@@ -85,7 +85,7 @@ class SecurityGroupServiceImplTest {
             createSecurityGroupEntity(3, 12, 22)
         );
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(null, null, null, null);
 
@@ -103,7 +103,7 @@ class SecurityGroupServiceImplTest {
             createSecurityGroupEntity(3, 12, 22)
         );
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null, null, null);
 
@@ -121,7 +121,7 @@ class SecurityGroupServiceImplTest {
             createSecurityGroupEntity(3, 12, 22)
         );
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null, null, null);
 
@@ -139,7 +139,7 @@ class SecurityGroupServiceImplTest {
             createSecurityGroupEntity(3, 12, 22)
         );
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null, null, null);
 
@@ -157,7 +157,7 @@ class SecurityGroupServiceImplTest {
             createSecurityGroupEntity(3, 12, 22)
         );
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(null, courthouseId, null, null);
 
@@ -175,7 +175,7 @@ class SecurityGroupServiceImplTest {
             createSecurityGroupEntity(3, 12, 22)
         );
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(null, courthouseId, null, null);
 
@@ -194,7 +194,7 @@ class SecurityGroupServiceImplTest {
             createSecurityGroupEntity(3, 12, 22)
         );
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, courthouseId, null, null);
 
@@ -214,7 +214,7 @@ class SecurityGroupServiceImplTest {
 
         addUserAccountsToSecurityGroups(securityGroupEntities);
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(null, null, userId, null);
 
@@ -234,7 +234,7 @@ class SecurityGroupServiceImplTest {
 
         addUserAccountsToSecurityGroups(securityGroupEntities);
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(null, null, userId, null);
 
@@ -254,7 +254,7 @@ class SecurityGroupServiceImplTest {
 
         addUserAccountsToSecurityGroups(securityGroupEntities);
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(null, null, null, singletonUser);
 
@@ -274,7 +274,7 @@ class SecurityGroupServiceImplTest {
 
         addUserAccountsToSecurityGroups(securityGroupEntities);
 
-        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).descending())).thenReturn(securityGroupEntities);
+        when(securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending())).thenReturn(securityGroupEntities);
 
         var filteredGroups = securityGroupService.getSecurityGroups(null, null, null, singletonUser);
 

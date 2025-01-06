@@ -236,13 +236,13 @@ class AdminAutomatedTasksServiceImplTest {
         AutomatedTaskEntity automatedTaskEntity3 =
             createAutomatedTaskEntity("CaseExpiryDeletion", true);
 
-        when(automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).descending()))
+        when(automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending()))
             .thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
         adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         verify(automatedTaskRepository, times(1))
-            .findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).descending());
+            .findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending());
         verify(mapper, times(1))
             .mapEntitiesToModel(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
     }
@@ -257,13 +257,13 @@ class AdminAutomatedTasksServiceImplTest {
         AutomatedTaskEntity automatedTaskEntity3 =
             createAutomatedTaskEntity("CaseExpiryDeletion", false);
 
-        when(automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).descending()))
+        when(automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending()))
             .thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
         adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         verify(automatedTaskRepository, times(1))
-            .findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).descending());
+            .findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending());
         verify(mapper, times(1))
             .mapEntitiesToModel(List.of(automatedTaskEntity1, automatedTaskEntity2));
     }

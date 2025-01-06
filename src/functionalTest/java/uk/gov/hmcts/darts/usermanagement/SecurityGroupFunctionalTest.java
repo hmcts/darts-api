@@ -128,20 +128,19 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                     || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId()))
                 .toList();
 
-        checkGroup(staticGroups.get(0), "hmcts_staff_6", true, 6, true, 127);
-        checkGroup(staticGroups.get(1), "hmcts_staff_5", true, 5, true, 127);
-        checkGroup(staticGroups.get(2), "hmcts_staff_4", false, 4, true, 127);
-        checkGroup(staticGroups.get(3), "hmcts_staff_3", false, 1, true, 127);
-        checkGroup(staticGroups.get(4), "hmcts_staff_2", false, 2, true, 127);
-        checkGroup(staticGroups.get(5), "hmcts_staff_1", false, 3, true, 127);
+        checkGroup(staticGroups.get(0), "CPP", true, 12, false, null);
+        checkGroup(staticGroups.get(1), "DARTS", true, 10, false, null);
+        checkGroup(staticGroups.get(2), "DAR_PC", true, 13, false, null);
+        checkGroup(staticGroups.get(3), "MID_TIER", true, 14, false, null);
+        checkGroup(staticGroups.get(4), "SUPER_ADMIN", true, 8, true, null);
+        checkGroup(staticGroups.get(5), "SUPER_USER", true, 7, true, null);
         checkGroup(staticGroups.get(6), "XHIBIT", true, 11, false, null);
-        checkGroup(staticGroups.get(7), "SUPER_USER", true, 7, true, null);
-        checkGroup(staticGroups.get(8), "SUPER_ADMIN", true, 8, true, null);
-        checkGroup(staticGroups.get(9), "MID_TIER", true, 14, false, null);
-        checkGroup(staticGroups.get(10), "MEDIA_IN_PERPETUITY", false, 10, true, null);
-        checkGroup(staticGroups.get(11), "DAR_PC", true, 13, false, null);
-        checkGroup(staticGroups.get(12), "DARTS", true, 10, false, null);
-        checkGroup(staticGroups.get(13), "CPP", true, 12, false, null);
+        checkGroup(staticGroups.get(7), "hmcts_staff_1", false, 3, true, 127);
+        checkGroup(staticGroups.get(8), "hmcts_staff_2", false, 2, true, 127);
+        checkGroup(staticGroups.get(9), "hmcts_staff_3", false, 1, true, 127);
+        checkGroup(staticGroups.get(10), "hmcts_staff_4", false, 4, true, 127);
+        checkGroup(staticGroups.get(11), "hmcts_staff_5", true, 5, true, 127);
+        checkGroup(staticGroups.get(12), "hmcts_staff_6", true, 6, true, 127);
     }
 
     private void checkGroup(SecurityGroupWithIdAndRoleAndUsers group, String name, boolean globalAccess, Integer roleId, boolean displayState,

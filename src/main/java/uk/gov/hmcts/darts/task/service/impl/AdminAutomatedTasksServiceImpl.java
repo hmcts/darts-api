@@ -56,7 +56,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     }
 
     List<AutomatedTaskEntity> getAllAutomatedTasksEntities() {
-        return automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).descending())
+        return automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending())
             .stream()
             .filter(this::shouldIncludeAutomatedTask)
             .toList();

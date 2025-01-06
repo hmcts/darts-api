@@ -193,7 +193,7 @@ class EventMappingServiceImplTest {
 
         EventHandlerEntity eventHandlerEntity2 = new EventHandlerEntity();
 
-        when(eventHandlerRepository.findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).descending())).thenReturn(List.of(eventHandlerEntity, eventHandlerEntity2));
+        when(eventHandlerRepository.findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).ascending())).thenReturn(List.of(eventHandlerEntity, eventHandlerEntity2));
 
         List<EventMapping> result = eventMappingServiceImpl.getEventMappings();
 
@@ -207,7 +207,7 @@ class EventMappingServiceImplTest {
         assertEquals(eventHandlerEntity.isReportingRestriction(), result.get(0).getHasRestrictions());
         assertEquals(eventHandlerEntity.getCreatedDateTime(), result.get(0).getCreatedAt());
 
-        verify(eventHandlerRepository).findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).descending());
+        verify(eventHandlerRepository).findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).ascending());
     }
 
     @ParameterizedTest

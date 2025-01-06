@@ -105,10 +105,17 @@ public class EventMappingServiceImpl implements EventMappingService {
 
     @Override
     public List<EventMapping> getEventMappings() {
-        return eventHandlerRepository.findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).descending())
+        List<EventMapping> events = eventHandlerRepository.findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).ascending())
             .stream()
             .map(this::mapToEventMapping)
             .toList();
+
+        for (int i = 0; i < events.size(); i++) {
+            EventMapping event = events.get(i);
+            System.out.println(".andExpect(jsonPath(\"$[" + i + "].name\", Matchers.is(\"" + event.getName() + "\")))");
+        }
+
+        return events;
     }
 
     @Override
