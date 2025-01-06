@@ -27,7 +27,7 @@ class DailyListHouseKeepingAutomatedTaskTest {
 
     @Test
     void runTask() {
-        var dailyListAutomatedTask = spy(new DailyListAutomatedTask(
+        var dailyListAutomatedTask = spy(new DailyListHousekeepingAutomatedTask(
             null,
             null,
             dailyListService,
