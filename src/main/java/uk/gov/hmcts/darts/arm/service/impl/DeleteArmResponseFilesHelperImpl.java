@@ -149,7 +149,7 @@ public class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesH
         return false;
     }
 
-    protected ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
+    private ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
         ExternalObjectDirectoryEntity externalObjectDirectory = null;
         try {
             Optional<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityOptional =
@@ -157,10 +157,10 @@ public class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesH
             if (externalObjectDirectoryEntityOptional.isPresent()) {
                 externalObjectDirectory = externalObjectDirectoryEntityOptional.get();
             } else {
-                log.warn("Unable to find external object directory with ID {}", eodId);
+                log.warn("Delete ARM responses - Unable to find external object directory with ID {}", eodId);
             }
         } catch (Exception e) {
-            log.error("Unable to find external object directory with ID {}", eodId, e);
+            log.error("Delete ARM responses - Unable to find external object directory with ID {}", eodId, e);
         }
         return externalObjectDirectory;
     }
