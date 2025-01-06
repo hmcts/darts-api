@@ -6,6 +6,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,6 +49,25 @@ class ObjectActionMapperTest {
         var adminActionResponse = adminMediaMapper.toApiModel(objectAdminActionEntities);
 
         assertNull(adminActionResponse);
+    }
+
+
+    @Test
+    void toGetAdminMediasMarkedForDeletionAdminAction_typical() {
+        // Given
+        ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+        objectAdminActionEntity.setTicketReference("ticketReference");
+        objectAdminActionEntity.setObjectHiddenReason(new ObjectHiddenReasonEntity());
+        objectAdminActionEntity.setHiddenBy(new UserAccountEntity());
+
+        // When
+        var getAdminMediasMarkedForDeletionAdminAction = adminMediaMapper.toGetAdminMediasMarkedForDeletionAdminAction(objectAdminActionEntity);
+
+        // Then
+        assertEquals(objectAdminActionEntity.getTicketReference(), getAdminMediasMarkedForDeletionAdminAction.getTicketReference());
+        assertEquals(objectAdminActionEntity.getObjectHiddenReason().getId(), getAdminMediasMarkedForDeletionAdminAction.getReasonId());
+        assertEquals(objectAdminActionEntity.getHiddenBy().getId(), getAdminMediasMarkedForDeletionAdminAction.getHiddenById());
+        assertNull(getAdminMediasMarkedForDeletionAdminAction.getComments());
     }
 
 }

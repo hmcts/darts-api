@@ -12,11 +12,16 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.PostAdminMediasSearchHelper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMediaMapper;
+import uk.gov.hmcts.darts.audio.mapper.CourthouseMapper;
+import uk.gov.hmcts.darts.audio.mapper.CourtroomMapper;
 import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
+import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionMediaItem;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
@@ -61,6 +66,10 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private final CurrentTimeHelper currentTimeHelper;
     private final AuditApi auditApi;
     private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
+
+    private final CourthouseMapper courthouseMapper;
+    private final CourtroomMapper courtroomMapper;
+    private final ObjectActionMapper objectActionMapper;
 
 
     @Value("${darts.audio.admin-search.max-results}")
@@ -133,15 +142,41 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .stream()
             .collect(Collectors.groupingBy(object -> {
                 MediaEntity media = object.getMedia();
-                return object.getTicketReference() + "-" + object.getHiddenBy().getId() + "-" + object.getObjectHiddenReason().getId()
+                String v = object.getTicketReference() + "-" + object.getHiddenBy().getId() + "-" + object.getObjectHiddenReason().getId()
                     + "-" + media.getCourtroom().getId() + "-" + media.getStart() + "-" + media.getEnd();
+                System.out.println("TMP: " + v);
+                return v;
             }))
             .values()
             .stream()
             .filter(objectAdminActionEntities -> !objectAdminActionEntities.isEmpty())
-            .map(actions -> adminMarkedForDeletionMapper.toGetAdminMediasMarkedForDeletionItem(actions))
+            .map(actions -> toGetAdminMediasMarkedForDeletionItem(actions))
             .toList();
     }
+
+    GetAdminMediasMarkedForDeletionItem toGetAdminMediasMarkedForDeletionItem(List<ObjectAdminActionEntity> actions) {
+        ObjectAdminActionEntity base = actions.get(0);
+        List<GetAdminMediasMarkedForDeletionMediaItem> media = actions.stream()
+            .map(action -> action.getMedia())
+            .map(mediaEntity -> {
+                GetAdminMediasMarkedForDeletionMediaItem item = adminMarkedForDeletionMapper.toGetAdminMediasMarkedForDeletionMediaItem(mediaEntity);
+                item.setVersionCount(mediaRepository.getVersionCount(mediaEntity.getChronicleId()));
+                return item;
+            })
+            .toList();
+
+        GetAdminMediasMarkedForDeletionItem item = new GetAdminMediasMarkedForDeletionItem();
+        item.setMedia(media);
+        item.setStartAt(base.getMedia().getStart());
+        item.setEndAt(base.getMedia().getEnd());
+        item.setCourtroom(courtroomMapper.toApiModel(base.getMedia().getCourtroom()));
+        item.setCourthouse(courthouseMapper.toApiModel(base.getMedia().getCourtroom().getCourthouse()));
+        GetAdminMediasMarkedForDeletionAdminAction adminAction = objectActionMapper.toGetAdminMediasMarkedForDeletionAdminAction(base);
+        adminAction.setComments(actions.stream().map(ObjectAdminActionEntity::getComments).toList());
+        item.setAdminAction(adminAction);
+        return item;
+    }
+
 
     private List<HearingEntity> getApplicableMediaHearings(MediaEntity mediaEntity, List<Integer> hearingsToMatchOn) {
         List<HearingEntity> hearingEntityList = CollectionUtils.isEmpty(hearingsToMatchOn) ? mediaEntity.getHearingList() : new ArrayList<>();
