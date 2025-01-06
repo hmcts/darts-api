@@ -74,8 +74,11 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
             String searchName = armRpoApi.addAsyncSearch(armBearerToken,
                                                          executionId,
                                                          userAccountEntity);
-
-            Thread.sleep(threadSleepDuration);
+            try {
+                Thread.sleep(threadSleepDuration);
+            } catch (InterruptedException e) {
+                log.error("Thread sleep interrupted", e);
+            }
 
             armRpoApi.saveBackgroundSearch(armBearerToken,
                                            executionId,
