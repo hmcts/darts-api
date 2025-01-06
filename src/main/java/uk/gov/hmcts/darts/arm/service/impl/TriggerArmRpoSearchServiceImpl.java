@@ -76,7 +76,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
                                                          userAccountEntity);
             try {
                 sleep(threadSleepDuration);
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
                 log.error("Sleep failed", e);
             }
 
@@ -99,7 +99,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
             Thread.sleep(threadSleepDuration);
         } catch (InterruptedException e) {
             log.error("Thread sleep interrupted", e);
-            throw e;
+            Thread.currentThread().interrupt();
         }
     }
 
