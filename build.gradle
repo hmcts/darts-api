@@ -10,7 +10,7 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'idea'
-  id 'io.spring.dependency-management' version '1.1.6'
+  id 'io.spring.dependency-management' version '1.1.7'
   id 'org.springframework.boot' version '3.3.5'
   id 'org.owasp.dependencycheck' version '11.1.1'
   id 'com.github.ben-manes.versions' version '0.51.0'
@@ -447,8 +447,8 @@ dependencies {
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.15'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.15'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.16'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.16'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.5'
 
@@ -458,7 +458,7 @@ dependencies {
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.0.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.1'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.4.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.3.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.4.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.4.Final')
@@ -496,7 +496,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.115.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.116.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
