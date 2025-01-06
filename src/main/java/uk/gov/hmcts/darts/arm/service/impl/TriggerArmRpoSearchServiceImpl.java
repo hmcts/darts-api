@@ -75,9 +75,9 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
                                                          executionId,
                                                          userAccountEntity);
             try {
-                Thread.sleep(threadSleepDuration);
-            } catch (InterruptedException e) {
-                log.error("Thread sleep interrupted", e);
+                sleep(threadSleepDuration);
+            } catch (Exception e) {
+                log.error("Sleep failed", e);
             }
 
             armRpoApi.saveBackgroundSearch(armBearerToken,
@@ -90,6 +90,15 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
         } catch (Exception e) {
             log.error("Error occurred during ARM RPO search flow", e);
             logApi.armRpoSearchFailed(executionId);
+        }
+    }
+
+    private static void sleep(Duration threadSleepDuration) throws InterruptedException {
+        try {
+            Thread.sleep(threadSleepDuration);
+        } catch (InterruptedException e) {
+            log.error("Thread sleep interrupted", e);
+            throw e;
         }
     }
 
