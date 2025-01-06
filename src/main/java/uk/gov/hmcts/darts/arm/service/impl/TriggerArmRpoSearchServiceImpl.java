@@ -74,11 +74,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
             String searchName = armRpoApi.addAsyncSearch(armBearerToken,
                                                          executionId,
                                                          userAccountEntity);
-            try {
-                sleep(threadSleepDuration);
-            } catch (InterruptedException e) {
-                log.error("Sleep failed", e);
-            }
+            sleep(threadSleepDuration);
 
             armRpoApi.saveBackgroundSearch(armBearerToken,
                                            executionId,
@@ -94,11 +90,11 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
     }
 
     // Added method to fix sonar complaint
-    private static void sleep(Duration threadSleepDuration) throws InterruptedException {
+    void sleep(Duration threadSleepDuration) {
         try {
             Thread.sleep(threadSleepDuration);
         } catch (InterruptedException e) {
-            log.error("Thread sleep interrupted", e);
+            log.error("Trigger ARM RPO search thread sleep interrupted", e);
             Thread.currentThread().interrupt();
         }
     }

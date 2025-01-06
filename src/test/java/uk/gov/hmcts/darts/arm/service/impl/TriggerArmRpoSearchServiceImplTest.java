@@ -16,11 +16,13 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.Duration;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -56,17 +58,15 @@ class TriggerArmRpoSearchServiceImplTest {
                                                                             userIdentity,
                                                                             logApi);
         userAccount = new UserAccountEntity();
-        when(userIdentity.getUserAccount())
-            .thenReturn(userAccount);
+        lenient().when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         armRpoExecutionDetailEntity.setMatterId(MATTER_ID);
-        when(armRpoService.createArmRpoExecutionDetailEntity(any(UserAccountEntity.class)))
+        lenient().when(armRpoService.createArmRpoExecutionDetailEntity(any(UserAccountEntity.class)))
             .thenReturn(armRpoExecutionDetailEntity);
 
-        when(armApiService.getArmBearerToken())
-            .thenReturn(BEARER_TOKEN);
+        lenient().when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
     }
 
     @Test
@@ -124,4 +124,16 @@ class TriggerArmRpoSearchServiceImplTest {
         verifyNoMoreInteractions(logApi);
     }
 
+    @Test
+    void sleep_shouldHandleInterruptedException() {
+        // Given
+        Duration threadSleepDuration = Duration.ofMillis(1);
+
+        // When
+        Thread.currentThread().interrupt(); // Simulate an interrupt
+        triggerArmRpoSearchServiceImpl.sleep(threadSleepDuration);
+
+        // Then
+        assertTrue(Thread.interrupted(), "Trigger ARM RPO search thread sleep interrupted");
+    }
 }
