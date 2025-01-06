@@ -329,13 +329,16 @@
 --    to user_account
 --    add subcontent_object_id and subcontent_position to annotation_document,
 --    daily_list,media,transcription_document
---
 --    add courthouse_object_id and folder_path to courthouse
 --    reinstate numeric user_state to user_account
 --    amend user_account.user_full_name to not null
 --    add table transcription_linked_case, as per event_linked_case
 --    add extobjdir_process_detail as 1:1 with external_object_directory ( c.f.case_overflow )
 --    remove user_name from user_account
+--v72.3 add rpt_id to case_overflow
+--    add numerous columns to extobjdir_process_detail
+--    move case_overflow to retention script
+--    add c_current_state and r_current_state to transcription
 
 
 -- List of Table Aliases
@@ -424,6 +427,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 --GRANT ALL ON TABLESPACE darts_tables TO darts_owner;
 --GRANT ALL ON TABLESPACE darts_indexes TO darts_owner;
+
 
 SET ROLE DARTS_OWNER;
 
@@ -697,25 +701,6 @@ IS 'foreign key from case, part of composite natural key and PK';
 
 COMMENT ON COLUMN case_transcription_ae.tra_id
 IS 'foreign key from transcription, part of composite natural key and PK';
-
-CREATE TABLE case_overflow
-(cas_id                      INTEGER                       NOT NULL
-,case_total_sentence         CHARACTER VARYING
-,retention_event_ts          TIMESTAMP WITH TIME ZONE     
-,case_retention_fixed        CHARACTER VARYING
-,retention_applies_from_ts   TIMESTAMP WITH TIME ZONE
-,end_of_sentence_date_ts     TIMESTAMP WITH TIME ZONE
-,manual_retention_override   INTEGER
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
-,is_standard_policy          BOOLEAN
-,is_permanent_policy         BOOLEAN
-,checked_ts                  TIMESTAMP WITH TIME ZONE
-,corrected_ts                TIMESTAMP WITH TIME ZONE
-,c_closed_pre_live           INTEGER
-,c_case_closed_date_pre_live TIMESTAMP WITH TIME ZONE
-,audio_folder_object_id      CHARACTER VARYING(16)
-,case_object_name            CHARACTER VARYING(255)                  -- to accommodate dm_sysobject_s.object_name
-) TABLESPACE pg_default;
 
 CREATE TABLE court_case
 (cas_id                      INTEGER                       NOT NULL
@@ -1061,14 +1046,23 @@ COMMENT ON COLUMN external_object_directory.ado_id
 IS 'foreign key from annotation_document';
 
 CREATE TABLE extobjdir_process_detail
-(epd_id                      INTEGER                       NOT NULL
-,eod_id                      INTEGER                       NOT NULL          UNIQUE
-,event_date_ts               TIMESTAMP WITH TIME ZONE
-,update_retention            BOOLEAN                       NOT NULL
-,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
-,created_by                  INTEGER                       NOT NULL
-,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+(epd_id                       INTEGER                       NOT NULL
+,eod_id                       INTEGER                       NOT NULL          UNIQUE
+,event_date_ts                TIMESTAMP WITH TIME ZONE
+,update_retention             BOOLEAN                       NOT NULL
+,input_upload_filename        CHARACTER VARYING
+,create_record_filename       CHARACTER VARYING
+,create_record_processed_ts   TIMESTAMP WITH TIME ZONE
+,upload_file_filename         CHARACTER VARYING
+,upload_file_processed_ts     TIMESTAMP WITH TIME ZONE
+,create_rec_inv_filename      CHARACTER VARYING
+,create_rec_inv_processed_ts  TIMESTAMP WITH TIME ZONE
+,upload_file_inv_filename     CHARACTER VARYING
+,upload_file_inv_processed_ts TIMESTAMP WITH TIME ZONE 
+,created_ts                   TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                   INTEGER                       NOT NULL
+,last_modified_ts             TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by             INTEGER                       NOT NULL
 ) TABLESPACE pg_default;
 
 COMMENT ON TABLE extobjdir_process_detail 
@@ -1509,6 +1503,8 @@ CREATE TABLE transcription
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
+,c_current_state             CHARACTER VARYING                       -- legacy field from moj_transcription
+,r_current_state             INTEGER                                 -- legacy field from dm_sysobject for transcription type
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1792,9 +1788,6 @@ ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
 
 CREATE UNIQUE INDEX case_transcription_ae_pk ON case_transcription_ae(cas_id,tra_id) TABLESPACE pg_default;
 ALTER TABLE case_transcription_ae        ADD PRIMARY KEY USING INDEX case_transcription_ae_pk;
-
-CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE pg_default; 
-ALTER TABLE case_overflow              ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
 CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE pg_default; 
 ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
@@ -2103,10 +2096,6 @@ FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 ALTER TABLE case_transcription_ae            
 ADD CONSTRAINT case_transcription_ae_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
-
-ALTER TABLE case_overflow                      
-ADD CONSTRAINT case_overflow_court_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 ALTER TABLE court_case                        
 ADD CONSTRAINT court_case_event_handler_fk
@@ -2680,7 +2669,6 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON automated_task TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_document TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_judge_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_transcription_ae TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON case_overflow TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON court_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse_region_ae TO darts_user;
