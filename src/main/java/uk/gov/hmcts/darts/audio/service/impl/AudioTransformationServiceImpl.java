@@ -36,6 +36,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,6 +48,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
@@ -223,6 +225,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
                                                                                      MediaRequestEntity mediaRequestEntity) {
         return mediaEntitiesForRequest.stream()
+            .filter(media -> nonNull(media.getStart()))
+            .filter(media -> nonNull(media.getEnd()))
+            // Filter out media where the media start and media end times are the same and not less than a second apart as trim works against seconds
+            .filter(media -> !media.getStart().truncatedTo(ChronoUnit.SECONDS).isEqual(media.getEnd().truncatedTo(ChronoUnit.SECONDS)))
+            .filter(media -> media.getStart().isBefore(media.getEnd()))
             .filter(media -> mediaRequestEntity.getStartTime().isBefore(media.getEnd()))
             .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
             .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
