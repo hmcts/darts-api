@@ -10,7 +10,7 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'idea'
-  id 'io.spring.dependency-management' version '1.1.6'
+  id 'io.spring.dependency-management' version '1.1.7'
   id 'org.springframework.boot' version '3.3.5'
   id 'org.owasp.dependencycheck' version '11.1.1'
   id 'com.github.ben-manes.versions' version '0.51.0'
@@ -403,7 +403,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
   implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.1'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.4.0'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.4.1'
 
   implementation group: 'commons-io', name: 'commons-io', version: '2.18.0'
   implementation 'org.apache.commons:commons-collections4:4.4'
@@ -447,8 +447,8 @@ dependencies {
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.15'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.15'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.16'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.16'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.5'
 
@@ -458,7 +458,7 @@ dependencies {
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.0.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.1'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.4.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.3.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.4.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.4.Final')
@@ -478,7 +478,7 @@ dependencies {
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.5'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.1'
-  testImplementation 'org.springframework.security:spring-security-test:6.4.1'
+  testImplementation 'org.springframework.security:spring-security-test:6.4.2'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.2'
@@ -496,7 +496,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.115.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.116.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
