@@ -16,9 +16,9 @@ import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
-import uk.gov.hmcts.darts.audio.model.PostAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
@@ -40,7 +40,6 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +52,6 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     private final MediaRepository mediaRepository;
     private final AdminMediaMapper adminMediaMapper;
-    private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
     private final PostAdminMediasSearchHelper postAdminMediasSearchHelper;
     private final SearchMediaValidator searchMediaValidator;
     private final TransformedMediaRepository transformedMediaRepository;
@@ -62,6 +60,8 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
     private final AuditApi auditApi;
+    private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
+
 
     @Value("${darts.audio.admin-search.max-results}")
     private Integer adminSearchMaxResults;
@@ -124,16 +124,22 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     }
 
     @Override
-    public List<PostAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion() {
+    public List<GetAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion() {
         if (!this.isManualDeletionEnabled()) {
             throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");
         }
 
-        return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason().stream()
-            .map(ObjectAdminActionEntity::getMedia)
-            .map(adminMarkedForDeletionMapper::toApiModel)
-            .filter(media -> media != null)
-            .sorted(Comparator.comparing(PostAdminMediasMarkedForDeletionItem::getMediaId))
+        return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason()
+            .stream()
+            .collect(Collectors.groupingBy(object -> {
+                MediaEntity media = object.getMedia();
+                return object.getTicketReference() + "-" + object.getHiddenBy().getId() + "-" + object.getObjectHiddenReason().getId()
+                    + "-" + media.getCourtroom().getId() + "-" + media.getStart() + "-" + media.getEnd();
+            }))
+            .values()
+            .stream()
+            .filter(objectAdminActionEntities -> !objectAdminActionEntities.isEmpty())
+            .map(actions -> adminMarkedForDeletionMapper.toGetAdminMediasMarkedForDeletionItem(actions))
             .toList();
     }
 
