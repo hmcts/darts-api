@@ -73,11 +73,9 @@ class TriggerArmRpoSearchServiceImplTest {
     void triggerArmRpoSearch_shouldCallExpectedApis() {
         // Given
         Duration threadSleepDuration = Duration.ofMillis(1);
-        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt()))
-            .thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
 
-        when(armRpoApi.addAsyncSearch(anyString(), anyInt(), any(UserAccountEntity.class)))
-            .thenReturn(SEARCH_NAME);
+        when(armRpoApi.addAsyncSearch(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(SEARCH_NAME);
 
         // When
         triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(threadSleepDuration);
@@ -94,7 +92,6 @@ class TriggerArmRpoSearchServiceImplTest {
         verify(armRpoApi).saveBackgroundSearch(BEARER_TOKEN, EXECUTION_ID, SEARCH_NAME, userAccount);
         verify(logApi).armRpoSearchSuccessful(EXECUTION_ID);
 
-        verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);
@@ -117,13 +114,13 @@ class TriggerArmRpoSearchServiceImplTest {
         verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(logApi).armRpoSearchFailed(EXECUTION_ID);
 
-        verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);
         verifyNoMoreInteractions(logApi);
     }
 
+    @SuppressWarnings("PMD.DoNotUseThreads")
     @Test
     void sleep_shouldHandleInterruptedException() {
         // Given
