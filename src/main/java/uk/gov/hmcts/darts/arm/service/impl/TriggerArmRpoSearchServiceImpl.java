@@ -93,6 +93,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
         }
     }
 
+    // Added method to fix sonar complaint
     private static void sleep(Duration threadSleepDuration) throws InterruptedException {
         try {
             Thread.sleep(threadSleepDuration);

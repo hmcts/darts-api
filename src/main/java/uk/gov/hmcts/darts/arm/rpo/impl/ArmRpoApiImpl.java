@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
 
 @Service
@@ -408,7 +409,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
-        if (!extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getIsSaved()) {
+        if (FALSE.equals(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getIsSaved())) {
             log.warn("The extendedSearchesByMatterResponse is not saved - with executionId: {}", executionId);
             throw new ArmRpoGetExtendedSearchesByMatterIdException("The extendedSearchesByMatterResponse is not saved");
         }
