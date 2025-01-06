@@ -21,6 +21,8 @@ public class GovNotifyRequestHelper {
     @Value("${darts.portal.url}")
     private String portalUrl;
 
+    private static final String NOT_AVAILABLE = "not available";
+
     public GovNotifyRequest map(NotificationEntity notification, String templateId) throws JsonProcessingException {
         GovNotifyRequest request = new GovNotifyRequest();
         request.setTemplateId(templateId);
@@ -56,6 +58,14 @@ public class GovNotifyRequestHelper {
         parameterMap.put(
             NotificationConstants.ParameterMapValues.PORTAL_URL,
             portalUrl
+        );
+
+        String courthouseName = notification.getCourtCase().getCourthouse().getDisplayName() != null
+            ? notification.getCourtCase().getCourthouse().getDisplayName() : NOT_AVAILABLE;
+
+        parameterMap.put(
+            NotificationConstants.ParameterMapValues.COURTHOUSE,
+            courthouseName
         );
     }
 }

@@ -64,6 +64,7 @@ class GovNotifyServiceTest {
         govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
         parameterMap.put(CASE_NUMBER, "TheCaseId");
         parameterMap.put(PORTAL_URL, "ThePortalURL");
+        parameterMap.put(COURTHOUSE, "TheCourthouse");
         govNotifyRequest.setParameterMap(parameterMap);
 
         return govNotifyService.sendNotification(govNotifyRequest);
@@ -146,7 +147,7 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString());
         assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
-                    We have received your audio recording order for case ID TheCaseId, and it's currently being processed.
+                    We have received your audio recording order for case ID TheCaseId at TheCourthouse and it's currently being processed.
 
                     We'll notify you when it's ready and available for use.
 
