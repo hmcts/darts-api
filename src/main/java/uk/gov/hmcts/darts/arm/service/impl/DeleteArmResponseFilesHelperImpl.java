@@ -96,7 +96,7 @@ public class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesH
 
     public void deleteResponseBlobs(ArmResponseBatchData armResponseBatchData) {
         List<String> responseBlobsToBeDeleted = getResponseBlobsToBeDeleted(armResponseBatchData);
-        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
+        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectory(armResponseBatchData.getExternalObjectDirectoryId());
         if (nonNull(externalObjectDirectory) && responseBlobsToBeDeleted.size() == 2) {
             ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
             if (STORED.equals(status)
@@ -149,7 +149,7 @@ public class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesH
         return false;
     }
 
-    private ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
+    private ExternalObjectDirectoryEntity getExternalObjectDirectory(Integer eodId) {
         ExternalObjectDirectoryEntity externalObjectDirectory = null;
         try {
             Optional<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityOptional =
