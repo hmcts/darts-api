@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
@@ -152,13 +151,7 @@ public class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesH
     private ExternalObjectDirectoryEntity getExternalObjectDirectory(Integer eodId) {
         ExternalObjectDirectoryEntity externalObjectDirectory = null;
         try {
-            Optional<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityOptional =
-                externalObjectDirectoryService.eagerLoadExternalObjectDirectory(eodId);
-            if (externalObjectDirectoryEntityOptional.isPresent()) {
-                externalObjectDirectory = externalObjectDirectoryEntityOptional.get();
-            } else {
-                log.warn("Delete ARM responses - Unable to find external object directory with ID {}", eodId);
-            }
+            externalObjectDirectory = externalObjectDirectoryService.eagerLoadExternalObjectDirectory(eodId).orElseThrow();
         } catch (Exception e) {
             log.error("Delete ARM responses - Unable to find external object directory with ID {}", eodId, e);
         }
