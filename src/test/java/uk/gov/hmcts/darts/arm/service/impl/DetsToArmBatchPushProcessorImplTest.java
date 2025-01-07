@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +29,7 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.config.DetsToArmPushAutomatedTaskConfig;
 import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
 
@@ -47,6 +47,7 @@ import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -84,6 +85,8 @@ class DetsToArmBatchPushProcessorImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private ExternalObjectDirectoryService externalObjectDirectoryService;
+    @Mock
+    private DetsToArmPushAutomatedTaskConfig detsToArmPushAutomatedTaskConfig;
 
     @InjectMocks
     private DataStoreToArmHelper dataStoreToArmHelper;
@@ -95,16 +98,12 @@ class DetsToArmBatchPushProcessorImplTest {
 
     private ObjectStateRecordEntity objectStateRecordEntity;
 
-    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
+    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks(false);
 
-    @AfterAll
-    static void close() {
-        EOD_HELPER_MOCKS.close();
-    }
 
     @BeforeEach
     void setUp() throws IOException {
-
+        lenient().when(detsToArmPushAutomatedTaskConfig.getThreads()).thenReturn(2);
         detsToArmBatchPushProcessor = new DetsToArmBatchPushProcessorImpl(
             archiveRecordService,
             dataStoreToArmHelper,
@@ -117,7 +116,8 @@ class DetsToArmBatchPushProcessorImplTest {
             detsToArmProcessorConfiguration,
             objectStateRecordRepository,
             currentTimeHelper,
-            externalObjectDirectoryService
+            externalObjectDirectoryService,
+            detsToArmPushAutomatedTaskConfig
         );
 
         lenient().when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
@@ -147,7 +147,8 @@ class DetsToArmBatchPushProcessorImplTest {
                                                                    externalObjectDirectoryEntityDets.getId(),
                                                                    externalObjectDirectoryEntityArm.getId());
         externalObjectDirectoryEntityDets.setOsrUuid(objectStateRecordEntity.getUuid());
-        lenient().when(objectStateRecordRepository.findById(objectStateRecordEntity.getUuid())).thenReturn(Optional.of(objectStateRecordEntity));
+        lenient().when(objectStateRecordRepository.findById(objectStateRecordEntity.getUuid()))
+            .thenReturn(Optional.of(objectStateRecordEntity));
 
         String filename = String.format("DETS_%s.a360", DETS_UUID);
         File manifestFile = new File(fileLocation, filename);
@@ -177,19 +178,18 @@ class DetsToArmBatchPushProcessorImplTest {
     void processDetsToArmSetObjectStatusNoMatchingDetsRecordErrorMessage() {
         //given
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
-        EOD_HELPER_MOCKS.givenIsEqualStatusReturns(true);
         when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(), 200
-        )).thenReturn(List.of(123));
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), eq(200)))
+            .thenReturn(List.of(123));
         when(externalObjectDirectoryRepository.findAllById(List.of(123))).thenReturn(List.of(externalObjectDirectoryEntityDets));
-
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+        //Before this method was made async EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true); was used to enforce the ELT to match
+        //This is no longer possible as mockito static mocks don't work well with threads. By setting ELt to ARM it simulates this behavior
+        externalObjectDirectoryEntityDets.setExternalLocationType(EOD_HELPER_MOCKS.getArmLocation());
         //when
         detsToArmBatchPushProcessor.processDetsToArm(200);
+
 
         //then
         assertTrue(
