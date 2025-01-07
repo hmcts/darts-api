@@ -84,6 +84,6 @@ class PostEventsFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        assertEquals(400, response.statusCode());
+        assertEquals(404, response.statusCode());
     }
 }
