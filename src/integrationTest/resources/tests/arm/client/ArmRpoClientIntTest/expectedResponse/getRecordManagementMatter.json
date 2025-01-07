@@ -1,0 +1,18 @@
+{
+  "status": 200,
+  "demoMode": false,
+  "isError": false,
+  "responseStatus": 0,
+  "recordManagementMatter": {
+    "matterCategory": 3,
+    "name": "Records Management",
+    "description": "Records Management",
+    "createdDate": "2022-12-14T08:50:55.75Z",
+    "type": 1,
+    "status": 0,
+    "quickSearch": false,
+    "closed": false,
+    "matterID": "cb70c7fa-8972-4400-af1d-ff5dd76d2104",
+    "isUsedForRM": true
+  }
+}
