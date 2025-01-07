@@ -50,14 +50,9 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
     private static final String EXPECTED_RESPONSE_DIRECTORY = BASE_JSON_DIRECTORY + "expectedResponse/";
 
     private static final String URL_PREFIX = "/api/v1/";
-
-
-    private static final String GET_RECORD_MANAGEMENT_MATTER_PATH = "/api/v1/getRecordManagementMatter";
-    private static final String GET_STORAGE_ACCOUNTS_PATH = "/api/v1/getStorageAccounts";
-
+    
     @Autowired
     private ArmRpoClient armRpoClient;
-
 
     private static Stream<Arguments> genericArmRpoClientTestArguments() {
         return Stream.of(
