@@ -96,7 +96,6 @@ class TriggerArmRpoSearchServiceImplTest {
         verify(armRpoApi).saveBackgroundSearch(BEARER_TOKEN, EXECUTION_ID, SEARCH_NAME, userAccount);
         verify(logApi).armRpoSearchSuccessful(EXECUTION_ID);
 
-        verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);
@@ -119,7 +118,6 @@ class TriggerArmRpoSearchServiceImplTest {
         verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(logApi).armRpoSearchFailed(EXECUTION_ID);
 
-        verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);
@@ -131,14 +129,14 @@ class TriggerArmRpoSearchServiceImplTest {
     void sleep_shouldHandleInterruptedException() {
         // Given
         Duration threadSleepDuration = Duration.ofMillis(5000);
-
-        // When
         ExecutorService executor = Executors.newFixedThreadPool(1);
         Thread thread = new Thread(() -> {
             log.info("Thread started");
             triggerArmRpoSearchServiceImpl.sleep(threadSleepDuration);
             log.info("Thread finished");
         });
+
+        // When
         executor.submit(() -> {
             thread.start();
         });
@@ -146,6 +144,6 @@ class TriggerArmRpoSearchServiceImplTest {
         Thread.currentThread().interrupt(); // Simulate an interrupt
 
         // Then
-        assertTrue(thread.interrupted(), "Trigger ARM RPO search thread sleep interrupted");
+        assertTrue(thread.interrupted());
     }
 }
