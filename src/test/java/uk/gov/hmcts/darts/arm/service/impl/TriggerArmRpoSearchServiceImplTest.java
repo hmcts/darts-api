@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class TriggerArmRpoSearchServiceImplTest {
 
     private static final String BEARER_TOKEN = "some token";
@@ -92,6 +96,7 @@ class TriggerArmRpoSearchServiceImplTest {
         verify(armRpoApi).saveBackgroundSearch(BEARER_TOKEN, EXECUTION_ID, SEARCH_NAME, userAccount);
         verify(logApi).armRpoSearchSuccessful(EXECUTION_ID);
 
+        verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);
@@ -114,6 +119,7 @@ class TriggerArmRpoSearchServiceImplTest {
         verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(logApi).armRpoSearchFailed(EXECUTION_ID);
 
+        verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);
@@ -124,13 +130,22 @@ class TriggerArmRpoSearchServiceImplTest {
     @Test
     void sleep_shouldHandleInterruptedException() {
         // Given
-        Duration threadSleepDuration = Duration.ofMillis(1);
+        Duration threadSleepDuration = Duration.ofMillis(5000);
 
         // When
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        Thread thread = new Thread(() -> {
+            log.info("Thread started");
+            triggerArmRpoSearchServiceImpl.sleep(threadSleepDuration);
+            log.info("Thread finished");
+        });
+        executor.submit(() -> {
+            thread.start();
+        });
+
         Thread.currentThread().interrupt(); // Simulate an interrupt
-        triggerArmRpoSearchServiceImpl.sleep(threadSleepDuration);
 
         // Then
-        assertTrue(Thread.interrupted(), "Trigger ARM RPO search thread sleep interrupted");
+        assertTrue(thread.interrupted(), "Trigger ARM RPO search thread sleep interrupted");
     }
 }

@@ -1,7 +1,8 @@
 package uk.gov.hmcts.darts.arm.exception;
 
-@SuppressWarnings("java:S110")
-public class ArmRpoGetExtendedSearchesByMatterIdException extends ArmRpoException {
+import uk.gov.hmcts.darts.common.exception.DartsException;
+
+public class ArmRpoGetExtendedSearchesByMatterIdException extends DartsException {
     public ArmRpoGetExtendedSearchesByMatterIdException(String message) {
         super(message);
     }
