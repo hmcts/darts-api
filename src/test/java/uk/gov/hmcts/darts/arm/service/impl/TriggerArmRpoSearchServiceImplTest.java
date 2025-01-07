@@ -129,21 +129,24 @@ class TriggerArmRpoSearchServiceImplTest {
     void sleep_shouldHandleInterruptedException() {
         // Given
         Duration threadSleepDuration = Duration.ofMillis(5000);
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        Thread thread = new Thread(() -> {
-            log.info("Thread started");
-            triggerArmRpoSearchServiceImpl.sleep(threadSleepDuration);
-            log.info("Thread finished");
-        });
 
-        // When
-        executor.submit(() -> {
-            thread.start();
-        });
+        try (ExecutorService executor = Executors.newFixedThreadPool(1)) {
+            Thread thread = new Thread(() -> {
+                log.info("Thread started");
+                triggerArmRpoSearchServiceImpl.sleep(threadSleepDuration);
+                log.info("Thread finished");
+            });
 
-        Thread.currentThread().interrupt(); // Simulate an interrupt
+            // When
+            executor.submit(() -> {
+                thread.start();
+            });
 
-        // Then
-        assertTrue(thread.interrupted());
+            Thread.currentThread().interrupt(); // Simulate an interrupt
+
+            // Then
+            assertTrue(thread.interrupted());
+        }
+
     }
 }
