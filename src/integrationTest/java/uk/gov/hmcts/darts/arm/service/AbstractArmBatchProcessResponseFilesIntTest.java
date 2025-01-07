@@ -10,7 +10,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
@@ -78,15 +78,15 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     protected ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Autowired
     protected ExternalObjectDirectoryService externalObjectDirectoryService;
-    @MockBean
+    @MockitoBean
     protected ArmDataManagementApi armDataManagementApi;
     @Autowired
     protected FileOperationService fileOperationService;
-    @MockBean
+    @MockitoBean
     protected ArmDataManagementConfiguration armDataManagementConfiguration;
     @Autowired
     protected ObjectMapper objectMapper;
-    @MockBean
+    @MockitoBean
     protected UserIdentity userIdentity;
     @Mock
     protected CurrentTimeHelper currentTimeHelper;

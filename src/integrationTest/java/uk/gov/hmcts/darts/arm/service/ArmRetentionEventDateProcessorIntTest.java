@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -79,22 +79,22 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @Autowired
     private ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
 
-    @MockBean
+    @MockitoBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired
     private AuthorisationStub authorisationStub;
 
-    @MockBean
+    @MockitoBean
     private ArmTokenClient armTokenClient;
 
     @Autowired
     private ArmApiConfigurationProperties armApiConfigurationProperties;
 
-    @MockBean
+    @MockitoBean
     private ArmApiClient armApiClient;
 
 

@@ -7,8 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
@@ -17,6 +15,8 @@ import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
@@ -130,7 +130,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     private CloseOldCasesProcessor closeOldCasesProcessor;
     @Autowired
     private DailyListService dailyListService;
-    @SpyBean
+    @MockitoSpyBean
     private CaseRepository caseRepository;
     @Autowired
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
@@ -156,7 +156,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
     private UserAccountEntity testUser;
 
