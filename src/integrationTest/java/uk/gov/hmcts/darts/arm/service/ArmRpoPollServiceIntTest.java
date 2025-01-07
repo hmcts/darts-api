@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
@@ -67,18 +67,18 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     private static final int HTTP_STATUS_OK = 200;
     private static final int HTTP_STATUS_400 = 400;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
-    @MockBean
+    @MockitoBean
     private ArmApiServiceImpl armApiService;
-    @MockBean
+    @MockitoBean
     private ArmRpoDownloadProduction armRpoDownloadProduction;
     @MockBean
     private ArmRpoUtil armRpoUtil;
 
-    @SpyBean
+    @MockitoSpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @TempDir
     protected File tempDirectory;

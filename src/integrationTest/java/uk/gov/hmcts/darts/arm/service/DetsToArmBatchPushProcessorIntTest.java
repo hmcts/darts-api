@@ -9,6 +9,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -47,11 +49,11 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
     private MediaEntity savedMedia;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
-    @MockBean
+    @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
-    @SpyBean
+    @MockitoSpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @TempDir
