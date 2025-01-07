@@ -199,18 +199,18 @@ class ModernisedTranscriptionSearchTest extends IntegrationBase {
 
         assertThat(transcriptionResponse).extracting("transcriptionId")
             .containsExactly(
-                transcriptions.get(0).getId(),
-                transcriptions.get(1).getId(),
-                transcriptions.get(2).getId(),
-                transcriptions.get(3).getId(),
-                transcriptions.get(4).getId(),
-                transcriptions.get(5).getId(),
-                transcriptions.get(6).getId(),
-                transcriptions.get(7).getId(),
-                transcriptions.get(8).getId(),
-                transcriptions.get(9).getId(),
+                transcriptions.get(11).getId(),
                 transcriptions.get(10).getId(),
-                transcriptions.get(11).getId());
+                transcriptions.get(9).getId(),
+                transcriptions.get(8).getId(),
+                transcriptions.get(7).getId(),
+                transcriptions.get(6).getId(),
+                transcriptions.get(5).getId(),
+                transcriptions.get(4).getId(),
+                transcriptions.get(3).getId(),
+                transcriptions.get(2).getId(),
+                transcriptions.get(1).getId(),
+                transcriptions.get(0).getId());
     }
 
     @Test
