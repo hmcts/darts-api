@@ -283,7 +283,7 @@ darts:
       arm-storage-account-name: ${ARM_STORAGE_ACCOUNT_NAME:}
 
       authentication-url:
-        token-path: /api/v1/token
+        token-path: /auth/account/token
         available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
         select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
       api-url:

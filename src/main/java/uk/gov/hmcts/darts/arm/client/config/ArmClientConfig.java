@@ -25,10 +25,9 @@ public class ArmClientConfig {
 
     private void encodeArmTokenRequest(ArmTokenRequest armTokenRequest, RequestTemplate requestTemplate) {
         requestTemplate.body(String.format(
-                                 "grant_type=%s&username=%s&password=%s",
-                                 armTokenRequest.grantType(),
-                                 armTokenRequest.username(),
-                                 armTokenRequest.password()
+                                 "&username=%s&password=%s",
+                                 armTokenRequest.getUsername(),
+                                 armTokenRequest.getPassword()
                              )
         );
     }
