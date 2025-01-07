@@ -240,7 +240,7 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
 
         assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Exact duplicate detected based upon media metadata and checksum.", toLevel(
+                        .searchLogs("Exact duplicate detected based upon media metadata and checksum for media entity ids [2].", toLevel(
                             Level.INFO_INT)).isEmpty());
     }
 
