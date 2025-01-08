@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
-import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 
 import java.time.OffsetDateTime;
@@ -53,7 +52,7 @@ class ArmApiServiceImplTest {
         when(armApiConfigurationProperties.getArmPassword()).thenReturn(password);
         when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(armProfile);
 
-        ArmTokenRequest tokenRequest = new ArmTokenRequest(username, password, GrantType.PASSWORD.getValue());
+        ArmTokenRequest tokenRequest = ArmTokenRequest.builder().username(username).password(password).build();
         ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
 
         when(armTokenClient.getToken(tokenRequest)).thenReturn(response);
