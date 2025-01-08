@@ -80,11 +80,12 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
 
         // then
         assertThat(result, containsString(PRODUCTION_NAME));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), any());
+                                                         any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()),
+                                                 any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -114,10 +115,10 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
         // then
         assertThat(armRpoGetExtendedSearchesByMatterIdException.getMessage(),
                    containsString("The extendedSearchesByMatterResponse is not saved"));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
+                                                         any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -135,11 +136,12 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
         // then
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO getExtendedSearchesByMatter: Unable to get ARM RPO response"));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+                                                         any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+                                                 any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -156,11 +158,12 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
         // then
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO getExtendedSearchesByMatter: ARM RPO API response is invalid"));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+                                                         any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+                                                 any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -178,11 +181,12 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
         // then
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO getExtendedSearchesByMatter: ARM RPO API response is invalid"));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+                                                 any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -207,11 +211,12 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
         // then
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO getExtendedSearchesByMatter: Search data is missing"));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+                                                 any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -236,11 +241,12 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
         // then
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO getExtendedSearchesByMatter: Search data is missing"));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+                                                 any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
     }
 
