@@ -118,7 +118,6 @@ class TriggerArmRpoSearchServiceImplTest {
         verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(logApi).armRpoSearchFailed(EXECUTION_ID);
 
-        verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);

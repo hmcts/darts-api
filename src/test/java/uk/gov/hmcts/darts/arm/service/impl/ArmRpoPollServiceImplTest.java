@@ -437,27 +437,7 @@ class ArmRpoPollServiceImplTest {
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
-
-    @Test
-    void pollArmRpo_shouldHandleGetExtendedSearchesByMatterGetInProgress() {
-        // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
-        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenThrow(ArmRpoGetExtendedSearchesByMatterIdException.class);
-
-        // when
-        armRpoPollService.pollArmRpo(false);
-
-        // then
-        verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(armApiService).getArmBearerToken();
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(userIdentity).getUserAccount();
-
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
-    }
-
+    
     @Test
     void pollArmRpo_shouldHandleGetExtendedSearchesByMatterGetInProgress() {
         // given
