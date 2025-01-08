@@ -300,7 +300,8 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         detsToArmBatchPushProcessor.processDetsToArm(5);
         // when
         //Error is gracefully handled and logged
-        assertThat(output).contains("uk.gov.hmcts.darts.common.exception.DartsException: Unable to find ObjectStateRecordEntity for ARM EOD ID: 2 as OSR UUID is null");
+        assertThat(output)
+            .contains("uk.gov.hmcts.darts.common.exception.DartsException: Unable to find ObjectStateRecordEntity for ARM EOD ID: 2 as OSR UUID is null");
     }
 
     private ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {
