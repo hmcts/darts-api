@@ -31,6 +31,7 @@ public class ExtendedSearchesByMatterResponse extends BaseRpoResponse {
 
         private String name;
         private Integer totalCount;
+        private Boolean isSaved;
 
     }
 
