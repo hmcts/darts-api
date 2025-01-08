@@ -299,7 +299,7 @@ class ArmRpoPollServiceImplTest {
 
         verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
 
-        verify(logApi).armRpoPollingSuccessful(any());
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -437,7 +437,7 @@ class ArmRpoPollServiceImplTest {
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
-    
+
     @Test
     void pollArmRpo_shouldHandleGetExtendedSearchesByMatterGetInProgress() {
         // given
