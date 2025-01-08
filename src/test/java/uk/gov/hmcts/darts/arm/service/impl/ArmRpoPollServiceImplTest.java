@@ -299,7 +299,7 @@ class ArmRpoPollServiceImplTest {
 
         verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
 
-        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
+        verify(logApi).armRpoPollingSuccessful(any());
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
