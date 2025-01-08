@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -77,7 +79,7 @@ class CaseControllerTest extends IntegrationBase {
         case1.setDefenceList(createListOfDefenceForCase(2, case1));
         case1.setProsecutorList(createListOfProsecutor(2, case1));
 
-        var hearingForCase1 =  PersistableFactory.getHearingTestData().createHearingWith(case1, swanseaCourtroom1);
+        var hearingForCase1 = PersistableFactory.getHearingTestData().createHearingWith(case1, swanseaCourtroom1);
         hearingForCase1.addJudges(createListOfJudges(1, case1));
         hearingForCase1.setHearingDate(LocalDate.parse("2023-06-20"));
         hearingForCase1.setScheduledStartTime(LocalTime.parse("09:00"));
@@ -91,7 +93,7 @@ class CaseControllerTest extends IntegrationBase {
         case2.setDefenceList(createListOfDefenceForCase(2, case2));
         case2.setProsecutorList(createListOfProsecutor(2, case2));
 
-        var hearingForCase2 =  PersistableFactory.getHearingTestData().createHearingWith(case2, swanseaCourtroom1);
+        var hearingForCase2 = PersistableFactory.getHearingTestData().createHearingWith(case2, swanseaCourtroom1);
         hearingForCase2.addJudges(createListOfJudges(1, case2));
         hearingForCase2.setHearingDate(LocalDate.parse("2023-06-20"));
         hearingForCase2.setScheduledStartTime(LocalTime.parse("10:00"));
@@ -105,7 +107,7 @@ class CaseControllerTest extends IntegrationBase {
         case3.setDefenceList(createListOfDefenceForCase(2, case3));
         case3.setProsecutorList(createListOfProsecutor(2, case3));
 
-        var hearingForCase3 =  PersistableFactory.getHearingTestData().createHearingWith(case3, swanseaCourtroom1);
+        var hearingForCase3 = PersistableFactory.getHearingTestData().createHearingWith(case3, swanseaCourtroom1);
         hearingForCase3.addJudges(createListOfJudges(1, case3));
         hearingForCase3.setHearingDate(LocalDate.parse(HEARING_DATE));
         hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
@@ -119,7 +121,7 @@ class CaseControllerTest extends IntegrationBase {
         case4.setDefenceList(createListOfDefenceForCase(2, case4));
         case4.setProsecutorList(createListOfProsecutor(2, case4));
 
-        var hearingForCase3 =  PersistableFactory.getHearingTestData().createHearingWith(case4, swanseaCourtroom1);
+        var hearingForCase3 = PersistableFactory.getHearingTestData().createHearingWith(case4, swanseaCourtroom1);
         hearingForCase3.addJudges(createListOfJudges(1, hearingForCase3.getCourtCase()));
         hearingForCase3.setHearingDate(LocalDate.now());
         hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
@@ -167,6 +169,19 @@ class CaseControllerTest extends IntegrationBase {
 
         String expectedResponse = getContentsFromFile(EXPECTED_RESPONSE_FILE);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getCase_courthouseNotFound_404ShouldBeReturned() throws Exception {
+        setupExternalDarPcUserForCourthouse(null);
+        MockHttpServletRequestBuilder requestBuilder = get(BASE_PATH)
+            .queryParam(COURTHOUSE, "SOME_UNKNOWN_HOUSE")
+            .queryParam(COURTROOM, "1")
+            .queryParam(DATE, HEARING_DATE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+        String content = response.getResponse().getContentAsString();
+        Problem problemResponse = objectMapper.readValue(content, Problem.class);
+        Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
     @Test
@@ -229,6 +244,19 @@ class CaseControllerTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCourthouseMissing_400.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesPost_courthouseNotFound_404ShouldBeReturned() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCourthouseNotFound.json"));
+
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+        String content = response.getResponse().getContentAsString();
+        Problem problemResponse = objectMapper.readValue(content, Problem.class);
+        Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
     @Test
