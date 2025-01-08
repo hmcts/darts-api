@@ -210,9 +210,9 @@ class ArmRpoPollServiceImplTest {
 
         verify(userIdentity).getUserAccount();
 
-        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(StorageConfiguration.class), anyBoolean());
 
-        verify(logApi).armRpoPollingSuccessful(any());
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -285,7 +285,7 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class));
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any(UserAccountEntity.class));
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class));
         verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), eq(headerColumns), anyString(), any(UserAccountEntity.class));
         verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any(UserAccountEntity.class));
         verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any(UserAccountEntity.class));
