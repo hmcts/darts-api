@@ -115,10 +115,50 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()", Matchers.is(1)))
             .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
             .andExpect(jsonPath("$[0].date", Matchers.is(DateConverterUtil.toLocalDateTime(SOME_DATE_TIME).toLocalDate().toString())))
             .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
             .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM.toUpperCase(Locale.ROOT))));
+    }
+
+    @Test
+    void caseHearingsGetEndpoint_shouldBeOrderedByHearingDate() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+
+        HearingEntity hearingEntity2 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_ID,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME.plusDays(1))
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()", Matchers.is(2)))
+            .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity2.getId())))
+            .andExpect(jsonPath("$[0].date", Matchers.is(hearingEntity2.getHearingDate().toString())))
+            .andExpect(jsonPath("$[1].id", Matchers.is(hearingEntity.getId())))
+            .andExpect(jsonPath("$[1].date", Matchers.is(hearingEntity.getHearingDate().toString())));
+
+        HearingEntity hearingEntity3 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_ID,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME.minusDays(1))
+        );
+
+        requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()", Matchers.is(3)))
+            .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity2.getId())))
+            .andExpect(jsonPath("$[0].date", Matchers.is(hearingEntity2.getHearingDate().toString())))
+            .andExpect(jsonPath("$[1].id", Matchers.is(hearingEntity.getId())))
+            .andExpect(jsonPath("$[1].date", Matchers.is(hearingEntity.getHearingDate().toString())))
+            .andExpect(jsonPath("$[2].id", Matchers.is(hearingEntity3.getId())))
+            .andExpect(jsonPath("$[2].date", Matchers.is(hearingEntity3.getHearingDate().toString())));
     }
 
     @Test

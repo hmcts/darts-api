@@ -81,7 +81,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
             FROM darts.transcription_document td
             WHERE td.tra_id = t.tra_id
         ))
-        ORDER BY t.created_ts
+        ORDER BY t.created_ts desc
         """, nativeQuery = true
     )
     List<TranscriptionEntity> findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments(Integer hearingId);

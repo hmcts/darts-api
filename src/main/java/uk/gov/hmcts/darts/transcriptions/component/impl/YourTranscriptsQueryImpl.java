@@ -131,7 +131,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 )
                 AND trw.workflow_ts >= :date_limit
                 AND tra.is_current = true
-                ORDER BY transcription_id DESC
+                ORDER BY requested_ts DESC
                 LIMIT :max_result_size
                 """,
             new MapSqlParameterSource()
@@ -255,7 +255,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 )
                 AND trw.workflow_ts >= :date_limit
                 AND tra.is_current = true
-                ORDER BY transcription_id DESC
+                ORDER BY requested_ts DESC
                 LIMIT :max_result_size
                 """,
             new MapSqlParameterSource("usr_id", userId)

@@ -346,8 +346,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         ));
 
         criteriaQuery.orderBy(List.of(
-            criteriaBuilder.asc(courtCase.get(CourtCaseEntity_.caseNumber)),
-            criteriaBuilder.asc(mediaRequest.get(MediaRequestEntity_.startTime))
+            criteriaBuilder.desc(mediaRequest.get(MediaRequestEntity_.id))
         ));
 
 
