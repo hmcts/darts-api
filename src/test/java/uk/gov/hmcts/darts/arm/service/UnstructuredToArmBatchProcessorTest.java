@@ -39,7 +39,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -143,7 +142,6 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(10));
         when(externalObjectDirectoryRepository.findAllById(List.of(10))).thenReturn(List.of(eod10));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        ExternalLocationTypeEntity armLocation = mock(ExternalLocationTypeEntity.class);
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);

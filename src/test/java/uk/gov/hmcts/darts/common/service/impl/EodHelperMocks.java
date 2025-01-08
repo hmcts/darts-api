@@ -194,6 +194,7 @@ public class EodHelperMocks implements Closeable {
     }
 
     @SneakyThrows
+    @Override
     public void close() {
         mockedEodHelper.close();
         closeable.close();
@@ -205,7 +206,7 @@ public class EodHelperMocks implements Closeable {
         ExternalLocationTypeRepository eltRepository = mock(ExternalLocationTypeRepository.class);
         ObjectRecordStatusRepository orsRepository = mock(ObjectRecordStatusRepository.class);
 
-        EodHelper eodHelper = spy(new EodHelper(null, eltRepository, orsRepository));
+        final EodHelper eodHelper = spy(new EodHelper(null, eltRepository, orsRepository));
 
         lenient().when(orsRepository.findById(STORED.getId())).thenReturn(Optional.of(storedStatus));
         lenient().when(orsRepository.findById(FAILURE.getId())).thenReturn(Optional.of(failureStatus));
