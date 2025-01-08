@@ -56,6 +56,7 @@ import java.util.Objects;
 
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
@@ -399,21 +400,37 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         handleResponseStatus(userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
 
         if (isNull(extendedSearchesByMatterResponse.getSearches())
-            || CollectionUtils.isEmpty(extendedSearchesByMatterResponse.getSearches())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount())
-            || StringUtils.isBlank(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getIsSaved())) {
+            || CollectionUtils.isEmpty(extendedSearchesByMatterResponse.getSearches())) {
+
             throw handleFailureAndCreateException(errorMessage.append("Search data is missing").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
-        if (FALSE.equals(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getIsSaved())) {
-            log.warn("The extendedSearchesByMatterResponse is not saved - with executionId: {}", executionId);
-            throw new ArmRpoGetExtendedSearchesByMatterIdException("The extendedSearchesByMatterResponse is not saved");
+        String searchId = armRpoExecutionDetailEntity.getSearchId();
+
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetailMatch = null;
+        for (ExtendedSearchesByMatterResponse.SearchDetail searchDetail : extendedSearchesByMatterResponse.getSearches()) {
+            if (nonNull(searchDetail.getSearch()) && !StringUtils.isBlank(searchDetail.getSearch().getName())) {
+                if (searchDetail.getSearch().getName().equals(searchId)) {
+                    searchDetailMatch = searchDetail;
+                    break;
+                }
+            }
         }
-        armRpoExecutionDetailEntity.setSearchItemCount(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount());
+        if (isNull(searchDetailMatch)
+            || isNull(searchDetailMatch.getSearch().getTotalCount())
+            || StringUtils.isBlank(searchDetailMatch.getSearch().getName())
+            || isNull(searchDetailMatch.getSearch().getIsSaved())) {
+            throw handleFailureAndCreateException(errorMessage.append("extendedSearchesByMatterResponse search data is missing for searchId: ")
+                                                      .append(searchId).append(" ").append(searchDetailMatch).toString(), armRpoExecutionDetailEntity,
+                                                  userAccount);
+        }
+
+        if (FALSE.equals(searchDetailMatch.getSearch().getIsSaved())) {
+            log.warn(errorMessage.append("The extendedSearchesByMatterResponse is not saved - with executionId: ").append(executionId).toString());
+            throw new ArmRpoGetExtendedSearchesByMatterIdException(errorMessage.toString());
+        }
+        armRpoExecutionDetailEntity.setSearchItemCount(searchDetailMatch.getSearch().getTotalCount());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName();
     }

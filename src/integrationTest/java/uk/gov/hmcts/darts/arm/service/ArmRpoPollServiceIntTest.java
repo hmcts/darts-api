@@ -55,7 +55,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private static final String BEARER_TOKEN = "BearerToken";
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
-    private static final String PRODUCTION_ID = "4";
+    private static final String PRODUCTION_ID = "DARTS_RPO_2024-08-13";
 
     @MockBean
     private UserIdentity userIdentity;
@@ -95,7 +95,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
         armRpoExecutionDetailEntity.setMatterId("MatterId");
-        armRpoExecutionDetailEntity.setSearchId("SearchId");
+        armRpoExecutionDetailEntity.setSearchId("DARTS_RPO_2024-08-13");
         armRpoExecutionDetailEntity.setStorageAccountId("StorageAccountId");
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
@@ -144,7 +144,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.getExtendedSearchesByMatterRpoState());
         armRpoExecutionDetailEntity.setMatterId("MatterId");
-        armRpoExecutionDetailEntity.setSearchId("SearchId");
+        armRpoExecutionDetailEntity.setSearchId("DARTS_RPO_2024-08-13");
         armRpoExecutionDetailEntity.setStorageAccountId("StorageAccountId");
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
@@ -194,7 +194,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
         armRpoExecutionDetailEntity.setMatterId("MatterId");
-        armRpoExecutionDetailEntity.setSearchId("SearchId");
+        armRpoExecutionDetailEntity.setSearchId("DARTS_RPO_2024-08-13");
         armRpoExecutionDetailEntity.setStorageAccountId("StorageAccountId");
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
@@ -229,7 +229,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.downloadProductionRpoState());
         armRpoExecutionDetailEntity.setMatterId("MatterId");
-        armRpoExecutionDetailEntity.setSearchId("SearchId");
+        armRpoExecutionDetailEntity.setSearchId("DARTS_RPO_2024-08-13");
         armRpoExecutionDetailEntity.setStorageAccountId("StorageAccountId");
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);

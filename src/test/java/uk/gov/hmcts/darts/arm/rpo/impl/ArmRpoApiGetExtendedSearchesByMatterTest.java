@@ -54,6 +54,7 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
 
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
+        armRpoExecutionDetailEntity.setSearchId(PRODUCTION_NAME);
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
     }
 
@@ -214,12 +215,11 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
         // then
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO getExtendedSearchesByMatter: ARM RPO API response is invalid"));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
-                                                 any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 

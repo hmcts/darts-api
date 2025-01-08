@@ -50,6 +50,7 @@ class ArmRpoApiGetExtendedSearchesByMatterIntTest extends IntegrationBase {
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setMatterId("1");
+        armRpoExecutionDetailEntity.setSearchId(PRODUCTION_NAME);
         armRpoExecutionDetailEntity.setCreatedBy(userAccount);
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
