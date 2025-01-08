@@ -116,12 +116,12 @@ public class EodHelperMocks implements Closeable {
      */
     public final void mockEodHelper() {
         mockedEodHelper = Mockito.mockStatic(EodHelper.class);
-        setupVairables();
+        setupVariables();
         setupLocationTypes();
         setupObjectRecordStatuses();
     }
 
-    private void setupVairables() {
+    private void setupVariables() {
         lenient().when(storedStatus.getId()).thenReturn(STORED.getId());
         lenient().when(storedStatus.getDescription()).thenReturn("Stored");
         lenient().when(failureStatus.getId()).thenReturn(FAILURE.getId());
@@ -202,7 +202,7 @@ public class EodHelperMocks implements Closeable {
 
     //This is needed to bypass static mock limitations with multi threaded operations
     public void simulateInitWithMockedData() {
-        setupVairables();
+        setupVariables();
         ExternalLocationTypeRepository eltRepository = mock(ExternalLocationTypeRepository.class);
         ObjectRecordStatusRepository orsRepository = mock(ObjectRecordStatusRepository.class);
 
