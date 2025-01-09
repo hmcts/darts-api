@@ -10,4 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @Configuration
 public class DetsToArmPushAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
+
+    private int threads;
 }
