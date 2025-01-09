@@ -36,8 +36,10 @@ set display_name = 'Newcastle Moot Hall'
 where courthouse_object_id = '0b17075880cd641a';
 
 
-insert into darts.courthouse(courthouse_name, display_name, folder_path, courthouse_object_id)
-values ('BURNLEY MAGS TWO', 'Burnley Mags Two', '/Area 2/Burnley Mags Two', '0b1707589a44e76c');
+insert into darts.courthouse(
+    cth_id, courthouse_name, display_name, folder_path, courthouse_object_id, created_by,created_ts, last_modified_by, last_modified_ts)
+values (nextval('cth_seq'),'BURNLEY MAGS TWO', 'Burnley Mags Two', '/Area 2/Burnley Mags Two', '0b1707589a44e76c',
+        0,current_timestamp, 0,current_timestamp);
 
 update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - ADULTS'
