@@ -395,8 +395,9 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         response.setIsError(false);
         ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
         search.setTotalCount(4);
-        search.setName("DARTS_RPO_2024-08-13");
+        search.setName(PRODUCTION_ID);
         search.setIsSaved(true);
+        search.setSearchId(SEARCH_ID);
         ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
         searchDetail.setSearch(search);
         response.setSearches(List.of(searchDetail));
