@@ -234,7 +234,6 @@ public class CaseServiceImpl implements CaseService {
                 }
             }
         }
-        annotations.sort((o1, o2) -> o2.getHearingDate().compareTo(o1.getHearingDate()));
         return annotations;
     }
 
