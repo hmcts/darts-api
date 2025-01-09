@@ -35,11 +35,9 @@ update darts.courthouse
 set display_name = 'Newcastle Moot Hall'
 where courthouse_object_id = '0b17075880cd641a';
 
-update darts.courthouse
-set courthouse_name = 'BURNLEY MAGS TWO',
-    display_name    = 'Burnley Mags Two',
-    folder_path     = '/Area 2/Burnley Mags Two'
-where courthouse_object_id = '0b1707589a44e76c';
+
+insert into darts.courthouse(courthouse_name, display_name, folder_path, courthouse_object_id)
+values ('BURNLEY MAGS TWO', 'Burnley Mags Two', '/Area 2/Burnley Mags Two', '0b1707589a44e76c');
 
 update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - ADULTS'
