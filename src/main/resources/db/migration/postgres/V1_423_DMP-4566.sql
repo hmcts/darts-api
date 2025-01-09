@@ -53,7 +53,7 @@ where event_type = '40751'
   and event_sub_type = '12400';
 update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - JUVENILES'
-where event_type = '40750'
+where event_type = '40751'
   and event_sub_type = '12401';
 update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - ADULTS'
@@ -61,7 +61,7 @@ where event_type = '40752'
   and event_sub_type = '12400';
 update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - JUVENILES'
-where event_type = '40750'
+where event_type = '40752'
   and event_sub_type = '12401';
 update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - ADULTS'
@@ -69,7 +69,7 @@ where event_type = '40753'
   and event_sub_type = '12400';
 update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - JUVENILES'
-where event_type = '40750'
+where event_type = '40753'
   and event_sub_type = '12401';
 
 
