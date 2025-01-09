@@ -114,7 +114,6 @@ java:
     AUTOMATED_TASK_MODE: true
     API_MODE: true
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
-    ARM_RPO_THREAD_SLEEP_DURATION: 5s
 
   secrets:
     DARTS_API_DB_PASSWORD:
