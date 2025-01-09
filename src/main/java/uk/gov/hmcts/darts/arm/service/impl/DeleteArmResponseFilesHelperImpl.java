@@ -27,7 +27,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
+class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementApi armDataManagementApi;
