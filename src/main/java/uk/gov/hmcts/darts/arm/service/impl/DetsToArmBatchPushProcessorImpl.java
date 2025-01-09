@@ -109,11 +109,13 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 }
                 return;
             }
+        } else {
+            log.info("No DETS EODs to process");
         }
         log.info("Finished running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
-    private List<Integer> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
+    List<Integer> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                         ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
         ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();
