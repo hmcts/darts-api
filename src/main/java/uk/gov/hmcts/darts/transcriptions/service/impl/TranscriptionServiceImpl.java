@@ -497,7 +497,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         } else {
             result = transcriberTranscriptsQuery.getTranscriptRequests(userId);
         }
-        result.sort((t1, t2) -> t2.getCaseId().compareTo(t1.getCaseId()));
         return result;
     }
 
