@@ -804,6 +804,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     @SneakyThrows
+    @SuppressWarnings("PMD.DoNotUseThreads")//Required for test stability
     public List<CaseRetentionEntity> createCaseRetention(CourtCaseEntity courtCase) {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity =
             getRetentionPolicyTypeEntity(RetentionPolicyEnum.MANUAL);

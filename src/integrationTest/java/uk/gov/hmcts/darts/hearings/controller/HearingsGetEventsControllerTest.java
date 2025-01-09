@@ -84,6 +84,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         expectedJson = expectedJson.replace("<<eventId>>", event.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
+
     @Test
     void getEvents_shouldBeOrderedByTimestamp() throws Exception {
 

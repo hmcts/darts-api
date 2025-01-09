@@ -82,19 +82,22 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
         var requestBuilder = get(URI.create(String.format("/retentions?case_id=%s", courtCase.getId())));
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_last_changed_date", Matchers.is(caseRetentionEntityList.get(2).getLastModifiedDateTime().toString())))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_last_changed_date",
+                                                      Matchers.is(caseRetentionEntityList.get(2).getLastModifiedDateTime().toString())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_date", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].amended_by", Matchers.is("system")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_policy_applied", Matchers.is("Manual")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].comments", Matchers.is("a comment")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].status", Matchers.is("c_state")))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_last_changed_date", Matchers.is(caseRetentionEntityList.get(1).getLastModifiedDateTime().toString())))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_last_changed_date",
+                                                      Matchers.is(caseRetentionEntityList.get(1).getLastModifiedDateTime().toString())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_date", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].amended_by", Matchers.is("system")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_policy_applied", Matchers.is("Manual")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].comments", Matchers.is("a comment")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].status", Matchers.is("b_state")))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_last_changed_date", Matchers.is(caseRetentionEntityList.get(0).getLastModifiedDateTime().toString())))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_last_changed_date",
+                                                      Matchers.is(caseRetentionEntityList.get(0).getLastModifiedDateTime().toString())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_date", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].amended_by", Matchers.is("system")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_policy_applied", Matchers.is("Manual")))
