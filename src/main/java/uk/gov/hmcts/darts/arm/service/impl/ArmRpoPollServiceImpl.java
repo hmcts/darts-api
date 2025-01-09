@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoGetExtendedSearchesByMatterIdException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
@@ -39,10 +40,9 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final LogApi logApi;
 
-    private List<File> tempProductionFiles = new ArrayList<>();
+    private List<File> tempProductionFiles;
 
-    private List<Integer> allowableFailedStates = new ArrayList<>();
-
+    private List<Integer> allowableFailedStates;
 
     @Override
     public void pollArmRpo(boolean isManualRun) {
@@ -69,6 +69,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
             // step to call ARM RPO API to get the extended searches by matter
             String productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
+            
             // step to call ARM RPO API to get the master index field by record class schema
             List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
                 bearerToken, executionId,
@@ -95,10 +96,13 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 } else {
                     log.warn("No production export files found");
                 }
+                logApi.armRpoPollingSuccessful(executionId);
             } else {
-                log.warn("Create export of production files is still in progress");
+                log.warn("ARM RPO Polling is still in-progress as the createExportBasedOnSearchResultsTable is still not completed");
             }
-            logApi.armRpoPollingSuccessful(executionId);
+            log.info("Polling ARM RPO service completed");
+        } catch (ArmRpoGetExtendedSearchesByMatterIdException e) {
+            log.warn("ARM RPO Polling getExtendedSearchesByMatterId is still in-progress", e);
         } catch (Exception e) {
             log.error("Error while polling ARM RPO", e);
             logApi.armRpoPollingFailed(executionId);
@@ -161,9 +165,12 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         if (isNull(armRpoExecutionDetailEntity)) {
             return null;
         }
+
         // If the previous state is saveBackgroundSearch and status is completed
+        // or the previous state is getExtendedSearchesByMatterId and status is in progress
         // or the previous state is createExportBasedOnSearchResultsTable and status is in progress, return the entity
         if (saveBackgroundSearchCompleted(armRpoExecutionDetailEntity)
+            || getExtendedSearchesByMatterIdInProgress(armRpoExecutionDetailEntity)
             || createExportBasedOnSearchResultsTableInProgress(armRpoExecutionDetailEntity)) {
             return armRpoExecutionDetailEntity;
         }
@@ -182,6 +189,12 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             return true;
         }
         return false;
+    }
+
+    private boolean getExtendedSearchesByMatterIdInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
+            && ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
+            && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
     }
 
     private boolean createExportBasedOnSearchResultsTableInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {

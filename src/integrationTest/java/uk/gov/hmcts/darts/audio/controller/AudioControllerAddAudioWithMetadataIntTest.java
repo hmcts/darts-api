@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.test.common.LogUtil;
@@ -196,6 +197,37 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
     }
 
     @Test
+    void addAudioMetadata_courtHouseNotFound_404ShouldBeReturned() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
+        addAudioMetadataRequest.setCourthouse("UNKNOWN_COURTHOUSE");
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.mp2",
+            "audio/mpeg",
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
+        );
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
+
+        MvcResult response = mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
+            .andExpect(status().isNotFound())
+            .andReturn();
+        String content = response.getResponse().getContentAsString();
+        Problem problemResponse = objectMapper.readValue(content, Problem.class);
+        assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
+    }
+
+    @Test
     void addAudioMetadataDuplicate() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
@@ -240,7 +272,7 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
 
         assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Exact duplicate detected based upon media metadata and checksum.", toLevel(
+                        .searchLogs("Exact duplicate detected based upon media metadata and checksum for media entity ids [2].", toLevel(
                             Level.INFO_INT)).isEmpty());
     }
 
@@ -340,12 +372,12 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
                 multipart(ENDPOINT)
                     .file(audioFile)
                     .file(metadataJson))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isNotFound())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":400,"detail":"Courthouse 'TEST' not found."}""";
+            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":404,"detail":"Courthouse 'TEST' not found."}""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
