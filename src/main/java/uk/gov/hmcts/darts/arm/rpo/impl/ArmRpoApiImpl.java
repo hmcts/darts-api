@@ -410,8 +410,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         ExtendedSearchesByMatterResponse.SearchDetail searchDetailMatch = null;
         for (ExtendedSearchesByMatterResponse.SearchDetail searchDetail : extendedSearchesByMatterResponse.getSearches()) {
-            if (nonNull(searchDetail.getSearch()) && !StringUtils.isBlank(searchDetail.getSearch().getName())) {
-                if (searchDetail.getSearch().getName().equals(searchId)) {
+            if (nonNull(searchDetail.getSearch()) && !StringUtils.isBlank(searchDetail.getSearch().getSearchId())) {
+                if (searchDetail.getSearch().getSearchId().equals(searchId)) {
                     searchDetailMatch = searchDetail;
                     break;
                 }
