@@ -20,6 +20,7 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
          JOIN ann.hearingList hearing
         WHERE hearing.id = :hearingId
         AND ann.deleted = false
+        ORDER BY annDoc.uploadedDateTime DESC        
         """)
     List<AnnotationEntity> findByHearingId(int hearingId);
 
@@ -31,6 +32,7 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
         WHERE hearing.id = :hearingId
         AND ann.deleted = false
         AND ann.currentOwner = :userAccount
+        ORDER BY annDoc.uploadedDateTime DESC        
         """)
     List<AnnotationEntity> findByHearingIdAndUser(int hearingId, UserAccountEntity userAccount);
 

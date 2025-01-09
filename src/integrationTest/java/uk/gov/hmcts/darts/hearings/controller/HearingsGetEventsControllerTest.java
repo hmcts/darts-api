@@ -83,7 +83,39 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
             """;
         expectedJson = expectedJson.replace("<<eventId>>", event.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+    @Test
+    void getEvents_shouldBeOrderedByTimestamp() throws Exception {
 
+        EventEntity eventEntity = dartsDatabase.createEvent(hearingEntity);
+        eventEntity.setTimestamp(event.getTimestamp().plusMinutes(1));
+        eventEntity.setEventId(2);
+        dartsDatabase.save(eventEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        log.info("actualJson: {}", actualJson);
+        String expectedJson = """
+            [
+                {
+                  "id": 2,
+                  "timestamp": "2020-06-20T10:01:00Z",
+                  "name": "Defendant recalled",
+                  "text": "testEventText",
+                  "is_data_anonymised": false
+                },
+                {
+                  "id": 1,
+                  "timestamp": "2020-06-20T10:00:00Z",
+                  "name": "Defendant recalled",
+                  "text": "testEventText",
+                  "is_data_anonymised": false
+                }
+              ]
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);
     }
 
     @Test

@@ -42,6 +42,7 @@ public class GetEventsResponseMapper {
         return groupedEvents.values().stream()
             .flatMap(GetEventsResponseMapper::getLatestEvent)
             .filter(Objects::nonNull)
+            .sorted(Comparator.comparing(EventEntity::getTimestamp).reversed())
             .toList();
     }
 

@@ -87,7 +87,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
-        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -97,7 +97,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(transcription);
         TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 1, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(transcription2);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, hearingEntity.getId());
@@ -106,7 +106,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
-        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -161,7 +161,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
-        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -205,7 +205,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
-        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.STRICT);
     }
 
     private void createTranscriptionDocs(TranscriptionEntity transcriptionEntity, List<Boolean> hiddenList) {
