@@ -35,14 +35,11 @@ update darts.courthouse
 set display_name = 'Newcastle Moot Hall'
 where courthouse_object_id = '0b17075880cd641a';
 
-
 update darts.courthouse
 set courthouse_name = 'BURNLEY MAGS TWO',
     display_name    = 'Burnley Mags Two',
     folder_path     = '/Area 2/Burnley Mags Two'
 where courthouse_object_id = '0b1707589a44e76c';
-
-
 
 update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - ADULTS'
@@ -76,3 +73,8 @@ update darts.event_handler
 set event_name = 'Disqualification Order (from working with children) - JUVENILES'
 where event_type = '40750'
   and event_sub_type = '12401';
+
+
+update darts.security_group
+set rol_id = (select rol_id from darts.security_role where role_name = 'DARTS')
+where group_name = 'MEDIA_IN_PERPETUITY';
