@@ -60,10 +60,7 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
     public List<RetentionPolicyType> getRetentionPolicyTypes() {
         List<RetentionPolicyTypeEntity> policyTypeRepositoryAll = retentionPolicyTypeRepository.findAll(
             Sort.by(RetentionPolicyTypeEntity_.FIXED_POLICY_KEY).descending());
-
-        ///admin/retention-policy-types
         return retentionPolicyTypeMapper.mapToModelList(policyTypeRepositoryAll);
-
     }
 
     @Override

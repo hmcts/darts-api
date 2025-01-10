@@ -92,4 +92,12 @@ public interface CaseRepository
         and cr.retainUntil < :maxRetentionDate
         """)
     List<Integer> findCaseIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
+
+    @Query("""
+        SELECT cc.id
+        FROM CourtCaseEntity cc
+        WHERE cc.id in :ids
+        ORDER BY cc.id DESC        
+        """)
+    List<CourtCaseEntity> findAllWithIdMatchingOneOf(List<Integer> ids);
 }

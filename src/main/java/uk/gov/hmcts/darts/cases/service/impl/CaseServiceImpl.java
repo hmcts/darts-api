@@ -1,15 +1,9 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -41,7 +35,6 @@ import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -251,12 +244,7 @@ public class CaseServiceImpl implements CaseService {
         if (matchingCaseIds.size() > adminSearchMaxResults) {
             throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }
-        List<CourtCaseEntity> matchingCases = caseRepository.findAll(new Specification<CourtCaseEntity>() {
-            @Override
-            public Predicate toPredicate(Root<CourtCaseEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                return root.get(CourtCaseEntity_.id).in(matchingCaseIds);
-            }
-        }, Sort.by(Sort.Order.desc(CourtCaseEntity_.id.getName())));
+        List<CourtCaseEntity> matchingCases = caseRepository.findAllWithIdMatchingOneOf(matchingCaseIds);
 
         return AdminCasesSearchResponseMapper.mapResponse(matchingCases);
     }
