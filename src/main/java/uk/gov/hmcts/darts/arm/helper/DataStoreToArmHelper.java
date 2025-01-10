@@ -309,6 +309,14 @@ public class DataStoreToArmHelper {
         }
     }
 
+    public void updateEodByIdAndStatus(List<Integer> eodsIds, ObjectRecordStatusEntity oldStatus,
+                                       ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount) {
+        if (nonNull(eodsIds) && !eodsIds.isEmpty()) {
+            externalObjectDirectoryRepository.updateEodByIdAndStatus(eodsIds, newStatus, oldStatus, userAccount);
+            log.error("Updated eods from {} to {}", oldStatus.getDescription(), newStatus.getDescription());
+        }
+    }
+
     public BinaryData convertStringToBinaryData(String manifestFileContents) {
         return BinaryData.fromString(manifestFileContents);
     }
