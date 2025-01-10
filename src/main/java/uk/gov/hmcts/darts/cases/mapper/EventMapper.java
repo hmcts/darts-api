@@ -21,7 +21,7 @@ public class EventMapper {
 
         return emptyIfNull(latestEvents).stream()
             .map(EventMapper::map)
-            .sorted((e1, e2) -> e2.getTimestamp().compareTo(e1.getTimestamp()))
+            .sorted((e1, e2) -> e2.getHearingDate().compareTo(e1.getHearingDate()))
             .collect(Collectors.toList());
     }
 
