@@ -142,10 +142,8 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .stream()
             .collect(Collectors.groupingBy(object -> {
                 MediaEntity media = object.getMedia();
-                String v = object.getTicketReference() + "-" + object.getHiddenBy().getId() + "-" + object.getObjectHiddenReason().getId()
+                return object.getTicketReference() + "-" + object.getHiddenBy().getId() + "-" + object.getObjectHiddenReason().getId()
                     + "-" + media.getCourtroom().getId() + "-" + media.getStart() + "-" + media.getEnd();
-                System.out.println("TMP: " + v);
-                return v;
             }))
             .values()
             .stream()
