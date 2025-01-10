@@ -10,11 +10,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.net.URI;
@@ -317,6 +319,51 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
+
+    @Test
+    void getYourTranscriptsWithApprovedStatusShouldReturnApproveOnTimeStamp() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        OffsetDateTime now = now();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity =
+            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), systemUser,
+                                                                now, transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                "user_id",
+                testUser.getId()
+            );
+
+        TranscriptionUrgencyEntity urgencyEntity = transcriptionStub.getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD);
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath(
+                "$.requester_transcriptions[0].case_id",
+                is(courtCase.getId())
+            ))
+            .andExpect(jsonPath(
+                "$.requester_transcriptions[0].case_number",
+                is(courtCase.getCaseNumber())
+            ))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Approved")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0]." +
+                                    "transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
+
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts").isString());
+
     }
 
 

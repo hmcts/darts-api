@@ -22,6 +22,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final YourTranscriptsSummaryRowMapper yourTranscriptsSummaryRowMapper;
+    private final YourTranscriptsSummaryRequesterRowMapper yourTranscriptsSummaryRequesterRowMapper;
 
     private static final String USR_ID = "usr_id";
     private static final String ROL_ID = "rol_id";
@@ -52,7 +53,8 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as transcription_urgency_description,
                     tru.tru_id  as transcription_urgency_id,
                     tru.priority_order as transcription_urgency_priority_order,
-                    trw.workflow_ts as requested_ts
+                    trw.workflow_ts as requested_ts,
+                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
@@ -97,7 +99,8 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as transcription_urgency_description,
                     tru.tru_id  as transcription_urgency_id,
                     tru.priority_order as transcription_urgency_priority_order,
-                    trw.workflow_ts as requested_ts
+                    trw.workflow_ts as requested_ts,
+                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
@@ -139,7 +142,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 .addValue(INCLUDE_HIDDEN_FROM_REQUESTOR, includeHiddenFromRequester)
                 .addValue(DATE_LIMIT, TranscriptionUtil.getDateToLimitResults(dateLimit))
                 .addValue(MAX_RESULT_SIZE, maxResultSize),
-            yourTranscriptsSummaryRowMapper
+            yourTranscriptsSummaryRequesterRowMapper
         );
     }
 
