@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
@@ -50,14 +51,15 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
     private static final String EXPECTED_RESPONSE_DIRECTORY = BASE_JSON_DIRECTORY + "expectedResponse/";
 
     private static final String URL_PREFIX = "/api/v1/";
-    
+
     @Autowired
     private ArmRpoClient armRpoClient;
 
     private static Stream<Arguments> genericArmRpoClientTestArguments() {
         return Stream.of(
             Arguments.of("getRecordManagementMatter", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
-                return new ClientCallable(null, armRpoClient.getRecordManagementMatter(bearerAuth));
+                EmptyRpoRequest request = EmptyRpoRequest.builder().build();
+                return new ClientCallable(request, armRpoClient.getRecordManagementMatter(bearerAuth, request));
             }),
             Arguments.of("getStorageAccounts", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
                 StorageAccountRequest request = StorageAccountRequest.builder()
