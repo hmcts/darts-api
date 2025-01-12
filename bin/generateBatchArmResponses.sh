@@ -44,10 +44,10 @@ addNewResponses () {
     exit 1
   fi
 
-  read -p "enter IU timestamp or return to use default - 2024-01-11T12:46:21.215310: " iuTimestamp
+  read -p "enter IU timestamp or return to use default - 2024-06-10T14:08:28.316382+00:00 (yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]): " iuTimestamp
   if [ -z "$iuTimestamp" ]
   then
-    iuTimestamp="2024-01-11T12:46:21.215310"
+    iuTimestamp="2024-06-10T14:08:28.316382+00:00"
   fi
   #${parameter//pattern/string}
   uiFileContentsParam="{\"operation\": \"input_upload\", \"timestamp\": \"IU_TIMESTAMP\", \"status\": 1, \"exception_description\": null, \"error_status\": null, \"filename\": \"CGITestFilesMalformedManifest_1\", \"submission_folder\": \"/dropzone/A360/submission\", \"file_hash\": \"fbfec54925d62146aeced724ff9f3c8e\"}"

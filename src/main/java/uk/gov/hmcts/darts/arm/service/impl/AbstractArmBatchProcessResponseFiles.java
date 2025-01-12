@@ -131,7 +131,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             log.info("Contents of ARM Input Upload file: '{}' '{}", inputUploadBlob, inputUploadFileRecordStr);
             ArmResponseInputUploadFileRecord inputUploadFileRecord = objectMapper.readValue(inputUploadFileRecordStr, ArmResponseInputUploadFileRecord.class);
 
-
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
 
@@ -171,7 +170,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
             return OffsetDateTime.parse(inputUploadFileRecord.getTimestamp(), dateTimeFormatter);
         } catch (Exception e) {
-            log.error("Unable to parse timestamp from ARM input upload file", e);
+            log.error("Unable to parse timestamp {} from ARM input upload file {}", inputUploadFileRecord.getTimestamp(),
+                      inputUploadFileRecord.getFilename(), e);
             throw new IllegalArgumentException(e);
         }
     }
