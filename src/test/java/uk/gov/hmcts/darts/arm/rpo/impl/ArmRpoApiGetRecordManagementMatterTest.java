@@ -61,7 +61,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
         RecordManagementMatterResponse expectedResponse = new RecordManagementMatterResponse();
         expectedResponse.setStatus(200);
         expectedResponse.setIsError(false);
-        when(armRpoClient.getRecordManagementMatter(anyString())).thenReturn(expectedResponse);
+        when(armRpoClient.getRecordManagementMatter(anyString(), any())).thenReturn(expectedResponse);
 
         // when
         assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
@@ -77,7 +77,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
     @Test
     void getRecordManagementMatterThrowsArmRpoExceptionWhenClientFails() {
         // given
-        when(armRpoClient.getRecordManagementMatter(anyString())).thenThrow(FeignException.class);
+        when(armRpoClient.getRecordManagementMatter(anyString(), any())).thenThrow(FeignException.class);
 
         // when
         assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
@@ -111,7 +111,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
         response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
         response.getRecordManagementMatter().setMatterId("123");
-        when(armRpoClient.getRecordManagementMatter(anyString())).thenReturn(response);
+        when(armRpoClient.getRecordManagementMatter(anyString(), any())).thenReturn(response);
 
         Integer executionId = 1;
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();

@@ -102,14 +102,13 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         var response = new RecordManagementMatterResponse();
         response.setIsError(true);
         response.setStatus(400);
-
-        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN)))
+        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN), any()))
             .thenReturn(response);
 
         // When
         task.preRunTask();
         task.runTask();
-        
+
         // Then
         List<ArmRpoExecutionDetailEntity> allExecutionDetails = dartsDatabase.getArmRpoExecutionDetailRepository()
             .findAll();
@@ -208,8 +207,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         response.setIsError(false);
         response.setStatus(200);
 
-        when(armRpoClient.getRecordManagementMatter(BEARER_TOKEN))
-            .thenReturn(response);
+        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN), any())).thenReturn(response);
     }
 
 }
