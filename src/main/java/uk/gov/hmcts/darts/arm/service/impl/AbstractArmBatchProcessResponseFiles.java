@@ -165,7 +165,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private OffsetDateTime getInputUploadFileTimestamp(ArmResponseInputUploadFileRecord inputUploadFileRecord) {
+    OffsetDateTime getInputUploadFileTimestamp(ArmResponseInputUploadFileRecord inputUploadFileRecord) {
         try {
             dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
             return OffsetDateTime.parse(inputUploadFileRecord.getTimestamp(), dateTimeFormatter);
