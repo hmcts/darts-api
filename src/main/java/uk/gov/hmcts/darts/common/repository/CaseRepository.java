@@ -94,7 +94,7 @@ public interface CaseRepository
     List<Integer> findCaseIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
 
     @Query("""
-        SELECT cc.id
+        SELECT cc
         FROM CourtCaseEntity cc
         WHERE cc.id in :ids
         ORDER BY cc.id DESC        
