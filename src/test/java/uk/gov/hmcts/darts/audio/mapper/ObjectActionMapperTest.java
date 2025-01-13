@@ -53,7 +53,7 @@ class ObjectActionMapperTest {
 
 
     @Test
-    void toGetAdminMediasMarkedForDeletionAdminAction_typical() {
+    void toGetAdminMediasMarkedForDeletionAdminAction_shouldReturnAdminMediasMarkedForDeletion_whenTypicalDataPassedIn() {
         // Given
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
         objectAdminActionEntity.setTicketReference("ticketReference");
