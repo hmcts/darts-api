@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInputUploadFil
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
+import uk.gov.hmcts.darts.arm.service.DeleteArmResponseFilesHelper;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
@@ -56,7 +57,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MISSING
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
@@ -75,6 +75,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected final CurrentTimeHelper timeHelper;
     protected final ExternalObjectDirectoryService externalObjectDirectoryService;
     protected final LogApi logApi;
+    protected final DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
 
     protected DateTimeFormatter dateTimeFormatter;
 
@@ -123,13 +124,16 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     private void processInputUploadBlob(String inputUploadBlob, UserAccountEntity userAccount) {
         log.debug("Found ARM Input Upload file {}", inputUploadBlob);
+        BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = null;
         try {
-            BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = new BatchInputUploadFileFilenameProcessor(inputUploadBlob);
+            batchUploadFileFilenameProcessor = new BatchInputUploadFileFilenameProcessor(inputUploadBlob);
             String manifestName = generateManifestName(batchUploadFileFilenameProcessor.getUuidString());
 
             String inputUploadFileRecordStr = armDataManagementApi.getBlobData(inputUploadBlob).toString();
             log.info("Contents of ARM Input Upload file: '{}' '{}", inputUploadBlob, inputUploadFileRecordStr);
-            ArmResponseInputUploadFileRecord inputUploadFileRecord = objectMapper.readValue(inputUploadFileRecordStr, ArmResponseInputUploadFileRecord.class);
+
+            ArmResponseInputUploadFileRecord inputUploadFileRecord = getResponseInputUploadFileRecordOrDelete(batchUploadFileFilenameProcessor,
+                                                                                                              inputUploadFileRecordStr);
 
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
@@ -155,11 +159,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             }
 
             processResponseFileByHashcode(batchUploadFileFilenameProcessor, manifestName, userAccount);
-            deleteResponseBlobsByManifestName(batchUploadFileFilenameProcessor, manifestName);
+            deleteArmResponseFilesHelper.deleteResponseBlobsByManifestName(batchUploadFileFilenameProcessor, manifestName);
             resetArmStatusForUnprocessedEods(manifestName, userAccount);
         } catch (IllegalArgumentException e) {
             log.error("Unable to process manifest filename {}", inputUploadBlob, e);
-            deleteResponseBlobs(List.of(inputUploadBlob));
+            deleteArmResponseFilesHelper.deleteDanglingResponses(batchUploadFileFilenameProcessor);
         } catch (Exception e) {
             log.error("Unable to process manifest", e);
         }
@@ -176,71 +180,16 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private void deleteResponseBlobsByManifestName(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
-                                                   String manifestName) {
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findByManifestFile(manifestName);
-        if (CollectionUtils.isNotEmpty(externalObjectDirectoryEntities)) {
-            List<ExternalObjectDirectoryEntity> completedExternalObjectDirectoryEntities = new ArrayList<>();
-            for (ExternalObjectDirectoryEntity eod : externalObjectDirectoryEntities) {
-                if (isResponseCompletedAndCleaned(eod)) {
-                    completedExternalObjectDirectoryEntities.add(eod);
-                }
-            }
-            if (externalObjectDirectoryEntities.size() == completedExternalObjectDirectoryEntities.size()) {
-                log.info("About to delete ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
-                armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
-            } else {
-                log.warn("Unable to delete ARM batch input upload file {} as referenced data is not complete - total {} vs completed {}",
-                         batchUploadFileFilenameProcessor.getBatchMetadataFilename(),
-                         externalObjectDirectoryEntities.size(), completedExternalObjectDirectoryEntities.size());
-            }
-        } else {
-            // If no EODs are found for the manifest, delete the input upload blob and any linked response files as they are dangling
-            deleteDanglingResponses(batchUploadFileFilenameProcessor);
-        }
-
-    }
-
-    // Delete the response files if they are not linked to any EODs
-    private void deleteDanglingResponses(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor) {
-        List<String> responseFiles = new ArrayList<>();
+    private ArmResponseInputUploadFileRecord getResponseInputUploadFileRecordOrDelete(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
+                                                                                      String inputUploadFileRecordStr) throws IOException {
         try {
-            responseFiles.addAll(armDataManagementApi.listResponseBlobs(batchUploadFileFilenameProcessor.getHashcode()));
+            return objectMapper.readValue(inputUploadFileRecordStr, ArmResponseInputUploadFileRecord.class);
         } catch (Exception e) {
-            log.error("Unable to find dangling response files for hashcode {}", batchUploadFileFilenameProcessor.getHashcode(), e);
+            log.error("Unable to read ARM response input upload file {} - About to delete ",
+                      batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
+            deleteArmResponseFilesHelper.deleteDanglingResponses(batchUploadFileFilenameProcessor);
+            throw e;
         }
-
-        if (CollectionUtils.isNotEmpty(responseFiles)) {
-            List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseFiles);
-
-            if (deletedResponseBlobStatuses.contains(false)) {
-                log.warn("Unable to delete dangling ARM batch input upload file {} as referenced data is not all deleted",
-                         batchUploadFileFilenameProcessor.getBatchMetadataFilename());
-            } else {
-                log.info("About to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
-                armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
-            }
-        } else {
-            log.info("Unable to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
-            armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
-        }
-    }
-
-    private boolean isResponseCompletedAndCleaned(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return externalObjectDirectory.isResponseCleaned()
-            && isCompletedStatus(externalObjectDirectory.getStatus());
-    }
-
-    private boolean isCompletedStatus(ObjectRecordStatusEntity status) {
-        if (nonNull(status)) {
-            ObjectRecordStatusEnum statusEnum = ObjectRecordStatusEnum.valueOfId(status.getId());
-            return STORED.equals(statusEnum)
-                || ARM_RPO_PENDING.equals(statusEnum)
-                || ARM_RESPONSE_PROCESSING_FAILED.equals(statusEnum)
-                || ARM_RESPONSE_MANIFEST_FAILED.equals(statusEnum)
-                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(statusEnum);
-        }
-        return false;
     }
 
     private String generateManifestName(String uuid) {
@@ -324,20 +273,20 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                            armResponseBatchData.getCreateRecordFilenameProcessor(),
                                            armResponseBatchData.getUploadFileFilenameProcessor(),
                                            userAccount);
-                    deleteResponseBlobs(armResponseBatchData);
+                    deleteArmResponseFilesHelper.deleteResponseBlobs(armResponseBatchData);
                 } else if (CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())
                     && (armResponseBatchData.getInvalidLineFileFilenameProcessors().size() > 1)) {
 
                     preProcessResponseFilesActions(armResponseBatchData.getExternalObjectDirectoryId());
                     processMultipleInvalidLineFiles(armResponseBatchData, userAccount);
-                    deleteResponseBlobs(armResponseBatchData);
+                    deleteArmResponseFilesHelper.deleteResponseBlobs(armResponseBatchData);
 
                 } else if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     && nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
                     preProcessResponseFilesActions(armResponseBatchData.getExternalObjectDirectoryId());
 
                     processUploadFileObject(batchUploadFileFilenameProcessor, armResponseBatchData, userAccount);
-                    deleteResponseBlobs(armResponseBatchData);
+                    deleteArmResponseFilesHelper.deleteResponseBlobs(armResponseBatchData);
                 } else {
                     log.info("Unable to find response files for external object {}", armResponseBatchData.getExternalObjectDirectoryId());
                     logResponsesFound(armResponseBatchData);
@@ -434,7 +383,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     armResponseBatchData.getInvalidLineFileFilenameProcessors().forEach(
                         invalidLineFileFilenameProcessor -> invalidResponseFiles.add(invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath())
                     );
-                    deleteResponseBlobs(invalidResponseFiles);
+                    deleteArmResponseFilesHelper.deleteResponseBlobs(invalidResponseFiles);
                 }
             } else {
 
@@ -446,7 +395,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 armResponseBatchData.getInvalidLineFileFilenameProcessors().forEach(
                     invalidLineFileFilenameProcessor -> invalidResponseFiles.add(invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath())
                 );
-                deleteResponseBlobs(invalidResponseFiles);
+                deleteArmResponseFilesHelper.deleteResponseBlobs(invalidResponseFiles);
             }
         } catch (Exception e) {
             log.error("Unable to update invalid line responses", e);
@@ -587,7 +536,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             return objectMapper.readValue(uploadFileBinary.toString(), ArmResponseUploadFileRecord.class);
         } catch (Exception e) {
             log.error("Unable to read ARM response upload file {} - About to delete ", uploadFileFilenameAndPath, e);
-            deleteResponseBlobs(List.of(uploadFileFilenameAndPath));
+            deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(uploadFileFilenameAndPath));
             throw e;
         }
     }
@@ -638,7 +587,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                  uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
         List<String> validResponseFiles = List.of(createRecordFilenameProcessor.getCreateRecordFilenameAndPath(),
                                                   uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
-        deleteResponseBlobs(validResponseFiles);
+        deleteArmResponseFilesHelper.deleteResponseBlobs(validResponseFiles);
         log.warn(
             "Unable to process upload file {} with EOD record {}, IU file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
             armResponseUploadFileRecord.getA360RecordId(), armResponseUploadFileRecord.getA360FileId());
@@ -719,7 +668,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             } catch (IllegalArgumentException e) {
                 // This occurs when the filename is not parsable
                 log.error("Invalid ARM response filename: {} for manifest {}", responseFile, manifestName);
-                deleteResponseBlobs(List.of(responseFile));
+                deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(responseFile));
             }
         }
         return responseFilenames;
@@ -758,7 +707,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 } else {
                     log.warn("Failed to obtain EOD id (relation id) from invalid line record {} from file {}", input,
                              invalidLineFileFilenameProcessor.getInvalidLineFilename());
-                    deleteResponseBlobs(List.of(invalidLineFileFilenameAndPath));
+                    deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(invalidLineFileFilenameAndPath));
                 }
 
             } catch (Exception e) {
@@ -775,7 +724,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             return objectMapper.readValue(invalidLineFileBinary.toString(), ArmResponseInvalidLineRecord.class);
         } catch (Exception e) {
             log.error("Unable to read ARM response {} - About to delete ", invalidLineFileFilenameAndPath, e);
-            deleteResponseBlobs(List.of(invalidLineFileFilenameAndPath));
+            deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(invalidLineFileFilenameAndPath));
             throw e;
         }
     }
@@ -839,49 +788,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         return armResponseFile;
     }
 
-    void deleteResponseBlobs(ArmResponseBatchData armResponseBatchData) {
-        List<String> responseBlobsToBeDeleted = getResponseBlobsToBeDeleted(armResponseBatchData);
-        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
-        if (nonNull(externalObjectDirectory) && responseBlobsToBeDeleted.size() == 2) {
-            ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
-            if (STORED.equals(status)
-                || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
-                || ARM_RPO_PENDING.equals(status)
-                || ARM_RESPONSE_MANIFEST_FAILED.equals(status)
-                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
-                log.info("About to  delete ARM responses for EOD {}", externalObjectDirectory.getId());
-                List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseBlobsToBeDeleted);
-
-                if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
-                    externalObjectDirectory.setResponseCleaned(true);
-                    externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
-                } else {
-                    log.warn("Unable to successfully delete the response files for EOD {} ", externalObjectDirectory.getId());
-                }
-            }
-        }
-    }
-
-    private List<Boolean> deleteResponseBlobs(List<String> responseBlobsToBeDeleted) {
-        return responseBlobsToBeDeleted.stream()
-            .map(armDataManagementApi::deleteBlobData)
-            .toList();
-    }
-
-    private List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {
-        List<String> responseBlobsToBeDeleted = new ArrayList<>();
-        if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())) {
-            responseBlobsToBeDeleted.add(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilenameAndPath());
-        }
-        if (nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
-            responseBlobsToBeDeleted.add(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilenameAndPath());
-        }
-        if (CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())) {
-            armResponseBatchData.getInvalidLineFileFilenameProcessors().forEach(
-                processor -> responseBlobsToBeDeleted.add(processor.getInvalidLineFileFilenameAndPath()));
-        }
-        return responseBlobsToBeDeleted;
-    }
 
     protected ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
         ExternalObjectDirectoryEntity externalObjectDirectory = null;

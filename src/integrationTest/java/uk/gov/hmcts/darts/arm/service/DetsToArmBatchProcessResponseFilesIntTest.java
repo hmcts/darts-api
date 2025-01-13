@@ -54,6 +54,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             currentTimeHelper,
             externalObjectDirectoryService,
             logApi,
+            deleteArmResponseFilesHelper,
             detsDataManagementConfiguration,
             osrRepository
         );

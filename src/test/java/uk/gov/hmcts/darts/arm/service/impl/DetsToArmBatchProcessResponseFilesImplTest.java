@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseCreateRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInputUploadFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
+import uk.gov.hmcts.darts.arm.service.DeleteArmResponseFilesHelper;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
@@ -69,6 +70,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
     private CurrentTimeHelper timeHelper;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
 
     private DetsToArmBatchProcessResponseFilesImpl detsToArmBatchProcessResponseFilesImpl;
 
@@ -98,6 +101,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             timeHelper,
             externalObjectDirectoryService,
             logApi,
+            deleteArmResponseFilesHelper,
             configuration,
             osrRepository
         );
