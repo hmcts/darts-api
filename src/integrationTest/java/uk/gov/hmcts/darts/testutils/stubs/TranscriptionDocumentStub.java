@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -96,8 +97,8 @@ public class TranscriptionDocumentStub {
                     .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)), userAccountRepository.getReferenceById(0));
 
             for (int i = 0; i < caseCount; i++) {
-                caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(
-                    UUID.randomUUID() + "Case Number" + transriptionDocumentCount + i), courtroomEntity.getCourthouse().getId());
+                caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(StringUtils.right(TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(
+                    UUID.randomUUID() + "Case Number" + transriptionDocumentCount + i), 32), courtroomEntity.getCourthouse().getId());
                 caseEntityList.add(caseEntity);
             }
 
