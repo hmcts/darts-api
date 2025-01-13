@@ -1,234 +1,201 @@
 package uk.gov.hmcts.darts.arm.client;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import org.junit.jupiter.api.Disabled;
+import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
+import lombok.AllArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 @TestPropertySource(properties = {
     "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
 class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
 
-    private static final String GET_RECORD_MANAGEMENT_MATTER_PATH = "/api/v1/getRecordManagementMatter";
+    private static final String BASE_JSON_DIRECTORY = "tests/arm/client/ArmRpoClientIntTest/";
+    private static final String MOCK_RESPONSE_DIRECTORY = BASE_JSON_DIRECTORY + "mocks/";
+    private static final String EXPECTED_RESPONSE_DIRECTORY = BASE_JSON_DIRECTORY + "expectedResponse/";
 
-    private static final String GET_STORAGE_ACCOUNTS_PATH = "/api/v1/getStorageAccounts";
-
+    private static final String URL_PREFIX = "/api/v1/";
+    
     @Autowired
     private ArmRpoClient armRpoClient;
 
-    @Disabled("This test is failing other wiremock tests")
-    @Test
-    void getRecordManagementMatterShouldSucceedIfServerReturns200Success() {
-        // given
-        var bearerAuth = "Bearer some-token";
+    private static Stream<Arguments> genericArmRpoClientTestArguments() {
+        return Stream.of(
+            Arguments.of("getRecordManagementMatter", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                return new ClientCallable(null, armRpoClient.getRecordManagementMatter(bearerAuth));
+            }),
+            Arguments.of("getStorageAccounts", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                StorageAccountRequest request = StorageAccountRequest.builder()
+                    .onlyKeyAccessType(false)
+                    .storageType(1)
+                    .build();
+                return new ClientCallable(request, armRpoClient.getStorageAccounts(bearerAuth, request));
+            }),
+            Arguments.of("getMasterIndexFieldByRecordClassSchema", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                MasterIndexFieldByRecordClassSchemaRequest request = MasterIndexFieldByRecordClassSchemaRequest.builder()
+                    .recordClassCode("some-record-class-code")
+                    .isForSearch(true)
+                    .fieldType(1)
+                    .usePaging(true)
+                    .build();
+                return new ClientCallable(request, armRpoClient.getMasterIndexFieldByRecordClassSchema(bearerAuth, request));
+            }),
+            Arguments.of("getProfileEntitlements", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                return new ClientCallable(null, armRpoClient.getProfileEntitlementResponse(bearerAuth));
+            }),
+            Arguments.of("addAsyncSearch", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                String request = "{\"request\": \"body\"}";
+                return new ClientCallable(request, armRpoClient.addAsyncSearch(bearerAuth, request));
+            }),
+            Arguments.of("getIndexesByMatterId", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                IndexesByMatterIdRequest request = IndexesByMatterIdRequest.builder()
+                    .matterId("matterId")
+                    .build();
+                return new ClientCallable(request, armRpoClient.getIndexesByMatterId(bearerAuth, request));
+            }),
+            Arguments.of("SaveBackgroundSearch", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                SaveBackgroundSearchRequest request = SaveBackgroundSearchRequest.builder()
+                    .name("some-name")
+                    .searchId("some-search-id")
+                    .build();
+                return new ClientCallable(request, armRpoClient.saveBackgroundSearch(bearerAuth, request));
+            }),
+            Arguments.of("getExtendedSearchesByMatter", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                String request = "{\"request\": \"body\"}";
+                return new ClientCallable(request, armRpoClient.getExtendedSearchesByMatter(bearerAuth, request));
+            }),
+            Arguments.of("getProductionOutputFiles", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                ProductionOutputFilesRequest request = ProductionOutputFilesRequest.builder()
+                    .productionId("some-production-id")
+                    .build();
+                return new ClientCallable(request, armRpoClient.getProductionOutputFiles(bearerAuth, request));
+            }),
+            Arguments.of("CreateExportBasedOnSearchResultsTable", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                CreateExportBasedOnSearchResultsTableRequest request = CreateExportBasedOnSearchResultsTableRequest.builder()
+                    .core("some-core")
+                    .formFields("some-form-fields")
+                    .searchId("some-search-id")
+                    .searchitemsCount(1)
+                    .headerColumns(
+                        List.of(CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
+                                    .masterIndexField("some-master-index-field")
+                                    .displayName("some-display-name")
+                                    .propertyName("some-property-name")
+                                    .propertyType("some-property-type")
+                                    .isMasked(true)
+                                    .build())
+                    )
+                    .productionName("some-production-name")
+                    .storageAccountId("some-storage-account-id")
+                    .build();
+                return new ClientCallable(request, armRpoClient.createExportBasedOnSearchResultsTable(bearerAuth, request));
+            }),
+            Arguments.of("removeProduction", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                RemoveProductionRequest request = RemoveProductionRequest.builder()
+                    .productionId("some-production-id")
+                    .deleteSearch(true)
+                    .build();
+                return new ClientCallable(request, armRpoClient.removeProduction(bearerAuth, request));
+            }),
+            Arguments.of("getExtendedProductionsByMatter", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                String request = "{\"request\": \"body\"}";
+                return new ClientCallable(request, armRpoClient.getExtendedProductionsByMatter(bearerAuth, request));
+            })
+        );
+    }
 
+
+    @AllArgsConstructor
+    static class ClientCallable {
+        Object request;
+        Object response;
+    }
+
+
+    @ParameterizedTest(name = "{0} should succeed when server returns 200")
+    @MethodSource("genericArmRpoClientTestArguments")
+    void generic_serverReturns200Success_ShouldSucceed(String suffix, BiFunction<ArmRpoClient, String, ClientCallable> callClient) throws IOException {
         stubFor(
-            WireMock.post(urlEqualTo(GET_RECORD_MANAGEMENT_MATTER_PATH))
+            WireMock.post(urlEqualTo(URL_PREFIX + suffix))
                 .willReturn(
                     aResponse()
                         .withHeader("Content-type", "application/json")
-                        .withBody("""
-                                      {
-                                           "recordManagementMatter": {
-                                               "matterCategory": 3,
-                                               "matterID": "cb70c7fa-8972-4400-af1d-ff5dd76d2104",
-                                               "name": "Records Management",
-                                               "isQuickSearch": false,
-                                               "isUsedForRM": true,
-                                               "description": "Records Management",
-                                               "createdDate": "2022-12-14T08:50:55.75+00:00",
-                                               "type": 1,
-                                               "status": 0,
-                                               "userID": null,
-                                               "backgroundJobID": null,
-                                               "isClosed": false
-                                           },
-                                           "status": 200,
-                                           "demoMode": false,
-                                           "isError": false,
-                                           "responseStatus": 0,
-                                           "responseStatusMessages": null,
-                                           "exception": null,
-                                           "message": null
-                                       }
-                                      """
-                        )
+                        .withBody(TestUtils.getContentsFromFile(MOCK_RESPONSE_DIRECTORY + suffix + ".json"))
                         .withStatus(200)));
-        // when
-        var getRecordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerAuth);
+        String bearerAuth = "Bearer some-token";
 
-        // then
-        verify(postRequestedFor(urlEqualTo(GET_RECORD_MANAGEMENT_MATTER_PATH))
-                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
-                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-        );
+        ClientCallable clientCallable = callClient.apply(armRpoClient, bearerAuth);
 
-        assertEquals("Failed to get matter id", "cb70c7fa-8972-4400-af1d-ff5dd76d2104",
-                     getRecordManagementMatterResponse.getRecordManagementMatter().getMatterId());
+        RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlEqualTo(URL_PREFIX + suffix))
+            .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+            .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE));
+
+        if (clientCallable.request != null) {
+            requestPatternBuilder.withRequestBody(equalTo(TestUtils.writeAsString(clientCallable.request)));
+
+        }
+        verify(requestPatternBuilder);
+        JSONAssert.assertEquals(TestUtils.getContentsFromFile(EXPECTED_RESPONSE_DIRECTORY + suffix + ".json"),
+                                TestUtils.writeAsString(clientCallable.response),
+                                JSONCompareMode.STRICT);
     }
 
-
-    @Disabled("This test is failing other wiremock tests but works locally")
     @Test
-    void getStorageAccountsShouldSucceedIfServerReturns200Success() {
-        // given
-        var bearerAuth = "Bearer some-token";
-
+    void downloadProduction_serverReturns200Success_ShouldSucceed() throws IOException {
+        String url = "downloadProduction/1234/false";
+        String suffix = "downloadProduction";
         stubFor(
-            WireMock.post(urlEqualTo(GET_STORAGE_ACCOUNTS_PATH))
+            WireMock.get(urlEqualTo(URL_PREFIX + url))
                 .willReturn(
                     aResponse()
-                        .withHeader("Content-type", "application/json")
-                        .withBody("""
-                                      {
-                                          "indexes": [
-                                            {
-                                              "index": {
-                                                "indexID": "c19454c6-c378-43c1-ae59-d0d013e30915",
-                                                "isGroup": false,
-                                                "name": "rm5",
-                                                "displayName": "rm5",
-                                                "userIndexID": "2f4d6512-64b5-4478-940d-bd29e115591c",
-                                                "userID": "8b2a9527-e8e2-4430-8e51-b2af4227ff10",
-                                                "azureSearchAccountID": "dac6878a-6269-48de-981d-3f2f43dfddd2",
-                                                "indexStatusID": 4,
-                                                "notified": false,
-                                                "startDate": null,
-                                                "endDate": null,
-                                                "discoveryStartDate": "2023-11-16T13:53:03.94151+00:00",
-                                                "discoveryEndDate": "2023-11-16T14:36:19.5597796+00:00",
-                                                "buildStartDate": "2023-11-16T14:37:43.4140026+00:00",
-                                                "buildEndDate": "2023-11-16T16:22:19.4438814+00:00",
-                                                "resumeStartDate": "2024-07-25T10:56:39.5283925+00:00",
-                                                "resumeEndDate": null,
-                                                "stoppingStartDate": "2024-07-25T09:21:05.1366667+00:00",
-                                                "stoppingEndDate": null,
-                                                "createdDate": "2023-11-16T13:52:49.614141+00:00",
-                                                "totalTime": 8883.4780311,
-                                                "blobCount": 768987,
-                                                "blobsProcessed": 768987,
-                                                "indexDiscoveryItemsCount": 1,
-                                                "indexDiscoveryItemsProcessed": 1,
-                                                "exceptionsCount": null,
-                                                "indexBlobExceptionsCount": 0,
-                                                "indexDiscoveryItemExceptionsCount": null,
-                                                "indexBatchJobPartitionsCount": 277,
-                                                "indexExceptionBatchPartitionsCount": null,
-                                                "indexUpdateBatchPartitionsCount": 299,
-                                                "indexUpdateExceptionBatchPartitionsCount": null,
-                                                "indexBatchLastJobPartitionsCount": null,
-                                                "indexBlobPartitionsCount": 7651,
-                                                "indexBlobJobExceptionPartitionsCount": null,
-                                                "indexBlobLastJobExceptionPartitionsCount": null,
-                                                "indexDiscoveryItemPartitionsCount": 1,
-                                                "indexDiscoveryItemExceptionPartitionsCount": null,
-                                                "indexJobExceptionPartitionsCount": null,
-                                                "indexLastJobExceptionPartitionsCount": null,
-                                                "tablePartitionSize": 100,
-                                                "updateDate": "2023-11-16T13:52:49.614141+00:00",
-                                                "lastJobID": 0,
-                                                "jobID": 1,
-                                                "indexBlobLastJobID": null,
-                                                "indexBlobJobID": 0,
-                                                "isContinous": true,
-                                                "isPrimary": true,
-                                                "isUsedForRM": true,
-                                                "continousIndexBlobPartitionsCount": 7935,
-                                                "requestSizeLimit": 100,
-                                                "skipContentOverLimit": true,
-                                                "skipContentIfParserError": true,
-                                                "fileSizeLimitToTikaParser": 52428800,
-                                                "sortByResultField": false,
-                                                "blobContainer": "cloud360",
-                                                "continuousIndexBatchSize": 16,
-                                                "continousTablePartitionSize": 100,
-                                                "isDeleted": false,
-                                                "mainQueueProcessPriority": 0,
-                                                "secondaryQueueProcessPriority": 1,
-                                                "buildBatchesInQueue": 1350,
-                                                "buildBatchesProcessed": 1350,
-                                                "buildContinuationToken": "0000000000000000276-0000000000000000000",
-                                                "buildExceptionContinuationToken": null,
-                                                "updateContinuationToken": "0000000000000000298-0000000000000000000",
-                                                "updateExceptionContinuationToken": null,
-                                                "countOnly": false,
-                                                "errorCodes": null,
-                                                "esIndexRolloverSize": null,
-                                                "esIndexRolloverSizePerShard": 40,
-                                                "esIndexNoReplicas": 1,
-                                                "esIndexNoShards": 6,
-                                                "isDiscoveryCancelled": false,
-                                                "indexContinuousLastSavedBlobExceptionPartitionsCount": null,
-                                                "continuousExceptionsInProgress": 0,
-                                                "preparingContinuousErrorBatches": false,
-                                                "schemaUpdated": false,
-                                                "discoveryItemsLock": false,
-                                                "blobExceptionsStreamUpdateNeeded": false,
-                                                "streamIDsToProcess": null,
-                                                "indexUpdateBlobPartitionsCount": 315,
-                                                "indexUpdateExceptionPartitionsCount": 176,
-                                                "indexUpdateExceptionsCount": 822,
-                                                "updateBlobCount": 3918,
-                                                "updateBlobsProcessed": 3918,
-                                                "indexLastSavedUpdateExceptionPartitionsCount": null,
-                                                "updateExceptionsInProgress": 0,
-                                                "preparingUpdateErrorBatches": false,
-                                                "poisonHandlingFailed": false
-                                              },
-                                              "isMultiStream": false,
-                                              "children": []
-                                            }
-                                          ],
-                                          "itemsCount": 1,
-                                          "status": 200,
-                                          "demoMode": false,
-                                          "isError": false,
-                                          "responseStatus": 0,
-                                          "responseStatusMessages": null,
-                                          "exception": null,
-                                          "message": null
-                                        }
-                                      """
-                        )
+                        .withHeader("Content-type", MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                        .withBody(TestUtils.getContentsFromFile(MOCK_RESPONSE_DIRECTORY + suffix + ".csv"))
                         .withStatus(200)));
-        // when
-        var getStorageAccountsResponse = armRpoClient.getStorageAccounts(bearerAuth, createStorageAccountRequest());
+        String bearerAuth = "Bearer some-token";
 
-        // then
-        verify(postRequestedFor(urlEqualTo(GET_STORAGE_ACCOUNTS_PATH))
-                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
-                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-        );
+        try (feign.Response response = armRpoClient.downloadProduction(bearerAuth, "1234")) {
+            RequestPatternBuilder requestPatternBuilder = getRequestedFor(urlEqualTo(URL_PREFIX + url))
+                .withHeader(AUTHORIZATION, equalTo(bearerAuth));
 
-        assertEquals("Failed to get storage account index name", "rm5",
-                     getStorageAccountsResponse.getDataDetails().getFirst().getId());
-        assertEquals("Failed to get storage account index id", "c19454c6-c378-43c1-ae59-d0d013e30915",
-                     getStorageAccountsResponse.getDataDetails().getFirst().getName());
+            verify(requestPatternBuilder);
 
+            assertEquals(TestUtils.getContentsFromFile(EXPECTED_RESPONSE_DIRECTORY + suffix + ".csv"),
+                         IOUtils.toString(response.body().asInputStream()));
+        }
     }
-
-
-    private StorageAccountRequest createStorageAccountRequest() {
-        return StorageAccountRequest.builder()
-            .onlyKeyAccessType(false)
-            .storageType(1)
-            .build();
-
-    }
-
 }

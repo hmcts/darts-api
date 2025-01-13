@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
-import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -39,7 +38,7 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private WireMockServer wireMockServer;
 
-    private static final String TOKEN_PATH = "/api/v1/token";
+    private static final String TOKEN_PATH = "/auth/account/token";
 
     @Test
     void getTokenShouldSucceedIfServerReturns200Success() {
@@ -67,7 +66,7 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
 
         // Then
         wireMockServer.verify(postRequestedFor(urlEqualTo(TOKEN_PATH))
-                                  .withRequestBody(equalTo("grant_type=password&username=some-username&password=some-password")));
+                                  .withRequestBody(equalTo("{\"username\":\"some-username\",\"password\":\"some-password\"}")));
 
         assertEquals("some-token", token.getAccessToken());
         assertEquals("some-token-type", token.getTokenType());
@@ -90,13 +89,16 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
 
         // Then
         assertEquals(
-            "[403 Forbidden] during [POST] to [http://localhost:" + wiremockPort + "/api/v1/token] [ArmTokenClient#getToken(ArmTokenRequest)]: []",
+            "[403 Forbidden] during [POST] to [http://localhost:" + wiremockPort + "/auth/account/token] [ArmTokenClient#getToken(ArmTokenRequest)]: []",
             exception.getMessage()
         );
     }
 
     private static ArmTokenRequest createTokenRequest() {
-        return new ArmTokenRequest("some-username", "some-password", GrantType.PASSWORD.getValue());
+        return ArmTokenRequest.builder()
+            .username("some-username")
+            .password("some-password")
+            .build();
     }
 
 }

@@ -139,6 +139,56 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     }
 
     @Test
+    void pollArmRpo_shouldPollSuccessfullyWithGetExtendedSearchesByMatterInProgress() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.getExtendedSearchesByMatterRpoState());
+        armRpoExecutionDetailEntity.setMatterId("MatterId");
+        armRpoExecutionDetailEntity.setSearchId("SearchId");
+        armRpoExecutionDetailEntity.setStorageAccountId("StorageAccountId");
+        armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
+        armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
+        when(armRpoClient.getExtendedSearchesByMatter(any(), any()))
+            .thenReturn(getExtendedSearchesByMatterResponse());
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any()))
+            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse("propertyName", "ingestionDate"));
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any()))
+            .thenReturn(getCreateExportBasedOnSearchResultsTableResponse());
+        when(armRpoClient.getExtendedProductionsByMatter(anyString(), any()))
+            .thenReturn(getExtendedProductionsByMatterResponse());
+        when(armRpoClient.getProductionOutputFiles(any(), any()))
+            .thenReturn(getProductionOutputFilesResponse(PRODUCTION_ID));
+
+        when(armRpoDownloadProduction.downloadProduction(any(), any(), any()))
+            .thenReturn(getFeignResponse(200));
+
+        when(armRpoClient.removeProduction(any(), any()))
+            .thenReturn(getRemoveProductionResponse());
+
+        // when
+        armRpoPollService.pollArmRpo(false);
+
+        // then
+        var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
+        assertNotNull(updatedArmRpoExecutionDetailEntity);
+        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
+
+        verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
+        verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
+        verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
+        verify(armRpoClient).getExtendedProductionsByMatter(anyString(), any());
+        verify(armRpoClient).getProductionOutputFiles(any(), any());
+        verify(armRpoDownloadProduction).downloadProduction(any(), any(), any());
+        verify(armRpoClient).removeProduction(any(), any());
+
+        verifyNoMoreInteractions(armRpoClient);
+
+    }
+
+    @Test
     void pollArmRpo_shouldPollSuccessfullyWithSaveBackgroundCompletedCreateExportInProgress() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
@@ -341,6 +391,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
         search.setTotalCount(4);
         search.setName("DARTS_RPO_2024-08-13");
+        search.setIsSaved(true);
         ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
         searchDetail.setSearch(search);
         response.setSearches(List.of(searchDetail));

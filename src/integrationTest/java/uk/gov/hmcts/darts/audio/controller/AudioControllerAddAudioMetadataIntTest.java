@@ -252,7 +252,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
 
         assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Exact duplicate detected based upon media metadata and checksum.", toLevel(
+                        .searchLogs("Exact duplicate detected based upon media metadata and checksum for media entity ids [2].", toLevel(
                             Level.INFO_INT)).isEmpty());
     }
 
@@ -340,12 +340,12 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
                 post(ENDPOINT)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(addAudioMetadataRequest)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isNotFound())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":400,"detail":"Courthouse 'TEST' not found."}""";
+            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":404,"detail":"Courthouse 'TEST' not found."}""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }

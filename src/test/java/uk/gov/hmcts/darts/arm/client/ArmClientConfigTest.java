@@ -18,14 +18,14 @@ class ArmClientConfigTest {
         var armClientConfig = new ArmClientConfig();
         Encoder encoder = armClientConfig.armTokenClientEncoder();
 
-        var armTokenRequest = new ArmTokenRequest("some-username", "some-password", "some-grant-type");
+        var armTokenRequest = ArmTokenRequest.builder().username("some-username").password("some-password").build();
         var requestTemplate = new RequestTemplate();
 
         // When
         encoder.encode(armTokenRequest, null, requestTemplate);
 
         // Then
-        assertEquals("grant_type=some-grant-type&username=some-username&password=some-password", new String(requestTemplate.body()));
+        assertEquals("&username=some-username&password=some-password", new String(requestTemplate.body()));
     }
 
     @Test

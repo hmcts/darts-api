@@ -40,6 +40,7 @@ class ArmRpoApiGetExtendedSearchesByMatterIntTest extends IntegrationBase {
         ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
         search.setTotalCount(4);
         search.setName(PRODUCTION_NAME);
+        search.setIsSaved(true);
         ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
         searchDetail.setSearch(search);
         extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));

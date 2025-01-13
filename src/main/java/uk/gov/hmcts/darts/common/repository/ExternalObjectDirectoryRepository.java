@@ -364,10 +364,12 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
             where (eod2.status = :notExistsStatus or eod2.transferAttempts >= :maxTransferAttempts)
             AND eod2.externalLocationType = :notExistsType
-            and (eod.media = eod2.media
-              OR eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity
-              OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
-              OR eod.caseDocument = eod2.caseDocument ))
+            
+                        
+            and ((eod.media is not null and eod.media = eod2.media)
+              OR (eod.transcriptionDocumentEntity is not null and eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
+              OR (eod.annotationDocumentEntity is not null and eod.annotationDocumentEntity = eod2.annotationDocumentEntity)
+              OR (eod.caseDocument is not null and eod.caseDocument = eod2.caseDocument )))
             order by eod.lastModifiedDateTime
             """
     )
@@ -382,10 +384,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.externalLocationType = :type
             AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
             where eod2.externalLocationType = :notExistsLocation
-            and (eod.media = eod2.media
-              OR eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity
-              OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
-              OR eod.caseDocument = eod2.caseDocument ))
+            and ((eod.media is not null and eod.media = eod2.media)
+              OR (eod.transcriptionDocumentEntity is not null and eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
+              OR (eod.annotationDocumentEntity is not null and eod.annotationDocumentEntity = eod2.annotationDocumentEntity)
+              OR (eod.caseDocument is not null and eod.caseDocument = eod2.caseDocument )))
             order by eod.id
             LIMIT :limitRecords
             """
