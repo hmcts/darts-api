@@ -2416,10 +2416,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
         MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        //OffsetDateTime inputUploadFileTimestamp = OffsetDateTime.parse("2024-12-19T10:00:00.000Z");
-        //BinaryData inputUploadFileRecord = convertStringToBinaryData("{\"timestamp\": \"" + inputUploadFileTimestamp + "\"}");
-        //when(armDataManagementApi.getBlobData(Mockito.startsWith("dropzone/DARTS/response/" + prefix() + "_"))).thenReturn(inputUploadFileRecord);
-
+        
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = prefix() + "_" + manifest1Uuid + ".a360";
 
