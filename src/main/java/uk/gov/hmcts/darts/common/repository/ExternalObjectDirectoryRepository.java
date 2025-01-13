@@ -361,8 +361,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
 
     default List<ExternalObjectDirectoryEntity> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
-                                                                             ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
-                                                                             Integer maxTransferAttempts, Limit limit) {
+                                                                    ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
+                                                                    Integer maxTransferAttempts, Limit limit) {
         Set<ExternalObjectDirectoryEntity> results = new HashSet<>();//Ensures no duplicates
         results.addAll(findEodsForTransferOnlyMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts, limit));
         if (results.size() < limit.max()) {
