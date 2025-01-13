@@ -486,7 +486,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             return objectMapper.readValue(createRecordBinary.toString(), ArmResponseCreateRecord.class);
         } catch (Exception e) {
             log.error("Unable to read ARM response create record file {} - About to delete ", createRecordFilenameAndPath, e);
-            deleteResponseBlobs(List.of(createRecordFilenameAndPath));
+            deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(createRecordFilenameAndPath));
             throw e;
         }
     }
@@ -761,7 +761,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                          invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(),
                          armResponseFile);
                 List<String> invalidResponseFiles = getInvalidResponseFiles(invalidLineFileFilenameProcessor, armResponseFile);
-                deleteResponseBlobs(invalidResponseFiles);
+                deleteArmResponseFilesHelper.deleteResponseBlobs(invalidResponseFiles);
             }
         } catch (Exception e) {
             log.error("Unable to update invalid line responses", e);

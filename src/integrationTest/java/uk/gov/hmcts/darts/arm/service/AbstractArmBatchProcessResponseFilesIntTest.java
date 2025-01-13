@@ -2410,7 +2410,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     }
 
     @Test
-    void batchProcessResponseFiles_updateEodWithArmMissingResponse_WhenNoResponseFileGenerated() throws IOException {
+    void batchProcessResponseFiles_updateEodWithArmMissingResponse_WhenNoResponseFileGenerated() {
         //given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
