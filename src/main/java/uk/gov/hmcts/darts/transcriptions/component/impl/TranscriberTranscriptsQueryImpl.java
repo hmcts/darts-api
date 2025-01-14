@@ -52,7 +52,8 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tru.priority_order               as transcription_urgency_priority_order,
                     tra.is_manual_transcription      as is_manual,
                     (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts,
-                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = tra.trs_id) as state_change_ts
+                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = tra.trs_id) as state_change_ts,
+                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription tra
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
                 JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
@@ -106,7 +107,8 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tru.priority_order               as transcription_urgency_priority_order,
                     requested_trw.workflow_ts        as requested_ts,
                     with_transcriber_trw.workflow_ts as state_change_ts,
-                    tra.is_manual_transcription      as is_manual
+                    tra.is_manual_transcription      as is_manual,
+                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription tra
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
                 JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
@@ -171,7 +173,8 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tru.priority_order          as transcription_urgency_priority_order,
                     requested_trw.workflow_ts   as requested_ts,
                     complete_trw.workflow_ts    as state_change_ts,
-                    tra.is_manual_transcription as is_manual
+                    tra.is_manual_transcription as is_manual,
+                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription tra
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
                 JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id

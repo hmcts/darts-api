@@ -116,7 +116,9 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              h.hearingDate,
              t.createdDateTime,
              ts.id,
-             t.isManualTranscription)
+             t.isManualTranscription,
+             (SELECT MAX(w.workflowTimestamp) FROM TranscriptionWorkflowEntity w WHERE w.transcription = t AND 
+              w.transcriptionStatus = :transcriptionStatus) as approvedAt)
          FROM TranscriptionEntity t
          JOIN t.hearings h
          JOIN h.courtCase cc
@@ -141,7 +143,8 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         OffsetDateTime createdFrom,
         OffsetDateTime createdTo,
         Boolean isManual,
-        String requestedBy);
+        String requestedBy,
+        TranscriptionStatusEntity transcriptionStatus);
 
 
     @Query("""
@@ -152,7 +155,9 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              t.hearingDate,
              t.createdDateTime,
              ts.id,
-             t.isManualTranscription)
+             t.isManualTranscription,
+             (SELECT MAX(w.workflowTimestamp) FROM TranscriptionWorkflowEntity w WHERE w.transcription = t AND 
+              w.transcriptionStatus = :transcriptionStatus) as approvedAt)
          FROM TranscriptionEntity t
          JOIN t.transcriptionStatus ts
          JOIN t.createdBy ua
@@ -176,7 +181,8 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         OffsetDateTime createdFrom,
         OffsetDateTime createdTo,
         Boolean isManual,
-        String requestedBy);
+        String requestedBy,
+        TranscriptionStatusEntity transcriptionStatus);
 
     @Query("""
         SELECT distinct t

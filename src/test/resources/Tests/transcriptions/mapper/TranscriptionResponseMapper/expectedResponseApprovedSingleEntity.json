@@ -1,0 +1,30 @@
+{
+  "legacy_comments" : [ "comment1", "comment2" ],
+  "transcription_id" : 1,
+  "case_id" : 101,
+  "hearing_id" : 102,
+  "case_number" : "case1",
+  "courthouse_id" : 1001,
+  "courthouse" : "case_courthouse",
+  "case_reporting_restrictions" : [ ],
+  "status" : "APPROVED",
+  "received" : "2020-06-20T10:10:00Z",
+  "requestor" : {
+    "user_id" : 1002,
+    "user_full_name" : "testUsername"
+  },
+  "defendants" : [ "defendant_case1_1", "defendant_case1_2" ],
+  "judges" : [ "Judge_1", "Judge_2" ],
+  "transcript_file_name" : "test.doc",
+  "hearing_date" : "2023-06-20",
+  "request_type" : "SENTENCING_REMARKS",
+  "is_manual" : true,
+  "transcription_urgency" : {
+    "transcription_urgency_id" : 1,
+    "priority_order" : 999,
+    "description" : "STANDARD"
+  },
+  "courtroom" : "1",
+  "transcription_object_id" : "legacyObjectId",
+  "approved" : "2020-10-10T11:00:00Z"
+}

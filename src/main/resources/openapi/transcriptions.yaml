@@ -1090,6 +1090,9 @@ components:
         is_manual_transcription:
           type: boolean
           example: true
+        approved_at:
+          type: string
+          format: date-time
     TranscriptionStatus:
       type: object
       properties:
@@ -1222,6 +1225,9 @@ components:
         requested_ts:
           type: string
           format: date-time
+        approved_ts:
+          type: string
+          format: date-time
         transcription_urgency:
           $ref: '#/components/schemas/TranscriptionUrgencyDetails'
     TranscriberViewSummary:
@@ -1261,6 +1267,9 @@ components:
           format: date-time
         is_manual:
           type: boolean
+        approved_ts:
+          type: string
+          format: date-time
         transcription_urgency:
           $ref: '#/components/schemas/TranscriptionUrgencyDetails'
     TranscriptionUrgencyDetails:
@@ -1491,6 +1500,10 @@ components:
         hide_request_from_requestor:
           type: boolean
           example: false
+        approved:
+          type: string
+          format: date-time
+          example: 2023-06-26T13:00:00Z
     defendant:
       type: string
       example: Joe Bloggs
@@ -1560,6 +1573,9 @@ components:
           type: integer
         is_manual_transcription:
           type: boolean
+        approved_at:
+          type: string
+          format: date-time
 
     SearchTranscriptionDocumentRequest:
       type: object
