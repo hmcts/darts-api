@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.AsyncUtil;
@@ -38,12 +41,16 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @RequiredArgsConstructor
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
     private final ArchiveRecordService archiveRecordService;
+    private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
     private final DataStoreToArmHelper unstructuredToArmHelper;
     private final UserIdentity userIdentity;
     private final LogApi logApi;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final FileOperationService fileOperationService;
+    private final ArmDataManagementApi armDataManagementApi;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
+    private final EodHelper eodHelper;
 
     private List<Integer> eodsForTransfer;
 
@@ -56,9 +63,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                          EodHelper.armLocation(),
-                                                          taskBatchSize);
+        List<Integer> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
+                                                                                          EodHelper.armLocation(),
+                                                                                          taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
