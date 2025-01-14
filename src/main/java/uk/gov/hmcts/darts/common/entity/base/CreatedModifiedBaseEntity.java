@@ -16,7 +16,8 @@ import java.time.OffsetDateTime;
 @MappedSuperclass
 @Getter
 @Setter
-public class CreatedModifiedBaseEntity extends CreatedBaseEntity {
+public class CreatedModifiedBaseEntity extends CreatedBaseEntity
+    implements LastModifiedBy {
 
     @UpdateTimestamp
     @Column(name = "last_modified_ts")

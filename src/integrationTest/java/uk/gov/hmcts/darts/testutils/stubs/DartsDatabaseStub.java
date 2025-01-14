@@ -46,6 +46,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -247,7 +248,12 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void resetTablesWithPredefinedTestData() {
-
+        entityManager.getMetamodel().getEntities().stream()
+            .filter(entityType -> LastModifiedBy.class.isAssignableFrom(entityType.getJavaType()))
+            .forEach(entityType -> {
+                String table = entityType.getJavaType().getAnnotation(Table.class).name();
+                entityManager.createNativeQuery("update darts." + table + " set last_modified_by = 0").executeUpdate();
+            });
         retentionPolicyTypeRepository.deleteAll(
             retentionPolicyTypeRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
