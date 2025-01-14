@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
@@ -20,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.AsyncUtil;
@@ -41,16 +38,12 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @RequiredArgsConstructor
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
     private final ArchiveRecordService archiveRecordService;
-    private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
     private final DataStoreToArmHelper unstructuredToArmHelper;
     private final UserIdentity userIdentity;
     private final LogApi logApi;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final FileOperationService fileOperationService;
-    private final ArmDataManagementApi armDataManagementApi;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
-    private final EodHelper eodHelper;
 
     private List<Integer> eodsForTransfer;
 
@@ -214,13 +207,17 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     @PreDestroy
     public void destroy() {
-        log.info("UnstructuredToArmBatchProcessorImpl shutting down.");
+        System.out.println("UnstructuredToArmBatchProcessorImpl shutting down.");
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
-            log.info("Reverting EODs to failed status for potentially {} EODs", eodsForTransfer.size());
+            System.out.println("Reverting EODs to failed status for potentially EODs " + eodsForTransfer.size());
             unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
                                                            EodHelper.armIngestionStatus(),
                                                            EodHelper.failedArmRawDataStatus(),
                                                            userIdentity.getUserAccount());
+            eodsForTransfer.forEach(eodId -> System.out.println("EOD ID: " + eodId + " has been reverted to failed status"));
+        } else {
+            System.out.println("No EODs to revert to failed status");
         }
+        System.out.println("UnstructuredToArmBatchProcessorImpl has shut down.");
     }
 }

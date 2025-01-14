@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 
+import javax.annotation.PreDestroy;
+
 @Configuration
 @EnableScheduling
 @AllArgsConstructor
@@ -27,5 +29,10 @@ public class AutomatedTaskConfigurationStrategy implements SchedulingConfigurer 
         log.debug("Configuring automated tasks");
         automatedTaskService.configureAndLoadAutomatedTasks(taskRegistrar);
         log.debug("Automated tasks configured and loaded");
+    }
+
+    @PreDestroy
+    public void destroy() {
+        System.out.println("AutomatedTaskConfigurationStrategy - @PreDestroy called.");
     }
 }
