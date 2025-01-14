@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 
 import java.time.LocalDateTime;
@@ -25,11 +26,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -66,18 +66,16 @@ class CloseOldCasesProcessorImplTest {
             caseService,
             caseRetentionRepository,
             retentionApi,
-            retentionDateHelper,
-            currentTimeHelper
+            retentionDateHelper
         );
 
         closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseProcessor, caseRepository, authorisationApi);
 
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-
     }
 
     @Test
-    void closeCases() {
+    void closeCases_shouldCloseTheExpectedCases_andSetExpectedRetentionConfidence() {
         // given
         LocalDateTime hearingDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now().minusYears(7));
         OffsetDateTime createdDate = OffsetDateTime.now().minusYears(7);
@@ -94,16 +92,17 @@ class CloseOldCasesProcessorImplTest {
         when(caseService.getCourtCaseById(1)).thenReturn(courtCase);
 
         CaseRetentionEntity caseRetention = createRetentionEntity(courtCase, userAccountEntity);
-        when(retentionApi.createRetention(any(), any(), any(), any(), any())).thenReturn(caseRetention);
+        when(retentionApi.createRetention(any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
         assertFalse(courtCase.getClosed());
-        assertNull(courtCase.getRetConfUpdatedTs());
+
+        when(retentionApi.updateCourtCaseConfidenceAttributesForRetention(any(), eq(RetentionConfidenceCategoryEnum.AGED_CASE)))
+            .thenReturn(courtCase);
 
         // when
         closeOldCasesProcessor.closeCases(2);
 
         // then
         assertTrue(courtCase.getClosed());
-        assertEquals(CURRENT_DATE_TIME, courtCase.getRetConfUpdatedTs());
     }
 
     public static CaseRetentionEntity createRetentionEntity(CourtCaseEntity courtCase, UserAccountEntity userAccount) {
@@ -114,4 +113,5 @@ class CloseOldCasesProcessorImplTest {
         caseRetention.setSubmittedBy(userAccount);
         return caseRetention;
     }
+
 }

@@ -387,7 +387,8 @@ class AdminTranscriptionServiceTest {
             LocalDate.parse("2020-01-01").plusDays(seed),
             OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed),
             seed + 20,
-            seed % 2 == 0);
+            seed % 2 == 0,
+            OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed));
     }
 
     @Nested

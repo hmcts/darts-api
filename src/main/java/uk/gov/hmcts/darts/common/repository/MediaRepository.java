@@ -53,7 +53,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
            AND me.channel = :channel
            AND me.isHidden = false
            AND me.isCurrent = true
-           ORDER BY me.start
+           ORDER BY me.start DESC, me.end DESC
         """)
     List<MediaEntity> findAllByHearingIdAndChannelAndIsCurrentTrue(Integer hearingId, Integer channel);
 

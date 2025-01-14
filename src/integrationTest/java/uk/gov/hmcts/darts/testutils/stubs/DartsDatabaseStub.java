@@ -7,6 +7,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.data.history.Revisions;
@@ -85,6 +86,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
+import uk.gov.hmcts.darts.common.repository.RetentionConfidenceCategoryMapperRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
@@ -201,6 +203,7 @@ public class DartsDatabaseStub {
     private final AutomatedTaskRepository automatedTaskRepository;
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
+    private final RetentionConfidenceCategoryMapperRepository retentionConfidenceCategoryMapperRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -306,6 +309,7 @@ public class DartsDatabaseStub {
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
+        retentionConfidenceCategoryMapperRepository.deleteAll();
     }
 
     @SafeVarargs
@@ -802,16 +806,22 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void createCaseRetention(CourtCaseEntity courtCase) {
+    @SneakyThrows
+    @SuppressWarnings("PMD.DoNotUseThreads")//Required for test stability
+    public List<CaseRetentionEntity> createCaseRetention(CourtCaseEntity courtCase) {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity =
             getRetentionPolicyTypeEntity(RetentionPolicyEnum.MANUAL);
 
         CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
-        dartsDatabaseSaveStub.save(caseRetentionEntity1);
+        caseRetentionEntity1 = dartsDatabaseSaveStub.save(caseRetentionEntity1);
+        Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
         CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(2, courtCase, retentionPolicyTypeEntity, "b_state");
-        dartsDatabaseSaveStub.save(caseRetentionEntity2);
+        caseRetentionEntity2 = dartsDatabaseSaveStub.save(caseRetentionEntity2);
+        Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
         CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity, "c_state");
-        dartsDatabaseSaveStub.save(caseRetentionEntity3);
+        caseRetentionEntity3 = dartsDatabaseSaveStub.save(caseRetentionEntity3);
+        Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
+        return List.of(caseRetentionEntity1, caseRetentionEntity2, caseRetentionEntity3);
     }
 
     public CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,

@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
@@ -81,8 +82,11 @@ class CaseServiceGetTranscriptsTest extends IntegrationBase {
     void testGetTranscriptsByCaseId() {
         var caseTranscripts = service.getTranscriptsByCaseId(caseId);
         assertEquals(3, caseTranscripts.size());
-        assertEquals(1, caseTranscripts.get(0).getTranscriptionId());
-        assertEquals(2, caseTranscripts.get(1).getTranscriptionId());
+        assertThat(caseTranscripts.get(0).getRequestedOn()).isAfterOrEqualTo(caseTranscripts.get(1).getRequestedOn());
+        assertThat(caseTranscripts.get(1).getRequestedOn()).isAfterOrEqualTo(caseTranscripts.get(2).getRequestedOn());
+
+        assertEquals(2, caseTranscripts.get(0).getTranscriptionId());
+        assertEquals(1, caseTranscripts.get(1).getTranscriptionId());
         assertEquals(3, caseTranscripts.get(2).getTranscriptionId());
     }
 

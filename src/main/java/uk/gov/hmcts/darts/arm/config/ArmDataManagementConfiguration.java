@@ -41,6 +41,8 @@ public class ArmDataManagementConfiguration extends StorageConfiguration {
     private Integer eventDateAdjustmentYears;
     private Integer maxContinuationBatchSize;
     private Duration armMissingResponseDuration;
+    private String inputUploadResponseTimestampFormat;
+
 
     @Getter
     @Setter

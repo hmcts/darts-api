@@ -260,6 +260,7 @@ darts:
       transcription-record-properties-file: properties/arm/transcription-record.properties
       annotation-record-properties-file: properties/arm/annotation-record.properties
       case-record-properties-file: properties/arm/case-record.properties
+      input-upload-response-timestamp-format: yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]
 
       response-cleanup-buffer-days: 0
       batch-response-cleanup:
@@ -283,7 +284,7 @@ darts:
       arm-storage-account-name: ${ARM_STORAGE_ACCOUNT_NAME:}
 
       authentication-url:
-        token-path: /api/v1/token
+        token-path: /auth/account/token
         available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
         select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
       api-url:
@@ -430,6 +431,7 @@ darts:
           at-least-for: PT1M
           at-most-for: PT90M
       dets-to-arm:
+        threads: 20
         system-user-email: system_DetsToArm@hmcts.net
         lock:
           at-least-for: PT1M
@@ -493,6 +495,7 @@ darts:
         system-user-email: system_ProcessE2EArmRpoPending@hmcts.net
         process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:true}
         arm-rpo-duration: ${ARM_RPO_DURATION:1h}
+        thread-sleep-duration: ${ARM_RPO_THREAD_SLEEP_DURATION:5s}
         lock:
           at-least-for: PT1M
           at-most-for: PT60M

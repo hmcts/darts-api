@@ -85,7 +85,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        assertEquals(400, response.statusCode());
+        assertEquals(404, response.statusCode());
     }
 
     @Test

@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
+import uk.gov.hmcts.darts.arm.service.DeleteArmResponseFilesHelper;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
@@ -39,7 +40,9 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                   ArmDataManagementConfiguration armDataManagementConfiguration,
                                                   ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
                                                   ExternalObjectDirectoryService externalObjectDirectoryService,
-                                                  LogApi logApi, DetsDataManagementConfiguration configuration,
+                                                  LogApi logApi,
+                                                  DeleteArmResponseFilesHelper deleteArmResponseFilesHelper,
+                                                  DetsDataManagementConfiguration configuration,
                                                   ObjectStateRecordRepository objectStateRecordRepository) {
         super(externalObjectDirectoryRepository,
               armDataManagementApi,
@@ -49,7 +52,8 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
               userIdentity,
               currentTimeHelper,
               externalObjectDirectoryService,
-              logApi);
+              logApi,
+              deleteArmResponseFilesHelper);
         this.configuration = configuration;
         this.objectStateRecordRepository = objectStateRecordRepository;
     }

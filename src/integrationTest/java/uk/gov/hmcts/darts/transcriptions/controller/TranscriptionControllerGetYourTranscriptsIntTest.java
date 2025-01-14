@@ -10,18 +10,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
@@ -121,7 +125,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         var courtCase = authorisationStub.getCourtCaseEntity();
         var hearing = authorisationStub.getHearingEntity();
         TranscriptionEntity transcription = transcriptionStub
-            .createAndSaveAwaitingAuthorisationTranscription(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, false);
+            .createAndSaveAwaitingAuthorisationTranscription(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY.minusMinutes(1), false);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -129,27 +133,27 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
                 testUser.getId()
             );
         requestBuilder.content("");
+        //Ensures sorting is correct
+        assertThat(getRequestedTs(transcriptionEntity)).isAfter(getRequestedTs(transcription));
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
-            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionEntity.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[1].case_id", is(courtCase.getId())))
-            .andExpect(jsonPath(
-                "$.requester_transcriptions[1].case_number",
-                is(courtCase.getCaseNumber())
-            ))
-            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcription.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is(getRequestedTsStr(transcriptionEntity))))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
 
-            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].urgency").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0]." +
-                                    "transcription_urgency.priority_order").doesNotExist())
 
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcription.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is(getRequestedTsStr(transcription))))
+            .andExpect(jsonPath("$.requester_transcriptions[1].courthouse_name", is(transcription.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Specified Times")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1]." + "transcription_urgency.priority_order").doesNotExist())
 
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
@@ -255,8 +259,10 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(nonHiddenTranscription.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is(getRequestedTsStr(transcriptionEntity))))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(nonHiddenTranscription.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is(getRequestedTsStr(nonHiddenTranscription))))
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
@@ -313,5 +319,62 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
+
+    @Test
+    void getYourTranscriptsWithApprovedStatusShouldReturnApproveOnTimeStamp() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        OffsetDateTime now = now();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity =
+            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), systemUser,
+                                                                now, transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                "user_id",
+                testUser.getId()
+            );
+
+        TranscriptionUrgencyEntity urgencyEntity = transcriptionStub.getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD);
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath(
+                "$.requester_transcriptions[0].case_id",
+                is(courtCase.getId())
+            ))
+            .andExpect(jsonPath(
+                "$.requester_transcriptions[0].case_number",
+                is(courtCase.getCaseNumber())
+            ))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Approved")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0]." +
+                                    "transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
+
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts").isString());
+
+    }
+
+
+    private OffsetDateTime getRequestedTs(TranscriptionEntity transcriptionEntity) {
+        return transcriptionEntity.getTranscriptionWorkflowEntities()
+            .stream()
+            .filter(transcriptionWorkflowEntity -> transcriptionWorkflowEntity.getTranscriptionStatus().getId().equals(1))
+            .findFirst().get().getWorkflowTimestamp();
+    }
+
+    private String getRequestedTsStr(TranscriptionEntity transcriptionEntity) {
+        return getRequestedTs(transcriptionEntity).format(DateTimeFormatter.ISO_DATE_TIME);
     }
 }

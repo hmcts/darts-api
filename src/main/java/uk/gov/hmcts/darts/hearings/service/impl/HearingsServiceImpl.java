@@ -96,7 +96,6 @@ public class HearingsServiceImpl implements HearingsService {
             //Non-admin will only see their own annotations
             annotations = annotationRepository.findByHearingIdAndUser(hearingId, authorisationApi.getCurrentUser());
         }
-
         return GetAnnotationsResponseMapper.mapToAnnotations(annotations, hearingId);
     }
 

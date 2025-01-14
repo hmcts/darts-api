@@ -83,4 +83,17 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         dartsDatabase.save(transcription.getCreatedBy());
         return dartsDatabase.save(transcription);
     }
+
+    @Override
+    public TranscriptionEntity createApprovedTranscription() {
+        var transcription = PersistableFactory.getTranscriptionTestData().minimalApprovedTranscription();
+        var courtroom = someMinimalCourtRoom();
+        dartsDatabase.save(courtroom.getCourthouse());
+        dartsDatabase.save(courtroom);
+        transcription.setHearings(new ArrayList<>());
+        transcription.setCourtroom(courtroom);
+        dartsDatabase.save(transcription.getCourtCase());
+        dartsDatabase.save(transcription.getCreatedBy());
+        return dartsDatabase.save(transcription);
+    }
 }

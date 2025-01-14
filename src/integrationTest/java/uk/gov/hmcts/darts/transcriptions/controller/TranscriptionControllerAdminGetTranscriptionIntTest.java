@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -570,6 +571,53 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             .andReturn();
     }
 
+    @Test
+    void getTransactionsForUserBeyondOrEqualToDateWithAssociatedApprovedWorkflow() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        OffsetDateTime now = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
+        CourtroomEntity courtroomAtNewcastleEntity = dartsDatabase.createCourtroomUnlessExists("Newcastle", "room_a");
+        HearingEntity headerEntity = dartsDatabase.createHearing(
+            courtroomAtNewcastleEntity.getCourthouse().getCourthouseName(),
+            courtroomAtNewcastleEntity.getName(),
+            "c1",
+            LocalDateTime.of(2020, 6, 20, 10, 0, 0)
+        );
+
+        TranscriptionStatusEntity statusEntity = transcriptionStub
+            .getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED);
+
+        TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
+        TranscriptionEntity transcriptionEntity1
+            = transcriptionStub.createTranscription(headerEntity, transcriptionEntity.getCreatedBy(), TranscriptionStatusEnum.APPROVED);
+
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(transcriptionEntity1,
+                                                                                                                      courtroomAtNewcastleEntity.getCreatedBy(),
+                                                                                                                      now,
+                                                                                                                      statusEntity);
+        transcriptionEntity1.setTranscriptionWorkflowEntities(List.of(transcriptionWorkflowEntity));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity1);
+
+        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
+                                                                               OffsetDateTime.now().minusMonths(2).toString())))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        GetTranscriptionDetailAdminResponse[] transcriptionResponses
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailAdminResponse[].class);
+
+        assertEquals(2, transcriptionResponses.length);
+        assertNotNull(transcriptionResponses[1].getHearingDate());
+        assertEquals(transcriptionEntity1.getId(), transcriptionResponses[1].getTranscriptionId());
+        assertTrue(transcriptionResponses[1].getIsManualTranscription());
+        assertEquals(headerEntity.getCourtCase().getCaseNumber(), transcriptionResponses[1].getCaseNumber());
+        assertEquals(TranscriptionStatusEnum.APPROVED.getId(), transcriptionResponses[1].getTranscriptionStatusId());
+        assertEquals(headerEntity.getCourtCase().getCourthouse().getId(), transcriptionResponses[1].getCourthouseId());
+        assertEquals(transcriptionEntity1.getCreatedDateTime()
+                         .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[1].getRequestedAt());
+        assertEquals(now, transcriptionResponses[1].getApprovedAt());
+
+    }
 
     private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Integer id,  List<TranscriptionDocumentEntity> transformedMediaEntityList) {
         return transformedMediaEntityList.stream().filter(e -> e.getId().equals(id)).findFirst().get();

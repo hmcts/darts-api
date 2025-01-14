@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionWorkflowEnti
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
@@ -15,22 +16,25 @@ public class TranscriptionWorkflowTestData implements Persistable<
     TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilderRetrieve,
     TranscriptionWorkflowEntity, TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder> {
 
+    public static final OffsetDateTime WORKFLOW_TIMESTAMP = OffsetDateTime.of(2025, 1, 10, 10,
+                                                                      0, 0, 0, ZoneOffset.UTC);
+
     TranscriptionWorkflowTestData() {
 
     }
 
-    public TranscriptionWorkflowEntity minimalTranscriptionWorkflow() {
+    public TranscriptionWorkflowEntity minimalTranscriptionWorkflow(TranscriptionStatusEnum transcriptionStatusEnum) {
         var transcriptionWorkflow = new TranscriptionWorkflowEntity();
         transcriptionWorkflow.setTranscription(PersistableFactory.getTranscriptionTestData().minimalTranscription());
         transcriptionWorkflow.setWorkflowActor(minimalUserAccount());
         transcriptionWorkflow.setTranscriptionStatus(
-            new TranscriptionStatusEntity(TranscriptionStatusEnum.REQUESTED.getId()));
-        transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.now());
+            new TranscriptionStatusEntity(transcriptionStatusEnum.getId()));
+        transcriptionWorkflow.setWorkflowTimestamp(WORKFLOW_TIMESTAMP);
         return transcriptionWorkflow;
     }
 
-    public TranscriptionWorkflowEntity workflowForTranscription(TranscriptionEntity transcription) {
-        var transcriptionWorkflow = minimalTranscriptionWorkflow();
+    public TranscriptionWorkflowEntity workflowForTranscription(TranscriptionEntity transcription, TranscriptionStatusEnum transcriptionStatusEnum) {
+        var transcriptionWorkflow = minimalTranscriptionWorkflow(transcriptionStatusEnum);
         transcription.setTranscriptionStatus(transcription.getTranscriptionStatus());
         transcriptionWorkflow.setTranscription(transcription);
         var workflowEntityList = new ArrayList<TranscriptionWorkflowEntity>();
@@ -40,7 +44,7 @@ public class TranscriptionWorkflowTestData implements Persistable<
     }
 
     public TranscriptionWorkflowEntity workflowForTranscriptionWithStatus(TranscriptionEntity transcription, TranscriptionStatusEnum status) {
-        var transcriptionWorkflow = workflowForTranscription(transcription);
+        var transcriptionWorkflow = workflowForTranscription(transcription, status);
         transcriptionWorkflow.setTranscriptionStatus(new TranscriptionStatusEntity(status.getId()));
         return transcriptionWorkflow;
     }

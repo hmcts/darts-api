@@ -121,8 +121,12 @@ public final class TestUtils {
         }
     }
 
+    public static void compareJson(String expectedJson, String actualJson, List<String> tagsToRemove, JSONCompareMode jsonCompareMode) {
+        JSONAssert.assertEquals(removeTags(tagsToRemove, expectedJson), removeTags(tagsToRemove, actualJson), jsonCompareMode);
+    }
+
     public static void compareJson(String expectedJson, String actualJson, List<String> tagsToRemove) {
-        JSONAssert.assertEquals(removeTags(tagsToRemove, expectedJson), removeTags(tagsToRemove, actualJson), JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(expectedJson, actualJson, tagsToRemove, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     public static String encodeToString(byte[] bytes) {
@@ -182,5 +186,12 @@ public final class TestUtils {
     public static String removeIds(String input) {
         return input.replaceAll("\"case_id\".{1,6},", "")
             .replaceAll("\"id\".{1,6},", "");
+    }
+
+    public static String writeAsString(Object object) throws JsonProcessingException {
+        if (object instanceof String) {
+            return String.valueOf(object);
+        }
+        return getObjectMapper().writeValueAsString(object);
     }
 }

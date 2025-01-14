@@ -79,6 +79,72 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     }
 
     @Test
+    void getAudioMetadataGet_shouldBeOrderedByTimestamp() throws Exception {
+        var courtroomEntity = someMinimalCourtRoom();
+        var mediaChannel1 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        var mediaChannel2 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME.plusMinutes(5), MEDIA_END_TIME.plusMinutes(5), 1);
+        var mediaChannel3 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME.plusMinutes(1), MEDIA_END_TIME.plusMinutes(1), 1);
+        var mediaChannel4 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME.plusMinutes(8), MEDIA_END_TIME.plusMinutes(8), 1);
+        var mediaChannel5 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME.plusMinutes(5), MEDIA_END_TIME.plusMinutes(6), 1);
+        var hearingEntity = dartsPersistence.save(
+            hearingWithMedias(mediaChannel1, mediaChannel2, mediaChannel3, mediaChannel4, mediaChannel5));
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        dartsPersistence.save(PersistableFactory.getExternalObjectDirectoryTestData().eodStoredInUnstructuredLocationForMedia(mediaChannel1));
+
+        var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            [
+                {
+                  "id": 4,
+                  "media_start_timestamp": "2023-01-01T12:08:00Z",
+                  "media_end_timestamp": "2023-01-01T13:08:00Z",
+                  "is_archived": false,
+                  "is_available": false
+                },
+                {
+                  "id": 5,
+                  "media_start_timestamp": "2023-01-01T12:05:00Z",
+                  "media_end_timestamp": "2023-01-01T13:06:00Z",
+                  "is_archived": false,
+                  "is_available": false
+                },
+                {
+                  "id": 2,
+                  "media_start_timestamp": "2023-01-01T12:05:00Z",
+                  "media_end_timestamp": "2023-01-01T13:05:00Z",
+                  "is_archived": false,
+                  "is_available": false
+                },
+                {
+                  "id": 3,
+                  "media_start_timestamp": "2023-01-01T12:01:00Z",
+                  "media_end_timestamp": "2023-01-01T13:01:00Z",
+                  "is_archived": false,
+                  "is_available": false
+                },
+                {
+                  "id": 1,
+                  "media_start_timestamp": "2023-01-01T12:00:00Z",
+                  "media_end_timestamp": "2023-01-01T13:00:00Z",
+                  "is_archived": false,
+                  "is_available": true
+                }
+              ]
+            """.formatted(mediaChannel1.getId());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);
+    }
+
+    @Test
     void getAudioMetadataGetShouldReturnEmptyListWhenNoMediaIsAssociatedWithHearing() throws Exception {
         var hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "999",

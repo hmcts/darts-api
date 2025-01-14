@@ -329,9 +329,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     public TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
-                                                                  TranscriptionEntity transcription,
-                                                                  TranscriptionStatusEntity transcriptionStatus,
-                                                                  String workflowComment) {
+                                                                 TranscriptionEntity transcription,
+                                                                 TranscriptionStatusEntity transcriptionStatus,
+                                                                 String workflowComment) {
 
         TranscriptionWorkflowEntity transcriptionWorkflow = new TranscriptionWorkflowEntity();
         transcriptionWorkflow.setTranscription(transcription);
@@ -491,10 +491,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned) {
+        List<TranscriberViewSummary> result = new ArrayList<>();
         if (TRUE.equals(assigned)) {
-            return transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
+            result = transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
+        } else {
+            result = transcriberTranscriptsQuery.getTranscriptRequests(userId);
         }
-        return transcriberTranscriptsQuery.getTranscriptRequests(userId);
+        return result;
     }
 
     @SuppressWarnings({"java:S2259"})

@@ -68,6 +68,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
@@ -606,7 +607,7 @@ class TranscriptionServiceImplTest {
         TranscriptionWorkflowEntity transcriptionWorkflowEntityEntity = new TranscriptionWorkflowEntity();
         transcriptionWorkflowEntityEntity.setTranscription(transcriptionEntity);
 
-        when(mockTranscriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.APPROVED.getId())).thenReturn(transcriptionStatusEntity);
+        when(mockTranscriptionStatusRepository.getReferenceById(APPROVED.getId())).thenReturn(transcriptionStatusEntity);
         when(mockTranscriptionWorkflowRepository
                  .findWorkflowForUserWithTranscriptionState(entity.getId(), TranscriptionStatusEnum.WITH_TRANSCRIBER.getId()))
             .thenReturn(Arrays.asList(transcriptionEntity));
