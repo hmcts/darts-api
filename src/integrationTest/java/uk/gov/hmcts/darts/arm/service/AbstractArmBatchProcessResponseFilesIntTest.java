@@ -124,9 +124,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
     @BeforeEach
     void commonSetup() {
-
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        when(userIdentity.getUserAccount()).thenReturn(testUser);
         lenient().when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(10);
         lenient().when(armDataManagementConfiguration.getArmMissingResponseDuration()).thenReturn(Duration.ofHours(24));
         String dateTimeFormatStr = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]";
@@ -140,10 +137,16 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(Mockito.startsWith("dropzone/DARTS/response/" + prefix() + "_"))).thenReturn(inputUploadFileRecord);
     }
 
+    protected void setupAuth() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+    }
+
     protected abstract String prefix();
 
     @Test
     void batchProcessResponseFiles_WithMediaReturnsSuccess() throws IOException {
+        setupAuth();
 
         // given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
@@ -418,6 +421,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
     @Test
     void batchProcessResponseFiles_WithInvalidLineFileAndCreateRecordFileSuccess() throws IOException {
+        setupAuth();
 
         // given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
@@ -505,6 +509,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
     @Test
     void batchProcessResponseFiles_successful_withUploadFileAndCreateRecordFile() throws IOException {
+        setupAuth();
 
         // given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
@@ -593,6 +598,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
     @Test
     void batchProcessResponseFiles_With3InvalidLineFilesCausingFailure() throws IOException {
+        setupAuth();
 
         // given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
@@ -694,6 +700,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
     @Test
     void batchProcessResponseFiles_WithMediaUsingSmallContinuationTokenReturnsSuccess() throws IOException {
+        setupAuth();
 
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATETIME);
@@ -1266,6 +1273,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
     @Test
     void batchProcessResponseFiles_WithInvalidFilenameStatus() throws IOException {
+        setupAuth();
 
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATETIME);
@@ -2411,6 +2419,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
     @Test
     void batchProcessResponseFiles_updateEodWithArmMissingResponse_WhenNoResponseFileGenerated() {
+        setupAuth();
         //given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
