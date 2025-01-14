@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,7 +21,7 @@ import static java.time.ZoneOffset.UTC;
 @EnableTransactionManagement
 @Slf4j
 @RequiredArgsConstructor
-public class Application implements CommandLineRunner {
+public class Application implements CommandLineRunner, DisposableBean {
 
     private final AudioApi audioApi;
 
@@ -52,7 +53,6 @@ public class Application implements CommandLineRunner {
 
     @PreDestroy
     public void destroy() {
-        System.out.println(
-            "Callback triggered - @PreDestroy.");
+        System.out.println("Application callback triggered - @PreDestroy called.");
     }
 }
