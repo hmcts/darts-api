@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,6 +75,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected final CurrentTimeHelper timeHelper;
     protected final ExternalObjectDirectoryService externalObjectDirectoryService;
     protected final LogApi logApi;
+
+    protected DateTimeFormatter dateTimeFormatter;
 
     @Override
     public void processResponseFiles(int batchSize) {
@@ -128,12 +131,12 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             log.info("Contents of ARM Input Upload file: '{}' '{}", inputUploadBlob, inputUploadFileRecordStr);
             ArmResponseInputUploadFileRecord inputUploadFileRecord = objectMapper.readValue(inputUploadFileRecordStr, ArmResponseInputUploadFileRecord.class);
 
-
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
 
             if (CollectionUtils.isNotEmpty(externalObjectDirectoryEntities)) {
-                OffsetDateTime timestamp = inputUploadFileRecord.getTimestamp().atOffset(OffsetDateTime.now().getOffset());
+                OffsetDateTime timestamp = getInputUploadFileTimestamp(inputUploadFileRecord);
+
                 List<ExternalObjectDirectoryEntity> editedExternalObjectDirectoryEntities = externalObjectDirectoryEntities.stream()
                     .filter(eod -> eod.getInputUploadProcessedTs() == null)
                     .peek(eod -> eod.setInputUploadProcessedTs(timestamp))
@@ -159,6 +162,17 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             deleteResponseBlobs(List.of(inputUploadBlob));
         } catch (Exception e) {
             log.error("Unable to process manifest", e);
+        }
+    }
+
+    OffsetDateTime getInputUploadFileTimestamp(ArmResponseInputUploadFileRecord inputUploadFileRecord) {
+        try {
+            dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
+            return OffsetDateTime.parse(inputUploadFileRecord.getTimestamp(), dateTimeFormatter);
+        } catch (Exception e) {
+            log.error("Unable to parse timestamp {} from ARM input upload file {}", inputUploadFileRecord.getTimestamp(),
+                      inputUploadFileRecord.getFilename(), e);
+            throw new IllegalArgumentException(e);
         }
     }
 

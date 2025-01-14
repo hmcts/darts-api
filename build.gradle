@@ -452,7 +452,7 @@ dependencies {
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.5'
 
-  implementation group: 'com.google.guava', name: 'guava', version: '33.3.1-jre'
+  implementation group: 'com.google.guava', name: 'guava', version: '33.4.0-jre'
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.0.0'
