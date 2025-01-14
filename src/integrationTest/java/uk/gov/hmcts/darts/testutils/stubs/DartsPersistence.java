@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -86,6 +87,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.test.common.data.builder.DbInsertable;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
@@ -846,4 +848,14 @@ public class DartsPersistence {
     }
 
 
+    public HearingEntity refresh(HearingEntity entity) {
+       return refresh(entity, hearingRepository);
+    }
+
+    public <T extends HasIntegerId> T refresh(T entity, JpaRepository<T, Integer> repository) {
+        if (entity.getId() == null) {
+            return entity;
+        }
+        return repository.findById(entity.getId()).orElseThrow();
+    }
 }

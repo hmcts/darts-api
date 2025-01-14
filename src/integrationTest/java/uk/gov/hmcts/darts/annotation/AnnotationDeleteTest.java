@@ -125,7 +125,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount) {
-        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount,  PersistableFactory.getHearingTestData().someMinimalHearing());
+        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, PersistableFactory.getHearingTestData().someMinimalHearing());
     }
 
     private AnnotationEntity someAnnotationForHearingNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount, HearingEntity hearing) {
@@ -134,8 +134,7 @@ class AnnotationDeleteTest extends IntegrationBase {
         annotation.setCurrentOwner(userAccount);
         annotation.setCreatedBy(userAccount);
         annotation.setLastModifiedBy(userAccount);
-        var hearingEntity = dartsPersistence.save(hearing);
-        annotation.addHearing(hearingEntity);
+        annotation.addHearing(dartsPersistence.refresh(hearing));
         dartsPersistence.save(annotation);
         return annotation;
     }
