@@ -105,16 +105,12 @@ class UnstructuredToArmBatchProcessorTest {
 
         unstructuredToArmBatchProcessor = new UnstructuredToArmBatchProcessorImpl(
             archiveRecordService,
-            archiveRecordFileGenerator,
             unstructuredToArmHelper,
             userIdentity,
             logApi,
             armDataManagementConfiguration,
             externalObjectDirectoryRepository,
-            fileOperationService,
-            armDataManagementApi,
-            unstructuredToArmProcessorConfiguration,
-            eodHelper
+            unstructuredToArmProcessorConfiguration
         );
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);

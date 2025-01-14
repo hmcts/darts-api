@@ -105,6 +105,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     protected UserIdentity userIdentity;
     @Mock
     protected CurrentTimeHelper currentTimeHelper;
+    @Autowired
+    protected DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
 
     @Autowired
     protected AuthorisationStub authorisationStub;
@@ -2408,7 +2410,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     }
 
     @Test
-    void batchProcessResponseFiles_updateEodWithArmMissingResponse_WhenNoResponseFileGenerated() throws IOException {
+    void batchProcessResponseFiles_updateEodWithArmMissingResponse_WhenNoResponseFileGenerated() {
         //given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
@@ -2416,7 +2418,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
         MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        
+
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = prefix() + "_" + manifest1Uuid + ".a360";
 

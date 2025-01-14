@@ -86,6 +86,8 @@ class ArmBatchProcessResponseFilesImplTest {
     private ExternalObjectDirectoryService externalObjectDirectoryService;
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
+    @Mock
+    private DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
 
     private ArmBatchProcessResponseFilesImplProtectedMethodSupport armBatchProcessResponseFiles;
 
@@ -104,7 +106,8 @@ class ArmBatchProcessResponseFilesImplTest {
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            logApi
+            logApi,
+            deleteArmResponseFilesHelper
         ));
 
 
@@ -383,9 +386,10 @@ class ArmBatchProcessResponseFilesImplTest {
                                                                       ArmDataManagementConfiguration armDataManagementConfiguration, ObjectMapper objectMapper,
                                                                       UserIdentity userIdentity,
                                                                       CurrentTimeHelper currentTimeHelper,
-                                                                      ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi) {
+                                                                      ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi,
+                                                                      DeleteArmResponseFilesHelper deleteArmResponseFilesHelper) {
             super(externalObjectDirectoryRepository, armDataManagementApi, fileOperationService, armDataManagementConfiguration,
-                  objectMapper, userIdentity, currentTimeHelper, externalObjectDirectoryService, logApi);
+                  objectMapper, userIdentity, currentTimeHelper, externalObjectDirectoryService, logApi, deleteArmResponseFilesHelper);
         }
 
         @Override
