@@ -471,14 +471,11 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         List<CaseRetentionEntity> caseRetentionEntities2 = dartsDatabase.getCaseRetentionRepository().findByCaseId(courtCaseEntity.getId());
         // there are 2 case retention entries
         assertEquals(2, caseRetentionEntities2.size());
-        // the initial one is untouched by the new event, with no CMR link
-        CaseRetentionEntity initialCaseRetentionEntity = caseRetentionEntities2.get(0);
-        assertEquals(initialRetainUntilDate, initialCaseRetentionEntity.getRetainUntil());
-        assertEquals(String.valueOf(PENDING), initialCaseRetentionEntity.getCurrentState());
-        assertNull(initialCaseRetentionEntity.getCaseManagementRetention());
+
+        assertThat(caseRetentionEntities2.get(0).getCreatedDateTime()).isAfter(caseRetentionEntities2.get(1).getCreatedDateTime());
 
         // the latest entry should match the data received from the event
-        CaseRetentionEntity latestCaseRetentionEntity = caseRetentionEntities2.get(1);
+        CaseRetentionEntity latestCaseRetentionEntity = caseRetentionEntities2.get(0);
         assertNull(latestCaseRetentionEntity.getTotalSentence());
         var date7YearsLater = testTime.plusYears(7).truncatedTo(ChronoUnit.DAYS);
         assertEquals(date7YearsLater, latestCaseRetentionEntity.getRetainUntil());
@@ -486,6 +483,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(4, latestCaseRetentionEntity.getRetentionPolicyType().getId());
         assertEquals(CASE_CLOSED, latestCaseRetentionEntity.getConfidenceCategory());
         assertNotNull(latestCaseRetentionEntity.getCaseManagementRetention().getId());
+
+        // the initial one is untouched by the new event, with no CMR link
+        CaseRetentionEntity initialCaseRetentionEntity = caseRetentionEntities2.get(1);
+        assertEquals(initialRetainUntilDate, initialCaseRetentionEntity.getRetainUntil());
+        assertEquals(String.valueOf(PENDING), initialCaseRetentionEntity.getCurrentState());
+        assertNull(initialCaseRetentionEntity.getCaseManagementRetention());
 
         // the initial entry should be created first
         assertTrue(initialCaseRetentionEntity.getCreatedDateTime().isBefore(latestCaseRetentionEntity.getCreatedDateTime()));

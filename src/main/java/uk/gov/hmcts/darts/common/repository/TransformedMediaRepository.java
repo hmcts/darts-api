@@ -48,7 +48,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         and ((true = :expired and tm.expiryTime < current_timestamp and mr.status in ('EXPIRED', 'COMPLETED')) or
         (false = :expired and (tm.expiryTime is null or tm.expiryTime >= current_timestamp) and mr.status = 'COMPLETED'))
         and mr.hearing = he
-        order by 1
+        order by tm.id DESC
         """)
     List<TransformedMediaDetailsDto> findTransformedMediaDetails(Integer userId, boolean expired);
 

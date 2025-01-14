@@ -75,7 +75,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 WHERE (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = tra.trs_id) >= :date_limit
                 AND tra.is_current = true
                 AND tra.trs_id = 3
-                ORDER BY transcription_id desc
+                ORDER BY cas.case_number desc
                 LIMIT :max_result_size
                 """,
             new MapSqlParameterSource()
@@ -213,7 +213,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     )
                 )
                 AND tra.is_current = true
-                ORDER BY transcription_id desc
+                ORDER BY case_number desc
                 LIMIT :max_result_size
                 """,
             new MapSqlParameterSource()
