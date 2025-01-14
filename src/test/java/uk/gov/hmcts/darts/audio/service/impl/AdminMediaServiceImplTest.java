@@ -4,15 +4,32 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapper;
+import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapperImpl;
+import uk.gov.hmcts.darts.audio.mapper.CourthouseMapper;
+import uk.gov.hmcts.darts.audio.mapper.CourthouseMapperImpl;
+import uk.gov.hmcts.darts.audio.mapper.CourtroomMapper;
+import uk.gov.hmcts.darts.audio.mapper.CourtroomMapperImpl;
+import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapper;
+import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapperImpl;
+import uk.gov.hmcts.darts.audio.model.AdminMediaCourthouseResponse;
+import uk.gov.hmcts.darts.audio.model.AdminMediaCourtroomResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionMediaItem;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -20,16 +37,21 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +59,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,13 +68,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AdminMediaServiceImplTest {
     @InjectMocks
+    @Spy
     private AdminMediaServiceImpl mediaRequestService;
 
     @Mock
     private MediaRepository mediaRepository;
     @Mock
+    private ObjectAdminActionRepository objectAdminActionRepository;
+    @Mock
     private TransformedMediaRepository mockTransformedMediaRepository;
-
     @Mock
     private SearchMediaValidator searchMediaValidator;
 
@@ -119,8 +144,11 @@ class AdminMediaServiceImplTest {
     }
 
     private void disableManualDeletion() {
-        this.mediaRequestService = spy(mediaRequestService);
         when(mediaRequestService.isManualDeletionEnabled()).thenReturn(false);
+    }
+
+    private void enableManualDeletion() {
+        when(mediaRequestService.isManualDeletionEnabled()).thenReturn(true);
     }
 
     @Test
@@ -136,6 +164,212 @@ class AdminMediaServiceImplTest {
         DartsApiException dartsApiException = assertThrows(DartsApiException.class, () -> mediaRequestService.adminApproveMediaMarkedForDeletion(1));
         assertThat(dartsApiException.getError()).isEqualTo(CommonApiError.FEATURE_FLAG_NOT_ENABLED);
     }
+
+
+    @Nested
+    class GetMediasMarkedForDeletion {
+        private static final int OBJECT_ADMIN_ACTION_ENTITY_ID_1 = 4;
+        private static final int OBJECT_ADMIN_ACTION_ENTITY_ID_2 = 8;
+        private static final int OBJECT_ADMIN_ACTION_ENTITY_ID_3 = 12;
+        private ObjectAdminActionEntity objectAdminActionEntity1;
+        private ObjectAdminActionEntity objectAdminActionEntity2;
+        private ObjectAdminActionEntity objectAdminActionEntity3;
+
+        @BeforeEach
+        void beforeEach() {
+            enableManualDeletion();
+        }
+
+        record ExpectedResult(int... mediaIds) {
+
+        }
+
+        private void triggerAndValidate(List<ObjectAdminActionEntity> objectAdminActionEntity,
+                                        ExpectedResult... expectedResults) {
+
+            when(objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason()).thenReturn(objectAdminActionEntity);
+
+            GetAdminMediasMarkedForDeletionItem responseItem1 = mock(GetAdminMediasMarkedForDeletionItem.class);
+            List<GetAdminMediasMarkedForDeletionItem> responseItems = new ArrayList<>();
+            responseItems.add(responseItem1);
+            if (expectedResults.length > 1) {
+                GetAdminMediasMarkedForDeletionItem[] responseItemsArray = new GetAdminMediasMarkedForDeletionItem[expectedResults.length - 1];
+                for (int i = 0; i < expectedResults.length - 1; i++) {
+                    responseItemsArray[i] = mock(GetAdminMediasMarkedForDeletionItem.class);
+                }
+                doReturn(responseItem1, (Object[]) responseItemsArray).when(mediaRequestService).toGetAdminMediasMarkedForDeletionItem(any());
+            } else {
+                doReturn(responseItem1).when(mediaRequestService).toGetAdminMediasMarkedForDeletionItem(any());
+            }
+
+
+            List<GetAdminMediasMarkedForDeletionItem> result = mediaRequestService.getMediasMarkedForDeletion();
+            assertThat(result).hasSize(expectedResults.length);
+            assertThat(result).containsAll(responseItems);
+
+            ArgumentCaptor<List<ObjectAdminActionEntity>> actionsCaptor = ArgumentCaptor.captor();
+            verify(mediaRequestService, times(expectedResults.length)).toGetAdminMediasMarkedForDeletionItem(actionsCaptor.capture());
+
+            List<List<ObjectAdminActionEntity>> actionEntities = actionsCaptor.getAllValues();
+
+            assertThat(actionEntities).hasSize(expectedResults.length);
+
+            //Sort to prevent flaky tests
+            actionEntities.sort((a, b) -> b.size() - a.size());
+
+            int expectedResultIndex = 0;
+            for (ExpectedResult expectedResult : expectedResults) {
+                List<ObjectAdminActionEntity> actionEntityList = actionEntities.get(expectedResultIndex++);
+                assertThat(actionEntityList).hasSize(expectedResult.mediaIds().length);
+                for (int i = 0; i < expectedResult.mediaIds().length; i++) {
+                    assertThat(actionEntityList.get(i).getId()).isEqualTo(expectedResult.mediaIds()[i]);
+                }
+            }
+        }
+
+        private void setupStandingData() {
+            OffsetDateTime start = OffsetDateTime.now();
+            OffsetDateTime end = OffsetDateTime.now().plusDays(1);
+            objectAdminActionEntity1 =
+                createObjectAdminActionEntity(
+                    "TicketRef1",
+                    1,
+                    2,
+                    3,
+                    start,
+                    end,
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_1
+                );
+            objectAdminActionEntity2 =
+                createObjectAdminActionEntity(
+                    "TicketRef1",
+                    1,
+                    2,
+                    3,
+                    start,
+                    end,
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_2
+                );
+            objectAdminActionEntity3 =
+                createObjectAdminActionEntity(
+                    "TicketRef1",
+                    1,
+                    2,
+                    3,
+                    start,
+                    end,
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_3
+                );
+        }
+
+        @Test
+        void getMediasMarkedForDeletion_typical() {
+            setupStandingData();
+            triggerAndValidate(List.of(objectAdminActionEntity1, objectAdminActionEntity2, objectAdminActionEntity3),
+                               new ExpectedResult(OBJECT_ADMIN_ACTION_ENTITY_ID_1, OBJECT_ADMIN_ACTION_ENTITY_ID_2, OBJECT_ADMIN_ACTION_ENTITY_ID_3));
+        }
+
+
+        @Test
+        void getMediasMarkedForDeletion_shouldGroupByTicketReference() {
+            setupStandingData();
+            when(objectAdminActionEntity2.getTicketReference()).thenReturn("TicketRef2");
+            triggerAndValidate(List.of(objectAdminActionEntity1, objectAdminActionEntity2, objectAdminActionEntity3),
+                               new ExpectedResult(OBJECT_ADMIN_ACTION_ENTITY_ID_1, OBJECT_ADMIN_ACTION_ENTITY_ID_3), new ExpectedResult(
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_2));
+        }
+
+        @Test
+        void getMediasMarkedForDeletion_shouldGroupByHiddenById() {
+            setupStandingData();
+            when(objectAdminActionEntity2.getHiddenBy().getId()).thenReturn(123);
+            triggerAndValidate(List.of(objectAdminActionEntity1, objectAdminActionEntity2, objectAdminActionEntity3),
+                               new ExpectedResult(OBJECT_ADMIN_ACTION_ENTITY_ID_1, OBJECT_ADMIN_ACTION_ENTITY_ID_3), new ExpectedResult(
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_2));
+        }
+
+        @Test
+        void getMediasMarkedForDeletion_shouldGroupByObjectHiddenReasons() {
+            setupStandingData();
+            when(objectAdminActionEntity2.getObjectHiddenReason().getId()).thenReturn(123);
+            triggerAndValidate(List.of(objectAdminActionEntity1, objectAdminActionEntity2, objectAdminActionEntity3),
+                               new ExpectedResult(OBJECT_ADMIN_ACTION_ENTITY_ID_1, OBJECT_ADMIN_ACTION_ENTITY_ID_3), new ExpectedResult(
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_2));
+        }
+
+        @Test
+        void getMediasMarkedForDeletion_shouldGroupByCourtRoom() {
+            setupStandingData();
+            when(objectAdminActionEntity2.getMedia().getCourtroom().getId()).thenReturn(123);
+            triggerAndValidate(List.of(objectAdminActionEntity1, objectAdminActionEntity2, objectAdminActionEntity3),
+                               new ExpectedResult(OBJECT_ADMIN_ACTION_ENTITY_ID_1, OBJECT_ADMIN_ACTION_ENTITY_ID_3), new ExpectedResult(
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_2));
+        }
+
+        @Test
+        void getMediasMarkedForDeletion_shouldGroupByStart() {
+            setupStandingData();
+            when(objectAdminActionEntity2.getMedia().getStart()).thenReturn(OffsetDateTime.now().plusMinutes(2));
+            triggerAndValidate(List.of(objectAdminActionEntity1, objectAdminActionEntity2, objectAdminActionEntity3),
+                               new ExpectedResult(OBJECT_ADMIN_ACTION_ENTITY_ID_1, OBJECT_ADMIN_ACTION_ENTITY_ID_3), new ExpectedResult(
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_2));
+        }
+
+        @Test
+        void getMediasMarkedForDeletion_shouldGroupByEnd() {
+            setupStandingData();
+            when(objectAdminActionEntity2.getMedia().getEnd()).thenReturn(OffsetDateTime.now().plusMinutes(2));
+            triggerAndValidate(List.of(objectAdminActionEntity1, objectAdminActionEntity2, objectAdminActionEntity3),
+                               new ExpectedResult(OBJECT_ADMIN_ACTION_ENTITY_ID_1, OBJECT_ADMIN_ACTION_ENTITY_ID_3), new ExpectedResult(
+                    OBJECT_ADMIN_ACTION_ENTITY_ID_2));
+        }
+    }
+
+
+    private ObjectAdminActionEntity createObjectAdminActionEntity(String ticketRef,
+                                                                  int userAccountId,
+                                                                  int objectHiddenReasonEntityId,
+                                                                  int courtroomEntityId,
+                                                                  OffsetDateTime start, OffsetDateTime end,
+                                                                  int objectAdminActionEntityId) {
+
+        UserAccountEntity userAccount = createUserAccountWithId(userAccountId);
+        ObjectHiddenReasonEntity objectHiddenReasonEntity = createObjectHiddenReasonEntity(objectHiddenReasonEntityId);
+        CourtroomEntity courtroomEntity = createCourtroomEntity(courtroomEntityId);
+
+
+        ObjectAdminActionEntity objectAdminActionEntity = mock(ObjectAdminActionEntity.class);
+        when(objectAdminActionEntity.getTicketReference()).thenReturn(ticketRef);
+        when(objectAdminActionEntity.getHiddenBy()).thenReturn(userAccount);
+        when(objectAdminActionEntity.getObjectHiddenReason()).thenReturn(objectHiddenReasonEntity);
+        when(objectAdminActionEntity.getId()).thenReturn(objectAdminActionEntityId);
+
+        MediaEntity media = mock(MediaEntity.class);
+        when(media.getCourtroom()).thenReturn(courtroomEntity);
+        when(media.getStart()).thenReturn(start);
+        when(media.getEnd()).thenReturn(end);
+        when(objectAdminActionEntity.getMedia()).thenReturn(media);
+        return objectAdminActionEntity;
+    }
+
+    private CourtroomEntity createCourtroomEntity(int id) {
+        CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+        when(courtroomEntity.getId()).thenReturn(id);
+        return courtroomEntity;
+    }
+
+    private ObjectHiddenReasonEntity createObjectHiddenReasonEntity(int id) {
+        ObjectHiddenReasonEntity objectHiddenReasonEntity = mock(ObjectHiddenReasonEntity.class);
+        when(objectHiddenReasonEntity.getId()).thenReturn(id);
+        return objectHiddenReasonEntity;
+    }
+
+    private UserAccountEntity createUserAccountWithId(int id) {
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        when(userAccount.getId()).thenReturn(id);
+        return userAccount;
+    }
+
 
     @Test
     void filterMedias_alwaysValidatesSearchData() {
@@ -332,6 +566,137 @@ class AdminMediaServiceImplTest {
         hearing.setCourtroom(courtroom);
         hearing.setCourtCase(courtCase);
         return hearing;
+    }
+
+    @Nested
+    class ToGetAdminMediasMarkedForDeletionItemTests {
+
+        private final CourthouseMapper courthouseMapper = new CourthouseMapperImpl();
+        private final CourtroomMapper courtroomMapper = new CourtroomMapperImpl();
+        private final ObjectActionMapper objectActionMapper = new ObjectActionMapperImpl();
+        private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper = new AdminMarkedForDeletionMapperImpl();
+
+        @BeforeEach
+        void beforeEach() {
+            ReflectionTestUtils.setField(mediaRequestService, "courthouseMapper", courthouseMapper);
+            ReflectionTestUtils.setField(mediaRequestService, "courtroomMapper", courtroomMapper);
+            ReflectionTestUtils.setField(mediaRequestService, "objectActionMapper", objectActionMapper);
+            ReflectionTestUtils.setField(mediaRequestService, "adminMarkedForDeletionMapper", adminMarkedForDeletionMapper);
+        }
+
+        @Test
+        void toGetAdminMediasMarkedForDeletionItem_shouldMapAllFieldsCorrectly() {
+            //Data setup
+            CourthouseEntity courthouseEntity = mock(CourthouseEntity.class);
+            when(courthouseEntity.getId()).thenReturn(1);
+            when(courthouseEntity.getDisplayName()).thenReturn("courthouseName");
+
+
+            CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+            when(courtroomEntity.getId()).thenReturn(2);
+            when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
+            when(courtroomEntity.getName()).thenReturn("courtRoomName");
+
+
+            final OffsetDateTime start = OffsetDateTime.now();
+            final OffsetDateTime end = OffsetDateTime.now().plusDays(1);
+
+
+            MediaEntity baseMediaEntity = mock(MediaEntity.class);
+            when(baseMediaEntity.getStart()).thenReturn(start);
+            when(baseMediaEntity.getEnd()).thenReturn(end);
+            when(baseMediaEntity.getCourtroom()).thenReturn(courtroomEntity);
+
+
+            when(baseMediaEntity.getId()).thenReturn(321);
+            when(baseMediaEntity.getChannel()).thenReturn(1);
+            when(baseMediaEntity.getTotalChannels()).thenReturn(4);
+            when(baseMediaEntity.getIsCurrent()).thenReturn(true);
+            when(baseMediaEntity.getChronicleId()).thenReturn("chronicleId1");
+
+            when(mediaRepository.getVersionCount("chronicleId1")).thenReturn(2);
+
+
+            UserAccountEntity userAccount = mock(UserAccountEntity.class);
+            when(userAccount.getId()).thenReturn(3);
+
+            ObjectHiddenReasonEntity objectHiddenReasonEntity = mock(ObjectHiddenReasonEntity.class);
+            when(objectHiddenReasonEntity.getId()).thenReturn(4);
+
+
+            ObjectAdminActionEntity baseObjectAdminActionEntity = mock(ObjectAdminActionEntity.class);
+            when(baseObjectAdminActionEntity.getMedia()).thenReturn(baseMediaEntity);
+            when(baseObjectAdminActionEntity.getComments()).thenReturn("Comment1");
+            when(baseObjectAdminActionEntity.getTicketReference()).thenReturn("ticketReference1");
+            when(baseObjectAdminActionEntity.getObjectHiddenReason()).thenReturn(objectHiddenReasonEntity);
+            when(baseObjectAdminActionEntity.getHiddenBy()).thenReturn(userAccount);
+
+            MediaEntity media2 = mock(MediaEntity.class);
+            when(media2.getId()).thenReturn(4321);
+            when(media2.getChannel()).thenReturn(2);
+            when(media2.getTotalChannels()).thenReturn(4);
+            when(media2.getIsCurrent()).thenReturn(true);
+            when(media2.getChronicleId()).thenReturn("chronicleId2");
+
+            ObjectAdminActionEntity objectAdminActionEntity2 = mock(ObjectAdminActionEntity.class);
+            when(objectAdminActionEntity2.getMedia()).thenReturn(media2);
+            when(objectAdminActionEntity2.getComments()).thenReturn("Comment2");
+
+            when(mediaRepository.getVersionCount("chronicleId1")).thenReturn(2);
+            when(mediaRepository.getVersionCount("chronicleId2")).thenReturn(3);
+
+            //Run
+            GetAdminMediasMarkedForDeletionItem result = mediaRequestService.toGetAdminMediasMarkedForDeletionItem(
+                List.of(baseObjectAdminActionEntity, objectAdminActionEntity2));
+
+            //Check media
+            assertThat(result.getMedia()).hasSize(2);
+            assertMedia(result.getMedia().get(0), 321, 1, 4, true, 2);
+            assertMedia(result.getMedia().get(1), 4321, 2, 4, true, 3);
+            //Check courthouse
+            assertCourthouse(result.getCourthouse(), "courthouseName", 1);
+            assertCourtroom(result.getCourtroom(), "courtRoomName", 2);
+            assertAdminAction(result.getAdminAction(), "ticketReference1", 3, 4,
+                              List.of("Comment1", "Comment2"));
+            assertThat(result.getStartAt()).isEqualTo(start);
+            assertThat(result.getEndAt()).isEqualTo(end);
+            verify(mediaRepository).getVersionCount("chronicleId1");
+            verify(mediaRepository).getVersionCount("chronicleId2");
+        }
+
+        private void assertMedia(GetAdminMediasMarkedForDeletionMediaItem actual,
+                                 int expectedId,
+                                 int expectedChannel,
+                                 int expectedTotalChannels,
+                                 boolean expectedIsCurrent,
+                                 int expectedVersionCount) {
+            assertThat(actual.getId()).isEqualTo(expectedId);
+            assertThat(actual.getChannel()).isEqualTo(expectedChannel);
+            assertThat(actual.getTotalChannels()).isEqualTo(expectedTotalChannels);
+            assertThat(actual.getIsCurrent()).isEqualTo(expectedIsCurrent);
+            assertThat(actual.getVersionCount()).isEqualTo(expectedVersionCount);
+        }
+
+        private void assertAdminAction(GetAdminMediasMarkedForDeletionAdminAction actual,
+                                       String expectedTicketReference,
+                                       int expectedHiddenById,
+                                       int expectedReasonId,
+                                       List<String> expectedComments) {
+            assertThat(actual.getTicketReference()).isEqualTo(expectedTicketReference);
+            assertThat(actual.getHiddenById()).isEqualTo(expectedHiddenById);
+            assertThat(actual.getReasonId()).isEqualTo(expectedReasonId);
+            assertThat(actual.getComments()).isEqualTo(expectedComments);
+        }
+
+        private void assertCourtroom(AdminMediaCourtroomResponse actual, String expectedCourtRoomName, int expectedId) {
+            assertThat(actual.getId()).isEqualTo(expectedId);
+            assertThat(actual.getName()).isEqualTo(expectedCourtRoomName);
+        }
+
+        private void assertCourthouse(AdminMediaCourthouseResponse actual, String expectedCourtHouseName, int expectedId) {
+            assertThat(actual.getId()).isEqualTo(expectedId);
+            assertThat(actual.getDisplayName()).isEqualTo(expectedCourtHouseName);
+        }
     }
 
 }

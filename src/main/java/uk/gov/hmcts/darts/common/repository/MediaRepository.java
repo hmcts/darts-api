@@ -106,4 +106,11 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     List<MediaEntity> findAllLinkedByMediaLinkedCaseByCaseId(Integer caseId);
 
     boolean existsByIdAndIsHiddenFalse(Integer mediaId);
+
+    @Query("""
+           SELECT COUNT(me)
+           FROM MediaEntity me
+           WHERE me.chronicleId = :chronicleId
+        """)
+    Integer getVersionCount(String chronicleId);
 }
