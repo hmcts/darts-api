@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
@@ -40,7 +41,8 @@ public interface ArmRpoClient {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth);
+    RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                                             @RequestBody EmptyRpoRequest emptyRpoRequest);
 
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-storage-accounts-path}",
@@ -62,7 +64,8 @@ public interface ArmRpoClient {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    ProfileEntitlementResponse getProfileEntitlementResponse(@RequestHeader(AUTHORIZATION) String bearerAuth);
+    ProfileEntitlementResponse getProfileEntitlementResponse(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                                             @RequestBody EmptyRpoRequest emptyRpoRequest);
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.add-async-search-path}",
         consumes = APPLICATION_JSON_VALUE,

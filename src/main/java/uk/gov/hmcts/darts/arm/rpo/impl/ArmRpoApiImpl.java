@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
@@ -89,7 +90,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO getRecordManagementMatter: ");
         RecordManagementMatterResponse recordManagementMatterResponse;
         try {
-            recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken);
+            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
@@ -203,7 +205,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProfileEntitlements: ");
         ProfileEntitlementResponse response;
         try {
-            response = armRpoClient.getProfileEntitlementResponse(bearerToken);
+            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            response = armRpoClient.getProfileEntitlementResponse(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
                                                       .append(e)
@@ -745,6 +748,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
             .productionName(productionName + CREATE_EXPORT_CSV_EXTENSION)
             .storageAccountId(storageAccountId)
+            .onlyForCurrentUser(Boolean.FALSE)
+            .exportType(32)
             .build();
     }
 

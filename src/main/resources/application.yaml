@@ -296,7 +296,7 @@ darts:
         get-indexes-by-matter-id-path: /api/v1/getIndexesByMatterId
         get-master-index-field-by-record-class-schema-path: /api/v1/getMasterIndexFieldByRecordClassSchema
         get-profile-entitlements-path: /api/v1/getProfileEntitlements
-        add-async-search-path: /api/v1/addAsyncSearch
+        add-async-search-path: /api/v1/addAsyncSearchRM
         save-background-search-path: /api/v1/SaveBackgroundSearch
         create-export-based-on-search-results-table-path: /api/v1/CreateExportBasedOnSearchResultsTable
         get-extended-searches-by-matter-path: /api/v1/getExtendedSearchesByMatter
