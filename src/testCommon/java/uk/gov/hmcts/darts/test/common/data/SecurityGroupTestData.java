@@ -27,7 +27,7 @@ public class SecurityGroupTestData {
         securityGroup.setDisplayName("Some Group Name " + postfix);
         securityGroup.setDescription("a-test-security-group");
         securityGroup.setCreatedBy(userAccountEntity);
-        securityGroup.setLastModifiedBy(userAccountEntity);
+        securityGroup.setLastModifiedById(0);
         return securityGroup;
     }
 

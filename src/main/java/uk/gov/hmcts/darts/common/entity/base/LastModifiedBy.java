@@ -14,4 +14,8 @@ public interface LastModifiedBy {
     boolean isSkipUserAudit();
 
     void setSkipUserAudit(boolean value);
+
+    OffsetDateTime getLastModifiedDateTime();
+
+    void setLastModifiedById(Integer lastModifiedById);
 }

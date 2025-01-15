@@ -759,7 +759,7 @@ public class DartsDatabaseStub {
     }
 
     public void createTestUserAccount() {
-        if (userAccountRepository.findByEmailAddressIgnoreCase("test.user@example.com").isEmpty()) {
+        if (userAccountRepository.findFirstByEmailAddressIgnoreCase("test.user@example.com").isEmpty()) {
             UserAccountEntity testUser = new UserAccountEntity();
             testUser.setEmailAddress("test.user@example.com");
             testUser.setUserFullName("testuser");

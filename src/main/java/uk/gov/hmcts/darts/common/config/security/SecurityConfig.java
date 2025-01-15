@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderCon
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiTrait;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.io.IOException;
 import java.util.Map;
@@ -58,6 +60,7 @@ public class SecurityConfig {
     private final InternalAuthConfigurationProperties internalAuthConfigurationProperties;
     private final InternalAuthProviderConfigurationProperties internalAuthProviderConfigurationProperties;
     private final UserIdentity userIdentity;
+    private final UserAccountRepository userAccountRepository;
     private final JwtDecoder jwtDecoder;
     private static final String TOKEN_BEARER_PREFIX = "Bearer";
 
@@ -123,16 +126,30 @@ public class SecurityConfig {
 
     private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
                                                                                String jwkSetUri) {
-
         var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
             .jwsAlgorithm(SignatureAlgorithm.RS256)
             .build();
 
+        //TODO justify this
+        var dartsJwtDecoder = new JwtDecoder() {
+            @Override
+            public Jwt decode(String token) {
+                Jwt jwt = jwtDecoder.decode(token);
+                Integer userId = null;
+                String email = jwt.getClaimAsString("email");
+
+                if (email != null && !email.isBlank()) {
+                    userId = userAccountRepository.findFirstByEmailAddressIgnoreCase(email)
+                        .map(UserAccountEntity::getId)
+                        .orElse(null);
+                }
+                return new DartsJwt(jwt, userId);
+            }
+        };
+
         OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(issuer);
         jwtDecoder.setJwtValidator(jwtValidator);
-
-        var authenticationProvider = new JwtAuthenticationProvider(jwtDecoder);
-
+        var authenticationProvider = new JwtAuthenticationProvider(dartsJwtDecoder);
         return Map.entry(issuer, authenticationProvider::authenticate);
     }
 
@@ -168,10 +185,10 @@ public class SecurityConfig {
             } else {
                 try {
                     UserAccountEntity userAccountEntity = userIdentity.getUserAccount(jwt);
-                    if (!userAccountEntity.isActive()) {
-                        writeError(response);
-                    } else {
+                    if (userAccountEntity.isActive()) {
                         filterChain.doFilter(request, response);
+                    } else {
+                        writeError(response);
                     }
                 } catch (Exception exception) {
                     log.error("User is invalid", exception);

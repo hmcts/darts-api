@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 import uk.gov.hmcts.darts.task.runner.AutomatedOnDemandTask;
@@ -132,10 +133,13 @@ public class IntegrationBase {
     }
 
     protected void givenBearerTokenExists(String email) {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("emails", List.of(email))
-            .build();
+        DartsJwt jwt = new DartsJwt(
+            Jwt.withTokenValue("test")
+                .header("alg", "RS256")
+                .claim("emails", List.of(email))
+                .build(),
+            dartsDatabase.getUserAccountRepository().findFirstByEmailAddressIgnoreCase(email)
+                .orElseThrow().getId());
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
@@ -166,6 +170,6 @@ public class IntegrationBase {
     }
 
     protected void anAuthenticatedUserFor(String userEmail) {
-        GivenBuilder.anAuthenticatedUserFor(userEmail);
+        GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }
 }

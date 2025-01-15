@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,14 +28,21 @@ public class CreatedBaseEntity implements CreatedBy {
 
     @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", insertable = false, updatable = false)
+    @Setter(AccessLevel.NONE)
     private UserAccountEntity createdBy;
 
+    @NotAudited
+    @Column(name = "created_by")
+    private Integer createdById;
+
+    @Override
     public void setCreatedBy(UserAccountEntity userAccount) {
         this.createdBy = userAccount;
+        this.createdById = userAccount == null ? null : createdBy.getId();
         this.skipUserAudit = true;//As this was manualy set we should not override it
     }
 
     @Transient
-    private transient boolean skipUserAudit = true;
+    protected transient boolean skipUserAudit = true;
 }

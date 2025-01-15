@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface UserIdentity {
@@ -12,6 +13,8 @@ public interface UserIdentity {
     UserAccountEntity getUserAccount();
 
     UserAccountEntity getUserAccount(Jwt jwt);
+
+    Optional<Integer> getUserIdFromJwt();
 
     boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRolest);
 

@@ -4,11 +4,15 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AbstractAutomatedTaskConfig;
@@ -55,6 +59,8 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     private ThreadLocal<UUID> executionId;
     @Getter
     private boolean isManualRun;
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                             T abstractAutomatedTaskConfig,
@@ -70,12 +76,19 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     }
 
     private void setupUserAuthentication() {
-        Jwt jwt = Jwt.withTokenValue("automated-task")
-            .header("alg", "RS256")
-            .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
-            .build();
+        String email = automatedTaskConfigurationProperties.getSystemUserEmail();
+        Integer userId = userAccountRepository.findFirstByEmailAddressIgnoreCase(email)
+            .orElseThrow(() -> new DartsException(
+                "System user not found with email " + email))
+            .getId();
+
+        DartsJwt jwt = new DartsJwt(Jwt.withTokenValue("automated-task")
+                                        .header("alg", "RS256")
+                                        .claim("emails", List.of(email))
+                                        .build(),
+                                    userId);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-        log.debug("Task: {} using email: {}", getTaskName(), automatedTaskConfigurationProperties.getSystemUserEmail());
+        log.debug("Task: {} using email: {}", getTaskName(), email);
     }
 
     @Override

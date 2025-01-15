@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
 import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 
@@ -53,9 +52,9 @@ public class UserAuditListener {
         }
     }
 
-    Optional<UserAccountEntity> getUserAccount() {
+    Optional<Integer> getUserAccount() {
         try {
-            return Optional.ofNullable(userIdentity.getUserAccount());
+            return userIdentity.getUserIdFromJwt();
         } catch (Exception e) {
             log.error("Error getting user account", e);
             return Optional.empty();
@@ -72,13 +71,13 @@ public class UserAuditListener {
                 log.debug("Skipping audit as isSkipUserAudit is set or createdBy is already set");
                 return;
             }
-            Optional<UserAccountEntity> userAccountOpt = getUserAccount();
+            Optional<Integer> userAccountOpt = getUserAccount();
             if (userAccountOpt.isEmpty()) {
                 log.debug("Before save: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
                 return;
             }
-            UserAccountEntity userAccount = userAccountOpt.get();
-            entity.setCreatedBy(userAccount);
+            Integer userAccount = userAccountOpt.get();
+            entity.setCreatedById(userAccount);
             entity.setCreatedDateTime(OffsetDateTime.now(clock));
         }
     }
@@ -91,14 +90,14 @@ public class UserAuditListener {
                 return;
             }
 
-            Optional<UserAccountEntity> userAccountOpt = getUserAccount();
+            Optional<Integer> userAccountOpt = getUserAccount();
             if (userAccountOpt.isEmpty()) {
                 log.debug("Before update: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
                 return;
             }
-            UserAccountEntity userAccount = userAccountOpt.get();
+            Integer userAccount = userAccountOpt.get();
             entity.setLastModifiedDateTime(OffsetDateTime.now(clock));
-            entity.setLastModifiedBy(userAccount);
+            entity.setLastModifiedById(userAccount);
         }
     }
 }

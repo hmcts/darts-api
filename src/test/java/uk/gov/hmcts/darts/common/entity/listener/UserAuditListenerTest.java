@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserAuditListenerTest {
 
-    //TODO finish testing
     private final Clock clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
 
     @Mock
@@ -40,12 +39,6 @@ class UserAuditListenerTest {
     @BeforeEach
     void beforeEach() {
         userAuditListener = spy(new UserAuditListener(clock, userIdentity));
-    }
-
-    private UserAccountEntity mockUserAccount() {
-        UserAccountEntity userAccount = mock(UserAccountEntity.class);
-        when(userIdentity.getUserAccount()).thenReturn(userAccount);
-        return userAccount;
     }
 
     @Test
@@ -74,31 +67,19 @@ class UserAuditListenerTest {
 
     @Test
     void getUserAccount_shouldReturnUserAccount_whenUserAccountIsPresent() {
-        UserAccountEntity mockUserAccount = mockUserAccount();
-
-        Optional<UserAccountEntity> userAccount = userAuditListener.getUserAccount();
+        when(userIdentity.getUserIdFromJwt()).thenReturn(Optional.of(1));
+        Optional<Integer> userAccount = userAuditListener.getUserAccount();
         assertThat(userAccount.isPresent()).isTrue();
-        assertThat(userAccount.get()).isEqualTo(mockUserAccount);
-        verify(userIdentity).getUserAccount();
+        assertThat(userAccount.get()).isEqualTo(1);
+        verify(userIdentity).getUserIdFromJwt();
     }
 
     @Test
     void getUserAccount_shouldReturnEmpty_whenUserAccountIsNotPresent() {
-        Optional<UserAccountEntity> userAccount = userAuditListener.getUserAccount();
+        when(userIdentity.getUserIdFromJwt()).thenReturn(Optional.empty());
+        Optional<Integer> userAccount = userAuditListener.getUserAccount();
         assertThat(userAccount.isPresent()).isFalse();
-        verify(userIdentity).getUserAccount();
-    }
-
-    @Test
-    void updateCreatedBy_shouldUpdateCreatedBy_whenEntityIsCreatedByAndSkipUserAuditIsFalseAndCreatedByIsNull() {
-        UserAccountEntity userAccount = mockUserAccount();
-        CreatedBy createdBy = mock(CreatedBy.class);
-        when(createdBy.isSkipUserAudit()).thenReturn(false);
-        when(createdBy.getCreatedBy()).thenReturn(null);
-
-        userAuditListener.updateCreatedBy(createdBy);
-        verify(createdBy).setCreatedBy(userAccount);
-        verify(createdBy).setCreatedDateTime(OffsetDateTime.now(clock));
+        verify(userIdentity).getUserIdFromJwt();
     }
 
     @Test
@@ -124,12 +105,12 @@ class UserAuditListenerTest {
 
     @Test
     void updateModifiedBy_shouldUpdateModifiedBy_whenEntityIsLastModifiedByAndSkipUserAuditIsFalse() {
-        UserAccountEntity userAccount = mockUserAccount();
         LastModifiedBy lastModifiedBy = mock(LastModifiedBy.class);
         when(lastModifiedBy.isSkipUserAudit()).thenReturn(false);
+        when(userIdentity.getUserIdFromJwt()).thenReturn(Optional.of(1));
 
         userAuditListener.updateModifiedBy(lastModifiedBy);
-        verify(lastModifiedBy).setLastModifiedBy(userAccount);
+        verify(lastModifiedBy).setLastModifiedById(1);
         verify(lastModifiedBy).setLastModifiedDateTime(OffsetDateTime.now(clock));
     }
 
