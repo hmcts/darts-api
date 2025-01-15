@@ -485,7 +485,7 @@ dependencies {
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
   testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
-  testImplementation 'io.github.hakky54:logcaptor:2.10.0'
+  testImplementation 'io.github.hakky54:logcaptor:2.10.1'
   testImplementation 'org.testcontainers:testcontainers:1.20.4'
 
   testImplementation group: 'org.jeasy', name: 'easy-random-core', version: '5.0.0'
