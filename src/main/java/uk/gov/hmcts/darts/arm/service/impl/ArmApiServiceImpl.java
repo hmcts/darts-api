@@ -120,7 +120,7 @@ public class ArmApiServiceImpl implements ArmApiService {
                     .findAny();
                 if (profileId.isPresent()) {
                     log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
-                    ArmTokenResponse tokenResponse = armTokenClient.selectEntitlementProfile(bearerToken, profileId.get());
+                    ArmTokenResponse tokenResponse = armTokenClient.selectEntitlementProfile(bearerToken, profileId.get(), emptyRpoRequest);
                     accessToken = tokenResponse.getAccessToken();
                 }
             }

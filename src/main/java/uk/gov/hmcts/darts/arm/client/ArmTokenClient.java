@@ -36,6 +36,7 @@ public interface ArmTokenClient {
         produces = APPLICATION_JSON_VALUE)
     @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     ArmTokenResponse selectEntitlementProfile(@RequestHeader(AUTHORIZATION) String bearerAuth,
-                                              @PathVariable("profile_id") String profileId);
+                                              @PathVariable("profile_id") String profileId,
+                                              @RequestBody EmptyRpoRequest emptyRpoRequest);
 
 }

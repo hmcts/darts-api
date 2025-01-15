@@ -63,7 +63,7 @@ class ArmApiServiceImplTest {
         when(profile.getProfiles()).thenReturn(List.of(profiles));
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId)).thenReturn(response);
+        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(response);
 
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)

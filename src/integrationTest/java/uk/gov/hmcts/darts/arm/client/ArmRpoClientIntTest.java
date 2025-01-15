@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import lombok.AllArgsConstructor;
@@ -54,6 +55,9 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
     private ArmRpoClient armRpoClient;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private static Stream<Arguments> genericArmRpoClientTestArguments() {
         return Stream.of(
@@ -202,5 +206,32 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
             assertEquals(TestUtils.getContentsFromFile(EXPECTED_RESPONSE_DIRECTORY + suffix + ".csv"),
                          IOUtils.toString(response.body().asInputStream()));
         }
+    }
+
+
+    @Test
+    void getRecordManagementMatter_ShouldSucceedIfServerReturns200Success_WithEmptyRequest() throws Exception {
+        // Given
+        var bearerAuth = "Bearer some-token";
+        EmptyRpoRequest request = EmptyRpoRequest.builder().build();
+
+        stubFor(
+            WireMock.post(urlEqualTo("/api/v1/getRecordManagementMatter"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-type", "application/json")
+                        .withBody(TestUtils.getContentsFromFile(MOCK_RESPONSE_DIRECTORY + "getRecordManagementMatter.json"))
+                        .withStatus(200)));
+
+
+        // When
+        armRpoClient.getRecordManagementMatter(bearerAuth, request);
+
+        // Then
+        verify(postRequestedFor(urlEqualTo("/api/v1/getRecordManagementMatter"))
+                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+                   .withRequestBody(equalTo("{}"))
+                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+        );
     }
 }

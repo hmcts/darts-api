@@ -123,7 +123,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(profile.getProfiles()).thenReturn(List.of(profiles));
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId)).thenReturn(tokenResponse);
+        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
 
     }
 

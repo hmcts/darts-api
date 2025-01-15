@@ -91,7 +91,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         when(armTokenClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest))
             .thenReturn(getAvailableEntitlementProfile());
-        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id"))
+        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id", emptyRpoRequest))
             .thenReturn(armTokenResponse);
 
         String fileLocation = tempDirectory.getAbsolutePath();
