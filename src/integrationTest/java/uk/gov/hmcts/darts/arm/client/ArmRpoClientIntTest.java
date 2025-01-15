@@ -222,8 +222,7 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                         .withHeader("Content-type", "application/json")
                         .withBody(TestUtils.getContentsFromFile(MOCK_RESPONSE_DIRECTORY + "getRecordManagementMatter.json"))
                         .withStatus(200)));
-
-
+        
         // When
         armRpoClient.getRecordManagementMatter(bearerAuth, request);
 
