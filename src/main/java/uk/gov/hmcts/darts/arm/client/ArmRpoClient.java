@@ -64,7 +64,8 @@ public interface ArmRpoClient {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    ProfileEntitlementResponse getProfileEntitlementResponse(@RequestHeader(AUTHORIZATION) String bearerAuth);
+    ProfileEntitlementResponse getProfileEntitlementResponse(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                                             @RequestBody EmptyRpoRequest emptyRpoRequest);
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.add-async-search-path}",
         consumes = APPLICATION_JSON_VALUE,

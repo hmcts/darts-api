@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
@@ -158,13 +159,12 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         var profileEntitlement = new ProfileEntitlementResponse.ProfileEntitlement();
         profileEntitlement.setName(ENTITLEMENT_NAME);
         profileEntitlement.setEntitlementId(ENTITLEMENT_ID);
-
         var response = new ProfileEntitlementResponse();
         response.setEntitlements(Collections.singletonList(profileEntitlement));
         response.setStatus(200);
         response.setIsError(false);
-
-        when(armRpoClient.getProfileEntitlementResponse(BEARER_TOKEN))
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armRpoClient.getProfileEntitlementResponse(BEARER_TOKEN, emptyRpoRequest))
             .thenReturn(response);
     }
 

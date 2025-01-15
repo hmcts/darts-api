@@ -78,9 +78,10 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                 return new ClientCallable(request, armRpoClient.getMasterIndexFieldByRecordClassSchema(bearerAuth, request));
             }),
             Arguments.of("getProfileEntitlements", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
-                return new ClientCallable(null, armRpoClient.getProfileEntitlementResponse(bearerAuth));
+                EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+                return new ClientCallable(null, armRpoClient.getProfileEntitlementResponse(bearerAuth, emptyRpoRequest));
             }),
-            Arguments.of("addAsyncSearch", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+            Arguments.of("addAsyncSearchRM", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
                 String request = "{\"request\": \"body\"}";
                 return new ClientCallable(request, armRpoClient.addAsyncSearch(bearerAuth, request));
             }),
@@ -124,6 +125,8 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                     )
                     .productionName("some-production-name")
                     .storageAccountId("some-storage-account-id")
+                    .onlyForCurrentUser(Boolean.FALSE)
+                    .exportType(32)
                     .build();
                 return new ClientCallable(request, armRpoClient.createExportBasedOnSearchResultsTable(bearerAuth, request));
             }),
