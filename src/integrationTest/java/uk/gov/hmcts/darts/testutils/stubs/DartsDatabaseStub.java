@@ -907,9 +907,8 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
-        securityGroup.getUsers().add(userAccount);
-        userAccount.getSecurityGroupEntities().add(securityGroup);
         dartsDatabaseSaveStub.save(securityGroup);
+        userAccount.getSecurityGroupEntities().add(securityGroup);
         dartsDatabaseSaveStub.save(userAccount);
     }
 

@@ -9,7 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
+import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
@@ -33,9 +34,7 @@ public class DartsDatabaseSaveStub {
             return null;
         }
         return transactionalUtil.executeInTransaction(() -> {
-            if (entity instanceof CreatedModifiedBaseEntity createdModifiedBaseEntity) {
-                updateCreatedByLastModifiedBy(createdModifiedBaseEntity);
-            }
+            updateCreatedByLastModifiedBy(entity);
             Method getIdInstanceMethod;
             try {
                 getIdInstanceMethod = getIdMethod(entity.getClass());
@@ -61,39 +60,50 @@ public class DartsDatabaseSaveStub {
     }
 
 
-    @Transactional
-    public void updateCreatedByLastModifiedBy(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
+    public void updateCreatedBy(CreatedBy createdBy) {
         //No need to update values if the entity is a proxy and is not initialized
-        if (createdModifiedBaseEntity instanceof HibernateProxy proxy
+        if (createdBy instanceof HibernateProxy proxy
             && proxy.getHibernateLazyInitializer().isUninitialized()) {
             return;
         }
-        if (createdModifiedBaseEntity.getCreatedBy() == null) {
-            createdModifiedBaseEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
-            createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());
-        } else if (createdModifiedBaseEntity.getCreatedBy().getId() == null) {
-            UserAccountEntity userAccount = createdModifiedBaseEntity.getCreatedBy();
+        if (createdBy.getCreatedBy() == null) {
+            createdBy.setCreatedBy(userAccountRepository.getReferenceById(0));
+            createdBy.setCreatedDateTime(OffsetDateTime.now());
+        } else if (createdBy.getCreatedBy().getId() == null) {
+            UserAccountEntity userAccount = createdBy.getCreatedBy();
             updateCreatedByLastModifiedBy(userAccount);
-            createdModifiedBaseEntity.setCreatedBy(userAccountRepository.save(userAccount));
+            createdBy.setCreatedBy(userAccountRepository.save(userAccount));
         } else {
-            userAccountRepository.save(createdModifiedBaseEntity.getCreatedBy());
+            userAccountRepository.save(createdBy.getCreatedBy());
         }
-        if (createdModifiedBaseEntity.getCreatedDateTime() == null) {
-            createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());
+        if (createdBy.getCreatedDateTime() == null) {
+            createdBy.setCreatedDateTime(OffsetDateTime.now());
         }
+    }
 
-        if (createdModifiedBaseEntity.getLastModifiedBy() == null) {
-            createdModifiedBaseEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
-            createdModifiedBaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
-        } else if (createdModifiedBaseEntity.getLastModifiedBy().getId() == null) {
-            UserAccountEntity userAccount = createdModifiedBaseEntity.getLastModifiedBy();
+    public void updateLastModifiedBy(LastModifiedBy lastModifiedBy) {
+        if (lastModifiedBy.getLastModifiedBy() == null) {
+            lastModifiedBy.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+            lastModifiedBy.setLastModifiedDateTime(OffsetDateTime.now());
+        } else if (lastModifiedBy.getLastModifiedBy().getId() == null) {
+            UserAccountEntity userAccount = lastModifiedBy.getLastModifiedBy();
             updateCreatedByLastModifiedBy(userAccount);
-            createdModifiedBaseEntity.setLastModifiedBy(userAccountRepository.save(userAccount));
+            lastModifiedBy.setLastModifiedBy(userAccountRepository.save(userAccount));
         } else {
-            userAccountRepository.save(createdModifiedBaseEntity.getLastModifiedBy());
+            userAccountRepository.save(lastModifiedBy.getLastModifiedBy());
         }
-        if (createdModifiedBaseEntity.getLastModifiedDateTime() == null) {
-            createdModifiedBaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        if (lastModifiedBy.getLastModifiedDateTime() == null) {
+            lastModifiedBy.setLastModifiedDateTime(OffsetDateTime.now());
+        }
+    }
+
+    @Transactional
+    public void updateCreatedByLastModifiedBy(Object entity) {
+        if (entity instanceof CreatedBy createdBy) {
+            updateCreatedBy(createdBy);
+        }
+        if (entity instanceof LastModifiedBy lastModifiedBy) {
+            updateLastModifiedBy(lastModifiedBy);
         }
     }
 
