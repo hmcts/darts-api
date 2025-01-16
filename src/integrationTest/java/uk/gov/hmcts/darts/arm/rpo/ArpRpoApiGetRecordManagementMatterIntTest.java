@@ -38,7 +38,7 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
         response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
         response.getRecordManagementMatter().setMatterId("some-matter-id");
-        when(armRpoClient.getRecordManagementMatter(any())).thenReturn(response);
+        when(armRpoClient.getRecordManagementMatter(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -67,7 +67,7 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
         response.setStatus(200);
         response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
-        when(armRpoClient.getRecordManagementMatter(any())).thenReturn(response);
+        when(armRpoClient.getRecordManagementMatter(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -91,7 +91,7 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
     void getRecordManagementMatterFailsWhenClientReturns400Error() {
 
         // given
-        when(armRpoClient.getRecordManagementMatter(any())).thenThrow(FeignException.BadRequest.class);
+        when(armRpoClient.getRecordManagementMatter(any(), any())).thenThrow(FeignException.BadRequest.class);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();

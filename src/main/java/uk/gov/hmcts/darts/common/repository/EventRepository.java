@@ -24,7 +24,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
            FROM EventEntity ee
            JOIN ee.hearingEntities he
            WHERE he.id = :hearingId
-           ORDER by ee.timestamp
+           ORDER by ee.timestamp desc 
         """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
 

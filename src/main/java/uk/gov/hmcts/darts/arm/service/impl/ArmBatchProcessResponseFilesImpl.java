@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.service.DeleteArmResponseFilesHelper;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -22,7 +23,7 @@ public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessRes
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
                                             ExternalObjectDirectoryService externalObjectDirectoryService,
-                                            LogApi logApi) {
+                                            LogApi logApi, DeleteArmResponseFilesHelper deleteArmResponseFilesHelper) {
         super(externalObjectDirectoryRepository,
               armDataManagementApi,
               fileOperationService,
@@ -31,7 +32,8 @@ public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessRes
               userIdentity,
               currentTimeHelper,
               externalObjectDirectoryService,
-              logApi);
+              logApi,
+              deleteArmResponseFilesHelper);
     }
 
     @Override

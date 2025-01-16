@@ -1,0 +1,10 @@
+{
+  "operation": "input_upload",
+  "timestamp": "2025-01-10T07:08:28.316382+00:00",
+  "status": 1,
+  "exception_description": null,
+  "error_status": null,
+  "filename": "DARTS_fa292f18-55e7-4d58-b610-0435a37900a2",
+  "submission_folder": "/dropzone/DARTS/submission",
+  "file_hash": "a11f992a43ea6d0b192d57fe44403942"
+}

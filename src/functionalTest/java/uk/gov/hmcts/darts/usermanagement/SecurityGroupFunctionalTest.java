@@ -136,14 +136,15 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         checkGroup(staticGroups.get(2), "CPP", true, 12, false, null);
         checkGroup(staticGroups.get(3), "XHIBIT", true, 11, false, null);
         checkGroup(staticGroups.get(4), "DARTS", true, 10, false, null);
-        checkGroup(staticGroups.get(5), "SUPER_ADMIN", true, 8, true, null);
-        checkGroup(staticGroups.get(6), "SUPER_USER", true, 7, true, null);
-        checkGroup(staticGroups.get(7), "hmcts_staff_1", false, 3, true, 127);
-        checkGroup(staticGroups.get(8), "hmcts_staff_2", false, 2, true, 127);
-        checkGroup(staticGroups.get(9), "hmcts_staff_3", false, 1, true, 127);
-        checkGroup(staticGroups.get(10), "hmcts_staff_4", false, 4, true, 127);
-        checkGroup(staticGroups.get(11), "hmcts_staff_5", true, 5, true, 127);
-        checkGroup(staticGroups.get(12), "hmcts_staff_6", true, 6, true, 127);
+        checkGroup(staticGroups.get(5), "MEDIA_IN_PERPETUITY", false, 10, true, null);
+        checkGroup(staticGroups.get(6), "SUPER_ADMIN", true, 8, true, null);
+        checkGroup(staticGroups.get(7), "SUPER_USER", true, 7, true, null);
+        checkGroup(staticGroups.get(8), "hmcts_staff_1", false, 3, true, 127);
+        checkGroup(staticGroups.get(9), "hmcts_staff_2", false, 2, true, 127);
+        checkGroup(staticGroups.get(10), "hmcts_staff_3", false, 1, true, 127);
+        checkGroup(staticGroups.get(11), "hmcts_staff_4", false, 4, true, 127);
+        checkGroup(staticGroups.get(12), "hmcts_staff_5", true, 5, true, 127);
+        checkGroup(staticGroups.get(13), "hmcts_staff_6", true, 6, true, 127);
 
     }
 

@@ -2,7 +2,7 @@
   {
     "hearing_date": "2023-01-01",
     "type": "Sentencing remarks",
-    "requested_on": "2023-06-20T10:01:00Z",
+    "requested_on": "2023-06-20T10:04:00Z",
     "requested_by_name": "integrationtest.user@example.comFullName",
     "status": "Approved"
   },
@@ -16,7 +16,7 @@
   {
     "hearing_date": "2023-01-01",
     "type": "Sentencing remarks",
-    "requested_on": "2023-06-20T10:04:00Z",
+    "requested_on": "2023-06-20T10:01:00Z",
     "requested_by_name": "integrationtest.user@example.comFullName",
     "status": "Approved"
   }

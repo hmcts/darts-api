@@ -1,13 +1,19 @@
 package uk.gov.hmcts.darts.arm.client.model;
 
-import org.apache.commons.lang3.Validate;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
-public record ArmTokenRequest(String username, String password, String grantType) {
+@Data
+@Builder
+@Jacksonized
+public class ArmTokenRequest {
 
-    public ArmTokenRequest {
-        Validate.notBlank(username, "username must not be blank");
-        Validate.notBlank(password, "password must not be blank");
-        Validate.notBlank(grantType, "grant type must not be blank");
-    }
+    @JsonProperty("username")
+    public String username;
+    @JsonProperty("password")
+    public String password;
+
 
 }

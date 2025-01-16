@@ -18,7 +18,8 @@ class ArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessRespons
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            logApi
+            logApi,
+            deleteArmResponseFilesHelper
         );
     }
 

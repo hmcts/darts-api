@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoGetExtendedSearchesByMatterIdException;
+import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
@@ -95,8 +97,9 @@ class ArmRpoPollServiceImplTest {
 
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
-            .thenReturn(createHeaderColumns());
+            .thenReturn(headerColumns);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
         InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
@@ -111,19 +114,20 @@ class ArmRpoPollServiceImplTest {
         armRpoPollService.pollArmRpo(false);
 
         // then
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
-        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
-        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                                                                 userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
+        verify(armRpoApi).getExtendedProductionsByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).downloadProduction("bearerToken", 1, "fileId", userAccountEntity);
+        verify(armRpoApi).removeProduction("bearerToken", 1, userAccountEntity);
 
         verify(userIdentity).getUserAccount();
 
-        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+        verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
 
-        verify(logApi).armRpoPollingSuccessful(any());
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -136,8 +140,9 @@ class ArmRpoPollServiceImplTest {
 
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
-            .thenReturn(createHeaderColumns());
+            .thenReturn(headerColumns);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
         InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
@@ -152,33 +157,35 @@ class ArmRpoPollServiceImplTest {
         armRpoPollService.pollArmRpo(true);
 
         // then
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
-        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
-        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1,
+                                                                 ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(), userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
+        verify(armRpoApi).getExtendedProductionsByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).downloadProduction("bearerToken", 1, "fileId", userAccountEntity);
+        verify(armRpoApi).removeProduction("bearerToken", 1, userAccountEntity);
 
         verify(userIdentity).getUserAccount();
 
-        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+        verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
 
-        verify(logApi).armRpoPollingSuccessful(any());
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfully_whenCreateExportBasedOnSearchResultsTableInProgress() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_whenGetExtendedSearchesByMatterInProgress() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState());
 
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
-            .thenReturn(createHeaderColumns());
+            .thenReturn(headerColumns);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
         InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
@@ -193,19 +200,63 @@ class ArmRpoPollServiceImplTest {
         armRpoPollService.pollArmRpo(false);
 
         // then
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
-        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
-        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                                                                 userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
+        verify(armRpoApi).getExtendedProductionsByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).downloadProduction("bearerToken", 1, "fileId", userAccountEntity);
+        verify(armRpoApi).removeProduction("bearerToken", 1, userAccountEntity);
 
         verify(userIdentity).getUserAccount();
 
-        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+        verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
 
-        verify(logApi).armRpoPollingSuccessful(any());
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
+    }
+
+    @Test
+    void pollArmRpo_shouldPollSuccessfully_whenCreateExportBasedOnSearchResultsTableInProgress() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState());
+
+        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
+        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
+            .thenReturn(headerColumns);
+        when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
+        when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
+        InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
+        when(armRpoApi.downloadProduction(anyString(), anyInt(), anyString(), any())).thenReturn(resource);
+        doNothing().when(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        String fileName = "fileId.csv";
+        Path filePath = Path.of(tempDirectory.getAbsolutePath()).resolve(fileName);
+        when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
+
+        // when
+        armRpoPollService.pollArmRpo(false);
+
+        // then
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                                                                 userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
+        verify(armRpoApi).getExtendedProductionsByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).downloadProduction("bearerToken", 1, "fileId", userAccountEntity);
+        verify(armRpoApi).removeProduction("bearerToken", 1, userAccountEntity);
+
+        verify(userIdentity).getUserAccount();
+
+        verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
+
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -218,8 +269,9 @@ class ArmRpoPollServiceImplTest {
 
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
-            .thenReturn(createHeaderColumns());
+            .thenReturn(headerColumns);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
         InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
@@ -234,19 +286,20 @@ class ArmRpoPollServiceImplTest {
         armRpoPollService.pollArmRpo(true);
 
         // then
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
-        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
-        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                                                                 userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
+        verify(armRpoApi).getExtendedProductionsByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).downloadProduction("bearerToken", 1, "fileId", userAccountEntity);
+        verify(armRpoApi).removeProduction("bearerToken", 1, userAccountEntity);
 
         verify(userIdentity).getUserAccount();
 
-        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+        verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
 
-        verify(logApi).armRpoPollingSuccessful(any());
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -259,12 +312,11 @@ class ArmRpoPollServiceImplTest {
 
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
-            .thenReturn(createHeaderColumns());
+            .thenReturn(headerColumns);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
-        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
-            .thenReturn(createHeaderColumns());
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
         InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
@@ -279,19 +331,20 @@ class ArmRpoPollServiceImplTest {
         armRpoPollService.pollArmRpo(true);
 
         // then
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
-        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
-        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                                                                 userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
+        verify(armRpoApi).getExtendedProductionsByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).downloadProduction("bearerToken", 1, "fileId", userAccountEntity);
+        verify(armRpoApi).removeProduction("bearerToken", 1, userAccountEntity);
 
         verify(userIdentity).getUserAccount();
 
-        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+        verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
 
-        verify(logApi).armRpoPollingSuccessful(any());
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -354,7 +407,7 @@ class ArmRpoPollServiceImplTest {
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
-        verify(logApi).armRpoPollingFailed(any());
+        verify(logApi).armRpoPollingFailed(EXECUTION_ID);
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
@@ -364,6 +417,10 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
+        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
+            .thenReturn(headerColumns);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(false);
 
         // when
@@ -372,11 +429,31 @@ class ArmRpoPollServiceImplTest {
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                                                                 userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
         verify(userIdentity).getUserAccount();
-        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
+    }
+
+    @Test
+    void pollArmRpo_shouldHandleGetExtendedSearchesByMatterGetInProgress() {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
+        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenThrow(ArmRpoGetExtendedSearchesByMatterIdException.class);
+
+        // when
+        armRpoPollService.pollArmRpo(false);
+
+        // then
+        verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
+        verify(armApiService).getArmBearerToken();
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(userIdentity).getUserAccount();
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -387,6 +464,10 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
+        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
+            .thenReturn(headerColumns);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of());
 
@@ -396,13 +477,14 @@ class ArmRpoPollServiceImplTest {
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
-        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                                                                 userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
+        verify(armRpoApi).getExtendedProductionsByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
         verify(userIdentity).getUserAccount();
-        verify(logApi).armRpoPollingSuccessful(any());
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -413,6 +495,10 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
+        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
+            .thenReturn(headerColumns);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenThrow(new ArmRpoException("Test exception"));
 
         // when
@@ -421,11 +507,12 @@ class ArmRpoPollServiceImplTest {
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
-        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
+        verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                                                                 userAccountEntity);
+        verify(armRpoApi).createExportBasedOnSearchResultsTable("bearerToken", 1, headerColumns, PRODUCTION_NAME, userAccountEntity);
         verify(userIdentity).getUserAccount();
-        verify(logApi).armRpoPollingFailed(any());
+        verify(logApi).armRpoPollingFailed(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }

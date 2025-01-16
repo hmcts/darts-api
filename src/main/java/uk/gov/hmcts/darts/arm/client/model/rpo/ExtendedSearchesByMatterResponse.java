@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.client.model.rpo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -29,8 +30,11 @@ public class ExtendedSearchesByMatterResponse extends BaseRpoResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Search {
 
+        @JsonProperty("searchID")
+        private String searchId;
         private String name;
         private Integer totalCount;
+        private Boolean isSaved;
 
     }
 

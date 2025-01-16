@@ -158,6 +158,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         transcriptionSearchResponse.setRequestedAt(transcriptionSearchResult.requestedAt());
         transcriptionSearchResponse.setIsManualTranscription(transcriptionSearchResult.isManualTranscription());
         transcriptionSearchResponse.setTranscriptionStatusId(transcriptionSearchResult.transcriptionStatusId());
+        transcriptionSearchResponse.setApprovedAt(transcriptionSearchResult.approvedAt());
         return transcriptionSearchResponse;
     }
 

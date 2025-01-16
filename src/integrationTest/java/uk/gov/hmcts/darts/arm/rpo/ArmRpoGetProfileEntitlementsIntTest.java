@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -106,7 +107,8 @@ class ArmRpoGetProfileEntitlementsIntTest extends PostgresIntegrationBase {
         response.setStatus(200);
         response.setIsError(false);
         response.setEntitlements(profileEntitlements);
-        when(armRpoClient.getProfileEntitlementResponse(TOKEN))
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armRpoClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
             .thenReturn(response);
     }
 

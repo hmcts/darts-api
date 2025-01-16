@@ -120,6 +120,60 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         Assertions.assertEquals(1, eventEntityList.size());
     }
 
+
+    @Test
+    void casesGetEventsEndpoint_shouldBeSortedByTimestamp() throws Exception {
+
+        HearingEntity hearingEntity2 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+        );
+        CourtCaseEntity courtCase = hearingEntity2.getCourtCase();
+        dartsDatabase.save(courtCase);
+
+        eventEntityList = createEventsWithDefaults(1).stream()
+            .map(eve -> dartsDatabase.addHandlerToEvent(eve, SECTION_11_1981_DB_ID))
+            .toList();
+        EventEntity eventEntity = eventEntityList.get(0);
+        eventEntity.setEventId(3);
+        eventEntity.setTimestamp(eventEntity.getTimestamp().plusDays(1));
+
+        dartsDatabase.saveEventsForHearing(hearingEntity2, eventEntityList);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+           
+            [
+             {
+               "id": 2,
+               "hearing_id": 1,
+               "hearing_date": "2023-01-01",
+               "timestamp": "2023-01-02T12:00:00Z",
+               "name": "Section 11 of the Contempt of Court Act 1981",
+               "is_data_anonymised": false,
+               "text": "some-event-text-1"
+             },
+             {
+               "id": 1,
+               "hearing_id": 1,
+               "hearing_date": "2023-01-01",
+               "timestamp": "2023-01-01T12:00:00Z",
+               "name": "Section 11 of the Contempt of Court Act 1981",
+               "is_data_anonymised": false,
+               "text": "some-event-text-1"
+             }
+           ]
+            """;
+
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);
+    }
+
     @Test
     void casesGetEventsEndpointCaseNotFound() throws Exception {
 

@@ -7,13 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -103,6 +106,44 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         EventHandlerEntity eventType = persistedEvent.getEventType();
         Assertions.assertEquals("New Description", eventType.getEventName());
+    }
+
+
+    @Test
+    void eventsPost_courtHouseNotFound_404ShouldBeReturned() throws Exception {
+        EventHandlerEntity activeHandler = getActiveHandler();
+        activeHandler.setEventName("New Description");
+
+        EventHandlerEntity inactiveHandler = getInactiveHandler();
+        inactiveHandler.setEventName("Old Description");
+
+        dartsDatabase.saveAllWithTransient(activeHandler, inactiveHandler);
+
+        String requestBody = """
+            {
+              "message_id": "12345",
+              "type": "ActiveTestType",
+              "sub_type": "ActiveTestSubType",
+              "courthouse": "UNKNOWN_COURTHOUSE",
+              "courtroom": "1",
+              "case_numbers": [
+                "A20230049"
+              ],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }""";
+
+        setupExternalUserForCourthouse(null);
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(requestBody);
+
+        MvcResult response = mockMvc.perform(requestBuilder)
+            .andExpect(MockMvcResultMatchers.status().isNotFound())
+            .andReturn();
+
+        String content = response.getResponse().getContentAsString();
+        Problem problemResponse = objectMapper.readValue(content, Problem.class);
+        Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
     @Test

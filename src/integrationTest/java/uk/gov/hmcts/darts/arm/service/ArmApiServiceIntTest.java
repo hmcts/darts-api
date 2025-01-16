@@ -17,8 +17,8 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
@@ -68,7 +68,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     @Value("${darts.storage.arm-api.url}")
     private String baseArmPath;
-    
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -80,14 +80,18 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     @BeforeEach
     void setup() {
-        armTokenRequest = new ArmTokenRequest("some-username", "some-password", GrantType.PASSWORD.getValue());
+        armTokenRequest = ArmTokenRequest.builder()
+            .username("some-username")
+            .password("some-password")
+            .build();
         ArmTokenResponse armTokenResponse = getArmTokenResponse();
         String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
         when(armTokenClient.getToken(armTokenRequest))
             .thenReturn(armTokenResponse);
-        when(armTokenClient.availableEntitlementProfiles(bearerToken))
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armTokenClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest))
             .thenReturn(getAvailableEntitlementProfile());
-        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id"))
+        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id", emptyRpoRequest))
             .thenReturn(armTokenResponse);
 
         String fileLocation = tempDirectory.getAbsolutePath();

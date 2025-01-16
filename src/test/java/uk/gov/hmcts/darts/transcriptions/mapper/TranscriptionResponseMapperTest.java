@@ -916,4 +916,27 @@ class TranscriptionResponseMapperTest {
         assertEquals("3b", responseCommentList.get(5));
     }
 
+    @Test
+    void mapToTranscriptionResponseWithApprovedTimeStamp() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false, true);
+        TranscriptionEntity transcriptionEntity = transcriptionList.getFirst();
+
+        TranscriptionWorkflowEntity transcriptionWorkflow = new TranscriptionWorkflowEntity();
+        transcriptionWorkflow.setTranscription(transcriptionList.getFirst());
+        transcriptionWorkflow.setTranscriptionStatus(CommonTestDataUtil.createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
+        transcriptionWorkflow.setId(1);
+        transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
+
+        transcriptionEntity.setTranscriptionWorkflowEntities(List.of(transcriptionWorkflow));
+
+        GetTranscriptionByIdResponse transcriptionResponse =
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseApprovedSingleEntity.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
 }

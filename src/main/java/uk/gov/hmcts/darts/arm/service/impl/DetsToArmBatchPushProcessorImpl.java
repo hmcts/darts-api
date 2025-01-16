@@ -28,6 +28,8 @@ import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.config.DetsToArmPushAutomatedTaskConfig;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -35,6 +37,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
@@ -57,6 +62,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     private final ObjectStateRecordRepository objectStateRecordRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final ExternalObjectDirectoryService externalObjectDirectoryService;
+    private final DetsToArmPushAutomatedTaskConfig automatedTaskConfigurationProperties;
 
 
     public void processDetsToArm(int taskBatchSize) {
@@ -73,18 +79,43 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
             List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer,
                                                                     detsToArmProcessorConfiguration.getMaxArmManifestItems());
-            int batchCounter = 1;
             UserAccountEntity userAccount = userIdentity.getUserAccount();
-            for (List<Integer> eodsForBatch : batchesForArm) {
-                log.info("Creating DETS batch {} out of {}", batchCounter++, batchesForArm.size());
-                List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
-                createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
+
+            AtomicInteger batchCounter = new AtomicInteger(1);
+            List<Callable<Void>> tasks = batchesForArm
+                .stream()
+                .map(eodsForBatch -> (Callable<Void>) () -> {
+                    int batchNumber = batchCounter.getAndIncrement();
+                    try {
+                        log.info("Creating DETS batch {} out of {}", batchNumber, batchesForArm.size());
+                        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
+                        log.info("Starting processing DETS batch {} out of {}", batchNumber, batchesForArm.size());
+                        createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
+                        log.info("Finished processing DETS batch {} out of {}", batchNumber, batchesForArm.size());
+                    } catch (Exception e) {
+                        log.error("Unexpected exception when processing DETS batch {}", batchNumber, e);
+                    }
+                    return null;
+                })
+                .toList();
+
+
+            try {
+                AsyncUtil.invokeAllAwaitTermination(tasks, automatedTaskConfigurationProperties.getThreads(), 90, TimeUnit.MINUTES);
+            } catch (Exception e) {
+                log.error("Dets to arm batch unexpected exception", e);
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                return;
             }
+        } else {
+            log.info("No DETS EODs to process");
         }
         log.info("Finished running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
-    private List<Integer> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
+    List<Integer> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                         ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
         ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();

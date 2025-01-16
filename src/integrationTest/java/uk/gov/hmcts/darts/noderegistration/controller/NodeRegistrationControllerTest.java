@@ -81,7 +81,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         setupExternalUserForCourthouse(null);
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest("SWANSEA", "999", "DAR");
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
         String response = mvcResult.getResponse().getContentAsString();
         assertTrue(response.contains("Courthouse 'SWANSEA' not found."));
     }

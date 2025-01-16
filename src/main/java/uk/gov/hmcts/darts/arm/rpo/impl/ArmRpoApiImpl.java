@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.darts.arm.component.impl.GetExtendedProductionsByMatterReque
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedSearchesByMatterRequestGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoGetExtendedSearchesByMatterIdException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
@@ -53,7 +55,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
@@ -78,6 +82,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        log.debug("getRecordManagementMatter called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getRecordManagementMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -85,7 +90,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO getRecordManagementMatter: ");
         RecordManagementMatterResponse recordManagementMatterResponse;
         try {
-            recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken);
+            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
@@ -104,6 +110,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void getIndexesByMatterId(String bearerToken, Integer executionId, String matterId, UserAccountEntity userAccount) {
+        log.debug("getIndexesByMatterId called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getIndexesByMatterIdRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -142,6 +149,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        log.debug("getStorageAccounts called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getStorageAccountsRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -187,6 +195,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        log.debug("getProfileEntitlements called with executionId: {}", executionId);
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
                                                  ArmRpoHelper.getProfileEntitlementsRpoState(),
@@ -196,7 +205,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProfileEntitlements: ");
         ProfileEntitlementResponse response;
         try {
-            response = armRpoClient.getProfileEntitlementResponse(bearerToken);
+            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            response = armRpoClient.getProfileEntitlementResponse(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
                                                       .append(e)
@@ -236,6 +246,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                                                             Integer executionId,
                                                                                             ArmRpoStateEntity rpoStateEntity,
                                                                                             UserAccountEntity userAccount) {
+        log.debug("getMasterIndexFieldByRecordClassSchema called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, rpoStateEntity,
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -288,6 +299,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     @Override
     public String addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
 
+        log.debug("addAsyncSearch called with executionId: {}", executionId);
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
                                                  ArmRpoHelper.addAsyncSearchRpoState(),
@@ -343,6 +355,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount) {
+        log.debug("saveBackgroundSearch called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.saveBackgroundSearchRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -390,16 +403,37 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         handleResponseStatus(userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
 
         if (isNull(extendedSearchesByMatterResponse.getSearches())
-            || CollectionUtils.isEmpty(extendedSearchesByMatterResponse.getSearches())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount())
-            || StringUtils.isBlank(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName())) {
+            || CollectionUtils.isEmpty(extendedSearchesByMatterResponse.getSearches())) {
+
             throw handleFailureAndCreateException(errorMessage.append("Search data is missing").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
-        armRpoExecutionDetailEntity.setSearchItemCount(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount());
+        String searchId = armRpoExecutionDetailEntity.getSearchId();
+
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetailMatch = null;
+        for (ExtendedSearchesByMatterResponse.SearchDetail searchDetail : extendedSearchesByMatterResponse.getSearches()) {
+            if (nonNull(searchDetail.getSearch()) && !StringUtils.isBlank(searchDetail.getSearch().getSearchId())) {
+                if (searchDetail.getSearch().getSearchId().equals(searchId)) {
+                    searchDetailMatch = searchDetail;
+                    break;
+                }
+            }
+        }
+        if (isNull(searchDetailMatch)
+            || isNull(searchDetailMatch.getSearch().getTotalCount())
+            || StringUtils.isBlank(searchDetailMatch.getSearch().getName())
+            || isNull(searchDetailMatch.getSearch().getIsSaved())) {
+            throw handleFailureAndCreateException(errorMessage.append("extendedSearchesByMatterResponse search data is missing for searchId: ")
+                                                      .append(searchId).append(" ").append(searchDetailMatch).toString(), armRpoExecutionDetailEntity,
+                                                  userAccount);
+        }
+
+        if (FALSE.equals(searchDetailMatch.getSearch().getIsSaved())) {
+            log.warn(errorMessage.append("The extendedSearchesByMatterResponse is not saved - with executionId: ").append(executionId).toString());
+            throw new ArmRpoGetExtendedSearchesByMatterIdException(errorMessage.toString());
+        }
+        armRpoExecutionDetailEntity.setSearchItemCount(searchDetailMatch.getSearch().getTotalCount());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName();
     }
@@ -714,6 +748,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
             .productionName(productionName + CREATE_EXPORT_CSV_EXTENSION)
             .storageAccountId(storageAccountId)
+            .onlyForCurrentUser(Boolean.FALSE)
+            .exportType(32)
             .build();
     }
 

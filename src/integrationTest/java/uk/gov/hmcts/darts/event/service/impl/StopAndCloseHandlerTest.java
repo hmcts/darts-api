@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
@@ -22,10 +25,13 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.RetentionConfidenceCategoryMapperTestData;
+import uk.gov.hmcts.darts.test.common.data.builder.TestRetentionConfidenceCategoryMapperEntity;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -49,7 +55,9 @@ import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.IGNORED;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.PENDING;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum.CASE_CLOSED;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
+@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true") // To override Clock bean
 class StopAndCloseHandlerTest extends HandlerTestData {
 
     private static final String ARCHIVE_CASE_EVENT_TYPE = "3000";
@@ -76,6 +84,13 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
 
+    @TestConfiguration
+    public static class ClockConfig {
+        @Bean
+        public Clock clock() {
+            return Clock.fixed(CURRENT_DATE_TIME.toInstant(), ZoneOffset.UTC);
+        }
+    }
 
     @BeforeEach
     public void setupStubs() {
@@ -87,6 +102,19 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
         dartsGateway.darNotificationReturnsSuccess();
+
+        createAndSaveRetentionConfidenceCategoryMappings();
+    }
+
+    private void createAndSaveRetentionConfidenceCategoryMappings() {
+        RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
+
+        TestRetentionConfidenceCategoryMapperEntity closedMappingEntity = testData.someMinimalBuilder()
+            .confidenceCategory(CASE_CLOSED)
+            .confidenceReason(RetentionConfidenceReasonEnum.CASE_CLOSED)
+            .confidenceScore(CASE_PERFECTLY_CLOSED)
+            .build();
+        dartsPersistence.save(closedMappingEntity.getEntity());
     }
 
     @Test
@@ -287,7 +315,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(testTime, persistedCase.getCaseClosedTimestamp());
         assertTrue(persistedCase.getClosed());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
         assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
@@ -383,7 +411,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertTrue(persistedCase.getClosed());
         assertEquals(testTime.plusSeconds(10), persistedCase.getCaseClosedTimestamp());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
         assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
 
         // apply retention and check it was applied correctly
@@ -443,14 +471,11 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         List<CaseRetentionEntity> caseRetentionEntities2 = dartsDatabase.getCaseRetentionRepository().findByCaseId(courtCaseEntity.getId());
         // there are 2 case retention entries
         assertEquals(2, caseRetentionEntities2.size());
-        // the initial one is untouched by the new event, with no CMR link
-        CaseRetentionEntity initialCaseRetentionEntity = caseRetentionEntities2.get(0);
-        assertEquals(initialRetainUntilDate, initialCaseRetentionEntity.getRetainUntil());
-        assertEquals(String.valueOf(PENDING), initialCaseRetentionEntity.getCurrentState());
-        assertNull(initialCaseRetentionEntity.getCaseManagementRetention());
+
+        assertThat(caseRetentionEntities2.get(0).getCreatedDateTime()).isAfter(caseRetentionEntities2.get(1).getCreatedDateTime());
 
         // the latest entry should match the data received from the event
-        CaseRetentionEntity latestCaseRetentionEntity = caseRetentionEntities2.get(1);
+        CaseRetentionEntity latestCaseRetentionEntity = caseRetentionEntities2.get(0);
         assertNull(latestCaseRetentionEntity.getTotalSentence());
         var date7YearsLater = testTime.plusYears(7).truncatedTo(ChronoUnit.DAYS);
         assertEquals(date7YearsLater, latestCaseRetentionEntity.getRetainUntil());
@@ -458,6 +483,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(4, latestCaseRetentionEntity.getRetentionPolicyType().getId());
         assertEquals(CASE_CLOSED, latestCaseRetentionEntity.getConfidenceCategory());
         assertNotNull(latestCaseRetentionEntity.getCaseManagementRetention().getId());
+
+        // the initial one is untouched by the new event, with no CMR link
+        CaseRetentionEntity initialCaseRetentionEntity = caseRetentionEntities2.get(1);
+        assertEquals(initialRetainUntilDate, initialCaseRetentionEntity.getRetainUntil());
+        assertEquals(String.valueOf(PENDING), initialCaseRetentionEntity.getCurrentState());
+        assertNull(initialCaseRetentionEntity.getCaseManagementRetention());
 
         // the initial entry should be created first
         assertTrue(initialCaseRetentionEntity.getCreatedDateTime().isBefore(latestCaseRetentionEntity.getCreatedDateTime()));
@@ -481,7 +512,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertTrue(persistedCase.getClosed());
         assertEquals(testTime.plusSeconds(10), persistedCase.getCaseClosedTimestamp());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
         assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
 
         // apply retention and check it was applied correctly

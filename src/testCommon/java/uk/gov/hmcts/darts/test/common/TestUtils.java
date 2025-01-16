@@ -121,8 +121,12 @@ public final class TestUtils {
         }
     }
 
+    public static void compareJson(String expectedJson, String actualJson, List<String> tagsToRemove, JSONCompareMode jsonCompareMode) {
+        JSONAssert.assertEquals(removeTags(tagsToRemove, expectedJson), removeTags(tagsToRemove, actualJson), jsonCompareMode);
+    }
+
     public static void compareJson(String expectedJson, String actualJson, List<String> tagsToRemove) {
-        JSONAssert.assertEquals(removeTags(tagsToRemove, expectedJson), removeTags(tagsToRemove, actualJson), JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(expectedJson, actualJson, tagsToRemove, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     public static String encodeToString(byte[] bytes) {

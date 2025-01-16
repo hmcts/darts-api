@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -57,12 +58,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFES
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.common.util.EodHelper.armDropZoneStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
-import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmManifestFileStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmRawDataStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
 @Slf4j
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
@@ -156,12 +151,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
                     medias.get(3).getId(),
                     medias.get(4).getId(),
                     medias.get(5).getId()),
-            armDropZoneStatus(),
-            armLocation()
+            EodHelper.armDropZoneStatus(),
+            EodHelper.armLocation()
         );
         assertThat(foundMediaList.size()).isEqualTo(BATCH_SIZE);
         assertThat(
-            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
+            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())
         )
             .hasSize(1);
     }
@@ -201,12 +196,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
                     medias.get(3).getId(),
                     medias.get(4).getId(),
                     medias.get(5).getId()),
-            armDropZoneStatus(),
-            armLocation()
+            EodHelper.armDropZoneStatus(),
+            EodHelper.armLocation()
         );
         assertThat(foundMediaList.size()).isEqualTo(5);
         assertThat(
-            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
+            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())
         )
             .hasSize(1);
     }
@@ -246,12 +241,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
                     medias.get(3).getId(),
                     medias.get(4).getId(),
                     medias.get(5).getId()),
-            armDropZoneStatus(),
-            armLocation()
+            EodHelper.armDropZoneStatus(),
+            EodHelper.armLocation()
         );
         assertThat(foundMediaList.size()).isEqualTo(3);
         assertThat(
-            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
+            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())
         )
             .hasSize(1);
     }
@@ -289,12 +284,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
                     medias.get(3).getId(),
                     medias.get(4).getId(),
                     medias.get(5).getId()),
-            armDropZoneStatus(),
-            armLocation()
+            EodHelper.armDropZoneStatus(),
+            EodHelper.armLocation()
         );
         assertThat(foundMediaList.size()).isEqualTo(3);
         assertThat(
-            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
+            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())
         ).hasSize(1);
 
 
@@ -305,8 +300,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
                     medias.get(3).getId(),
                     medias.get(4).getId(),
                     medias.get(5).getId()),
-            failedArmRawDataStatus(),
-            armLocation()
+            EodHelper.failedArmRawDataStatus(),
+            EodHelper.armLocation()
         );
         assertThat(failedMediaList.size()).isEqualTo(2);
 
@@ -323,7 +318,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         List<ExternalObjectDirectoryEntity> successEods = new ArrayList<>();
 
         for (MediaEntity mediaEntity : successfulMedias) {
-            successEods.addAll(eodRepository.findByMediaAndExternalLocationType(mediaEntity, armLocation()));
+            successEods.addAll(eodRepository.findByMediaAndExternalLocationType(mediaEntity, EodHelper.armLocation()));
         }
 
         List<MediaEntity> failedMedias = medias.stream()
@@ -331,7 +326,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         List<ExternalObjectDirectoryEntity> failedEods = new ArrayList<>();
 
         for (MediaEntity mediaEntity : failedMedias) {
-            failedEods.addAll(eodRepository.findByMediaAndExternalLocationType(mediaEntity, armLocation()));
+            failedEods.addAll(eodRepository.findByMediaAndExternalLocationType(mediaEntity, EodHelper.armLocation()));
         }
 
         assertTrue(successEods.stream().allMatch(eodEntity -> manifestFileContents.contains(
@@ -355,9 +350,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm(5);
 
         //then
-        List<ExternalObjectDirectoryEntity> armDropZoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), armDropZoneStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> armDropZoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), EodHelper.armDropZoneStatus(),
+                                                                                                           EodHelper.armLocation());
         assertThat(armDropZoneEodsMedia0).hasSize(1);
-        List<ExternalObjectDirectoryEntity> armDropZoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> armDropZoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), EodHelper.armDropZoneStatus(),
+                                                                                                           EodHelper.armLocation());
         assertThat(armDropZoneEodsMedia1).hasSize(1);
 
         var rawFile0Name = format("%d_%d_1", armDropZoneEodsMedia0.get(0).getId(), medias.get(0).getId());
@@ -412,11 +409,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(any(), any());
 
-        var armDropzoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), armDropZoneStatus(), armLocation());
+        var armDropzoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
         assertThat(armDropzoneEodsMedia0).hasSize(1);
-        var armDropzoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
+        var armDropzoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
         assertThat(armDropzoneEodsMedia1).hasSize(1);
-        var armDropzoneEodsMedia3 = eodRepository.findByMediaStatusAndType(medias.get(3), armDropZoneStatus(), armLocation());
+        var armDropzoneEodsMedia3 = eodRepository.findByMediaStatusAndType(medias.get(3), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
         assertThat(armDropzoneEodsMedia3).hasSize(0);
 
 
@@ -452,11 +449,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         //then
         List<ExternalObjectDirectoryEntity> failedArmEods = eodRepository.findByMediaStatusAndType(
-            medias.get(0), failedArmManifestFileStatus(), armLocation());
+            medias.get(0), EodHelper.failedArmManifestFileStatus(), EodHelper.armLocation());
         assertThat(failedArmEods).hasSize(1);
         assertThat(failedArmEods.get(0).getManifestFile()).isEqualTo("existingManifestFile");
         assertThat(failedArmEods.get(0).getTransferAttempts()).isEqualTo(2);
-        assertThat(eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation())).hasSize(1);
+        assertThat(eodRepository.findByMediaStatusAndType(medias.get(1), EodHelper.armDropZoneStatus(), EodHelper.armLocation())).hasSize(1);
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
 
@@ -488,9 +485,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm(5);
 
         //then
-        List<ExternalObjectDirectoryEntity> failedArmEods = eodRepository.findByMediaStatusAndType(medias.get(0), failedArmRawDataStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> failedArmEods = eodRepository.findByMediaStatusAndType(medias.get(0), EodHelper.failedArmRawDataStatus(),
+                                                                                                   EodHelper.armLocation());
         assertThat(failedArmEods).hasSize(1);
-        List<ExternalObjectDirectoryEntity> ingestedArmEods = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> ingestedArmEods = eodRepository.findByMediaStatusAndType(medias.get(1), EodHelper.armDropZoneStatus(),
+                                                                                                     EodHelper.armLocation());
         assertThat(ingestedArmEods).hasSize(1);
         var failedEod = failedArmEods.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(3);
@@ -517,10 +516,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         //then
         List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(
-            medias.get(0), failedArmManifestFileStatus(), armLocation());
+            medias.get(0), EodHelper.failedArmManifestFileStatus(), EodHelper.armLocation());
         assertThat(failedArmEodsMedia0).hasSize(1);
         List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(
-            medias.get(1), failedArmManifestFileStatus(), armLocation());
+            medias.get(1), EodHelper.failedArmManifestFileStatus(), EodHelper.armLocation());
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
@@ -546,10 +545,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         //then
         List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(
-            medias.get(0), failedArmManifestFileStatus(), armLocation());
+            medias.get(0), EodHelper.failedArmManifestFileStatus(), EodHelper.armLocation());
         assertThat(failedArmEodsMedia0).hasSize(1);
         List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(
-            medias.get(1), failedArmManifestFileStatus(), armLocation());
+            medias.get(1), EodHelper.failedArmManifestFileStatus(), EodHelper.armLocation());
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
@@ -575,10 +574,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         //then
         List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(
-            medias.get(0), failedArmManifestFileStatus(), armLocation());
+            medias.get(0), EodHelper.failedArmManifestFileStatus(), EodHelper.armLocation());
         assertThat(failedArmEodsMedia0).hasSize(1);
         List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(
-            medias.get(1), failedArmManifestFileStatus(), armLocation());
+            medias.get(1), EodHelper.failedArmManifestFileStatus(), EodHelper.armLocation());
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);

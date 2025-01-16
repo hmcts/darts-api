@@ -101,30 +101,36 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
         // Then
         JSONAssert.assertEquals("""
                                     [
-                                      {
-                                        "media_id": %d,
-                                        "channel": 1,
-                                        "start_at": "2024-01-01T00:00:00Z",
-                                        "end_at": "2024-01-01T00:00:00Z",
-                                        "courthouse": {
-                                          "id": 1,
-                                          "display_name": "TEST COURTHOUSE"
-                                        },
-                                        "courtroom": {
-                                          "id": 1,
-                                          "name": "TEST COURTROOM"
-                                        },
-                                        "admin_action": {
-                                          "id": %d,
-                                          "reason_id": 1,
-                                          "hidden_by_id": 0,
-                                          "hidden_at": "2024-01-01T00:00:00Z",
-                                          "is_marked_for_manual_deletion": false,
-                                          "ticket_reference": "Some ticket reference",
-                                          "comments": "Some comment"
-                                        }
-                                      }
-                                    ]""".formatted(expectedMediaEntity.getId(),
+                                       {
+                                         "media": [
+                                           {
+                                             "id": 1,
+                                             "channel": 1,
+                                             "total_channels": 2,
+                                             "is_current": true,
+                                             "version_count": 0
+                                           }
+                                         ],
+                                         "start_at": "2024-01-01T00:00:00Z",
+                                         "end_at": "2024-01-01T00:00:00Z",
+                                         "courthouse": {
+                                           "id": 1,
+                                           "display_name": "TEST COURTHOUSE"
+                                         },
+                                         "courtroom": {
+                                           "id": 1,
+                                           "name": "TEST COURTROOM"
+                                         },
+                                         "admin_action": {
+                                           "ticket_reference": "Some ticket reference",
+                                           "hidden_by_id": 0,
+                                           "reason_id": 1,
+                                           "comments": [
+                                             "Some comment"
+                                           ]
+                                         }
+                                       }
+                                     ]""".formatted(expectedMediaEntity.getId(),
                                                    expectedObjectAdminActionEntity.getId()),
                                 mvcResult.getResponse().getContentAsString(),
                                 JSONCompareMode.NON_EXTENSIBLE);

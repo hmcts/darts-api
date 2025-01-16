@@ -111,6 +111,7 @@ public class CaseServiceImpl implements CaseService {
 
         List<HearingEntity> filteredHearings = hearingList.stream()
             .filter(HearingEntity::getHearingIsActual)
+            .sorted((o1, o2) -> o2.getHearingDate().compareTo(o1.getHearingDate()))
             .toList();
 
         return HearingEntityToCaseHearing.mapToHearingList(filteredHearings, transcriptionDocumentRepository);
@@ -176,6 +177,7 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds).stream()
             .filter(HearingEntity::getHearingIsActual)
+            .sorted((o1, o2) -> o2.getCourtCase().getCaseNumber().compareTo(o1.getCourtCase().getCaseNumber()))
             .toList();
 
         return AdvancedSearchResponseMapper.mapResponse(hearings);
@@ -195,11 +197,13 @@ public class CaseServiceImpl implements CaseService {
         getCourtCaseById(caseId).validateIsExpired();
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, false);
         List<CaseTranscriptModel> caseTranscriptModelList = transcriptionMapper.mapResponse(transcriptionEntities);
+        caseTranscriptModelList.sort((o1, o2) -> o2.getRequestedOn().compareTo(o1.getRequestedOn()));
         return transcriptionMapper.getTranscriptList(caseTranscriptModelList);
     }
 
     @Override
     public List<Annotation> getAnnotations(Integer caseId) {
+        List<Annotation> annotations = new ArrayList<>();
         CourtCaseEntity courtCaseEntity = getCourtCaseById(caseId).validateIsExpired();
         List<HearingEntity> hearingEntities = courtCaseEntity.getHearings();
 
@@ -211,14 +215,11 @@ public class CaseServiceImpl implements CaseService {
                         .map(HearingEntity::getId)
                         .collect(Collectors.toList()));
 
-            List<Annotation> annotations = new ArrayList<>();
             for (AnnotationEntity annotationEntity : annotationsEntities) {
                 for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
                     annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
                 }
             }
-
-            return annotations;
         } else {
             List<AnnotationEntity> annotationsEntities =
                 annotationRepository.findByListOfHearingIdsAndUser(
@@ -227,14 +228,13 @@ public class CaseServiceImpl implements CaseService {
                         .map(HearingEntity::getId)
                         .collect(Collectors.toList()), authorisationApi.getCurrentUser());
 
-            List<Annotation> annotations = new ArrayList<>();
             for (AnnotationEntity annotationEntity : annotationsEntities) {
                 for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
                     annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
                 }
             }
-            return annotations;
         }
+        return annotations;
     }
 
     @Override

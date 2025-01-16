@@ -20,7 +20,9 @@ import static org.mockito.Mockito.when;
 
 class ArmRpoApiGetExtendedSearchesByMatterIntTest extends IntegrationBase {
 
-    public static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    private static final String SEARCH_ID = "8271f101-8c14-4c41-8865-edc5d8baed99";
+    private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+
     @MockitoBean
     private ArmRpoClient armRpoClient;
 
@@ -38,8 +40,10 @@ class ArmRpoApiGetExtendedSearchesByMatterIntTest extends IntegrationBase {
         extendedSearchesByMatterResponse.setStatus(200);
         extendedSearchesByMatterResponse.setIsError(false);
         ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setSearchId(SEARCH_ID);
         search.setTotalCount(4);
         search.setName(PRODUCTION_NAME);
+        search.setIsSaved(true);
         ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
         searchDetail.setSearch(search);
         extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
@@ -49,6 +53,7 @@ class ArmRpoApiGetExtendedSearchesByMatterIntTest extends IntegrationBase {
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setMatterId("1");
+        armRpoExecutionDetailEntity.setSearchId(SEARCH_ID);
         armRpoExecutionDetailEntity.setCreatedBy(userAccount);
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);

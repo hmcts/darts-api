@@ -11,8 +11,10 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseCreateRecord;
+import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInputUploadFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
+import uk.gov.hmcts.darts.arm.service.DeleteArmResponseFilesHelper;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
@@ -32,8 +34,11 @@ import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -42,6 +47,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DetsToArmBatchProcessResponseFilesImplTest {
+    public static final String UPLOAD_RESPONSE_TIMESTAMP_FORAMT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]";
     @Mock
     private ArmDataManagementApi armDataManagementApi;
     @Mock
@@ -64,6 +70,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
     private CurrentTimeHelper timeHelper;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
 
     private DetsToArmBatchProcessResponseFilesImpl detsToArmBatchProcessResponseFilesImpl;
 
@@ -93,6 +101,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             timeHelper,
             externalObjectDirectoryService,
             logApi,
+            deleteArmResponseFilesHelper,
             configuration,
             osrRepository
         );
@@ -230,6 +239,38 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         // then
         verify(osrRepository).findByArmEodId("1");
         verify(osrRepository).save(objectStateRecordEntity);
+    }
+
+    @Test
+    void getInputUploadFileTimestamp_shouldReturnParsedOffsetDateTime() {
+        // given
+        String timestamp = "2023-06-10T14:08:28.316382+00:00";
+        ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
+        inputUploadFileRecord.setTimestamp(timestamp);
+
+        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+
+        // when
+        OffsetDateTime result = detsToArmBatchProcessResponseFilesImpl.getInputUploadFileTimestamp(inputUploadFileRecord);
+
+        // then
+        assertEquals(OffsetDateTime.parse(timestamp, formatter), result);
+    }
+
+    @Test
+    void getInputUploadFileTimestamp_shouldThrowIllegalArgumentException_whenTimestampIsInvalid() {
+        // given
+        String invalidTimestamp = "invalid-timestamp";
+        ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
+        inputUploadFileRecord.setTimestamp(invalidTimestamp);
+
+        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> {
+            detsToArmBatchProcessResponseFilesImpl.getInputUploadFileTimestamp(inputUploadFileRecord);
+        });
     }
 
     public ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {

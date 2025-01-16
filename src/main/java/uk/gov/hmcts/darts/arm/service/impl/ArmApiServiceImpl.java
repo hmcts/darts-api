@@ -13,9 +13,9 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
@@ -100,16 +100,19 @@ public class ArmApiServiceImpl implements ArmApiService {
         log.debug("Get ARM Bearer Token with Username: {}, Password: {}", armApiConfigurationProperties.getArmUsername(),
                   armApiConfigurationProperties.getArmPassword());
         String accessToken = null;
-        ArmTokenResponse armTokenResponse = armTokenClient.getToken(new ArmTokenRequest(
-            armApiConfigurationProperties.getArmUsername(),
-            armApiConfigurationProperties.getArmPassword(),
-            GrantType.PASSWORD.getValue()
-        ));
+
+        ArmTokenRequest armTokenRequest = ArmTokenRequest.builder()
+            .username(armApiConfigurationProperties.getArmUsername())
+            .password(armApiConfigurationProperties.getArmPassword())
+            .build();
+
+        ArmTokenResponse armTokenResponse = armTokenClient.getToken(armTokenRequest);
 
         if (StringUtils.isNotEmpty(armTokenResponse.getAccessToken())) {
             String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
             log.debug("Fetched ARM Bearer Token from /token: {}", bearerToken);
-            AvailableEntitlementProfile availableEntitlementProfile = armTokenClient.availableEntitlementProfiles(bearerToken);
+            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            AvailableEntitlementProfile availableEntitlementProfile = armTokenClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest);
             if (!availableEntitlementProfile.isError()) {
                 Optional<String> profileId = availableEntitlementProfile.getProfiles().stream()
                     .filter(p -> armApiConfigurationProperties.getArmServiceProfile().equalsIgnoreCase(p.getProfileName()))
@@ -117,7 +120,7 @@ public class ArmApiServiceImpl implements ArmApiService {
                     .findAny();
                 if (profileId.isPresent()) {
                     log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
-                    ArmTokenResponse tokenResponse = armTokenClient.selectEntitlementProfile(bearerToken, profileId.get());
+                    ArmTokenResponse tokenResponse = armTokenClient.selectEntitlementProfile(bearerToken, profileId.get(), emptyRpoRequest);
                     accessToken = tokenResponse.getAccessToken();
                 }
             }

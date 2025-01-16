@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
+import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
@@ -38,8 +39,6 @@ import java.util.Optional;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
-import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum.MANUAL_OVERRIDE;
-import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
 @Service
 @RequiredArgsConstructor
@@ -50,11 +49,12 @@ public class RetentionPostServiceImpl implements RetentionPostService {
 
     private final CaseRepository caseRepository;
     private final CaseRetentionRepository caseRetentionRepository;
-    private final AuthorisationApi authorisationApi;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
+    private final AuthorisationApi authorisationApi;
     private final CurrentTimeHelper currentTimeHelper;
     private final AuditApi auditApi;
     private final RetentionDateHelper retentionDateHelper;
+    private final RetentionService retentionService;
 
     @Override
     public PostRetentionResponse postRetention(Boolean validateOnly, PostRetentionRequest postRetentionRequest) {
@@ -78,8 +78,13 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         }
 
         if (BooleanUtils.isNotTrue(validateOnly)) {
-            createNewCaseRetention(postRetentionRequest, courtCase, newRetentionDate);
-            updateCourtCaseConfidenceAttributesForRetention(courtCase);
+            CaseRetentionEntity caseRetention = createNewCaseRetention(postRetentionRequest,
+                                                                       courtCase,
+                                                                       newRetentionDate,
+                                                                       authorisationApi.getCurrentUser(),
+                                                                       CaseRetentionStatus.COMPLETE,
+                                                                       RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE);
+            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCase, caseRetention.getConfidenceCategory());
         }
 
         PostRetentionResponse response = new PostRetentionResponse();
@@ -176,8 +181,12 @@ public class RetentionPostServiceImpl implements RetentionPostService {
     }
 
     @Override
-    public CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
-                                                      LocalDate newRetentionDate, UserAccountEntity userAccount, CaseRetentionStatus caseRetentionStatus) {
+    public CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest,
+                                                      CourtCaseEntity courtCase,
+                                                      LocalDate newRetentionDate,
+                                                      UserAccountEntity userAccount,
+                                                      CaseRetentionStatus caseRetentionStatus,
+                                                      RetentionConfidenceCategoryEnum retentionConfidenceCategory) {
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
         caseRetention.setLastModifiedBy(userAccount);
@@ -188,7 +197,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetention.setCurrentState(String.valueOf(caseRetentionStatus));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
         caseRetention.setRetentionPolicyType(getRetentionPolicy(postRetentionRequest.getIsPermanentRetention()));
-        caseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE);
+        caseRetention.setConfidenceCategory(retentionConfidenceCategory);
 
         caseRetentionRepository.saveAndFlush(caseRetention);
         auditApi.record(
@@ -197,13 +206,6 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             courtCase
         );
         return caseRetention;
-    }
-
-    private CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
-                                                       LocalDate newRetentionDate) {
-        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
-        return createNewCaseRetention(postRetentionRequest, courtCase,
-                                      newRetentionDate, currentUser, CaseRetentionStatus.COMPLETE);
     }
 
     private RetentionPolicyTypeEntity getRetentionPolicy(Boolean isPermanent) {
@@ -229,13 +231,6 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                                         MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", policyKey));
         }
         return retentionPolicyList.get(0);
-    }
-
-    private void updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase) {
-        courtCase.setRetConfScore(CASE_PERFECTLY_CLOSED);
-        courtCase.setRetConfReason(MANUAL_OVERRIDE);
-        courtCase.setRetConfUpdatedTs(currentTimeHelper.currentOffsetDateTime());
-        caseRepository.save(courtCase);
     }
 
 }

@@ -241,13 +241,13 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(1, mediaA1.getRetConfScore());
+        assertEquals(0, mediaA1.getRetConfScore());
         assertNull(mediaA1.getRetConfReason());
 
-        assertEquals(1, mediaA2.getRetConfScore());
+        assertEquals(0, mediaA2.getRetConfScore());
         assertNull(mediaA2.getRetConfReason());
 
-        assertEquals(1, mediaB1.getRetConfScore());
+        assertEquals(0, mediaB1.getRetConfScore());
         assertNull(mediaB1.getRetConfReason());
 
     }
@@ -292,13 +292,13 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(1, mediaA1.getRetConfScore());
+        assertEquals(0, mediaA1.getRetConfScore());
         assertNull(mediaA1.getRetConfReason());
 
-        assertEquals(1, mediaA2.getRetConfScore());
+        assertEquals(0, mediaA2.getRetConfScore());
         assertNull(mediaA2.getRetConfReason());
 
-        assertEquals(1, mediaB1.getRetConfScore());
+        assertEquals(0, mediaB1.getRetConfScore());
         assertNull(mediaB1.getRetConfReason());
 
     }
@@ -334,14 +334,14 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case3NotPerfectlyClosed.getId());
 
         // then
-        assertEquals(2, mediaA1.getRetConfScore());
+        assertEquals(1, mediaA1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, mediaA1.getRetConfReason());
 
-        assertEquals(2, mediaA2.getRetConfScore());
+        assertEquals(1, mediaA2.getRetConfScore());
         assertEquals(expectedResult, mediaA2.getRetConfReason());
 
-        assertEquals(2, mediaB1.getRetConfScore());
+        assertEquals(1, mediaB1.getRetConfScore());
         String expectedResult2 = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"},{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult2, mediaB1.getRetConfReason());
 
@@ -378,11 +378,11 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(1, mediaA1.getRetConfScore());
+        assertEquals(0, mediaA1.getRetConfScore());
 
-        assertEquals(1, mediaA2.getRetConfScore());
+        assertEquals(0, mediaA2.getRetConfScore());
 
-        assertEquals(2, mediaB1.getRetConfScore());
+        assertEquals(1, mediaB1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, mediaB1.getRetConfReason());
 
@@ -423,9 +423,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(1, annotationDocumentA1.getRetConfScore());
+        assertEquals(0, annotationDocumentA1.getRetConfScore());
 
-        assertEquals(2, annotationDocumentB1.getRetConfScore());
+        assertEquals(1, annotationDocumentB1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, annotationDocumentB1.getRetConfReason());
 
@@ -470,9 +470,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(1, transcriptionDocumentA1.getRetConfScore());
+        assertEquals(0, transcriptionDocumentA1.getRetConfScore());
 
-        assertEquals(2, transcriptionDocumentB1.getRetConfScore());
+        assertEquals(1, transcriptionDocumentB1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, transcriptionDocumentB1.getRetConfReason());
 
@@ -497,7 +497,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(1, caseDocument.getRetConfScore());
+        assertEquals(0, caseDocument.getRetConfScore());
         assertNull(caseDocument.getRetConfReason());
 
     }
@@ -524,7 +524,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case4NotPerfectlyClosed.getId());
 
         // then
-        assertEquals(2, caseDocument.getRetConfScore());
+        assertEquals(1, caseDocument.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, caseDocument.getRetConfReason());
 

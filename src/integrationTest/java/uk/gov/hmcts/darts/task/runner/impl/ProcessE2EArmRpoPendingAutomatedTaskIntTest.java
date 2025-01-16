@@ -7,6 +7,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
@@ -102,14 +103,13 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         var response = new RecordManagementMatterResponse();
         response.setIsError(true);
         response.setStatus(400);
-
-        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN)))
+        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN), any()))
             .thenReturn(response);
 
         // When
         task.preRunTask();
         task.runTask();
-        
+
         // Then
         List<ArmRpoExecutionDetailEntity> allExecutionDetails = dartsDatabase.getArmRpoExecutionDetailRepository()
             .findAll();
@@ -159,13 +159,12 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         var profileEntitlement = new ProfileEntitlementResponse.ProfileEntitlement();
         profileEntitlement.setName(ENTITLEMENT_NAME);
         profileEntitlement.setEntitlementId(ENTITLEMENT_ID);
-
         var response = new ProfileEntitlementResponse();
         response.setEntitlements(Collections.singletonList(profileEntitlement));
         response.setStatus(200);
         response.setIsError(false);
-
-        when(armRpoClient.getProfileEntitlementResponse(BEARER_TOKEN))
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armRpoClient.getProfileEntitlementResponse(BEARER_TOKEN, emptyRpoRequest))
             .thenReturn(response);
     }
 
@@ -208,8 +207,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         response.setIsError(false);
         response.setStatus(200);
 
-        when(armRpoClient.getRecordManagementMatter(BEARER_TOKEN))
-            .thenReturn(response);
+        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN), any())).thenReturn(response);
     }
 
 }

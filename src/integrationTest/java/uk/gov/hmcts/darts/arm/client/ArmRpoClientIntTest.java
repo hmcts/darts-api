@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
@@ -51,18 +53,17 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
 
     private static final String URL_PREFIX = "/api/v1/";
 
-
-    private static final String GET_RECORD_MANAGEMENT_MATTER_PATH = "/api/v1/getRecordManagementMatter";
-    private static final String GET_STORAGE_ACCOUNTS_PATH = "/api/v1/getStorageAccounts";
-
     @Autowired
     private ArmRpoClient armRpoClient;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private static Stream<Arguments> genericArmRpoClientTestArguments() {
         return Stream.of(
             Arguments.of("getRecordManagementMatter", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
-                return new ClientCallable(null, armRpoClient.getRecordManagementMatter(bearerAuth));
+                EmptyRpoRequest request = EmptyRpoRequest.builder().build();
+                return new ClientCallable(request, armRpoClient.getRecordManagementMatter(bearerAuth, request));
             }),
             Arguments.of("getStorageAccounts", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
                 StorageAccountRequest request = StorageAccountRequest.builder()
@@ -81,9 +82,10 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                 return new ClientCallable(request, armRpoClient.getMasterIndexFieldByRecordClassSchema(bearerAuth, request));
             }),
             Arguments.of("getProfileEntitlements", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
-                return new ClientCallable(null, armRpoClient.getProfileEntitlementResponse(bearerAuth));
+                EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+                return new ClientCallable(null, armRpoClient.getProfileEntitlementResponse(bearerAuth, emptyRpoRequest));
             }),
-            Arguments.of("addAsyncSearch", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+            Arguments.of("addAsyncSearchRM", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
                 String request = "{\"request\": \"body\"}";
                 return new ClientCallable(request, armRpoClient.addAsyncSearch(bearerAuth, request));
             }),
@@ -127,6 +129,8 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                     )
                     .productionName("some-production-name")
                     .storageAccountId("some-storage-account-id")
+                    .onlyForCurrentUser(Boolean.FALSE)
+                    .exportType(32)
                     .build();
                 return new ClientCallable(request, armRpoClient.createExportBasedOnSearchResultsTable(bearerAuth, request));
             }),
@@ -202,5 +206,31 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
             assertEquals(TestUtils.getContentsFromFile(EXPECTED_RESPONSE_DIRECTORY + suffix + ".csv"),
                          IOUtils.toString(response.body().asInputStream()));
         }
+    }
+
+
+    @Test
+    void getRecordManagementMatter_ShouldSucceedIfServerReturns200Success_WithEmptyRequest() throws Exception {
+        // Given
+        var bearerAuth = "Bearer some-token";
+        EmptyRpoRequest request = EmptyRpoRequest.builder().build();
+
+        stubFor(
+            WireMock.post(urlEqualTo("/api/v1/getRecordManagementMatter"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-type", "application/json")
+                        .withBody(TestUtils.getContentsFromFile(MOCK_RESPONSE_DIRECTORY + "getRecordManagementMatter.json"))
+                        .withStatus(200)));
+        
+        // When
+        armRpoClient.getRecordManagementMatter(bearerAuth, request);
+
+        // Then
+        verify(postRequestedFor(urlEqualTo("/api/v1/getRecordManagementMatter"))
+                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+                   .withRequestBody(equalTo("{}"))
+                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+        );
     }
 }

@@ -13,10 +13,10 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRetentionEventDateProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -108,8 +108,10 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                                                                                 armRetentionEventDateCalculator);
 
         String bearerToken = "bearer";
-        ArmTokenRequest tokenRequest = new ArmTokenRequest(
-            armApiConfigurationProperties.getArmUsername(), armApiConfigurationProperties.getArmPassword(), GrantType.PASSWORD.getValue());
+        ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
+            .username(armApiConfigurationProperties.getArmUsername())
+            .password(armApiConfigurationProperties.getArmPassword())
+            .build();
         ArmTokenResponse tokenResponse = ArmTokenResponse.builder().accessToken(bearerToken).build();
         String armProfileId = "profileId";
 
@@ -119,9 +121,9 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             = AvailableEntitlementProfile.Profiles.builder().profileId(armProfileId).profileName(armApiConfigurationProperties.getArmServiceProfile()).build();
         AvailableEntitlementProfile profile = Mockito.mock(AvailableEntitlementProfile.class);
         when(profile.getProfiles()).thenReturn(List.of(profiles));
-
-        when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken)).thenReturn(profile);
-        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId)).thenReturn(tokenResponse);
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
+        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
 
     }
 

@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -26,6 +27,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -40,8 +42,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     private static final List<String> TAGS_TO_IGNORE = List.of("annotation_id", "uploaded_ts", "hearing_id", "annotation_document_id");
 
     CustomComparator jsonComparator = new CustomComparator(
-        JSONCompareMode.NON_EXTENSIBLE,
-        new Customization("[*].annotation_id", (o1, o2) -> true),
+        JSONCompareMode.STRICT,
         new Customization("[*].annotation_documents[*].uploaded_ts", (o1, o2) -> true),
         new Customization("[*].hearing_id", (o1, o2) -> true),
         new Customization("[*].annotation_documents.annotation_document_id", (o1, o2) -> true)
@@ -236,7 +237,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, """
             [
-
+            
             ]
             """);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -260,7 +261,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(judgeUser, "annotationText1");
         annotation.addHearing(hearingEntity);
         dartsDatabase.save(annotation);
-        dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
+        AnnotationDocumentEntity annotationDocumentEntity1 = dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
             annotation,
             "filename1",
             "fileType1",
@@ -284,7 +285,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
         AnnotationEntity annotation2 = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(anotherJudgeUser, "annotationText1");
         annotation2.addHearing(hearingEntity);
         dartsDatabase.save(annotation2);
-        dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
+        AnnotationDocumentEntity annotationDocumentEntity2 = dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
             annotation2,
             "filename1",
             "fileType1",
@@ -308,44 +309,48 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, """
-            [
-              {
-                "annotation_id": 1,
-                "hearing_id": 1,
-                "hearing_date": "2023-01-01",
-                "annotation_text": "annotationText1",
-                "annotation_documents": [
+                [
                   {
-                    "annotation_document_id": 1,
-                    "file_name": "filename1",
-                    "file_type": "fileType1",
-                    "uploaded_by": "JudgedefaultFullName",
-                    "uploaded_ts": "2024-01-31T16:54:14.456498Z"
+                    "annotation_id": 2,
+                    "hearing_id": 1,
+                    "hearing_date": "2023-01-01",
+                    "annotation_text": "annotationText1",
+                    "annotation_documents": [
+                      {
+                        "annotation_document_id": 2,
+                        "file_name": "filename1",
+                        "file_type": "fileType1",
+                        "uploaded_by": "Judge2FullName",
+                        "uploaded_ts": "<<uploaded_ts_doc_2>>"
+                      }
+                    ]
+                  },
+                  {
+                    "annotation_id": 1,
+                    "hearing_id": 1,
+                    "hearing_date": "2023-01-01",
+                    "annotation_text": "annotationText1",
+                    "annotation_documents": [
+                      {
+                        "annotation_document_id": 1,
+                        "file_name": "filename1",
+                        "file_type": "fileType1",
+                        "uploaded_by": "JudgedefaultFullName",
+                        "uploaded_ts": "<<uploaded_ts_doc_1>>"
+                      }
+                    ]
                   }
                 ]
-              },
-              {
-                "annotation_id": 2,
-                "hearing_id": 1,
-                "hearing_date": "2023-01-01",
-                "annotation_text": "annotationText1",
-                "annotation_documents": [
-                  {
-                    "annotation_document_id": 2,
-                    "file_name": "filename1",
-                    "file_type": "fileType1",
-                    "uploaded_by": "Judge2FullName",
-                    "uploaded_ts": "2024-01-31T16:54:14.464236Z"
-                  }
-                ]
-              }
-            ]
-            """);
+                """)
+            .replace("<<uploaded_ts_doc_1>>", annotationDocumentEntity1.getUploadedDateTime().toString())
+            .replace("<<uploaded_ts_doc_2>>", annotationDocumentEntity2.getUploadedDateTime().toString());
+
+        assertThat(annotationDocumentEntity2.getUploadedDateTime()).isAfter(annotationDocumentEntity1.getUploadedDateTime());
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
 
-        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test

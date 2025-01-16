@@ -22,11 +22,11 @@ import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
-import uk.gov.hmcts.darts.audio.model.PostAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
@@ -192,7 +192,7 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<List<PostAdminMediasMarkedForDeletionItem>> adminMediasMarkedForDeletionGet() {
+    public ResponseEntity<List<GetAdminMediasMarkedForDeletionItem>> adminMediasMarkedForDeletionGet() {
         return new ResponseEntity<>(adminMediaService.getMediasMarkedForDeletion(), HttpStatus.OK);
     }
 
