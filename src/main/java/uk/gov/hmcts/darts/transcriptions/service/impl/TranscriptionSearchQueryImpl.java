@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -43,6 +44,11 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
             request.getRequestedBy(),
             transcriptionStatusEntity.orElse(null)
         );
+        System.out.println("TMP: " + nonLegacyTranscriptions);
+        nonLegacyTranscriptions.forEach(transcriptionSearchResult -> {
+           TranscriptionEntity entity = transcriptionRepository.findById(transcriptionSearchResult.id()).get();
+            System.out.println("TMP: " + entity.getId() + " " + entity.getCreatedById());
+        });
 
         var legacyTranscriptions = transcriptionRepository.searchMigratedTranscriptionsFilteringOn(
             transcriptionIds,

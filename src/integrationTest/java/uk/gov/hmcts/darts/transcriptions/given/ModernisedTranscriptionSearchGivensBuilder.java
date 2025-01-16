@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -77,10 +78,10 @@ public class ModernisedTranscriptionSearchGivensBuilder extends TranscriptionSea
     public TranscriptionEntity createTranscription() {
         var hearing = dartsDatabase.save(PersistableFactory.getHearingTestData().someMinimalHearing());
         var transcription = PersistableFactory.getTranscriptionTestData().someTranscriptionForHearing(hearing);
-        //Save created by user and reset them on the transcription (Ensures the user is saved in the database)
-        UserAccountEntity user = dartsDatabase.save(transcription.getCreatedBy());
-        transcription.setCreatedBy(user);
-        transcription.setLastModifiedBy(user);
+
+        UserAccountEntity userAccount = dartsDatabase.save(UserAccountTestData.minimalUserAccount());
+        transcription.setCreatedBy(userAccount);
+        transcription.setLastModifiedBy(userAccount);
         return dartsDatabase.save(transcription);
     }
 

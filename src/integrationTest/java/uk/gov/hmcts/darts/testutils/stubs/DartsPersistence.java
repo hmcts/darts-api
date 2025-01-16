@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -854,6 +855,11 @@ public class DartsPersistence {
 
     public UserAccountEntity refresh(UserAccountEntity judge) {
         return refresh(judge, userAccountRepository);
+    }
+
+
+    public CaseRetentionEntity refresh(CaseRetentionEntity caseRetentionEntity) {
+        return refresh(caseRetentionEntity, caseRetentionRepository);
     }
 
     public <T extends HasIntegerId> T refresh(T entity, JpaRepository<T, Integer> repository) {
