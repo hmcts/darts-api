@@ -908,6 +908,11 @@ public class DartsDatabaseStub {
     @Transactional
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
         dartsDatabaseSaveStub.save(securityGroup);
+        if (userAccount.getSecurityGroupEntities().stream().anyMatch(securityGroupEntity -> {
+            return securityGroup.getId().equals(securityGroupEntity.getId());
+        })) {
+            return;
+        }
         userAccount.getSecurityGroupEntities().add(securityGroup);
         dartsDatabaseSaveStub.save(userAccount);
     }
@@ -927,8 +932,7 @@ public class DartsDatabaseStub {
     @Transactional
     public EventHandlerEntity createEventHandlerData(String subtype) {
         var eventHandler = createEventHandlerWith("DarStartHandler", "99999", subtype);
-        saveWithTransientEntities(eventHandler);
-        return eventHandler;
+        return save(eventHandler);
     }
 
     @Transactional

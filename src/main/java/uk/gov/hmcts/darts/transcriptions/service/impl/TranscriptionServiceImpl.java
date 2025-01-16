@@ -328,6 +328,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
+    @Override
     public TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
                                                                  TranscriptionEntity transcription,
                                                                  TranscriptionStatusEntity transcriptionStatus,

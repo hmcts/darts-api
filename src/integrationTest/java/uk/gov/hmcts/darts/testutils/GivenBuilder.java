@@ -34,12 +34,12 @@ public class GivenBuilder {
 
         var user = minimalUserAccount();
         user.setEmailAddress(userEmail);
-        dartsDatabase.save(user);
-        anAuthenticatedUserFor(user);
+        user = dartsDatabase.save(user);
 
         dartsDatabase.addUserToGroup(user, securityGroup);
+        anAuthenticatedUserFor(user);
 
-        return user;
+        return dartsDatabase.getDartsPersistence().refresh(user);
     }
 
     public UserAccountEntity anAuthenticatedUserAuthorizedForCourthouse(SecurityRoleEnum role, CourthouseEntity courthouse) {
@@ -49,12 +49,11 @@ public class GivenBuilder {
 
         var judge = minimalUserAccount();
         judge.setEmailAddress(userEmail);
-        dartsDatabase.save(judge);
-        anAuthenticatedUserFor(judge);
-
+        judge = dartsDatabase.save(judge);
         dartsDatabase.addUserToGroup(judge, securityGroup);
 
-        return judge;
+        anAuthenticatedUserFor(judge);
+        return dartsDatabase.getDartsPersistence().refresh(judge);
     }
 
     public static void anAuthenticatedUserFor(String email, UserAccountRepository userAccountRepository) {

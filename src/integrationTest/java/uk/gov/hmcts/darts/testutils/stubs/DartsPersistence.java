@@ -849,7 +849,11 @@ public class DartsPersistence {
 
 
     public HearingEntity refresh(HearingEntity entity) {
-       return refresh(entity, hearingRepository);
+        return refresh(entity, hearingRepository);
+    }
+
+    public UserAccountEntity refresh(UserAccountEntity judge) {
+        return refresh(judge, userAccountRepository);
     }
 
     public <T extends HasIntegerId> T refresh(T entity, JpaRepository<T, Integer> repository) {

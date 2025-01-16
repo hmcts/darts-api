@@ -39,6 +39,7 @@ public class BlobClientUploadResponseImpl implements BlobClientUploadResponse {
      * @param additionalMetadata Metadata to add to the blob
      * @return A map containing all metadata applied to the blob.
      */
+    @Override
     public Map<String, String> addMetadata(Map<String, String> additionalMetadata) {
         var metadata = new HashMap<>(blobClient.getProperties().getMetadata());
         metadata.putAll(additionalMetadata);

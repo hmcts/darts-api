@@ -82,6 +82,11 @@ public class DartsDatabaseSaveStub {
     }
 
     public void updateLastModifiedBy(LastModifiedBy lastModifiedBy) {
+        //No need to update values if the entity is a proxy and is not initialized
+        if (lastModifiedBy instanceof HibernateProxy proxy
+            && proxy.getHibernateLazyInitializer().isUninitialized()) {
+            return;
+        }
         if (lastModifiedBy.getLastModifiedBy() == null) {
             lastModifiedBy.setLastModifiedBy(userAccountRepository.getReferenceById(0));
             lastModifiedBy.setLastModifiedDateTime(OffsetDateTime.now());
