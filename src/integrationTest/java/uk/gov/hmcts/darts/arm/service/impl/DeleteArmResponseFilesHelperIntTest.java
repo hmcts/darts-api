@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -39,10 +39,10 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
-    @MockBean
+    @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired
