@@ -245,6 +245,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                         if (externalObjectDirectoryEntity.getInputUploadProcessedTs() != null
                             && externalObjectDirectoryEntity.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
                             markEodAsResponseProcessingFailed(externalObjectDirectoryEntity, userAccount);
+                        } else {
+                            updateExternalObjectDirectoryStatus(externalObjectDirectoryEntity, EodHelper.armDropZoneStatus(), userAccount);
                         }
                     }
                 );
