@@ -9,7 +9,6 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.SecurityRoleTestData.createSecurityRoleFor;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public class SecurityGroupTestData {
 
@@ -18,6 +17,10 @@ public class SecurityGroupTestData {
     }
 
     public static SecurityGroupEntity minimalSecurityGroup(UserAccountEntity userAccountEntity) {
+        return minimalSecurityGroup(userAccountEntity.getId());
+    }
+
+    public static SecurityGroupEntity minimalSecurityGroup(Integer userAccountEntityId) {
         var postfix = random(10, false, true);
         var securityGroup = new SecurityGroupEntity();
         securityGroup.setGroupName("some-group-name-" + postfix);
@@ -26,15 +29,15 @@ public class SecurityGroupTestData {
         securityGroup.setUseInterpreter(false);
         securityGroup.setDisplayName("Some Group Name " + postfix);
         securityGroup.setDescription("a-test-security-group");
-        securityGroup.setCreatedBy(userAccountEntity);
-        securityGroup.setLastModifiedById(0);
+        securityGroup.setCreatedById(userAccountEntityId);
+        securityGroup.setLastModifiedById(userAccountEntityId);
         return securityGroup;
     }
 
     // Use with caution, when persisted it will overwrite values for subsequent tests
     @Deprecated
     public static SecurityGroupEntity createGroupForRole(SecurityRoleEnum role) {
-        var securityGroupEntity = minimalSecurityGroup(minimalUserAccount());
+        var securityGroupEntity = minimalSecurityGroup(0);
         securityGroupEntity.setSecurityRoleEntity(createSecurityRoleFor(role));
         return securityGroupEntity;
     }

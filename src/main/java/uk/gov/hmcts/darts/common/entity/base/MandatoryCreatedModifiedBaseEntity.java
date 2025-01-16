@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.common.entity.base;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -28,12 +27,12 @@ public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEnti
     private OffsetDateTime lastModifiedDateTime;
 
     @NotAudited
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modified_by", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
     private UserAccountEntity lastModifiedBy;
 
-    @Column(name = "last_modified_by")
+    @Column(name = "last_modified_by", nullable = false)
     private Integer lastModifiedById;
 
     @Override

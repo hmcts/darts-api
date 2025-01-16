@@ -72,8 +72,8 @@ public class UserAccountStubComposable {
         newUser.setActive(true);
         newUser.setIsSystemUser(true);
         newUser.setUserFullName(username);
-        newUser.setCreatedBy(newUser);
-        newUser.setLastModifiedBy(newUser);
+        newUser.setCreatedById(0);
+        newUser.setLastModifiedById(0);
         newUser.setCreatedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         newUser.setLastModifiedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         return userAccountRepository.saveAndFlush(newUser);

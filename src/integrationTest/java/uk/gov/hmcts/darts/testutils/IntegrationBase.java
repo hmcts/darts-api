@@ -16,6 +16,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 import uk.gov.hmcts.darts.task.runner.AutomatedOnDemandTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.darts.test.common.AwaitabilityUtil;
 import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
@@ -133,13 +135,18 @@ public class IntegrationBase {
     }
 
     protected void givenBearerTokenExists(String email) {
+        Optional<UserAccountEntity> userAccount = dartsDatabase.getUserAccountRepository().findFirstByEmailAddressIgnoreCase(email);
+        if (userAccount.isEmpty()) {
+            UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
+            dartsDatabase.getUserAccountRepository().save(userAccountEntity);
+            userAccount = Optional.of(userAccountEntity);
+        }
         DartsJwt jwt = new DartsJwt(
             Jwt.withTokenValue("test")
                 .header("alg", "RS256")
                 .claim("emails", List.of(email))
                 .build(),
-            dartsDatabase.getUserAccountRepository().findFirstByEmailAddressIgnoreCase(email)
-                .orElseThrow().getId());
+            userAccount.get().getId());
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 

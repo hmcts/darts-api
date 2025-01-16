@@ -95,6 +95,7 @@ public class DartsDatabaseSaveStub {
             updateCreatedByLastModifiedBy(userAccount);
             lastModifiedBy.setLastModifiedBy(userAccountRepository.save(userAccount));
         } else {
+            lastModifiedBy.setLastModifiedBy(lastModifiedBy.getLastModifiedBy());//Ensures lastModifiedById is set
             userAccountRepository.save(lastModifiedBy.getLastModifiedBy());
         }
         if (lastModifiedBy.getLastModifiedDateTime() == null) {
