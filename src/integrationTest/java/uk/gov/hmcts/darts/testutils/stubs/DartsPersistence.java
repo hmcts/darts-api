@@ -451,8 +451,12 @@ public class DartsPersistence {
                 transcription.setCourtCases(listOfCases);
             }
 
-            transcription.setCreatedBy(save(transcription.getCreatedBy()));
-            transcription.setLastModifiedBy(save(transcription.getLastModifiedBy()));
+            if (transcription.getCreatedBy() != null) {
+                transcription.setCreatedBy(save(transcription.getCreatedBy()));
+            }
+            if (transcription.getLastModifiedBy() != null) {
+                transcription.setLastModifiedBy(save(transcription.getLastModifiedBy()));
+            }
             transcription = transcriptionRepository.save(transcription);
 
         } else {
