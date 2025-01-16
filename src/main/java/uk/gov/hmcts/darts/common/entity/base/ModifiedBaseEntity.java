@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -52,5 +53,6 @@ public class ModifiedBaseEntity implements LastModifiedBy {
     }
 
     @Transient
-    private transient boolean skipUserAudit = true;
+    @JsonIgnore
+    private transient boolean skipUserAudit = false;
 }

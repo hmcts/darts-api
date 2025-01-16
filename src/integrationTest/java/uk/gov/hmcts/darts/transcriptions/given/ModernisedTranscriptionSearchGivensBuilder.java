@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.given;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.LocalDate;
@@ -76,7 +77,10 @@ public class ModernisedTranscriptionSearchGivensBuilder extends TranscriptionSea
     public TranscriptionEntity createTranscription() {
         var hearing = dartsDatabase.save(PersistableFactory.getHearingTestData().someMinimalHearing());
         var transcription = PersistableFactory.getTranscriptionTestData().someTranscriptionForHearing(hearing);
-        dartsDatabase.save(transcription.getCreatedBy());
+        //Save created by user and reset them on the transcription (Ensures the user is saved in the database)
+        UserAccountEntity user = dartsDatabase.save(transcription.getCreatedBy());
+        transcription.setCreatedBy(user);
+        transcription.setLastModifiedBy(user);
         return dartsDatabase.save(transcription);
     }
 

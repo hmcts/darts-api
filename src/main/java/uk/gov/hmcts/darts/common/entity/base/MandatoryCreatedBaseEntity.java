@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -48,6 +49,7 @@ public class MandatoryCreatedBaseEntity implements CreatedBy {
     }
 
     @Transient
-    protected transient boolean skipUserAudit = true;
+    @JsonIgnore
+    protected transient boolean skipUserAudit = false;
 
 }

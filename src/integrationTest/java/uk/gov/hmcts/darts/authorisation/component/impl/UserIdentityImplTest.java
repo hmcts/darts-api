@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -183,8 +184,9 @@ class UserIdentityImplTest extends IntegrationBase {
 
         doReturn(dartsJwt).when(userIdentity).getJwt();
 
-        assertThat(userIdentity.getUserIdFromJwt()).isPresent();
-        assertThat(userIdentity.getUserIdFromJwt().get()).isEqualTo(123);
+        Optional<Integer> userId = userIdentity.getUserIdFromJwt();
+        assertThat(userId).isPresent();
+        assertThat(userId.get()).isEqualTo(123);
 
         verify(userIdentity).getUserIdFromJwt();
     }
