@@ -23,6 +23,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTI
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MISSING_RESPONSE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PULL_POD_RECYCLED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PUSH_POD_RECYCLED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
@@ -79,6 +81,10 @@ public class EodHelper {
     private static ObjectRecordStatusEntity armRpoPendingStatus;
     @Getter
     private static ObjectRecordStatusEntity awaitingVerificationStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armPushPodRecycledStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armPullPodRecycledStatus;
 
     @Getter
     private static List<ObjectRecordStatusEntity> failedArmStatuses;
@@ -111,6 +117,8 @@ public class EodHelper {
         armRpoPendingStatus = orsRepository.findById(ARM_RPO_PENDING.getId()).orElseThrow();
         armReplayStatus = orsRepository.findById(ARM_REPLAY.getId()).orElseThrow();
         armMissingResponseStatus = orsRepository.findById(ARM_MISSING_RESPONSE.getId()).orElseThrow();
+        armPushPodRecycledStatus = orsRepository.findById(ARM_PUSH_POD_RECYCLED.getId()).orElseThrow();
+        armPullPodRecycledStatus = orsRepository.findById(ARM_PULL_POD_RECYCLED.getId()).orElseThrow();
 
         failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, armResponseManifestFailedStatus);
 

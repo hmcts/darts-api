@@ -53,6 +53,7 @@ public class Application implements CommandLineRunner, DisposableBean {
 
     @PreDestroy
     public void destroy() {
+        // The logger doesn't work in the preDestroy method
         System.out.println("Application callback triggered - @PreDestroy called.");
     }
 }
