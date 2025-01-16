@@ -33,7 +33,9 @@ public enum ObjectRecordStatusEnum {
     FAILURE_EMPTY_FILE(20),
     ARM_RPO_PENDING(21),
     ARM_REPLAY(22),
-    ARM_MISSING_RESPONSE(23);
+    ARM_MISSING_RESPONSE(23),
+    ARM_PUSH_POD_RECYCLED(24),
+    ARM_PULL_POD_RECYCLED(25);
 
     private static final Map<Integer, ObjectRecordStatusEnum> BY_ID = new ConcurrentHashMap<>();
 

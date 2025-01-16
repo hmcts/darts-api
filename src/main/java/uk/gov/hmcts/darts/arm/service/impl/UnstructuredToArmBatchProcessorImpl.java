@@ -27,6 +27,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
@@ -46,12 +47,14 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
 
     private List<Integer> eodsForTransfer;
+    private UserAccountEntity userAccount;
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
     public void processUnstructuredToArm(int taskBatchSize) {
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
+        userAccount = userIdentity.getUserAccount();
 
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
@@ -65,7 +68,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
             List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer, unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
             AtomicInteger batchCounter = new AtomicInteger(1);
-            UserAccountEntity userAccount = userIdentity.getUserAccount();
+
             List<Callable<Void>> tasks = batchesForArm
                 .stream()
                 .map(eodsForBatch -> (Callable<Void>) () -> {
@@ -210,11 +213,17 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         System.out.println("UnstructuredToArmBatchProcessorImpl shutting down.");
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
             System.out.println("Reverting EODs to failed status for potentially EODs " + eodsForTransfer.size());
+            String eodsIds = eodsForTransfer
+                .stream()
+                .map(eodId -> String.valueOf(eodId))
+                .collect(Collectors.joining(","));
+            System.out.println("EODs  " + eodsIds + " will be reverted to pod recycled status");
+
             unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
                                                            EodHelper.armIngestionStatus(),
-                                                           EodHelper.failedArmRawDataStatus(),
-                                                           userIdentity.getUserAccount());
-            eodsForTransfer.forEach(eodId -> System.out.println("EOD ID: " + eodId + " has been reverted to failed status"));
+                                                           EodHelper.armPushPodRecycledStatus(),
+                                                           userAccount);
+            eodsForTransfer.forEach(eodId -> System.out.println("EOD ID: " + eodId + " has been reverted to pod recycled status"));
         } else {
             System.out.println("No EODs to revert to failed status");
         }
