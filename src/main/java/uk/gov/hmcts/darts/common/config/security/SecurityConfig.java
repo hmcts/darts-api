@@ -130,7 +130,9 @@ public class SecurityConfig {
             .jwsAlgorithm(SignatureAlgorithm.RS256)
             .build();
 
-        //TODO justify this
+        //Use a custom JWT decoder so that we can add the user id to the JWT without modifiying the underlying JWT
+        //This is required for user auditing, as the audit event will need to know the user id but can not call the database to retrieve it
+        //As such by wrapping the JWT we can persist the loged in user id without changing the root authentication
         var dartsJwtDecoder = new JwtDecoder() {
             @Override
             public Jwt decode(String token) {
