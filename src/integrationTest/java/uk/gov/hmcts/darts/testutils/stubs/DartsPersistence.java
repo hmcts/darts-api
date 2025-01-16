@@ -39,6 +39,8 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
+import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -451,12 +453,8 @@ public class DartsPersistence {
                 transcription.setCourtCases(listOfCases);
             }
 
-            if (transcription.getCreatedBy() != null) {
-                transcription.setCreatedBy(save(transcription.getCreatedBy()));
-            }
-            if (transcription.getLastModifiedBy() != null) {
-                transcription.setLastModifiedBy(save(transcription.getLastModifiedBy()));
-            }
+            saveCreatedBy(transcription);
+            saveLastModifiedBy(transcription);
             transcription = transcriptionRepository.save(transcription);
 
         } else {
@@ -871,5 +869,17 @@ public class DartsPersistence {
             return entity;
         }
         return repository.findById(entity.getId()).orElseThrow();
+    }
+
+    private void saveLastModifiedBy(LastModifiedBy lastModifiedBy) {
+        if (lastModifiedBy.getLastModifiedBy() != null) {
+            lastModifiedBy.setLastModifiedBy(save(lastModifiedBy.getLastModifiedBy()));
+        }
+    }
+
+    private void saveCreatedBy(CreatedBy createdBy) {
+        if (createdBy.getCreatedBy() != null) {
+            createdBy.setCreatedBy(save(createdBy.getCreatedBy()));
+        }
     }
 }
