@@ -359,7 +359,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
     @Test
     void findAllWithIdMatchingOneOf_shouldReturn() {
         CourtCaseEntity case1 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
-        CourtCaseEntity case2 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
+        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
         CourtCaseEntity case3 = dartsDatabase.createCase(SOME_COURTHOUSE, "SOME_CASE_NUMBER_3");
 
         List<CourtCaseEntity> returnedCourtCases = caseRepository.findAllWithIdMatchingOneOf(List.of(
