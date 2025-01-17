@@ -710,9 +710,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                       armRpoExecutionDetailEntity, userAccount);
             }
         } catch (IllegalArgumentException e) {
-            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response status is invalid - ")
-                                                      .append(baseRpoResponse).toString(),
-                                                  armRpoExecutionDetailEntity, userAccount);
+            log.error(errorMessage.append("ARM RPO API response status is invalid - ").append(baseRpoResponse).toString(), e);
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
     }
 
