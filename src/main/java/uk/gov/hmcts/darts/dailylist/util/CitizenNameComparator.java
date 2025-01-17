@@ -13,6 +13,7 @@ public class CitizenNameComparator implements Comparator<CitizenName> {
 
     private final CitizenNameMapper mapper;
 
+    @Override
     public int compare(CitizenName o1, CitizenName o2) {
 
         // for now just use a string comparator to determine equality

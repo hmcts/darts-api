@@ -106,7 +106,7 @@ abstract class TranscriptionSearchGivensBuilder {
         var transcriptions = persistedTranscriptions(quantity);
         range(0, quantity).forEach(i -> {
             var transcription = transcriptions.get(i);
-            var requester = transcription.getCreatedBy();
+            var requester = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
             requester.setUserFullName(requesterNames[i]);
             dartsDatabase.save(requester);
         });

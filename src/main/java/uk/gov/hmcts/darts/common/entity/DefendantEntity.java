@@ -42,7 +42,7 @@ public class DefendantEntity extends CreatedModifiedBaseEntity
     @Column(name = DEFENDANT_NAME)
     private String name;
 
-
+    @Override
     public void setName(String name) {
         this.name = DataUtil.trim(name);
     }

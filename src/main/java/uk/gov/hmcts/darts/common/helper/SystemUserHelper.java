@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
-import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -27,13 +27,13 @@ public class SystemUserHelper {
     private final AutomatedTaskConfigurationProperties properties;
 
     public UserAccountEntity getSystemUser() {
-        List<UserAccountEntity> userList = userAccountRepository.findByEmailAddressIgnoreCase(properties.getSystemUserEmail());
+        Optional<UserAccountEntity> userAccount = userAccountRepository.findFirstByEmailAddressIgnoreCase(properties.getSystemUserEmail());
 
-        if (userList.isEmpty()) {
+        if (userAccount.isEmpty()) {
             throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);
         }
 
-        return userList.getFirst();
+        return userAccount.get();
     }
 
     public UserAccountEntity getReferenceTo(SystemUsersEnum systemUserEnum) {

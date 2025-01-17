@@ -70,7 +70,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
     @SneakyThrows
     @Test
     void batchProcessResponseFiles_WithMediaReturnsSuccess_UpdateObjectStateRecords() {
-
         // given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 

@@ -124,7 +124,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
     @BeforeEach
     void commonSetup() {
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         lenient().when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(10);

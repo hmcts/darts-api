@@ -175,6 +175,33 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
+    void adminCaseSearch_multipleReturned_shouldBeOrderedByCaseId() throws Exception {
+
+        String requestBody = """
+            {
+              "courthouse_ids": [
+                <<courthouseId>>
+              ],
+              "case_number": "Case",
+              "courtroom_name": "COURTROOM1",
+              "hearing_start_at": "2020-06-18",
+              "hearing_end_at": "2024-06-18"
+            }""";
+
+        requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminSearchTest/testOk/expectedResponseMultiple.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
     void testOkIsAnonymised() throws Exception {
         CourtCaseEntity caseEntity = dartsDatabase.getCaseRepository()
             .findByCaseNumberAndCourthouse_CourthouseName("Case1", "SWANSEA").orElseThrow();

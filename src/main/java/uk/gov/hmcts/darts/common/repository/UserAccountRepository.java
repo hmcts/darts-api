@@ -20,7 +20,7 @@ public interface UserAccountRepository extends
     JpaRepository<UserAccountEntity, Integer>,
     JpaSpecificationExecutor<UserAccountEntity> {
 
-    List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
+    Optional<UserAccountEntity> findFirstByEmailAddressIgnoreCase(String emailAddress);
 
     List<UserAccountEntity> findByIdGreaterThanEqual(Integer value);
 

@@ -355,4 +355,18 @@ class CaseRepositoryIntTest extends IntegrationBase {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(foundCourtCase1.getId());
     }
+
+    @Test
+    void findAllWithIdMatchingOneOf_shouldReturn() {
+        CourtCaseEntity case1 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
+        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
+        CourtCaseEntity case3 = dartsDatabase.createCase(SOME_COURTHOUSE, "SOME_CASE_NUMBER_3");
+
+        List<CourtCaseEntity> returnedCourtCases = caseRepository.findAllWithIdMatchingOneOf(List.of(
+            case1.getId(), case3.getId()
+        ));
+        assertThat(returnedCourtCases).hasSize(2);
+        assertThat(returnedCourtCases.get(0).getId()).isEqualTo(case3.getId());
+        assertThat(returnedCourtCases.get(1).getId()).isEqualTo(case1.getId());
+    }
 }

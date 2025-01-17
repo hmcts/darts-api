@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.util.EmailAddressFromTokenUtil;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,6 +43,7 @@ public class UserIdentityImpl implements UserIdentity {
         return null;
     }
 
+    @Override
     public UserAccountEntity getUserAccount() {
         return getUserAccount(getJwt());
     }
@@ -62,13 +65,12 @@ public class UserIdentityImpl implements UserIdentity {
         return userAccount;
     }
 
-    private Jwt getJwt() {
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
-                return jwt;
-            }
+    @Override
+    public Jwt getJwt() {
+        if (SecurityContextHolder.getContext().getAuthentication() != null
+            && SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
+            return jwt;
         }
-
         return null;
     }
 
@@ -108,5 +110,13 @@ public class UserIdentityImpl implements UserIdentity {
     public List<Integer> getListOfCourthouseIdsUserHasAccessTo() {
         UserAccountEntity userAccount = getUserAccount();
         return userRolesCourthousesRepository.findAllCourthouseIdsByUserAccount(userAccount);
+    }
+
+    @Override
+    public Optional<Integer> getUserIdFromJwt() {
+        if (getJwt() instanceof DartsJwt dartsJwt) {
+            return Optional.ofNullable(dartsJwt.getUserId());
+        }
+        return Optional.empty();
     }
 }

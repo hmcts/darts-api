@@ -28,6 +28,7 @@ public class CourthouseUpdateMapperImpl implements CourthouseUpdateMapper {
     private final SecurityGroupRepository securityGroupRepository;
 
     @Transactional
+    @Override
     public CourthouseEntity mapPatchToEntity(CourthousePatch courthousePatch, CourthouseEntity courthouseEntity) {
         if (nonNull(courthousePatch.getCourthouseName())) {
             courthouseEntity.setCourthouseName(courthousePatch.getCourthouseName());
@@ -49,6 +50,7 @@ public class CourthouseUpdateMapperImpl implements CourthouseUpdateMapper {
         return courthouseEntity;
     }
 
+    @Override
     public AdminCourthouse mapEntityToAdminCourthouse(CourthouseEntity patchedCourthouse) {
         var adminCourthouse = new AdminCourthouse();
 

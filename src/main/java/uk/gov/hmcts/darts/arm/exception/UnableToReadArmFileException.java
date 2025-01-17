@@ -12,5 +12,6 @@ public class UnableToReadArmFileException extends Exception {
     }
 
     public UnableToReadArmFileException() {
+        super();
     }
 }

@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.testutils.stubs.SuperUserStub;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
@@ -73,7 +74,13 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
 
-        List<CaseRetentionEntity> caseRetentionEntityList = dartsDatabase.createCaseRetention(courtCase);
+        List<CaseRetentionEntity> caseRetentionEntityList = dartsDatabase.createCaseRetention(courtCase)
+            .stream()
+            .map(caseRetentionEntity -> {
+                //Refresh to get latest db values
+                return dartsDatabase.getDartsPersistence().refresh(caseRetentionEntity);
+            })
+            .toList();
 
         assertThat(caseRetentionEntityList).hasSize(3);
         assertThat(caseRetentionEntityList.get(2).getLastModifiedDateTime()).isAfter(caseRetentionEntityList.get(1).getLastModifiedDateTime());
@@ -83,21 +90,24 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_last_changed_date",
-                                                      Matchers.is(caseRetentionEntityList.get(2).getLastModifiedDateTime().toString())))
+                                                      Matchers.is(caseRetentionEntityList.get(2).getLastModifiedDateTime()
+                                                                      .format(DateTimeFormatter.ISO_DATE_TIME))))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_date", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].amended_by", Matchers.is("system")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_policy_applied", Matchers.is("Manual")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].comments", Matchers.is("a comment")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].status", Matchers.is("c_state")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_last_changed_date",
-                                                      Matchers.is(caseRetentionEntityList.get(1).getLastModifiedDateTime().toString())))
+                                                      Matchers.is(caseRetentionEntityList.get(1).getLastModifiedDateTime()
+                                                                      .format(DateTimeFormatter.ISO_DATE_TIME))))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_date", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].amended_by", Matchers.is("system")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_policy_applied", Matchers.is("Manual")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].comments", Matchers.is("a comment")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].status", Matchers.is("b_state")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_last_changed_date",
-                                                      Matchers.is(caseRetentionEntityList.get(0).getLastModifiedDateTime().toString())))
+                                                      Matchers.is(caseRetentionEntityList.get(0).getLastModifiedDateTime()
+                                                                      .format(DateTimeFormatter.ISO_DATE_TIME))))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_date", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].amended_by", Matchers.is("system")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_policy_applied", Matchers.is("Manual")))
