@@ -90,7 +90,8 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_last_changed_date",
-                                                      Matchers.is(caseRetentionEntityList.get(2).getLastModifiedDateTime().toString())))
+                                                      Matchers.is(caseRetentionEntityList.get(2).getLastModifiedDateTime()
+                                                                      .format(DateTimeFormatter.ISO_DATE_TIME))))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_date", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].amended_by", Matchers.is("system")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_policy_applied", Matchers.is("Manual")))
