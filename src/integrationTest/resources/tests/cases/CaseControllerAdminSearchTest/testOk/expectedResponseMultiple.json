@@ -1,0 +1,127 @@
+[
+  {
+    "case_number": "case6",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "COURTROOM2"
+      },
+      {
+        "name": "COURTROOM3"
+      },
+      {
+        "name": "COURTROOM1"
+      }
+    ],
+    "judges": [
+      "AJUDGE",
+      "JUDGE6B"
+    ],
+    "defendants": [
+      "aDefendant"
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_number": "case5",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "COURTROOM2"
+      },
+      {
+        "name": "COURTROOM1"
+      },
+      {
+        "name": "COURTROOM3"
+      }
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "defendants": [
+      "aDefendant"
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_number": "Case4",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "COURTROOM2"
+      },
+      {
+        "name": "COURTROOM1"
+      }
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "defendants": [
+      "aDefendant"
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_number": "Case3",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "COURTROOM1"
+      }
+    ],
+    "judges": [
+      "AJUDGE",
+      "JUDGE3A"
+    ],
+    "defendants": [
+      "aDefendant"
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_number": "Case2",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "COURTROOM1"
+      }
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "defendants": [
+      "Defendant2"
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_number": "Case1",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "COURTROOM1"
+      }
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "defendants": [
+      "aDefendant"
+    ],
+    "is_data_anonymised": false
+  }
+]

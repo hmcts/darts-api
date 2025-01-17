@@ -1,15 +1,16 @@
 package uk.gov.hmcts.darts.event.mapper;
 
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResultCourthouse;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResultCourtroom;
 import uk.gov.hmcts.darts.event.model.EventSearchResult;
 
-@Component
-public class EventSearchMapper {
+public final class EventSearchMapper {
 
-    public AdminSearchEventResponseResult adminSearchEventResponseResultFrom(EventSearchResult evr) {
+    private EventSearchMapper() {
+    }
+
+    public static AdminSearchEventResponseResult adminSearchEventResponseResultFrom(EventSearchResult evr) {
         return new AdminSearchEventResponseResult()
             .id(evr.id())
             .eventTs(evr.eventTs())

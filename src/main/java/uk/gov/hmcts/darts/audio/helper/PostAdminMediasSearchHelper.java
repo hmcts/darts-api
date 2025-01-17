@@ -54,6 +54,7 @@ public class PostAdminMediasSearchHelper {
         Path<MediaEntity> namePath = mediaRoot;
         criteriaQuery.select(namePath).distinct(true);
         criteriaQuery.where(finalAndPredicate);
+        criteriaQuery.orderBy(criteriaBuilder.desc(mediaRoot.get(MediaEntity_.ID)));
 
         TypedQuery<MediaEntity> query = entityManager.createQuery(criteriaQuery);
         query.setMaxResults(maxResults + 1);

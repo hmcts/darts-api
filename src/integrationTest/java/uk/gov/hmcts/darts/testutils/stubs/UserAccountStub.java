@@ -222,6 +222,13 @@ public class UserAccountStub {
     }
 
     @Transactional
+    public UserAccountEntity createUser(String identifier) {
+        var testUser = getIntegrationTestUserAccountEntity(identifier);
+        testUser = dartsDatabaseSaveStub.save(testUser);
+        return testUser;
+    }
+
+    @Transactional
     public UserAccountEntity createRcjAppealUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = SecurityGroupTestData
             .buildGroupForRoleAndCourthouse(SecurityRoleEnum.RCJ_APPEALS, courthouseEntity);

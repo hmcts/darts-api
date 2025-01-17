@@ -4,12 +4,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity_;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -54,7 +56,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     }
 
     List<AutomatedTaskEntity> getAllAutomatedTasksEntities() {
-        return automatedTaskRepository.findAll()
+        return automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending())
             .stream()
             .filter(this::shouldIncludeAutomatedTask)
             .toList();

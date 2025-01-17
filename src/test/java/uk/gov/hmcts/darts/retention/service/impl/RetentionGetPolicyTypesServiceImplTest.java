@@ -6,9 +6,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
@@ -107,7 +109,7 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         assertEquals(1, caseRetentionPolicies.get(0).getId());
 
-        verify(retentionPolicyTypeRepository).findAll();
+        verify(retentionPolicyTypeRepository).findAll(Sort.by(RetentionPolicyTypeEntity_.FIXED_POLICY_KEY).descending());
         verify(retentionPolicyTypeMapper).mapToModelList(any());
         verifyNoInteractions(editPolicyTypeValidator);
     }
