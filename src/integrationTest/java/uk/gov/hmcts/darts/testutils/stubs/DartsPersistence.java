@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -37,6 +39,8 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
+import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -86,6 +90,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.test.common.data.builder.DbInsertable;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
@@ -448,8 +453,8 @@ public class DartsPersistence {
                 transcription.setCourtCases(listOfCases);
             }
 
-            transcription.setCreatedBy(save(transcription.getCreatedBy()));
-            transcription.setLastModifiedBy(save(transcription.getLastModifiedBy()));
+            saveCreatedBy(transcription);
+            saveLastModifiedBy(transcription);
             transcription = transcriptionRepository.save(transcription);
 
         } else {
@@ -846,4 +851,35 @@ public class DartsPersistence {
     }
 
 
+    public HearingEntity refresh(HearingEntity entity) {
+        return refresh(entity, hearingRepository);
+    }
+
+    public UserAccountEntity refresh(UserAccountEntity judge) {
+        return refresh(judge, userAccountRepository);
+    }
+
+
+    public CaseRetentionEntity refresh(CaseRetentionEntity caseRetentionEntity) {
+        return refresh(caseRetentionEntity, caseRetentionRepository);
+    }
+
+    public <T extends HasIntegerId> T refresh(T entity, JpaRepository<T, Integer> repository) {
+        if (entity.getId() == null) {
+            return entity;
+        }
+        return repository.findById(entity.getId()).orElseThrow();
+    }
+
+    private void saveLastModifiedBy(LastModifiedBy lastModifiedBy) {
+        if (lastModifiedBy.getLastModifiedBy() != null) {
+            lastModifiedBy.setLastModifiedBy(save(lastModifiedBy.getLastModifiedBy()));
+        }
+    }
+
+    private void saveCreatedBy(CreatedBy createdBy) {
+        if (createdBy.getCreatedBy() != null) {
+            createdBy.setCreatedBy(save(createdBy.getCreatedBy()));
+        }
+    }
 }

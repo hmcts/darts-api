@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.OffsetDateTime;
 
@@ -22,7 +23,8 @@ import java.time.OffsetDateTime;
 @Table(name = CaseRetentionEntity.TABLE_NAME)
 @Getter
 @Setter
-public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
+public class CaseRetentionEntity extends CreatedModifiedBaseEntity
+    implements HasIntegerId {
 
 
     public static final String ID = "car_id";

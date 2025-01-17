@@ -17,6 +17,7 @@ public class CaseDocumentServiceImpl implements CaseDocumentService {
     private final CaseRepository caseRepository;
     private final CourtCaseDocumentMapper caseDocumentMapper;
 
+    @Override
     public CourtCaseDocument generateCaseDocument(Integer caseId) {
         CourtCaseEntity courtCase = caseRepository.findById(caseId).orElseThrow(
             () -> new DartsException(String.format("court case not found: %s", caseId))

@@ -36,9 +36,8 @@ public class TranscriptionTestData
         minimalTranscription.setTranscriptionStatus(transcriptionStatusEntity);
         minimalTranscription.setHideRequestFromRequestor(false);
         minimalTranscription.setIsManualTranscription(false);
-        var userAccount = minimalUserAccount();
-        minimalTranscription.setLastModifiedBy(userAccount);
-        minimalTranscription.setCreatedBy(userAccount);
+        minimalTranscription.setLastModifiedById(0);
+        minimalTranscription.setCreatedById(0);
         return minimalTranscription;
     }
 

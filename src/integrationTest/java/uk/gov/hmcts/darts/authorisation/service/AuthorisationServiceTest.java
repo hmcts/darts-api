@@ -248,9 +248,9 @@ class AuthorisationServiceTest extends IntegrationBase {
 
     @Test
     void shouldCheckAuthorisationOK() {
-        var a1Court = createCourthouseWithName("A1 COURT");
-        var b2Court = createCourthouseWithName("B2 COURT");
-        var c3Court = createCourthouseWithName("C3 COURT");
+        var a1Court = dartsDatabase.save(createCourthouseWithName("A1 COURT"));
+        var b2Court = dartsDatabase.save(createCourthouseWithName("B2 COURT"));
+        var c3Court = dartsDatabase.save(createCourthouseWithName("C3 COURT"));
 
         var bristolUser = minimalUserAccount();
         bristolUser.setEmailAddress(TEST_BRISTOL_EMAIL);
@@ -263,11 +263,11 @@ class AuthorisationServiceTest extends IntegrationBase {
         var secGrpForRequestor = minimalSecurityGroup(bristolUser);
         secGrpForRequestor.setSecurityRoleEntity(dartsDatabase.findSecurityRole(REQUESTER));
         secGrpForRequestor.setCourthouseEntities(asSet(b2Court, c3Court));
-        entityGraphPersistence.persistAll(List.of(secGrpForApprover, secGrpForRequestor));
+        secGrpForRequestor = dartsDatabase.save(secGrpForRequestor);
+        secGrpForApprover = dartsDatabase.save(secGrpForApprover);
 
         bristolUser.setSecurityGroupEntities(asSet(secGrpForApprover, secGrpForRequestor));
-
-        entityGraphPersistence.persist(bristolUser);
+        dartsDatabase.save(bristolUser);
 
         assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(
             List.of(a1Court, c3Court),

@@ -118,10 +118,11 @@ class EventsControllerTest extends IntegrationBase {
 
         // Given
         // setup an event id
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         LocalDateTime hearingDate = LocalDateTime.of(2020, 6, 6, 20, 0, 0);
         HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", hearingDate);
         EventEntity eventEntity = dartsDatabaseStub.createEvent(hearing);
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
         MockHttpServletRequestBuilder requestBuilder = get("/admin/events/" + eventEntity.getId())

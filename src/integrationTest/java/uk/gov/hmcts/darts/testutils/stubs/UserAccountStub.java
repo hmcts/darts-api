@@ -103,7 +103,7 @@ public class UserAccountStub {
 
     @Transactional
     public void setActiveState(String email, boolean active) {
-        UserAccountEntity userAccountEntity = userAccountRepository.findByEmailAddressIgnoreCase(email).get(0);
+        UserAccountEntity userAccountEntity = userAccountRepository.findFirstByEmailAddressIgnoreCase(email).get();
         userAccountEntity.setActive(active);
         userAccountRepository.save(userAccountEntity);
     }

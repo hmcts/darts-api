@@ -78,6 +78,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     @Getter(AccessLevel.PACKAGE)
     private boolean manualDeletionEnabled;
 
+    @Override
     public AdminMediaResponse getMediasById(Integer id) {
         var mediaEntity = mediaRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));

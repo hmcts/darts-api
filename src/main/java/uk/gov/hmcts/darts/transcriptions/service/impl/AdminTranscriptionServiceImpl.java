@@ -114,6 +114,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             .toList();
     }
 
+    @Override
     public List<SearchTranscriptionDocumentResponse> searchTranscriptionDocument(SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
         OffsetDateTime requestedAtFrom = searchTranscriptionDocumentRequest.getRequestedAtFrom()
             != null ? OffsetDateTime.of(searchTranscriptionDocumentRequest.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC) : null;
@@ -174,6 +175,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     }
 
     @Transactional
+    @Override
     public TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
                                                                                  TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
         TranscriptionDocumentHideResponse response;
@@ -237,6 +239,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     }
 
     @Transactional
+    @Override
     public AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Integer transcriptionDocumentId) {
         if (!this.isManualDeletionEnabled()) {
             throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");

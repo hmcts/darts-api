@@ -65,6 +65,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     private final DetsToArmPushAutomatedTaskConfig automatedTaskConfigurationProperties;
 
 
+    @Override
     public void processDetsToArm(int taskBatchSize) {
         log.info("Started running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.detsLocation();
