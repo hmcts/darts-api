@@ -14,7 +14,7 @@ public final class AsyncUtil {
 
     }
 
-    public static void shutdownAndAwaitTermination(ExecutorService executorService, int timeout, TimeUnit unit) {
+    public static void shutdownAndAwaitTermination(ExecutorService executorService, long timeout, TimeUnit unit) {
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(timeout, unit)) {
@@ -30,7 +30,7 @@ public final class AsyncUtil {
     }
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
-                                                 int threads, int timeout, TimeUnit timeUnit) throws InterruptedException {
+                                                 int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
         log.info("Starting {} tasks with {} threads", tasks.size(), threads);
         try (ExecutorService executorService = Executors.newFixedThreadPool(threads)) {
             executorService.invokeAll(tasks, timeout, timeUnit);
