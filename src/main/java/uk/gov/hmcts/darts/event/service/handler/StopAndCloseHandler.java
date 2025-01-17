@@ -101,7 +101,8 @@ public class StopAndCloseHandler extends EventHandlerBase {
 
         Optional<CaseRetentionEntity> latestCompletedManualRetention = caseRetentionRepository.findLatestCompletedManualRetention(courtCase);
         if (latestCompletedManualRetention.isPresent()) {
-            log.info("Ignoring retention for event with id {} because there is an existing manual retention for caseId {}.", dartsEvent.getEventId(), courtCase.getId());
+            log.info("Ignoring retention for event with id {} because there is an existing manual retention for caseId {}.",
+                     dartsEvent.getEventId(), courtCase.getId());
             return;
         }
 
