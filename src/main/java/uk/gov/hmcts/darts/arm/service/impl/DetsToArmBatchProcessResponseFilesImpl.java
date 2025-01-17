@@ -168,11 +168,19 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
         super.markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
 
         ObjectStateRecordEntity objectStateRecordEntity = externalObjectDirectory.getObjectStateRecordEntity();
+
         if (objectStateRecordEntity != null) {
-            objectStateRecordEntity.setObjectStatus(String.format("No response files produced by ARM within %s",
-                                                                  DurationUtil.formatDurationHumanReadable(
-                                                                      armDataManagementConfiguration.getArmMissingResponseDuration())));
-            objectStateRecordRepository.save(objectStateRecordEntity);
+            Optional<ObjectStateRecordEntity> osrEntity = objectStateRecordRepository.findById(objectStateRecordEntity.getUuid());
+            if (osrEntity.isPresent()) {
+                osrEntity.get().setObjectStatus(String.format("No response files produced by ARM within %s",
+                                                              DurationUtil.formatDurationHumanReadable(
+                                                                  armDataManagementConfiguration.getArmMissingResponseDuration())));
+                objectStateRecordRepository.save(objectStateRecordEntity);
+            } else {
+                log.warn("No OSR Object exists with OsrId : {} for EodId : {}", objectStateRecordEntity.getUuid(), externalObjectDirectory.getId());
+            }
+        } else {
+            log.warn("Unable to fetch associated OSR for EodId : {}", externalObjectDirectory.getId());
         }
     }
 }
