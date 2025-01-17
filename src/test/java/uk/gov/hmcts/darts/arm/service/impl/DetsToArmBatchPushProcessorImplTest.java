@@ -55,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -260,7 +261,7 @@ class DetsToArmBatchPushProcessorImplTest {
         doReturn(List.of(1)).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
 
         try (MockedStatic<AsyncUtil> asyncUtilMockedStatic = Mockito.mockStatic(AsyncUtil.class)) {
-            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), anyInt(), anyInt(), any()))
+            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), anyInt(), anyLong(), any()))
                 .thenThrow(new RuntimeException("Test exception"));
             detsToArmBatchPushProcessor.processDetsToArm(5);
             LogUtil.waitUntilMessag(output, "Dets to arm batch unexpected exception", 5);
