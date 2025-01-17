@@ -96,15 +96,14 @@ public class TransformedMediaHelper {
         entity.setOutputFilename(filename);
         entity.setStartTime(startTime);
         entity.setEndTime(endTime);
+        //By manually setting these values it bypasses the auto update of the last modified by and created by fields
         entity.setLastModifiedBy(mediaRequest.getCreatedBy());
         entity.setCreatedBy(mediaRequest.getCreatedBy());
         entity.setOutputFormat(audioRequestOutputFormat);
         if (nonNull(fileSize)) {
             entity.setOutputFilesize(fileSize.intValue());
         }
-        //Ensures createdBy / LastModified does not get overridden by the @CreatedBy / @LastModifiedBy annotation
-        TransformedMediaEntity savedTM = transformedMediaRepository.save(entity);
-        return savedTM;
+        return transformedMediaRepository.save(entity);
     }
 
     @SuppressWarnings({"PMD.CognitiveComplexity"})
