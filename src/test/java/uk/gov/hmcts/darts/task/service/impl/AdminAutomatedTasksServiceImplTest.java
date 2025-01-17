@@ -6,10 +6,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
@@ -234,12 +236,13 @@ class AdminAutomatedTasksServiceImplTest {
         AutomatedTaskEntity automatedTaskEntity3 =
             createAutomatedTaskEntity("CaseExpiryDeletion", true);
 
-        when(automatedTaskRepository.findAll()).thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
+        when(automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending()))
+            .thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
         adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         verify(automatedTaskRepository, times(1))
-            .findAll();
+            .findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending());
         verify(mapper, times(1))
             .mapEntitiesToModel(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
     }
@@ -254,12 +257,13 @@ class AdminAutomatedTasksServiceImplTest {
         AutomatedTaskEntity automatedTaskEntity3 =
             createAutomatedTaskEntity("CaseExpiryDeletion", false);
 
-        when(automatedTaskRepository.findAll()).thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
+        when(automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending()))
+            .thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
         adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         verify(automatedTaskRepository, times(1))
-            .findAll();
+            .findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending());
         verify(mapper, times(1))
             .mapEntitiesToModel(List.of(automatedTaskEntity1, automatedTaskEntity2));
     }

@@ -162,6 +162,29 @@ class UserControllerSearchIntTest extends IntegrationBase {
     }
 
     @Test
+    void searchByEmailAddress_withMultipleReturnedItems_shouldBeOrderdByFullName() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        dartsDatabaseStub.getUserAccountStub().createUser("user1");
+        dartsDatabaseStub.getUserAccountStub().createUser("user3");
+        dartsDatabaseStub.getUserAccountStub().createUser("user2");
+
+        UserSearch userSearch = new UserSearch();
+        userSearch.setEmailAddress("user");
+
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
+            .andExpect(jsonPath("$[1].full_name").value("user1FullName"))
+            .andExpect(jsonPath("$[2].full_name").value("user2FullName"))
+            .andExpect(jsonPath("$[3].full_name").value("user3FullName"));
+
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verifyNoMoreInteractions(userIdentity);
+    }
+
+    @Test
     void searchByFullNameShouldReturnOk() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 

@@ -35,6 +35,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testGetAllHearingNoSearchCriteria() {
+        generatedHearingEntities.sort((he1, he2) -> he2.getHearingDate().compareTo(he1.getHearingDate()));
         List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null, null,
                                                                                      null, null,
                                                                                      null, RESULT_LIMIT);
@@ -46,6 +47,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testGetHearingWithLimit() {
+        generatedHearingEntities.sort((he1, he2) -> he2.getHearingDate().compareTo(he1.getHearingDate()));
         int resultLimit = 2;
         List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null, null,
                                                                                      null, null,
@@ -81,6 +83,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testGetHearingForCourthouseIds() {
+        generatedHearingEntities.sort((he1, he2) -> he2.getHearingDate().compareTo(he1.getHearingDate()));
         int recordIndexToFind = GENERATION_COUNT / 2;
         int recordIndexToFindNext = (GENERATION_COUNT / 2) + 1;
 
@@ -186,7 +189,8 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testGetHearingsForHearingStartDate() {
-        Integer recordIndexToFindFrom = (GENERATION_COUNT / 2) - 1;
+        generatedHearingEntities.sort((he1, he2) -> he2.getHearingDate().compareTo(he1.getHearingDate()));
+        Integer recordIndexToFindFrom = GENERATION_COUNT / 2;
 
         List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
                                                                                      null,
@@ -194,7 +198,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
                                                                                      generatedHearingEntities.get(recordIndexToFindFrom).getHearingDate(),
                                                                                      null, RESULT_LIMIT);
 
-        List<HearingEntity> expectedHearings = generatedHearingEntities.subList(recordIndexToFindFrom, generatedHearingEntities.size());
+        List<HearingEntity> expectedHearings = generatedHearingEntities.subList(0, recordIndexToFindFrom + 1);
         assertEquals(expectedHearings.size(), hearingEntityList.size());
 
         for (int i = 0; i < expectedHearings.size(); i++) {
@@ -204,7 +208,8 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testGetHearingsForHearingAfterDate() {
-        Integer recordIndexToFindTo = (GENERATION_COUNT / 2) - 1;
+        Integer recordIndexToFindTo = GENERATION_COUNT / 2;
+        generatedHearingEntities.sort((he1, he2) -> he2.getHearingDate().compareTo(he1.getHearingDate()));
 
         List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
                                                                                      null,
@@ -213,7 +218,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
                                                                                      generatedHearingEntities.get(recordIndexToFindTo).getHearingDate(),
                                                                                      RESULT_LIMIT);
 
-        List<HearingEntity> expectedHearings = generatedHearingEntities.subList(0, recordIndexToFindTo + 1);
+        List<HearingEntity> expectedHearings = generatedHearingEntities.subList(recordIndexToFindTo, generatedHearingEntities.size());
         assertEquals(expectedHearings.size(), hearingEntityList.size());
 
         for (int i = 0; i < expectedHearings.size(); i++) {
@@ -223,6 +228,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testGetHearingsForHearingBetweenBeforeAndAfterDate() {
+        generatedHearingEntities.sort((he1, he2) -> he2.getHearingDate().compareTo(he1.getHearingDate()));
         Integer recordToOffset = 2;
         Integer recordIndexToFindFrom = (GENERATION_COUNT / 2) - 1;
         Integer recordIndexToFindTo = (GENERATION_COUNT / 2) + recordToOffset - 1;
@@ -230,10 +236,9 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
         List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
                                                                                      null,
                                                                                      null,
-                                                                                     generatedHearingEntities.get(recordIndexToFindFrom).getHearingDate(),
                                                                                      generatedHearingEntities.get(recordIndexToFindTo).getHearingDate(),
+                                                                                     generatedHearingEntities.get(recordIndexToFindFrom).getHearingDate(),
                                                                                      RESULT_LIMIT);
-
         List<HearingEntity> expectedHearings = generatedHearingEntities.subList(recordIndexToFindFrom, recordIndexToFindTo + 1);
         assertEquals(expectedHearings.size(), hearingEntityList.size());
 

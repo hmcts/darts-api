@@ -67,7 +67,7 @@ public class UserSearchQueryImpl implements UserSearchQuery {
 
         Predicate finalWherePredicate = criteriaBuilder.and(wherePredicates.toArray(Predicate[]::new));
         criteriaQuery.where(finalWherePredicate);
-        criteriaQuery.orderBy(criteriaBuilder.desc(root.get(UserAccountEntity_.id)));
+        criteriaQuery.orderBy(criteriaBuilder.asc(root.get(UserAccountEntity_.userFullName)));
 
         TypedQuery<UserAccountEntity> query = em.createQuery(criteriaQuery);
         if (isNotBlankEmailAddress) {
