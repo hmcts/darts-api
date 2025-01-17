@@ -49,7 +49,8 @@ public class ModifiedBaseEntity implements LastModifiedBy {
     public void setLastModifiedBy(UserAccountEntity userAccount) {
         this.lastModifiedBy = userAccount;
         this.lastModifiedById = userAccount == null ? null : userAccount.getId();
-        this.skipUserAudit = true;//As this was manualy set we should not override it
+        //Mark skip user audit as true to prevent audit listener from overriding the lastModifiedBy and lastModifiedDateTime
+        this.skipUserAudit = true;
     }
 
     @Transient

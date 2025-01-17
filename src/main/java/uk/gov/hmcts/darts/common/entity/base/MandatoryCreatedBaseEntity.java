@@ -45,7 +45,8 @@ public class MandatoryCreatedBaseEntity implements CreatedBy {
     public void setCreatedBy(UserAccountEntity userAccount) {
         this.createdBy = userAccount;
         this.createdById = userAccount == null ? null : userAccount.getId();
-        this.skipUserAudit = true;//As this was manualy set we should not override it
+        //Mark skip user audit as true to prevent audit listener from overriding the createdBy and createdDateTime
+        this.skipUserAudit = true;
     }
 
     @Transient
