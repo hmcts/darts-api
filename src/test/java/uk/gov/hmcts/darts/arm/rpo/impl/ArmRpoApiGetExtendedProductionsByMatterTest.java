@@ -21,6 +21,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ArmRpoApiGetExtendedProductionsByMatterTest {
 
+    public static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
     @Mock
     private ArmRpoClient armRpoClient;
 
@@ -62,6 +64,8 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
         extendedProductionsByMatterResponse.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
         productions.setProductionId("12345");
+        productions.setStatus(4);
+        productions.setName(PRODUCTION_NAME);
         extendedProductionsByMatterResponse.setProductions(List.of(productions));
 
         armRpoExecutionDetailEntity.setMatterId("1");
@@ -69,9 +73,10 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
         when(armRpoClient.getExtendedProductionsByMatter(anyString(), any())).thenReturn(extendedProductionsByMatterResponse);
 
         // when
-        armRpoApi.getExtendedProductionsByMatter("token", 1, userAccount);
+        var result = armRpoApi.getExtendedProductionsByMatter("token", 1, PRODUCTION_NAME, userAccount);
 
         // then
+        assertTrue(result);
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
@@ -88,7 +93,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(
-            ArmRpoException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, userAccount));
+            ArmRpoException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, PRODUCTION_NAME, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -109,7 +114,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(
-            ArmRpoException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, userAccount));
+            ArmRpoException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, PRODUCTION_NAME, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -131,7 +136,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(
-            ArmRpoException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, userAccount));
+            ArmRpoException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, PRODUCTION_NAME, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -157,11 +162,11 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(
-            ArmRpoException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, userAccount));
+            ArmRpoException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, PRODUCTION_NAME, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM RPO Extended Productions By Matter: ProductionId is missing from ARM RPO response"));
+            "Failure during ARM RPO Extended Productions By Matter: Production Id or status is missing from ARM RPO response"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),

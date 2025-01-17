@@ -26,5 +26,10 @@ public class ExtendedProductionsByMatterResponse extends BaseRpoResponse {
 
         @JsonProperty("productionID")
         private String productionId;
+        @JsonProperty("status")
+        private Integer status;
+        @JsonProperty("name")
+        private String name;
+
     }
 }

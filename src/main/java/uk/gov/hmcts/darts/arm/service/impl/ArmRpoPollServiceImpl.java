@@ -81,22 +81,26 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 bearerToken, executionId, headerColumns, productionName, userAccount);
             if (createExportBasedOnSearchResultsTable) {
                 // step to call ARM RPO API to get the extended productions by matter
-                armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, userAccount);
-                // step to call ARM RPO API to get the production output files
-                var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
+                boolean getExtendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, productionName, userAccount);
+                if (getExtendedProductionsByMatter) {
+                    // step to call ARM RPO API to get the production output files
+                    var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
 
-                for (var productionExportFileId : productionOutputFiles) {
-                    processProductionFiles(productionExportFileId, bearerToken, executionId, userAccount);
-                }
-                if (CollectionUtils.isNotEmpty(tempProductionFiles)) {
-                    // step to call ARM RPO API to remove the production
-                    armRpoApi.removeProduction(bearerToken, executionId, userAccount);
-                    log.debug("About to reconcile production files");
-                    armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles);
+                    for (var productionExportFileId : productionOutputFiles) {
+                        processProductionFiles(productionExportFileId, bearerToken, executionId, userAccount);
+                    }
+                    if (CollectionUtils.isNotEmpty(tempProductionFiles)) {
+                        // step to call ARM RPO API to remove the production
+                        armRpoApi.removeProduction(bearerToken, executionId, userAccount);
+                        log.debug("About to reconcile production files");
+                        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles);
+                    } else {
+                        log.warn("No production export files found");
+                    }
+                    logApi.armRpoPollingSuccessful(executionId);
                 } else {
-                    log.warn("No production export files found");
+                    log.warn("ARM RPO Polling is still in-progress as the getExtendedProductionsByMatter is still not completed");
                 }
-                logApi.armRpoPollingSuccessful(executionId);
             } else {
                 log.warn("ARM RPO Polling is still in-progress as the createExportBasedOnSearchResultsTable is still not completed");
             }
@@ -169,9 +173,11 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         // If the previous state is saveBackgroundSearch and status is completed
         // or the previous state is getExtendedSearchesByMatterId and status is in progress
         // or the previous state is createExportBasedOnSearchResultsTable and status is in progress, return the entity
+        // or the previous state is getExtendedProductionsByMatter and status is in progress
         if (saveBackgroundSearchCompleted(armRpoExecutionDetailEntity)
             || getExtendedSearchesByMatterIdInProgress(armRpoExecutionDetailEntity)
-            || createExportBasedOnSearchResultsTableInProgress(armRpoExecutionDetailEntity)) {
+            || createExportBasedOnSearchResultsTableInProgress(armRpoExecutionDetailEntity)
+            || getExtendedProductionsByMatterInProgress(armRpoExecutionDetailEntity)) {
             return armRpoExecutionDetailEntity;
         }
         // If the job is a manual run, the previous status is failed and the state is greater than saveBackgroundSearch, return the entity
@@ -180,7 +186,6 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         }
         return null;
     }
-
 
     private boolean pollServiceNotInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         if (nonNull(armRpoExecutionDetailEntity.getArmRpoState())
@@ -200,6 +205,12 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private boolean createExportBasedOnSearchResultsTableInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
             && ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
+            && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+    }
+
+    private boolean getExtendedProductionsByMatterInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
+            && ArmRpoHelper.getExtendedProductionsByMatterRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
             && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
     }
 

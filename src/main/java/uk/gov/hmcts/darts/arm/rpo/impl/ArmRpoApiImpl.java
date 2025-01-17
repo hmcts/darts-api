@@ -70,8 +70,11 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private static final String RECORD_CLASS_CODE = "DARTS";
     private static final int FIELD_TYPE_7 = 7;
     private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
-    public static final String UNABLE_TO_GET_ARM_RPO_RESPONSE = "Unable to get ARM RPO response from client ";
-    public static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
+    private static final String UNABLE_TO_GET_ARM_RPO_RESPONSE = "Unable to get ARM RPO response from client ";
+    private static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
+
+    private static final int READY_STATUS = 4;
+    private static final int CONNECTION_FAILED = 5;
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
@@ -435,7 +438,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
         armRpoExecutionDetailEntity.setSearchItemCount(searchDetailMatch.getSearch().getTotalCount());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-        return extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName();
+        return searchDetailMatch.getSearch().getName();
     }
 
 
@@ -502,7 +505,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+    public boolean getExtendedProductionsByMatter(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount) {
         log.debug("getExtendedProductionsByMatter called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedProductionsByMatterRpoState(),
@@ -528,15 +531,35 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         handleResponseStatus(userAccount, extendedProductionsByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
         if (isNull(extendedProductionsByMatterResponse.getProductions())
-            || CollectionUtils.isEmpty(extendedProductionsByMatterResponse.getProductions())
-            || isNull(extendedProductionsByMatterResponse.getProductions().getFirst())
-            || StringUtils.isBlank(extendedProductionsByMatterResponse.getProductions().getFirst().getProductionId())) {
+            || CollectionUtils.isEmpty(extendedProductionsByMatterResponse.getProductions())) {
             throw handleFailureAndCreateException(errorMessage.append("ProductionId is missing from ARM RPO response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
-        armRpoExecutionDetailEntity.setProductionId(extendedProductionsByMatterResponse.getProductions().getFirst().getProductionId());
+        ExtendedProductionsByMatterResponse.Productions productionMatch = null;
+        for (ExtendedProductionsByMatterResponse.Productions productionsItem : extendedProductionsByMatterResponse.getProductions()) {
+            if (nonNull(productionsItem) && !StringUtils.isBlank(productionsItem.getName()) && productionName.equals(productionsItem.getName())) {
+                productionMatch = productionsItem;
+                break;
+            }
+        }
+
+        if (isNull(productionMatch)
+            || StringUtils.isBlank(productionMatch.getProductionId())
+            || isNull(productionMatch.getStatus())) {
+            throw handleFailureAndCreateException(errorMessage.append("Production Id or status is missing from ARM RPO response").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+
+        List<Integer> validStatuses = List.of(READY_STATUS, CONNECTION_FAILED);
+        if (!validStatuses.contains(productionMatch.getStatus())) {
+            log.error(errorMessage.append("Production status is not ready: ").append(productionMatch.getStatus()).toString());
+            return false;
+        }
+
+        armRpoExecutionDetailEntity.setProductionId(productionMatch.getProductionId());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+        return true;
     }
 
     @Override
@@ -748,7 +771,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
             .productionName(productionName + CREATE_EXPORT_CSV_EXTENSION)
             .storageAccountId(storageAccountId)
-            .onlyForCurrentUser(Boolean.FALSE)
+            .onlyForCurrentUser(FALSE)
             .exportType(32)
             .build();
     }

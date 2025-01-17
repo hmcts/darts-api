@@ -55,9 +55,10 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private static final String BEARER_TOKEN = "BearerToken";
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
-    private static final String PRODUCTION_ID = "DARTS_RPO_2024-08-13";
+    private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    private static final String PRODUCTION_ID = " b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";
     private static final String SEARCH_ID = "8271f101-8c14-4c41-8865-edc5d8baed99";
-    private static final String MATTER_ID = "MatterId";
+    private static final String MATTER_ID = "cb70c7fa-8972-4400-af1d-ff5dd76d2104";
     private static final String STORAGE_ACCOUNT_ID = "StorageAccountId";
     private static final String PROPERTY_NAME = "propertyName";
     private static final String INGESTION_DATE = "ingestionDate";
@@ -95,7 +96,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithSaveBackgroundCompleted() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_WithSaveBackgroundCompleted() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
@@ -144,7 +145,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithGetExtendedSearchesByMatterInProgress() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_WithGetExtendedSearchesByMatterInProgress() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.getExtendedSearchesByMatterRpoState());
@@ -194,7 +195,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithSaveBackgroundCompletedCreateExportInProgress() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_WithSaveBackgroundCompletedCreateExportInProgress() {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
@@ -307,7 +308,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             }
 
             @Override
-            public Reader asReader(Charset charset) throws IOException {
+            public Reader asReader(Charset charset) {
                 return null;
             }
 
@@ -348,6 +349,8 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         response.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
         productions.setProductionId(PRODUCTION_ID);
+        productions.setName(PRODUCTION_NAME);
+        productions.setStatus(4);
         response.setProductions(List.of(productions));
         return response;
     }
@@ -395,7 +398,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         response.setIsError(false);
         ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
         search.setTotalCount(4);
-        search.setName(PRODUCTION_ID);
+        search.setName(PRODUCTION_NAME);
         search.setIsSaved(true);
         search.setSearchId(SEARCH_ID);
         ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
