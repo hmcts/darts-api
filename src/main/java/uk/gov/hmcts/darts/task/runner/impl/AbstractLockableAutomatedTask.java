@@ -27,6 +27,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.validation.constraints.NotNull;
 
 import static java.lang.Boolean.TRUE;
@@ -108,7 +114,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                             log.info("Task: {} is inactive but has been run manually", getTaskName());
                         }
                         logApi.taskStarted(executionId.get(), this.getTaskName());
-                        lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
+                        lockService.getLockingTaskExecutor().executeWithLock(createLockableTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(SKIPPED);
                         log.warn("Task: {} not running now as it has been disabled", getTaskName());
@@ -127,6 +133,10 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
         } finally {
             postRunTask();
         }
+    }
+
+    LockedTask createLockableTask() {
+        return new LockedTask();
     }
 
     @Override
@@ -251,16 +261,37 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     class LockedTask implements Runnable {
         @Override
         public void run() {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<?> future = executor.submit(() -> {
+                try {
+                    assertLocked();
+                    runTask();
+                } catch (IllegalStateException exception) {
+                    setAutomatedTaskStatus(LOCK_FAILED);
+                    log.error("Unable to lock task", exception);
+                } catch (Exception exception) {
+                    setAutomatedTaskStatus(FAILED);
+                    handleException(exception);
+                    throw exception;
+                }
+            });
+
             try {
-                LockAssert.assertLocked();
-                runTask();
-            } catch (IllegalStateException exception) {
-                setAutomatedTaskStatus(LOCK_FAILED);
-                log.error("Unable to lock task", exception);
-            } catch (Exception exception) {
-                setAutomatedTaskStatus(FAILED);
-                handleException(exception);
+                Object result = future.get(getLockAtMostFor().toMillis(), TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                log.error("Task: {} timed out after {}ms", getTaskName(), getLockAtMostFor().toMillis());
+                future.cancel(true);
+            } catch (ExecutionException e) {
+                log.error("Task: {} execution exception", getTaskName(), e);
+            } catch (InterruptedException e) {
+                log.error("Task: {} interrupted", getTaskName(), e);
             }
+            executor.shutdown();
+        }
+
+        //Separate method to allow mockingd
+        void assertLocked() {
+            LockAssert.assertLocked();
         }
     }
 }
