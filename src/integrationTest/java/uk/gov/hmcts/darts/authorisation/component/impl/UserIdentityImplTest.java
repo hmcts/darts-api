@@ -82,6 +82,44 @@ class UserIdentityImplTest extends IntegrationBase {
 
     }
 
+
+    @Test
+    void getUserAccountOptional_whenExists_shouldReturnUserAccount() {
+        String email = "integrationtest.user@example.com";
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("emails", List.of(email))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        Optional<UserAccountEntity> userAccountEntity = userIdentity.getUserAccountOptional(jwt);
+
+        assertTrue(userAccountEntity.isPresent());
+        assertEquals(email, userIdentity.getUserAccount().getEmailAddress());
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        UserAccountEntity currentUser = userIdentity.getUserAccount();
+        assertEquals(testUser.getId(), currentUser.getId());
+    }
+
+    @Test
+    void getUserAccountOptional_whenNotExists_shouldReturnEmptyUserAccountOptiaonl() {
+        String email = "unknown.integrationtest.user@example.com";
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("emails", List.of(email))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        Optional<UserAccountEntity> userAccountEntity = userIdentity.getUserAccountOptional(jwt);
+
+        assertTrue(userAccountEntity.isEmpty());
+    }
+
+
     @Test
     void getGuid() {
         String guid = UUID.randomUUID().toString();

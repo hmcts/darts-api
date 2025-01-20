@@ -137,14 +137,9 @@ public class SecurityConfig {
             @Override
             public Jwt decode(String token) {
                 Jwt jwt = jwtDecoder.decode(token);
-                Integer userId = null;
-                String email = jwt.getClaimAsString("email");
-
-                if (email != null && !email.isBlank()) {
-                    userId = userAccountRepository.findFirstByEmailAddressIgnoreCase(email)
-                        .map(UserAccountEntity::getId)
-                        .orElse(null);
-                }
+                Integer userId = userIdentity.getUserAccountOptional(jwt)
+                    .map(userAccountEntity -> userAccountEntity.getId())
+                    .orElse(null);
                 return new DartsJwt(jwt, userId);
             }
         };
