@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = false)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ArmResponseInputUploadFileRecord {
 
     @JsonProperty("operation")
     private String operation;
 
-    @JsonProperty("timestamp")
+    @JsonProperty(value = "timestamp", required = true)
     private String timestamp;
 
     @JsonProperty("status")
