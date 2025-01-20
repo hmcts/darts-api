@@ -289,7 +289,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
             executor.shutdown();
         }
 
-        //Separate method to allow mockingd
+        //Separate method to allow mocking
         void assertLocked() {
             LockAssert.assertLocked();
         }
