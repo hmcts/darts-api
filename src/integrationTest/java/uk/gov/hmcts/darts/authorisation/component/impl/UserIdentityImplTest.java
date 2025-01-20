@@ -105,7 +105,7 @@ class UserIdentityImplTest extends IntegrationBase {
     }
 
     @Test
-    void getUserAccountOptional_whenNotExists_shouldReturnEmptyUserAccountOptiaonl() {
+    void getUserAccountOptional_whenNotExists_shouldReturnEmptyUserAccountOptional() {
         String email = "unknown.integrationtest.user@example.com";
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
