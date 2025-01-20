@@ -461,7 +461,7 @@ dependencies {
   implementation 'org.hibernate:hibernate-spatial:6.6.4.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.4.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.5.Final')
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
