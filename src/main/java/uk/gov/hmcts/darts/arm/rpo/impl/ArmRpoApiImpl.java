@@ -140,7 +140,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             || isNull(indexesByMatterIdResponse.getIndexes().getFirst())
             || isNull(indexesByMatterIdResponse.getIndexes().getFirst().getIndex())
             || StringUtils.isBlank(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId())) {
-            throw handleFailureAndCreateException(errorMessage.append("Unable to find indexes by matter ID in response").toString(),
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find any indexes by matter ID in response").toString(),
                                                   armRpoExecutionDetailEntity,
                                                   userAccount);
         }
@@ -149,12 +149,6 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
         armRpoExecutionDetailEntity.setIndexId(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-    }
-
-    private IndexesByMatterIdRequest createIndexesByMatterIdRequest(String matterId) {
-        return IndexesByMatterIdRequest.builder()
-            .matterId(matterId)
-            .build();
     }
 
     @Override
@@ -736,6 +730,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     private GetExtendedProductionsByMatterRequestGenerator createExtendedProductionsByMatterRequest(String matterId) {
         return GetExtendedProductionsByMatterRequestGenerator.builder()
+            .matterId(matterId)
+            .build();
+    }
+
+    private IndexesByMatterIdRequest createIndexesByMatterIdRequest(String matterId) {
+        return IndexesByMatterIdRequest.builder()
             .matterId(matterId)
             .build();
     }
