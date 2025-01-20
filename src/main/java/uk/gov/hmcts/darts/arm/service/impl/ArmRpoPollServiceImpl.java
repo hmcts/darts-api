@@ -106,7 +106,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             }
             log.info("Polling ARM RPO service completed");
         } catch (ArmRpoGetExtendedSearchesByMatterIdException e) {
-            log.warn("ARM RPO Polling getExtendedSearchesByMatterId is still in-progress", e);
+            log.warn("ARM RPO Polling getExtendedSearchesByMatterId is still in-progress", e.getMessage());
         } catch (Exception e) {
             log.error("Error while polling ARM RPO", e);
             logApi.armRpoPollingFailed(executionId);

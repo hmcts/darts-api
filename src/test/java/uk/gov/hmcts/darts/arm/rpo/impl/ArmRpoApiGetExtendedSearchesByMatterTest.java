@@ -117,12 +117,12 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
             ArmRpoGetExtendedSearchesByMatterIdException.class, () -> armRpoApi.getExtendedSearchesByMatter("token", 1, userAccount));
 
         // then
-        assertThat(armRpoGetExtendedSearchesByMatterIdException.getMessage(),
-                   containsString("The extendedSearchesByMatterResponse is not saved"));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        assertThat(armRpoGetExtendedSearchesByMatterIdException.getMessage(), containsString(
+            "Failure during ARM RPO getExtendedSearchesByMatter: The extendedSearchesByMatterResponse is_saved attribute is FALSE for executionId: 1"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
+                                                         any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
 
     }
