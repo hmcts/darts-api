@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -69,6 +71,8 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
     private AuditApi auditApi;
     @Mock
     private AssociatedObjectDataExpiryDeletionAutomatedTaskConfig config;
+    @Mock
+    private TransactionTemplate transactionTemplate;
 
     private final AtomicInteger idAddition = new AtomicInteger(123);
 
@@ -83,8 +87,14 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
                 transcriptionDocumentRepository, mediaRepository, annotationDocumentRepository,
                 caseDocumentRepository,
                 externalObjectDirectoryRepository, inboundDeleter, unstructuredDeleter,
-                auditApi, 100)
+                auditApi, 100, transactionTemplate)
         );
+        lenient().when(transactionTemplate.execute(any()))
+            .thenAnswer(invocation -> {
+                Runnable runnable = invocation.getArgument(0);
+                runnable.run();
+                return null;
+            });
     }
 
     @Test
