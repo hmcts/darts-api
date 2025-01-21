@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -46,7 +47,7 @@ class ArmApiServiceImplTest {
         String armProfileId = "profileId";
         String externalRecordId = "myexternalrecord";
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
-        Integer refConfScope = 2;
+        var refConfScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         String refConfReason = "reason";
 
         when(armApiConfigurationProperties.getArmUsername()).thenReturn(username);
@@ -70,12 +71,12 @@ class ArmApiServiceImplTest {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(offsetDateTime)
                           .retConfReason(refConfReason)
-                          .retConfScore(refConfScope)
+                          .retConfScore(refConfScore)
                           .build())
             .useGuidsForFields(false)
             .build();
 
-        armApiService.updateMetadata(externalRecordId, offsetDateTime, refConfScope, refConfReason);
+        armApiService.updateMetadata(externalRecordId, offsetDateTime, refConfScore, refConfReason);
 
         Mockito.verify(armApiClient, times(1)).updateMetadata(eq("Bearer " + bearerToken), eq(expectedMetadataRequest));
     }

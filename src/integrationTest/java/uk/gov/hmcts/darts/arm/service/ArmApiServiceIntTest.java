@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.io.File;
@@ -107,7 +108,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
         var bearerAuth = "Bearer some-token";
         var reasonConf = "reason";
-        var scoreConfId = 23;
+        var scoreConfId = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()
@@ -156,7 +157,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         // Given
         var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
         var reasonConf = "reason";
-        var scoreConfId = 23;
+        var scoreConfId = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()

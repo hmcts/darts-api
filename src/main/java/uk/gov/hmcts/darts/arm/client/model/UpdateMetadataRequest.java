@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 
@@ -33,7 +34,7 @@ public class UpdateMetadataRequest {
         private OffsetDateTime eventDate;
 
         @JsonProperty("ret_conf_score")
-        private Integer retConfScore;
+        private RetentionConfidenceScoreEnum retConfScore;
 
         @JsonProperty("ret_conf_reason")
         private String retConfReason;

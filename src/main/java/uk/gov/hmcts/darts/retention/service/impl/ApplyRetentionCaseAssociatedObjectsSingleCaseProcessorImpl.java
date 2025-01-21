@@ -193,10 +193,10 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private void setRetentionConfidenceScoreAndReasonForMedia(MediaEntity media, List<CourtCaseEntity> cases) {
         if (areAllCasesPerfectlyClosed(cases)) {
-            media.setRetConfScore(CASE_PERFECTLY_CLOSED.getId());
+            media.setRetConfScore(CASE_PERFECTLY_CLOSED);
         } else {
             var notPerfectlyClosedCases = filterCasesNotPerfectlyClosed(cases);
-            media.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
+            media.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
             try {
                 String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
                     notPerfectlyClosedCases,
@@ -213,10 +213,10 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private void setRetentionConfidenceScoreAndReasonForAnnotationDocument(AnnotationDocumentEntity annotationDoc, List<CourtCaseEntity> cases) {
         if (areAllCasesPerfectlyClosed(cases)) {
-            annotationDoc.setRetConfScore(CASE_PERFECTLY_CLOSED.getId());
+            annotationDoc.setRetConfScore(CASE_PERFECTLY_CLOSED);
         } else {
             var notPerfectlyClosedCases = filterCasesNotPerfectlyClosed(cases);
-            annotationDoc.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
+            annotationDoc.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
             String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
                 notPerfectlyClosedCases,
                 format("Unable to generate retention confidence reason for annotation document %s", annotationDoc.getId()));
@@ -229,10 +229,10 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     private void setRetentionConfidenceScoreAndReasonForTranscriptionDocument(TranscriptionDocumentEntity transcriptionDoc, List<CourtCaseEntity> cases) {
 
         if (areAllCasesPerfectlyClosed(cases)) {
-            transcriptionDoc.setRetConfScore(CASE_PERFECTLY_CLOSED.getId());
+            transcriptionDoc.setRetConfScore(CASE_PERFECTLY_CLOSED);
         } else {
             var notPerfectlyClosedCases = filterCasesNotPerfectlyClosed(cases);
-            transcriptionDoc.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
+            transcriptionDoc.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
             String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
                 notPerfectlyClosedCases,
                 format("Unable to generate retention confidence reason for transcription document %s", transcriptionDoc.getId()));
@@ -245,9 +245,9 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     private void setRetentionConfidenceScoreAndReasonForCaseDocument(CourtCaseEntity courtCase, CaseDocumentEntity caseDocument) {
         var courtCases = List.of(courtCase);
         if (areAllCasesPerfectlyClosed(courtCases)) {
-            caseDocument.setRetConfScore(CASE_PERFECTLY_CLOSED.getId());
+            caseDocument.setRetConfScore(CASE_PERFECTLY_CLOSED);
         } else {
-            caseDocument.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
+            caseDocument.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
             String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
                 courtCases,
                 format("Unable to generate retention confidence reason for annotation document %s", caseDocument.getId()));

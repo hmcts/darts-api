@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.dets.api.impl.DetsDataManagementApiImpl;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -88,7 +89,10 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, Integer retConfScore, String retConfReason) {
+    public UpdateMetadataResponse updateMetadata(String externalRecordId,
+                                                 OffsetDateTime eventTimestamp,
+                                                 RetentionConfidenceScoreEnum retConfScore,
+                                                 String retConfReason) {
         return armApiService.updateMetadata(externalRecordId, eventTimestamp, retConfScore, retConfReason);
     }
 

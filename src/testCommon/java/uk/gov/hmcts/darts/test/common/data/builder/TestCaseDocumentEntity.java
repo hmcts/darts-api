@@ -6,6 +6,7 @@ import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -26,7 +27,7 @@ public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInse
         String checksum,
         boolean hidden,
         OffsetDateTime retainUntilTs,
-        Integer retConfScore,
+        RetentionConfidenceScoreEnum retConfScore,
         String retConfReason,
         OffsetDateTime createdDateTime,
         UserAccountEntity createdBy,

@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -539,7 +540,7 @@ public class TranscriptionStub {
         final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
         final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
         final String confidenceReason = "reason";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
         return updateTranscriptionWithDocument(transcriptionEntity,
                                                fileName,
@@ -564,7 +565,7 @@ public class TranscriptionStub {
                                                                ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                UUID externalLocation,
                                                                String checksum,
-                                                               Integer confScore,
+                                                               RetentionConfidenceScoreEnum confScore,
                                                                String confReason
     ) {
 
@@ -597,7 +598,7 @@ public class TranscriptionStub {
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize, UserAccountEntity testUser, String checksum) {
-        return createTranscriptionDocumentEntity(transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, 100, "confidence reason");
+        return createTranscriptionDocumentEntity(transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, null, null);
     }
 
 
@@ -605,7 +606,7 @@ public class TranscriptionStub {
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize,
                                                                                 UserAccountEntity testUser,
-                                                                                String checksum, Integer confScore, String confReason) {
+                                                                                String checksum, RetentionConfidenceScoreEnum confScore, String confReason) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(fileName);
@@ -626,7 +627,7 @@ public class TranscriptionStub {
                                                                                 int fileSize, UserAccountEntity testUser, String checksum,
                                                                                 OffsetDateTime uploadedDateTime) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, 100, "confidence reason");
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, null, "confidence reason");
         transcriptionDocumentEntity.setUploadedDateTime(uploadedDateTime);
         return transcriptionDocumentEntity;
     }
