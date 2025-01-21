@@ -594,8 +594,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.warn(errorMessage.append("No production id found against the production name: " + productionName + ", so continue polling").toString());
             return false;
         }
-        if (StringUtils.isBlank(productionMatch.getProductionId())
-            || isNull(productionMatch.getStatus())) {
+        if (StringUtils.isBlank(productionMatch.getProductionId())) {
             throw handleFailureAndCreateException(errorMessage.append("Production Id or status is missing from ARM RPO response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }

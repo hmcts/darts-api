@@ -64,7 +64,6 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
         extendedProductionsByMatterResponse.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
         productions.setProductionId("12345");
-        productions.setStatus(4);
         productions.setName(PRODUCTION_NAME);
         productions.setStartProductionTime("2025-01-16T12:30:02.9343888+00:00");
         productions.setEndProductionTime("2025-01-16T12:30:09.9129726+00:00");

@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 
 class ArmRpoApiGetExtendedProductionsByMatterIntTest extends IntegrationBase {
 
@@ -42,7 +41,6 @@ class ArmRpoApiGetExtendedProductionsByMatterIntTest extends IntegrationBase {
         extendedProductionsByMatterResponse.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
         productions.setProductionId("1234");
-        productions.setStatus(READY_STATUS.getStatusCode());
         productions.setName(PRODUCTION_NAME);
         productions.setEndProductionTime(END_PRODUCTION_TIME);
         extendedProductionsByMatterResponse.setProductions(List.of(productions));
@@ -77,7 +75,6 @@ class ArmRpoApiGetExtendedProductionsByMatterIntTest extends IntegrationBase {
         extendedProductionsByMatterResponse.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
         productions.setProductionId("1234");
-        productions.setStatus(2);
         productions.setName(PRODUCTION_NAME);
         extendedProductionsByMatterResponse.setProductions(List.of(productions));
 
