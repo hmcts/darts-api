@@ -57,7 +57,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
     }
 
     @Test
-    void getExtendedProductionsByMatterSuccess() {
+    void getExtendedProductionsByMatter_Success() {
         // given
         ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse = new ExtendedProductionsByMatterResponse();
         extendedProductionsByMatterResponse.setStatus(200);
@@ -88,7 +88,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
     }
 
     @Test
-    void getExtendedProductionsByMatterThrowsFeignException() {
+    void getExtendedProductionsByMatter_ThrowsArmRpoException_WhenFeignExceptionIsThrown() {
         // given
         when(armRpoClient.getExtendedProductionsByMatter(anyString(), anyString())).thenThrow(FeignException.class);
         armRpoExecutionDetailEntity.setMatterId("1");
@@ -109,7 +109,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
     }
 
     @Test
-    void getExtendedProductionsByMatterWithNullResponse() {
+    void getExtendedProductionsByMatter_ThrowsException_WithNullResponse() {
         // given
         when(armRpoClient.getExtendedProductionsByMatter(anyString(), anyString())).thenReturn(null);
         armRpoExecutionDetailEntity.setMatterId("1");
@@ -130,7 +130,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
     }
 
     @Test
-    void getExtendedProductionsByMatterWithEmptyResponse() {
+    void getExtendedProductionsByMatter_ThrowsException_WithEmptyResponse() {
         // given
         ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse = new ExtendedProductionsByMatterResponse();
         when(armRpoClient.getExtendedProductionsByMatter(anyString(), anyString())).thenReturn(extendedProductionsByMatterResponse);
@@ -152,12 +152,13 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
     }
 
     @Test
-    void getExtendedSearchesByMatterWithMissingProductionId() {
+    void getExtendedSearchesByMatter_ThrowsException_WithMissingProductionId() {
         // given
         ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse = new ExtendedProductionsByMatterResponse();
         extendedProductionsByMatterResponse.setStatus(200);
         extendedProductionsByMatterResponse.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
+        productions.setName(PRODUCTION_NAME);
         extendedProductionsByMatterResponse.setProductions(List.of(productions));
         when(armRpoClient.getExtendedProductionsByMatter(anyString(), anyString())).thenReturn(extendedProductionsByMatterResponse);
         armRpoExecutionDetailEntity.setMatterId("1");

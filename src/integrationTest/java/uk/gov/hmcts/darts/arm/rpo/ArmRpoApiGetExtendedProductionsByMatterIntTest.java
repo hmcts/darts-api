@@ -1,8 +1,6 @@
 package uk.gov.hmcts.darts.arm.rpo;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
@@ -21,10 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 
 class ArmRpoApiGetExtendedProductionsByMatterIntTest extends IntegrationBase {
 
-    public static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    public static final String END_PRODUCTION_TIME = "2025-01-16T12:30:09.9129726+00:00";
     @MockBean
     private ArmRpoClient armRpoClient;
 
@@ -34,17 +34,17 @@ class ArmRpoApiGetExtendedProductionsByMatterIntTest extends IntegrationBase {
     @Autowired
     private ArmRpoApi armRpoApi;
 
-    @ParameterizedTest
-    @ValueSource(ints = {4, 5})
-    void getExtendedSearchesByMatter_ReturnsTrue_WithValidStatus(int status) {
+    @Test
+    void getExtendedSearchesByMatter_ReturnsTrue() {
         // given
         ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse = new ExtendedProductionsByMatterResponse();
         extendedProductionsByMatterResponse.setStatus(200);
         extendedProductionsByMatterResponse.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
         productions.setProductionId("1234");
-        productions.setStatus(status);
+        productions.setStatus(READY_STATUS.getStatusCode());
         productions.setName(PRODUCTION_NAME);
+        productions.setEndProductionTime(END_PRODUCTION_TIME);
         extendedProductionsByMatterResponse.setProductions(List.of(productions));
 
         when(armRpoClient.getExtendedProductionsByMatter(any(), any())).thenReturn(extendedProductionsByMatterResponse);
@@ -70,7 +70,7 @@ class ArmRpoApiGetExtendedProductionsByMatterIntTest extends IntegrationBase {
     }
 
     @Test
-    void getExtendedSearchesByMatter_ReturnsFalse_WhenInProgress() {
+    void getExtendedSearchesByMatter_ReturnsFalse_WhenEndProductionTimeIsNullInProgress() {
         // given
         ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse = new ExtendedProductionsByMatterResponse();
         extendedProductionsByMatterResponse.setStatus(200);

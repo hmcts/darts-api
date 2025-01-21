@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 
 @SuppressWarnings("checkstyle:linelength")
 class ArmRpoApiGetProductionOutputFilesIntTest extends PostgresIntegrationBase {
@@ -39,7 +40,7 @@ class ArmRpoApiGetProductionOutputFilesIntTest extends PostgresIntegrationBase {
     private static final String PRODUCTION_EXPORT_FILE_ID = UUID.randomUUID().toString();
 
     @Test
-    void getProductionOutputFiles_shouldSucceedAndReturnASingleItem_whenASuccessResponseIsReturnedFromArmWithASingularProductionExportFile() {
+    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenSuccessResponseIsReturnedFromArmWithSingularProductionExportFile() {
         // Given
         var productionOutputFilesResponse = createProductionOutputFilesResponse(PRODUCTION_EXPORT_FILE_ID);
         when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
@@ -100,6 +101,7 @@ class ArmRpoApiGetProductionOutputFilesIntTest extends PostgresIntegrationBase {
     private ProductionOutputFilesResponse createProductionOutputFilesResponse(String fileId) {
         var productionExportFileDetail = new ProductionOutputFilesResponse.ProductionExportFileDetail();
         productionExportFileDetail.setProductionExportFileId(fileId);
+        productionExportFileDetail.setStatus(READY_STATUS.getStatusCode());
 
         var productionExportFile = new ProductionOutputFilesResponse.ProductionExportFile();
         productionExportFile.setProductionExportFileDetails(productionExportFileDetail);
