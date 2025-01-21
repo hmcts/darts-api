@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -262,13 +263,19 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
         @Override
         public void run() {
             ExecutorService executor = Executors.newSingleThreadExecutor();
+            try {
+                assertLocked();
+            } catch (IllegalStateException exception) {
+                setAutomatedTaskStatus(LOCK_FAILED);
+                log.error("Unable to lock task", exception);
+            }
+
+            final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Future<?> future = executor.submit(() -> {
                 try {
-                    assertLocked();
+                    //Spring security context default strategy is ThreadLocal meaning we need to set it up on each thread we want the user on
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                     runTask();
-                } catch (IllegalStateException exception) {
-                    setAutomatedTaskStatus(LOCK_FAILED);
-                    log.error("Unable to lock task", exception);
                 } catch (Exception exception) {
                     setAutomatedTaskStatus(FAILED);
                     handleException(exception);
