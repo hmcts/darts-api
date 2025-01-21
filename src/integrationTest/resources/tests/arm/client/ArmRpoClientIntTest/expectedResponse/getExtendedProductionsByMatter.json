@@ -8,7 +8,9 @@
     {
       "productionID": "1b6a29d9-a72e-420b-8d69-b8acbeed806a",
       "name": "DARTS_RPO_2024-08-13_CSV",
-      "status": 4
+      "status": 4,
+      "startProductionTime": "2024-08-13T16:50:15.4091127+00:00",
+      "endProductionTime": "2024-08-13T16:50:21.1592576+00:00"
     }
   ]
 }

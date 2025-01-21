@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.exception.ArmRpoGetExtendedSearchesByMatterIdException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
@@ -70,6 +70,7 @@ class ArmRpoPollServiceImplTest {
 
     private final List<File> tempProductionFiles = new ArrayList<>();
     private final List<Integer> allowableFailedStates = new ArrayList<>();
+    private final List<Integer> inProgressStates = new ArrayList<>();
 
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
@@ -81,7 +82,8 @@ class ArmRpoPollServiceImplTest {
     @BeforeEach
     void setUp() {
         armRpoPollService = new ArmRpoPollServiceImpl(armRpoApi, armApiService, armRpoService, userIdentity, fileOperationService,
-                                                      armDataManagementConfiguration, logApi, tempProductionFiles, allowableFailedStates);
+                                                      armDataManagementConfiguration, logApi, tempProductionFiles, allowableFailedStates,
+                                                      inProgressStates);
 
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
@@ -451,7 +453,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenThrow(
-            ArmRpoGetExtendedSearchesByMatterIdException.class);
+            ArmRpoInProgressException.class);
 
         // when
         armRpoPollService.pollArmRpo(false);

@@ -30,6 +30,10 @@ public class ExtendedProductionsByMatterResponse extends BaseRpoResponse {
         private Integer status;
         @JsonProperty("name")
         private String name;
+        @JsonProperty("startProductionTime")
+        private String startProductionTime;
+        @JsonProperty("endProductionTime")
+        private String endProductionTime;
 
     }
 }

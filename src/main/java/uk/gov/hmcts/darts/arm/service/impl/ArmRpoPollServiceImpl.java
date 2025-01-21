@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.exception.ArmRpoGetExtendedSearchesByMatterIdException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
@@ -43,11 +43,13 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private List<File> tempProductionFiles;
 
     private List<Integer> allowableFailedStates;
+    private List<Integer> allowableInProgressStates;
 
     @Override
     public void pollArmRpo(boolean isManualRun) {
         log.info("Polling ARM RPO service - isManualRun: {}", isManualRun);
         setupFailedStatuses();
+        setupAllowableInProgressStates();
         Integer executionId = null;
         tempProductionFiles = new ArrayList<>();
         try {
@@ -99,14 +101,14 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                     }
                     logApi.armRpoPollingSuccessful(executionId);
                 } else {
-                    log.warn("ARM RPO Polling is still in-progress as the getExtendedProductionsByMatter is still not completed");
+                    log.warn("ARM RPO Polling is still in-progress for getExtendedProductionsByMatter");
                 }
             } else {
-                log.warn("ARM RPO Polling is still in-progress as the createExportBasedOnSearchResultsTable is still not completed");
+                log.warn("ARM RPO Polling is still in-progress for createExportBasedOnSearchResultsTable");
             }
             log.info("Polling ARM RPO service completed");
-        } catch (ArmRpoGetExtendedSearchesByMatterIdException e) {
-            log.warn("ARM RPO Polling getExtendedSearchesByMatterId is still in-progress", e.getMessage());
+        } catch (ArmRpoInProgressException e) {
+            log.warn("ARM RPO Polling is still in-progress - ", e.getMessage());
         } catch (Exception e) {
             log.error("Error while polling ARM RPO", e);
             logApi.armRpoPollingFailed(executionId);
@@ -144,6 +146,17 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         }
     }
 
+    private void setupAllowableInProgressStates() {
+        if (CollectionUtils.isEmpty(allowableInProgressStates)) {
+            allowableInProgressStates = List.of(
+                ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId(),
+                ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId(),
+                ArmRpoHelper.getExtendedProductionsByMatterRpoState().getId(),
+                ArmRpoHelper.getProductionOutputFilesRpoState().getId()
+            );
+        }
+    }
+
     private void cleanUpTempFiles() {
         try {
             for (var tempProductionFile : tempProductionFiles) {
@@ -172,22 +185,21 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
         // If the previous state is saveBackgroundSearch and status is completed
         // or the previous state is getExtendedSearchesByMatterId and status is in progress
-        // or the previous state is createExportBasedOnSearchResultsTable and status is in progress, return the entity
+        // or the previous state is createExportBasedOnSearchResultsTable and status is in progress
         // or the previous state is getExtendedProductionsByMatter and status is in progress
+        // or the previous state is getProductionOutputFiles and status is in progress
         if (saveBackgroundSearchCompleted(armRpoExecutionDetailEntity)
-            || getExtendedSearchesByMatterIdInProgress(armRpoExecutionDetailEntity)
-            || createExportBasedOnSearchResultsTableInProgress(armRpoExecutionDetailEntity)
-            || getExtendedProductionsByMatterInProgress(armRpoExecutionDetailEntity)) {
+            || pollServiceInProgress(armRpoExecutionDetailEntity)) {
             return armRpoExecutionDetailEntity;
         }
         // If the job is a manual run, the previous status is failed and the state is greater than saveBackgroundSearch, return the entity
-        if (isManualRun && pollServiceNotInProgress(armRpoExecutionDetailEntity)) {
+        if (isManualRun && pollServiceFailed(armRpoExecutionDetailEntity)) {
             return armRpoExecutionDetailEntity;
         }
         return null;
     }
 
-    private boolean pollServiceNotInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+    private boolean pollServiceFailed(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         if (nonNull(armRpoExecutionDetailEntity.getArmRpoState())
             && ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId())
             && allowableFailedStates.contains(armRpoExecutionDetailEntity.getArmRpoState().getId())) {
@@ -196,22 +208,13 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         return false;
     }
 
-    private boolean getExtendedSearchesByMatterIdInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
-            && ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
-            && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
-    }
-
-    private boolean createExportBasedOnSearchResultsTableInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
-            && ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
-            && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
-    }
-
-    private boolean getExtendedProductionsByMatterInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
-            && ArmRpoHelper.getExtendedProductionsByMatterRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
-            && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+    private boolean pollServiceInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetail) {
+        if (nonNull(armRpoExecutionDetail.getArmRpoState())
+            && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetail.getArmRpoStatus().getId())
+            && allowableInProgressStates.contains(armRpoExecutionDetail.getArmRpoState().getId())) {
+            return true;
+        }
+        return false;
     }
 
     private boolean saveBackgroundSearchCompleted(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {

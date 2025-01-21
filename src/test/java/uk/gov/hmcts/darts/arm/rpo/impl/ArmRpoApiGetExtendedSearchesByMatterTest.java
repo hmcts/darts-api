@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.exception.ArmRpoGetExtendedSearchesByMatterIdException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -113,12 +113,12 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
         when(armRpoClient.getExtendedSearchesByMatter(anyString(), any())).thenReturn(extendedSearchesByMatterResponse);
 
         // when
-        ArmRpoGetExtendedSearchesByMatterIdException armRpoGetExtendedSearchesByMatterIdException = assertThrows(
-            ArmRpoGetExtendedSearchesByMatterIdException.class, () -> armRpoApi.getExtendedSearchesByMatter("token", 1, userAccount));
+        ArmRpoInProgressException armRpoInProgressException = assertThrows(
+            ArmRpoInProgressException.class, () -> armRpoApi.getExtendedSearchesByMatter("token", 1, userAccount));
 
         // then
-        assertThat(armRpoGetExtendedSearchesByMatterIdException.getMessage(), containsString(
-            "Failure during ARM RPO getExtendedSearchesByMatter: The extendedSearchesByMatterResponse is_saved attribute is FALSE for executionId: 1"));
+        assertThat(armRpoInProgressException.getMessage(), containsString(
+            "RPO endpoint extendedSearchesByMatterResponse is already in progress for execution id 1"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
