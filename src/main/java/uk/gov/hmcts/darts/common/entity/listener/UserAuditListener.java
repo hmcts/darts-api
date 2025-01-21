@@ -31,14 +31,12 @@ public class UserAuditListener {
 
     @PrePersist
     void beforeSave(Object object) {
-        log.debug("Before save: {}", object.getClass().getSimpleName());
         updateCreatedBy(object);
         updateModifiedBy(object);
     }
 
     @PreUpdate
     void beforeUpdate(Object object) {
-        log.debug("Before update: {}", object.getClass().getSimpleName());
         updateModifiedBy(object);
     }
 
@@ -68,12 +66,10 @@ public class UserAuditListener {
     void updateCreatedBy(Object object) {
         if (object instanceof CreatedBy entity) {
             if (entity.isSkipUserAudit() || entity.getCreatedBy() != null) {
-                log.debug("Skipping audit as isSkipUserAudit is set or createdBy is already set");
                 return;
             }
             Optional<Integer> userAccountOpt = getUserAccount();
             if (userAccountOpt.isEmpty()) {
-                log.debug("Before save: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
                 return;
             }
             Integer userAccount = userAccountOpt.get();
@@ -86,13 +82,11 @@ public class UserAuditListener {
     void updateModifiedBy(Object object) {
         if (object instanceof LastModifiedBy entity) {
             if (entity.isSkipUserAudit()) {
-                log.debug("Skipping audit as isSkipUserAudit is set");
                 return;
             }
 
             Optional<Integer> userAccountOpt = getUserAccount();
             if (userAccountOpt.isEmpty()) {
-                log.debug("Before update: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
                 return;
             }
             Integer userAccount = userAccountOpt.get();
