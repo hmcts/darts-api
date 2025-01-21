@@ -44,7 +44,8 @@ public class AbstractLockableAutomatedTaskTest {
 
     @Nested
     @ExtendWith(OutputCaptureExtension.class)
-    public class LockedTaskTest {
+    @SuppressWarnings("PMD.SystemPrintln") // System.out.println is used to ensure runnable is executed
+    class LockedTaskTest {
 
 
         @Test
@@ -78,11 +79,15 @@ public class AbstractLockableAutomatedTaskTest {
         @Test
         //Timeout after 10 seconds to ensure the task is killed before completion
         @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @SuppressWarnings({
+            "PMD.AvoidThrowingRawExceptionTypes", //Required to simulate exception
+            "PMD.DoNotUseThreads" //Required to test timeout
+        })
         void lockedTaskRun_shouldFail_whenTaskDoesNotCompletesWithinLockAtMostFor(CapturedOutput output) {
             Runnable task = () -> {
                 try {
                     System.out.println("LockedTaskTest: Task is running");
-                    Thread.sleep(30000);
+                    Thread.sleep(30_000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -145,7 +150,7 @@ public class AbstractLockableAutomatedTaskTest {
 
 
         private AbstractLockableAutomatedTask<AbstractAutomatedTaskConfig> createAbstractLockableAutomatedTask(Runnable runTask) {
-            return new AbstractLockableAutomatedTask<AbstractAutomatedTaskConfig>(
+            return new AbstractLockableAutomatedTask<>(
                 automatedTaskRepository,
                 abstractAutomatedTaskConfig,
                 logApi,
