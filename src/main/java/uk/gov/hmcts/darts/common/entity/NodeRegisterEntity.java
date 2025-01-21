@@ -14,9 +14,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
-
-import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Entity
 @Table(name = NodeRegisterEntity.TABLE_NAME)
@@ -36,7 +35,7 @@ public class NodeRegisterEntity extends CreatedBaseEntity {
     public static final String MAC_ADDRESS = "mac_address";
     public static final String NODE_TYPE = "node_type";
 
-    @Audited(targetAuditMode = NOT_AUDITED)
+    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = COURTROOM_ID, nullable = false)
     private CourtroomEntity courtroom;
