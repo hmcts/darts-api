@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -91,8 +92,8 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         );
         lenient().when(transactionTemplate.execute(any()))
             .thenAnswer(invocation -> {
-                Runnable runnable = invocation.getArgument(0);
-                runnable.run();
+                TransactionCallback transactionCallback = invocation.getArgument(0);
+                transactionCallback.doInTransaction(null);
                 return null;
             });
     }
