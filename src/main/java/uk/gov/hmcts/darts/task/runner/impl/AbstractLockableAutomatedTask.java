@@ -292,6 +292,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                 log.error("Task: {} execution exception", getTaskName(), e);
             } catch (InterruptedException e) {
                 log.error("Task: {} interrupted", getTaskName(), e);
+                Thread.currentThread().interrupt();
             }
             executor.shutdown();
         }
