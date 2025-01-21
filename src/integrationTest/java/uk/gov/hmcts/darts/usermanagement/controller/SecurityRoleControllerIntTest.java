@@ -98,7 +98,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                     "id": 9,
                     "role_name": "MEDIA_ACCESSOR",
                     "display_name": "Media Accessor",
-                    "display_state": true
+                    "display_state": false
                   },
                   {
                     "id": 10,
@@ -129,6 +129,12 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                     "role_name": "MID_TIER",
                     "display_name": "Mid Tier",
                     "display_state": false
+                  },
+                  {
+                    "id": 15,
+                    "role_name": "MEDIA_IN_PERPETUITY",
+                    "display_name": "Media in Perpetuity",
+                    "display_state": true
                   }
                 ]
             """;
