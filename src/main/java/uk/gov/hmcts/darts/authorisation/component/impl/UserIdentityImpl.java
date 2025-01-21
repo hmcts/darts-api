@@ -57,14 +57,18 @@ public class UserIdentityImpl implements UserIdentity {
     public Optional<UserAccountEntity> getUserAccountOptional(Jwt jwt) {
         String guid = getGuidFromToken(jwt);
 
-        return Optional.ofNullable(guid)
+        Optional<UserAccountEntity> userAccount = Optional.ofNullable(guid)
             .map(guidValue -> userAccountRepository.findByAccountGuidAndActive(guidValue, true))
-            .orElseGet(() -> {
-                String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
-                return userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true)
-                    .stream()
-                    .findFirst();
-            });
+            .orElse(Optional.empty());
+
+        if (userAccount.isPresent()) {
+            return userAccount;
+        }
+
+        String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+        return userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true)
+            .stream()
+            .findFirst();
     }
 
     @Override
