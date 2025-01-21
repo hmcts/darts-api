@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
 
 import java.time.OffsetDateTime;
 
@@ -21,6 +23,8 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode
+@Audited
+@AuditTable("arm_automated_task_aud")
 public class ArmAutomatedTaskEntity {
 
     @Id
