@@ -401,7 +401,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.1'
+  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.2'
 
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.4.1'
 
@@ -461,7 +461,7 @@ dependencies {
   implementation 'org.hibernate:hibernate-spatial:6.6.4.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.4.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.5.Final')
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
@@ -496,7 +496,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.116.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.117.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
