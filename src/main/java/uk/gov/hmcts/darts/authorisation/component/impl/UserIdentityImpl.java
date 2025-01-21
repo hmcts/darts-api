@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
 
@@ -50,19 +49,26 @@ public class UserIdentityImpl implements UserIdentity {
 
     @Override
     public UserAccountEntity getUserAccount(Jwt jwt) {
-        UserAccountEntity userAccount = null;
+        return getUserAccountOptional(jwt)
+            .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
+    }
+
+    @Override
+    public Optional<UserAccountEntity> getUserAccountOptional(Jwt jwt) {
         String guid = getGuidFromToken(jwt);
-        if (nonNull(guid)) {
-            // System users will use GUID not email address
-            userAccount = userAccountRepository.findByAccountGuidAndActive(guid, true).orElse(null);
+
+        Optional<UserAccountEntity> userAccount = Optional.ofNullable(guid)
+            .map(guidValue -> userAccountRepository.findByAccountGuidAndActive(guidValue, true))
+            .orElse(Optional.empty());
+
+        if (userAccount.isPresent()) {
+            return userAccount;
         }
-        if (isNull(userAccount)) {
-            String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
-            userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true).stream()
-                .findFirst()
-                .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
-        }
-        return userAccount;
+
+        String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+        return userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true)
+            .stream()
+            .findFirst();
     }
 
     @Override

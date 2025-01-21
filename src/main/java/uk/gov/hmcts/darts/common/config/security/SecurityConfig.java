@@ -39,7 +39,6 @@ import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderCon
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiTrait;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.io.IOException;
 import java.util.Map;
@@ -60,7 +59,6 @@ public class SecurityConfig {
     private final InternalAuthConfigurationProperties internalAuthConfigurationProperties;
     private final InternalAuthProviderConfigurationProperties internalAuthProviderConfigurationProperties;
     private final UserIdentity userIdentity;
-    private final UserAccountRepository userAccountRepository;
     private final JwtDecoder jwtDecoder;
     private static final String TOKEN_BEARER_PREFIX = "Bearer";
 
@@ -137,14 +135,9 @@ public class SecurityConfig {
             @Override
             public Jwt decode(String token) {
                 Jwt jwt = jwtDecoder.decode(token);
-                Integer userId = null;
-                String email = jwt.getClaimAsString("email");
-
-                if (email != null && !email.isBlank()) {
-                    userId = userAccountRepository.findFirstByEmailAddressIgnoreCase(email)
-                        .map(UserAccountEntity::getId)
-                        .orElse(null);
-                }
+                Integer userId = userIdentity.getUserAccountOptional(jwt)
+                    .map(userAccountEntity -> userAccountEntity.getId())
+                    .orElse(null);
                 return new DartsJwt(jwt, userId);
             }
         };
