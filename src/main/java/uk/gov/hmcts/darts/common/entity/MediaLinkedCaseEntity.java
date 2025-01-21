@@ -50,6 +50,7 @@ public class MediaLinkedCaseEntity extends CreatedBaseEntity {
     private MediaLinkedCaseSourceType source;
 
     public MediaLinkedCaseEntity(MediaEntity mediaEntity, CourtCaseEntity courtCase, UserAccountEntity createdBy, MediaLinkedCaseSourceType sourceType) {
+        super();
         this.media = mediaEntity;
         this.courtCase = courtCase;
         this.source = sourceType;

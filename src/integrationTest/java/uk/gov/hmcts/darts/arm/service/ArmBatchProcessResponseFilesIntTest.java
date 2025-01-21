@@ -8,7 +8,6 @@ class ArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessRespons
 
     @BeforeEach
     void setupData() {
-
         armBatchProcessResponseFiles = new ArmBatchProcessResponseFilesImpl(
             externalObjectDirectoryRepository,
             armDataManagementApi,
@@ -18,7 +17,8 @@ class ArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessRespons
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            logApi
+            logApi,
+            deleteArmResponseFilesHelper
         );
     }
 

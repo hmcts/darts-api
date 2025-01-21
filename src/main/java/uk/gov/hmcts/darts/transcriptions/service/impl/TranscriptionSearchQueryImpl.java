@@ -2,8 +2,11 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionIdsAndLatestWorkflowTs;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
@@ -14,6 +17,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -22,10 +26,12 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
 
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
+    private final TranscriptionStatusRepository transcriptionStatusRepository;
 
     @Override
     public Set<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Integer> transcriptionIds) {
 
+        Optional<TranscriptionStatusEntity> transcriptionStatusEntity = transcriptionStatusRepository.findById(TranscriptionStatusEnum.APPROVED.getId());
         var nonLegacyTranscriptions = transcriptionRepository.searchModernisedTranscriptionsFilteringOn(
             transcriptionIds,
             request.getCaseNumber(),
@@ -34,7 +40,8 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
             getCreatedFromTs(request),
             getCreatedTo(request),
             request.getIsManualTranscription(),
-            request.getRequestedBy()
+            request.getRequestedBy(),
+            transcriptionStatusEntity.orElse(null)
         );
 
         var legacyTranscriptions = transcriptionRepository.searchMigratedTranscriptionsFilteringOn(
@@ -45,7 +52,8 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
             getCreatedFromTs(request),
             getCreatedTo(request),
             request.getIsManualTranscription(),
-            request.getRequestedBy()
+            request.getRequestedBy(),
+            transcriptionStatusEntity.orElse(null)
         );
 
         var combinedSearchResults = new HashSet<TranscriptionSearchResult>();

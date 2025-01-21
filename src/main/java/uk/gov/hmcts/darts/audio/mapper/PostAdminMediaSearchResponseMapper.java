@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.audio.mapper;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.hmcts.darts.audio.model.CourthouseResponseObject;
-import uk.gov.hmcts.darts.audio.model.CourtroomResponseObject;
+import uk.gov.hmcts.darts.audio.model.AdminMediaCourthouseResponse;
+import uk.gov.hmcts.darts.audio.model.AdminMediaCourtroomResponse;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -37,15 +37,15 @@ public class PostAdminMediaSearchResponseMapper {
         return responseItem;
     }
 
-    private CourthouseResponseObject createCourthouse(CourthouseEntity courthouse) {
-        CourthouseResponseObject responseCourthouse = new CourthouseResponseObject();
+    private AdminMediaCourthouseResponse createCourthouse(CourthouseEntity courthouse) {
+        AdminMediaCourthouseResponse responseCourthouse = new AdminMediaCourthouseResponse();
         responseCourthouse.setId(courthouse.getId());
         responseCourthouse.setDisplayName(courthouse.getDisplayName());
         return responseCourthouse;
     }
 
-    private CourtroomResponseObject createCourtroom(CourtroomEntity courtroomEntity) {
-        CourtroomResponseObject courtroomResponseObject = new CourtroomResponseObject();
+    private AdminMediaCourtroomResponse createCourtroom(CourtroomEntity courtroomEntity) {
+        AdminMediaCourtroomResponse courtroomResponseObject = new AdminMediaCourtroomResponse();
         courtroomResponseObject.setId(courtroomEntity.getId());
         courtroomResponseObject.setName(courtroomEntity.getName());
         return courtroomResponseObject;

@@ -103,7 +103,7 @@ public class UserAccountStub {
 
     @Transactional
     public void setActiveState(String email, boolean active) {
-        UserAccountEntity userAccountEntity = userAccountRepository.findByEmailAddressIgnoreCase(email).get(0);
+        UserAccountEntity userAccountEntity = userAccountRepository.findFirstByEmailAddressIgnoreCase(email).get();
         userAccountEntity.setActive(active);
         userAccountRepository.save(userAccountEntity);
     }
@@ -217,6 +217,13 @@ public class UserAccountStub {
         var testUser = getIntegrationTestUserAccountEntity("Judge" + identifier);
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = dartsDatabaseSaveStub.save(testUser);
+        return testUser;
+    }
+
+    @Transactional
+    public UserAccountEntity createUser(String identifier) {
+        var testUser = getIntegrationTestUserAccountEntity(identifier);
         testUser = dartsDatabaseSaveStub.save(testUser);
         return testUser;
     }

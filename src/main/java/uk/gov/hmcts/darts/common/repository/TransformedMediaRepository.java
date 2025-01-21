@@ -48,7 +48,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         and ((true = :expired and tm.expiryTime < current_timestamp and mr.status in ('EXPIRED', 'COMPLETED')) or
         (false = :expired and (tm.expiryTime is null or tm.expiryTime >= current_timestamp) and mr.status = 'COMPLETED'))
         and mr.hearing = he
-        order by 1
+        order by tm.id DESC
         """)
     List<TransformedMediaDetailsDto> findTransformedMediaDetails(Integer userId, boolean expired);
 
@@ -82,6 +82,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            (:requestedBy IS NULL OR (tm.createdBy.userFullName ILIKE CONCAT('%', cast (:requestedBy as text), '%'))) AND
            ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR media.createdDateTime >= :requestedAtFrom) AND
            ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
+           ORDER BY media.id DESC
         """)
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,
@@ -91,6 +92,4 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
                                                       String requestedBy,
                                                       OffsetDateTime requestedAtFrom,
                                                       OffsetDateTime requestedAtTo);
-
-
 }

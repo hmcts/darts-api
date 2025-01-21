@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -37,11 +38,12 @@ abstract class TranscriptionSearchGivensBuilder {
 
     public abstract TranscriptionEntity createTranscription();
 
+    public abstract TranscriptionEntity createApprovedTranscription();
 
-    public void allOwnedBy(List<TranscriptionEntity> transcriptions, String owner) {
+
+    public void allOwnedBy(List<TranscriptionEntity> transcriptions, String owner, TranscriptionStatusEnum transcriptionStatusEnum) {
         transcriptions.forEach(t -> {
-            var workflow = PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscription(t);
-            workflow.setWorkflowTimestamp(middayToday());
+            var workflow = PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscription(t, transcriptionStatusEnum);
 
             var workflowActor = workflow.getWorkflowActor();
             workflowActor.setUserFullName(owner);
@@ -104,7 +106,7 @@ abstract class TranscriptionSearchGivensBuilder {
         var transcriptions = persistedTranscriptions(quantity);
         range(0, quantity).forEach(i -> {
             var transcription = transcriptions.get(i);
-            var requester = transcription.getCreatedBy();
+            var requester = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
             requester.setUserFullName(requesterNames[i]);
             dartsDatabase.save(requester);
         });
@@ -120,7 +122,7 @@ abstract class TranscriptionSearchGivensBuilder {
             var transcription = transcriptions.get(i);
             // create workflows
             range(0, 3).forEach(j -> {
-                var workflow = PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscription(transcription);
+                var workflow = PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscription(transcription, TranscriptionStatusEnum.REQUESTED);
                 workflow.setWorkflowTimestamp(middayToday().minusDays(j));
 
                 var workflowActor = workflow.getWorkflowActor();
@@ -164,5 +166,9 @@ abstract class TranscriptionSearchGivensBuilder {
 
     public List<TranscriptionEntity> persistedTranscriptions(int quantity) {
         return generate(this::createTranscription).limit(quantity).toList();
+    }
+
+    public List<TranscriptionEntity> persistedApprovedTranscriptions(int quantity) {
+        return generate(this::createApprovedTranscription).limit(quantity).toList();
     }
 }

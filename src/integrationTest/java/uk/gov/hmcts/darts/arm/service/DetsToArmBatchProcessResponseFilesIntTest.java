@@ -29,10 +29,12 @@ import java.util.UUID;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MISSING_RESPONSE;
 
 @SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount"})
 class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessResponseFilesIntTest {
@@ -54,6 +56,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             currentTimeHelper,
             externalObjectDirectoryService,
             logApi,
+            deleteArmResponseFilesHelper,
             detsDataManagementConfiguration,
             osrRepository
         );
@@ -69,7 +72,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
     @SneakyThrows
     @Test
     void batchProcessResponseFiles_WithMediaReturnsSuccess_UpdateObjectStateRecords() {
-
         // given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
@@ -465,6 +467,128 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr.getIdResponseUfFile()).isNull();
         assertThat(dbOsr.getFlagFileDetsCleanupStatus()).isNull();
         assertThat(dbOsr.getDateFileDetsCleanup()).isNull();
+    }
+
+    @Override
+    @Test
+    void batchProcessResponseFiles_updateEodWithArmMissingResponse_WhenNoResponseFileGenerated() {
+        //given
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
+
+        OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
+        OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
+        MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifestFile1 = prefix() + "_" + manifest1Uuid + ".a360";
+
+        ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
+            .save(createObjectStateRecordEntity(111L));
+
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+        armEod1.setTransferAttempts(1);
+        armEod1.setVerificationAttempts(1);
+        armEod1.setManifestFile(manifestFile1);
+        armEod1.setChecksum("7017013d05bcc5032e142049081821d6");
+        armEod1.setOsrUuid(objectStateRecordEntity.getUuid());
+        armEod1.setObjectStateRecordEntity(objectStateRecordEntity);
+        dartsPersistence.save(armEod1);
+
+        List<String> blobNamesAndPaths = new ArrayList<>();
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
+        blobNamesAndPaths.add(blobNameAndPath1);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(blobNamesAndPaths)
+            .build();
+
+        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
+        String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(null);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+
+        // when
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+
+        // then
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, externalObjectDirectoryEntities.size());
+        ExternalObjectDirectoryEntity foundEod = externalObjectDirectoryEntities.getFirst();
+        assertEquals("2023-06-10T14:08:28.316382Z", foundEod.getInputUploadProcessedTs().toString());
+        assertEquals(ARM_MISSING_RESPONSE.getId(), foundEod.getStatus().getId());
+        assertEquals(111L, foundEod.getObjectStateRecordEntity().getUuid());
+    }
+
+    @Test
+    void batchProcessResponseFiles_updateEodWithArmMissingResponse_WhenNoResponseFileGeneratedAndNoOsrObject() {
+        //given
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
+
+        OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
+        OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
+        MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifestFile1 = prefix() + "_" + manifest1Uuid + ".a360";
+
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+        armEod1.setTransferAttempts(1);
+        armEod1.setVerificationAttempts(1);
+        armEod1.setManifestFile(manifestFile1);
+        armEod1.setChecksum("7017013d05bcc5032e142049081821d6");
+        dartsPersistence.save(armEod1);
+
+        List<String> blobNamesAndPaths = new ArrayList<>();
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
+        blobNamesAndPaths.add(blobNameAndPath1);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(blobNamesAndPaths)
+            .build();
+
+        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
+        String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(null);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+
+        // when
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+
+        // then
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, externalObjectDirectoryEntities.size());
+        ExternalObjectDirectoryEntity foundEod = externalObjectDirectoryEntities.getFirst();
+        assertEquals("2023-06-10T14:08:28.316382Z", foundEod.getInputUploadProcessedTs().toString());
+        assertEquals(ARM_MISSING_RESPONSE.getId(), foundEod.getStatus().getId());
+        assertEquals(null, foundEod.getObjectStateRecordEntity());
+    }
+
+    private ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {
+        ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
+        objectStateRecordEntity.setUuid(uuid);
+        return objectStateRecordEntity;
     }
 
 }

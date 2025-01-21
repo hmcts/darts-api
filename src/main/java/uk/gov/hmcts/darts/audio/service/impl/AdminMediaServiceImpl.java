@@ -12,13 +12,18 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.PostAdminMediasSearchHelper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMediaMapper;
+import uk.gov.hmcts.darts.audio.mapper.CourthouseMapper;
+import uk.gov.hmcts.darts.audio.mapper.CourtroomMapper;
 import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
+import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionMediaItem;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
-import uk.gov.hmcts.darts.audio.model.PostAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
@@ -40,7 +45,6 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +57,6 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     private final MediaRepository mediaRepository;
     private final AdminMediaMapper adminMediaMapper;
-    private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
     private final PostAdminMediasSearchHelper postAdminMediasSearchHelper;
     private final SearchMediaValidator searchMediaValidator;
     private final TransformedMediaRepository transformedMediaRepository;
@@ -62,6 +65,12 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
     private final AuditApi auditApi;
+    private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
+
+    private final CourthouseMapper courthouseMapper;
+    private final CourtroomMapper courtroomMapper;
+    private final ObjectActionMapper objectActionMapper;
+
 
     @Value("${darts.audio.admin-search.max-results}")
     private Integer adminSearchMaxResults;
@@ -69,6 +78,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     @Getter(AccessLevel.PACKAGE)
     private boolean manualDeletionEnabled;
 
+    @Override
     public AdminMediaResponse getMediasById(Integer id) {
         var mediaEntity = mediaRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
@@ -120,22 +130,53 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         Set<Integer> uniqueIds = new HashSet<>();
         return responseMediaItemList.stream()
             .filter(item -> uniqueIds.add(item.getId()))
+            .sorted((o1, o2) -> o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()))
             .collect(Collectors.toList());
     }
 
     @Override
-    public List<PostAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion() {
+    public List<GetAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion() {
         if (!this.isManualDeletionEnabled()) {
             throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");
         }
 
-        return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason().stream()
-            .map(ObjectAdminActionEntity::getMedia)
-            .map(adminMarkedForDeletionMapper::toApiModel)
-            .filter(media -> media != null)
-            .sorted(Comparator.comparing(PostAdminMediasMarkedForDeletionItem::getMediaId))
+        return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason()
+            .stream()
+            .collect(Collectors.groupingBy(object -> {
+                MediaEntity media = object.getMedia();
+                return object.getTicketReference() + "-" + object.getHiddenBy().getId() + "-" + object.getObjectHiddenReason().getId()
+                    + "-" + media.getCourtroom().getId() + "-" + media.getStart() + "-" + media.getEnd();
+            }))
+            .values()
+            .stream()
+            .filter(objectAdminActionEntities -> !objectAdminActionEntities.isEmpty())
+            .map(actions -> toGetAdminMediasMarkedForDeletionItem(actions))
             .toList();
     }
+
+    GetAdminMediasMarkedForDeletionItem toGetAdminMediasMarkedForDeletionItem(List<ObjectAdminActionEntity> actions) {
+        ObjectAdminActionEntity base = actions.get(0);
+        List<GetAdminMediasMarkedForDeletionMediaItem> media = actions.stream()
+            .map(action -> action.getMedia())
+            .map(mediaEntity -> {
+                GetAdminMediasMarkedForDeletionMediaItem item = adminMarkedForDeletionMapper.toGetAdminMediasMarkedForDeletionMediaItem(mediaEntity);
+                item.setVersionCount(mediaRepository.getVersionCount(mediaEntity.getChronicleId()));
+                return item;
+            })
+            .toList();
+
+        GetAdminMediasMarkedForDeletionItem item = new GetAdminMediasMarkedForDeletionItem();
+        item.setMedia(media);
+        item.setStartAt(base.getMedia().getStart());
+        item.setEndAt(base.getMedia().getEnd());
+        item.setCourtroom(courtroomMapper.toApiModel(base.getMedia().getCourtroom()));
+        item.setCourthouse(courthouseMapper.toApiModel(base.getMedia().getCourtroom().getCourthouse()));
+        GetAdminMediasMarkedForDeletionAdminAction adminAction = objectActionMapper.toGetAdminMediasMarkedForDeletionAdminAction(base);
+        adminAction.setComments(actions.stream().map(ObjectAdminActionEntity::getComments).toList());
+        item.setAdminAction(adminAction);
+        return item;
+    }
+
 
     private List<HearingEntity> getApplicableMediaHearings(MediaEntity mediaEntity, List<Integer> hearingsToMatchOn) {
         List<HearingEntity> hearingEntityList = CollectionUtils.isEmpty(hearingsToMatchOn) ? mediaEntity.getHearingList() : new ArrayList<>();

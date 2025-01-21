@@ -16,7 +16,10 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 public class GetAnnotationsResponseMapper {
 
     public List<Annotation> mapToAnnotations(List<AnnotationEntity> annotationEntities, Integer hearingId) {
-        return emptyIfNull(annotationEntities).stream().map(annotationEntity -> mapToAnnotation(annotationEntity, hearingId)).collect(Collectors.toList());
+        return emptyIfNull(annotationEntities)
+            .stream()
+            .map(annotationEntity -> mapToAnnotation(annotationEntity, hearingId))
+            .collect(Collectors.toList());
     }
 
     private Annotation mapToAnnotation(AnnotationEntity annotationEntity, Integer hearingId) {
@@ -32,11 +35,18 @@ public class GetAnnotationsResponseMapper {
     }
 
     private HearingEntity findHearingInList(List<HearingEntity> hearingEntities, Integer hearingId) {
-        return hearingEntities.stream().filter(hearing -> hearing.getId().equals(hearingId)).findAny().orElse(new HearingEntity());
+        return hearingEntities
+            .stream()
+            .filter(hearing -> hearing.getId().equals(hearingId))
+            .findAny()
+            .orElse(new HearingEntity());
     }
 
     private List<AnnotationDocument> mapToAnnotationDocuments(List<AnnotationDocumentEntity> annotationDocumentEntities) {
-        return emptyIfNull(annotationDocumentEntities).stream().map(GetAnnotationsResponseMapper::mapToAnnotationDocument).collect(Collectors.toList());
+        return emptyIfNull(annotationDocumentEntities)
+            .stream()
+            .map(GetAnnotationsResponseMapper::mapToAnnotationDocument)
+            .collect(Collectors.toList());
     }
 
     private AnnotationDocument mapToAnnotationDocument(AnnotationDocumentEntity annotationDocumentEntity) {
@@ -48,6 +58,4 @@ public class GetAnnotationsResponseMapper {
         annotationDocument.setUploadedTs(annotationDocumentEntity.getUploadedDateTime());
         return annotationDocument;
     }
-
-
 }

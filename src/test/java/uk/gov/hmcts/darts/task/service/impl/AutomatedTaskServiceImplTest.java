@@ -12,11 +12,14 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.TriggerTask;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
@@ -310,6 +313,7 @@ class AutomatedTaskServiceImplTest {
     @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     void taskFailedToBeStartedMovesToFailedStatus() {
         when(mockAutomatedTaskConfigurationProperties.getSystemUserEmail()).thenReturn("system@darts.test");
+        UserAccountEntity userAccount = new UserAccountEntity();
         when(lockService.getLockAtMostFor()).thenReturn(Duration.of(1, ChronoUnit.HOURS));
 
         var failingAutomatedTask = new AbstractLockableAutomatedTask<>(
@@ -336,6 +340,9 @@ class AutomatedTaskServiceImplTest {
                 return "*/7 * * * * *";
             }
         };
+        UserAccountRepository userAccountRepository = mock(UserAccountRepository.class);
+        ReflectionTestUtils.setField(failingAutomatedTask, "userAccountRepository", userAccountRepository);
+        when(userAccountRepository.findFirstByEmailAddressIgnoreCase("system@darts.test")).thenReturn(Optional.of(userAccount));
 
         when(mockAutomatedTaskRepository.findByTaskName(failingAutomatedTask.getTaskName()))
             .thenThrow(RuntimeException.class);

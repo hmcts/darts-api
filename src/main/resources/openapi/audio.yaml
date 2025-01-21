@@ -454,7 +454,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PostAdminMediasMarkedForDeletionItem'
+                  $ref: '#/components/schemas/GetAdminMediasMarkedForDeletionItem'
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS
@@ -462,6 +462,55 @@ paths:
 
 components:
   schemas:
+    GetAdminMediasMarkedForDeletionItem:
+      type: object
+      properties:
+        media:
+          type: array
+          items:
+              $ref: '#/components/schemas/GetAdminMediasMarkedForDeletionMediaItem'
+        start_at:
+          type: string
+          format: date-time
+          description: start timestamp
+        end_at:
+          type: string
+          format: date-time
+          description: end timestamp
+        courthouse:
+          $ref: '#/components/schemas/AdminMediaCourthouseResponse'
+        courtroom:
+          $ref: '#/components/schemas/AdminMediaCourtroomResponse'
+        admin_action:
+          $ref: '#/components/schemas/GetAdminMediasMarkedForDeletionAdminAction'
+      required:
+        - media
+        - start_at
+        - end_at
+        - courthouse
+        - courtroom
+        - admin_action
+    GetAdminMediasMarkedForDeletionAdminAction:
+      type: object
+      properties:
+        ticket_reference:
+          type: string
+          example: "1234"
+        hidden_by_id:
+          type: integer
+          example: 1
+        reason_id:
+          type: integer
+          example: 1
+        comments:
+          type: array
+          items:
+            type: string
+      required:
+        - ticket_reference
+        - hidden_by_id
+        - reason_id
+        - comments
     PostAdminMediasSearchRequest:
       type: object
       properties:
@@ -476,12 +525,37 @@ components:
         courtroom_name:
           type: string
           example: "1"
+          maxLength: 64
         hearing_start_at:
           type: string
           format: date
         hearing_end_at:
           type: string
           format: date
+    GetAdminMediasMarkedForDeletionMediaItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        channel:
+          type: integer
+          example: 1
+        total_channels:
+          type: integer
+          example: 1
+        is_current:
+          type: boolean
+          example: true
+        version_count:
+          type: integer
+          example: 1
+      required:
+        - id
+        - channel
+        - total_channels
+        - is_current
+        - version_count
 
     PostAdminMediasSearchResponseItem:
       type: object
@@ -491,9 +565,9 @@ components:
           example: 1
           description: Unique media identifier, used internally by DARTS.
         courthouse:
-          $ref: '#/components/schemas/CourthouseResponseObject'
+          $ref: '#/components/schemas/AdminMediaCourthouseResponse'
         courtroom:
-          $ref: '#/components/schemas/CourtroomResponseObject'
+          $ref: '#/components/schemas/AdminMediaCourtroomResponse'
         start_at:
           type: string
           format: date-time
@@ -507,7 +581,6 @@ components:
           example: 1
         is_hidden:
           type: boolean
-
     PostAdminMediasMarkedForDeletionItem:
       type: object
       properties:
@@ -525,30 +598,6 @@ components:
           $ref: '#/components/schemas/AdminMediaCourtroomResponse'
         admin_action:
           $ref: '#/components/schemas/AdminActionResponse'
-
-
-    CourthouseResponseObject:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-          description: the courthouse ID
-        display_name:
-          type: string
-          example: Swansea
-
-    CourtroomResponseObject:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-          description: the courtroom ID
-        name:
-          type: string
-          example: "1"
-
     AdminMediaResponse:
       type: object
       properties:
@@ -685,7 +734,6 @@ components:
               $ref: '#/components/schemas/CourtroomId'
             name:
               $ref: '#/components/schemas/CourtroomName'
-
     GetAdminMediaResponseItem:
       type: object
       required:

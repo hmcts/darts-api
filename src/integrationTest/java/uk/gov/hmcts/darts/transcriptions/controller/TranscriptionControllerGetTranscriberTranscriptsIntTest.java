@@ -176,7 +176,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                   "transcription_urgency_id": 1,
                   "description": "Standard",
                   "priority_order": 999
-                }
+                },
+                "approved_ts": ":expectedStateChangeTs"
               }
             ]
             """.replace(":expectedStateChangeTs", expectedStateChangeTs);
@@ -236,7 +237,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                 "status": "Approved",
                 "requested_ts": "2023-11-23T16:25:55.304517Z",
                 "state_change_ts": ":expectedStateChangeTs",
-                "is_manual": true
+                "is_manual": true,
+                "approved_ts": ":expectedStateChangeTs"
               }
             ]
             """.replace(":expectedStateChangeTs", expectedStateChangeTs);
@@ -282,7 +284,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                         "description": "Standard",
                         "priority_order": 999,
                         "transcription_urgency_id": 1
-                    }
+                    },
+                    "approved_ts": ":expectedStateChangeTodayTs"
                 },
                 {
                     "case_id": -1,
@@ -299,7 +302,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                         "description": "Standard",
                         "priority_order": 999,
                         "transcription_urgency_id": 1
-                    }
+                    },
+                    "approved_ts": ":expectedStateChangeTs"
                 }
             ]
             """.replace(":expectedStateChangeTs", expectedStateChangeTs)

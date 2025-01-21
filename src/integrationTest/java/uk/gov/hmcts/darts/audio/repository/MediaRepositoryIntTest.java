@@ -234,6 +234,23 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         assertEquals(1, linkedMediaForCaseC.size());
     }
 
+
+    @Test
+    void mediaRepositoryIntTest_shouldReutrnTheCountOfMatchingChronicleIds() {
+        var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media1.setChronicleId("someIdSingle");
+        dartsPersistence.save(media1);
+        var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media2.setChronicleId("someIdMultiple");
+        dartsPersistence.save(media2);
+        var media3 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media3.setChronicleId("someIdMultiple");
+        dartsPersistence.save(media3);
+
+        assertThat(mediaRepository.getVersionCount("someIdSingle")).isEqualTo(1);
+        assertThat(mediaRepository.getVersionCount("someIdMultiple")).isEqualTo(2);
+    }
+
     private MediaLinkedCaseEntity createMediaLinkedCase(MediaEntity media, CourtCaseEntity courtCase) {
         MediaLinkedCaseEntity mediaLinkedCase = new MediaLinkedCaseEntity();
         mediaLinkedCase.setMedia(media);

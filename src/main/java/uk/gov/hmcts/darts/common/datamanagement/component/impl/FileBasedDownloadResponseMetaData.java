@@ -82,9 +82,11 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         private final InputStream inputStream;
 
         public FileInputStreamWrapper(InputStream inputStream) {
+            super();
             this.inputStream = inputStream;
         }
 
+        @Override
         public int read() throws IOException {
             return inputStream.read();
         }

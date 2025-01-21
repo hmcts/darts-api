@@ -28,9 +28,7 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,10 +49,24 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ArmBatchProcessResponseFilesImplTest {
 
-    public static final String PREFIX = "DARTS";
-    public static final String RESPONSE_FILENAME_EXTENSION = "a360";
+    private static final String PREFIX = "DARTS";
+    private static final String RESPONSE_FILENAME_EXTENSION = "a360";
+    private static final String INPUT_UPLOAD_RESPONSE = """
+            {
+                "operation": "input_upload",
+                "timestamp": "<datetimekey>",
+                "status": 1,
+                "exception_description": null,
+                "error_status": null,
+                "filename": "DARTS_fa292f18-55e7-4d58-b610-0435a37900a2",
+                "submission_folder": "/dropzone/DARTS/submission",
+                "file_hash": "a11f992a43ea6d0b192d57fe44403942"
+            }
+        """;
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
     private static final Integer BATCH_SIZE = 2;
+    private static final String DATETIMEKEY = "<datetimekey>";
+    private static final String INPUT_UPLOAD_RESPONSE_DATETIME = "2021-08-01T10:08:28.316382+00:00";
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -74,6 +86,8 @@ class ArmBatchProcessResponseFilesImplTest {
     private ExternalObjectDirectoryService externalObjectDirectoryService;
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
+    @Mock
+    private DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
 
     private ArmBatchProcessResponseFilesImplProtectedMethodSupport armBatchProcessResponseFiles;
 
@@ -92,8 +106,10 @@ class ArmBatchProcessResponseFilesImplTest {
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            logApi
+            logApi,
+            deleteArmResponseFilesHelper
         ));
+
 
     }
 
@@ -104,17 +120,19 @@ class ArmBatchProcessResponseFilesImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void batchProcessResponseFilesWithBatchSizeTwo() throws Exception {
+    void batchProcessResponseFilesWithBatchSizeTwo() {
 
         // given
         final String continuationToken = null;
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
+        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]");
+
         BinaryData binaryData = mock(BinaryData.class);
         when(armDataManagementApi.getBlobData(any())).thenReturn(binaryData);
-        final String bindaryDataString = "{\"timestamp\": \"2021-08-10T10:00:00.000000\"}";
-        when(binaryData.toString()).thenReturn(bindaryDataString);
+        String inputUploadResponse = INPUT_UPLOAD_RESPONSE.replace(DATETIMEKEY, INPUT_UPLOAD_RESPONSE_DATETIME);
+        when(binaryData.toString()).thenReturn(inputUploadResponse);
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifest2Uuid = UUID.randomUUID().toString();
@@ -153,8 +171,9 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
         verify(armDataManagementApi).getBlobData(blobNameAndPath2);
 
-        verify(externalObjectDirectoryArmDropZone).setInputUploadProcessedTs(OffsetDateTime.of(2021, 8, 10, 10, 0, 0, 0, ZoneOffset.UTC));
-        verify(externalObjectDirectoryEntity2).setInputUploadProcessedTs(OffsetDateTime.of(2021, 8, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        OffsetDateTime inputUploadProcessedTs = OffsetDateTime.parse(INPUT_UPLOAD_RESPONSE_DATETIME);
+        verify(externalObjectDirectoryArmDropZone).setInputUploadProcessedTs(inputUploadProcessedTs);
+        verify(externalObjectDirectoryEntity2).setInputUploadProcessedTs(inputUploadProcessedTs);
 
         verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryArmDropZone));
         verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryEntity2));
@@ -163,27 +182,29 @@ class ArmBatchProcessResponseFilesImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void batchProcessResponseFilesWithBatchSizeTwoWithFailedToUpload() throws Exception {
+    void batchProcessResponseFilesWithBatchSizeTwoWithFailedToUpload() {
 
         // given
         final String continuationToken = null;
 
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
+        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]");
+
         BinaryData binaryData1 = mock(BinaryData.class);
         BinaryData binaryData2 = mock(BinaryData.class);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
-        LocalDateTime dateTime1 = LocalDateTime.now().plusDays(1);
-        LocalDateTime dateTime2 = LocalDateTime.now().minusDays(1);
+        String dateTime1 = "2027-08-01T10:08:28.316382+00:00";
+        String dateTime2 = INPUT_UPLOAD_RESPONSE_DATETIME;
 
         when(armDataManagementApi.getBlobData(any())).thenReturn(binaryData1, binaryData2);
-        final String bindaryDataString1 = "{\"timestamp\": \"" + dateTime1 + "\"}";
-        final String bindaryDataString2 = "{\"timestamp\": \"" + dateTime2 + "\"}";
+        final String inputUploadResponse1 = INPUT_UPLOAD_RESPONSE.replace(DATETIMEKEY, dateTime1);
+        final String inputUploadResponse2 = INPUT_UPLOAD_RESPONSE.replace(DATETIMEKEY, dateTime2);
 
-        when(binaryData1.toString()).thenReturn(bindaryDataString1);
-        when(binaryData2.toString()).thenReturn(bindaryDataString2);
+        when(binaryData1.toString()).thenReturn(inputUploadResponse1);
+        when(binaryData2.toString()).thenReturn(inputUploadResponse2);
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifest2Uuid = UUID.randomUUID().toString();
@@ -207,7 +228,8 @@ class ArmBatchProcessResponseFilesImplTest {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = mock(ExternalObjectDirectoryEntity.class);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = mock(ExternalObjectDirectoryEntity.class);
-        when(externalObjectDirectoryEntity2.getInputUploadProcessedTs()).thenReturn(dateTime2.atOffset(ZoneOffset.UTC));
+        OffsetDateTime inputUploadProcessedTs2 = OffsetDateTime.parse(dateTime2);
+        when(externalObjectDirectoryEntity2.getInputUploadProcessedTs()).thenReturn(inputUploadProcessedTs2);
 
         when(externalObjectDirectoryRepository.findAllByStatusAndManifestFile(any(), any()))
             .thenReturn(List.of(externalObjectDirectoryEntity1), List.of(externalObjectDirectoryEntity2));
@@ -224,7 +246,6 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
         verify(armDataManagementApi).getBlobData(blobNameAndPath2);
 
-        verify(externalObjectDirectoryEntity1).setInputUploadProcessedTs(dateTime1.atOffset(ZoneOffset.UTC));
         verify(externalObjectDirectoryEntity2, never()).setInputUploadProcessedTs(any());
 
         verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryEntity1));
@@ -365,9 +386,10 @@ class ArmBatchProcessResponseFilesImplTest {
                                                                       ArmDataManagementConfiguration armDataManagementConfiguration, ObjectMapper objectMapper,
                                                                       UserIdentity userIdentity,
                                                                       CurrentTimeHelper currentTimeHelper,
-                                                                      ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi) {
+                                                                      ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi,
+                                                                      DeleteArmResponseFilesHelper deleteArmResponseFilesHelper) {
             super(externalObjectDirectoryRepository, armDataManagementApi, fileOperationService, armDataManagementConfiguration,
-                  objectMapper, userIdentity, currentTimeHelper, externalObjectDirectoryService, logApi);
+                  objectMapper, userIdentity, currentTimeHelper, externalObjectDirectoryService, logApi, deleteArmResponseFilesHelper);
         }
 
         @Override

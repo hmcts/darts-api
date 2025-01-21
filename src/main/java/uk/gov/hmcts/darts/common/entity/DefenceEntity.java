@@ -41,7 +41,7 @@ public class DefenceEntity extends CreatedModifiedBaseEntity implements IsNamedE
     @Column(name = DEFENCE_NAME)
     private String name;
 
-
+    @Override
     public void setName(String name) {
         this.name = DataUtil.trim(name);
     }

@@ -53,7 +53,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
            AND me.channel = :channel
            AND me.isHidden = false
            AND me.isCurrent = true
-           ORDER BY me.start
+           ORDER BY me.start DESC, me.end DESC
         """)
     List<MediaEntity> findAllByHearingIdAndChannelAndIsCurrentTrue(Integer hearingId, Integer channel);
 
@@ -106,4 +106,11 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     List<MediaEntity> findAllLinkedByMediaLinkedCaseByCaseId(Integer caseId);
 
     boolean existsByIdAndIsHiddenFalse(Integer mediaId);
+
+    @Query("""
+           SELECT COUNT(me)
+           FROM MediaEntity me
+           WHERE me.chronicleId = :chronicleId
+        """)
+    Integer getVersionCount(String chronicleId);
 }

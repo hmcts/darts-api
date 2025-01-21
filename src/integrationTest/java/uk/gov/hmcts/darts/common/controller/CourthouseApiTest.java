@@ -230,11 +230,14 @@ class CourthouseApiTest extends IntegrationBase {
         var region = minimalRegion();
         var secGrp1 = createGroupForRole(SUPER_USER);
         var secGrp2 = createGroupForRole(SUPER_USER);
+        dartsDatabase.save(region);
+        dartsDatabase.save(secGrp1);
+        dartsDatabase.save(secGrp2);
 
         courthouse.setRegion(region);
         courthouse.setSecurityGroups(Set.of(secGrp1, secGrp2));
 
-        entityGraphPersistence.persist(courthouse);
+        dartsDatabase.save(courthouse);
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", courthouse.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE);

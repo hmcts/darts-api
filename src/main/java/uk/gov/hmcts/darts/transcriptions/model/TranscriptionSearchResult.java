@@ -11,7 +11,8 @@ public record TranscriptionSearchResult(
     LocalDate hearingDate,
     OffsetDateTime requestedAt,
     Integer transcriptionStatusId,
-    Boolean isManualTranscription
+    Boolean isManualTranscription,
+    OffsetDateTime approvedAt
 ) {
 
     @Override

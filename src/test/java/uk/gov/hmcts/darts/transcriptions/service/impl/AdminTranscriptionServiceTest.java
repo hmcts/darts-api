@@ -163,18 +163,18 @@ class AdminTranscriptionServiceTest {
 
         var searchResponses = adminTranscriptionService.searchTranscriptions(new TranscriptionSearchRequest());
 
-        assertThat(searchResponses).extracting("transcriptionId").containsExactly(1, 2, 3);
-        assertThat(searchResponses).extracting("caseNumber").containsExactly("case-number-1", "case-number-2", "case-number-3");
-        assertThat(searchResponses).extracting("courthouseId").containsExactly(11, 12, 13);
+        assertThat(searchResponses).extracting("transcriptionId").containsExactly(3, 2, 1);
+        assertThat(searchResponses).extracting("caseNumber").containsExactly("case-number-3", "case-number-2", "case-number-1");
+        assertThat(searchResponses).extracting("courthouseId").containsExactly(13, 12, 11);
         assertThat(searchResponses).extracting("hearingDate").containsExactly(
-            LocalDate.parse("2020-01-02"),
+            LocalDate.parse("2020-01-04"),
             LocalDate.parse("2020-01-03"),
-            LocalDate.parse("2020-01-04"));
+            LocalDate.parse("2020-01-02"));
         assertThat(searchResponses).extracting("requestedAt").containsExactly(
-            OffsetDateTime.parse("2021-02-03T00:00:00Z"),
+            OffsetDateTime.parse("2021-02-05T00:00:00Z"),
             OffsetDateTime.parse("2021-02-04T00:00:00Z"),
-            OffsetDateTime.parse("2021-02-05T00:00:00Z"));
-        assertThat(searchResponses).extracting("transcriptionStatusId").containsExactly(21, 22, 23);
+            OffsetDateTime.parse("2021-02-03T00:00:00Z"));
+        assertThat(searchResponses).extracting("transcriptionStatusId").containsExactly(23, 22, 21);
         assertThat(searchResponses).extracting("isManualTranscription").containsExactly(false, true, false);
 
         verifyNoMoreInteractions(transcriptionSearchQuery);
@@ -387,7 +387,8 @@ class AdminTranscriptionServiceTest {
             LocalDate.parse("2020-01-01").plusDays(seed),
             OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed),
             seed + 20,
-            seed % 2 == 0);
+            seed % 2 == 0,
+            OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed));
     }
 
     @Nested

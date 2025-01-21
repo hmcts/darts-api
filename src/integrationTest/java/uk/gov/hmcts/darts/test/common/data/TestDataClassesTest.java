@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.test.common.data;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A test to test the integrity of our data insertion classes. This class is useful to ensure we fail fast on
@@ -26,22 +29,27 @@ class TestDataClassesTest extends IntegrationBase {
     private DartsPersistence dartsPersistence;
 
 
-    @Test
-    void testRequestMinimal() throws Exception {
-        List<Class<?>> classList = getPersistableClasses();
-        for (Class<?> cls : classList) {
-            Persistable<?,?,?> obj = (Persistable<?,?,?>) cls.getDeclaredConstructors()[0].newInstance();
-            BuilderHolder<?,?> retrieve = obj.someMinimalBuilderHolder();
-            Object entity = retrieve.build().getEntity();
+    @ParameterizedTest(name = "testRequestMinimal - {0}")
+    @MethodSource("persistableClassesProvider")
+    void testRequestMinimal(Class<?> cls) throws Exception {
+        Persistable<?, ?, ?> obj = (Persistable<?, ?, ?>) cls.getDeclaredConstructors()[0].newInstance();
+        BuilderHolder<?, ?> retrieve = obj.someMinimalBuilderHolder();
+        Object entity = retrieve.build().getEntity();
 
-            log.info("TESTING DATA CLASS " + cls.getName());
-            dartsPersistence.getClass()
-                .getMethod("save", entity.getClass()).invoke(dartsPersistence,
-                                                                             entity);
-        }
+        dartsPersistence.getClass()
+            .getMethod("save", entity.getClass())
+            .invoke(dartsPersistence, entity);
+
     }
 
-    private List<Class<?>> getPersistableClasses() throws ClassNotFoundException {
+
+    static Stream<Arguments> persistableClassesProvider() throws ClassNotFoundException {
+        return getPersistableClasses()
+            .stream()
+            .map(cls -> Arguments.of(cls));
+    }
+
+    private static List<Class<?>> getPersistableClasses() throws ClassNotFoundException {
         List<Class<?>> classList = new ArrayList<>();
         BeanDefinitionRegistry bdr = new SimpleBeanDefinitionRegistry();
         ClassPathBeanDefinitionScanner classPathBeanDefinitionScanner = new ClassPathBeanDefinitionScanner(bdr);

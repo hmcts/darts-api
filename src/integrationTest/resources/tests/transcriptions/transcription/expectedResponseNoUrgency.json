@@ -21,5 +21,6 @@
   "transcription_end_ts": "2023-01-01T12:00:00Z",
   "courtroom": "SOME-COURTROOM",
   "transcription_object_id": "legacyObjectId",
-  "hide_request_from_requestor": false
+  "hide_request_from_requestor": false,
+  "approved" : "2023-06-20T10:00:00Z"
 }

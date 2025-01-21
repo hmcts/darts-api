@@ -6,6 +6,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.audio.model.AdminActionResponse;
 import uk.gov.hmcts.darts.audio.model.AdminMediaHearingResponseItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 
@@ -48,4 +49,11 @@ public interface ObjectActionMapper {
         return toApiModel(objectAdminActionEntities.get(0));
     }
 
+    @Mappings({
+        @Mapping(target = "ticketReference", source = "ticketReference"),
+        @Mapping(target = "reasonId", source = "objectHiddenReason.id"),
+        @Mapping(target = "hiddenById", source = "hiddenBy.id"),
+        @Mapping(target = "comments", ignore = true)
+    })
+    GetAdminMediasMarkedForDeletionAdminAction toGetAdminMediasMarkedForDeletionAdminAction(ObjectAdminActionEntity objectAdminActionEntity);
 }

@@ -62,7 +62,7 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
         FROM CaseRetentionEntity c, CourtCaseEntity case
         WHERE case.id = :caseId
         AND c.courtCase = case
-        ORDER BY c.createdDateTime
+        ORDER BY c.lastModifiedDateTime desc
         """
     )
     List<CaseRetentionEntity> findByCaseId(Integer caseId);

@@ -21,6 +21,7 @@ public record TranscriptionDocumentResult(
 ) {
 
     @SuppressWarnings({"PMD.SimplifyBooleanReturns"})
+    @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;

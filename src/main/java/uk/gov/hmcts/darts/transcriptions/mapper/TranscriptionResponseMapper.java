@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
@@ -63,6 +64,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil.getRequestedById;
 import static uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil.getRequestedByName;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TranscriptionResponseMapper {
@@ -236,6 +238,7 @@ public class TranscriptionResponseMapper {
             .toList();
 
         transcriptionResponse.setLegacyComments(legacyComments.isEmpty() ? null : legacyComments);
+        transcriptionResponse.setApproved(mapToTranscriptionWorkflowsApprovedTimestamp(transcriptionEntity.getTranscriptionWorkflowEntities()));
 
         return transcriptionResponse;
     }
@@ -306,7 +309,16 @@ public class TranscriptionResponseMapper {
         courthouseEntityOptional.ifPresent(courthouseEntity -> details.setCourthouseId(courthouseEntity.getId()));
 
         details.requestedAt(transcriptionEntity.getCreatedDateTime());
+        details.approvedAt(mapToTranscriptionWorkflowsApprovedTimestamp(transcriptionEntity.getTranscriptionWorkflowEntities()));
         return details;
+    }
+
+    private OffsetDateTime mapToTranscriptionWorkflowsApprovedTimestamp(List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {
+        Optional<TranscriptionWorkflowEntity> transcriptionWorkflowEntity = transcriptionWorkflowEntities.stream()
+            .filter(trw -> TranscriptionStatusEnum.APPROVED.getId().equals(trw.getTranscriptionStatus().getId()))
+            .max(Comparator.comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp));
+
+        return transcriptionWorkflowEntity.map(TranscriptionWorkflowEntity::getWorkflowTimestamp).orElse(null);
     }
 
     public SearchTranscriptionDocumentResponse mapSearchTranscriptionDocumentResult(TranscriptionDocumentResult transcriptionDocumentResponse) {
@@ -377,7 +389,7 @@ public class TranscriptionResponseMapper {
             .clipId(entity.getClipId())
             .checksum(entity.getChecksum())
             .lastModifiedAt(entity.getLastModifiedTimestamp())
-            .lastModifiedBy(entity.getLastModifiedBy().getId())
+            .lastModifiedBy(entity.getLastModifiedById())
             .adminAction(buildAdminActionForHiddenValue(entity));
     }
 

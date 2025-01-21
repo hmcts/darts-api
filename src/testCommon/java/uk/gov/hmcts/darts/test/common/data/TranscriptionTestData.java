@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionEntity;
 import java.util.Arrays;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 
@@ -20,16 +21,23 @@ public class TranscriptionTestData
     }
 
     public TranscriptionEntity minimalTranscription() {
+        return minimalRawTranscription(someTranscriptionStatus());
+    }
+
+    public TranscriptionEntity minimalApprovedTranscription() {
+        return minimalRawTranscription(someApprovedTranscriptionStatus());
+    }
+
+    public TranscriptionEntity minimalRawTranscription(TranscriptionStatusEntity transcriptionStatusEntity) {
         var minimalTranscription = new TranscriptionEntity();
         var someMinimalCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         minimalTranscription.addCase(someMinimalCase);
         minimalTranscription.setTranscriptionType(someTranscriptionType());
-        minimalTranscription.setTranscriptionStatus(someTranscriptionStatus());
+        minimalTranscription.setTranscriptionStatus(transcriptionStatusEntity);
         minimalTranscription.setHideRequestFromRequestor(false);
         minimalTranscription.setIsManualTranscription(false);
-        var userAccount = minimalUserAccount();
-        minimalTranscription.setLastModifiedBy(userAccount);
-        minimalTranscription.setCreatedBy(userAccount);
+        minimalTranscription.setLastModifiedById(0);
+        minimalTranscription.setCreatedById(0);
         return minimalTranscription;
     }
 
@@ -45,8 +53,21 @@ public class TranscriptionTestData
         return transcriptionStatus;
     }
 
+    public TranscriptionStatusEntity someApprovedTranscriptionStatus() {
+        var transcriptionStatus = new TranscriptionStatusEntity();
+        transcriptionStatus.setId(APPROVED.getId());
+        return transcriptionStatus;
+    }
+
     public TranscriptionEntity someTranscriptionForHearing(HearingEntity hearingEntity) {
         var transcription = minimalTranscription();
+        transcription.addHearing(hearingEntity);
+        transcription.setCourtCases(Arrays.asList(hearingEntity.getCourtCase()));
+        return transcription;
+    }
+
+    public TranscriptionEntity someApprovedTranscriptionForHearing(HearingEntity hearingEntity) {
+        var transcription = minimalApprovedTranscription();
         transcription.addHearing(hearingEntity);
         transcription.setCourtCases(Arrays.asList(hearingEntity.getCourtCase()));
         return transcription;

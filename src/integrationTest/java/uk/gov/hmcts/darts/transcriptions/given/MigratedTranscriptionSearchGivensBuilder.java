@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.transcriptions.given;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -74,13 +76,31 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
     @Override
     public TranscriptionEntity createTranscription() {
         var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+        UserAccountEntity userAccount = dartsDatabase.save(UserAccountTestData.minimalUserAccount());
+        transcription.setCreatedBy(userAccount);
+        transcription.setLastModifiedBy(userAccount);
         var courtroom = someMinimalCourtRoom();
         dartsDatabase.save(courtroom.getCourthouse());
         dartsDatabase.save(courtroom);
         transcription.setHearings(new ArrayList<>());
         transcription.setCourtroom(courtroom);
         dartsDatabase.save(transcription.getCourtCase());
-        dartsDatabase.save(transcription.getCreatedBy());
+        return dartsDatabase.save(transcription);
+    }
+
+    @Override
+    public TranscriptionEntity createApprovedTranscription() {
+        var transcription = PersistableFactory.getTranscriptionTestData().minimalApprovedTranscription();
+        var courtroom = someMinimalCourtRoom();
+        dartsDatabase.save(courtroom.getCourthouse());
+        dartsDatabase.save(courtroom);
+        transcription.setHearings(new ArrayList<>());
+        transcription.setCourtroom(courtroom);
+        dartsDatabase.save(transcription.getCourtCase());
+        //Save created by user and reset them on the transcription (Ensures the user is saved in the database)
+        UserAccountEntity user = dartsDatabase.save(transcription.getCreatedBy());
+        transcription.setCreatedBy(user);
+        transcription.setLastModifiedBy(user);
         return dartsDatabase.save(transcription);
     }
 }

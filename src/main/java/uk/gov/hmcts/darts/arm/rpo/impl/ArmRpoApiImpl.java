@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
@@ -56,6 +57,7 @@ import java.util.Objects;
 
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
@@ -88,7 +90,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO getRecordManagementMatter: ");
         RecordManagementMatterResponse recordManagementMatterResponse;
         try {
-            recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken);
+            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
@@ -202,7 +205,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProfileEntitlements: ");
         ProfileEntitlementResponse response;
         try {
-            response = armRpoClient.getProfileEntitlementResponse(bearerToken);
+            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            response = armRpoClient.getProfileEntitlementResponse(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
                                                       .append(e)
@@ -399,21 +403,37 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         handleResponseStatus(userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
 
         if (isNull(extendedSearchesByMatterResponse.getSearches())
-            || CollectionUtils.isEmpty(extendedSearchesByMatterResponse.getSearches())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount())
-            || StringUtils.isBlank(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getIsSaved())) {
+            || CollectionUtils.isEmpty(extendedSearchesByMatterResponse.getSearches())) {
+
             throw handleFailureAndCreateException(errorMessage.append("Search data is missing").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
-        if (FALSE.equals(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getIsSaved())) {
-            log.warn("The extendedSearchesByMatterResponse is not saved - with executionId: {}", executionId);
-            throw new ArmRpoGetExtendedSearchesByMatterIdException("The extendedSearchesByMatterResponse is not saved");
+        String searchId = armRpoExecutionDetailEntity.getSearchId();
+
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetailMatch = null;
+        for (ExtendedSearchesByMatterResponse.SearchDetail searchDetail : extendedSearchesByMatterResponse.getSearches()) {
+            if (nonNull(searchDetail.getSearch()) && !StringUtils.isBlank(searchDetail.getSearch().getSearchId())) {
+                if (searchDetail.getSearch().getSearchId().equals(searchId)) {
+                    searchDetailMatch = searchDetail;
+                    break;
+                }
+            }
         }
-        armRpoExecutionDetailEntity.setSearchItemCount(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount());
+        if (isNull(searchDetailMatch)
+            || isNull(searchDetailMatch.getSearch().getTotalCount())
+            || StringUtils.isBlank(searchDetailMatch.getSearch().getName())
+            || isNull(searchDetailMatch.getSearch().getIsSaved())) {
+            throw handleFailureAndCreateException(errorMessage.append("extendedSearchesByMatterResponse search data is missing for searchId: ")
+                                                      .append(searchId).append(" ").append(searchDetailMatch).toString(), armRpoExecutionDetailEntity,
+                                                  userAccount);
+        }
+
+        if (FALSE.equals(searchDetailMatch.getSearch().getIsSaved())) {
+            log.warn(errorMessage.append("The extendedSearchesByMatterResponse is not saved - with executionId: ").append(executionId).toString());
+            throw new ArmRpoGetExtendedSearchesByMatterIdException(errorMessage.toString());
+        }
+        armRpoExecutionDetailEntity.setSearchItemCount(searchDetailMatch.getSearch().getTotalCount());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName();
     }
@@ -728,6 +748,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
             .productionName(productionName + CREATE_EXPORT_CSV_EXTENSION)
             .storageAccountId(storageAccountId)
+            .onlyForCurrentUser(Boolean.FALSE)
+            .exportType(32)
             .build();
     }
 

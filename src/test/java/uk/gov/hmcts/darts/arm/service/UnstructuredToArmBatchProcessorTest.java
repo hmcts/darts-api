@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -40,7 +39,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -107,16 +105,12 @@ class UnstructuredToArmBatchProcessorTest {
 
         unstructuredToArmBatchProcessor = new UnstructuredToArmBatchProcessorImpl(
             archiveRecordService,
-            archiveRecordFileGenerator,
             unstructuredToArmHelper,
             userIdentity,
             logApi,
             armDataManagementConfiguration,
             externalObjectDirectoryRepository,
-            fileOperationService,
-            armDataManagementApi,
-            unstructuredToArmProcessorConfiguration,
-            eodHelper
+            unstructuredToArmProcessorConfiguration
         );
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
@@ -144,13 +138,10 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(10));
         when(externalObjectDirectoryRepository.findAllById(List.of(10))).thenReturn(List.of(eod10));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        ExternalLocationTypeEntity armLocation = mock(ExternalLocationTypeEntity.class);
-        when(armLocation.getId()).thenReturn(ExternalLocationTypeEnum.ARM.getId());
-        EOD_HELPER_MOCKS.simulateInitWithMockedData(mock(ObjectRecordStatusEntity.class), armLocation);
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
-
 
         //when
         unstructuredToArmBatchProcessor.processUnstructuredToArm(200);

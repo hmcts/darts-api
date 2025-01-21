@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
@@ -18,7 +16,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.AsyncUtil;
@@ -38,20 +35,14 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Component
 @RequiredArgsConstructor
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
+    
     private final ArchiveRecordService archiveRecordService;
-    private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
     private final DataStoreToArmHelper unstructuredToArmHelper;
     private final UserIdentity userIdentity;
     private final LogApi logApi;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final FileOperationService fileOperationService;
-    private final ArmDataManagementApi armDataManagementApi;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
-    private final EodHelper eodHelper;
-
-    private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
-
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})

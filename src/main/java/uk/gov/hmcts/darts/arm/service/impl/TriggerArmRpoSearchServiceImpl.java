@@ -51,8 +51,8 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
                                                 userAccountEntity);
 
             // We expect getRecordManagementMatter() to populate the matter id as a side effect, so refresh the entity to get the updated value
-            final String matterId = armRpoService.getArmRpoExecutionDetailEntity(executionId)
-                .getMatterId();
+            final String matterId = armRpoService.getArmRpoExecutionDetailEntity(executionId).getMatterId();
+
             armRpoApi.getIndexesByMatterId(armBearerToken,
                                            executionId,
                                            matterId,
