@@ -209,12 +209,9 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     }
 
     private boolean pollServiceInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetail) {
-        if (nonNull(armRpoExecutionDetail.getArmRpoState())
+        return nonNull(armRpoExecutionDetail.getArmRpoState())
             && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetail.getArmRpoStatus().getId())
-            && allowableInProgressStates.contains(armRpoExecutionDetail.getArmRpoState().getId())) {
-            return true;
-        }
-        return false;
+            && allowableInProgressStates.contains(armRpoExecutionDetail.getArmRpoState().getId());
     }
 
     private boolean saveBackgroundSearchCompleted(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
