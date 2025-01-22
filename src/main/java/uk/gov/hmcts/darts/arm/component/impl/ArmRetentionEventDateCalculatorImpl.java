@@ -74,7 +74,6 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             String confidenceReason = confidenceAware.getRetConfReason();
             if (isNull(externalObjectDirectory.getExternalRecordId())) {
                 log.error("External Record Id is not available for EOD: {}", externalObjectDirectoryId);
-                return false;
             }
             if (confidenceScore != null) {
                 UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
