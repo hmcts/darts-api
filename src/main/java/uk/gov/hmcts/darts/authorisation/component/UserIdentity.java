@@ -20,5 +20,7 @@ public interface UserIdentity {
 
     List<Integer> getListOfCourthouseIdsUserHasAccessTo();
 
+    Optional<UserAccountEntity> getUserAccountOptional(Jwt jwt);
+
     Jwt getJwt();
 }
