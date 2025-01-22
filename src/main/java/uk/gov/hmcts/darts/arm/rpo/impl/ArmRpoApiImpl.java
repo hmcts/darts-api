@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.IN_PROGRESS_STATUS;
@@ -76,6 +77,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
 
     private static final String COULD_NOT_CONSTRUCT_API_REQUEST = "Could not construct API request: ";
+    public static final String AND_RESPONSE = " and response - ";
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
@@ -524,13 +526,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                     return false;
                 } else {
                     throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with invalid status - ").append(responseStatus)
-                                                              .append(" and response - ").append(
+                                                              .append(AND_RESPONSE).append(
                                                                   createExportBasedOnSearchResultsTableResponse).toString(),
                                                           armRpoExecutionDetailEntity, userAccount);
                 }
-            } else if (!responseStatus.is2xxSuccessful() || createExportBasedOnSearchResultsTableResponse.getIsError()) {
+            } else if (!responseStatus.is2xxSuccessful() || TRUE.equals(createExportBasedOnSearchResultsTableResponse.getIsError())) {
                 throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with status - ").append(responseStatus)
-                                                          .append(" and response - ").append(
+                                                          .append(AND_RESPONSE).append(
                                                               createExportBasedOnSearchResultsTableResponse).toString(),
                                                       armRpoExecutionDetailEntity, userAccount);
             }
@@ -786,7 +788,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             HttpStatus responseStatus = HttpStatus.valueOf(baseRpoResponse.getStatus());
             if (!responseStatus.is2xxSuccessful() || baseRpoResponse.getIsError()) {
                 throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with status - ").append(responseStatus)
-                                                          .append(" and response - ").append(baseRpoResponse).toString(),
+                                                          .append(AND_RESPONSE).append(baseRpoResponse).toString(),
                                                       armRpoExecutionDetailEntity, userAccount);
             }
         } catch (IllegalArgumentException e) {
