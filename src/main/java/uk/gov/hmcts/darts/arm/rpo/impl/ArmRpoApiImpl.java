@@ -77,7 +77,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
 
     private static final String COULD_NOT_CONSTRUCT_API_REQUEST = "Could not construct API request: ";
-    public static final String AND_RESPONSE = " and response - ";
+    private static final String AND_RESPONSE = " and response - ";
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
@@ -138,17 +138,18 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                   ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         handleResponseStatus(userAccount, indexesByMatterIdResponse, errorMessage, armRpoExecutionDetailEntity);
 
-        if (CollectionUtils.isEmpty(indexesByMatterIdResponse.getIndexes())
-            || isNull(indexesByMatterIdResponse.getIndexes().getFirst())
-            || isNull(indexesByMatterIdResponse.getIndexes().getFirst().getIndex())
-            || StringUtils.isBlank(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId())) {
+        List<IndexesByMatterIdResponse.Index> indexes = indexesByMatterIdResponse.getIndexes();
+        if (CollectionUtils.isEmpty(indexes)
+            || isNull(indexes.getFirst())
+            || isNull(indexes.getFirst().getIndex())
+            || StringUtils.isBlank(indexes.getFirst().getIndex().getIndexId())) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to find any indexes by matter ID in response").toString(),
                                                   armRpoExecutionDetailEntity,
                                                   userAccount);
         }
 
-        String indexId = indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId();
-        if (indexesByMatterIdResponse.getIndexes().size() > 1) {
+        String indexId = indexes.getFirst().getIndex().getIndexId();
+        if (indexes.size() > 1) {
             log.warn("More than one index found in response for matterId: {}. Using first index id: {} from response: {}",
                      matterId, indexId, indexesByMatterIdResponse);
         }
@@ -246,8 +247,9 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         var profileEntitlement = entitlements.stream()
             .filter(entitlement -> configuredEntitlement.equals(entitlement.getName()))
             .findFirst()
-            .orElseThrow(() -> handleFailureAndCreateException(exceptionMessageBuilder.append(
-                "No matching entitlements '" + configuredEntitlement + "' were returned").toString(), executionDetail, userAccount));
+            .orElseThrow(() -> handleFailureAndCreateException(
+                exceptionMessageBuilder.append("No matching entitlements '").append(configuredEntitlement).append("' were returned").toString(),
+                executionDetail, userAccount));
 
         String entitlementId = profileEntitlement.getEntitlementId();
         if (StringUtils.isEmpty(entitlementId)) {
