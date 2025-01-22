@@ -132,11 +132,14 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             String inputUploadFileRecordStr = armDataManagementApi.getBlobData(inputUploadBlob).toString();
             log.info("Contents of ARM Input Upload file: '{}' '{}", inputUploadBlob, inputUploadFileRecordStr);
 
-            ArmResponseInputUploadFileRecord inputUploadFileRecord = getResponseInputUploadFileRecordOrDelete(batchUploadFileFilenameProcessor,
-                                                                                                              inputUploadFileRecordStr);
-
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
+
+            ArmResponseInputUploadFileRecord inputUploadFileRecord = getResponseInputUploadFileRecordOrDelete(batchUploadFileFilenameProcessor,
+                                                                                                              inputUploadFileRecordStr,
+                                                                                                              externalObjectDirectoryEntities,
+                                                                                                              userAccount);
+
 
             if (CollectionUtils.isNotEmpty(externalObjectDirectoryEntities)) {
                 OffsetDateTime timestamp = getInputUploadFileTimestamp(inputUploadFileRecord);
@@ -181,13 +184,20 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     private ArmResponseInputUploadFileRecord getResponseInputUploadFileRecordOrDelete(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
-                                                                                      String inputUploadFileRecordStr) throws IOException {
+                                                                                      String inputUploadFileRecordStr,
+                                                                                      List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
+                                                                                      UserAccountEntity userAccount) throws IOException {
         try {
             return objectMapper.readValue(inputUploadFileRecordStr, ArmResponseInputUploadFileRecord.class);
         } catch (Exception e) {
             log.error("Unable to read ARM response input upload file {} - About to delete ",
                       batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
             deleteArmResponseFilesHelper.deleteDanglingResponses(batchUploadFileFilenameProcessor);
+            externalObjectDirectoryService.updateStatus(
+                EodHelper.armResponseProcessingFailedStatus(),
+                userAccount,
+                externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList(),
+                timeHelper.currentOffsetDateTime());
             throw e;
         }
     }
