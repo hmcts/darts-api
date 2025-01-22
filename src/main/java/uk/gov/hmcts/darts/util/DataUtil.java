@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public final class DataUtil {
     private DataUtil() {
-
+        // Utility class
     }
 
     public static String toUpperCase(String value) {
@@ -32,19 +32,19 @@ public final class DataUtil {
     }
 
     public static void preProcess(DartsEvent dartsEvent) {
-        dartsEvent.setCourthouse(DataUtil.toUpperCase(dartsEvent.getCourthouse()));
-        dartsEvent.setCourtroom(DataUtil.toUpperCase(dartsEvent.getCourtroom()));
+        dartsEvent.setCourthouse(toUpperCase(dartsEvent.getCourthouse()));
+        dartsEvent.setCourtroom(toUpperCase(dartsEvent.getCourtroom()));
     }
 
     public static void preProcess(AddCaseRequest addCaseRequest) {
-        addCaseRequest.setCourthouse(DataUtil.toUpperCase(addCaseRequest.getCourthouse()));
-        addCaseRequest.defenders(DataUtil.trim(addCaseRequest.getDefenders()));
-        addCaseRequest.prosecutors(DataUtil.trim(addCaseRequest.getProsecutors()));
-        addCaseRequest.defendants(DataUtil.trim(addCaseRequest.getDefendants()));
+        addCaseRequest.setCourthouse(toUpperCase(addCaseRequest.getCourthouse()));
+        addCaseRequest.defenders(trim(addCaseRequest.getDefenders()));
+        addCaseRequest.prosecutors(trim(addCaseRequest.getProsecutors()));
+        addCaseRequest.defendants(trim(addCaseRequest.getDefendants()));
     }
 
     public static void preProcess(AddAudioMetadataRequest metadata) {
-        metadata.setCourthouse(DataUtil.toUpperCase(metadata.getCourthouse()));
-        metadata.setCourtroom(DataUtil.toUpperCase(metadata.getCourtroom()));
+        metadata.setCourthouse(toUpperCase(metadata.getCourthouse()));
+        metadata.setCourtroom(toUpperCase(metadata.getCourtroom()));
     }
 }

@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,14 +50,12 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         // setup the test data
         generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
-        int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
-
         // exercise the logic
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
-                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
+                getCurrentDateTimeWithHoursBefore(setupHoursBeforeCurrentTime),
                 ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
                 Limit.of(100_000));
 
@@ -75,13 +72,11 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         // setup the test data
         generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
-        int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
-
-        // excerise the logic
+        // exercise the logic
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(), EodHelper.storedStatus(),
                                                   EodHelper.inboundLocation(), EodHelper.armLocation(),
-                                                  getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
+                                                  getCurrentDateTimeWithHoursBefore(setupHoursBeforeCurrentTime),
                                                   ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
                                                   Limit.of(100_000));
 
@@ -98,14 +93,12 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         // setup the test data
         generateDataWithAnnotationForInbound(setupHoursBeforeCurrentTime);
 
-        int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
-
         // exercise the logic
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
-                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours), ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
+                getCurrentDateTimeWithHoursBefore(setupHoursBeforeCurrentTime), ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
                 Limit.of(100_000));
 
         // assert the logic
@@ -303,10 +296,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         OffsetDateTime lastModifiedBeforeCurrentTimeForArm = currentTimeHelper.currentOffsetDateTime().minusHours(hoursBeforeCurrentTimeForArm);
 
-        OffsetDateTime lastModifiedBeforeCurrentTimeForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
-            weeksBeforeCurrentTimeForUnstructured,
-            ChronoUnit.WEEKS
-        );
+        OffsetDateTime lastModifiedBeforeCurrentTimeForUnstructured = currentTimeHelper.currentOffsetDateTime().minusWeeks(
+            weeksBeforeCurrentTimeForUnstructured);
 
         OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minusHours(1);
 
