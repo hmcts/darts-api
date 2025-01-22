@@ -69,7 +69,7 @@ public class ArmApiServiceImpl implements ArmApiService {
 
     private void logUpdateMetadataRequestJson(UpdateMetadataRequest armUpdateMetadataRequest) {
         try {
-            objectMapper.writeValueAsString(armUpdateMetadataRequest);
+            log.info("UpdateMetadataRequest {}", objectMapper.writeValueAsString(armUpdateMetadataRequest));
         } catch (JsonProcessingException e) {
             log.warn("Error during ARM update metadata: Detail: {}", e.getMessage());
         }
