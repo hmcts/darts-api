@@ -67,7 +67,7 @@ public class AbstractLockableAutomatedTaskTest {
             lockedTask.run();
 
             //Ensure task is run
-            LogUtil.waitUntilMessag(output, "LockedTaskTest: Task is running", 10);
+            LogUtil.waitUntilMessage(output, "LockedTaskTest: Task is running", 10);
             //Ensure no task errors are logged
             assertThat(output.getErr()).doesNotContain("Task:");
 
@@ -107,9 +107,9 @@ public class AbstractLockableAutomatedTaskTest {
             lockedTask.run();
 
             //Ensure task is run
-            LogUtil.waitUntilMessag(output, "LockedTaskTest: Task is running", 10);
+            LogUtil.waitUntilMessage(output, "LockedTaskTest: Task is running", 10);
             //Ensure task errors are logged correctly
-            LogUtil.waitUntilMessag(output, "Task: TEST_TASK timed out after 1000ms", 10);
+            LogUtil.waitUntilMessage(output, "Task: TEST_TASK timed out after 1000ms", 10);
 
             verify(abstractLockableAutomatedTask).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             verify(lockedTask).assertLocked();
@@ -137,11 +137,11 @@ public class AbstractLockableAutomatedTaskTest {
             lockedTask.run();
 
             //Ensure task is run
-            LogUtil.waitUntilMessag(output, "LockedTaskTest: Task is running", 5);
+            LogUtil.waitUntilMessage(output, "LockedTaskTest: Task is running", 5);
             //Ensure no task errors are logged
 
-            LogUtil.waitUntilMessag(output, "Task: TEST_TASK exception during execution of the task business logic", 5);
-            LogUtil.waitUntilMessag(output, "Task: TEST_TASK execution exception", 5);
+            LogUtil.waitUntilMessage(output, "Task: TEST_TASK exception during execution of the task business logic", 5);
+            LogUtil.waitUntilMessage(output, "Task: TEST_TASK execution exception", 5);
 
             verify(abstractLockableAutomatedTask).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             verify(abstractLockableAutomatedTask).handleException(exception);
