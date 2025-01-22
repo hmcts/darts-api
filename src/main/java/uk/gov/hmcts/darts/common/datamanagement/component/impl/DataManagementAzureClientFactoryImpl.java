@@ -40,6 +40,8 @@ public class DataManagementAzureClientFactoryImpl implements DataManagementAzure
 
     @Override
     public BlobServiceClient getBlobServiceClientWithSasEndpoint(String sasEndpoint) {
+        //temp change, a new SAS token will be generated once the analysis is done
+        log.info("The DETS SAS Token {}", sasEndpoint);
         return blobServiceClientMap.computeIfAbsent(sasEndpoint, k -> new BlobServiceClientBuilder()
             .endpoint(sasEndpoint).buildClient());
     }
