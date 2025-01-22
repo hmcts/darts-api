@@ -120,7 +120,7 @@ public class CourthouseServiceImpl implements CourthouseService {
                 extendedCourthouse.setRegionId(courthouseEntity.getRegion() == null ? null : courthouseEntity.getRegion().getId());
                 extendedCourthouses.add(extendedCourthouse);
             });
-
+        extendedCourthouses.sort((o1, o2) -> o1.getCourthouseName().compareTo(o2.getCourthouseName()));
         return extendedCourthouses;
     }
 

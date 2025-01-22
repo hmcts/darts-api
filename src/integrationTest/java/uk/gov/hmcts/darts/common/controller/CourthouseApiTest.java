@@ -279,9 +279,9 @@ class CourthouseApiTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].courthouse_name", is(SWANSEA_CROWN_COURT)))
-            .andExpect(jsonPath("$[1].courthouse_name", is(LEEDS_COURT)))
-            .andExpect(jsonPath("$[2].courthouse_name", is(MANCHESTER_COURT)))
+            .andExpect(jsonPath("$[0].courthouse_name", is(LEEDS_COURT)))
+            .andExpect(jsonPath("$[1].courthouse_name", is(MANCHESTER_COURT)))
+            .andExpect(jsonPath("$[2].courthouse_name", is(SWANSEA_CROWN_COURT)))
             .andExpect(jsonPath("$[3].courthouse_name").doesNotExist())
             .andDo(print()).andReturn();
 
@@ -318,8 +318,8 @@ class CourthouseApiTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].courthouse_name", is(SWANSEA_CROWN_COURT)))
-            .andExpect(jsonPath("$[1].courthouse_name", is(MANCHESTER_COURT)))
+            .andExpect(jsonPath("$[0].courthouse_name", is(MANCHESTER_COURT)))
+            .andExpect(jsonPath("$[1].courthouse_name", is(SWANSEA_CROWN_COURT)))
             .andExpect(jsonPath("$[2].courthouse_name").doesNotExist())
             .andDo(print()).andReturn();
 
@@ -352,8 +352,8 @@ class CourthouseApiTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].courthouse_name", is(LEEDS_COURT)))
-            .andExpect(jsonPath("$[1].courthouse_name", is(SWANSEA_CROWN_COURT)))
-            .andExpect(jsonPath("$[2].courthouse_name", is(MANCHESTER_COURT)))
+            .andExpect(jsonPath("$[1].courthouse_name", is(MANCHESTER_COURT)))
+            .andExpect(jsonPath("$[2].courthouse_name", is(SWANSEA_CROWN_COURT)))
             .andDo(print()).andReturn();
 
         assertEquals(200, response.getResponse().getStatus());
