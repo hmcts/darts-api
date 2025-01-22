@@ -39,7 +39,6 @@ class ArmRpoGetProfileEntitlementsIntTest extends PostgresIntegrationBase {
     private static final String ENTITLEMENT_ID = "some entitlement id";
     private static final String ENTITLEMENT_NAME = "SRV-DARTS-RW-E";
 
-
     @Test
     void getProfileEntitlements_shouldSucceed_whenASuccessResponseIsObtainedFromArmThatContainsAMatchingEntitlement() {
         // Given
@@ -86,7 +85,7 @@ class ArmRpoGetProfileEntitlementsIntTest extends PostgresIntegrationBase {
             .getMessage();
 
         // Then
-        assertThat(exceptionMessage, containsString("No matching entitlements were returned"));
+        assertThat(exceptionMessage, containsString("ARM getProfileEntitlements: No matching entitlements 'SRV-DARTS-RW-E' were returned"));
 
         executionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(executionId)
             .orElseThrow();

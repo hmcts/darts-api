@@ -35,7 +35,7 @@ import uk.gov.hmcts.darts.arm.component.impl.GetExtendedProductionsByMatterReque
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedSearchesByMatterRequestGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.exception.ArmRpoGetExtendedSearchesByMatterIdException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
@@ -56,8 +56,11 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.IN_PROGRESS_STATUS;
+import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 
 @Service
 @AllArgsConstructor
@@ -70,8 +73,11 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private static final String RECORD_CLASS_CODE = "DARTS";
     private static final int FIELD_TYPE_7 = 7;
     private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
-    public static final String UNABLE_TO_GET_ARM_RPO_RESPONSE = "Unable to get ARM RPO response from client ";
-    public static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
+    private static final String UNABLE_TO_GET_ARM_RPO_RESPONSE = "Unable to get ARM RPO response from client ";
+    private static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
+
+    private static final String COULD_NOT_CONSTRUCT_API_REQUEST = "Could not construct API request: ";
+    private static final String AND_RESPONSE = " and response - ";
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
@@ -87,7 +93,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getRecordManagementMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO getRecordManagementMatter: ");
+        StringBuilder errorMessage = new StringBuilder(96).append("Failure during ARM RPO getRecordManagementMatter: ");
         RecordManagementMatterResponse recordManagementMatterResponse;
         try {
             EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
@@ -110,12 +116,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void getIndexesByMatterId(String bearerToken, Integer executionId, String matterId, UserAccountEntity userAccount) {
-        log.debug("getIndexesByMatterId called with executionId: {}", executionId);
+        log.debug("getIndexesByMatterId called with executionId: {}, matterId: {}", executionId, matterId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getIndexesByMatterIdRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO get indexes by matter ID: ");
+        StringBuilder errorMessage = new StringBuilder(151).append("Failure during ARM RPO get indexes by matter ID: ");
         IndexesByMatterIdResponse indexesByMatterIdResponse;
         try {
             indexesByMatterIdResponse = armRpoClient.getIndexesByMatterId(bearerToken, createIndexesByMatterIdRequest(matterId));
@@ -124,27 +130,31 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
+        processIndexesByMatterIdResponse(matterId, userAccount, indexesByMatterIdResponse, errorMessage, armRpoExecutionDetailEntity);
+    }
+
+    private void processIndexesByMatterIdResponse(String matterId, UserAccountEntity userAccount, IndexesByMatterIdResponse indexesByMatterIdResponse,
+                                                  StringBuilder errorMessage,
+                                                  ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         handleResponseStatus(userAccount, indexesByMatterIdResponse, errorMessage, armRpoExecutionDetailEntity);
 
-        if (CollectionUtils.isEmpty(indexesByMatterIdResponse.getIndexes())
-            || isNull(indexesByMatterIdResponse.getIndexes().getFirst())
-            || isNull(indexesByMatterIdResponse.getIndexes().getFirst().getIndex())
-            || StringUtils.isBlank(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId())) {
-            throw handleFailureAndCreateException(errorMessage.append("Unable to find indexes by matter ID in response").toString(),
+        List<IndexesByMatterIdResponse.Index> indexes = indexesByMatterIdResponse.getIndexes();
+        if (CollectionUtils.isEmpty(indexes)
+            || isNull(indexes.getFirst())
+            || isNull(indexes.getFirst().getIndex())
+            || StringUtils.isBlank(indexes.getFirst().getIndex().getIndexId())) {
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find any indexes by matter ID in response").toString(),
                                                   armRpoExecutionDetailEntity,
                                                   userAccount);
         }
-        if (indexesByMatterIdResponse.getIndexes().size() > 1) {
-            log.warn("More than one index found in response for matterId: {} - response {}", matterId, indexesByMatterIdResponse);
-        }
-        armRpoExecutionDetailEntity.setIndexId(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId());
-        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-    }
 
-    private IndexesByMatterIdRequest createIndexesByMatterIdRequest(String matterId) {
-        return IndexesByMatterIdRequest.builder()
-            .matterId(matterId)
-            .build();
+        String indexId = indexes.getFirst().getIndex().getIndexId();
+        if (indexes.size() > 1) {
+            log.warn("More than one index found in response for matterId: {}. Using first index id: {} from response: {}",
+                     matterId, indexId, indexesByMatterIdResponse);
+        }
+        armRpoExecutionDetailEntity.setIndexId(indexId);
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
     @Override
@@ -164,6 +174,11 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
+        processGetStorageAccountsResponse(userAccount, storageAccountResponse, errorMessage, armRpoExecutionDetailEntity);
+    }
+
+    private void processGetStorageAccountsResponse(UserAccountEntity userAccount, StorageAccountResponse storageAccountResponse, StringBuilder errorMessage,
+                                                   ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         handleResponseStatus(userAccount, storageAccountResponse, errorMessage, armRpoExecutionDetailEntity);
 
         if (!CollectionUtils.isNotEmpty(storageAccountResponse.getDataDetails())) {
@@ -202,20 +217,26 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                  ArmRpoHelper.inProgressRpoStatus(),
                                                  userAccount);
 
-        final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProfileEntitlements: ");
-        ProfileEntitlementResponse response;
+        final StringBuilder exceptionMessageBuilder = new StringBuilder(90).append("ARM getProfileEntitlements: ");
+        ProfileEntitlementResponse profileEntitlementResponse;
         try {
             EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-            response = armRpoClient.getProfileEntitlementResponse(bearerToken, emptyRpoRequest);
+            profileEntitlementResponse = armRpoClient.getProfileEntitlementResponse(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
                                                       .append(e)
                                                       .toString(),
                                                   executionDetail, userAccount);
         }
-        handleResponseStatus(userAccount, response, exceptionMessageBuilder, executionDetail);
+        processGetProfileEntitlementsResponse(userAccount, profileEntitlementResponse, exceptionMessageBuilder, executionDetail);
+    }
 
-        var entitlements = response.getEntitlements();
+    private void processGetProfileEntitlementsResponse(UserAccountEntity userAccount, ProfileEntitlementResponse profileEntitlementResponse,
+                                                       StringBuilder exceptionMessageBuilder,
+                                                       ArmRpoExecutionDetailEntity executionDetail) {
+        handleResponseStatus(userAccount, profileEntitlementResponse, exceptionMessageBuilder, executionDetail);
+
+        var entitlements = profileEntitlementResponse.getEntitlements();
         if (CollectionUtils.isEmpty(entitlements)) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("No entitlements were returned")
                                                       .toString(),
@@ -226,14 +247,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         var profileEntitlement = entitlements.stream()
             .filter(entitlement -> configuredEntitlement.equals(entitlement.getName()))
             .findFirst()
-            .orElseThrow(() -> handleFailureAndCreateException(exceptionMessageBuilder.append("No matching entitlements were returned")
-                                                                   .toString(),
-                                                               executionDetail, userAccount));
+            .orElseThrow(() -> handleFailureAndCreateException(
+                exceptionMessageBuilder.append("No matching entitlements '").append(configuredEntitlement).append("' were returned").toString(),
+                executionDetail, userAccount));
 
         String entitlementId = profileEntitlement.getEntitlementId();
         if (StringUtils.isEmpty(entitlementId)) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("The obtained entitlement id was empty")
-                                                      .toString(),
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("The obtained entitlement id was empty").toString(),
                                                   executionDetail, userAccount);
         }
 
@@ -246,12 +266,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                                                             Integer executionId,
                                                                                             ArmRpoStateEntity rpoStateEntity,
                                                                                             UserAccountEntity userAccount) {
-        log.debug("getMasterIndexFieldByRecordClassSchema called with executionId: {}", executionId);
+        log.debug("getMasterIndexFieldByRecordClassSchema called with executionId: {}, rpo state: {}", executionId, rpoStateEntity.getId());
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, rpoStateEntity,
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM get master index field by record class schema: ");
+        StringBuilder errorMessage = new StringBuilder(273).append("Failure during ARM get master index field by record class schema: ");
 
         if (!(ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState().getId().equals(rpoStateEntity.getId())
             || ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState().getId().equals(rpoStateEntity.getId()))) {
@@ -267,6 +287,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
+
+        return processMasterIndexFieldByRecordClassSchemas(userAccount, masterIndexFieldByRecordClassSchemaResponse, errorMessage, armRpoExecutionDetailEntity);
+    }
+
+    private List<MasterIndexFieldByRecordClassSchema> processMasterIndexFieldByRecordClassSchemas(
+        UserAccountEntity userAccount, MasterIndexFieldByRecordClassSchemaResponse masterIndexFieldByRecordClassSchemaResponse,
+        StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
 
         if (isNull(masterIndexFieldByRecordClassSchemaResponse)
             || CollectionUtils.isEmpty(masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields())) {
@@ -311,7 +338,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             now.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
         );
 
-        final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM addAsyncSearch: ");
+        final StringBuilder exceptionMessageBuilder = new StringBuilder(99).append("ARM addAsyncSearch: ");
         ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTask_taskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
             .orElseThrow(() -> handleFailureAndCreateException(exceptionMessageBuilder.append("Automated task not found: ")
                                                                    .append(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
@@ -322,27 +349,29 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         try {
             requestGenerator = createAddAsyncSearchRequestGenerator(searchName, executionDetail, armAutomatedTaskEntity, now);
         } catch (Exception e) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("Could not construct API request: ")
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append(COULD_NOT_CONSTRUCT_API_REQUEST)
                                                       .append(e)
                                                       .toString(),
                                                   executionDetail, userAccount);
         }
 
-        ArmAsyncSearchResponse response;
+        ArmAsyncSearchResponse armAsyncSearchResponse;
         try {
-            response = armRpoClient.addAsyncSearch(bearerToken, requestGenerator.getJsonRequest());
+            armAsyncSearchResponse = armRpoClient.addAsyncSearch(bearerToken, requestGenerator.getJsonRequest());
         } catch (FeignException e) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
-                                                      .append(e)
-                                                      .toString(),
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(e).toString(),
                                                   executionDetail, userAccount);
         }
-        handleResponseStatus(userAccount, response, exceptionMessageBuilder, executionDetail);
+        return processAddAsyncSearch(userAccount, armAsyncSearchResponse, exceptionMessageBuilder, executionDetail, searchName);
+    }
 
-        String searchId = response.getSearchId();
+    private String processAddAsyncSearch(UserAccountEntity userAccount, ArmAsyncSearchResponse armAsyncSearchResponse, StringBuilder exceptionMessageBuilder,
+                                         ArmRpoExecutionDetailEntity executionDetail, String searchName) {
+        handleResponseStatus(userAccount, armAsyncSearchResponse, exceptionMessageBuilder, executionDetail);
+
+        String searchId = armAsyncSearchResponse.getSearchId();
         if (searchId == null) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("The obtained search id was empty")
-                                                      .toString(),
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("The obtained search id was empty").toString(),
                                                   executionDetail, userAccount);
         }
 
@@ -355,12 +384,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount) {
-        log.debug("saveBackgroundSearch called with executionId: {}", executionId);
+        log.debug("saveBackgroundSearch called with executionId: {}, searchName: {}", executionId, searchName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.saveBackgroundSearchRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM save background search: ");
+        StringBuilder errorMessage = new StringBuilder(134).append("Failure during ARM save background search: ");
         SaveBackgroundSearchResponse saveBackgroundSearchResponse;
         try {
             SaveBackgroundSearchRequest saveBackgroundSearchRequest =
@@ -383,12 +412,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedSearchesByMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO getExtendedSearchesByMatter: ");
+        StringBuilder errorMessage = new StringBuilder(153).append("Failure during ARM RPO getExtendedSearchesByMatter: ");
         GetExtendedSearchesByMatterRequestGenerator requestGenerator;
         try {
             requestGenerator = createExtendedSearchesByMatterRequestGenerator(armRpoExecutionDetailEntity.getMatterId());
         } catch (Exception e) {
-            throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e)
+            throw handleFailureAndCreateException(errorMessage.append(COULD_NOT_CONSTRUCT_API_REQUEST).append(e)
                                                       .toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -400,6 +429,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
+        return processExtendedSearchesByMatterResponse(executionId, userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
+    }
+
+    private String processExtendedSearchesByMatterResponse(Integer executionId, UserAccountEntity userAccount,
+                                                           ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse,
+                                                           StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         handleResponseStatus(userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
 
         if (isNull(extendedSearchesByMatterResponse.getSearches())
@@ -413,11 +448,11 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         ExtendedSearchesByMatterResponse.SearchDetail searchDetailMatch = null;
         for (ExtendedSearchesByMatterResponse.SearchDetail searchDetail : extendedSearchesByMatterResponse.getSearches()) {
-            if (nonNull(searchDetail.getSearch()) && !StringUtils.isBlank(searchDetail.getSearch().getSearchId())) {
-                if (searchDetail.getSearch().getSearchId().equals(searchId)) {
-                    searchDetailMatch = searchDetail;
-                    break;
-                }
+            if (nonNull(searchDetail.getSearch())
+                && !StringUtils.isBlank(searchDetail.getSearch().getSearchId())
+                && searchDetail.getSearch().getSearchId().equals(searchId)) {
+                searchDetailMatch = searchDetail;
+                break;
             }
         }
         if (isNull(searchDetailMatch)
@@ -425,25 +460,25 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             || StringUtils.isBlank(searchDetailMatch.getSearch().getName())
             || isNull(searchDetailMatch.getSearch().getIsSaved())) {
             throw handleFailureAndCreateException(errorMessage.append("extendedSearchesByMatterResponse search data is missing for searchId: ")
-                                                      .append(searchId).append(" ").append(searchDetailMatch).toString(), armRpoExecutionDetailEntity,
+                                                      .append(searchId).append(" (total_count, name, is_saved) ").append(searchDetailMatch).toString(),
+                                                  armRpoExecutionDetailEntity,
                                                   userAccount);
         }
 
         if (FALSE.equals(searchDetailMatch.getSearch().getIsSaved())) {
-            log.warn(errorMessage.append("The extendedSearchesByMatterResponse is not saved - with executionId: ").append(executionId).toString());
-            throw new ArmRpoGetExtendedSearchesByMatterIdException(errorMessage.toString());
+            log.warn(errorMessage.append("The extendedSearchesByMatterResponse is_saved attribute is FALSE for executionId: ").append(executionId).toString());
+            throw new ArmRpoInProgressException("extendedSearchesByMatterResponse", executionId);
         }
         armRpoExecutionDetailEntity.setSearchItemCount(searchDetailMatch.getSearch().getTotalCount());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-        return extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName();
+        return searchDetailMatch.getSearch().getName();
     }
-
 
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
                                                          List<MasterIndexFieldByRecordClassSchema> headerColumns,
                                                          String productionName, UserAccountEntity userAccount) {
-        log.debug("createExportBasedOnSearchResultsTable called with executionId: {}", executionId);
+        log.debug("createExportBasedOnSearchResultsTable called with executionId: {}, productionName: {}", executionId, productionName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -458,43 +493,54 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                 armRpoExecutionDetailEntity.getStorageAccountId()
             );
         } catch (Exception e) {
-            throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e).toString(),
+            throw handleFailureAndCreateException(errorMessage.append(COULD_NOT_CONSTRUCT_API_REQUEST).append(e).toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
-        CreateExportBasedOnSearchResultsTableResponse response;
+        CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTableResponse;
         try {
-
-            response = armRpoClient.createExportBasedOnSearchResultsTable(bearerToken, request);
+            createExportBasedOnSearchResultsTableResponse = armRpoClient.createExportBasedOnSearchResultsTable(bearerToken, request);
         } catch (FeignException e) {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        if (isNull(response) || isNull(response.getStatus()) || isNull(response.getIsError())
-            || (!response.getIsError() && isNull(response.getResponseStatus()))
+        return processCreateExportBasedOnSearchResultsTableResponse(userAccount, createExportBasedOnSearchResultsTableResponse, errorMessage,
+                                                                    armRpoExecutionDetailEntity);
+    }
+
+    private boolean processCreateExportBasedOnSearchResultsTableResponse(
+        UserAccountEntity userAccount, CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTableResponse,
+        StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+
+        if (isNull(createExportBasedOnSearchResultsTableResponse) || isNull(createExportBasedOnSearchResultsTableResponse.getStatus()) || isNull(
+            createExportBasedOnSearchResultsTableResponse.getIsError())
+            || (!createExportBasedOnSearchResultsTableResponse.getIsError() && isNull(createExportBasedOnSearchResultsTableResponse.getResponseStatus()))
         ) {
-            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response is invalid - ").append(response)
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API createExportBasedOnSearchResultsTableResponse is invalid - ").append(
+                                                          createExportBasedOnSearchResultsTableResponse)
                                                       .toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
         try {
-            HttpStatus responseStatus = HttpStatus.valueOf(response.getStatus());
+            HttpStatus responseStatus = HttpStatus.valueOf(createExportBasedOnSearchResultsTableResponse.getStatus());
             if (HttpStatus.BAD_REQUEST.value() == responseStatus.value()) {
-                if (response.getResponseStatus() == 2) {
-                    log.error("The search is still running and cannot export as csv - {}", response);
+                if (createExportBasedOnSearchResultsTableResponse.getResponseStatus() == 2) {
+                    log.error("The search is still running and cannot export as csv - {}", createExportBasedOnSearchResultsTableResponse);
                     return false;
                 } else {
                     throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with invalid status - ").append(responseStatus)
-                                                              .append(" and response - ").append(response).toString(),
+                                                              .append(AND_RESPONSE).append(
+                                                                  createExportBasedOnSearchResultsTableResponse).toString(),
                                                           armRpoExecutionDetailEntity, userAccount);
                 }
-            } else if (!responseStatus.is2xxSuccessful() || response.getIsError()) {
+            } else if (!responseStatus.is2xxSuccessful() || TRUE.equals(createExportBasedOnSearchResultsTableResponse.getIsError())) {
                 throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with status - ").append(responseStatus)
-                                                          .append(" and response - ").append(response).toString(),
+                                                          .append(AND_RESPONSE).append(
+                                                              createExportBasedOnSearchResultsTableResponse).toString(),
                                                       armRpoExecutionDetailEntity, userAccount);
             }
         } catch (IllegalArgumentException e) {
-            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response status is invalid - ")
-                                                      .append(response).toString(),
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API createExportBasedOnSearchResultsTableResponse status is invalid - ")
+                                                      .append(createExportBasedOnSearchResultsTableResponse).toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
@@ -502,8 +548,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        log.debug("getExtendedProductionsByMatter called with executionId: {}", executionId);
+    public boolean getExtendedProductionsByMatter(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount) {
+        log.debug("getExtendedProductionsByMatter called with executionId: {}, productionName: {}", executionId, productionName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedProductionsByMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -514,7 +560,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         try {
             requestGenerator = createExtendedProductionsByMatterRequest(armRpoExecutionDetailEntity.getMatterId());
         } catch (Exception e) {
-            throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e)
+            throw handleFailureAndCreateException(errorMessage.append(COULD_NOT_CONSTRUCT_API_REQUEST).append(e)
                                                       .toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -526,17 +572,45 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
+        return processExtendedProductionsByMatterResponse(productionName, userAccount, extendedProductionsByMatterResponse, errorMessage,
+                                                          armRpoExecutionDetailEntity);
+    }
+
+    private boolean processExtendedProductionsByMatterResponse(String productionName, UserAccountEntity userAccount,
+                                                               ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse,
+                                                               StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         handleResponseStatus(userAccount, extendedProductionsByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
         if (isNull(extendedProductionsByMatterResponse.getProductions())
-            || CollectionUtils.isEmpty(extendedProductionsByMatterResponse.getProductions())
-            || isNull(extendedProductionsByMatterResponse.getProductions().getFirst())
-            || StringUtils.isBlank(extendedProductionsByMatterResponse.getProductions().getFirst().getProductionId())) {
+            || CollectionUtils.isEmpty(extendedProductionsByMatterResponse.getProductions())) {
             throw handleFailureAndCreateException(errorMessage.append("ProductionId is missing from ARM RPO response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
-        armRpoExecutionDetailEntity.setProductionId(extendedProductionsByMatterResponse.getProductions().getFirst().getProductionId());
+        ExtendedProductionsByMatterResponse.Productions productionMatch = null;
+        for (ExtendedProductionsByMatterResponse.Productions productionsItem : extendedProductionsByMatterResponse.getProductions()) {
+            if (nonNull(productionsItem) && !StringUtils.isBlank(productionsItem.getName()) && productionName.equals(productionsItem.getName())) {
+                productionMatch = productionsItem;
+                break;
+            }
+        }
+
+        if (isNull(productionMatch)) {
+            log.warn(errorMessage.append("No production id found against the production name: " + productionName + ", so continue polling").toString());
+            return false;
+        }
+        if (StringUtils.isBlank(productionMatch.getProductionId())) {
+            throw handleFailureAndCreateException(errorMessage.append("Production Id is missing from ARM RPO response").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+
+        if (isNull(productionMatch.getEndProductionTime())) {
+            log.warn(errorMessage.append("End production time is missing from ARM RPO response, so continue polling").toString());
+            return false;
+        }
+
+        armRpoExecutionDetailEntity.setProductionId(productionMatch.getProductionId());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+        return true;
     }
 
     @Override
@@ -548,45 +622,50 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                  ArmRpoHelper.inProgressRpoStatus(),
                                                  userAccount);
 
-        final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProductionOutputFiles: ");
+        final StringBuilder exceptionMessageBuilder = new StringBuilder(135).append("ARM getProductionOutputFiles: ");
 
         String productionId = executionDetail.getProductionId();
         if (StringUtils.isBlank(productionId)) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("production id was blank for execution id: ")
-                                                      .append(executionId)
-                                                      .toString(),
+                                                      .append(executionId).toString(),
                                                   executionDetail, userAccount);
         }
 
-        ProductionOutputFilesResponse response;
+        ProductionOutputFilesResponse productionOutputFilesResponse;
         try {
-            response = armRpoClient.getProductionOutputFiles(bearerToken, createProductionOutputFilesRequest(productionId));
+            productionOutputFilesResponse = armRpoClient.getProductionOutputFiles(bearerToken, createProductionOutputFilesRequest(productionId));
         } catch (FeignException e) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
-                                                      .append(e)
-                                                      .toString(),
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(e).toString(),
                                                   executionDetail, userAccount);
         }
-        handleResponseStatus(userAccount, response, exceptionMessageBuilder, executionDetail);
+        return processProductionOutputFilesResponse(userAccount, productionOutputFilesResponse, exceptionMessageBuilder, executionDetail);
+    }
 
-        List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles = response.getProductionExportFiles();
-        if (CollectionUtils.isEmpty(productionExportFiles)) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export files were returned")
-                                                      .toString(),
+    private List<String> processProductionOutputFilesResponse(UserAccountEntity userAccount, ProductionOutputFilesResponse productionOutputFilesResponse,
+                                                              StringBuilder exceptionMessageBuilder,
+                                                              ArmRpoExecutionDetailEntity executionDetail) {
+        handleResponseStatus(userAccount, productionOutputFilesResponse, exceptionMessageBuilder, executionDetail);
+
+        List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles = productionOutputFilesResponse.getProductionExportFiles();
+        if (CollectionUtils.isEmpty(productionExportFiles)
+            || productionExportFiles.stream().anyMatch(Objects::isNull)) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export files were returned").toString(),
                                                   executionDetail, userAccount);
         }
+
+        validateProductionExportResponse(userAccount, exceptionMessageBuilder, executionDetail, productionExportFiles);
 
         List<String> productionExportFileIds = productionExportFiles.stream()
             .filter(Objects::nonNull)
             .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
             .filter(Objects::nonNull)
+            .filter(productionExportFileDetails -> productionExportFileDetails.getStatus() == READY_STATUS.getStatusCode())
             .map(ProductionOutputFilesResponse.ProductionExportFileDetail::getProductionExportFileId)
             .filter(StringUtils::isNotBlank)
             .toList();
 
         if (productionExportFileIds.isEmpty()) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export file ids were returned")
-                                                      .toString(),
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export file id's were returned").toString(),
                                                   executionDetail, userAccount);
         }
 
@@ -595,16 +674,38 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         return productionExportFileIds;
     }
 
+    private void validateProductionExportResponse(UserAccountEntity userAccount, StringBuilder exceptionMessageBuilder,
+                                                  ArmRpoExecutionDetailEntity executionDetail,
+                                                  List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles) {
+        if (productionExportFiles.stream().map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .anyMatch(details -> nonNull(details) && IN_PROGRESS_STATUS.getStatusCode() == details.getStatus())) {
+            throw new ArmRpoInProgressException("getProductionExportFileDetails", executionDetail.getId());
+        } else if (productionExportFiles.stream().map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .allMatch(details -> nonNull(details) && READY_STATUS.getStatusCode() == details.getStatus())) {
+            log.info("All production export files are ready for download");
+        } else if (productionExportFiles.stream().map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .allMatch(details -> nonNull(details) && details.getStatus() != READY_STATUS.getStatusCode())) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("Production export files contain failures").toString(),
+                                                  executionDetail, userAccount);
+        } else if (productionExportFiles.stream().map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .anyMatch(details -> nonNull(details) && READY_STATUS.getStatusCode() == details.getStatus())) {
+            log.warn("Some production export files are not ready for download");
+        } else {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("Production export files contain failures").toString(),
+                                                  executionDetail, userAccount);
+        }
+    }
+
     @Override
     public InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileId,
                                           UserAccountEntity userAccount) throws IOException {
-        log.debug("downloadProduction called with executionId: {} and productionExportFileId: {}", executionId, productionExportFileId);
+        log.debug("downloadProduction called with executionId: {}, productionExportFileId: {}", executionId, productionExportFileId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.downloadProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
         feign.Response response;
-        StringBuilder errorMessage = new StringBuilder("Failure during download production: ");
+        StringBuilder errorMessage = new StringBuilder(185).append("Failure during download production: ");
 
         try {
             response = armRpoDownloadProduction.downloadProduction(bearerToken, executionId, productionExportFileId);
@@ -614,7 +715,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
-        // on any error occurring return a download failure
+        // on any error occurring, return a download failure
         if (isNull(response) || !HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
             errorMessage.append("Failed ARM RPO download production with id: ").append(productionExportFileId)
                 .append(" response ").append(response);
@@ -663,6 +764,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .build();
     }
 
+    private IndexesByMatterIdRequest createIndexesByMatterIdRequest(String matterId) {
+        return IndexesByMatterIdRequest.builder()
+            .matterId(matterId)
+            .build();
+    }
+
     private ArmRpoException handleFailureAndCreateException(String message,
                                                             ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
                                                             UserAccountEntity userAccount) {
@@ -683,13 +790,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             HttpStatus responseStatus = HttpStatus.valueOf(baseRpoResponse.getStatus());
             if (!responseStatus.is2xxSuccessful() || baseRpoResponse.getIsError()) {
                 throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with status - ").append(responseStatus)
-                                                          .append(" and response - ").append(baseRpoResponse).toString(),
+                                                          .append(AND_RESPONSE).append(baseRpoResponse).toString(),
                                                       armRpoExecutionDetailEntity, userAccount);
             }
         } catch (IllegalArgumentException e) {
-            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response status is invalid - ")
-                                                      .append(baseRpoResponse).toString(),
-                                                  armRpoExecutionDetailEntity, userAccount);
+            log.error(errorMessage.append("ARM RPO API response status is invalid - ").append(baseRpoResponse).toString(), e);
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
     }
 
@@ -748,7 +854,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
             .productionName(productionName + CREATE_EXPORT_CSV_EXTENSION)
             .storageAccountId(storageAccountId)
-            .onlyForCurrentUser(Boolean.FALSE)
+            .onlyForCurrentUser(FALSE)
             .exportType(32)
             .build();
     }
