@@ -32,13 +32,13 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getRecordManagementMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO getRecordManagementMatter: ");
+        StringBuilder errorMessage = new StringBuilder(96).append("Failure during ARM RPO getRecordManagementMatter: ");
         RecordManagementMatterResponse recordManagementMatterResponse;
         try {
             EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
             recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
-            log.error(errorMessage.append("API call failed").append(e).toString(), e);
+            log.error(errorMessage.append("Unable to get ARM RPO response").append(e).toString(), e);
             throw armRpoApiHelper.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
