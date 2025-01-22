@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class ArmApiServiceImpl implements ArmApiService {
     private final ArmTokenClient armTokenClient;
     private final ArmApiClient armApiClient;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final ObjectMapper objectMapper;
 
     @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId,
@@ -53,12 +56,22 @@ public class ArmApiServiceImpl implements ArmApiService {
             .useGuidsForFields(false)
             .build();
 
+        logUpdateMetadataRequestJson(armUpdateMetadataRequest);
+
         try {
             return armApiClient.updateMetadata(getArmBearerToken(), armUpdateMetadataRequest);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error("Error during ARM update metadata: Detail: {}", e.contentUTF8(), e);
             throw e;
+        }
+    }
+
+    private void logUpdateMetadataRequestJson(UpdateMetadataRequest armUpdateMetadataRequest) {
+        try {
+            objectMapper.writeValueAsString(armUpdateMetadataRequest);
+        } catch (JsonProcessingException e) {
+            log.warn("Error during ARM update metadata: Detail: {}", e.getMessage());
         }
     }
 
