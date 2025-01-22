@@ -202,6 +202,8 @@ function:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
         - name: ARMSasEndpoint
           alias: ARM_SAS_ENDPOINT
+        - name: DETSSasURLEndpoint
+          alias: DETS_SAS_URL_ENDPOINT
         - name: ArmUsername
           alias: ARM_USERNAME
         - name: ArmPassword
