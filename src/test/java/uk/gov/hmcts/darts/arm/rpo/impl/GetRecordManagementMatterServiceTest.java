@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.rpo.GetRecordManagementMatterService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ArmRpoApiGetRecordManagementMatterTest {
+class GetRecordManagementMatterServiceTest {
 
     @Mock
     private ArmRpoClient armRpoClient;
@@ -37,7 +38,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
     private ArmRpoHelper armRpoHelper;
 
     @InjectMocks
-    private ArmRpoApiImpl armRpoApi;
+    private GetRecordManagementMatterService getRecordManagementMatterService;
 
     private UserAccountEntity userAccountEntity;
 
@@ -64,7 +65,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
         when(armRpoClient.getRecordManagementMatter(anyString(), any())).thenReturn(expectedResponse);
 
         // when
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
+        assertThrows(ArmRpoException.class, () -> getRecordManagementMatterService.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
@@ -80,7 +81,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
         when(armRpoClient.getRecordManagementMatter(anyString(), any())).thenThrow(FeignException.class);
 
         // when
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
+        assertThrows(ArmRpoException.class, () -> getRecordManagementMatterService.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
@@ -93,7 +94,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
     @Test
     void getRecordManagementMatterUpdatesStatusToInProgress() {
         // when
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
+        assertThrows(ArmRpoException.class, () -> getRecordManagementMatterService.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
@@ -119,7 +120,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
         when(armRpoService.getArmRpoExecutionDetailEntity(executionId)).thenReturn(armRpoExecutionDetailEntity);
 
         // when
-        armRpoApi.getRecordManagementMatter("token", executionId, userAccountEntity);
+        getRecordManagementMatterService.getRecordManagementMatter("token", executionId, userAccountEntity);
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),

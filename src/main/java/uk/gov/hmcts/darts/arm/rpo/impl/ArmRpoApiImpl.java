@@ -15,14 +15,12 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsT
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
-import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
-import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
@@ -67,7 +65,6 @@ import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS
 @Slf4j
 public class ArmRpoApiImpl implements ArmRpoApi {
 
-    private static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
     private static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
     private static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
     private static final String RECORD_CLASS_CODE = "DARTS";
@@ -85,34 +82,6 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final ArmRpoDownloadProduction armRpoDownloadProduction;
-
-    @Override
-    public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        log.debug("getRecordManagementMatter called with executionId: {}", executionId);
-        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
-        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getRecordManagementMatterRpoState(),
-                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
-
-        StringBuilder errorMessage = new StringBuilder(96).append("Failure during ARM RPO getRecordManagementMatter: ");
-        RecordManagementMatterResponse recordManagementMatterResponse;
-        try {
-            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-            recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken, emptyRpoRequest);
-        } catch (FeignException e) {
-            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
-            throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
-        }
-
-        handleResponseStatus(userAccount, recordManagementMatterResponse, errorMessage, armRpoExecutionDetailEntity);
-
-        if (isNull(recordManagementMatterResponse.getRecordManagementMatter())
-            || StringUtils.isBlank(recordManagementMatterResponse.getRecordManagementMatter().getMatterId())) {
-            throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
-        }
-
-        armRpoExecutionDetailEntity.setMatterId(recordManagementMatterResponse.getRecordManagementMatter().getMatterId());
-        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-    }
 
     @Override
     public void getIndexesByMatterId(String bearerToken, Integer executionId, String matterId, UserAccountEntity userAccount) {

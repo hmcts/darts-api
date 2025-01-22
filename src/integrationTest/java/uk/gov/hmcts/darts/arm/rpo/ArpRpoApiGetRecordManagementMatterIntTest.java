@@ -28,6 +28,9 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
     @Autowired
     private ArmRpoApi armRpoApi;
 
+    @Autowired
+    private GetRecordManagementMatterService getRecordManagementMatterService;
+
 
     @Test
     void getRecordManagementMatterShouldSucceedIfServerReturns200Success() {
@@ -49,7 +52,7 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
         var bearerAuth = "Bearer some-token";
 
         // when
-        armRpoApi.getRecordManagementMatter(bearerAuth, armRpoExecutionDetail.getId(), userAccount);
+        getRecordManagementMatterService.getRecordManagementMatter(bearerAuth, armRpoExecutionDetail.getId(), userAccount);
 
         // then
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
@@ -78,7 +81,8 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
         var bearerAuth = "Bearer some-token";
 
         // when
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
+        assertThrows(ArmRpoException.class,
+                     () -> getRecordManagementMatterService.getRecordManagementMatter(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
 
         // then
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
@@ -102,7 +106,8 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
         var bearerAuth = "Bearer some-token";
 
         // when
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
+        assertThrows(ArmRpoException.class,
+                     () -> getRecordManagementMatterService.getRecordManagementMatter(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
 
         // then
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();

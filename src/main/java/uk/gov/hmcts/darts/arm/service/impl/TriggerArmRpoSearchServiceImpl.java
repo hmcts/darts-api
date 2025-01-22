@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
+import uk.gov.hmcts.darts.arm.rpo.GetRecordManagementMatterService;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.TriggerArmRpoSearchService;
@@ -23,6 +24,8 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
     private final ArmApiService armApiService;
     private final UserIdentity userIdentity;
     private final LogApi logApi;
+
+    private final GetRecordManagementMatterService getRecordManagementMatterService;
 
     /**
      * This method integrates various ARM RPO API calls to ultimately trigger a search. The results of that search are then processed by another automated
@@ -46,9 +49,9 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
             // armBearerToken may be null, but we'll let the lower level service methods deal with that by handling the resultant HTTP exception
             final String armBearerToken = armApiService.getArmBearerToken();
 
-            armRpoApi.getRecordManagementMatter(armBearerToken,
-                                                executionId,
-                                                userAccountEntity);
+            getRecordManagementMatterService.getRecordManagementMatter(armBearerToken,
+                                                                       executionId,
+                                                                       userAccountEntity);
 
             // We expect getRecordManagementMatter() to populate the matter id as a side effect, so refresh the entity to get the updated value
             final String matterId = armRpoService.getArmRpoExecutionDetailEntity(executionId).getMatterId();

@@ -9,9 +9,7 @@ import java.io.InputStream;
 import java.util.List;
 
 public interface ArmRpoApi {
-
-    void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
-
+    
     void getIndexesByMatterId(String bearerToken, Integer executionId, String matterId, UserAccountEntity userAccount);
 
     void getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount);

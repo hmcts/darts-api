@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
+import uk.gov.hmcts.darts.arm.rpo.GetRecordManagementMatterService;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -49,6 +50,8 @@ class TriggerArmRpoSearchServiceImplTest {
     private UserIdentity userIdentity;
     @Mock
     private LogApi logApi;
+    @Mock
+    private GetRecordManagementMatterService getRecordManagementMatterService;
 
     private TriggerArmRpoSearchServiceImpl triggerArmRpoSearchServiceImpl;
     private UserAccountEntity userAccount;
@@ -60,7 +63,8 @@ class TriggerArmRpoSearchServiceImplTest {
                                                                             armRpoService,
                                                                             armApiService,
                                                                             userIdentity,
-                                                                            logApi);
+                                                                            logApi,
+                                                                            getRecordManagementMatterService);
         userAccount = new UserAccountEntity();
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
@@ -87,7 +91,7 @@ class TriggerArmRpoSearchServiceImplTest {
         // Then
         verify(armRpoService).createArmRpoExecutionDetailEntity(userAccount);
         verify(armApiService).getArmBearerToken();
-        verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
+        verify(getRecordManagementMatterService).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(armRpoApi).getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, MATTER_ID, userAccount);
         verify(armRpoApi).getStorageAccounts(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(armRpoApi).getProfileEntitlements(BEARER_TOKEN, EXECUTION_ID, userAccount);
@@ -107,7 +111,7 @@ class TriggerArmRpoSearchServiceImplTest {
         // Given
         Duration threadSleepDuration = Duration.ofMillis(1);
         doThrow(new ArmRpoException("some message"))
-            .when(armRpoApi).getRecordManagementMatter(anyString(), anyInt(), any(UserAccountEntity.class));
+            .when(getRecordManagementMatterService).getRecordManagementMatter(anyString(), anyInt(), any(UserAccountEntity.class));
 
         // When
         triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(threadSleepDuration);
@@ -115,7 +119,7 @@ class TriggerArmRpoSearchServiceImplTest {
         // Then
         verify(armRpoService).createArmRpoExecutionDetailEntity(userAccount);
         verify(armApiService).getArmBearerToken();
-        verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
+        verify(getRecordManagementMatterService).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(logApi).armRpoSearchFailed(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoService);
