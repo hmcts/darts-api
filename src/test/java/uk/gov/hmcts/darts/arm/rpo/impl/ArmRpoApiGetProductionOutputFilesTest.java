@@ -318,7 +318,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
     }
 
     @Test
-    void getProductionOutputFiles_shouldReturnNonFailedProductions_when1FailedStatusIsReturnedFromArmWithMultipleProductionExportFile() {
+    void getProductionOutputFiles_shouldReturnNonFailedProductions_whenOneFailedStatusIsReturnedFromArmWithMultipleProductionExportFile() {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
