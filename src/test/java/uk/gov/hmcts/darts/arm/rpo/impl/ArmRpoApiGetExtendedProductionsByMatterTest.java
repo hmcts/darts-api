@@ -168,7 +168,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM RPO Extended Productions By Matter: Production Id or status is missing from ARM RPO response"));
+            "Failure during ARM RPO Extended Productions By Matter: Production Id is missing from ARM RPO response"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),

@@ -37,12 +37,13 @@ class ArmRpoApiGetProductionOutputFilesIntTest extends PostgresIntegrationBase {
 
     private static final String TOKEN = "some token";
     private static final String PRODUCTION_ID = UUID.randomUUID().toString();
-    private static final String PRODUCTION_EXPORT_FILE_ID = UUID.randomUUID().toString();
+    private static final String PRODUCTION_EXPORT_FILE_ID1 = UUID.randomUUID().toString();
+    private static final String PRODUCTION_EXPORT_FILE_ID2 = UUID.randomUUID().toString();
 
     @Test
     void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenSuccessResponseIsReturnedFromArmWithSingularProductionExportFile() {
         // Given
-        var productionOutputFilesResponse = createProductionOutputFilesResponse(PRODUCTION_EXPORT_FILE_ID);
+        var productionOutputFilesResponse = createProductionOutputFilesResponse(PRODUCTION_EXPORT_FILE_ID1);
         when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(productionOutputFilesResponse);
 
@@ -57,10 +58,36 @@ class ArmRpoApiGetProductionOutputFilesIntTest extends PostgresIntegrationBase {
 
         // Then
         assertEquals(1, productionOutputFiles.size());
-        assertEquals(PRODUCTION_EXPORT_FILE_ID, productionOutputFiles.getFirst());
+        assertEquals(PRODUCTION_EXPORT_FILE_ID1, productionOutputFiles.getFirst());
 
         executionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(executionId)
             .orElseThrow();
+        assertEquals(ArmRpoStateEnum.GET_PRODUCTION_OUTPUT_FILES.getId(), executionDetailEntity.getArmRpoState().getId());
+        assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), executionDetailEntity.getArmRpoStatus().getId());
+    }
+
+    @Test
+    void getProductionOutputFiles_shouldSucceedAndReturnMultipleItems_whenSuccessResponseIsReturnedFromArmWithSingularProductionExportFile() {
+        // Given
+        var productionOutputFilesResponse = createMultipleProductionOutputFilesResponse(PRODUCTION_EXPORT_FILE_ID1, PRODUCTION_EXPORT_FILE_ID2);
+        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+            .thenReturn(productionOutputFilesResponse);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        var executionDetailEntity = createExecutionDetailEntity(userAccount);
+        executionDetailEntity = dartsPersistence.save(executionDetailEntity);
+
+        Integer executionId = executionDetailEntity.getId();
+
+        // When
+        List<String> productionOutputFiles = armRpoApi.getProductionOutputFiles(TOKEN, executionId, userAccount);
+
+        // Then
+        assertEquals(2, productionOutputFiles.size());
+        assertEquals(PRODUCTION_EXPORT_FILE_ID1, productionOutputFiles.getFirst());
+        assertEquals(PRODUCTION_EXPORT_FILE_ID2, productionOutputFiles.get(1));
+
+        executionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(executionId).orElseThrow();
         assertEquals(ArmRpoStateEnum.GET_PRODUCTION_OUTPUT_FILES.getId(), executionDetailEntity.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), executionDetailEntity.getArmRpoStatus().getId());
     }
@@ -82,7 +109,7 @@ class ArmRpoApiGetProductionOutputFilesIntTest extends PostgresIntegrationBase {
             .getMessage();
 
         // Then
-        assertThat(exceptionMessage, containsString("No production export file ids were returned"));
+        assertThat(exceptionMessage, containsString("ARM getProductionOutputFiles: No production export file id's were returned"));
 
         executionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(executionId)
             .orElseThrow();
@@ -110,6 +137,29 @@ class ArmRpoApiGetProductionOutputFilesIntTest extends PostgresIntegrationBase {
         response.setStatus(200);
         response.setIsError(false);
         response.setProductionExportFiles(Collections.singletonList(productionExportFile));
+
+        return response;
+    }
+
+    private ProductionOutputFilesResponse createMultipleProductionOutputFilesResponse(String fileId1, String fileId2) {
+        var productionExportFileDetail1 = new ProductionOutputFilesResponse.ProductionExportFileDetail();
+        productionExportFileDetail1.setProductionExportFileId(fileId1);
+        productionExportFileDetail1.setStatus(READY_STATUS.getStatusCode());
+
+        var productionExportFile1 = new ProductionOutputFilesResponse.ProductionExportFile();
+        productionExportFile1.setProductionExportFileDetails(productionExportFileDetail1);
+
+        var productionExportFileDetail2 = new ProductionOutputFilesResponse.ProductionExportFileDetail();
+        productionExportFileDetail2.setProductionExportFileId(fileId2);
+        productionExportFileDetail2.setStatus(READY_STATUS.getStatusCode());
+
+        var productionExportFile2 = new ProductionOutputFilesResponse.ProductionExportFile();
+        productionExportFile2.setProductionExportFileDetails(productionExportFileDetail2);
+
+        var response = new ProductionOutputFilesResponse();
+        response.setStatus(200);
+        response.setIsError(false);
+        response.setProductionExportFiles(List.of(productionExportFile1, productionExportFile2));
 
         return response;
     }

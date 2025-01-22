@@ -82,7 +82,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
     }
 
     @Test
-    void getProductionOutputFiles_shouldSucceedAndReturnASingleItem_whenASuccessResponseIsReturnedFromArmWithASingularProductionExportFile() {
+    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenSuccessResponseIsReturnedFromArmWithSingularProductionExportFile() {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
@@ -116,7 +116,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
     }
 
     @Test
-    void getProductionOutputFiles_shouldSucceedAndReturnMultipleItems_whenASuccessResponseIsReturnedFromArmWithMultipleProductionExportFile() {
+    void getProductionOutputFiles_shouldSucceedAndReturnMultipleItems_whenSuccessResponseIsReturnedFromArmWithMultipleProductionExportFile() {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
@@ -154,7 +154,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
     @ParameterizedTest
     @NullSource
     @EmptySource
-    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenASuccessResponseIsReturnedFromArmWithMixtureOfPopulatedAndUnpopulatedExportFileIds(
+    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenSuccessResponseIsReturnedFromArmWithMixtureOfPopulatedAndUnpopulatedExportFileIds(
         String productionExportFileId) {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
@@ -302,7 +302,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
         // When
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.getProductionOutputFiles(TOKEN, EXECUTION_ID, someUserAccount));
-        assertThat(armRpoException.getMessage(), containsString("No production export file ids were returned"));
+        assertThat(armRpoException.getMessage(), containsString("No production export file id's were returned"));
 
         // Then verify execution detail state moves to in progress
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,

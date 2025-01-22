@@ -595,7 +595,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             return false;
         }
         if (StringUtils.isBlank(productionMatch.getProductionId())) {
-            throw handleFailureAndCreateException(errorMessage.append("Production Id or status is missing from ARM RPO response").toString(),
+            throw handleFailureAndCreateException(errorMessage.append("Production Id is missing from ARM RPO response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -651,11 +651,11 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         if (productionExportFiles.stream()
             .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
-            .anyMatch(details -> nonNull(details) && details.getStatus() == IN_PROGRESS_STATUS.getStatusCode())) {
+            .anyMatch(details -> nonNull(details) && IN_PROGRESS_STATUS.getStatusCode() == details.getStatus())) {
             throw new ArmRpoInProgressException("getProductionExportFileDetails", executionDetail.getId());
         } else if (productionExportFiles.stream()
             .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
-            .allMatch(details -> nonNull(details) && details.getStatus() == READY_STATUS.getStatusCode())) {
+            .allMatch(details -> nonNull(details) && READY_STATUS.getStatusCode() == details.getStatus())) {
             log.info("All production export files are ready for download");
         } else if (productionExportFiles.stream()
             .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
@@ -664,7 +664,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                   executionDetail, userAccount);
         } else if (productionExportFiles.stream()
             .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
-            .anyMatch(details -> nonNull(details) && details.getStatus() == READY_STATUS.getStatusCode())) {
+            .anyMatch(details -> nonNull(details) && READY_STATUS.getStatusCode() == details.getStatus())) {
             log.info("Some production export files are not ready for download");
         } else {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("Production export files contain failures").toString(),
@@ -681,7 +681,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .toList();
 
         if (productionExportFileIds.isEmpty()) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export file ids were returned").toString(),
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export file id's were returned").toString(),
                                                   executionDetail, userAccount);
         }
 
