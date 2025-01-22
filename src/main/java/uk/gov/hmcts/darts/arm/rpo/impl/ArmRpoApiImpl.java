@@ -649,27 +649,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                   executionDetail, userAccount);
         }
 
-        if (productionExportFiles.stream()
-            .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
-            .anyMatch(details -> nonNull(details) && IN_PROGRESS_STATUS.getStatusCode() == details.getStatus())) {
-            throw new ArmRpoInProgressException("getProductionExportFileDetails", executionDetail.getId());
-        } else if (productionExportFiles.stream()
-            .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
-            .allMatch(details -> nonNull(details) && READY_STATUS.getStatusCode() == details.getStatus())) {
-            log.info("All production export files are ready for download");
-        } else if (productionExportFiles.stream()
-            .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
-            .allMatch(details -> nonNull(details) && details.getStatus() != READY_STATUS.getStatusCode())) {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("Production export files contain failures").toString(),
-                                                  executionDetail, userAccount);
-        } else if (productionExportFiles.stream()
-            .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
-            .anyMatch(details -> nonNull(details) && READY_STATUS.getStatusCode() == details.getStatus())) {
-            log.info("Some production export files are not ready for download");
-        } else {
-            throw handleFailureAndCreateException(exceptionMessageBuilder.append("Production export files contain failures").toString(),
-                                                  executionDetail, userAccount);
-        }
+        validateProductionExportResponse(userAccount, exceptionMessageBuilder, executionDetail, productionExportFiles);
 
         List<String> productionExportFileIds = productionExportFiles.stream()
             .filter(Objects::nonNull)
@@ -688,6 +668,28 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStatus(executionDetail, ArmRpoHelper.completedRpoStatus(), userAccount);
 
         return productionExportFileIds;
+    }
+
+    private void validateProductionExportResponse(UserAccountEntity userAccount, StringBuilder exceptionMessageBuilder,
+                                                  ArmRpoExecutionDetailEntity executionDetail,
+                                                  List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles) {
+        if (productionExportFiles.stream().map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .anyMatch(details -> nonNull(details) && IN_PROGRESS_STATUS.getStatusCode() == details.getStatus())) {
+            throw new ArmRpoInProgressException("getProductionExportFileDetails", executionDetail.getId());
+        } else if (productionExportFiles.stream().map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .allMatch(details -> nonNull(details) && READY_STATUS.getStatusCode() == details.getStatus())) {
+            log.info("All production export files are ready for download");
+        } else if (productionExportFiles.stream().map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .allMatch(details -> nonNull(details) && details.getStatus() != READY_STATUS.getStatusCode())) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("Production export files contain failures").toString(),
+                                                  executionDetail, userAccount);
+        } else if (productionExportFiles.stream().map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .anyMatch(details -> nonNull(details) && READY_STATUS.getStatusCode() == details.getStatus())) {
+            log.warn("Some production export files are not ready for download");
+        } else {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("Production export files contain failures").toString(),
+                                                  executionDetail, userAccount);
+        }
     }
 
     @Override
