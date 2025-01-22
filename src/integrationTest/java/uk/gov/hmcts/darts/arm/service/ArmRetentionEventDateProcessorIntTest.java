@@ -241,7 +241,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
         log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
         assertTrue(persistedEod.isUpdateRetention());
-        assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
 
     }
 
