@@ -248,7 +248,7 @@ class DetsToArmBatchPushProcessorImplTest {
         // given
         detsToArmBatchPushProcessor.processDetsToArm(5);
         // when
-        LogUtil.waitUntilMessag(output, "No DETS EODs to process", 5);
+        LogUtil.waitUntilMessage(output, "No DETS EODs to process", 5);
         assertThat(output)
             .contains("No DETS EODs to process");
     }
@@ -263,7 +263,7 @@ class DetsToArmBatchPushProcessorImplTest {
             asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), anyInt(), anyInt(), any()))
                 .thenThrow(new RuntimeException("Test exception"));
             detsToArmBatchPushProcessor.processDetsToArm(5);
-            LogUtil.waitUntilMessag(output, "Dets to arm batch unexpected exception", 5);
+            LogUtil.waitUntilMessage(output, "Dets to arm batch unexpected exception", 5);
 
             assertThat(output)
                 .contains("Dets to arm batch unexpected exception")
