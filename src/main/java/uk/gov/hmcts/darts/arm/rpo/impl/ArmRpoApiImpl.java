@@ -502,18 +502,32 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         try {
             createExportBasedOnSearchResultsTableResponse = armRpoClient.createExportBasedOnSearchResultsTable(bearerToken, request);
         } catch (FeignException e) {
-            String feignResponse = e.contentUTF8();
-            log.debug("Feign response: {}", feignResponse);
-            try {
-                createExportBasedOnSearchResultsTableResponse = objectMapper.readValue(feignResponse, CreateExportBasedOnSearchResultsTableResponse.class);
-            } catch (JsonProcessingException ex) {
-                throw handleFailureAndCreateException(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(),
-                                                      armRpoExecutionDetailEntity, userAccount);
-            }
+            createExportBasedOnSearchResultsTableResponse = processCreateExportBasedOnSearchResultsTableResponseFeignException(userAccount, e, errorMessage,
+                                                                                                                               armRpoExecutionDetailEntity);
 
         }
         return processCreateExportBasedOnSearchResultsTableResponse(userAccount, createExportBasedOnSearchResultsTableResponse, errorMessage,
                                                                     armRpoExecutionDetailEntity);
+    }
+
+    private CreateExportBasedOnSearchResultsTableResponse processCreateExportBasedOnSearchResultsTableResponseFeignException(UserAccountEntity userAccount,
+                                                                                                                             FeignException e,
+                                                                                                                             StringBuilder errorMessage,
+                                                                                                                             ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTableResponse;
+        String feignResponse = e.contentUTF8();
+        if (StringUtils.isBlank(feignResponse)) {
+            throw handleFailureAndCreateException(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+        log.debug("Feign response: {}", feignResponse);
+        try {
+            createExportBasedOnSearchResultsTableResponse = objectMapper.readValue(feignResponse, CreateExportBasedOnSearchResultsTableResponse.class);
+        } catch (JsonProcessingException ex) {
+            throw handleFailureAndCreateException(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+        return createExportBasedOnSearchResultsTableResponse;
     }
 
     private boolean processCreateExportBasedOnSearchResultsTableResponse(UserAccountEntity userAccount,
