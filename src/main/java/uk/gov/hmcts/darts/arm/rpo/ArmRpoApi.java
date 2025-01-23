@@ -31,7 +31,7 @@ public interface ArmRpoApi {
                                                   List<MasterIndexFieldByRecordClassSchema> headerColumns, String productionName,
                                                   UserAccountEntity userAccount);
 
-    void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
+    boolean getExtendedProductionsByMatter(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount);
 
     List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
