@@ -175,7 +175,7 @@ class ArmRpoApiGetProfileEntitlementsTest {
         // When
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.getProfileEntitlements(TOKEN, EXECUTION_ID, someUserAccount));
-        assertThat(armRpoException.getMessage(), containsString("No matching entitlements were returned"));
+        assertThat(armRpoException.getMessage(), containsString("ARM getProfileEntitlements: No matching entitlements 'some entitlement name' were returned"));
 
         // Then verify execution detail state moves to in progress
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
