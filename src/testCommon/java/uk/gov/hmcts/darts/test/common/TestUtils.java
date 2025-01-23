@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.data.TemporalUnitOffset;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.CognitiveComplexity"})
+@Slf4j
 public final class TestUtils {
 
     public static final String UUID_REGEX = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
@@ -193,5 +195,25 @@ public final class TestUtils {
             return String.valueOf(object);
         }
         return getObjectMapper().writeValueAsString(object);
+    }
+
+    public static void retryLoop(int maxRetries, int waitBetweenTries, Runnable runnable) {
+        do {
+            try {
+                runnable.run();
+                break;
+            } catch (Exception e) {
+                maxRetries--;
+                if (maxRetries == 0) {
+                    throw e;
+                }
+                log.error("Retry Loop, run failed with exception. Try count {} out of {}", maxRetries, waitBetweenTries, e);
+                try {
+                    Thread.sleep(waitBetweenTries);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        } while (maxRetries > 0);
     }
 }
