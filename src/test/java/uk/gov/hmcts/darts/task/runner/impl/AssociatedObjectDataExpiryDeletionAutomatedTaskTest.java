@@ -90,6 +90,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
                 externalObjectDirectoryRepository, inboundDeleter, unstructuredDeleter,
                 auditApi, 100, transactionTemplate)
         );
+        lenient().doCallRealMethod().when(transactionTemplate).executeWithoutResult(any());
         lenient().when(transactionTemplate.execute(any()))
             .thenAnswer(invocation -> {
                 TransactionCallback transactionCallback = invocation.getArgument(0);
