@@ -510,10 +510,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                                     armRpoExecutionDetailEntity);
     }
 
-    private CreateExportBasedOnSearchResultsTableResponse processCreateExportBasedOnSearchResultsTableResponseFeignException(UserAccountEntity userAccount,
-                                                                                                                             FeignException e,
-                                                                                                                             StringBuilder errorMessage,
-                                                                                                                             ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+    private CreateExportBasedOnSearchResultsTableResponse processCreateExportBasedOnSearchResultsTableResponseFeignException(
+        UserAccountEntity userAccount, FeignException e, StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTableResponse;
         String feignResponse = e.contentUTF8();
         if (StringUtils.isBlank(feignResponse)) {
