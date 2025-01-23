@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.helper.ArmRpoApiHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.GetRecordManagementMatterService;
-import uk.gov.hmcts.darts.arm.service.ArmRpoApiHelper;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 

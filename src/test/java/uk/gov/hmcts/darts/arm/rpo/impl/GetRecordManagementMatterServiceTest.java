@@ -5,15 +5,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
+import uk.gov.hmcts.darts.arm.helper.ArmRpoApiHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
-import uk.gov.hmcts.darts.arm.rpo.GetRecordManagementMatterService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -35,10 +33,9 @@ class GetRecordManagementMatterServiceTest {
     private ArmRpoService armRpoService;
 
     @Mock
-    private ArmRpoHelper armRpoHelper;
+    private ArmRpoApiHelper armRpoApiHelper;
 
-    @InjectMocks
-    private GetRecordManagementMatterService getRecordManagementMatterService;
+    private GetRecordManagementMatterServiceImpl getRecordManagementMatterService;
 
     private UserAccountEntity userAccountEntity;
 
@@ -53,6 +50,8 @@ class GetRecordManagementMatterServiceTest {
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
+
+        getRecordManagementMatterService = new GetRecordManagementMatterServiceImpl(armRpoService, armRpoClient, armRpoApiHelper);
 
     }
 

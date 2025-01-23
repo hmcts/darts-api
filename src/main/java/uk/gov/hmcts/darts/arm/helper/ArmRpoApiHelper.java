@@ -1,19 +1,17 @@
-package uk.gov.hmcts.darts.arm.service.impl;
+package uk.gov.hmcts.darts.arm.helper;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
-import uk.gov.hmcts.darts.arm.service.ArmRpoApiHelper;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
-@Service
+@Component
 @AllArgsConstructor
-public class ArmRpoApiHelperImpl implements ArmRpoApiHelper {
+public class ArmRpoApiHelper {
 
     private final ArmRpoService armRpoService;
 
