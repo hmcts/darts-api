@@ -185,7 +185,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(savedMedia.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
                           .retConfReason(confidenceReason)
-                          .retConfScore(confidenceScore)
+                          .retConfScore(confidenceScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -309,7 +309,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(transcriptionDocumentEntity.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
                           .retConfReason(confidenceReason)
-                          .retConfScore(confidenceScore)
+                          .retConfScore(confidenceScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -385,7 +385,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(annotationDocument.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
                           .retConfReason(confidenceReason)
-                          .retConfScore(confidenceScore)
+                          .retConfScore(confidenceScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -441,7 +441,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(caseDocument.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
                           .retConfReason(confidenceReason)
-                          .retConfScore(confidenceScore)
+                          .retConfScore(confidenceScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();

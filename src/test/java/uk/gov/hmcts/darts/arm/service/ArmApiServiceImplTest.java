@@ -71,7 +71,7 @@ class ArmApiServiceImplTest {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(offsetDateTime)
                           .retConfReason(refConfReason)
-                          .retConfScore(refConfScore)
+                          .retConfScore(refConfScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();

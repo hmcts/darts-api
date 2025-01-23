@@ -48,7 +48,7 @@ public class ArmApiServiceImpl implements ArmApiService {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(eventTimestamp)
                           .retConfReason(retConfReason)
-                          .retConfScore(retConfScore)
+                          .retConfScore(retConfScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();
