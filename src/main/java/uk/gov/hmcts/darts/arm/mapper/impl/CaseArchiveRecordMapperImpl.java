@@ -160,7 +160,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         }
 
         if (nonNull(caseDocument.getRetConfScore())) {
-            metadata.setRetentionConfidenceScore(caseDocument.getRetConfScore());
+            metadata.setRetentionConfidenceScore(caseDocument.getRetConfScore().getId());
         }
 
         if (caseRecordProperties.containsKey(BF_001_KEY)) {

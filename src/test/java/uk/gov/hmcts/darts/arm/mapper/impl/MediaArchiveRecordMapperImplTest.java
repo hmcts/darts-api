@@ -74,7 +74,7 @@ class MediaArchiveRecordMapperImplTest {
                                                                                                     "someFilename");
 
             // Then
-            assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED,
+            assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
                          mediaArchiveRecord.getMediaCreateArchiveRecord().getRecordMetadata().getRetentionConfidenceScore());
         }
 

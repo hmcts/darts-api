@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import uk.gov.hmcts.darts.arm.model.ArchiveMetadata;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
@@ -32,7 +31,7 @@ public class RecordMetadata implements ArchiveMetadata {
     @JsonProperty("contributor")
     private String contributor;
     @JsonProperty("ret_conf_score")
-    private RetentionConfidenceScoreEnum retentionConfidenceScore;
+    private Integer retentionConfidenceScore;
     @JsonProperty("ret_conf_reason")
     private String retentionConfidenceReason;
 

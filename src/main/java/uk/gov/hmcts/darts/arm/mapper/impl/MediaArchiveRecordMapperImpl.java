@@ -148,7 +148,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         }
 
         if (nonNull(media.getRetConfScore())) {
-            metadata.setRetentionConfidenceScore(media.getRetConfScore());
+            metadata.setRetentionConfidenceScore(media.getRetConfScore().getId());
         }
 
         if (mediaRecordProperties.containsKey(BF_001_KEY)) {

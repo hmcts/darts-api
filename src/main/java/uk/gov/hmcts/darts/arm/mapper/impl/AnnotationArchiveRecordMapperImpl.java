@@ -150,7 +150,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         }
 
         if (nonNull(annotationDocument.getRetConfScore())) {
-            metadata.setRetentionConfidenceScore(annotationDocument.getRetConfScore());
+            metadata.setRetentionConfidenceScore(annotationDocument.getRetConfScore().getId());
         }
 
         if (annotationRecordProperties.containsKey(BF_001_KEY)) {

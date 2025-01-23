@@ -74,7 +74,7 @@ class CaseArchiveRecordMapperImplTest {
                                                                                                  "someFilename");
 
             // Then
-            assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED,
+            assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
                          caseArchiveRecord.getCaseCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
         }
 

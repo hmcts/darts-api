@@ -627,7 +627,8 @@ public class TranscriptionStub {
                                                                                 int fileSize, UserAccountEntity testUser, String checksum,
                                                                                 OffsetDateTime uploadedDateTime) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, null, "confidence reason");
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED,
+            "confidence reason");
         transcriptionDocumentEntity.setUploadedDateTime(uploadedDateTime);
         return transcriptionDocumentEntity;
     }

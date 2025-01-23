@@ -75,7 +75,7 @@ class TranscriptionArchiveRecordMapperImplTest {
                                                                                                                               "someFilename");
 
             // Then
-            assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED,
+            assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
                          transcriptionRecord.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
         }
 
