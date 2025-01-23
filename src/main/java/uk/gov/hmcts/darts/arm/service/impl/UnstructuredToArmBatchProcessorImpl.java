@@ -80,10 +80,12 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 .map(eodsForBatch -> (Callable<Void>) () -> {
                     int batchNumber = batchCounter.getAndIncrement();
                     try {
+                        TimeUnit.SECONDS.sleep(5);
                         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
                         log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
                         createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
                         log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
+
                     } catch (Exception e) {
                         log.error("Unexpected exception when processing batch {}", batchNumber, e);
                     }
