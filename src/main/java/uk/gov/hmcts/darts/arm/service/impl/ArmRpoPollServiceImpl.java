@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -31,6 +32,8 @@ import static java.util.Objects.nonNull;
 @AllArgsConstructor
 @Slf4j
 public class ArmRpoPollServiceImpl implements ArmRpoPollService {
+
+    private static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
 
     private final ArmRpoApi armRpoApi;
     private final ArmApiService armApiService;
@@ -72,6 +75,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             // step to call ARM RPO API to get the extended searches by matter
             String productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
 
+            String uniqueProductionName = productionName + "_" + UUID.randomUUID().toString() + CREATE_EXPORT_CSV_EXTENSION;
+
             // step to call ARM RPO API to get the master index field by record class schema
             List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
                 bearerToken, executionId,
@@ -80,15 +85,15 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
             // step to call ARM RPO API to create export based on search results table
             boolean createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(
-                bearerToken, executionId, headerColumns, productionName, userAccount);
+                bearerToken, executionId, headerColumns, uniqueProductionName, userAccount);
             if (createExportBasedOnSearchResultsTable) {
-                processProductions(bearerToken, executionId, productionName, userAccount, armRpoExecutionDetailEntity);
+                processProductions(bearerToken, executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity);
             } else {
                 log.warn("ARM RPO Polling is still in-progress for createExportBasedOnSearchResultsTable");
             }
             log.info("Polling ARM RPO service completed");
         } catch (ArmRpoInProgressException e) {
-            log.warn("ARM RPO Polling is still in-progress - ", e.getMessage());
+            log.warn("ARM RPO Polling is still in-progress - {}", e.getMessage());
         } catch (Exception e) {
             log.error("Error while polling ARM RPO", e);
             logApi.armRpoPollingFailed(executionId);
@@ -97,10 +102,10 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         }
     }
 
-    private void processProductions(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount,
+    private void processProductions(String bearerToken, Integer executionId, String uniqueProductionName, UserAccountEntity userAccount,
                                     ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) throws IOException {
         // step to call ARM RPO API to get the extended productions by matter
-        boolean getExtendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, productionName, userAccount);
+        boolean getExtendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, uniqueProductionName, userAccount);
         if (getExtendedProductionsByMatter) {
             // step to call ARM RPO API to get the production output files
             var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
@@ -205,12 +210,9 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     }
 
     private boolean pollServiceFailed(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        if (nonNull(armRpoExecutionDetailEntity.getArmRpoState())
+        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
             && ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId())
-            && allowableFailedStates.contains(armRpoExecutionDetailEntity.getArmRpoState().getId())) {
-            return true;
-        }
-        return false;
+            && allowableFailedStates.contains(armRpoExecutionDetailEntity.getArmRpoState().getId());
     }
 
     private boolean pollServiceInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetail) {

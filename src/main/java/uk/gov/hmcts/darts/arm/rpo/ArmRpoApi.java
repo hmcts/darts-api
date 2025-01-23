@@ -28,10 +28,10 @@ public interface ArmRpoApi {
     String getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
     boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
-                                                  List<MasterIndexFieldByRecordClassSchema> headerColumns, String productionName,
+                                                  List<MasterIndexFieldByRecordClassSchema> headerColumns, String uniqueProductionName,
                                                   UserAccountEntity userAccount);
 
-    boolean getExtendedProductionsByMatter(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount);
+    boolean getExtendedProductionsByMatter(String bearerToken, Integer executionId, String uniqueProductionName, UserAccountEntity userAccount);
 
     List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
