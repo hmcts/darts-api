@@ -31,7 +31,6 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
     @Autowired
     private ArmRpoApi armRpoApi;
 
-
     @Test
     void createExportBasedOnSearchResultsTable_ReturnsTrue() {
         // given
@@ -101,9 +100,8 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
     private List<MasterIndexFieldByRecordClassSchema> createHeaderColumns() {
         return List.of(
             createMasterIndexFieldByRecordClassSchema("200b9c27-b497-4977-82e7-1586b32a5871", "Record Class", "record_class", "string", false),
-            createMasterIndexFieldByRecordClassSchema("90ee0e13-8639-4c4a-b542-66b6c8911549", "Archived Date", "ingestionDate", "date", false),
-            createMasterIndexFieldByRecordClassSchema("a9b8daf2-d9ff-4815-b65a-f6ae2763b92c", "Client Identifier", "client_identifier", "string",
-                                                      false),
+            createMasterIndexFieldByRecordClassSchema("90ee0e13-8639-4c4a-b542-66b6c8911549", "Archived Date", "ingestionDate", "date", true),
+            createMasterIndexFieldByRecordClassSchema("a9b8daf2-d9ff-4815-b65a-f6ae2763b92c", "Client Identifier", "client_identifier", "string", false),
             createMasterIndexFieldByRecordClassSchema("109b6bf1-57a0-48ec-b22e-c7248dc74f91", "Contributor", "contributor", "string", false),
             createMasterIndexFieldByRecordClassSchema("893048bf-1e7c-4811-9abf-00cd77a715cf", "Record Date", "recordDate", "date", false),
             createMasterIndexFieldByRecordClassSchema("fdd0fcbb-da46-4af1-a627-ac255c12bb23", "ObjectId", "bf_012", "number", false)
