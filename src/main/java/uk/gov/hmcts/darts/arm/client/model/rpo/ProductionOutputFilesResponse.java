@@ -34,6 +34,10 @@ public class ProductionOutputFilesResponse extends BaseRpoResponse {
     public static class ProductionExportFileDetail {
         @JsonProperty("productionExportFileID")
         private String productionExportFileId;
+
+        @JsonProperty("status")
+        private Integer status;
+        
     }
 
 }
