@@ -28,8 +28,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.annotation.PreDestroy;
+import javax.annotation.PostConstruct;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 
@@ -49,6 +50,11 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private List<Integer> eodsForTransfer;
     private UserAccountEntity userAccount;
 
+    @PostConstruct
+    public void init() {
+        Runtime.getRuntime().addShutdownHook(new Thread(this::resetEodStatusOnShutdown));
+    }
+
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
     public void processUnstructuredToArm(int taskBatchSize) {
@@ -64,7 +70,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                                                                             taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
-        if (!eodsForTransfer.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
             List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer, unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
             AtomicInteger batchCounter = new AtomicInteger(1);
@@ -194,9 +200,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.armResponseManifestFailedStatus());
     }
 
-    @SuppressWarnings({"PMD.ConfusingTernary"})
     private void recoverByUpdatingEodToFailedArmStatus(ArmBatchItem batchItem, UserAccountEntity userAccount) {
-        if (batchItem.getArmEod() != null) {
+        if (nonNull(batchItem.getArmEod())) {
             logApi.armPushFailed(batchItem.getArmEod().getId());
             batchItem.undoManifestFileChange();
             if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
@@ -208,25 +213,26 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
     }
 
-    @PreDestroy
+    //@PreDestroy
     public void destroy() {
-        System.out.println("UnstructuredToArmBatchProcessorImpl shutting down.");
-        if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
-            System.out.println("Reverting EODs to failed status for potentially EODs " + eodsForTransfer.size());
-            String eodsIds = eodsForTransfer
-                .stream()
-                .map(eodId -> String.valueOf(eodId))
-                .collect(Collectors.joining(","));
-            System.out.println("EODs  " + eodsIds + " will be reverted to pod recycled status");
+        resetEodStatusOnShutdown();
+    }
 
-            unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
-                                                           EodHelper.armIngestionStatus(),
-                                                           EodHelper.armPushPodRecycledStatus(),
-                                                           userAccount);
-            eodsForTransfer.forEach(eodId -> System.out.println("EOD ID: " + eodId + " has been reverted to pod recycled status"));
+    private void resetEodStatusOnShutdown() {
+        log.info("UnstructuredToArmBatchProcessorImpl shutting down.");
+        if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
+            log.info("Reverting EODs to failed status for potentially EODs {}", eodsForTransfer.size());
+            String eodsIds = eodsForTransfer.stream().map(String::valueOf).collect(Collectors.joining(","));
+            log.info("EODs {} will be reverted to pod recycled status", eodsIds);
+
+            externalObjectDirectoryRepository.updateEodByIdAndStatus(
+                eodsForTransfer, EodHelper.armPushPodRecycledStatus(), EodHelper.armIngestionStatus(), userAccount);
+            log.error("Updated eods from {} to {}", EodHelper.armIngestionStatus().getDescription(), EodHelper.armPushPodRecycledStatus().getDescription());
+
+            eodsForTransfer.forEach(eodId -> log.info("EOD ID: {} has been reverted to pod recycled status", eodId));
         } else {
-            System.out.println("No EODs to revert to failed status");
+            log.info("No EODs to revert to failed status");
         }
-        System.out.println("UnstructuredToArmBatchProcessorImpl has shut down.");
+        log.info("UnstructuredToArmBatchProcessorImpl has shut down.");
     }
 }
