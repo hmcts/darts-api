@@ -115,7 +115,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     }
 
     void deleteTranscriptionDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
-        transactionTemplate.execute(status -> {
+        transactionTemplate.executeWithoutResult(status -> {
             deleteExternalObjectDirectoryEntity(
                 userAccount,
                 transcriptionDocumentRepository,
@@ -123,13 +123,12 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
                 ExternalObjectDirectoryEntity::getTranscriptionDocumentEntity,
                 AuditActivity.TRANSCRIPT_EXPIRED
             );
-            return null;
         });
     }
 
 
     void deleteMediaEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
-        transactionTemplate.execute(status -> {
+        transactionTemplate.executeWithoutResult(status -> {
             deleteExternalObjectDirectoryEntity(
                 userAccount,
                 mediaRepository,
@@ -137,12 +136,11 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
                 ExternalObjectDirectoryEntity::getMedia,
                 AuditActivity.AUDIO_EXPIRED
             );
-            return null;
         });
     }
 
     void deleteAnnotationDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
-        transactionTemplate.execute(status -> {
+        transactionTemplate.executeWithoutResult(status -> {
             deleteExternalObjectDirectoryEntity(
                 userAccount,
                 annotationDocumentRepository,
@@ -150,12 +148,11 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
                 ExternalObjectDirectoryEntity::getAnnotationDocumentEntity,
                 AuditActivity.ANNOTATION_EXPIRED
             );
-            return null;
         });
     }
 
     void deleteCaseDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
-        transactionTemplate.execute(status -> {
+        transactionTemplate.executeWithoutResult(status -> {
             deleteExternalObjectDirectoryEntity(
                 userAccount,
                 caseDocumentRepository,
@@ -163,7 +160,6 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
                 ExternalObjectDirectoryEntity::getCaseDocument,
                 AuditActivity.CASE_DOCUMENT_EXPIRED
             );
-            return null;
         });
     }
 
