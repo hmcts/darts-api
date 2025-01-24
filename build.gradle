@@ -421,8 +421,8 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.4'
   implementation 'org.springframework.retry:spring-retry:2.0.11'
 
-  implementation 'net.javacrumbs.shedlock:shedlock-spring:6.0.2'
-  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.0.2'
+  implementation 'net.javacrumbs.shedlock:shedlock-spring:6.2.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.2.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.7'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
