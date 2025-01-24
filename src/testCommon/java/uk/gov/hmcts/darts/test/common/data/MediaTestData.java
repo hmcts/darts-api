@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.builder.TestMediaEntity;
 
@@ -60,11 +61,11 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
     }
 
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return createMediaWith(courtroomEntity, startTime, endTime, channel, "mp2", 100, "reason");
+        return createMediaWith(courtroomEntity, startTime, endTime, channel, "mp2", null, "reason");
     }
 
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
-                                       String mediaType, Integer refConfScore, String reFConfReason) {
+                                       String mediaType, RetentionConfidenceScoreEnum retConfScore, String retConfReason) {
         var mediaEntity = someMinimalMedia();
         mediaEntity.setCourtroom(courtroomEntity);
         mediaEntity.setStart(startTime);
@@ -73,8 +74,8 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
         mediaEntity.setTotalChannels(2);
         mediaEntity.setMediaFormat(mediaType);
         mediaEntity.setChecksum(getChecksum());
-        mediaEntity.setRetConfScore(refConfScore);
-        mediaEntity.setRetConfReason(reFConfReason);
+        mediaEntity.setRetConfScore(retConfScore);
+        mediaEntity.setRetConfReason(retConfReason);
         return mediaEntity;
     }
 
