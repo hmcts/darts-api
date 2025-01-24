@@ -35,16 +35,6 @@ select cth_id,
        0 as revtype
 from security_group_courthouse_ae;
 
-insert into node_register_aud
-select node_id,
-       hostname,
-       ip_address,
-       mac_address,
-       node_type,
-       currval('revinfo_seq'),
-       0 as revtype
-from node_register;
-
 insert into event_handler_aud
 select evh_id,
        event_type,
