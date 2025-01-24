@@ -276,11 +276,13 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "RPO endpoint extendedSearchesByMatterResponse is already in progress for execution id 1"));
+            "Failure during ARM RPO getExtendedSearchesByMatter: extendedSearchesByMatterResponse search data is missing for searchId"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+                                                 any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
 
     }
