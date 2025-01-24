@@ -399,7 +399,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     }
 
     @Test
-    void createExportBasedOnSearchResultsTable_ThrowsException_WhenFeignExceptionThrown() {
+    void createExportBasedOnSearchResultsTable_ThrowsException_WhenFeignExceptionThrownWithStatus500IsErrorFalseResponseStatus500() {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("500", true, "500"));
@@ -413,6 +413,106 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // then
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with status - 500 INTERNAL_SERVER_ERROR"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ThrowsException_WhenFeignExceptionThrownWithNullResponse() {
+        // given
+        FeignException feignException = mock(FeignException.class);
+        when(feignException.contentUTF8()).thenReturn(null);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.createExportBasedOnSearchResultsTable(
+                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM createExportBasedOnSearchResultsTable: Unable to get ARM RPO response from client"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ThrowsException_WhenFeignExceptionThrownWithEmptyResponse() {
+        // given
+        FeignException feignException = mock(FeignException.class);
+        when(feignException.contentUTF8()).thenReturn("");
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.createExportBasedOnSearchResultsTable(
+                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM createExportBasedOnSearchResultsTable: Unable to get ARM RPO response from client"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ThrowsException_WhenFeignExceptionThrownWithInvalidJsonResponse() {
+        // given
+        FeignException feignException = mock(FeignException.class);
+        when(feignException.contentUTF8()).thenReturn("{");
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.createExportBasedOnSearchResultsTable(
+                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM createExportBasedOnSearchResultsTable: Unable to get ARM RPO response from client"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ThrowsException_WhenFeignExceptionThrownWithEmptyResponseObject() {
+        // given
+        FeignException feignException = mock(FeignException.class);
+        when(feignException.contentUTF8()).thenReturn("{}");
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.createExportBasedOnSearchResultsTable(
+                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API baseRpoResponse is invalid"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
