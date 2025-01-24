@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
@@ -56,6 +57,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @Slf4j
@@ -130,7 +132,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @Test
     void calculateEventDates_WithMediaSuccessfulUpdate() {
         final String confidenceReason = "reason";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = CASE_PERFECTLY_CLOSED;
         final String externalRecordId = "recordId";
 
         // given
@@ -183,7 +185,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(savedMedia.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
                           .retConfReason(confidenceReason)
-                          .retConfScore(confidenceScore)
+                          .retConfScore(confidenceScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -199,7 +201,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
         String confReason = "reason";
-        Integer confScore = 100;
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
@@ -207,7 +208,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                 END_TIME,
                 1,
                 "mp2",
-                confScore,
+                CASE_PERFECTLY_CLOSED,
                 confReason
             ));
         savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
@@ -253,7 +254,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "123";
         final String confidenceReason = "reason";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = CASE_PERFECTLY_CLOSED;
         final String externalRecordId = "recordId";
 
         TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve
@@ -308,7 +309,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(transcriptionDocumentEntity.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
                           .retConfReason(confidenceReason)
-                          .retConfScore(confidenceScore)
+                          .retConfScore(confidenceScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -337,7 +338,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "123";
         final String confidenceReason = "reason";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = CASE_PERFECTLY_CLOSED;
         final String externalRecordId = "recordId";
 
         AnnotationDocumentEntity annotationDocument = PersistableFactory
@@ -384,7 +385,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(annotationDocument.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
                           .retConfReason(confidenceReason)
-                          .retConfScore(confidenceScore)
+                          .retConfScore(confidenceScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -400,7 +401,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         String confidenceReason = "reason";
-        Integer confidenceScore = 232;
+        RetentionConfidenceScoreEnum confidenceScore = CASE_PERFECTLY_CLOSED;
 
         CaseDocumentEntity caseDocument = PersistableFactory
             .getCaseDocumentTestData().someMinimalBuilder().fileName("test_case_document.docx")
@@ -440,7 +441,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(caseDocument.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
                           .retConfReason(confidenceReason)
-                          .retConfScore(confidenceScore)
+                          .retConfScore(confidenceScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -510,7 +511,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .getCaseDocumentTestData().someMinimalBuilder().fileName("test_case_document.docx")
             .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME)
             .retConfReason(confidenceReason)
-            .retConfScore(0).build().getEntity();
+            .retConfScore(null).build().getEntity();
 
         dartsPersistence.save(caseDocument);
 
@@ -550,7 +551,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
         String confReason = "reason";
-        Integer confScore = 100;
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
@@ -558,7 +558,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                 END_TIME,
                 1,
                 "mp2",
-                confScore,
+                CASE_PERFECTLY_CLOSED,
                 confReason
             ));
         savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);

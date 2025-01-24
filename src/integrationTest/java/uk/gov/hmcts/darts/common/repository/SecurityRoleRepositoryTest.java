@@ -43,7 +43,7 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
     @Test
     void shouldFindAllSecurityRoles() {
         List<SecurityRoleEntity> securityRoleEntityList = securityRoleRepository.findAll();
-        assertEquals(14, securityRoleEntityList.size());
+        assertEquals(15, securityRoleEntityList.size());
     }
 
     @Test

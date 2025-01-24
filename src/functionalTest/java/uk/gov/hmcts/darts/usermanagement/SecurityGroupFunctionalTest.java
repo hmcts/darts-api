@@ -137,11 +137,10 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         checkGroup(staticGroups.get(6), "hmcts_staff_4", false, 4, true, 127);
         checkGroup(staticGroups.get(7), "hmcts_staff_5", true, 5, true, 127);
         checkGroup(staticGroups.get(8), "hmcts_staff_6", true, 6, true, 127);
-        checkGroup(staticGroups.get(9), "MEDIA_IN_PERPETUITY", false, 10, true, null);
-        checkGroup(staticGroups.get(10), "MID_TIER", true, 14, false, null);
-        checkGroup(staticGroups.get(11), "SUPER_ADMIN", true, 8, true, null);
-        checkGroup(staticGroups.get(12), "SUPER_USER", true, 7, true, null);
-        checkGroup(staticGroups.get(13), "XHIBIT", true, 11, false, null);
+        checkGroup(staticGroups.get(9), "MID_TIER", true, 14, false, null);
+        checkGroup(staticGroups.get(10), "SUPER_ADMIN", true, 8, true, null);
+        checkGroup(staticGroups.get(11), "SUPER_USER", true, 7, true, null);
+        checkGroup(staticGroups.get(12), "XHIBIT", true, 11, false, null);
 
     }
 
