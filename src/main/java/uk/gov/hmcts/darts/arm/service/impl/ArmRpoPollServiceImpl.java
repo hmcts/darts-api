@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -32,8 +31,6 @@ import static java.util.Objects.nonNull;
 @AllArgsConstructor
 @Slf4j
 public class ArmRpoPollServiceImpl implements ArmRpoPollService {
-
-    private static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
 
     private final ArmRpoApi armRpoApi;
     private final ArmApiService armApiService;
@@ -75,7 +72,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             // step to call ARM RPO API to get the extended searches by matter
             String productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
 
-            String uniqueProductionName = productionName + "_" + UUID.randomUUID().toString() + CREATE_EXPORT_CSV_EXTENSION;
+            String uniqueProductionName = ArmRpoHelper.generateUniqueProductionName(productionName);
 
             // step to call ARM RPO API to get the master index field by record class schema
             List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
@@ -101,6 +98,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             cleanUpTempFiles();
         }
     }
+
 
     private void processProductions(String bearerToken, Integer executionId, String uniqueProductionName, UserAccountEntity userAccount,
                                     ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) throws IOException {

@@ -92,6 +92,9 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
+
+        ARM_RPO_HELPER_MOCKS.mockArmRpoGenerateUniqueProductionName(PRODUCTION_NAME);
+
     }
 
     @Test
