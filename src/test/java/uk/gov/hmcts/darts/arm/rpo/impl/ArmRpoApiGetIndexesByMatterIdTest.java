@@ -111,7 +111,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -128,7 +128,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -150,7 +150,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -174,7 +174,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -240,7 +240,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -269,7 +269,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -295,7 +295,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -321,7 +321,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
