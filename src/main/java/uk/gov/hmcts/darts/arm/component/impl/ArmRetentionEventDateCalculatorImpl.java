@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 
@@ -68,10 +69,10 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
 
         if (confidenceAware != null) {
-            Integer confidenceScore = confidenceAware.getRetConfScore();
+            RetentionConfidenceScoreEnum confidenceScore = confidenceAware.getRetConfScore();
             String confidenceReason = confidenceAware.getRetConfReason();
 
-            if (confidenceScore != null && confidenceScore != 0) {
+            if (confidenceScore != null) {
                 UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
                     externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
 
