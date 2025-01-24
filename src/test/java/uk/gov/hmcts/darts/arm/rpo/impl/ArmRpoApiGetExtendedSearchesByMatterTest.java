@@ -252,6 +252,40 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
     }
 
     @Test
+    void getExtendedSearchesByMatter_ThrowsException_WithNonMatchingSearch() {
+        // given
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
+        extendedSearchesByMatterResponse.setStatus(200);
+        extendedSearchesByMatterResponse.setIsError(false);
+        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setSearchId("nonMatchingSearchId");
+        search.setTotalCount(4);
+        search.setName(PRODUCTION_NAME);
+        search.setIsSaved(false);
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
+        searchDetail.setSearch(search);
+        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+
+        armRpoExecutionDetailEntity.setMatterId("1");
+
+        when(armRpoClient.getExtendedSearchesByMatter(anyString(), any())).thenReturn(extendedSearchesByMatterResponse);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class, () -> armRpoApi.getExtendedSearchesByMatter("token", 1, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "RPO endpoint extendedSearchesByMatterResponse is already in progress for execution id 1"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any(UserAccountEntity.class));
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
     void getExtendedSearchesByMatter_ThrowsException_WithMissingTotalCount() {
         // given
         ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
