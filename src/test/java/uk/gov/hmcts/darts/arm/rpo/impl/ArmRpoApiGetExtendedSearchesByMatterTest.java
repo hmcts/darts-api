@@ -187,6 +187,27 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
     }
 
     @Test
+    void getExtendedSearchesByMatter_ThrowsException_WhenMatterIdIsNull() {
+        // given
+        armRpoExecutionDetailEntity.setMatterId(null);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class, () -> armRpoApi.getExtendedSearchesByMatter("token", 1, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM RPO getExtendedSearchesByMatter: Could not construct API request"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+                                                 any(UserAccountEntity.class));
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
     void getExtendedSearchesByMatter_ThrowsException_WithNullResponse() {
         // given
         when(armRpoClient.getExtendedSearchesByMatter(anyString(), anyString())).thenReturn(null);
