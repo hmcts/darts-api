@@ -17,7 +17,7 @@ class ArmRpoUtilTest {
         String result = armRpoUtil.generateUniqueProductionName(productionName);
 
         // then
-        assertEquals("testProduction__CSV", result);
+        assertEquals("testProduction_" + result.substring(15, 51) + "_CSV", result);
     }
 
     @Test
@@ -29,7 +29,7 @@ class ArmRpoUtilTest {
         String result = armRpoUtil.generateUniqueProductionName(productionName);
 
         // then
-        assertEquals("_CSV", result);
+        assertEquals("_" + result.substring(1, 37) + "_CSV", result);
     }
 
     @Test
@@ -41,6 +41,6 @@ class ArmRpoUtilTest {
         String result = armRpoUtil.generateUniqueProductionName(productionName);
 
         // then
-        assertEquals("null_CSV", result);
+        assertEquals("null_" + result.substring(5, 41) + "_CSV", result);
     }
 }
