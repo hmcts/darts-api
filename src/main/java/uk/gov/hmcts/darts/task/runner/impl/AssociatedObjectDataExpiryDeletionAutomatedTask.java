@@ -115,52 +115,48 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     }
 
     void deleteTranscriptionDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
-        transactionTemplate.executeWithoutResult(status -> {
-            deleteExternalObjectDirectoryEntity(
-                userAccount,
-                transcriptionDocumentRepository,
-                externalObjectDirectoryRepository.findExpiredTranscriptionDocuments(maxRetentionDate, limit),
-                ExternalObjectDirectoryEntity::getTranscriptionDocumentEntity,
-                AuditActivity.TRANSCRIPT_EXPIRED
-            );
-        });
+        transactionTemplate.executeWithoutResult(status -> deleteExternalObjectDirectoryEntity(
+                                                     userAccount,
+                                                     transcriptionDocumentRepository,
+                                                     externalObjectDirectoryRepository.findExpiredTranscriptionDocuments(maxRetentionDate, limit),
+                                                     ExternalObjectDirectoryEntity::getTranscriptionDocumentEntity,
+                                                     AuditActivity.TRANSCRIPT_EXPIRED
+                                                 )
+        );
     }
 
 
     void deleteMediaEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
-        transactionTemplate.executeWithoutResult(status -> {
-            deleteExternalObjectDirectoryEntity(
-                userAccount,
-                mediaRepository,
-                externalObjectDirectoryRepository.findExpiredMediaEntries(maxRetentionDate, limit),
-                ExternalObjectDirectoryEntity::getMedia,
-                AuditActivity.AUDIO_EXPIRED
-            );
-        });
+        transactionTemplate.executeWithoutResult(status -> deleteExternalObjectDirectoryEntity(
+                                                     userAccount,
+                                                     mediaRepository,
+                                                     externalObjectDirectoryRepository.findExpiredMediaEntries(maxRetentionDate, limit),
+                                                     ExternalObjectDirectoryEntity::getMedia,
+                                                     AuditActivity.AUDIO_EXPIRED
+                                                 )
+        );
     }
 
     void deleteAnnotationDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
-        transactionTemplate.executeWithoutResult(status -> {
-            deleteExternalObjectDirectoryEntity(
-                userAccount,
-                annotationDocumentRepository,
-                externalObjectDirectoryRepository.findExpiredAnnotationDocuments(maxRetentionDate, limit),
-                ExternalObjectDirectoryEntity::getAnnotationDocumentEntity,
-                AuditActivity.ANNOTATION_EXPIRED
-            );
-        });
+        transactionTemplate.executeWithoutResult(status -> deleteExternalObjectDirectoryEntity(
+                                                     userAccount,
+                                                     annotationDocumentRepository,
+                                                     externalObjectDirectoryRepository.findExpiredAnnotationDocuments(maxRetentionDate, limit),
+                                                     ExternalObjectDirectoryEntity::getAnnotationDocumentEntity,
+                                                     AuditActivity.ANNOTATION_EXPIRED
+                                                 )
+        );
     }
 
     void deleteCaseDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
-        transactionTemplate.executeWithoutResult(status -> {
-            deleteExternalObjectDirectoryEntity(
-                userAccount,
-                caseDocumentRepository,
-                externalObjectDirectoryRepository.findExpiredCaseDocuments(maxRetentionDate, limit),
-                ExternalObjectDirectoryEntity::getCaseDocument,
-                AuditActivity.CASE_DOCUMENT_EXPIRED
-            );
-        });
+        transactionTemplate.executeWithoutResult(status -> deleteExternalObjectDirectoryEntity(
+                                                     userAccount,
+                                                     caseDocumentRepository,
+                                                     externalObjectDirectoryRepository.findExpiredCaseDocuments(maxRetentionDate, limit),
+                                                     ExternalObjectDirectoryEntity::getCaseDocument,
+                                                     AuditActivity.CASE_DOCUMENT_EXPIRED
+                                                 )
+        );
     }
 
 
