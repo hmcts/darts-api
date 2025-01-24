@@ -537,7 +537,8 @@ darts:
           at-most-for: PT45M
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
-        threads: 20
+        threads: 30
+        async-timeout: 90m
       dets-to-arm-batch-processor:
         max-arm-manifest-items: 100
         manifest-file-prefix: DETS

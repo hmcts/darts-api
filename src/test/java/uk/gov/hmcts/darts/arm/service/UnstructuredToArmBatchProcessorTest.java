@@ -30,6 +30,8 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
@@ -141,6 +143,7 @@ class UnstructuredToArmBatchProcessorTest {
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
+        when(unstructuredToArmProcessorConfiguration.getAsyncTimeout()).thenReturn(Duration.of(100, ChronoUnit.SECONDS));
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         //when
