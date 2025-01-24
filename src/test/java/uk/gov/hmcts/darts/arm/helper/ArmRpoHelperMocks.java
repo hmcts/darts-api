@@ -188,10 +188,6 @@ public class ArmRpoHelperMocks {
         }
     }
 
-    public void mockArmRpoGenerateUniqueProductionName(String productionName) {
-        lenient().when(ArmRpoHelper.generateUniqueProductionName(productionName)).thenReturn(productionName + "_uuid_CSV");
-    }
-
     @SneakyThrows
     public void close() {
         armRpoHelperMockedStatic.close();

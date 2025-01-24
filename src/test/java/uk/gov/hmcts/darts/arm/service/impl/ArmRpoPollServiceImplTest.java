@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
@@ -63,6 +64,8 @@ class ArmRpoPollServiceImplTest {
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
     private LogApi logApi;
+    @Mock
+    private ArmRpoUtil armRpoUtil;
 
     @Mock
     private UserAccountEntity userAccountEntity;
@@ -77,14 +80,14 @@ class ArmRpoPollServiceImplTest {
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
-
+    private String uniqueProductionName;
+    
     private ArmRpoPollServiceImpl armRpoPollService;
-
 
     @BeforeEach
     void setUp() {
         armRpoPollService = new ArmRpoPollServiceImpl(armRpoApi, armApiService, armRpoService, userIdentity, fileOperationService,
-                                                      armDataManagementConfiguration, logApi, tempProductionFiles, allowableFailedStates,
+                                                      armDataManagementConfiguration, logApi, armRpoUtil, tempProductionFiles, allowableFailedStates,
                                                       inProgressStates);
 
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
@@ -92,9 +95,8 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
-
-        ARM_RPO_HELPER_MOCKS.mockArmRpoGenerateUniqueProductionName(PRODUCTION_NAME);
-
+        uniqueProductionName = PRODUCTION_NAME + "_UUID_CSV";
+        lenient().when(armRpoUtil.generateUniqueProductionName(anyString())).thenReturn(uniqueProductionName);
     }
 
     @Test

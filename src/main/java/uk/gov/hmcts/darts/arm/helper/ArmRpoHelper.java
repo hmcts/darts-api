@@ -12,14 +12,10 @@ import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ArmRpoStateRepository;
 import uk.gov.hmcts.darts.common.repository.ArmRpoStatusRepository;
 
-import java.util.UUID;
-
 @Component
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class ArmRpoHelper {
-
-    private static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
 
     private final ArmRpoStateRepository armRpoStateRepository;
     private final ArmRpoStatusRepository armRpoStatusRepository;
@@ -94,7 +90,5 @@ public class ArmRpoHelper {
         return rpoState1.getId().equals(rpoState2.getId());
     }
 
-    public static String generateUniqueProductionName(String productionName) {
-        return productionName + "_" + UUID.randomUUID().toString() + CREATE_EXPORT_CSV_EXTENSION;
-    }
+
 }

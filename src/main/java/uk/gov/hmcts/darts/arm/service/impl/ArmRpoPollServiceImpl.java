@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -39,6 +40,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private final FileOperationService fileOperationService;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final LogApi logApi;
+    private final ArmRpoUtil armRpoUtil;
 
     private List<File> tempProductionFiles;
 
@@ -72,7 +74,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             // step to call ARM RPO API to get the extended searches by matter
             String productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
 
-            String uniqueProductionName = ArmRpoHelper.generateUniqueProductionName(productionName);
+            String uniqueProductionName = armRpoUtil.generateUniqueProductionName(productionName);
 
             // step to call ARM RPO API to get the master index field by record class schema
             List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
