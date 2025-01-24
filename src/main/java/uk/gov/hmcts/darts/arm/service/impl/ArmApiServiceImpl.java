@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownload
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadReadingBodyException;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -37,14 +38,17 @@ public class ArmApiServiceImpl implements ArmApiService {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
-    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, Integer retConfScore, String retConfReason) {
+    public UpdateMetadataResponse updateMetadata(String externalRecordId,
+                                                 OffsetDateTime eventTimestamp,
+                                                 RetentionConfidenceScoreEnum retConfScore,
+                                                 String retConfReason) {
 
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(eventTimestamp)
                           .retConfReason(retConfReason)
-                          .retConfScore(retConfScore)
+                          .retConfScore(retConfScore.getId())
                           .build())
             .useGuidsForFields(false)
             .build();

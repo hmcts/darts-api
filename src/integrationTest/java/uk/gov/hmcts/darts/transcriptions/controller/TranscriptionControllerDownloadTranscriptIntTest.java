@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -196,7 +197,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
         final String confidenceReason = "reason";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
         // setup a real file so we can assert against its processing
         StorageConfiguration configuration = new StorageConfiguration();
@@ -269,7 +270,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "KQ9vVogyRdsnEvxyNQz77g==";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         final String confidenceReason = "reason";
 
         transcriptionEntity = transcriptionStub.updateTranscriptionWithDocument(

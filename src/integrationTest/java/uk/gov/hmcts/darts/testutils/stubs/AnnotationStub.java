@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 
@@ -39,14 +40,14 @@ public class AnnotationStub {
                                                                               String checksum) {
         return
             annotationStubComposable.createAndSaveAnnotationDocumentEntityWith(
-                annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, 0, "confidence reason");
+                annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, null, null);
     }
 
     @Transactional
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy,
-                                                                   OffsetDateTime uploadedDateTime, String checksum, Integer confScore,
+                                                                   OffsetDateTime uploadedDateTime, String checksum, RetentionConfidenceScoreEnum confScore,
                                                                    String confReason) {
         return annotationStubComposable
             .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, confScore, confReason);
@@ -56,7 +57,8 @@ public class AnnotationStub {
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime, String checksum) {
         return annotationStubComposable
-            .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, 100, "confidence reason");
+            .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum,
+                                            RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, "confidence reason");
     }
 
     @Transactional
