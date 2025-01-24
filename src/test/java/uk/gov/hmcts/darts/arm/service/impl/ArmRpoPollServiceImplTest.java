@@ -80,8 +80,7 @@ class ArmRpoPollServiceImplTest {
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
-    private String uniqueProductionName;
-    
+
     private ArmRpoPollServiceImpl armRpoPollService;
 
     @BeforeEach
@@ -95,8 +94,8 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
-        uniqueProductionName = PRODUCTION_NAME + "_UUID_CSV";
-        lenient().when(armRpoUtil.generateUniqueProductionName(anyString())).thenReturn(uniqueProductionName);
+
+        lenient().when(armRpoUtil.generateUniqueProductionName(anyString())).thenReturn(PRODUCTION_NAME + "_UUID_CSV");
     }
 
     @Test
