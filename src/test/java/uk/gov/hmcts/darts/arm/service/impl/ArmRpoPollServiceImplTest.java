@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +81,7 @@ class ArmRpoPollServiceImplTest {
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private final Duration pollDuration = Duration.ofHours(4);
 
     private ArmRpoPollServiceImpl armRpoPollService;
 
@@ -122,7 +124,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -166,7 +168,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(true);
+        armRpoPollService.pollArmRpo(true, pollDuration);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -210,7 +212,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -254,7 +256,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -298,7 +300,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(true);
+        armRpoPollService.pollArmRpo(true, pollDuration);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -342,7 +344,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(true);
+        armRpoPollService.pollArmRpo(true, pollDuration);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -370,7 +372,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -385,7 +387,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
 
         // when
-        armRpoPollService.pollArmRpo(true);
+        armRpoPollService.pollArmRpo(true, pollDuration);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -399,7 +401,7 @@ class ArmRpoPollServiceImplTest {
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(null);
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -416,7 +418,7 @@ class ArmRpoPollServiceImplTest {
         when(armApiService.getArmBearerToken()).thenReturn(null);
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -438,7 +440,7 @@ class ArmRpoPollServiceImplTest {
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), anyString(), any(UserAccountEntity.class))).thenReturn(false);
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -462,7 +464,7 @@ class ArmRpoPollServiceImplTest {
             ArmRpoInProgressException.class);
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -488,7 +490,7 @@ class ArmRpoPollServiceImplTest {
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(List.of());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -519,7 +521,7 @@ class ArmRpoPollServiceImplTest {
             new ArmRpoException("Test exception"));
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
