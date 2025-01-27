@@ -486,7 +486,9 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         log.debug("createExportBasedOnSearchResultsTable called with executionId: {}, uniqueProductionName: {}", executionId, uniqueProductionName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
-        armRpoExecutionDetailEntity.setPollingCreatedTs(currentTimeHelper.currentOffsetDateTime());
+        if (isNull(armRpoExecutionDetailEntity.getPollingCreatedTs())) {
+            armRpoExecutionDetailEntity.setPollingCreatedTs(currentTimeHelper.currentOffsetDateTime());
+        }
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
@@ -589,7 +591,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         if (isNull(armRpoExecutionDetailEntity.getPollingCreatedTs())) {
             log.error("checkCreateExportBasedOnSearchResults is still In-Progress - {}", baseRpoResponse);
             return false;
-        } else if (Duration.between(armRpoExecutionDetailEntity.getPollingCreatedTs(), currentTimeHelper.currentOffsetDateTime())
+        } else if (Duration.between(armRpoExecutionDetailEntity.getPollingCreatedTs(),
+                                    currentTimeHelper.currentOffsetDateTime())
             .compareTo(pollDuration) <= 0) {
             log.error("The search is still running and cannot export as csv - {}", baseRpoResponse);
             return false;
