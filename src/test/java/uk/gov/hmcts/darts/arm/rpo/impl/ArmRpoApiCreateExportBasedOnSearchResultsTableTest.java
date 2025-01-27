@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -54,6 +56,8 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
     @Mock
     private UserAccountEntity userAccount;
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
 
     private static final Integer EXECUTION_ID = 1;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
@@ -86,10 +90,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_Success() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(200);
-        response.setIsError(false);
-        response.setResponseStatus(0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(200, false, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
@@ -109,10 +110,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ReturnsInProgress() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(400);
-        response.setIsError(false);
-        response.setResponseStatus(2);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
@@ -152,10 +150,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus200IsErrorTrueResponseStatusZero() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(200);
-        response.setIsError(true);
-        response.setResponseStatus(0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(200, true, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
@@ -203,10 +198,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus400IsErrorTrueResponseStatusZero() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(400);
-        response.setIsError(true);
-        response.setResponseStatus(0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, true, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
@@ -254,10 +246,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus400IsErrorFalseResponseStatusZero() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(400);
-        response.setIsError(false);
-        response.setResponseStatus(0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
@@ -304,10 +293,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus500IsErrorFalseResponseStatus500() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(500);
-        response.setIsError(false);
-        response.setResponseStatus(500);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(500, false, 500);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
@@ -519,6 +505,42 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
     }
 
+    @Test
+    void checkCreateExportBasedOnSearchResultsInProgress_PollingStillInProgress() {
+        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusMinutes(10));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+        boolean result = armRpoApi.checkCreateExportBasedOnSearchResultsInProgress(userAccount, response, new StringBuilder(),
+                                                                                   armRpoExecutionDetailEntity, pollDuration);
+
+        assertFalse(result);
+        verify(armRpoService, never()).updateArmRpoStatus(any(), any(), any());
+    }
+
+    @Test
+    void checkCreateExportBasedOnSearchResultsInProgress_PollingExceeded() {
+        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusHours(5));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+
+        assertThrows(ArmRpoException.class, () ->
+            armRpoApi.checkCreateExportBasedOnSearchResultsInProgress(userAccount, response, new StringBuilder(), armRpoExecutionDetailEntity, pollDuration));
+
+        verify(armRpoService).updateArmRpoStatus(any(), any(), any());
+    }
+
+    @Test
+    void checkCreateExportBasedOnSearchResultsInProgress_PollingCreatedTsNull() {
+        armRpoExecutionDetailEntity.setPollingCreatedTs(null);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+
+        boolean result = armRpoApi.checkCreateExportBasedOnSearchResultsInProgress(userAccount, response, new StringBuilder(),
+                                                                                   armRpoExecutionDetailEntity, pollDuration);
+
+        assertFalse(result);
+        verify(armRpoService, never()).updateArmRpoStatus(any(), any(), any());
+    }
+
     private String getFeignResponseAsString(String status, boolean isError, String responseStatus) {
         return "{\n"
             + "  \"status\": \"" + status + "\",\n"
@@ -550,6 +572,14 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
             .isMasked(isMasked)
             .build();
 
+    }
+
+    private CreateExportBasedOnSearchResultsTableResponse createResponse(int status, boolean isError, int responseStatus) {
+        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
+        response.setStatus(status);
+        response.setIsError(isError);
+        response.setResponseStatus(responseStatus);
+        return response;
     }
 
     @AfterAll
