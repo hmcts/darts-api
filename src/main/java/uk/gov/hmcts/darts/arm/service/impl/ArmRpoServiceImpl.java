@@ -54,7 +54,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
 
         UserAccountEntity mergedUserAccountEntity = entityManager.merge(userAccount);
         armRpoExecutionDetailEntity.setCreatedBy(mergedUserAccountEntity);
-        // armRpoExecutionDetailEntity.setLastModifiedBy(mergedUserAccountEntity);
+        armRpoExecutionDetailEntity.setLastModifiedBy(mergedUserAccountEntity);
 
         return saveArmRpoExecutionDetailEntity(armRpoExecutionDetailEntity);
     }
