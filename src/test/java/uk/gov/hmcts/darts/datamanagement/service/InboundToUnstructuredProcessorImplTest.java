@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl;
-import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
+import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
 
 import java.time.Duration;
 import java.util.List;
@@ -33,7 +33,7 @@ class InboundToUnstructuredProcessorImplTest {
     @Mock
     InboundToUnstructuredProcessorSingleElement singleElementProcessor;
     @Mock
-    AsyncTaskConfig asyncTaskConfig;
+    InboundToUnstructuredAutomatedTaskConfig asyncTaskConfig;
 
     @BeforeEach
     void setUp() {

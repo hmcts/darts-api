@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
-import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
+import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
 import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.util.List;
@@ -52,7 +52,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final InboundToUnstructuredProcessorSingleElement singleElementProcessor;
-    private final AsyncTaskConfig asyncTaskConfig;
+    private final InboundToUnstructuredAutomatedTaskConfig asyncTaskConfig;
 
 
     @Override
