@@ -403,7 +403,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.error(errorMessage.append("Unable to save background search").append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - SaveBackgroundSearchResponse: {}", saveBackgroundSearchResponse);
+
         handleResponseStatus(userAccount, saveBackgroundSearchResponse, errorMessage, armRpoExecutionDetailEntity);
 
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
