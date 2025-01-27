@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -121,6 +122,51 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ReturnsInProgress_WithPollingCreatedTimestampInRange() {
+        // given
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now());
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        // when
+        boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
+            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
+
+        // then
+        assertFalse(result);
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ThrowsException_WhenPollingCreatedTimestampOutOfRange() {
+        // given
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusHours(5));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.createExportBasedOnSearchResultsTable(
+                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM createExportBasedOnSearchResultsTable: Polling can only run for a maximum of"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
