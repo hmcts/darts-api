@@ -479,6 +479,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
                                                          List<MasterIndexFieldByRecordClassSchema> headerColumns,
                                                          String uniqueProductionName, UserAccountEntity userAccount) {
+
         log.debug("createExportBasedOnSearchResultsTable called with executionId: {}, uniqueProductionName: {}", executionId, uniqueProductionName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
@@ -500,8 +501,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         BaseRpoResponse baseRpoResponse;
         try {
             baseRpoResponse = armRpoClient.createExportBasedOnSearchResultsTable(bearerToken, request);
-        } catch (FeignException e) {
-            baseRpoResponse = processCreateExportBasedOnSearchResultsTableResponseFeignException(userAccount, e, errorMessage,
+        } catch (FeignException feignException) {
+            baseRpoResponse = processCreateExportBasedOnSearchResultsTableResponseFeignException(userAccount, feignException, errorMessage,
                                                                                                  armRpoExecutionDetailEntity);
 
         }
@@ -510,25 +511,26 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     private BaseRpoResponse processCreateExportBasedOnSearchResultsTableResponseFeignException(
-        UserAccountEntity userAccount, FeignException e, StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        UserAccountEntity userAccount, FeignException feignException, StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         BaseRpoResponse baseRpoResponse;
-        baseRpoResponse = getBaseRpoResponse(userAccount, e, errorMessage, armRpoExecutionDetailEntity);
+        baseRpoResponse = getBaseRpoResponse(userAccount, feignException, errorMessage, armRpoExecutionDetailEntity);
         return baseRpoResponse;
     }
 
-    private BaseRpoResponse getBaseRpoResponse(UserAccountEntity userAccount, FeignException e, StringBuilder errorMessage,
+    private BaseRpoResponse getBaseRpoResponse(UserAccountEntity userAccount, FeignException feignException, StringBuilder errorMessage,
                                                ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        BaseRpoResponse baseRpoResponse;
-        String feignResponse = e.contentUTF8();
+        String feignResponse = feignException.contentUTF8();
         if (StringUtils.isEmpty(feignResponse)) {
-            throw handleFailureAndCreateException(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(),
+            throw handleFailureAndCreateException(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
         log.debug("Feign response: {}", feignResponse);
+        BaseRpoResponse baseRpoResponse;
         try {
             baseRpoResponse = objectMapper.readValue(feignResponse, BaseRpoResponse.class);
         } catch (JsonProcessingException ex) {
-            throw handleFailureAndCreateException(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(),
+            log.warn("Unable to parse feign response: {}", feignResponse, ex);
+            throw handleFailureAndCreateException(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
         return baseRpoResponse;
@@ -542,7 +544,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         if (isNull(baseRpoResponse) || isNull(baseRpoResponse.getStatus()) || isNull(baseRpoResponse.getIsError())
             || (!baseRpoResponse.getIsError() && isNull(baseRpoResponse.getResponseStatus()))
         ) {
-            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API baseRpoResponse is invalid - ")
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API createExportBasedOnSearchResultsTable is invalid - ")
                                                       .append(baseRpoResponse).toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }

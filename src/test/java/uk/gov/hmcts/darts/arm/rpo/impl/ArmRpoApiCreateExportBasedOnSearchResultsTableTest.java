@@ -503,7 +503,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API baseRpoResponse is invalid"));
+            "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API createExportBasedOnSearchResultsTable is invalid"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
