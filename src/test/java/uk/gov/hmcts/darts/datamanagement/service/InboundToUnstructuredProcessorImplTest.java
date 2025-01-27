@@ -10,7 +10,9 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl;
+import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -30,17 +32,21 @@ class InboundToUnstructuredProcessorImplTest {
     InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
     @Mock
     InboundToUnstructuredProcessorSingleElement singleElementProcessor;
+    @Mock
+    AsyncTaskConfig asyncTaskConfig;
 
     @BeforeEach
     void setUp() {
         inboundToUnstructuredProcessor = new InboundToUnstructuredProcessorImpl(externalObjectDirectoryRepository,
                                                                                 objectRecordStatusRepository, externalLocationTypeRepository,
                                                                                 singleElementProcessor,
-                                                                                20);
+                                                                                asyncTaskConfig);
     }
 
     @Test
     void testContinuesProcessingNextIterationOnException() {
+        when(asyncTaskConfig.getThreads()).thenReturn(20);
+        when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
         // given
         ExternalObjectDirectoryEntity eod1 = new ExternalObjectDirectoryEntity();
         eod1.setId(1);
