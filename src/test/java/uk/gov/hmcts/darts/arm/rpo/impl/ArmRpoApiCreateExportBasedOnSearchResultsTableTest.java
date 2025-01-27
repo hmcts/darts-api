@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,9 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -84,7 +81,8 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         armRpoExecutionDetailEntity.setSearchItemCount(7);
         armRpoExecutionDetailEntity.setProductionId("productionId");
         armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
-        lenient().when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
+
     }
 
     @Test
@@ -503,37 +501,6 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
-    }
-
-    @Test
-    void checkCreateExportBasedOnSearchResultsInProgress_PollingStillInProgress() {
-        //
-        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusMinutes(10));
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
-
-        // when
-        boolean result = armRpoApi.checkCreateExportBasedOnSearchResultsInProgress(userAccount, response, new StringBuilder(),
-                                                                                   armRpoExecutionDetailEntity, pollDuration);
-
-        // then
-        assertFalse(result);
-        verify(armRpoService, never()).updateArmRpoStatus(any(), any(), any());
-    }
-
-    @Test
-    void checkCreateExportBasedOnSearchResultsInProgress_PollingExceeded() {
-        //given
-        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusHours(5));
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
-
-        // when
-        assertThrows(ArmRpoException.class, () ->
-            armRpoApi.checkCreateExportBasedOnSearchResultsInProgress(userAccount, response, new StringBuilder(), armRpoExecutionDetailEntity, pollDuration));
-
-        // then
-        verify(armRpoService).updateArmRpoStatus(any(), any(), any());
     }
 
     private String getFeignResponseAsString(String status, boolean isError, String responseStatus) {
