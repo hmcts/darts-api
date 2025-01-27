@@ -78,6 +78,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     private static final String COULD_NOT_CONSTRUCT_API_REQUEST = "Could not construct API request: ";
     private static final String AND_RESPONSE = " and response - ";
+    public static final int CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_IN_PROGRESS_STATUS = 2;
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
@@ -549,7 +550,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             HttpStatus httpStatus = HttpStatus.valueOf(baseRpoResponse.getStatus());
 
             if (HttpStatus.BAD_REQUEST.value() == httpStatus.value()) {
-                if (baseRpoResponse.getResponseStatus() == 2) {
+                if (baseRpoResponse.getResponseStatus() == CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_IN_PROGRESS_STATUS) {
                     log.error("The search is still running and cannot export as csv - {}", baseRpoResponse);
                     return false;
                 } else {
