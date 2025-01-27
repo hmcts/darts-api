@@ -515,6 +515,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                                     armRpoExecutionDetailEntity, pollDuration);
     }
 
+
     private BaseRpoResponse processCreateExportBasedOnSearchResultsTableResponseFeignException(
         UserAccountEntity userAccount, FeignException feignException, StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         BaseRpoResponse baseRpoResponse;
@@ -559,8 +560,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
             if (HttpStatus.BAD_REQUEST.value() == httpStatus.value()) {
                 if (baseRpoResponse.getResponseStatus() == CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_IN_PROGRESS_STATUS) {
-                    log.error("The search is still running and cannot export as csv - {}", baseRpoResponse);
-                    return false;
+                    return checkCreateExportBasedOnSearchResultsInProgress(userAccount, baseRpoResponse, errorMessage,
+                                                                           armRpoExecutionDetailEntity, pollDuration);
                 } else {
                     throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with invalid status - ").append(httpStatus)
                                                               .append(AND_RESPONSE).append(
@@ -579,6 +580,14 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return true;
+    }
+
+    private void setPollingCreatedTimestamp(UserAccountEntity userAccount, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        if (isNull(armRpoExecutionDetailEntity.getPollingCreatedTs())) {
+            armRpoExecutionDetailEntity.setPollingCreatedTs(currentTimeHelper.currentOffsetDateTime());
+            armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
+                                                     ArmRpoHelper.inProgressRpoStatus(), userAccount);
+        }
     }
 
     private boolean checkCreateExportBasedOnSearchResultsInProgress(UserAccountEntity userAccount,
@@ -776,6 +785,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.error(errorMessage.toString());
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
+
         log.debug("Successfully downloaded ARM data for productionExportFileId: {}", productionExportFileId);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return response.body().asInputStream();
