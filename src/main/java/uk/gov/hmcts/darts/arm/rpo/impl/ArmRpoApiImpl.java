@@ -582,18 +582,10 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         return true;
     }
 
-    private void setPollingCreatedTimestamp(UserAccountEntity userAccount, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        if (isNull(armRpoExecutionDetailEntity.getPollingCreatedTs())) {
-            armRpoExecutionDetailEntity.setPollingCreatedTs(currentTimeHelper.currentOffsetDateTime());
-            armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
-                                                     ArmRpoHelper.inProgressRpoStatus(), userAccount);
-        }
-    }
-
-    private boolean checkCreateExportBasedOnSearchResultsInProgress(UserAccountEntity userAccount,
-                                                                    BaseRpoResponse baseRpoResponse,
-                                                                    StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
-                                                                    Duration pollDuration) {
+    boolean checkCreateExportBasedOnSearchResultsInProgress(UserAccountEntity userAccount,
+                                                            BaseRpoResponse baseRpoResponse,
+                                                            StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
+                                                            Duration pollDuration) {
         if (isNull(armRpoExecutionDetailEntity.getPollingCreatedTs())) {
             log.error("checkCreateExportBasedOnSearchResults is still In-Progress - {}", baseRpoResponse);
             return false;

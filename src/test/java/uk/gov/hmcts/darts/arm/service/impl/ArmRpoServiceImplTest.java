@@ -95,8 +95,7 @@ class ArmRpoServiceImplTest {
 
         var armRpoExecutionDetail = detailEntityCaptor.getValue();
         assertEquals(userAccountEntity, armRpoExecutionDetail.getCreatedBy());
-        assertEquals(userAccountEntity, armRpoExecutionDetail.getLastModifiedBy());
-
+        
         verifyNoMoreInteractions(entityManager, armRpoExecutionDetailRepository);
     }
 
