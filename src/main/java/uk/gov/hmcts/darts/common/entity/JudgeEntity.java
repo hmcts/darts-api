@@ -11,14 +11,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
 @Entity
 @Table(name = JudgeEntity.TABLE_NAME)
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class JudgeEntity extends CreatedModifiedBaseEntity implements IsNamedEntity {
+public class JudgeEntity extends CreatedModifiedBaseEntity {
 
     public static final String TABLE_NAME = "judge";
     public static final String ID = "jud_id";
