@@ -669,4 +669,20 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                          @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
                                                                                          @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
                                                                                          Limit limit);
+
+
+    @Transactional
+    @Query("""
+            update ExternalObjectDirectoryEntity eod
+            set eod.status = :newStatus
+            where eod.id in :idsToUpdate
+            and eod.status = :oldStatus
+            and eod.lastModifiedBy = :lastModifiedBy
+        """)
+    @Modifying
+    void updateEodByIdAndStatus(
+        List<Integer> idsToUpdate,
+        ObjectRecordStatusEntity newStatus,
+        ObjectRecordStatusEntity oldStatus,
+        UserAccountEntity lastModifiedBy);
 }
