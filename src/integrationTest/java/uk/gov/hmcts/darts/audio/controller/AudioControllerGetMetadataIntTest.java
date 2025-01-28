@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -94,6 +95,8 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         dartsPersistence.save(PersistableFactory.getExternalObjectDirectoryTestData().eodStoredInUnstructuredLocationForMedia(mediaChannel1));
+        dartsPersistence.save(
+            PersistableFactory.getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.DETS, mediaChannel2));
 
         var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
 
@@ -123,7 +126,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
                   "media_start_timestamp": "2023-01-01T12:05:00Z",
                   "media_end_timestamp": "2023-01-01T13:05:00Z",
                   "is_archived": false,
-                  "is_available": false
+                  "is_available": true
                 },
                 {
                   "id": 3,
