@@ -6,6 +6,7 @@ import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -47,7 +48,8 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
 
 @Slf4j
-public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedTaskConfig> implements AutomatedTask, AutoloadingAutomatedTask {
+public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedTaskConfig>
+    implements AutomatedTask, AutoloadingAutomatedTask, DisposableBean {
 
     private AutomatedTaskStatus automatedTaskStatus = NOT_STARTED;
 
@@ -115,7 +117,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                             log.info("Task: {} is inactive but has been run manually", getTaskName());
                         }
                         logApi.taskStarted(executionId.get(), this.getTaskName());
-                        lockService.getLockingTaskExecutor().executeWithLock(createLockableTask(), getLockConfiguration());
+                        lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(SKIPPED);
                         log.warn("Task: {} not running now as it has been disabled", getTaskName());
@@ -262,9 +264,9 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     class LockedTask implements Runnable {
         @Override
         public void run() {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
             try {
-                assertLocked();
+                LockAssert.assertLocked();
+                runTask();
             } catch (IllegalStateException exception) {
                 setAutomatedTaskStatus(LOCK_FAILED);
                 log.error("Unable to lock task", exception);
@@ -301,5 +303,10 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
         void assertLocked() {
             LockAssert.assertLocked();
         }
+    }
+
+    @Override
+    public void destroy() {
+        log.info("Task: {} destroyed", getTaskName());
     }
 }

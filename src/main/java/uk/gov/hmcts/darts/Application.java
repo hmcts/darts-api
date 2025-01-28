@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 
 import java.util.TimeZone;
+import javax.annotation.PreDestroy;
 
 import static java.time.ZoneOffset.UTC;
 
@@ -49,4 +50,9 @@ public class Application implements CommandLineRunner {
         }
     }
 
+    @PreDestroy
+    public void destroy() {
+        System.out.println(
+            "Callback triggered - @PreDestroy.");
+    }
 }
