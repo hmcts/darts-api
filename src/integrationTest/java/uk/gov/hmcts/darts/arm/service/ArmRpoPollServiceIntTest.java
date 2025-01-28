@@ -37,9 +37,11 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -249,6 +251,9 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setSearchId(SEARCH_ID);
         armRpoExecutionDetailEntity.setStorageAccountId(STORAGE_ACCOUNT_ID);
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
+        OffsetDateTime pollCreatedTs = OffsetDateTime.now().minusMinutes(10);
+        armRpoExecutionDetailEntity.setPollingCreatedTs(pollCreatedTs);
+        armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
         when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
@@ -277,7 +282,9 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
-
+        assertEquals(pollCreatedTs, updatedArmRpoExecutionDetailEntity.get().getPollingCreatedTs());
+        assertThat(updatedArmRpoExecutionDetailEntity.get().getProductionName()).contains(PRODUCTION_NAME);
+        
         verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
         verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
