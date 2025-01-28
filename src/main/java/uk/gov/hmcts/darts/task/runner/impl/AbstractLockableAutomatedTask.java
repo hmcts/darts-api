@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -117,7 +117,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                             log.info("Task: {} is inactive but has been run manually", getTaskName());
                         }
                         logApi.taskStarted(executionId.get(), this.getTaskName());
-                        lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
+                        lockService.getLockingTaskExecutor().executeWithLock(createLockableTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(SKIPPED);
                         log.warn("Task: {} not running now as it has been disabled", getTaskName());
@@ -264,9 +264,9 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     class LockedTask implements Runnable {
         @Override
         public void run() {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
             try {
-                LockAssert.assertLocked();
-                runTask();
+                assertLocked();
             } catch (IllegalStateException exception) {
                 setAutomatedTaskStatus(LOCK_FAILED);
                 log.error("Unable to lock task", exception);
