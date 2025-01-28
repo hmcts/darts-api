@@ -514,7 +514,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
         log.debug("ARM RPO Response - CreateExportBasedOnSearchResultsTable response: {}", baseRpoResponse);
         return processCreateExportBasedOnSearchResultsTableResponse(userAccount, baseRpoResponse, errorMessage,
-                                                                    armRpoExecutionDetailEntity, pollDuration);
+                                                                    armRpoExecutionDetailEntity, pollDuration, uniqueProductionName);
     }
 
 
@@ -548,7 +548,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                                          BaseRpoResponse baseRpoResponse,
                                                                          StringBuilder errorMessage,
                                                                          ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
-                                                                         Duration pollDuration) {
+                                                                         Duration pollDuration, String uniqueProductionName) {
 
         if (isNull(baseRpoResponse) || isNull(baseRpoResponse.getStatus()) || isNull(baseRpoResponse.getIsError())
             || (!baseRpoResponse.getIsError() && isNull(baseRpoResponse.getResponseStatus()))
@@ -580,6 +580,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                       .append(baseRpoResponse).toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
+        armRpoExecutionDetailEntity.setProductionName(uniqueProductionName);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return true;
     }
