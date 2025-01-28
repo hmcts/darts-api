@@ -220,13 +220,13 @@ darts:
       template-map:
         audio_request_being_processed: bbc5ffc0-8f75-412a-9f01-a99ef3e498da
         audio_request_being_processed_from_archive: c616d920-e36a-489b-af74-4ea068e967f9
-        court_manager_approve_transcript: a8390fa6-3f18-44c0-b224-f59971a5e20a
+        court_manager_approve_transcript: 4bf3fbbb-4474-46c9-9f30-499f9083653a
         error_processing_audio: 10d7e02d-360c-47b7-a97c-a98c13f3c122
-        request_to_transcriber: 12a70a9c-9bcf-4880-8291-1a5c6a4c4b08
+        request_to_transcriber: 463e63c5-9521-46c7-a0f0-5c40ad7a2240
         requested_audio_is_available: a6747899-08e9-4cbf-86d3-a3b871a66e86
-        transcription_available: b3378991-ad90-4430-8005-45dcb35741b8
-        transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
-        transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
+        transcription_available: 96d3b32c-6a6a-45ae-8c0e-91e9d04d2eb0
+        transcription_request_approved: 2e0a929b-6939-4d26-99d2-01cdb7454065
+        transcription_request_rejected: 9b48d057-5dda-4e36-8727-81a01e3a39ec
   retention:
     overridable-fixed-policy-keys: 3
     close-open-cases-older-than-years: 6

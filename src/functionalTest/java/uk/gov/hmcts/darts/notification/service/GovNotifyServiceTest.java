@@ -40,17 +40,6 @@ class GovNotifyServiceTest {
     @Autowired
     TemplateIdHelper templateIdHelper;
 
-    @Test
-    void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
-
-        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
-        assertEquals("A new transcript is ready for you to review", emailResponse.getSubject());
-        compare("""
-                    There is a new transcript available for you to review.
-
-                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
-    }
-
     private static void compare(String expected, SendEmailResponse emailResponse) {
         String actualUnix = emailResponse.getBody().replace("\r\n", "\n");
         assertEquals(expected, actualUnix);
@@ -65,6 +54,7 @@ class GovNotifyServiceTest {
         parameterMap.put(CASE_NUMBER, "TheCaseId");
         parameterMap.put(PORTAL_URL, "ThePortalURL");
         parameterMap.put(COURTHOUSE, "TheCourthouse");
+
         govNotifyRequest.setParameterMap(parameterMap);
 
         return govNotifyService.sendNotification(govNotifyRequest);
@@ -76,13 +66,24 @@ class GovNotifyServiceTest {
         return createAndSend(templateName, new ConcurrentHashMap<>());
     }
 
+    @Test
+    void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
+
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
+        assertEquals("A new transcript is ready for you to authorise", emailResponse.getSubject());
+        compare("""
+                    There is a new transcript available for you to authorise for case ID TheCaseId at TheCourthouse.
+
+                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
+    }
+
 
     @Test
     void requestToTranscriber() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER.toString());
         assertEquals("New DARTS transcription request", emailResponse.getSubject());
         compare("""
-                    You have received a new transcription request from the DARTS Portal.
+                    You have received a new transcription request from the DARTS Portal for case ID TheCaseId at TheCourthouse.
 
                     [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
@@ -108,7 +109,7 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE.toString());
         assertEquals("Your transcript is available", emailResponse.getSubject());
         compare("""
-                    Your transcript request for case ID TheCaseId has been completed and is available for download.
+                    Your transcript request for case ID TheCaseId at TheCourthouse has been completed and is available for download.
 
                     To access the transcript, [Sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
     }
@@ -118,7 +119,7 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED.toString());
         assertEquals("Your transcript request was approved", emailResponse.getSubject());
         compare("""
-                    Your transcript request for case ID TheCaseId has been approved.
+                    Your transcript request for case ID TheCaseId at TheCourthouse has been approved.
 
                     We’ll notify you when it’s available to download.""", emailResponse);
     }
@@ -135,7 +136,7 @@ class GovNotifyServiceTest {
         assertEquals("Your transcript request was rejected", emailResponse.getSubject());
         compare(
             """
-                Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason.
+                Your transcript request for case ID TheCaseId at TheCourthouse has been rejected due to TheRejectionReason.
 
                 You can resubmit your request, but take into account the reason for the original request's rejection.""",
             emailResponse
