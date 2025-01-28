@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -39,7 +38,6 @@ import uk.gov.hmcts.darts.dailylist.model.Defendant;
 import uk.gov.hmcts.darts.dailylist.model.Hearing;
 import uk.gov.hmcts.darts.dailylist.model.PersonalDetails;
 import uk.gov.hmcts.darts.dailylist.model.Sitting;
-import uk.gov.hmcts.darts.dailylist.util.CitizenNameComparator;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
 import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapper;
 import uk.gov.hmcts.darts.task.runner.dailylist.schemas.courtservice.DailyListStructure;
@@ -79,7 +77,6 @@ class DailyListUpdater {
     private final SystemUserHelper systemUserHelper;
     private final CurrentTimeHelper currentTimeHelper;
     private final CitizenNameMapper citizenNameMapper;
-    private final CitizenNameComparator citizenNameComparator;
     private final DetsApiService detsApiService;
 
     private final XmlParser xmlParser;
@@ -328,7 +325,7 @@ class DailyListUpdater {
     private boolean isExistingDefenders(CourtCaseEntity courtCase, PersonalDetails defenders) {
         boolean existingDefendant = false;
         for (DefenceEntity defenceEntity : courtCase.getDefenceList()) {
-            if (isEqual(defenders.getName(), citizenNameMapper.getCitizenName(defenceEntity.getName()))) {
+            if (citizenNameMapper.getCitizenName(defenders.getName()).equalsIgnoreCase(defenceEntity.getName())) {
                 existingDefendant = true;
             }
         }
@@ -339,7 +336,7 @@ class DailyListUpdater {
     private boolean isExistingDefendant(CourtCaseEntity courtCase, Defendant defendant) {
         boolean existingDefendant = false;
         for (DefendantEntity defendantEntity : courtCase.getDefendantList()) {
-            if (isEqual(defendant.getPersonalDetails().getName(), citizenNameMapper.getCitizenName(defendantEntity.getName()))) {
+            if (citizenNameMapper.getCitizenName(defendant.getPersonalDetails().getName()).equalsIgnoreCase(defendantEntity.getName())) {
                 existingDefendant = true;
             }
         }
@@ -351,16 +348,12 @@ class DailyListUpdater {
         boolean existingDefendant = false;
         for (ProsecutorEntity prosecutorEntity : courtCase.getProsecutorList()) {
 
-            if (isEqual(prosecutor.getName(), citizenNameMapper.getCitizenName(prosecutorEntity.getName()))) {
+            if (citizenNameMapper.getCitizenName(prosecutor.getName()).equalsIgnoreCase(prosecutorEntity.getName())) {
                 existingDefendant = true;
             }
         }
 
         return existingDefendant;
-    }
-
-    private boolean isEqual(CitizenName name1, CitizenName name2) {
-        return citizenNameComparator.compare(name1, name2) == 0;
     }
 
     /**
