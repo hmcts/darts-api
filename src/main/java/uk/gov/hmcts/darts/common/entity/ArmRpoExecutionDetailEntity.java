@@ -67,4 +67,7 @@ public class ArmRpoExecutionDetailEntity extends MandatoryCreatedModifiedBaseEnt
     @Column(name = "production_name")
     private String productionName;
 
+    @Column(name = "production_name")
+    private String productionName;
+
 }

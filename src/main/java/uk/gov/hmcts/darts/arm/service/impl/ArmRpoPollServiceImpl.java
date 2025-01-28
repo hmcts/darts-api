@@ -28,6 +28,7 @@ import java.util.List;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum.GET_EXTENDED_PRODUCTIONS_BY_MATTER;
 
 @Service
 @AllArgsConstructor
@@ -72,20 +73,28 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
             var userAccount = userIdentity.getUserAccount();
 
-            // step to call ARM RPO API to get the extended searches by matter
-            String productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
+            String productionName;
+            boolean createExportBasedOnSearchResultsTable;
+            String uniqueProductionName;
+            if (!skipSteps(armRpoExecutionDetailEntity)) {
+                // step to call ARM RPO API to get the extended searches by matter
+                productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
 
-            String uniqueProductionName = armRpoUtil.generateUniqueProductionName(productionName);
+                uniqueProductionName = armRpoUtil.generateUniqueProductionName(productionName);
 
-            // step to call ARM RPO API to get the master index field by record class schema
-            List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
-                bearerToken, executionId,
-                ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
-                userAccount);
+                // step to call ARM RPO API to get the master index field by record class schema
+                List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
+                    bearerToken, executionId,
+                    ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                    userAccount);
 
-            // step to call ARM RPO API to create export based on search results table
-            boolean createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(
-                bearerToken, executionId, headerColumns, uniqueProductionName, pollDuration, userAccount);
+                // step to call ARM RPO API to create export based on search results table
+                createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(
+                    bearerToken, executionId, headerColumns, uniqueProductionName, pollDuration, userAccount);
+            } else {
+                createExportBasedOnSearchResultsTable = true;
+                uniqueProductionName = armRpoExecutionDetailEntity.getProductionName();
+            }
             if (createExportBasedOnSearchResultsTable) {
                 processProductions(bearerToken, executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity);
             } else {
@@ -100,6 +109,13 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         } finally {
             cleanUpTempFiles();
         }
+    }
+
+    boolean skipSteps(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        if (nonNull(armRpoExecutionDetailEntity.getArmRpoState())) {
+            return GET_EXTENDED_PRODUCTIONS_BY_MATTER.getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId());
+        }
+        return false;
     }
 
     private void processProductions(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount,
@@ -210,12 +226,9 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     }
 
     private boolean pollServiceFailed(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        if (nonNull(armRpoExecutionDetailEntity.getArmRpoState())
+        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
             && ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId())
-            && allowableFailedStates.contains(armRpoExecutionDetailEntity.getArmRpoState().getId())) {
-            return true;
-        }
-        return false;
+            && allowableFailedStates.contains(armRpoExecutionDetailEntity.getArmRpoState().getId());
     }
 
     private boolean pollServiceInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetail) {
