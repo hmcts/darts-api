@@ -98,6 +98,8 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // then
         assertTrue(result);
+        // assert that the productionName of armRpoExecutionDetailEntity contains the production name
+        assertThat(armRpoExecutionDetailEntity.getProductionName(), containsString(PRODUCTION_NAME));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),

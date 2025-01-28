@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -267,6 +268,43 @@ class ArmRpoPollServiceImplTest {
                                                                  userAccountEntity);
         verify(armRpoApi).createExportBasedOnSearchResultsTable(eq("bearerToken"), eq(1), eq(headerColumns), contains(PRODUCTION_NAME), eq(pollDuration),
                                                                 eq(userAccountEntity));
+        verify(armRpoApi).getExtendedProductionsByMatter(eq("bearerToken"), eq(1), contains(PRODUCTION_NAME), eq(userAccountEntity));
+        verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
+        verify(armRpoApi).downloadProduction("bearerToken", 1, "fileId", userAccountEntity);
+        verify(armRpoApi).removeProduction("bearerToken", 1, userAccountEntity);
+
+        verify(userIdentity).getUserAccount();
+
+        verify(fileOperationService).saveFileToTempWorkspace(resource, "productionExportFileId_fileId.csv", armDataManagementConfiguration, true);
+
+        verify(logApi).armRpoPollingSuccessful(EXECUTION_ID);
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
+    }
+
+    @Test
+    void pollArmRpo_shouldPollSuccessfully_whenGetExtendedProductionsByMatterInProgressAndSkipsSteps() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState());
+        armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
+        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusMinutes(10));
+
+        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedProductionsByMatter(anyString(), anyInt(), anyString(), any(UserAccountEntity.class))).thenReturn(true);
+        when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
+        InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
+        when(armRpoApi.downloadProduction(anyString(), anyInt(), anyString(), any(UserAccountEntity.class))).thenReturn(resource);
+        doNothing().when(armRpoApi).removeProduction(anyString(), anyInt(), any(UserAccountEntity.class));
+
+        String fileName = "fileId.csv";
+        Path filePath = Path.of(tempDirectory.getAbsolutePath()).resolve(fileName);
+        when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
+
+        // when
+        armRpoPollService.pollArmRpo(false, pollDuration);
+
+        // then
         verify(armRpoApi).getExtendedProductionsByMatter(eq("bearerToken"), eq(1), contains(PRODUCTION_NAME), eq(userAccountEntity));
         verify(armRpoApi).getProductionOutputFiles("bearerToken", 1, userAccountEntity);
         verify(armRpoApi).downloadProduction("bearerToken", 1, "fileId", userAccountEntity);
