@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Component
@@ -199,12 +200,17 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         }
 
         if (armExternalObjectDirectoryEntity.getEventDateTs() == null
-            || !armExternalObjectDirectoryEntity.getEventDateTs().toLocalDate().minusYears(eventDateAdjustmentYears)
+            || !armExternalObjectDirectoryEntity.getEventDateTs().toLocalDate().plusYears(eventDateAdjustmentYears)
             .isEqual(entity.getRetainUntilTs().toLocalDate())) {
-            log.info("Skipping deletion of {} with id {} as the event date minus {} years is not the same as the retention date",
+            log.info("Skipping deletion of {} with id '{}' as the event date ({}) plus '{}' years is not the same as the retention date ({})",
                      entity.getClass().getSimpleName(),
                      entity.getId(),
-                     eventDateAdjustmentYears);
+                     Optional.ofNullable(armExternalObjectDirectoryEntity.getEventDateTs())
+                         .map(offsetDateTime -> offsetDateTime.toLocalDate())
+                         .orElse(null),
+                     eventDateAdjustmentYears,
+                     entity.getRetainUntilTs().toLocalDate()
+            );
             return false;
         }
         return true;
