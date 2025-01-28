@@ -4,6 +4,7 @@
 --v4    amend osr_uuid from character to bigint
 --v5    amend tablespace to pg_default
 --v6    add revinfo table, as another externally defined object
+--v7    add audit_user to revinfo and FK to user_account
 
 
 CREATE TABLE object_state_record
@@ -55,5 +56,10 @@ CREATE TABLE object_state_record
 CREATE TABLE revinfo
 (rev                           INT4                       NOT NULL
 ,revtstmp                      INT8 
+,audit_user                    INTEGER
 ,CONSTRAINT revinfo_pkey PRIMARY KEY(rev)
 ) TABLESPACE pg_default;
+
+ALTER TABLE revinfo 
+ADD CONSTRAINT revinfo_audit_user_fk
+FOREIGN KEY (audit_user) REFERENCES user_account(usr_id);
