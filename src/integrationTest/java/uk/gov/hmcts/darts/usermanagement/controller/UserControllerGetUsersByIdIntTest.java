@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 import java.util.Set;
 
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -68,6 +69,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         Assertions.assertEquals(TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID, userWithIdAndTimestamps.getSecurityGroupIds().get(0));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -86,6 +88,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getErrorTypeNumeric(), problem.getType().toString());
         Assertions.assertEquals("User id " + userAccountEntity.getId() + " not found", problem.getDetail());
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -109,6 +112,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         );
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -133,6 +137,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         );
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 }

@@ -24,8 +24,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -76,6 +76,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         );
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -111,7 +112,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verifyNoInteractions(userIdentity);
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
+        verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
@@ -135,6 +137,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         );
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -158,6 +161,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -181,6 +185,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[3].full_name").value("user3FullName"));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -204,6 +209,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -228,6 +234,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -254,6 +261,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -282,6 +290,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username2 + "@ex.com")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -310,6 +319,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username1 + "@ex.com")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
     }
 
