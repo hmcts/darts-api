@@ -412,9 +412,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     default List<Integer> findEodsNotInOtherStorage(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                     ExternalLocationTypeEntity notExistsLocation, Integer limitRecords) {
         Set<Integer> results = new HashSet<>();//Ensures no duplicates
-        results.addAll(findEodsNotInOtherStorageOnlyMedia(status, type, notExistsLocation, limitRecords));
+        results.addAll(findEodsNotInOtherStorageOnlyMedia(status.getId(), type.getId(), notExistsLocation.getId(), limitRecords));
         if (results.size() < limitRecords) {
-            results.addAll(findEodsNotInOtherStorageExcludingMedia(status, type, notExistsLocation, limitRecords - results.size()));
+            results.addAll(findEodsNotInOtherStorageExcludingMedia(status.getId(), type.getId(), notExistsLocation.getId(), limitRecords - results.size()));
         }
         return new ArrayList<>(results);
     }
@@ -432,8 +432,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """,
         nativeQuery = true
     )
-    List<Integer> findEodsNotInOtherStorageOnlyMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
-                                                     ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
+    List<Integer> findEodsNotInOtherStorageOnlyMedia(Integer status, Integer type,
+                                                     Integer notExistsLocation, Integer limitRecords);
 
     @Query(
         value = """
@@ -450,8 +450,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """,
         nativeQuery = true
     )
-    List<Integer> findEodsNotInOtherStorageExcludingMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
-                                                          ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
+    List<Integer> findEodsNotInOtherStorageExcludingMedia(Integer status, Integer type,
+                                                          Integer notExistsLocation, Integer limitRecords);
 
     @Query(
         """

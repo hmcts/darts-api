@@ -15,6 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ExternalObjectDirectoryRepositoryTest {
 
@@ -93,8 +94,11 @@ class ExternalObjectDirectoryRepositoryTest {
             .findEodsNotInOtherStorageExcludingMedia(any(), any(), any(), any());
 
         ObjectRecordStatusEntity status = mock(ObjectRecordStatusEntity.class);
+        when(status.getId()).thenReturn(1);
         ExternalLocationTypeEntity type = mock(ExternalLocationTypeEntity.class);
+        when(type.getId()).thenReturn(2);
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
+        when(notExistsType.getId()).thenReturn(3);
 
         List<Integer> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             status, type, notExistsType, 5);
@@ -104,9 +108,9 @@ class ExternalObjectDirectoryRepositoryTest {
             .containsExactlyInAnyOrder(mediaEod1Id, mediaEod2Id, nonMediaEod1Id);
 
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageOnlyMedia(status, type, notExistsType, 5);
+            .findEodsNotInOtherStorageOnlyMedia(1, 2, 3, 5);
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageExcludingMedia(status, type, notExistsType, 3);
+            .findEodsNotInOtherStorageExcludingMedia(1, 2, 3, 3);
     }
 
     @Test
@@ -118,8 +122,11 @@ class ExternalObjectDirectoryRepositoryTest {
             .when(externalObjectDirectoryRepository)
             .findEodsNotInOtherStorageOnlyMedia(any(), any(), any(), any());
         ObjectRecordStatusEntity status = mock(ObjectRecordStatusEntity.class);
+        when(status.getId()).thenReturn(1);
         ExternalLocationTypeEntity type = mock(ExternalLocationTypeEntity.class);
+        when(type.getId()).thenReturn(2);
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
+        when(notExistsType.getId()).thenReturn(3);
 
         List<Integer> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             status, type, notExistsType, 2);
@@ -129,7 +136,7 @@ class ExternalObjectDirectoryRepositoryTest {
             .containsExactlyInAnyOrder(mediaEod1Id, mediaEod2Id);
 
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageOnlyMedia(status, type, notExistsType, 2);
+            .findEodsNotInOtherStorageOnlyMedia(1, 2, 3, 2);
         verify(externalObjectDirectoryRepository, never())
             .findEodsNotInOtherStorageExcludingMedia(any(), any(), any(), any());
     }
