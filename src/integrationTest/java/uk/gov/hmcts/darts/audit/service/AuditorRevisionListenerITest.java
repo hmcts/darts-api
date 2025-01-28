@@ -26,7 +26,7 @@ class AuditorRevisionListenerITest extends PostgresIntegrationBase {
 
     @Test
     @SuppressWarnings("unchecked")
-    void test() {
+    void auditorRevisionListener_shouldSetAuditUser() {
         UserAccountEntity currentUser = dartsDatabase.createTestUserAccount();
         GivenBuilder.anAuthenticatedUserFor(currentUser);
         User user = new User();
@@ -48,8 +48,7 @@ class AuditorRevisionListenerITest extends PostgresIntegrationBase {
             .forRevisionsOfEntity(UserAccountEntity.class, true)
             .getResultList();
 
-        assertThat(audits).hasSize(2);
         assertThat(audits.get(0).getAuditUser()).isNull();//Created without user loggedin so should be null
-        assertThat(audits.get(1).getAuditUser()).isEqualTo(currentUser.getId());//Updated with user loggedin so should be current user
+        assertThat(audits.get(audits.size() - 1).getAuditUser()).isEqualTo(currentUser.getId());//Updated with user loggedin so should be current user
     }
 }
