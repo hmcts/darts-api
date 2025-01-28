@@ -148,13 +148,11 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
         );
     }
 
-
     @AllArgsConstructor
     static class ClientCallable {
         Object request;
         Object response;
     }
-
 
     @ParameterizedTest(name = "{0} should succeed when server returns 200")
     @MethodSource("genericArmRpoClientTestArguments")
@@ -176,7 +174,6 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
 
         if (clientCallable.request != null) {
             requestPatternBuilder.withRequestBody(equalTo(TestUtils.writeAsString(clientCallable.request)));
-
         }
         verify(requestPatternBuilder);
         JSONAssert.assertEquals(TestUtils.getContentsFromFile(EXPECTED_RESPONSE_DIRECTORY + suffix + ".json"),
@@ -208,7 +205,6 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
         }
     }
 
-
     @Test
     void getRecordManagementMatter_ShouldSucceedIfServerReturns200Success_WithEmptyRequest() throws Exception {
         // Given
@@ -222,7 +218,7 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                         .withHeader("Content-type", "application/json")
                         .withBody(TestUtils.getContentsFromFile(MOCK_RESPONSE_DIRECTORY + "getRecordManagementMatter.json"))
                         .withStatus(200)));
-        
+
         // When
         armRpoClient.getRecordManagementMatter(bearerAuth, request);
 

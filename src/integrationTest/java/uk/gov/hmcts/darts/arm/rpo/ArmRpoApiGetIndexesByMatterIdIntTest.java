@@ -90,7 +90,7 @@ class ArmRpoApiGetIndexesByMatterIdIntTest extends IntegrationBase {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM RPO get indexes by matter ID: Unable to find indexes by matter ID in response"));
+            "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.GET_INDEXES_BY_MATTERID.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());

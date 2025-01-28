@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class ProductionOutputFilesResponse extends BaseRpoResponse {
 
     @JsonProperty("productionID")
@@ -34,6 +36,10 @@ public class ProductionOutputFilesResponse extends BaseRpoResponse {
     public static class ProductionExportFileDetail {
         @JsonProperty("productionExportFileID")
         private String productionExportFileId;
+
+        @JsonProperty("status")
+        private Integer status;
+
     }
 
 }

@@ -55,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -248,7 +249,7 @@ class DetsToArmBatchPushProcessorImplTest {
         // given
         detsToArmBatchPushProcessor.processDetsToArm(5);
         // when
-        LogUtil.waitUntilMessag(output, "No DETS EODs to process", 5);
+        LogUtil.waitUntilMessage(output, "No DETS EODs to process", 5);
         assertThat(output)
             .contains("No DETS EODs to process");
     }
@@ -260,10 +261,10 @@ class DetsToArmBatchPushProcessorImplTest {
         doReturn(List.of(1)).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
 
         try (MockedStatic<AsyncUtil> asyncUtilMockedStatic = Mockito.mockStatic(AsyncUtil.class)) {
-            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), anyInt(), anyInt(), any()))
+            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), anyInt(), anyLong(), any()))
                 .thenThrow(new RuntimeException("Test exception"));
             detsToArmBatchPushProcessor.processDetsToArm(5);
-            LogUtil.waitUntilMessag(output, "Dets to arm batch unexpected exception", 5);
+            LogUtil.waitUntilMessage(output, "Dets to arm batch unexpected exception", 5);
 
             assertThat(output)
                 .contains("Dets to arm batch unexpected exception")

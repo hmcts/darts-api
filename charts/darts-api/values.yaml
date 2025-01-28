@@ -115,7 +115,7 @@ java:
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
-    ARM_RPO_THREAD_SLEEP_DURATION: 5s
+    ARM_RPO_THREAD_SLEEP_DURATION: 60s
 
 function:
   scaleType: Job
@@ -202,6 +202,8 @@ function:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
         - name: ARMSasEndpoint
           alias: ARM_SAS_ENDPOINT
+        - name: DETSSasURLEndpoint
+          alias: DETS_SAS_URL_ENDPOINT
         - name: ArmUsername
           alias: ARM_USERNAME
         - name: ArmPassword
@@ -229,7 +231,7 @@ function:
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
-    ARM_RPO_THREAD_SLEEP_DURATION: 5s
+    ARM_RPO_THREAD_SLEEP_DURATION: 60s
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:

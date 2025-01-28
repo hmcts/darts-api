@@ -175,7 +175,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                 osrEntity.get().setObjectStatus(String.format("No response files produced by ARM within %s",
                                                               DurationUtil.formatDurationHumanReadable(
                                                                   armDataManagementConfiguration.getArmMissingResponseDuration())));
-                objectStateRecordRepository.save(objectStateRecordEntity);
+                objectStateRecordRepository.save(osrEntity.get());
             } else {
                 log.warn("No OSR Object exists with OsrId : {} for EodId : {}", objectStateRecordEntity.getUuid(), externalObjectDirectory.getId());
             }

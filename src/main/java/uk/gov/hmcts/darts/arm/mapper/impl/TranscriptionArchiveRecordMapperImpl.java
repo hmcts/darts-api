@@ -177,8 +177,8 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             metadata.setRetentionConfidenceReason(transcriptionDocument.getRetConfReason());
         }
 
-        if (nonNull(transcriptionDocument.getRetConfScore()) && transcriptionDocument.getRetConfScore() != 0) {
-            metadata.setRetentionConfidenceScore(transcriptionDocument.getRetConfScore());
+        if (nonNull(transcriptionDocument.getRetConfScore())) {
+            metadata.setRetentionConfidenceScore(transcriptionDocument.getRetConfScore().getId());
         }
 
         if (transcriptionRecordProperties.containsKey(BF_001_KEY)) {

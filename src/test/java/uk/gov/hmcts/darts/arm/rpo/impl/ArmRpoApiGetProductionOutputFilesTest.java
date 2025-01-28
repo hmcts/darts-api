@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +17,10 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -39,6 +42,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.IN_PROGRESS_STATUS;
+import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 
 @TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
 @SuppressWarnings("checkstyle:linelength")
@@ -66,9 +71,12 @@ class ArmRpoApiGetProductionOutputFilesTest {
         var armRpoDownloadProduction = mock(ArmRpoDownloadProduction.class);
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
+        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+        ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties,
-                                      armAutomatedTaskRepository, currentTimeHelper, armRpoDownloadProduction);
+                                      armAutomatedTaskRepository, currentTimeHelper, armRpoDownloadProduction,
+                                      objectMapper);
 
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
     }
@@ -79,14 +87,12 @@ class ArmRpoApiGetProductionOutputFilesTest {
     }
 
     @Test
-    void getProductionOutputFiles_shouldSucceedAndReturnASingleItem_whenASuccessResponseIsReturnedFromArmWithASingularProductionExportFile() {
+    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenSuccessResponseIsReturnedFromArmWithSingularProductionExportFile() {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
-        var response = createProductionOutputFilesResponse(Collections.singletonList(
-                                                               createProductionExportFile(
-                                                                   createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1))
-                                                           )
+        var response = createProductionOutputFilesResponse(
+            Collections.singletonList(createProductionExportFile(createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1)))
         );
 
         when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
@@ -115,7 +121,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
     }
 
     @Test
-    void getProductionOutputFiles_shouldSucceedAndReturnMultipleItems_whenASuccessResponseIsReturnedFromArmWithMultipleProductionExportFile() {
+    void getProductionOutputFiles_shouldSucceedAndReturnMultipleItems_whenSuccessResponseIsReturnedFromArmWithMultipleProductionExportFile() {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
@@ -153,7 +159,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
     @ParameterizedTest
     @NullSource
     @EmptySource
-    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenASuccessResponseIsReturnedFromArmWithMixtureOfPopulatedAndUnpopulatedExportFileIds(
+    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenSuccessResponseIsReturnedFromArmWithMixtureOfPopulatedAndUnpopulatedExportFileIds(
         String productionExportFileId) {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
@@ -290,8 +296,118 @@ class ArmRpoApiGetProductionOutputFilesTest {
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
         var response = createProductionOutputFilesResponse(Collections.singletonList(
-                                                               createProductionExportFile(
-                                                                   createProductionExportFileDetail(productionExportFileId))
+            createProductionExportFile(createProductionExportFileDetail(productionExportFileId)))
+        );
+
+        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+            .thenReturn(response);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.getProductionOutputFiles(TOKEN, EXECUTION_ID, someUserAccount));
+        assertThat(armRpoException.getMessage(), containsString("No production export file id's were returned"));
+
+        // Then verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProductionOutputFilesRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify execution detail status moves to failed as the final operation
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity,
+                                                 armRpoHelperMocks.getFailedRpoStatus(),
+                                                 someUserAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getProductionOutputFiles_shouldReturnNonFailedProductions_whenOneFailedStatusIsReturnedFromArmWithMultipleProductionExportFile() {
+        // Given
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        ProductionOutputFilesResponse.ProductionExportFileDetail productionExportFileDetail1 = createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1);
+        ProductionOutputFilesResponse.ProductionExportFileDetail productionExportFileDetail2 = createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_2);
+        productionExportFileDetail2.setStatus(123);
+        var response = createProductionOutputFilesResponse(List.of(
+                                                               createProductionExportFile(productionExportFileDetail1),
+                                                               createProductionExportFile(productionExportFileDetail2)
+                                                           )
+        );
+
+        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+            .thenReturn(response);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        List<String> productionOutputFiles = armRpoApi.getProductionOutputFiles(TOKEN, EXECUTION_ID, someUserAccount);
+
+        // Then
+        assertEquals(1, productionOutputFiles.size());
+        assertEquals(PRODUCTION_EXPORT_FILE_ID_1, productionOutputFiles.getFirst());
+
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProductionOutputFilesRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify execution detail status moves to completed as the final operation
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity,
+                                                 armRpoHelperMocks.getCompletedRpoStatus(),
+                                                 someUserAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getProductionOutputFiles_shouldThrowInProgressException_whenInProgressResponseIsReturnedFromArmWithMultipleProductionExportFile() {
+        // Given
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        ProductionOutputFilesResponse.ProductionExportFileDetail productionExportFileDetail1 = createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1);
+        ProductionOutputFilesResponse.ProductionExportFileDetail productionExportFileDetail2 = createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_2);
+        productionExportFileDetail2.setStatus(IN_PROGRESS_STATUS.getStatusCode());
+        var response = createProductionOutputFilesResponse(List.of(
+                                                               createProductionExportFile(productionExportFileDetail1),
+                                                               createProductionExportFile(productionExportFileDetail2)
+                                                           )
+        );
+
+        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+            .thenReturn(response);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        ArmRpoInProgressException armRpoInProgressException = assertThrows(ArmRpoInProgressException.class, () ->
+            armRpoApi.getProductionOutputFiles(TOKEN, EXECUTION_ID, someUserAccount));
+
+        // Then
+        assertThat(armRpoInProgressException.getMessage(),
+                   containsString("RPO endpoint getProductionExportFileDetails is already in progress for execution id 1"));
+
+        // And verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProductionOutputFilesRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getProductionOutputFiles_shouldThrowException_whenAllStatusesAreInvalidWithMultipleProductionExportFile() {
+        // Given
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        ProductionOutputFilesResponse.ProductionExportFileDetail productionExportFileDetail1 = createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1);
+        productionExportFileDetail1.setStatus(123);
+        ProductionOutputFilesResponse.ProductionExportFileDetail productionExportFileDetail2 = createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_2);
+        productionExportFileDetail2.setStatus(123);
+        var response = createProductionOutputFilesResponse(List.of(
+                                                               createProductionExportFile(productionExportFileDetail1),
+                                                               createProductionExportFile(productionExportFileDetail2)
                                                            )
         );
 
@@ -303,9 +419,12 @@ class ArmRpoApiGetProductionOutputFilesTest {
         // When
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.getProductionOutputFiles(TOKEN, EXECUTION_ID, someUserAccount));
-        assertThat(armRpoException.getMessage(), containsString("No production export file ids were returned"));
 
-        // Then verify execution detail state moves to in progress
+        // Then
+        assertThat(armRpoException.getMessage(),
+                   containsString("ARM getProductionOutputFiles: Production export files contain failures"));
+
+        // And verify execution detail state moves to in progress
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
                                                          armRpoHelperMocks.getGetProductionOutputFilesRpoState(),
                                                          armRpoHelperMocks.getInProgressRpoStatus(),
@@ -337,6 +456,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
     private ProductionOutputFilesResponse.ProductionExportFileDetail createProductionExportFileDetail(String fileId) {
         var productionExportFileDetail = new ProductionOutputFilesResponse.ProductionExportFileDetail();
         productionExportFileDetail.setProductionExportFileId(fileId);
+        productionExportFileDetail.setStatus(READY_STATUS.getStatusCode());
         return productionExportFileDetail;
     }
 

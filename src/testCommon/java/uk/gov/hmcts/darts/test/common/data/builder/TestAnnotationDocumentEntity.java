@@ -6,6 +6,7 @@ import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -18,7 +19,7 @@ public class TestAnnotationDocumentEntity extends AnnotationDocumentEntity imple
                                         UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
                                         String checksum, boolean isDeleted, UserAccountEntity deletedBy,
                                         OffsetDateTime deletedTs, String contentObjectId, String clipId,
-                                        boolean isHidden, OffsetDateTime retainUntilTs, Integer retConfScore,
+                                        boolean isHidden, OffsetDateTime retainUntilTs, RetentionConfidenceScoreEnum retConfScore,
                                         String retConfReason, AnnotationEntity annotation,
                                         OffsetDateTime lastModifiedTimestamp, UserAccountEntity lastModifiedBy) {
         setId(id);

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -64,9 +66,12 @@ class ArmRpoApiGetProfileEntitlementsTest {
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
         armApiConfigurationProperties.setArmServiceEntitlement(ENTITLEMENT_NAME);
+        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+        ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties,
-                                      armAutomatedTaskRepository, currentTimeHelper, armRpoDownloadProduction);
+                                      armAutomatedTaskRepository, currentTimeHelper, armRpoDownloadProduction,
+                                      objectMapper);
     }
 
     @AfterEach
@@ -175,7 +180,7 @@ class ArmRpoApiGetProfileEntitlementsTest {
         // When
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.getProfileEntitlements(TOKEN, EXECUTION_ID, someUserAccount));
-        assertThat(armRpoException.getMessage(), containsString("No matching entitlements were returned"));
+        assertThat(armRpoException.getMessage(), containsString("ARM getProfileEntitlements: No matching entitlements 'some entitlement name' were returned"));
 
         // Then verify execution detail state moves to in progress
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
