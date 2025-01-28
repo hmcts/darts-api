@@ -274,8 +274,6 @@ public class DartsDatabaseStub {
             securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
-
-        entityManager.createNativeQuery("UPDATE darts.revinfo set audit_user = null where audit_user >= " + SEQUENCE_START_VALUE).executeUpdate();
         userAccountRepository.deleteAll(
             userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
