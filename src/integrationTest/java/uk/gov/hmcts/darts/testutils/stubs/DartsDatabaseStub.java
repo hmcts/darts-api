@@ -279,6 +279,7 @@ public class DartsDatabaseStub {
     @Transactional
     public void clearDatabaseInThisOrder() {
         removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
+        entityManager.createNativeQuery("UPDATE darts.revinfo set audit_user = null").executeUpdate();
         dataAnonymisationRepository.deleteAll();
         armRpoExecutionDetailRepository.deleteAll();
         objectAdminActionRepository.deleteAll();
