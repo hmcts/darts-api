@@ -12,10 +12,6 @@ public enum ArmRpoResponseStatusCode {
     @Getter
     private final int statusCode;
 
-    ArmRpoResponseStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
     private static final Map<Integer, ArmRpoResponseStatusCode> BY_STATUS_CODE = new ConcurrentHashMap<>();
 
     static {
@@ -24,6 +20,10 @@ public enum ArmRpoResponseStatusCode {
         }
     }
 
+    ArmRpoResponseStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+    
     public static ArmRpoResponseStatusCode valueOfId(Integer id) {
         return BY_STATUS_CODE.get(id);
     }

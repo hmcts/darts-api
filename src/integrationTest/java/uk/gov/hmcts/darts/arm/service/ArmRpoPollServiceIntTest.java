@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRpoPollServiceImpl;
+import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -74,6 +75,8 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     private ArmApiServiceImpl armApiService;
     @MockBean
     private ArmRpoDownloadProduction armRpoDownloadProduction;
+    @MockBean
+    private ArmRpoUtil armRpoUtil;
 
     @SpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -81,6 +84,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     protected File tempDirectory;
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
+    private String uniqueProductionName;
 
     @Autowired
     private ArmRpoPollServiceImpl armRpoPollService;
@@ -96,6 +100,8 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
 
+        uniqueProductionName = PRODUCTION_NAME + "_UUID_CSV";
+        lenient().when(armRpoUtil.generateUniqueProductionName(anyString())).thenReturn(uniqueProductionName);
     }
 
     @Test
@@ -452,7 +458,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         response.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
         productions.setProductionId(PRODUCTION_ID);
-        productions.setName(PRODUCTION_NAME);
+        productions.setName(uniqueProductionName);
         productions.setEndProductionTime("2025-01-16T12:30:09.9129726+00:00");
         response.setProductions(List.of(productions));
         return response;

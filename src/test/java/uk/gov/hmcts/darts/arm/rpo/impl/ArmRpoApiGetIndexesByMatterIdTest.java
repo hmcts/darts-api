@@ -67,7 +67,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
     }
 
     @Test
-    void getIndexesByMatterIdSuccess() {
+    void getIndexesByMatterId_Success() {
         // given
         IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
         response.setStatus(200);
@@ -111,7 +111,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -128,7 +128,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -150,7 +150,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -174,7 +174,154 @@ class ArmRpoApiGetIndexesByMatterIdTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getIndexesByMatterId_Success_WithMultipleIndexes() {
+        // given
+        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
+
+        IndexesByMatterIdResponse.Index index1 = new IndexesByMatterIdResponse.Index();
+        IndexesByMatterIdResponse.IndexDetails indexDetails1 = new IndexesByMatterIdResponse.IndexDetails();
+        indexDetails1.setIndexId("indexId");
+        index1.setIndex(indexDetails1);
+
+        IndexesByMatterIdResponse.Index index2 = new IndexesByMatterIdResponse.Index();
+        IndexesByMatterIdResponse.IndexDetails indexDetails2 = new IndexesByMatterIdResponse.IndexDetails();
+        indexDetails2.setIndexId("indexId 2");
+        index2.setIndex(indexDetails2);
+
+        response.setIndexes(List.of(index1, index2));
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+
+        // when
+        armRpoApi.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount);
+
+        // then
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        assertEquals("indexId", armRpoExecutionDetailEntityArgumentCaptor.getValue().getIndexId());
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getIndexesByMatterId_ThrowsException_WithNullIndexId() {
+        // given
+        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
+
+        IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
+        IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
+        indexDetails.setIndexId(null);
+        index.setIndex(indexDetails);
+        response.setIndexes(List.of(index));
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getIndexesByMatterId_ThrowsException_WithNullIndexDetails() {
+        // given
+        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
+
+        IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
+        index.setIndex(null);
+        response.setIndexes(List.of(index));
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getIndexesByMatterId_ThrowsException_WithEmptyIndexes() {
+        // given
+        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
+        response.setIndexes(Collections.emptyList());
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getIndexesByMatterId_ThrowsException_WithNullIndexes() {
+        // given
+        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
+        response.setIndexes(null);
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
