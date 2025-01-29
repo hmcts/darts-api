@@ -483,8 +483,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime2));
 
-        OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(1);
-        OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().plusDays(1);
+        OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(10);
+        OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(1);
 
         // when
         List<Integer> result = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(

@@ -648,6 +648,21 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         OffsetDateTime startTime, OffsetDateTime endTime,
         UserAccountEntity currentUser);
 
+    @Modifying(clearAutomatically = true)
+    @Query(
+        """
+            update ExternalObjectDirectoryEntity eod
+            set eod.status = :newStatus,
+                eod.transferAttempts = :transferAttempts,
+                eod.lastModifiedBy = :currentUser,
+                eod.lastModifiedDateTime = current_timestamp
+            where eod.id in :idsToUpdate
+            """
+    )
+    void updateEodStatusAndTransferAttemptsWhereIdIn(ObjectRecordStatusEntity newStatus, Integer transferAttempts, UserAccountEntity currentUser,
+                                                     List<Integer> idsToUpdate);
+
+
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
