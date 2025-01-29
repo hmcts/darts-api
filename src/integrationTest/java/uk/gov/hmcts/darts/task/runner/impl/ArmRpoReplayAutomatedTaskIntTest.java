@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("ArmRpoReplayAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class ArmRpoReplayAutomatedTaskITest extends PostgresIntegrationBase {
+class ArmRpoReplayAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     private final ArmRpoReplayAutomatedTask armRpoReplayAutomatedTask;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
@@ -42,7 +42,6 @@ class ArmRpoReplayAutomatedTaskITest extends PostgresIntegrationBase {
         final OffsetDateTime correctLastModifiedDateTime2 = endTs.minusMinutes(1);
         final OffsetDateTime incorrectLastModifiedDateTime1 = endTs.plusMinutes(1);
         final OffsetDateTime incorrectLastModifiedDateTime2 = startTs.minusMinutes(1);
-
 
         final ExternalObjectDirectoryEntity insideRangeCorrectStatus1 = createEod(correctStatus, correctLastModifiedDateTime1);
         final ExternalObjectDirectoryEntity insideRangeCorrectStatus2 = createEod(correctStatus, correctLastModifiedDateTime2);

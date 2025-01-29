@@ -3,7 +3,9 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -464,5 +467,47 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             assertTrue(eod.getDataIngestionTs().isBefore(ingestionEndDateTime));
         });
 
+    }
+
+    @Test
+    void findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit_Success() {
+        // given
+        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
+        ExternalLocationTypeEntity locationType = EodHelper.armLocation();
+
+        ExternalObjectDirectoryEntity entity1 = new ExternalObjectDirectoryEntity();
+        entity1.setStatus(status);
+        entity1.setExternalLocationType(locationType);
+        entity1.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(12));
+        externalObjectDirectoryRepository.save(entity1);
+
+        ExternalObjectDirectoryEntity entity2 = new ExternalObjectDirectoryEntity();
+        entity2.setStatus(status);
+        entity2.setExternalLocationType(locationType);
+        entity2.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(6));
+        externalObjectDirectoryRepository.save(entity2);
+
+        OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(1);
+        OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().plusDays(1);
+
+        List<Integer> result = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
+            status, startDateTime, endDateTime, locationType, Limit.of(10)
+        );
+
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit_NoResults() {
+        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
+        ExternalLocationTypeEntity locationType = EodHelper.armLocation();
+        OffsetDateTime newStartDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(2);
+        OffsetDateTime newEndDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(1);
+
+        List<Integer> result = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
+            status, newStartDateTime, newEndDateTime, locationType, Limit.of(10)
+        );
+
+        assertThat(result).isEmpty();
     }
 }
