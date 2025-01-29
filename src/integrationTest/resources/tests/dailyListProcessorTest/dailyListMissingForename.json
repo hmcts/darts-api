@@ -62,14 +62,14 @@
                   {
                     "name": {
                       "citizen_name_forename": "",
-                      "citizen_name_surname": "ProsecutorName CPP",
+                      "citizen_name_surname": "ProsecutorName CPP  ",
                       "citizen_name_requested_name": ""
                     }
                   },
                   {
                     "name": {
                       "citizen_name_forename": "",
-                      "citizen_name_surname": "ProsecutorName CPP",
+                      "citizen_name_surname": "  ProsecutorName CPP",
                       "citizen_name_requested_name": ""
                     }
                   }
@@ -80,7 +80,7 @@
                   "personal_details": {
                     "name": {
                       "citizen_name_forename": "",
-                      "citizen_name_surname": "DefendantName CPP",
+                      "citizen_name_surname": "DefendantName CPP  ",
                       "citizen_name_requested_name": ""
                     },
                     "is_masked": "false"
@@ -97,14 +97,14 @@
                     {
                       "name": {
                         "citizen_name_forename": "",
-                        "citizen_name_surname": "DefenceName CPP",
+                        "citizen_name_surname": "  DefenceName CPP",
                         "citizen_name_requested_name": ""
                       }
                     },
                     {
                       "name": {
                         "citizen_name_forename": "",
-                        "citizen_name_surname": "DefenceName CPP",
+                        "citizen_name_surname": "DefenceName CPP  ",
                         "citizen_name_requested_name": ""
                       }
                     }
@@ -114,7 +114,7 @@
                   "personal_details": {
                     "name": {
                       "citizen_name_forename": "",
-                      "citizen_name_surname": "DefendantName CPP",
+                      "citizen_name_surname": " DefendantName CPP ",
                       "citizen_name_requested_name": ""
                     },
                     "is_masked": "false"
@@ -131,14 +131,14 @@
                     {
                       "name": {
                         "citizen_name_forename": "",
-                        "citizen_name_surname": "DefenceName CPP",
+                        "citizen_name_surname": "  DefenceName CPP",
                         "citizen_name_requested_name": ""
                       }
                     },
                     {
                       "name": {
                         "citizen_name_forename": "",
-                        "citizen_name_surname": "DefenceName CPP",
+                        "citizen_name_surname": "DefenceName CPP  ",
                         "citizen_name_requested_name": ""
                       }
                     }
