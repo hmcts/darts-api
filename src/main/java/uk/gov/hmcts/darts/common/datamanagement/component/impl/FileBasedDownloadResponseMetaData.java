@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.FileUrlResource;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @Slf4j
 public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData {
 
+    @Getter
     private File fileToBeDownloadedTo;
 
     /**

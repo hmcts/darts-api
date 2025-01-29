@@ -486,7 +486,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         ExternalObjectDirectoryEntity armEod = createEodWithExternalLocationType(ExternalLocationTypeEnum.ARM);
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().minusYears(100));
+        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().plusYears(100));
         transcriptionDocumentEntity.setExternalObjectDirectoryEntities(List.of(inboundEod, unstructuredEod, armEod));
 
 
@@ -515,7 +515,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         armEod.setEventDateTs(null);
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().minusYears(100));
+        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().plusYears(100));
         transcriptionDocumentEntity.setExternalObjectDirectoryEntities(List.of(inboundEod, unstructuredEod, armEod));
 
 
@@ -531,7 +531,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         ExternalObjectDirectoryEntity armEod = createEodWithExternalLocationType(ExternalLocationTypeEnum.ARM);
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().minusYears(100).minusDays(1));
+        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().plusYears(100).minusDays(1));
         transcriptionDocumentEntity.setExternalObjectDirectoryEntities(List.of(inboundEod, unstructuredEod, armEod));
 
         assertThat(associatedObjectDataExpiryDeletionAutomatedTask.shouldDeleteFilter(transcriptionDocumentEntity))
