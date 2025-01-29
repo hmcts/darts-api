@@ -106,8 +106,8 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID()
         );
-        externalObjectDirectoryEntity1.setDataIngestionTs(OffsetDateTime.now().minusHours(26));
-        dartsDatabase.save(externalObjectDirectoryEntity1);
+        externalObjectDirectoryEntity2.setDataIngestionTs(OffsetDateTime.now().minusHours(6));
+        dartsDatabase.save(externalObjectDirectoryEntity2);
 
         log.info("eod 1: {}, eod 2: {}", externalObjectDirectoryEntity1.getId(), externalObjectDirectoryEntity2.getId());
 
