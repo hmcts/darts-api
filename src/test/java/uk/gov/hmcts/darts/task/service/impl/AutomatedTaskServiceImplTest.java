@@ -11,7 +11,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
-import org.springframework.scheduling.config.TriggerTask;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
+import uk.gov.hmcts.darts.task.model.AutomatedTaskTrigger;
 import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
@@ -157,7 +157,7 @@ class AutomatedTaskServiceImplTest {
         };
         autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
-        TriggerTask task = new TriggerTask(automatedTask, trigger);
+        AutomatedTaskTrigger task = new AutomatedTaskTrigger(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
         when(scheduledTask.getTask()).thenReturn(task);
 
@@ -192,7 +192,7 @@ class AutomatedTaskServiceImplTest {
         };
         autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
-        TriggerTask task = new TriggerTask(automatedTask, trigger);
+        AutomatedTaskTrigger task = new AutomatedTaskTrigger(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
         when(scheduledTask.getTask()).thenReturn(task);
 
@@ -227,7 +227,7 @@ class AutomatedTaskServiceImplTest {
         };
         autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
-        TriggerTask task = new TriggerTask(automatedTask, trigger);
+        AutomatedTaskTrigger task = new AutomatedTaskTrigger(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
         when(scheduledTask.getTask()).thenReturn(task);
 
@@ -385,7 +385,7 @@ class AutomatedTaskServiceImplTest {
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
 
-        TriggerTask task = getTriggerTask();
+        AutomatedTaskTrigger task = getTriggerTask();
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
         when(scheduledTask.getTask()).thenReturn(task);
 
@@ -393,7 +393,7 @@ class AutomatedTaskServiceImplTest {
 
     }
 
-    private TriggerTask getTriggerTask() {
+    private AutomatedTaskTrigger getTriggerTask() {
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
@@ -418,7 +418,7 @@ class AutomatedTaskServiceImplTest {
             }
         };
         Trigger trigger = triggerContext -> null;
-        return new TriggerTask(automatedTask, trigger);
+        return new AutomatedTaskTrigger(automatedTask, trigger);
     }
 
     @Test
