@@ -470,30 +470,30 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit_Success() {
+    void findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit_Success() throws Exception {
         // given
         ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
         ExternalLocationTypeEntity locationType = EodHelper.armLocation();
+        OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
+        OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusDays(2);
 
-        ExternalObjectDirectoryEntity entity1 = new ExternalObjectDirectoryEntity();
-        entity1.setStatus(status);
-        entity1.setExternalLocationType(locationType);
-        entity1.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(12));
-        externalObjectDirectoryRepository.save(entity1);
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities1
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime1));
 
-        ExternalObjectDirectoryEntity entity2 = new ExternalObjectDirectoryEntity();
-        entity2.setStatus(status);
-        entity2.setExternalLocationType(locationType);
-        entity2.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(6));
-        externalObjectDirectoryRepository.save(entity2);
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities2
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime2));
 
         OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(1);
         OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().plusDays(1);
 
+        // when
         List<Integer> result = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
             status, startDateTime, endDateTime, locationType, Limit.of(10)
         );
 
+        // then
         assertThat(result).hasSize(2);
     }
 
