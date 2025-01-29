@@ -477,12 +477,10 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
         OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusDays(2);
 
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities1
-            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+        externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime1));
 
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities2
-            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+        externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime2));
 
         OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(1);
