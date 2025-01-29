@@ -10,7 +10,6 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.config.Task;
-import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
+import uk.gov.hmcts.darts.task.model.AutomatedTaskTrigger;
 import uk.gov.hmcts.darts.task.model.TriggerAndAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
@@ -180,7 +180,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         for (ScheduledTask scheduledTask : scheduledTasks) {
             Task task = scheduledTask.getTask();
-            if (task instanceof TriggerTask triggerTask && cancelTriggerTask(
+            if (task instanceof AutomatedTaskTrigger triggerTask && cancelTriggerTask(
                 taskName,
                 scheduledTask,
                 triggerTask,
@@ -197,10 +197,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         for (ScheduledTask scheduledTask : scheduledTasks) {
             Task task = scheduledTask.getTask();
-            if (task instanceof TriggerTask triggerTask
-                && triggerTask.getRunnable() instanceof AutomatedTask automatedTask
-                && automatedTask.getTaskName().equals(taskName)) {
-                return automatedTask.getAutomatedTaskStatus();
+            if (task instanceof AutomatedTaskTrigger triggerTask
+                && triggerTask.getAutomatedTask().getTaskName().equals(taskName)) {
+                return triggerTask.getAutomatedTask().getAutomatedTaskStatus();
             }
         }
         throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
@@ -217,11 +216,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         for (ScheduledTask scheduledTask : scheduledTasks) {
             Task task = scheduledTask.getTask();
-            if (task instanceof TriggerTask triggerTask
-                && triggerTask.getRunnable() instanceof AbstractLockableAutomatedTask automatedTask
-                && automatedTask.getTaskName().equals(taskName)) {
+            if (task instanceof AutomatedTaskTrigger triggerTask
+                && triggerTask.getAutomatedTask().getTaskName().equals(taskName)) {
                 return TriggerAndAutomatedTask.builder()
-                    .automatedTask(automatedTask)
+                    .automatedTask(triggerTask.getAutomatedTask())
                     .trigger(triggerTask.getTrigger())
                     .build();
             }
@@ -229,8 +227,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         return null;
     }
 
-    private boolean cancelTriggerTask(String taskName, ScheduledTask scheduledTask, TriggerTask triggerTask, boolean mayInterruptIfRunning) {
-        if (triggerTask.getRunnable() instanceof AutomatedTask automatedTask && automatedTask.getTaskName().equals(taskName)) {
+    private boolean cancelTriggerTask(String taskName, ScheduledTask scheduledTask, AutomatedTaskTrigger triggerTask, boolean mayInterruptIfRunning) {
+        if (triggerTask.getAutomatedTask().getTaskName().equals(taskName)) {
             log.info("About to cancel task: " + taskName);
             scheduledTask.cancel(mayInterruptIfRunning);
             return true;
