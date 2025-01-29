@@ -75,7 +75,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     private ArmApiServiceImpl armApiService;
     @MockitoBean
     private ArmRpoDownloadProduction armRpoDownloadProduction;
-    @MockBean
+    @MockitoBean
     private ArmRpoUtil armRpoUtil;
 
     @MockitoSpyBean
