@@ -668,4 +668,18 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                          @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
                                                                                          @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
                                                                                          Limit limit);
+
+    @Query("""
+        SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+        WHERE eod.status = :status
+        AND eod.lastModifiedDateTime BETWEEN :startDateTime AND :endDateTime
+        AND eod.externalLocationType = :locationType
+        """)
+    List<Integer> findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(@Param("status") ObjectRecordStatusEntity status,
+                                                                           @Param("startDateTime") OffsetDateTime startDateTime,
+                                                                           @Param("endDateTime") OffsetDateTime endDateTime,
+                                                                           @Param("locationType") ExternalLocationTypeEntity locationType,
+                                                                           Limit limit);
+
+
 }
