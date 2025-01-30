@@ -70,7 +70,7 @@ ALTER TABLE case_retention_audit_heritage
     DROP COLUMN r_object_id;
 
 ALTER TABLE case_retention_audit_heritage
-    ADD COLUMN rah_id INTEGER NOT NULL; -- TODO DOES THIS NEED A DEFAULT?!
+    ADD COLUMN rah_id INTEGER NOT NULL;
 
 ALTER TABLE case_retention_audit_heritage
     ADD COLUMN cas_id INTEGER;
@@ -150,10 +150,10 @@ ALTER TABLE case_overflow
     ADD COLUMN audio_last_modified_ts TIMESTAMP WITH TIME ZONE;
 
 ALTER TABLE case_overflow
-    ADD COLUMN created_ts TIMESTAMP WITH TIME ZONE;
+    ADD COLUMN created_ts TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now();
 
 ALTER TABLE case_overflow
-    ADD COLUMN last_modified_ts TIMESTAMP WITH TIME ZONE;
+    ADD COLUMN last_modified_ts TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now();
 
 ALTER TABLE case_overflow
     ADD CONSTRAINT case_overflow_retention_policy_type_fk
