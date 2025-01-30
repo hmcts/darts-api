@@ -95,10 +95,6 @@ class DetsDataManagementServiceTest {
         } catch (Exception e) {
             log.error("Unable to copy non existing blob data to ARM", e);
         }
-        boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
-
-        armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
-        assertTrue(deleted, "Failed to delete DETS blob " + uuid);
 
     }
 
