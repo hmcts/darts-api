@@ -222,7 +222,7 @@ CREATE TABLE case_overflow
 ,audio_last_modified_ts      TIMESTAMP WITH TIME ZONE                -- to suppor delta, when moj_audio_folder changes
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-) TABLESPACE darts_tblspc;
+) TABLESPACE pg_default;
 
 CREATE TABLE case_retention_extra
 (cas_id                        INTEGER    NOT NULL
@@ -266,14 +266,14 @@ CREATE TABLE case_retention_extra
 ,created_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts              TIMESTAMP WITH TIME ZONE      NOT NULL
 ,migrated_ts                    TIMESTAMP WITH TIME ZONE
-) TABLESPACE darts_tblspc;
+) TABLESPACE pg_default;
 
 CREATE TABLE  retention_policy_type_heritage_mapping
 (rhm_id                        INTEGER                       NOT NULL
 ,heritage_policy_name          CHARACTER VARYING             NOT NULL
 ,heritage_table                CHARACTER VARYING             NOT NULL
 ,modernised_rpt_id             INTEGER                       NOT NULL
-) TABLESPACE darts_tblspc;
+) TABLESPACE pg_default;
 
 
 CREATE UNIQUE INDEX case_management_retention_pk ON case_management_retention(cmr_id) TABLESPACE pg_default;
@@ -291,17 +291,17 @@ ALTER TABLE retention_policy_type ADD PRIMARY KEY USING INDEX retention_policy_t
 CREATE UNIQUE INDEX rps_retainer_pk ON rps_retainer(rpr_id) TABLESPACE pg_default; 
 ALTER TABLE rps_retainer ADD PRIMARY KEY USING INDEX rps_retainer_pk;
 
-CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE darts_tblspc; 
+CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE pg_default; 
 ALTER TABLE case_overflow ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
-CREATE UNIQUE INDEX case_retention_extra_pk ON case_retention_extra(cas_id) TABLESPACE darts_tblspc; 
+CREATE UNIQUE INDEX case_retention_extra_pk ON case_retention_extra(cas_id) TABLESPACE pg_default; 
 ALTER TABLE case_retention_extra ADD PRIMARY KEY USING INDEX case_retention_extra_pk;
 
 
-CREATE UNIQUE INDEX case_retention_audit_heritage_pk ON case_retention_audit_heritage(rah_id) TABLESPACE darts_tblspc; 
+CREATE UNIQUE INDEX case_retention_audit_heritage_pk ON case_retention_audit_heritage(rah_id) TABLESPACE pg_default; 
 ALTER TABLE case_retention_audit_heritage ADD PRIMARY KEY USING INDEX case_retention_audit_heritage_pk;
 
-CREATE UNIQUE INDEX retention_policy_type_heritage_mapping_pk ON retention_policy_type_heritage_mapping(rhm_id) TABLESPACE darts_tblspc; 
+CREATE UNIQUE INDEX retention_policy_type_heritage_mapping_pk ON retention_policy_type_heritage_mapping(rhm_id) TABLESPACE pg_default; 
 ALTER TABLE retention_policy_type_heritage_mapping ADD PRIMARY KEY USING INDEX retention_policy_type_heritage_mapping_pk;
 
 CREATE SEQUENCE cmr_seq CACHE 20;
