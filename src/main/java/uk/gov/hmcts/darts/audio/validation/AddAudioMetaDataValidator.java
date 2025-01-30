@@ -9,8 +9,10 @@ import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -21,8 +23,8 @@ import java.time.OffsetDateTime;
 public class AddAudioMetaDataValidator implements Validator<AddAudioMetadataRequest> {
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;
-
     private final AudioConfigurationProperties properties;
+    private final AudioLoggerService audioLoggerService;
 
     @Value("${darts.audio.max-file-duration}")
     private Duration maxAllowableAudioDuration;
@@ -34,8 +36,14 @@ public class AddAudioMetaDataValidator implements Validator<AddAudioMetadataRequ
     public void validate(AddAudioMetadataRequest addAudioMetadataRequest) {
 
         // attempt to resolve the court house
-        retrieveCoreObjectService.retrieveCourthouse(addAudioMetadataRequest.getCourthouse());
-
+        try {
+            retrieveCoreObjectService.retrieveCourthouse(addAudioMetadataRequest.getCourthouse());
+        } catch (DartsApiException e) {
+            if (CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.equals(e.getError())) {
+                audioLoggerService.missingCourthouse(addAudioMetadataRequest.getCourthouse(), addAudioMetadataRequest.getCourtroom());
+            }
+            throw e;
+        }
         log.debug("Validated the court house {} exists", addAudioMetadataRequest.getCourthouse());
 
         boolean isMediaFormatValid = properties.getAllowedMediaFormats().contains(addAudioMetadataRequest.getFormat());
