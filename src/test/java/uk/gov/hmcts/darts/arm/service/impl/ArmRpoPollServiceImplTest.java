@@ -49,6 +49,7 @@ import static org.mockito.Mockito.when;
 class ArmRpoPollServiceImplTest {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    private static final int BATCH_SIZE = 10;
 
     @Mock
     private ArmRpoApi armRpoApi;
@@ -80,7 +81,6 @@ class ArmRpoPollServiceImplTest {
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
-    private int batchSize = 10;
 
     private ArmRpoPollServiceImpl armRpoPollService;
 
@@ -123,7 +123,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -167,7 +167,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(true, batchSize);
+        armRpoPollService.pollArmRpo(true, BATCH_SIZE);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -211,7 +211,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -255,7 +255,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -299,7 +299,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(true, batchSize);
+        armRpoPollService.pollArmRpo(true, BATCH_SIZE);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -343,7 +343,7 @@ class ArmRpoPollServiceImplTest {
         when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
-        armRpoPollService.pollArmRpo(true, batchSize);
+        armRpoPollService.pollArmRpo(true, BATCH_SIZE);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
@@ -371,7 +371,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -386,7 +386,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
 
         // when
-        armRpoPollService.pollArmRpo(true, batchSize);
+        armRpoPollService.pollArmRpo(true, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -400,7 +400,7 @@ class ArmRpoPollServiceImplTest {
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(null);
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -417,7 +417,7 @@ class ArmRpoPollServiceImplTest {
         when(armApiService.getArmBearerToken()).thenReturn(null);
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -439,7 +439,7 @@ class ArmRpoPollServiceImplTest {
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), anyString(), any(UserAccountEntity.class))).thenReturn(false);
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -463,7 +463,7 @@ class ArmRpoPollServiceImplTest {
             ArmRpoInProgressException.class);
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -489,7 +489,7 @@ class ArmRpoPollServiceImplTest {
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(List.of());
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
@@ -520,7 +520,7 @@ class ArmRpoPollServiceImplTest {
             new ArmRpoException("Test exception"));
 
         // when
-        armRpoPollService.pollArmRpo(false, batchSize);
+        armRpoPollService.pollArmRpo(false, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
