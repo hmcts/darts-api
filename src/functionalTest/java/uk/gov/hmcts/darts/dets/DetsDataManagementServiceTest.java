@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -90,11 +92,8 @@ class DetsDataManagementServiceTest {
 
         String filename = String.format("functional_test_%s", UUID.randomUUID());
         String blobPathAndName = armSubmissionDropZone + filename;
-        try {
-            dataManagementService.copyDetsBlobDataToArm(uuid.toString(), blobPathAndName);
-        } catch (Exception e) {
-            log.error("Unable to copy non existing blob data to ARM", e);
-        }
+        assertThrows(DartsException.class,
+                     () -> dataManagementService.copyDetsBlobDataToArm(uuid.toString(), blobPathAndName));
 
     }
 
