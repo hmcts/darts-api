@@ -9,8 +9,8 @@ import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 
@@ -33,8 +33,6 @@ class ArmRpoReplayServiceImplTest {
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
     private UserIdentity userIdentity;
-    @Mock
-    private CurrentTimeHelper currentTimeHelper;
 
     private ArmRpoReplayServiceImpl armRpoReplayService;
 
@@ -43,8 +41,7 @@ class ArmRpoReplayServiceImplTest {
         armRpoReplayService = new ArmRpoReplayServiceImpl(
             automatedTaskService,
             externalObjectDirectoryRepository,
-            userIdentity,
-            currentTimeHelper
+            userIdentity
         );
     }
 
@@ -78,15 +75,18 @@ class ArmRpoReplayServiceImplTest {
         when(externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
             any(), eq(startTs), eq(endTs), any(), any(Limit.class)
         )).thenReturn(List.of(22, 14));
-        when(userIdentity.getUserAccount()).thenReturn(mock(UserAccountEntity.class));
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        UserAccountEntity userAccountEntity = mock(UserAccountEntity.class);
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         // when
         armRpoReplayService.replayArmRpo(100);
 
         // then
-        verify(externalObjectDirectoryRepository).updateStatus(
-            any(), any(), eq(List.of(22, 14)), any()
+        verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
+            EodHelper.failedArmRawDataStatus(),
+            0,
+            userAccountEntity,
+            List.of(22, 14)
         );
     }
 }

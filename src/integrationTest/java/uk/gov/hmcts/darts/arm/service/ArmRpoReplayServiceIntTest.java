@@ -22,14 +22,14 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PEN
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
 @Slf4j
-public class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
+class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
 
     @MockBean
     private UserIdentity userIdentity;
 
+    private final OffsetDateTime startTs = OffsetDateTime.now().minusMinutes(60);
+    private final OffsetDateTime endTs = OffsetDateTime.now().minusMinutes(10);
     private ArmAutomatedTaskEntity armAutomatedTaskEntity;
-    private OffsetDateTime startTs = OffsetDateTime.now().minusMinutes(60);
-    private OffsetDateTime endTs = OffsetDateTime.now().minusMinutes(10);
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
 
     @Autowired

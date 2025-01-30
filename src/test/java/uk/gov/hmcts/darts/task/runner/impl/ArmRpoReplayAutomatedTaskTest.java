@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmRpoReplayServiceImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
@@ -37,8 +36,6 @@ class ArmRpoReplayAutomatedTaskTest {
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
     private UserIdentity userIdentity;
-    @Mock
-    private CurrentTimeHelper currentTimeHelper;
 
     private static EodHelperMocks eodHelperMocks;
 
@@ -52,8 +49,7 @@ class ArmRpoReplayAutomatedTaskTest {
         ArmRpoReplayServiceImpl armRpoReplayService = new ArmRpoReplayServiceImpl(
             automatedTaskService,
             externalObjectDirectoryRepository,
-            userIdentity,
-            currentTimeHelper
+            userIdentity
         );
 
         AutomatedTaskRepository automatedTaskRepository = mock(AutomatedTaskRepository.class);
@@ -87,8 +83,6 @@ class ArmRpoReplayAutomatedTaskTest {
         OffsetDateTime endTs = OffsetDateTime.now().plusHours(10);
         when(armAutomatedTaskEntity.getArmReplayStartTs()).thenReturn(startTs);
         when(armAutomatedTaskEntity.getArmReplayEndTs()).thenReturn(endTs);
-        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
         when(automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME))
             .thenReturn(armAutomatedTaskEntity);
@@ -111,11 +105,11 @@ class ArmRpoReplayAutomatedTaskTest {
         verify(armAutomatedTaskEntity).getArmReplayStartTs();
         verify(armAutomatedTaskEntity).getArmReplayEndTs();
         verify(userIdentity).getUserAccount();
-        verify(externalObjectDirectoryRepository).updateStatus(
+        verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
             EodHelper.failedArmRawDataStatus(),
+            0,
             userAccount,
-            List.of(22, 14),
-            testTime
+            List.of(22, 14)
         );
     }
 }

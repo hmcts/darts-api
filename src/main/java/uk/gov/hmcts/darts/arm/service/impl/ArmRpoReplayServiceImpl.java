@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.service.ArmRpoReplayService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
@@ -23,16 +22,13 @@ public class ArmRpoReplayServiceImpl implements ArmRpoReplayService {
     private final AutomatedTaskService automatedTaskService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final UserIdentity userIdentity;
-    private final CurrentTimeHelper currentTimeHelper;
 
     public ArmRpoReplayServiceImpl(@Lazy AutomatedTaskService automatedTaskService,
                                    ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                   UserIdentity userIdentity,
-                                   CurrentTimeHelper currentTimeHelper) {
+                                   UserIdentity userIdentity) {
         this.automatedTaskService = automatedTaskService;
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.userIdentity = userIdentity;
-        this.currentTimeHelper = currentTimeHelper;
     }
 
     @Transactional
