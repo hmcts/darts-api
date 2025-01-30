@@ -1,0 +1,154 @@
+{
+  "document_id": {
+    "document_name": "DailyList_457_20210219174938.xml",
+    "unique_id": "CSDDL1613756980160",
+    "document_type": "DL",
+    "time_stamp": "2021-02-19T17:49:38.391+01:00"
+  },
+  "list_header": {
+    "list_category": "Criminal",
+    "start_date": "2021-02-23",
+    "end_date": "2021-02-23",
+    "version": "NOT VERSIONED",
+    "published_time": "2021-02-19T17:49:38.767+01:00"
+  },
+  "crown_court": {
+    "court_house_type": "Crown Court",
+    "court_house_code": {
+      "court_house_short_name": "SWANS",
+      "code": 457
+    },
+    "court_house_name": "${COURTHOUSE}"
+  },
+  "court_lists": [
+    {
+      "court_house": {
+        "court_house_type": "Crown Court",
+        "court_house_code": {
+          "court_house_short_name": "SWANS",
+          "code": 457
+        },
+        "court_house_name": "${COURTHOUSE}"
+      },
+      "sittings": [
+        {
+          "court_room_number": "1A",
+          "sitting_sequence_no": 1,
+          "sitting_at": "09:00:00",
+          "sitting_priority": "T",
+          "judiciary": [
+            {
+              "citizen_name_forename": "",
+              "citizen_name_surname": "JudgeName CPP",
+              "citizen_name_requested_name": "JudgeName CPP"
+            }
+          ],
+          "hearings": [
+            {
+              "hearing_sequence_number": 1,
+              "hearing_details": {
+                "hearing_type": "PTR",
+                "hearing_description": "For Pre-Trial Review",
+                "hearing_date": "todays_date"
+              },
+              "time_marking_note": "NOT BEFORE 11:00 AM",
+              "prosecution": {
+                "prosecuting_authority": "Crown Prosecution Service",
+                "prosecuting_reference": "Crown Prosecution Service",
+                "prosecuting_organisation": {
+                  "organisation_name": "Crown Prosecution Service"
+                },
+                "advocates": [
+                  {
+                    "name": {
+                      "citizen_name_forename": "",
+                      "citizen_name_surname": "ProsecutorName CPP  ",
+                      "citizen_name_requested_name": ""
+                    }
+                  },
+                  {
+                    "name": {
+                      "citizen_name_forename": "",
+                      "citizen_name_surname": "  ProsecutorName CPP",
+                      "citizen_name_requested_name": ""
+                    }
+                  }
+                ]
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "",
+                      "citizen_name_surname": "DefendantName CPP  ",
+                      "citizen_name_requested_name": ""
+                    },
+                    "is_masked": "false"
+                  },
+                  "urn": "42GD2391421",
+                  "charges": [
+                    {
+                      "indictment_count_number": 1,
+                      "cjsoffence_code": "CA03014",
+                      "offence_statement": "Fail    / refuse give assistance to person executing Communications Act search warrant"
+                    }
+                  ],
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "",
+                        "citizen_name_surname": "  DefenceName CPP",
+                        "citizen_name_requested_name": ""
+                      }
+                    },
+                    {
+                      "name": {
+                        "citizen_name_forename": "",
+                        "citizen_name_surname": "DefenceName CPP  ",
+                        "citizen_name_requested_name": ""
+                      }
+                    }
+                  ]
+                },
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "",
+                      "citizen_name_surname": " DefendantName CPP ",
+                      "citizen_name_requested_name": ""
+                    },
+                    "is_masked": "false"
+                  },
+                  "urn": "42GD2391421",
+                  "charges": [
+                    {
+                      "indictment_count_number": 1,
+                      "cjsoffence_code": "CA03014",
+                      "offence_statement": "Fail    / refuse give assistance to person executing Communications Act search warrant"
+                    }
+                  ],
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "",
+                        "citizen_name_surname": "  DefenceName CPP",
+                        "citizen_name_requested_name": ""
+                      }
+                    },
+                    {
+                      "name": {
+                        "citizen_name_forename": "",
+                        "citizen_name_surname": "DefenceName CPP  ",
+                        "citizen_name_requested_name": ""
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

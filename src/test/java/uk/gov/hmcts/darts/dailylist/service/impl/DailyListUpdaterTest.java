@@ -33,7 +33,6 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.dailylist.mapper.CitizenNameMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.util.CitizenNameComparator;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
 import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapper;
 import uk.gov.hmcts.darts.task.runner.dailylist.schemas.courtservice.DailyListStructure;
@@ -79,9 +78,6 @@ class DailyListUpdaterTest {
     @Mock
     private CitizenNameMapper citizenNameMapper;
     @Mock
-    private CitizenNameComparator citizenNameComparator;
-
-    @Mock
     private DetsApiService detsApiService;
     @Mock
     private XmlParser xmlParser;
@@ -100,8 +96,7 @@ class DailyListUpdaterTest {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         dailyListUpdater = spy(new DailyListUpdater(retrieveCoreObjectService, createCoreObjectService, courthouseRepository,
                                                     hearingRepository, objectMapper, systemUserHelper,
-                                                    currentTimeHelper, citizenNameMapper, citizenNameComparator,
-                                                    detsApiService, xmlParser, dailyListRequestMapper));
+                                                    currentTimeHelper, citizenNameMapper, detsApiService, xmlParser, dailyListRequestMapper));
     }
 
     @Test
