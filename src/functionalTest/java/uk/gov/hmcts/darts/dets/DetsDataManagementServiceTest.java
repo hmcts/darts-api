@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.dets;
 
 import com.azure.core.util.BinaryData;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles({"dev", "h2db"})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class DetsDataManagementServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
@@ -75,6 +77,24 @@ class DetsDataManagementServiceTest {
 
         dataManagementService.copyDetsBlobDataToArm(uuid.toString(), blobPathAndName);
 
+        boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
+
+        armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        assertTrue(deleted, "Failed to delete DETS blob " + uuid);
+
+    }
+
+    @Test
+    void copyNonExistingDetsBlobDataToArm() throws AzureDeleteBlobException {
+        var uuid = UUID.randomUUID();
+
+        String filename = String.format("functional_test_%s", UUID.randomUUID());
+        String blobPathAndName = armSubmissionDropZone + filename;
+        try {
+            dataManagementService.copyDetsBlobDataToArm(uuid.toString(), blobPathAndName);
+        } catch (Exception e) {
+            log.error("Unable to copy non existing blob data to ARM", e);
+        }
         boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
 
         armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
