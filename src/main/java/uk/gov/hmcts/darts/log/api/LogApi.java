@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public interface LogApi {
@@ -73,4 +74,7 @@ public interface LogApi {
     void armRpoPollingSuccessful(Integer executionId);
 
     void armRpoPollingFailed(Integer executionId);
+
+    void addAudioSmallFileWithLongDuration(String courthouse, String courtroom, OffsetDateTime startDate, OffsetDateTime finishDate,
+                                           Integer medId, Long fileSize);
 }

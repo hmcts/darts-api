@@ -61,6 +61,20 @@ class AudioLoggerServiceImplTest {
         assertThat(logCaptor.getInfoLogs()).containsExactly(expectedLogEntry);
     }
 
+    @Test
+    void addAudioSmallFileWithLongDuration_logsCorrectData() {
+        audioLoggerService.addAudioSmallFileWithLongDuration(SOME_COURTHOUSE, SOME_COURTROOM, STARTED_AT, ENDED_AT, 123, 1024L);
+
+        var expectedLogEntry = format("Audio file size problem: courthouse=%s, courtroom=%s, started_at=%s, ended_at=%s, med_id=%s file_size=%s",
+                                      SOME_COURTHOUSE.toUpperCase(Locale.ROOT),
+                                      SOME_COURTROOM.toUpperCase(Locale.ROOT),
+                                      "2021-01-01T01:00:00Z",
+                                      "2021-01-01T02:00:00Z",
+                                      "123",
+                                      "1024");
+        assertThat(logCaptor.getWarnLogs()).containsExactly(expectedLogEntry);
+    }
+
     private AddAudioMetadataRequest someAddAudioMetadataRequest() {
         var addAudioMetadataRequest = new AddAudioMetadataRequest();
         addAudioMetadataRequest.setCourthouse(SOME_COURTHOUSE);

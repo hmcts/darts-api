@@ -15,4 +15,8 @@ public final class DurationUtil {
             true,
             true);
     }
+
+    public static boolean greaterThan(Duration duration1, Duration duration2) {
+        return duration1.compareTo(duration2) > 0;
+    }
 }
