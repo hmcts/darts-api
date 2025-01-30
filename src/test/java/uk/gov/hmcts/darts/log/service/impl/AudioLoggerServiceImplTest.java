@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
+import uk.gov.hmcts.darts.util.TestClock;
 
-import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Locale;
 
@@ -45,7 +45,7 @@ class AudioLoggerServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        audioLoggerService = new AudioLoggerServiceImpl(Clock.fixed(STARTED_AT.toInstant(), STARTED_AT.toZonedDateTime().getZone()));
+        audioLoggerService = new AudioLoggerServiceImpl(new TestClock(STARTED_AT));
     }
 
     @Test
