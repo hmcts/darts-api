@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
@@ -104,20 +105,31 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     }
 
     @Override
-    public void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles,
-                                       int batchSize) {
+    public void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles, int batchSize) {
         ObjectRecordStatusEntity armRpoPending = EodHelper.armRpoPendingStatus();
         StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO CSV Reconciliation: ");
 
         ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTask_taskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
             .orElseThrow(() -> new ArmRpoException(errorMessage.append("Automated task ProcessE2EArmRpoPending not found.").toString()));
 
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findByStatusAndIngestionDate(
-            armRpoPending,
-            armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
-            armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()));
-
         List<Integer> csvEodList = getEodsListFromCsvFiles(csvFiles, errorMessage);
+
+        // get all EODs that are in the pending state and within the time window in batches until no more are found
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
+        int offset = 0;
+        List<ExternalObjectDirectoryEntity> batch;
+
+        do {
+            batch = externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(
+                armRpoPending,
+                armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
+                armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()),
+                Pageable.ofSize(batchSize).withPage(offset)
+            );
+            externalObjectDirectoryEntities.addAll(batch);
+            offset += batchSize;
+        } while (!batch.isEmpty());
 
         externalObjectDirectoryEntities.forEach(
             externalObjectDirectoryEntity -> {

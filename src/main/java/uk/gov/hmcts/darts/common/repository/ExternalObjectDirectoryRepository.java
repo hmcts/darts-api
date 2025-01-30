@@ -656,9 +656,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
-    List<ExternalObjectDirectoryEntity> findByStatusAndIngestionDate(ObjectRecordStatusEntity status,
-                                                                     OffsetDateTime rpoCsvStartTime,
-                                                                     OffsetDateTime rpoCsvEndTime);
+    List<ExternalObjectDirectoryEntity> findByStatusAndIngestionDateTsWithPaging(ObjectRecordStatusEntity status,
+                                                                                 OffsetDateTime rpoCsvStartTime,
+                                                                                 OffsetDateTime rpoCsvEndTime,
+                                                                                 Pageable pageable);
 
     @Query("""
         SELECT eod FROM ExternalObjectDirectoryEntity eod
