@@ -14,6 +14,8 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
 
+import java.time.OffsetDateTime;
+
 @Entity
 @Table(name = "arm_rpo_execution_detail")
 @Getter
@@ -58,5 +60,11 @@ public class ArmRpoExecutionDetailEntity extends MandatoryCreatedModifiedBaseEnt
 
     @Column(name = "search_item_count")
     private Integer searchItemCount;
+
+    @Column(name = "polling_created_ts")
+    private OffsetDateTime pollingCreatedAt;
+
+    @Column(name = "production_name")
+    private String productionName;
 
 }
