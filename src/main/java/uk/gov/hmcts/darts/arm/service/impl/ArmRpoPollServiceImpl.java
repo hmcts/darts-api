@@ -113,7 +113,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     boolean skipSteps(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         if (nonNull(armRpoExecutionDetailEntity.getArmRpoState())) {
-            return GET_EXTENDED_PRODUCTIONS_BY_MATTER.getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId());
+            return (GET_EXTENDED_PRODUCTIONS_BY_MATTER.getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
+                && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId()));
         }
         return false;
     }
@@ -147,15 +148,17 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                                         UserAccountEntity userAccount) throws IOException {
         String productionExportFilename = generateTempProductionExportFilename(productionExportFileId);
         // step to call ARM RPO API to download the production export file
-        var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount);
-        log.info("About to save production export file to temp workspace {}", productionExportFilename);
-        Path tempProductionFile = fileOperationService.saveFileToTempWorkspace(
-            inputStream,
-            productionExportFilename,
-            armDataManagementConfiguration,
-            true
-        );
-        tempProductionFiles.add(tempProductionFile.toFile());
+        try (var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount)) {
+            log.info("About to save production export file to temp workspace {}", productionExportFilename);
+            Path tempProductionFile = fileOperationService.saveFileToTempWorkspace(
+                inputStream,
+                productionExportFilename,
+                armDataManagementConfiguration,
+                true
+            );
+            tempProductionFiles.add(tempProductionFile.toFile());
+        }
+
     }
 
     private void setupFailedStatuses() {
