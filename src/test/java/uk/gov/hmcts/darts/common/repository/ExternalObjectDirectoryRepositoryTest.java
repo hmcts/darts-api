@@ -82,10 +82,16 @@ class ExternalObjectDirectoryRepositoryTest {
 
     @Test
     void findEodsNotInOtherStorage_mediaItemsArelessThanLimit_shouldReturnBothMediaAndNonMedia() {
+        final int mediaEod1Id = 1;
+        final int mediaEod2Id = 2;
+        final int nonMediaEod1Id = 3;
+        final int statusId = 4;
+        final int typeId = 5;
+        final int notExistsTypeId = 6;
+        final int limitRecords = 5;
+        final int numberOfMediaEods = 2;
+
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        int mediaEod1Id = 1;
-        int mediaEod2Id = 2;
-        int nonMediaEod1Id = 3;
         doReturn(List.of(mediaEod1Id, mediaEod2Id))
             .when(externalObjectDirectoryRepository)
             .findEodsNotInOtherStorageOnlyMedia(any(), any(), any(), any());
@@ -93,50 +99,55 @@ class ExternalObjectDirectoryRepositoryTest {
             .when(externalObjectDirectoryRepository)
             .findEodsNotInOtherStorageExcludingMedia(any(), any(), any(), any());
 
+
         ObjectRecordStatusEntity status = mock(ObjectRecordStatusEntity.class);
-        when(status.getId()).thenReturn(1);
+        when(status.getId()).thenReturn(statusId);
         ExternalLocationTypeEntity type = mock(ExternalLocationTypeEntity.class);
-        when(type.getId()).thenReturn(2);
+        when(type.getId()).thenReturn(typeId);
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
-        when(notExistsType.getId()).thenReturn(3);
+        when(notExistsType.getId()).thenReturn(notExistsTypeId);
 
         List<Integer> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            status, type, notExistsType, 5);
+            status, type, notExistsType, limitRecords);
 
         assertThat(eods)
             .hasSize(3)
             .containsExactlyInAnyOrder(mediaEod1Id, mediaEod2Id, nonMediaEod1Id);
 
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageOnlyMedia(1, 2, 3, 5);
+            .findEodsNotInOtherStorageOnlyMedia(statusId, typeId, notExistsTypeId, limitRecords);
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageExcludingMedia(1, 2, 3, 3);
+            .findEodsNotInOtherStorageExcludingMedia(statusId, typeId, notExistsTypeId, limitRecords - numberOfMediaEods);
     }
 
     @Test
     void findEodsNotInOtherStorage_mediaItemsAreEqualToLimit_shouldReturnOnlyMedia() {
+        final int mediaEod1Id = 1;
+        final int mediaEod2Id = 2;
+        final int statusId = 4;
+        final int typeId = 5;
+        final int notExistsTypeId = 6;
+        final int limitRecords = 2;
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        int mediaEod1Id = 1;
-        int mediaEod2Id = 2;
         doReturn(List.of(mediaEod1Id, mediaEod2Id))
             .when(externalObjectDirectoryRepository)
             .findEodsNotInOtherStorageOnlyMedia(any(), any(), any(), any());
         ObjectRecordStatusEntity status = mock(ObjectRecordStatusEntity.class);
-        when(status.getId()).thenReturn(1);
+        when(status.getId()).thenReturn(statusId);
         ExternalLocationTypeEntity type = mock(ExternalLocationTypeEntity.class);
-        when(type.getId()).thenReturn(2);
+        when(type.getId()).thenReturn(typeId);
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
-        when(notExistsType.getId()).thenReturn(3);
+        when(notExistsType.getId()).thenReturn(notExistsTypeId);
 
         List<Integer> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            status, type, notExistsType, 2);
+            status, type, notExistsType, limitRecords);
 
         assertThat(eods)
             .hasSize(2)
             .containsExactlyInAnyOrder(mediaEod1Id, mediaEod2Id);
 
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageOnlyMedia(1, 2, 3, 2);
+            .findEodsNotInOtherStorageOnlyMedia(statusId, typeId, notExistsTypeId, limitRecords);
         verify(externalObjectDirectoryRepository, never())
             .findEodsNotInOtherStorageExcludingMedia(any(), any(), any(), any());
     }
