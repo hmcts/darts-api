@@ -24,7 +24,6 @@ import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
@@ -80,10 +79,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 .toList();
 
             try {
-                AsyncUtil.invokeAllAwaitTermination(tasks,
-                                                    unstructuredToArmProcessorConfiguration.getThreads(),
-                                                    unstructuredToArmProcessorConfiguration.getAsyncTimeout().getSeconds(),
-                                                    TimeUnit.SECONDS);
+                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
             } catch (Exception e) {
                 log.error("Unstructured to arm batch unexpected exception", e);
                 if (e instanceof InterruptedException) {

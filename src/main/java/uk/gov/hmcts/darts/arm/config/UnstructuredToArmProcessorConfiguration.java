@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
+import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 
 import java.time.Duration;
 
@@ -13,7 +14,7 @@ import java.time.Duration;
 @Getter
 @Setter
 @Configuration
-public class UnstructuredToArmProcessorConfiguration {
+public class UnstructuredToArmProcessorConfiguration implements AsyncTaskConfig {
 
     private int maxArmManifestItems;
     private int maxArmSingleModeItems;
