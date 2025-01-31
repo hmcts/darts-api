@@ -105,6 +105,7 @@ class AdminAutomatedTasksServiceImplTest {
         assertEquals(100, automatedTaskEntity.getBatchSize());
         assertEquals(expectedReturnTask, task);
         verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB, "some-task-name disabled");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Batch size updated");
         verifyNoMoreInteractions(auditApi);
     }
 
@@ -165,6 +166,11 @@ class AdminAutomatedTasksServiceImplTest {
 
 
         verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB, "some-task-name disabled");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Batch size updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Arm reply start ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Arm reply end ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv start hour updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv end hour updated");
         verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
         verify(automatedTaskRepository).save(automatedTaskEntity);
         verifyNoMoreInteractions(auditApi);
@@ -202,7 +208,9 @@ class AdminAutomatedTasksServiceImplTest {
 
         verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
         verify(automatedTaskRepository).save(automatedTaskEntity);
-        verifyNoInteractions(auditApi);
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Arm reply start ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv start hour updated");
+        verifyNoMoreInteractions(auditApi);
     }
 
     @Test
@@ -286,7 +294,7 @@ class AdminAutomatedTasksServiceImplTest {
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> adminAutomatedTaskService.getAutomatedTaskById(1234));
-        assertEquals(exception.getError(), AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND);
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND, exception.getError());
     }
 
     @Test
@@ -295,7 +303,7 @@ class AdminAutomatedTasksServiceImplTest {
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> adminAutomatedTaskService.runAutomatedTask(1234));
-        assertEquals(exception.getError(), AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND);
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND, exception.getError());
     }
 
     @Test
@@ -305,7 +313,18 @@ class AdminAutomatedTasksServiceImplTest {
 
         DartsApiException exception = assertThrows(
             DartsApiException.class, () -> adminAutomatedTaskService.updateAutomatedTask(1234, new AutomatedTaskPatch()));
-        assertEquals(exception.getError(), AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND);
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND, exception.getError());
+    }
+
+
+    @Test
+    void registerAudit_usingStandardData_shouldSaveAudit() {
+        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion", false);
+
+        adminAutomatedTaskService
+            .registerConfiguredAutomatedTaskAudit(automatedTaskEntity, "Some additional info");
+
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Some additional info");
     }
 
 

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -110,6 +111,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         if (automatedTaskPatch.getBatchSize() != null) {
             automatedTask.setBatchSize(automatedTaskPatch.getBatchSize());
+            registerConfiguredAutomatedTaskAudit(automatedTask, "Batch size updated");
             log.info("Batch size for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getBatchSize());
         }
 
@@ -120,6 +122,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
                 if (!automatedTaskPatch.getArmReplayStartTs().equals(armAutomatedTaskEntity.getArmReplayStartTs())) {
                     armAutomatedTaskEntity.setArmReplayStartTs(automatedTaskPatch.getArmReplayStartTs());
+                    registerConfiguredAutomatedTaskAudit(automatedTask, "Arm reply start ts updated");
                     log.info("ARM replay start timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayStartTs());
                 }
             });
@@ -129,6 +132,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
                 if (!automatedTaskPatch.getArmReplayEndTs().equals(armAutomatedTaskEntity.getArmReplayEndTs())) {
                     armAutomatedTaskEntity.setArmReplayEndTs(automatedTaskPatch.getArmReplayEndTs());
+                    registerConfiguredAutomatedTaskAudit(automatedTask, "Arm reply end ts updated");
                     log.info("ARM replay end timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayEndTs());
                 }
             });
@@ -138,6 +142,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
                 if (!automatedTaskPatch.getRpoCsvStartHour().equals(armAutomatedTaskEntity.getRpoCsvStartHour())) {
                     armAutomatedTaskEntity.setRpoCsvStartHour(automatedTaskPatch.getRpoCsvStartHour());
+                    registerConfiguredAutomatedTaskAudit(automatedTask, "Rpo Csv start hour updated");
                     log.info("RPO CSV start hour for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getRpoCsvStartHour());
                 }
             });
@@ -147,6 +152,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
                 if (!automatedTaskPatch.getRpoCsvEndHour().equals(armAutomatedTaskEntity.getRpoCsvEndHour())) {
                     armAutomatedTaskEntity.setRpoCsvEndHour(automatedTaskPatch.getRpoCsvEndHour());
+                    registerConfiguredAutomatedTaskAudit(automatedTask, "Rpo Csv end hour updated");
                     log.info("RPO CSV end hour for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getRpoCsvEndHour());
                 }
             });
@@ -183,5 +189,12 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AUTOMATED_TASK_NOT_FOUND);
         }
         return maybeAutomatedTask.get();
+    }
+
+    void registerConfiguredAutomatedTaskAudit(AutomatedTaskEntity automatedTaskEntity, String additionalData) {
+        auditApi.record(
+            AuditActivity.CONFIGURED_AUTOMATED_TASK,
+            "Task: " + automatedTaskEntity.getId() + " - " + additionalData
+        );
     }
 }
