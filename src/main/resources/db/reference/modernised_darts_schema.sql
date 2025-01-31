@@ -329,14 +329,23 @@
 --    to user_account
 --    add subcontent_object_id and subcontent_position to annotation_document,
 --    daily_list,media,transcription_document
---
 --    add courthouse_object_id and folder_path to courthouse
 --    reinstate numeric user_state to user_account
 --    amend user_account.user_full_name to not null
 --    add table transcription_linked_case, as per event_linked_case
 --    add extobjdir_process_detail as 1:1 with external_object_directory ( c.f.case_overflow )
 --    remove user_name from user_account
-
+--v72.3 add rpt_id to case_overflow
+--    add numerous columns to extobjdir_process_detail
+--    move case_overflow to retention script
+--    add c_current_state and r_current_state to transcription
+--v72.4 add FKs to extobjdir_process_detail
+--    add polling_created_ts to arm_rpo_execution_detail
+--    add data_ticket to media, transcription_document, daily_list,annotation_document, object_retrieval_queue
+--    reinstate user_name to user_account
+--    remove folder_path from event,media & transcription
+--    add production_name to arm_rpo_execution_detail
+--    add is_dets to external_object_directory
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -425,6 +434,9 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 --GRANT ALL ON TABLESPACE darts_tables TO darts_owner;
 --GRANT ALL ON TABLESPACE darts_indexes TO darts_owner;
 
+--CREATE TABLESPACE pg_default  location 'E:/PostgreSQL/DARTS';
+--GRANT ALL ON TABLESPACE pg_default TO darts_owner;
+
 SET ROLE DARTS_OWNER;
 
 SET SEARCH_PATH TO darts;
@@ -467,6 +479,7 @@ CREATE TABLE annotation_document
 ,subcontent_object_id        CHARACTER VARYING(16)
 ,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
+,data_ticket                 INTEGER
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
@@ -518,6 +531,8 @@ CREATE TABLE arm_rpo_execution_detail
 ,production_id               CHARACTER VARYING
 ,sorting_field               CHARACTER VARYING
 ,search_item_count           INTEGER
+,polling_created_ts          TIMESTAMP WITH TIME ZONE
+,production_name             CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -698,25 +713,6 @@ IS 'foreign key from case, part of composite natural key and PK';
 COMMENT ON COLUMN case_transcription_ae.tra_id
 IS 'foreign key from transcription, part of composite natural key and PK';
 
-CREATE TABLE case_overflow
-(cas_id                      INTEGER                       NOT NULL
-,case_total_sentence         CHARACTER VARYING
-,retention_event_ts          TIMESTAMP WITH TIME ZONE     
-,case_retention_fixed        CHARACTER VARYING
-,retention_applies_from_ts   TIMESTAMP WITH TIME ZONE
-,end_of_sentence_date_ts     TIMESTAMP WITH TIME ZONE
-,manual_retention_override   INTEGER
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
-,is_standard_policy          BOOLEAN
-,is_permanent_policy         BOOLEAN
-,checked_ts                  TIMESTAMP WITH TIME ZONE
-,corrected_ts                TIMESTAMP WITH TIME ZONE
-,c_closed_pre_live           INTEGER
-,c_case_closed_date_pre_live TIMESTAMP WITH TIME ZONE
-,audio_folder_object_id      CHARACTER VARYING(16)
-,case_object_name            CHARACTER VARYING(255)                  -- to accommodate dm_sysobject_s.object_name
-) TABLESPACE pg_default;
-
 CREATE TABLE court_case
 (cas_id                      INTEGER                       NOT NULL
 ,cth_id                      INTEGER                       NOT NULL
@@ -850,6 +846,7 @@ CREATE TABLE daily_list
 ,subcontent_object_id        CHARACTER VARYING(16)
 ,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING
+,data_ticket                 INTEGER
 ,external_location           UUID
 ,elt_id                      INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -923,7 +920,6 @@ CREATE TABLE event
 ,ctr_id                      INTEGER                       NOT NULL
 ,evh_id                      INTEGER                       NOT NULL  --  based on the content of dm_sysobject.object_name 
 ,event_object_id             CHARACTER VARYING(16)                   -- legacy id of this event
-,folder_path                 CHARACTER VARYING                       -- to accommodate dm_folder_r.r_folder_path
 ,event_id                    INTEGER                       
 ,event_text                  CHARACTER VARYING
 ,event_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1037,6 +1033,7 @@ CREATE TABLE external_object_directory
 ,update_retention            BOOLEAN                       NOT NULL  -- flag to indicate a change that requires retention to be updated has occurred
 ,input_upload_processed_ts   TIMESTAMP WITH TIME ZONE
 ,force_response_cleanup      BOOLEAN
+,is_dets                     BOOLEAN                       NOT NULL DEFAULT false
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1061,14 +1058,23 @@ COMMENT ON COLUMN external_object_directory.ado_id
 IS 'foreign key from annotation_document';
 
 CREATE TABLE extobjdir_process_detail
-(epd_id                      INTEGER                       NOT NULL
-,eod_id                      INTEGER                       NOT NULL          UNIQUE
-,event_date_ts               TIMESTAMP WITH TIME ZONE
-,update_retention            BOOLEAN                       NOT NULL
-,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
-,created_by                  INTEGER                       NOT NULL
-,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+(epd_id                       INTEGER                       NOT NULL
+,eod_id                       INTEGER                       NOT NULL          UNIQUE
+,event_date_ts                TIMESTAMP WITH TIME ZONE
+,update_retention             BOOLEAN                       NOT NULL
+,input_upload_filename        CHARACTER VARYING
+,create_record_filename       CHARACTER VARYING
+,create_record_processed_ts   TIMESTAMP WITH TIME ZONE
+,upload_file_filename         CHARACTER VARYING
+,upload_file_processed_ts     TIMESTAMP WITH TIME ZONE
+,create_rec_inv_filename      CHARACTER VARYING
+,create_rec_inv_processed_ts  TIMESTAMP WITH TIME ZONE
+,upload_file_inv_filename     CHARACTER VARYING
+,upload_file_inv_processed_ts TIMESTAMP WITH TIME ZONE 
+,created_ts                   TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                   INTEGER                       NOT NULL
+,last_modified_ts             TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by             INTEGER                       NOT NULL
 ) TABLESPACE pg_default;
 
 COMMENT ON TABLE extobjdir_process_detail 
@@ -1214,11 +1220,11 @@ CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
 ,media_object_id             CHARACTER VARYING(16)                  -- legacy id of this media
-,folder_path                 CHARACTER VARYING                      -- to accommodate dm_folder_r.r_folder_path
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy id of the content record associated with the external media
 ,subcontent_object_id        CHARACTER VARYING(16)
 ,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
+,data_ticket                 INTEGER
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
 ,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
 ,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1421,6 +1427,7 @@ CREATE TABLE object_retrieval_queue
 ,parent_object_id            CHARACTER VARYING
 ,content_object_id           CHARACTER VARYING
 ,clip_id                     CHARACTER VARYING
+,data_ticket                 INTEGER
 ,acknowledged_ts             TIMESTAMP WITH TIME ZONE
 ,migrated_ts                 TIMESTAMP WITH TIME ZONE
 ,status                      CHARACTER VARYING
@@ -1495,7 +1502,6 @@ CREATE TABLE transcription
 ,trs_id                      INTEGER                                -- to be set according to trigger on transcription_workflow only
 ,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
 ,transcription_object_name   CHARACTER VARYING(255)                 -- to accommodate dm_sysobject_s.object_name
-,folder_path                 CHARACTER VARYING                      -- to accommodate dm_folder_r.r_folder_path
 ,requested_by                INTEGER                                -- 1055 distinct, from <forname><surname> to <AAANNA>
 ,hearing_date                DATE                                   -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
@@ -1509,6 +1515,8 @@ CREATE TABLE transcription
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
+,c_current_state             CHARACTER VARYING                       -- legacy field from moj_transcription
+,r_current_state             INTEGER                                 -- legacy field from dm_sysobject for transcription type
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1586,6 +1594,7 @@ CREATE TABLE transcription_document
 ,subcontent_object_id        CHARACTER VARYING(16)
 ,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
+,data_ticket                 INTEGER
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
@@ -1726,6 +1735,7 @@ CREATE TABLE transient_object_directory
 CREATE TABLE user_account
 (usr_id                      INTEGER                       NOT NULL
 ,dm_user_s_object_id         CHARACTER VARYING(16)
+,user_name                   CHARACTER VARYING                      -- to accommodate legacy data only
 ,user_os_name                CHARACTER VARYING            
 ,user_full_name              CHARACTER VARYING             NOT NULL            
 ,user_email_address          CHARACTER VARYING
@@ -1792,9 +1802,6 @@ ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
 
 CREATE UNIQUE INDEX case_transcription_ae_pk ON case_transcription_ae(cas_id,tra_id) TABLESPACE pg_default;
 ALTER TABLE case_transcription_ae        ADD PRIMARY KEY USING INDEX case_transcription_ae_pk;
-
-CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE pg_default; 
-ALTER TABLE case_overflow              ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
 CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE pg_default; 
 ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
@@ -2104,10 +2111,6 @@ ALTER TABLE case_transcription_ae
 ADD CONSTRAINT case_transcription_ae_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
 
-ALTER TABLE case_overflow                      
-ADD CONSTRAINT case_overflow_court_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
-
 ALTER TABLE court_case                        
 ADD CONSTRAINT court_case_event_handler_fk
 FOREIGN KEY (evh_id) REFERENCES event_handler(evh_id);
@@ -2267,6 +2270,14 @@ FOREIGN KEY (ors_id) REFERENCES object_record_status(ors_id);
 ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_external_location_type_fk
 FOREIGN KEY (elt_id) REFERENCES external_location_type(elt_id);
+
+ALTER TABLE extobjdir_process_detail  
+ADD CONSTRAINT epd_created_by_fk
+FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE extobjdir_process_detail  
+ADD CONSTRAINT epd_last_modified_by_fk
+FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE extobjdir_process_detail  
 ADD CONSTRAINT epd_external_object_directory_fk
@@ -2680,7 +2691,6 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON automated_task TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_document TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_judge_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_transcription_ae TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON case_overflow TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON court_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse_region_ae TO darts_user;

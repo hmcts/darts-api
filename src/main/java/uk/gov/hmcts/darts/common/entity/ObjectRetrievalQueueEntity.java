@@ -55,4 +55,7 @@ public class ObjectRetrievalQueueEntity extends CreatedModifiedBaseEntity {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "data_ticket")
+    private Integer dataTicket;
+
 }

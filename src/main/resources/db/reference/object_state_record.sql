@@ -3,6 +3,8 @@
 --v3    add courthouse_name,cas_id, id_response_cr_file, id_response_uf_file
 --v4    amend osr_uuid from character to bigint
 --v5    amend tablespace to pg_default
+--v6    add revinfo table, as another externally defined object
+--v7    add audit_user to revinfo and FK to user_account
 
 
 CREATE TABLE object_state_record
@@ -12,14 +14,14 @@ CREATE TABLE object_state_record
 ,parent_id                     CHARACTER VARYING --
 ,parent_object_id              CHARACTER VARYING --
 ,content_object_id             CHARACTER VARYING --
-,object_type                   CHARACTER VARYING --
+,object_type                   CHARACTER VARYING --  
 ,id_clip                       CHARACTER VARYING
 ,id_case                       CHARACTER VARYING
 ,courthouse_name               CHARACTER VARYING
 ,cas_id                        INTEGER
 ,date_last_accessed            TIMESTAMP WITH TIME ZONE
 ,relation_id                   CHARACTER VARYING
-,dets_location                 CHARACTER VARYING --
+,dets_location                 CHARACTER VARYING -- 
 ,flag_file_transfer_to_dets    BOOLEAN
 ,date_file_transfer_to_dets    TIMESTAMP WITH TIME ZONE
 ,md5_doc_transfer_to_dets      CHARACTER VARYING
@@ -50,3 +52,14 @@ CREATE TABLE object_state_record
 ,flag_file_retained_in_ods     BOOLEAN
 ,object_status                 CHARACTER VARYING
 ) TABLESPACE pg_default;
+
+CREATE TABLE revinfo
+(rev                           INT4                       NOT NULL
+,revtstmp                      INT8 
+,audit_user                    INTEGER
+,CONSTRAINT revinfo_pkey PRIMARY KEY(rev)
+) TABLESPACE pg_default;
+
+ALTER TABLE revinfo 
+ADD CONSTRAINT revinfo_audit_user_fk
+FOREIGN KEY (audit_user) REFERENCES user_account(usr_id);

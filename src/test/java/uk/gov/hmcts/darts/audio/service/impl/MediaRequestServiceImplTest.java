@@ -347,10 +347,10 @@ class MediaRequestServiceImplTest {
 
         when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
             .thenReturn(List.of(
-                new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(184, 2547, 2750)
+                new AudioRequestBeingProcessedFromArchiveQueryResult(181),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(182),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(183),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(184)
             ));
 
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
