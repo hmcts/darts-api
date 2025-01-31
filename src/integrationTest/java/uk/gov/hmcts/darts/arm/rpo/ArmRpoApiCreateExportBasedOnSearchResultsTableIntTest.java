@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +31,9 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
     @Autowired
     private ArmRpoApi armRpoApi;
+
+    private final Duration pollDuration = Duration.ofHours(4);
+
 
     @Test
     void createExportBasedOnSearchResultsTable_ReturnsTrue() {
@@ -53,7 +57,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
         // when
         boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
-            bearerAuth, armRpoExecutionDetail.getId(), createHeaderColumns(), PRODUCTION_NAME, userAccount);
+            bearerAuth, armRpoExecutionDetail.getId(), createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertTrue(result);
@@ -86,7 +90,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
         // when
         boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
-            bearerAuth, armRpoExecutionDetail.getId(), createHeaderColumns(), PRODUCTION_NAME, userAccount);
+            bearerAuth, armRpoExecutionDetail.getId(), createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertFalse(result);

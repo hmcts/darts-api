@@ -50,6 +50,7 @@ import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - IndexesByMatterIdResponse: {}", indexesByMatterIdResponse);
+
         processIndexesByMatterIdResponse(matterId, userAccount, indexesByMatterIdResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 
@@ -175,7 +176,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - StorageAccountResponse: {}", storageAccountResponse);
+
         processGetStorageAccountsResponse(userAccount, storageAccountResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 
@@ -480,10 +481,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
                                                          List<MasterIndexFieldByRecordClassSchema> headerColumns,
-                                                         String uniqueProductionName, UserAccountEntity userAccount) {
+                                                         String uniqueProductionName, Duration pollDuration,
+                                                         UserAccountEntity userAccount) {
 
         log.debug("createExportBasedOnSearchResultsTable called with executionId: {}, uniqueProductionName: {}", executionId, uniqueProductionName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoExecutionDetailEntity.setPollingCreatedTs(currentTimeHelper.currentOffsetDateTime());
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
@@ -509,7 +512,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
         log.debug("ARM RPO Response - CreateExportBasedOnSearchResultsTable response: {}", baseRpoResponse);
         return processCreateExportBasedOnSearchResultsTableResponse(userAccount, baseRpoResponse, errorMessage,
-                                                                    armRpoExecutionDetailEntity);
+                                                                    armRpoExecutionDetailEntity, pollDuration);
     }
 
     private BaseRpoResponse processCreateExportBasedOnSearchResultsTableResponseFeignException(
@@ -541,7 +544,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private boolean processCreateExportBasedOnSearchResultsTableResponse(UserAccountEntity userAccount,
                                                                          BaseRpoResponse baseRpoResponse,
                                                                          StringBuilder errorMessage,
-                                                                         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+                                                                         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
+                                                                         Duration pollDuration) {
 
         if (isNull(baseRpoResponse) || isNull(baseRpoResponse.getStatus()) || isNull(baseRpoResponse.getIsError())
             || (!baseRpoResponse.getIsError() && isNull(baseRpoResponse.getResponseStatus()))
@@ -575,6 +579,23 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return true;
+    }
+
+    private boolean checkCreateExportBasedOnSearchResultsInProgress(UserAccountEntity userAccount,
+                                                                    BaseRpoResponse baseRpoResponse,
+                                                                    StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
+                                                                    Duration pollDuration) {
+        if (isNull(armRpoExecutionDetailEntity.getPollingCreatedTs())) {
+            log.error("checkCreateExportBasedOnSearchResults is still In-Progress - {}", baseRpoResponse);
+            return false;
+        } else if (Duration.between(armRpoExecutionDetailEntity.getPollingCreatedTs(), currentTimeHelper.currentOffsetDateTime())
+            .compareTo(pollDuration) <= 0) {
+            log.error("The search is still running and cannot export as csv - {}", baseRpoResponse);
+            return false;
+        } else {
+            throw handleFailureAndCreateException(errorMessage.append("Polling can only run for a maximum of ").append(pollDuration).toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
     }
 
     @Override
