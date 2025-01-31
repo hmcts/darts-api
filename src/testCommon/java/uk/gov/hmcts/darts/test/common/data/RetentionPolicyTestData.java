@@ -4,8 +4,6 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 
 import java.time.OffsetDateTime;
 
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
-
 
 public class RetentionPolicyTestData {
 
@@ -20,8 +18,8 @@ public class RetentionPolicyTestData {
         minimalRetentionPolicy.setDuration("some-duration");
         minimalRetentionPolicy.setDisplayName("some-display-name");
         minimalRetentionPolicy.setPolicyStart(OffsetDateTime.now());
-        minimalRetentionPolicy.setCreatedBy(minimalUserAccount());
-        minimalRetentionPolicy.setLastModifiedBy(minimalUserAccount());
+        minimalRetentionPolicy.setCreatedById(0);
+        minimalRetentionPolicy.setLastModifiedById(0);
         minimalRetentionPolicy.setDescription("some-description");
 
         return minimalRetentionPolicy;

@@ -96,6 +96,8 @@ darts:
         system-user-email: dartssystemuser@hmcts.net
       case-expiry-deletion:
         enabled: true
+      process-e2e-arm-rpo-pending:
+        thread-sleep-duration: ${ARM_RPO_THREAD_SLEEP_DURATION:2s}
 logging:
   level:
     root: DEBUG

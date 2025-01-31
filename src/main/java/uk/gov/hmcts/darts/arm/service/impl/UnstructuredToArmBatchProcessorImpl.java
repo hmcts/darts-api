@@ -35,7 +35,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Component
 @RequiredArgsConstructor
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
-    
+
     private final ArchiveRecordService archiveRecordService;
     private final DataStoreToArmHelper unstructuredToArmHelper;
     private final UserIdentity userIdentity;
@@ -80,7 +80,10 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 .toList();
 
             try {
-                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration.getThreads(), 90, TimeUnit.MINUTES);
+                AsyncUtil.invokeAllAwaitTermination(tasks,
+                                                    unstructuredToArmProcessorConfiguration.getThreads(),
+                                                    unstructuredToArmProcessorConfiguration.getAsyncTimeout().getSeconds(),
+                                                    TimeUnit.SECONDS);
             } catch (Exception e) {
                 log.error("Unstructured to arm batch unexpected exception", e);
                 if (e instanceof InterruptedException) {

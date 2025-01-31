@@ -149,8 +149,8 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             metadata.setRetentionConfidenceReason(annotationDocument.getRetConfReason());
         }
 
-        if (nonNull(annotationDocument.getRetConfScore()) && annotationDocument.getRetConfScore() != 0) {
-            metadata.setRetentionConfidenceScore(annotationDocument.getRetConfScore());
+        if (nonNull(annotationDocument.getRetConfScore())) {
+            metadata.setRetentionConfidenceScore(annotationDocument.getRetConfScore().getId());
         }
 
         if (annotationRecordProperties.containsKey(BF_001_KEY)) {

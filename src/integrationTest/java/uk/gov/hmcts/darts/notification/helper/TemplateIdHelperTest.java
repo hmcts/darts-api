@@ -40,13 +40,31 @@ class TemplateIdHelperTest extends IntegrationBase {
     @Test
     void okCourtManagerApproveTranscript() throws TemplateNotFoundException {
         String templateId = templateIdHelper.findTemplateId("court_manager_approve_transcript");
-        assertEquals("a8390fa6-3f18-44c0-b224-f59971a5e20a", templateId);
+        assertEquals("4bf3fbbb-4474-46c9-9f30-499f9083653a", templateId);
     }
 
     @Test
     void okRequestToTranscriber() throws TemplateNotFoundException {
         String templateId = templateIdHelper.findTemplateId("request_to_transcriber");
-        assertEquals("12a70a9c-9bcf-4880-8291-1a5c6a4c4b08", templateId);
+        assertEquals("463e63c5-9521-46c7-a0f0-5c40ad7a2240", templateId);
+    }
+
+    @Test
+    void okRequestTranscriptionAvailable() throws TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("transcription_available");
+        assertEquals("96d3b32c-6a6a-45ae-8c0e-91e9d04d2eb0", templateId);
+    }
+
+    @Test
+    void okRequestTranscriptionRequestApproved() throws TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("transcription_request_approved");
+        assertEquals("2e0a929b-6939-4d26-99d2-01cdb7454065", templateId);
+    }
+
+    @Test
+    void okRequestTranscriptionRequestRejected() throws TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("transcription_request_rejected");
+        assertEquals("9b48d057-5dda-4e36-8727-81a01e3a39ec", templateId);
     }
 
     @Test

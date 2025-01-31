@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
 
 import java.time.OffsetDateTime;
@@ -21,7 +22,8 @@ public class UpdateMetadataRequest {
     @JsonProperty("manifest")
     private Manifest manifest;
 
-    @JsonProperty("itemId")
+    @JsonProperty(value = "itemId", required = true)
+    @NonNull
     private String itemId;
 
     @Data

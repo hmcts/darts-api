@@ -20,6 +20,7 @@ public enum ObjectRecordStatusEnum {
     FAILURE_ARM_INGESTION_FAILED(8),
     AWAITING_VERIFICATION(9),
     MARKED_FOR_DELETION(10),
+    @Deprecated
     DELETED(11),
     ARM_INGESTION(12),
     ARM_DROP_ZONE(13),

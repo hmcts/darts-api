@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -26,7 +27,7 @@ public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity
                                            String checksum, boolean isDeleted,
                                            UserAccountEntity deletedBy, OffsetDateTime deletedTs,
                                            String contentObjectId, boolean isHidden,
-                                           OffsetDateTime retainUntilTs, Integer retConfScore,
+                                           OffsetDateTime retainUntilTs, RetentionConfidenceScoreEnum retConfScore,
                                            String retConfReason,
                                            List<ObjectAdminActionEntity> adminActions,
                                            UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,

@@ -78,6 +78,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     @Getter(AccessLevel.PACKAGE)
     private boolean manualDeletionEnabled;
 
+    @Override
     public AdminMediaResponse getMediasById(Integer id) {
         var mediaEntity = mediaRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
@@ -129,6 +130,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         Set<Integer> uniqueIds = new HashSet<>();
         return responseMediaItemList.stream()
             .filter(item -> uniqueIds.add(item.getId()))
+            .sorted((o1, o2) -> o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()))
             .collect(Collectors.toList());
     }
 

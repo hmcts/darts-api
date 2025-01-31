@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
+import java.util.List;
+
 /**
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
  */
@@ -50,6 +52,7 @@ public class PostgresIntegrationBase {
         ).withDatabaseName("darts")
             .withUsername("darts")
             .withPassword("darts");
+        POSTGRES.setPortBindings(List.of("5433:5432"));
     }
 
     @DynamicPropertySource
@@ -80,6 +83,6 @@ public class PostgresIntegrationBase {
 
 
     protected void anAuthenticatedUserFor(String userEmail) {
-        GivenBuilder.anAuthenticatedUserFor(userEmail);
+        GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }
 }

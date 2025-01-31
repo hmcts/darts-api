@@ -25,12 +25,12 @@ import uk.gov.hmcts.darts.common.repository.ObjectRetrievalQueueRepository;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
@@ -197,43 +197,55 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         throw new FileNotDownloadedException(logBuilder.toString());
     }
 
-    private void processUnstructuredData(
+    void processUnstructuredData(
         DatastoreContainerType datastoreContainerType,
         DownloadResponseMetaData downloadResponseMetaData,
-        ExternalObjectDirectoryEntity eodEntity,
+        ExternalObjectDirectoryEntity eodEntityToUpload,
         ExternalObjectDirectoryEntity eodEntityToDelete) throws IOException {
-        if (datastoreContainerType.equals(DatastoreContainerType.ARM)) {
 
-            String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
-            File targetFile = new File(tempBlobPath);
-            FileUtils.copyInputStreamToFile(downloadResponseMetaData.getResource().getInputStream(), targetFile);
-
-            try (FileBasedDownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData()) {
-                downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
-                downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
-                downloadResponseMetaDataUnstructured.setInputStream(new FileInputStream(targetFile), dataManagementConfiguration);
-                createCopyInUnstructuredDatastore(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
-            }
+        if (!DatastoreContainerType.ARM.equals(datastoreContainerType)) {
+            return;
         }
+
+        File targetFile;
+
+        boolean deleteFileOnCompletion = true;
+        if (downloadResponseMetaData instanceof FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData) {
+            targetFile = fileBasedDownloadResponseMetaData.getFileToBeDownloadedTo();
+            deleteFileOnCompletion = false;
+        } else {
+            String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
+            targetFile = new File(tempBlobPath);
+            FileUtils.copyInputStreamToFile(downloadResponseMetaData.getResource().getInputStream(), targetFile);
+        }
+        createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, deleteFileOnCompletion);
     }
 
-    /*
-    Creates a copy in the unstructured data store for quicker retrieval next time.
+    /**
+     * Creates a copy in the unstructured data store for quicker retrieval next time.
      */
-    private void createCopyInUnstructuredDatastore(
-        DownloadResponseMetaData downloadResponseMetaData,
+    void createCopyInUnstructuredDatastore(
+        ExternalObjectDirectoryEntity eodEntityToUpload,
         ExternalObjectDirectoryEntity eodEntityToDelete,
-        File targetFile) throws IOException {
+        File targetFile,
+        boolean deleteFileOnCompletion) {
 
-        try (InputStream inputStream = new BufferedInputStream(downloadResponseMetaData.getResource().getInputStream())) {
+        try (InputStream inputStream = new FileInputStream(targetFile)) {
             unstructuredDataHelper.createUnstructuredDataFromEod(
                 eodEntityToDelete,
-                downloadResponseMetaData.getEodEntity(),
-                inputStream,
-                targetFile
+                eodEntityToUpload,
+                inputStream
             );
+
+            if (deleteFileOnCompletion) {
+                try {
+                    Files.delete(targetFile.toPath());
+                } catch (IOException e) {
+                    log.error("Unable to delete temporary file {}", targetFile.getPath(), e);
+                }
+            }
         } catch (Exception e) {
-            log.warn("unable to store a copy of EOD {} in the unstructured Datastore.", downloadResponseMetaData.getEodEntity().getId(), e);
+            log.warn("unable to store a copy of EOD {} in the unstructured Datastore.", eodEntityToUpload.getId(), e);
         }
     }
 

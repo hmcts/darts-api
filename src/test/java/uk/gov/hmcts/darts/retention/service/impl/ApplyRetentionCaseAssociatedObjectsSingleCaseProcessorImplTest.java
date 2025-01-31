@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.retention.mapper.CaseRetentionConfidenceReasonMapper;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsSingleCaseProcessor;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
@@ -47,6 +46,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseRetention;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createRetentionPolicyType;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getExternalObjectDirectoryTestData;
 
 @ExtendWith(MockitoExtension.class)
@@ -124,7 +125,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case1PerfectlyClosed.setRetentionUpdated(true);
         case1PerfectlyClosed.setRetentionRetries(1);
         case1PerfectlyClosed.setClosed(true);
-        case1PerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
+        case1PerfectlyClosed.setRetConfScore(CASE_PERFECTLY_CLOSED);
         case1PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case1PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case1PerfectlyClosed, 1, 3);
@@ -133,7 +134,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case2PerfectlyClosed.setRetentionUpdated(true);
         case2PerfectlyClosed.setRetentionRetries(2);
         case2PerfectlyClosed.setClosed(true);
-        case2PerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
+        case2PerfectlyClosed.setRetConfScore(CASE_PERFECTLY_CLOSED);
         case2PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case2PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case2PerfectlyClosed, 1, 1);
@@ -142,7 +143,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case3NotPerfectlyClosed.setRetentionUpdated(true);
         case3NotPerfectlyClosed.setRetentionRetries(1);
         case3NotPerfectlyClosed.setClosed(true);
-        case3NotPerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED);
+        case3NotPerfectlyClosed.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
         case3NotPerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
         case3NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case3NotPerfectlyClosed, 1, 3);
@@ -151,7 +152,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case4NotPerfectlyClosed.setRetentionUpdated(true);
         case4NotPerfectlyClosed.setRetentionRetries(2);
         case4NotPerfectlyClosed.setClosed(true);
-        case4NotPerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED);
+        case4NotPerfectlyClosed.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
         case4NotPerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
         case4NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case4NotPerfectlyClosed, 1, 1);
@@ -160,7 +161,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case5PerfectlyClosed.setRetentionUpdated(true);
         case5PerfectlyClosed.setRetentionRetries(1);
         case5PerfectlyClosed.setClosed(true);
-        case5PerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
+        case5PerfectlyClosed.setRetConfScore(CASE_PERFECTLY_CLOSED);
         case5PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case5PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case5PerfectlyClosed, 1, 1);
@@ -241,13 +242,13 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(0, mediaA1.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaA1.getRetConfScore());
         assertNull(mediaA1.getRetConfReason());
 
-        assertEquals(0, mediaA2.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaA2.getRetConfScore());
         assertNull(mediaA2.getRetConfReason());
 
-        assertEquals(0, mediaB1.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaB1.getRetConfScore());
         assertNull(mediaB1.getRetConfReason());
 
     }
@@ -292,13 +293,13 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(0, mediaA1.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaA1.getRetConfScore());
         assertNull(mediaA1.getRetConfReason());
 
-        assertEquals(0, mediaA2.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaA2.getRetConfScore());
         assertNull(mediaA2.getRetConfReason());
 
-        assertEquals(0, mediaB1.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaB1.getRetConfScore());
         assertNull(mediaB1.getRetConfReason());
 
     }
@@ -334,14 +335,14 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case3NotPerfectlyClosed.getId());
 
         // then
-        assertEquals(1, mediaA1.getRetConfScore());
+        assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaA1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, mediaA1.getRetConfReason());
 
-        assertEquals(1, mediaA2.getRetConfScore());
+        assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaA2.getRetConfScore());
         assertEquals(expectedResult, mediaA2.getRetConfReason());
 
-        assertEquals(1, mediaB1.getRetConfScore());
+        assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaB1.getRetConfScore());
         String expectedResult2 = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"},{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult2, mediaB1.getRetConfReason());
 
@@ -378,11 +379,11 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(0, mediaA1.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaA1.getRetConfScore());
 
-        assertEquals(0, mediaA2.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaA2.getRetConfScore());
 
-        assertEquals(1, mediaB1.getRetConfScore());
+        assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaB1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, mediaB1.getRetConfReason());
 
@@ -423,9 +424,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(0, annotationDocumentA1.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, annotationDocumentA1.getRetConfScore());
 
-        assertEquals(1, annotationDocumentB1.getRetConfScore());
+        assertEquals(CASE_NOT_PERFECTLY_CLOSED, annotationDocumentB1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, annotationDocumentB1.getRetConfReason());
 
@@ -470,9 +471,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(0, transcriptionDocumentA1.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, transcriptionDocumentA1.getRetConfScore());
 
-        assertEquals(1, transcriptionDocumentB1.getRetConfScore());
+        assertEquals(CASE_NOT_PERFECTLY_CLOSED, transcriptionDocumentB1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, transcriptionDocumentB1.getRetConfReason());
 
@@ -497,7 +498,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
 
         // then
-        assertEquals(0, caseDocument.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, caseDocument.getRetConfScore());
         assertNull(caseDocument.getRetConfReason());
 
     }
@@ -524,7 +525,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case4NotPerfectlyClosed.getId());
 
         // then
-        assertEquals(1, caseDocument.getRetConfScore());
+        assertEquals(CASE_NOT_PERFECTLY_CLOSED, caseDocument.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, caseDocument.getRetConfReason());
 

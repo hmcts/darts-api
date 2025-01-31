@@ -5,7 +5,7 @@ import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -42,15 +42,15 @@ abstract class AbstractBatchCleanupArmResponseFilesServiceIntTest extends Integr
 
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
 
-    @MockBean
+    @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
     @Autowired
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @MockBean
+    @MockitoBean
     private ArmBatchCleanupConfiguration batchCleanupConfiguration;
-    @MockBean
+    @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
 
     @Autowired

@@ -19,10 +19,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -43,8 +40,7 @@ public class UnstructuredDataHelper {
     public boolean createUnstructuredDataFromEod(
         ExternalObjectDirectoryEntity eodEntityToDelete,
         ExternalObjectDirectoryEntity eodEntity,
-        InputStream inputStream,
-        File targetFile) {
+        InputStream inputStream) {
         boolean returnVal = true;
         UUID uuid = saveToUnstructuredDataStore(eodEntity, inputStream);
         if (uuid == null) {
@@ -52,11 +48,6 @@ public class UnstructuredDataHelper {
         } else {
             saveToDatabase(eodEntity, uuid);
             removeFromDatabase(eodEntityToDelete);
-        }
-        try {
-            Files.delete(targetFile.toPath());
-        } catch (IOException e) {
-            log.error("Unable to delete temporary file {}", targetFile.getPath(), e);
         }
         return returnVal;
     }

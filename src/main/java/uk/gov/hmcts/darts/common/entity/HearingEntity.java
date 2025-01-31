@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,7 +32,8 @@ import java.util.List;
 @Table(name = "hearing")
 @Getter
 @Setter
-public class HearingEntity extends CreatedModifiedBaseEntity {
+public class HearingEntity extends CreatedModifiedBaseEntity
+    implements HasIntegerId {
 
     public static final String HEA_ID = "hea_id";
     @Id

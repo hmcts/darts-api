@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -13,7 +14,8 @@ import java.util.Optional;
 
 @SuppressWarnings("PMD.MethodNamingConventions")
 @Repository
-public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
+public interface CaseRepository
+    extends JpaRepository<CourtCaseEntity, Integer>, JpaSpecificationExecutor<CourtCaseEntity> {
 
     Optional<CourtCaseEntity> findByCaseNumberAndCourthouse_CourthouseName(String caseNumber,
                                                                            String courthouseName);
@@ -90,4 +92,12 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         and cr.retainUntil < :maxRetentionDate
         """)
     List<Integer> findCaseIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
+
+    @Query("""
+        SELECT cc
+        FROM CourtCaseEntity cc
+        WHERE cc.id in :ids
+        ORDER BY cc.id DESC        
+        """)
+    List<CourtCaseEntity> findAllWithIdMatchingOneOf(List<Integer> ids);
 }

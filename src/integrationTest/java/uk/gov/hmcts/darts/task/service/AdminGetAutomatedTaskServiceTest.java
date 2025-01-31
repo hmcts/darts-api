@@ -50,22 +50,37 @@ class AdminGetAutomatedTaskServiceTest extends IntegrationBase {
     }
 
     private List<Boolean> taskIsActiveOf(List<AutomatedTaskEntity> persistedTasks) {
-        return persistedTasks.stream().map(AutomatedTaskEntity::getTaskEnabled).toList();
+        return persistedTasks.stream()
+            .sorted((task1, task2) -> task1.getTaskName().compareTo(task2.getTaskName()))
+            .map(AutomatedTaskEntity::getTaskEnabled)
+            .toList();
     }
 
     private List<String> cronExpressionsOf(List<AutomatedTaskEntity> persistedTasks) {
-        return persistedTasks.stream().map(AutomatedTaskEntity::getCronExpression).toList();
+        return persistedTasks.stream()
+            .sorted((task1, task2) -> task1.getTaskName().compareTo(task2.getTaskName()))
+            .map(AutomatedTaskEntity::getCronExpression)
+            .toList();
     }
 
     private List<String> taskDescriptionsOf(List<AutomatedTaskEntity> automatedTask) {
-        return automatedTask.stream().map(AutomatedTaskEntity::getTaskDescription).toList();
+        return automatedTask.stream()
+            .sorted((task1, task2) -> task1.getTaskName().compareTo(task2.getTaskName()))
+            .map(AutomatedTaskEntity::getTaskDescription)
+            .toList();
     }
 
     private List<String> taskNamesOf(List<AutomatedTaskEntity> automatedTask) {
-        return automatedTask.stream().map(AutomatedTaskEntity::getTaskName).toList();
+        return automatedTask.stream()
+            .sorted((task1, task2) -> task1.getTaskName().compareTo(task2.getTaskName()))
+            .map(AutomatedTaskEntity::getTaskName)
+            .toList();
     }
 
     private List<Integer> taskIdsOf(List<AutomatedTaskEntity> automatedTask) {
-        return automatedTask.stream().map(AutomatedTaskEntity::getId).toList();
+        return automatedTask.stream()
+            .sorted((task1, task2) -> task1.getTaskName().compareTo(task2.getTaskName()))
+            .map(AutomatedTaskEntity::getId)
+            .toList();
     }
 }

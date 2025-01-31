@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
@@ -49,9 +50,6 @@ public class MediaEntity extends CreatedModifiedBaseEntity
 
     @Column(name = "media_object_id", length = 16)
     private String legacyObjectId;
-
-    @Column(name = "folder_path")
-    private String folderPath;
 
     @Column(name = "channel", nullable = false)
     private Integer channel;
@@ -128,7 +126,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     private List<ObjectAdminActionEntity> adminActionReasons = new ArrayList<>();
 
     @Column(name = "ret_conf_score")
-    private Integer retConfScore;
+    private RetentionConfidenceScoreEnum retConfScore;
 
     @Column(name = "ret_conf_reason")
     private String retConfReason;
@@ -141,6 +139,9 @@ public class MediaEntity extends CreatedModifiedBaseEntity
 
     @Column(name = "subcontent_position")
     private Integer subcontentPosition;
+
+    @Column(name = "data_ticket")
+    private Integer dataTicket;
 
     public List<CourtCaseEntity> associatedCourtCases() {
         var cases = hearingList.stream().map(HearingEntity::getCourtCase);

@@ -413,7 +413,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             eventLinkedCaseStub.createCaseLinkedEvent(event2, caseEntity);
 
             dartsDatabase.createCaseRetentionObject(
-                null, caseEntity,
+                caseEntity,
                 OffsetDateTime.now().plusDays(daysUntilRetention),
                 dartsDatabase.getRetentionPolicyTypeEntity(
                     RetentionPolicyEnum.DEFAULT),
@@ -438,11 +438,11 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private void createMediaForHearing(HearingEntity hearingEntity) {
         MediaEntity mediaEntity = dartsDatabase.getMediaStub().createMediaEntity(hearingEntity.getCourtCase().getCourthouse().getCourthouseName(),
-                                          "1",
-                                           OffsetDateTime.parse("2024-01-01T00:00:00Z"),
-                                           OffsetDateTime.parse("2024-01-01T00:00:00Z"),
-                                           1,
-                                           "MP2");
+                                                                                 "1",
+                                                                                 OffsetDateTime.parse("2024-01-01T00:00:00Z"),
+                                                                                 OffsetDateTime.parse("2024-01-01T00:00:00Z"),
+                                                                                 1,
+                                                                                 "MP2");
         hearingEntity.setMediaList(new ArrayList<>(List.of(mediaEntity)));
         mediaLinkedCaseStub.createCaseLinkedMedia(mediaEntity, hearingEntity.getCourtCase());
         dartsDatabase.getHearingRepository().save(hearingEntity);

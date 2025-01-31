@@ -38,7 +38,7 @@ public class TranscriptionDocumentTestData
         transcriptionDocument.setUploadedDateTime(OffsetDateTime.now());
         transcriptionDocument.setHidden(false);
         transcriptionDocument.setLastModifiedTimestamp(OffsetDateTime.now());
-        transcriptionDocument.setLastModifiedBy(minimalUserAccount());
+        transcriptionDocument.setLastModifiedById(0);
 
         return transcriptionDocument;
     }

@@ -36,8 +36,10 @@ class AudioAuditTest extends IntegrationBase {
     @Test
     void performsStandardAndAdvancedAuditsWhenAudioOwnershipIsChanged() {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        MediaRequestEntity mediaRequest = entityGraphPersistence.persist(getMediaRequestTestData().someMinimalRequestData());
-        UserAccountEntity newOwner = entityGraphPersistence.persist(minimalUserAccount());
+        MediaRequestEntity mediaRequest = getMediaRequestTestData().someMinimalRequestData();
+        dartsDatabase.save(mediaRequest.getHearing());
+        dartsDatabase.save(mediaRequest);
+        UserAccountEntity newOwner = dartsDatabase.save(minimalUserAccount());
 
         mediaRequestService.patchMediaRequest(
             mediaRequest.getId(),
@@ -55,7 +57,9 @@ class AudioAuditTest extends IntegrationBase {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var media = PersistableFactory.getMediaTestData().someMinimalMedia();
         media.setHidden(false);
-        entityGraphPersistence.persist(media);
+        dartsDatabase.save(media.getCourtroom().getCourthouse());
+        dartsDatabase.save(media.getCourtroom());
+        dartsDatabase.save(media);
 
         mediaRequestService.adminHideOrShowMediaById(
             media.getId(),

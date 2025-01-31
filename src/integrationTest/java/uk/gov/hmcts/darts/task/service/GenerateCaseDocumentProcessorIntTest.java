@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.task.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -28,11 +28,11 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
 
-    @SpyBean
+    @MockitoSpyBean
     CaseRepository caseRepository;
-    @SpyBean
+    @MockitoSpyBean
     CaseDocumentRepository caseDocumentRepository;
-    @SpyBean
+    @MockitoSpyBean
     ExternalObjectDirectoryRepository eodRepository;
     @Autowired
     UserAccountRepository userAccountRepository;

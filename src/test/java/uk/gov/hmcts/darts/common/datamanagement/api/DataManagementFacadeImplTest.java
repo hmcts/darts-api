@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,7 +43,9 @@ import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.test.common.FileStore;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -54,15 +57,19 @@ import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.IOUtils.toInputStream;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -600,14 +607,11 @@ class DataManagementFacadeImplTest {
         ExternalObjectDirectoryEntity eodEntityToDelete = createEodEntity(unstructuredLocationEntity);
         eodEntityToDelete.setMedia(mediaEntity);
         BinaryData data = BinaryData.fromString("Test String");
-        String fileLocation = tempDirectory.getAbsolutePath();
-        File targetFile = new File(fileLocation, UUID.randomUUID().toString());
 
         boolean created = unstructuredDataHelperTest.createUnstructuredDataFromEod(
             eodEntityToDelete,
             eodEntity,
-            data.toStream(),
-            targetFile);
+            data.toStream());
 
         assertTrue(created);
     }
@@ -623,14 +627,11 @@ class DataManagementFacadeImplTest {
         ExternalObjectDirectoryEntity eodEntityToDelete = createEodEntity(unstructuredLocationEntity);
         eodEntityToDelete.setMedia(mediaEntity);
         BinaryData data = BinaryData.fromString("Test String");
-        String fileLocation = tempDirectory.getAbsolutePath();
-        File targetFile = new File(fileLocation, UUID.randomUUID().toString());
 
         boolean created = unstructuredDataHelperTest.createUnstructuredDataFromEod(
             eodEntityToDelete,
             eodEntity,
-            data.toStream(),
-            targetFile);
+            data.toStream());
 
         assertFalse(created);
     }
@@ -658,6 +659,106 @@ class DataManagementFacadeImplTest {
 
         downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity);
         assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
+    }
+
+    @Test
+    void createCopyInUnstructuredDatastore_whenDeleteFileOnCompletionIsTrue_shouldDeleteFile() throws IOException {
+        ExternalObjectDirectoryEntity eodEntityToUpload = mock(ExternalObjectDirectoryEntity.class);
+        ExternalObjectDirectoryEntity eodEntityToDelete = mock(ExternalObjectDirectoryEntity.class);
+        UnstructuredDataHelper unstructuredDataHelper = mock(UnstructuredDataHelper.class);
+        File targetFile = Files.createTempFile("test", "txt").toFile();
+
+
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(null, null,
+                                                                               null, null, unstructuredDataHelper,
+                                                                               null, null, null);
+
+        assertThat(targetFile).exists();
+        dmFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, true);
+
+        verify(unstructuredDataHelper).createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(FileInputStream.class));
+        assertThat(targetFile).doesNotExist();
+    }
+
+    @Test
+    void createCopyInUnstructuredDatastore_whenDeleteFileOnCompletionIsFalse_shouldNotDeleteFile() throws IOException {
+        ExternalObjectDirectoryEntity eodEntityToUpload = mock(ExternalObjectDirectoryEntity.class);
+        ExternalObjectDirectoryEntity eodEntityToDelete = mock(ExternalObjectDirectoryEntity.class);
+        UnstructuredDataHelper unstructuredDataHelper = mock(UnstructuredDataHelper.class);
+        File targetFile = Files.createTempFile("test", "txt").toFile();
+
+
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(null, null,
+                                                                               null, null, unstructuredDataHelper,
+                                                                               null, null, null);
+
+        assertThat(targetFile).exists();
+        dmFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, false);
+
+        verify(unstructuredDataHelper).createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(FileInputStream.class));
+        assertThat(targetFile).exists();
+    }
+
+    @Test
+    @SuppressWarnings("PMD.CloseResource") //False positive as resources are mocked
+    void processUnstructuredData_downloadResponseMetaDataIsFileBased_shouldNotCreateSecondTempFile() throws IOException {
+        DatastoreContainerType datastoreContainerType = DatastoreContainerType.ARM;
+        FileBasedDownloadResponseMetaData downloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        ExternalObjectDirectoryEntity eodEntityToUpload = mock(ExternalObjectDirectoryEntity.class);
+        ExternalObjectDirectoryEntity eodEntityToDelete = mock(ExternalObjectDirectoryEntity.class);
+
+        File targetFile = mock(File.class);
+        when(downloadResponseMetaData.getFileToBeDownloadedTo()).thenReturn(targetFile);
+
+
+        final DataManagementFacadeImpl dmFacade = spy(new DataManagementFacadeImpl(null, null,
+                                                                                   null, null, null,
+                                                                                   null, null, null));
+
+        doNothing().when(dmFacade).createCopyInUnstructuredDatastore(any(), any(), any(), anyBoolean());
+
+        dmFacade
+            .processUnstructuredData(datastoreContainerType, downloadResponseMetaData, eodEntityToUpload, eodEntityToDelete);
+
+        verify(downloadResponseMetaData).getFileToBeDownloadedTo();
+        verify(dmFacade).createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, false);
+    }
+
+    @Test
+    @SuppressWarnings("PMD.CloseResource") //False positive as resources are mocked
+    void processUnstructuredData_downloadResponseMetaDataIsNotFileBased_shouldCreateTempFile() throws IOException {
+        DatastoreContainerType datastoreContainerType = DatastoreContainerType.ARM;
+        DownloadResponseMetaData downloadResponseMetaData = mock(DownloadResponseMetaData.class);
+        ExternalObjectDirectoryEntity eodEntityToUpload = mock(ExternalObjectDirectoryEntity.class);
+        ExternalObjectDirectoryEntity eodEntityToDelete = mock(ExternalObjectDirectoryEntity.class);
+
+        Resource resource = mock(Resource.class);
+        when(downloadResponseMetaData.getResource()).thenReturn(resource);
+
+        InputStream stream = new ByteArrayInputStream("Test String".getBytes(UTF_8));
+        when(resource.getInputStream()).thenReturn(stream);
+
+
+        DataManagementConfiguration dataManagementConfiguration = mock(DataManagementConfiguration.class);
+        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("some/temp/workspace");
+        final DataManagementFacadeImpl dmFacade = spy(new DataManagementFacadeImpl(null, null,
+                                                                                   null, null, null,
+                                                                                   dataManagementConfiguration, null, null));
+
+        doNothing().when(dmFacade).createCopyInUnstructuredDatastore(any(), any(), any(), anyBoolean());
+
+        dmFacade
+            .processUnstructuredData(datastoreContainerType, downloadResponseMetaData, eodEntityToUpload, eodEntityToDelete);
+
+        ArgumentCaptor<File> targetFileArgumentCaptor = ArgumentCaptor.forClass(File.class);
+
+        verify(dataManagementConfiguration).getTempBlobWorkspace();
+        verify(downloadResponseMetaData).getResource();
+        verify(resource).getInputStream();
+        verify(dmFacade).createCopyInUnstructuredDatastore(eq(eodEntityToUpload), eq(eodEntityToDelete), targetFileArgumentCaptor.capture(), eq(true));
+
+        File targetFileActual = targetFileArgumentCaptor.getValue();
+        assertThat(targetFileActual.getAbsolutePath()).matches(".*/some/temp/workspace/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
     }
 
     @NotNull

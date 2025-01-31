@@ -244,8 +244,8 @@ public class CaseServiceImpl implements CaseService {
         if (matchingCaseIds.size() > adminSearchMaxResults) {
             throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }
-        List<CourtCaseEntity> matchingCases = caseRepository.findAllById(matchingCaseIds);
-        hearingRepository.findByCaseIds(matchingCaseIds);
+        List<CourtCaseEntity> matchingCases = caseRepository.findAllWithIdMatchingOneOf(matchingCaseIds);
+
         return AdminCasesSearchResponseMapper.mapResponse(matchingCases);
     }
 

@@ -31,6 +31,7 @@ public class AudioAsyncServiceImpl implements AudioAsyncService {
 
     @Async
     @Transactional
+    @Override
     public void linkAudioToHearingByEvent(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia, UserAccountEntity userAccount) {
 
         if (addAudioMetadataRequest.getTotalChannels() == 1

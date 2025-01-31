@@ -6,7 +6,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -50,7 +50,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Test
@@ -156,6 +156,29 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
+
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verifyNoMoreInteractions(userIdentity);
+    }
+
+    @Test
+    void searchByEmailAddress_withMultipleReturnedItems_shouldBeOrderdByFullName() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        dartsDatabaseStub.getUserAccountStub().createUser("user1");
+        dartsDatabaseStub.getUserAccountStub().createUser("user3");
+        dartsDatabaseStub.getUserAccountStub().createUser("user2");
+
+        UserSearch userSearch = new UserSearch();
+        userSearch.setEmailAddress("user");
+
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
+            .andExpect(jsonPath("$[1].full_name").value("user1FullName"))
+            .andExpect(jsonPath("$[2].full_name").value("user2FullName"))
+            .andExpect(jsonPath("$[3].full_name").value("user3FullName"));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);

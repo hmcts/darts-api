@@ -389,7 +389,7 @@ public class TranscriptionResponseMapper {
             .clipId(entity.getClipId())
             .checksum(entity.getChecksum())
             .lastModifiedAt(entity.getLastModifiedTimestamp())
-            .lastModifiedBy(entity.getLastModifiedBy().getId())
+            .lastModifiedBy(entity.getLastModifiedById())
             .adminAction(buildAdminActionForHiddenValue(entity));
     }
 

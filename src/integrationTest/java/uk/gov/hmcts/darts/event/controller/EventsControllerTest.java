@@ -9,10 +9,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -66,13 +66,13 @@ class EventsControllerTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private EventDispatcher eventDispatcher;
 
-    @MockBean
+    @MockitoBean
     private AudioApi audioApi;
 
-    @MockBean
+    @MockitoBean
     private DartsEventMapper dartsEventMapper;
 
     @Autowired
@@ -118,10 +118,11 @@ class EventsControllerTest extends IntegrationBase {
 
         // Given
         // setup an event id
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         LocalDateTime hearingDate = LocalDateTime.of(2020, 6, 6, 20, 0, 0);
         HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", hearingDate);
         EventEntity eventEntity = dartsDatabaseStub.createEvent(hearing);
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
         MockHttpServletRequestBuilder requestBuilder = get("/admin/events/" + eventEntity.getId())
