@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,7 +48,8 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
 
 @Slf4j
-public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedTaskConfig> implements AutomatedTask, AutoloadingAutomatedTask {
+public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedTaskConfig>
+    implements AutomatedTask, AutoloadingAutomatedTask, DisposableBean {
 
     private AutomatedTaskStatus automatedTaskStatus = NOT_STARTED;
 
@@ -301,5 +303,10 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
         void assertLocked() {
             LockAssert.assertLocked();
         }
+    }
+
+    @Override
+    public void destroy() {
+        log.info("Task: {} destroyed", getTaskName());
     }
 }

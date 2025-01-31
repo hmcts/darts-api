@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.util;
 
+import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -7,10 +8,9 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import java.util.List;
 import java.util.Optional;
 
+@UtilityClass
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public final class DataUtil {
-    private DataUtil() {
-
-    }
 
     public static String toUpperCase(String value) {
         return Optional.ofNullable(value).map(String::toUpperCase).orElse(null);
@@ -32,19 +32,19 @@ public final class DataUtil {
     }
 
     public static void preProcess(DartsEvent dartsEvent) {
-        dartsEvent.setCourthouse(DataUtil.toUpperCase(dartsEvent.getCourthouse()));
-        dartsEvent.setCourtroom(DataUtil.toUpperCase(dartsEvent.getCourtroom()));
+        dartsEvent.setCourthouse(toUpperCase(dartsEvent.getCourthouse()));
+        dartsEvent.setCourtroom(toUpperCase(dartsEvent.getCourtroom()));
     }
 
     public static void preProcess(AddCaseRequest addCaseRequest) {
-        addCaseRequest.setCourthouse(DataUtil.toUpperCase(addCaseRequest.getCourthouse()));
-        addCaseRequest.defenders(DataUtil.trim(addCaseRequest.getDefenders()));
-        addCaseRequest.prosecutors(DataUtil.trim(addCaseRequest.getProsecutors()));
-        addCaseRequest.defendants(DataUtil.trim(addCaseRequest.getDefendants()));
+        addCaseRequest.setCourthouse(toUpperCase(addCaseRequest.getCourthouse()));
+        addCaseRequest.defenders(trim(addCaseRequest.getDefenders()));
+        addCaseRequest.prosecutors(trim(addCaseRequest.getProsecutors()));
+        addCaseRequest.defendants(trim(addCaseRequest.getDefendants()));
     }
 
     public static void preProcess(AddAudioMetadataRequest metadata) {
-        metadata.setCourthouse(DataUtil.toUpperCase(metadata.getCourthouse()));
-        metadata.setCourtroom(DataUtil.toUpperCase(metadata.getCourtroom()));
+        metadata.setCourthouse(toUpperCase(metadata.getCourthouse()));
+        metadata.setCourtroom(toUpperCase(metadata.getCourtroom()));
     }
 }

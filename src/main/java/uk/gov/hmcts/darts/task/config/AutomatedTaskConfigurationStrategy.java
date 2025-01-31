@@ -28,4 +28,5 @@ public class AutomatedTaskConfigurationStrategy implements SchedulingConfigurer 
         automatedTaskService.configureAndLoadAutomatedTasks(taskRegistrar);
         log.debug("Automated tasks configured and loaded");
     }
+
 }
