@@ -47,6 +47,10 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity
     @Column(name = "dm_user_s_object_id", length = 16)
     private String dmObjectId;
 
+    @NotAudited
+    @Column(name = "user_name")
+    private String userName;
+
     @Column(name = "user_full_name", nullable = false)
     private String userFullName;
 
@@ -103,6 +107,8 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity
     @NotAudited
     @Column(name = "user_state")
     private Short userState;
+
+
 
     public Boolean isActive() {
         return active;

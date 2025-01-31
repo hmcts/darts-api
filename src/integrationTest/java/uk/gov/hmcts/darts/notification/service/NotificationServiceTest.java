@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.notification.service;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
@@ -38,12 +38,12 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Autowired
     NotificationService service;
-    @MockBean
+    @MockitoBean
     TemplateIdHelper templateIdHelper;
-    @MockBean
+    @MockitoBean
     GovNotifyService govNotifyService;
 
-    @MockBean
+    @MockitoBean
     LogApi logApi;
 
     @Test
