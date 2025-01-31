@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,7 +77,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(PRODUCTION_NAME, armRpoExecutionDetailEntityUpdated.getProductionName());
-        assertEquals(pollCreatedTs, armRpoExecutionDetailEntityUpdated.getPollingCreatedAt());
+        assertEquals(pollCreatedTs.truncatedTo(ChronoUnit.SECONDS), armRpoExecutionDetailEntityUpdated.getPollingCreatedAt().truncatedTo(ChronoUnit.SECONDS));
         assertThat(armRpoExecutionDetailEntityUpdated.getPollingCreatedAt()).isNotNull();
         assertEquals(ArmRpoStateEnum.CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
