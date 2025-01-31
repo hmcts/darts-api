@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,22 +116,23 @@ public class ArmRpoServiceImpl implements ArmRpoService {
 
         List<Integer> csvEodList = getEodsListFromCsvFiles(csvFiles, errorMessage);
 
-        // get all EODs that are in the pending state and within the time window in batches until no more are found
-
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
-        int offset = 0;
-        List<ExternalObjectDirectoryEntity> batch;
+        Pageable pageRequest = PageRequest.of(0, batchSize);
+        Page<ExternalObjectDirectoryEntity> pages;
 
         do {
-            batch = externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(
+            pages
+                = externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(
                 armRpoPending,
                 armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
                 armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()),
-                Pageable.ofSize(batchSize).withPage(offset)
+                pageRequest
             );
-            externalObjectDirectoryEntities.addAll(batch);
-            offset += batchSize;
-        } while (!batch.isEmpty());
+            log.info("Found number of elements {}, total elements {}, total pages {} for batch size {}",
+                     pages.getNumberOfElements(), pages.getTotalElements(), pages.getTotalPages(), batchSize);
+            externalObjectDirectoryEntities.addAll(pages.getContent());
+            pageRequest = pageRequest.next();
+        } while (pages.hasNext());
 
         externalObjectDirectoryEntities.forEach(
             externalObjectDirectoryEntity -> {
