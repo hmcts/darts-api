@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -36,7 +36,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     @Autowired
     private AudioTransformationServiceGivenBuilder given;
 
-    @MockBean
+    @MockitoBean
     FileOperationService mockFileOperationService;
 
     @Autowired

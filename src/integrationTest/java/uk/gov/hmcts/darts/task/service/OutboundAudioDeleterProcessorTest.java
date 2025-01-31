@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -53,10 +53,10 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
-    @MockBean
+    @MockitoBean
     private BankHolidaysService bankHolidaysService;
 
-    @MockBean
+    @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
 
     private UserAccountEntity requestor;

@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.retention.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -68,7 +68,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     MediaRepository mediaRepository;
     @Autowired
     ExternalObjectDirectoryStub eodStub;
-    @SpyBean
+    @MockitoSpyBean
     ExternalObjectDirectoryRepository eodRepository;
     @Autowired
     AnnotationStub annotationStub;
@@ -88,9 +88,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     CaseDocumentStub caseDocumentStub;
     @Autowired
     CaseDocumentRepository caseDocumentRepository;
-    @SpyBean
+    @MockitoSpyBean
     ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
-    @MockBean
+    @MockitoBean
     UserIdentity userIdentity;
 
     @Autowired

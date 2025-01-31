@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -33,7 +33,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 
 class AuthorisationImplTest extends IntegrationBase {
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Autowired

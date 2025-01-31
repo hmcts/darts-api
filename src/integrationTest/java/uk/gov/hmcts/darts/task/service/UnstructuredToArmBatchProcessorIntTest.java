@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -65,7 +65,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     ArgumentCaptor<String> manifestFileNameCaptor = ArgumentCaptor.forClass(String.class);
 
-    @SpyBean
+    @MockitoSpyBean
     private ArmDataManagementApi armDataManagementApi;
 
     @Autowired
@@ -74,30 +74,30 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Autowired
     private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @SpyBean
+    @MockitoSpyBean
     private DataManagementApi dataManagementApi;
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
     @Autowired
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @SpyBean
+    @MockitoSpyBean
     private FileOperationService fileOperationService;
-    @SpyBean
+    @MockitoSpyBean
     private ArchiveRecordService archiveRecordService;
     @Autowired
     private AuthorisationStub authorisationStub;
     @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
-    @SpyBean
+    @MockitoSpyBean
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
     @Autowired
     private ExternalObjectDirectoryRepository eodRepository;
-    @SpyBean
+    @MockitoSpyBean
     private MediaArchiveRecordMapper mediaArchiveRecordMapper;
-    @SpyBean
+    @MockitoSpyBean
     private DataStoreToArmHelper dataStoreToArmHelper;
 
-    @MockBean
+    @MockitoBean
     private UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
     private UserAccountEntity testUser;
     private static final Integer BATCH_SIZE = 5;

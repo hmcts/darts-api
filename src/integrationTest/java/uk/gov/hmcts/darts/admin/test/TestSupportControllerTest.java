@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -41,19 +41,19 @@ class TestSupportControllerTest extends IntegrationBase {
     private static final String ENDPOINT_URL = "/functional-tests";
     @Autowired
     private transient MockMvc mockMvc;
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
-    @MockBean
+    @MockitoBean
     private BankHolidaysService mockBankHolidaysService;
 
-    @MockBean
+    @MockitoBean
     private UserAccountEntity mockUserAccountEntity;
 
-    @MockBean
+    @MockitoBean
     private SecurityGroupEntity mockSecurityGroupEntity;
-    @MockBean
+    @MockitoBean
     private CourthouseEntity courthouseEntity;
-    @SpyBean
+    @MockitoSpyBean
     private AuditActivityRepository auditActivityRepository;
 
     @BeforeEach

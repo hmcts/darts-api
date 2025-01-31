@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
@@ -54,7 +54,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     @Autowired
     private AuthorisationService authorisationService;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Autowired
