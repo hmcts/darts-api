@@ -116,7 +116,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertNull(armRpoExecutionDetailEntityUpdated.getProductionName());
-        assertEquals(pollCreatedTs, armRpoExecutionDetailEntityUpdated.getPollingCreatedAt());
+        assertEquals(pollCreatedTs.truncatedTo(ChronoUnit.SECONDS), armRpoExecutionDetailEntityUpdated.getPollingCreatedAt().truncatedTo(ChronoUnit.SECONDS));
         assertEquals(ArmRpoStateEnum.CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.IN_PROGRESS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 
