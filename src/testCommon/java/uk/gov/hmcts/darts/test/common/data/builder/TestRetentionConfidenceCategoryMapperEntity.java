@@ -19,14 +19,13 @@ public class TestRetentionConfidenceCategoryMapperEntity extends RetentionConfid
     implements DbInsertable<RetentionConfidenceCategoryMapperEntity> {
 
     @Builder
-    public TestRetentionConfidenceCategoryMapperEntity(Integer id, RetentionConfidenceScoreEnum confidenceScore,
+    public TestRetentionConfidenceCategoryMapperEntity(RetentionConfidenceScoreEnum confidenceScore,
                                                        RetentionConfidenceReasonEnum confidenceReason,
                                                        RetentionConfidenceCategoryEnum confidenceCategory,
                                                        String description, OffsetDateTime createdAt,
                                                        OffsetDateTime lastModifiedAt, UserAccountEntity createdBy,
                                                        UserAccountEntity lastModifiedBy) {
         super();
-        setId(id);
         setConfidenceScore(confidenceScore);
         setConfidenceReason(confidenceReason);
         setConfidenceCategory(confidenceCategory);
