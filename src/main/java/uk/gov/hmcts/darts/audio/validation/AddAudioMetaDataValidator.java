@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.util.DurationUtil;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -55,7 +56,7 @@ public class AddAudioMetaDataValidator implements Validator<AddAudioMetadataRequ
 
         Duration difference = Duration.between(startDate, finishDate);
 
-        if (difference.compareTo(maxAllowableAudioDuration) > 0) {
+        if (DurationUtil.greaterThan(difference, maxAllowableAudioDuration)) {
             throw new DartsApiException(AudioApiError.FILE_DURATION_OUT_OF_BOUNDS);
         }
     }

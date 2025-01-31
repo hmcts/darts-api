@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
@@ -15,7 +16,6 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -27,14 +27,18 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.common.util.MediaEntityTreeNodeImpl;
 import uk.gov.hmcts.darts.common.util.Tree;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.DurationUtil;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -45,7 +49,6 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -65,6 +68,11 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final LogApi logApi;
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final AudioAsyncService audioAsyncService;
+
+    @Value("${darts.audio.small-file-max-length}")
+    private Duration smallFileSizeMaxLength;
+    @Value("${darts.audio.small-file-size}")
+    private long smallFileSize;
 
 
     @Override
@@ -120,7 +128,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             return;
         }
 
-        ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
         UUID externalLocation = externalLocationSupplier.get();
 
         UserAccountEntity currentUser = userIdentity.getUserAccount();
@@ -141,8 +148,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
 
         // version the file upload to the database
-        versionUpload(mediaToSupersede, addAudioMetadataRequest,
-                      externalLocation, incomingChecksum, objectRecordStatusEntity, currentUser);
+        versionUpload(mediaToSupersede, addAudioMetadataRequest, externalLocation, incomingChecksum, currentUser);
     }
 
     private UUID saveAudioToInbound(MultipartFile audioFileStream) {
@@ -153,11 +159,10 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
     }
 
-    private void versionUpload(List<MediaEntity> mediaToSupersede,
-                               AddAudioMetadataRequest addAudioMetadataRequest,
-                               UUID externalLocation, String checksum,
-                               ObjectRecordStatusEntity objectRecordStatusEntity,
-                               UserAccountEntity userAccount) {
+    void versionUpload(List<MediaEntity> mediaToSupersede,
+                       AddAudioMetadataRequest addAudioMetadataRequest,
+                       UUID externalLocation, String checksum,
+                       UserAccountEntity userAccount) {
 
         MediaEntity newMediaEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);
         newMediaEntity.setChecksum(checksum);
@@ -176,6 +181,21 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         mediaRepository.save(newMediaEntity);
         log.info("Saved media id {}", newMediaEntity.getId());
 
+        OffsetDateTime startDate = addAudioMetadataRequest.getStartedAt();
+        OffsetDateTime finishDate = addAudioMetadataRequest.getEndedAt();
+        Duration difference = Duration.between(startDate, finishDate);
+
+        if (addAudioMetadataRequest.getFileSize() <= smallFileSize
+            && DurationUtil.greaterThan(difference, smallFileSizeMaxLength)) {
+            logApi.addAudioSmallFileWithLongDuration(
+                addAudioMetadataRequest.getCourthouse(),
+                addAudioMetadataRequest.getCourtroom(),
+                startDate,
+                finishDate,
+                newMediaEntity.getId(),
+                addAudioMetadataRequest.getFileSize()
+            );
+        }
         linkAudioToHearingInMetadata(addAudioMetadataRequest, newMediaEntity);
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity, userAccount);
 
@@ -183,8 +203,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             externalLocation,
             checksum,
             userIdentity.getUserAccount(),
-            newMediaEntity,
-            objectRecordStatusEntity
+            newMediaEntity
         );
         for (MediaEntity mediaEntity : mediaToSupersede) {
             deleteMediaLinkingAndSetCurrentFalse(mediaEntity);
@@ -239,7 +258,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
     }
 
-    private void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
+    void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
         List<HearingEntity> hearingList = mediaEntity.getHearingList();
         for (HearingEntity hearing : hearingList) {
             mediaEntity.removeHearing(hearing);
@@ -248,14 +267,13 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         mediaRepository.save(mediaEntity);
     }
 
-    private void saveExternalObjectDirectory(UUID externalLocation,
+    void saveExternalObjectDirectory(UUID externalLocation,
                                              String checksum,
                                              UserAccountEntity userAccountEntity,
-                                             MediaEntity mediaEntity,
-                                             ObjectRecordStatusEntity objectRecordStatusEntity) {
+                                             MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
-        externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
+        externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);

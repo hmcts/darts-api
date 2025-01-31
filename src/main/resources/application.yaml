@@ -121,6 +121,8 @@ darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   audio:
+    small-file-size: ${SMALL_FILE_SIZE:1024}
+    small-file-max-length: ${SMALL_FILE_SIZE_MAX_LENGTH:2S}
     allowed-media-mime-types:
       - "audio/mpeg"
       - "application/octet-stream"
