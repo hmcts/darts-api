@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -670,7 +671,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
-    List<ExternalObjectDirectoryEntity> findByStatusAndIngestionDateTsWithPaging(ObjectRecordStatusEntity status,
+    Page<ExternalObjectDirectoryEntity> findByStatusAndIngestionDateTsWithPaging(ObjectRecordStatusEntity status,
                                                                                  OffsetDateTime rpoCsvStartTime,
                                                                                  OffsetDateTime rpoCsvEndTime,
                                                                                  Pageable pageable);

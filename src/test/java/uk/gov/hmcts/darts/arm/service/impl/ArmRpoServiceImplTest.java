@@ -9,6 +9,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
@@ -170,21 +172,22 @@ class ArmRpoServiceImplTest {
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void reconcileArmRpoCsvData_Success() {
         // given
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = createExternalObjectDirectoryEntity(1);
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = createExternalObjectDirectoryEntity(2);
-
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity1);
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity2);
+        Page<ExternalObjectDirectoryEntity> pagedEods = new PageImpl<>(externalObjectDirectoryEntities);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
         when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
         when(externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(any(), any(), any(), any()))
-            .thenReturn(externalObjectDirectoryEntities).thenReturn(Collections.emptyList());
+            .thenReturn(pagedEods);
 
         File file = TestUtils.getFile("Tests/arm/rpo/armRpoCsvData.csv");
 
@@ -195,12 +198,12 @@ class ArmRpoServiceImplTest {
         assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
         assertEquals(EodHelper.armReplayStatus(), externalObjectDirectoryEntity2.getStatus());
 
-        verify(externalObjectDirectoryRepository, times(2)).findByStatusAndIngestionDateTsWithPaging(
+        verify(externalObjectDirectoryRepository).findByStatusAndIngestionDateTsWithPaging(
             eq(EodHelper.armRpoPendingStatus()),
             eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_END_HOUR)),
             eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_START_HOUR)),
             any());
-        verify(externalObjectDirectoryRepository, times(1)).saveAllAndFlush(externalObjectDirectoryEntities);
+        verify(externalObjectDirectoryRepository).saveAllAndFlush(externalObjectDirectoryEntities);
     }
 
     @Test
