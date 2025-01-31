@@ -73,7 +73,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             log.info("Loading task: {}", task.getTaskName());
             task.setLastCronExpression(getAutomatedTaskCronExpression(task));
             Trigger trigger = createAutomatedTaskTrigger(task);
-            taskRegistrar.addTriggerTask(task, trigger);
+            taskRegistrar.addTriggerTask(new AutomatedTaskTrigger(task, trigger));
         });
     }
 

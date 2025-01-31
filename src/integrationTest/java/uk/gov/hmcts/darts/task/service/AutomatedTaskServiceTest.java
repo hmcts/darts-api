@@ -60,8 +60,8 @@ import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
+import uk.gov.hmcts.darts.task.model.AutomatedTaskTrigger;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRpoPollingAutomatedTask;
@@ -192,7 +192,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                     );
                 } else if (task instanceof TriggerTask triggerTask) {
 
-                    if (triggerTask.getRunnable() instanceof AbstractLockableAutomatedTask automatedTask) {
+                    if (triggerTask instanceof AutomatedTaskTrigger automatedTaskTrigger) {
+                        AutomatedTask automatedTask = automatedTaskTrigger.getAutomatedTask();
                         log.info("TriggerTask name: {}, cron expression: {}",
                                  automatedTask.getTaskName(), automatedTask.getLastCronExpression());
                     } else {
