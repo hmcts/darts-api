@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.casedocument.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -29,7 +29,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     protected static final String SOME_CASE_NUMBER_1 = "CASE1";
     protected static final String SOME_CASE_NUMBER_2 = "CASE2";
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     private final OffsetDateTime testTime = OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);

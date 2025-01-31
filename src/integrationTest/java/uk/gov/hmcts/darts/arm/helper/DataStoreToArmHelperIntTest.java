@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItem;
@@ -62,9 +62,9 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
     private MediaEntity savedMedia;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
-    @SpyBean
+    @MockitoSpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Autowired

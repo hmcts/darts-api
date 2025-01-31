@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsExternalObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
@@ -72,7 +72,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private BlobServiceClient blobServiceClient;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
-    @MockBean
+    @MockitoBean
     private DataManagementAzureClientFactory dataManagementFactory;
 
     @Autowired
@@ -97,7 +97,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Autowired
     private DetsDataStoreDeleter detsDataStoreDeleter;
 
-    @MockBean
+    @MockitoBean
     private DetsApiService detsApiService;
 
     private UserAccountEntity requestor;
