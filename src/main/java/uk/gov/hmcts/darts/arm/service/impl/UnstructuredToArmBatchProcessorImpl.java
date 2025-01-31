@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -122,6 +123,13 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
 
         try {
+            if (CollectionUtils.isNotEmpty(batchItems.getFailed())) {
+                batchItems.getFailed().forEach(batchItem -> {
+                    var eod = batchItem.getArmEod();
+                    eod.setManifestFile(null);
+                    externalObjectDirectoryRepository.save(eod);
+                });
+            }
             if (!batchItems.getSuccessful().isEmpty()) {
                 String manifestFileContents = unstructuredToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
                 unstructuredToArmHelper.copyMetadataToArm(manifestFileContents, archiveRecordsFileName);
@@ -148,7 +156,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             unstructuredToArmHelper.incrementTransferAttempts(armEod);
             unstructuredToArmHelper.updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus(), userAccount);
         } else {
-            log.error("Unable to find matching external object directory for {}", armEod.getId());
+            log.error("Unable to find matching external object directory {} for manifest {}", armEod.getId(), archiveRecordsFileName);
             unstructuredToArmHelper.updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
             throw new RuntimeException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }

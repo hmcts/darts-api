@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.data.domain.Limit;
@@ -116,7 +117,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     List<Integer> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
-                                                        ExternalLocationTypeEntity armLocation, int maxResultSize) {
+                                                ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
         ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();
 
@@ -197,11 +198,17 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
             logApi.armPushSuccessful(batchItem.getArmEod().getId());
         }
-
     }
 
     private boolean writeManifestAndCopyToArm(UserAccountEntity userAccount, ArmBatchItems batchItems, String archiveRecordsFileName) {
         try {
+            if (CollectionUtils.isNotEmpty(batchItems.getFailed())) {
+                batchItems.getFailed().forEach(batchItem -> {
+                    var eod = batchItem.getArmEod();
+                    eod.setManifestFile(null);
+                    externalObjectDirectoryRepository.save(eod);
+                });
+            }
             if (!batchItems.getSuccessful().isEmpty()) {
                 String archiveRecordsContents = dataStoreToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
 
@@ -211,6 +218,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             } else {
                 log.warn("No EODs were able to be processed, skipping manifest file creation");
             }
+
         } catch (Exception e) {
             String errorMessage = String.format("Error during generation of DETS batch manifest file %s", archiveRecordsFileName);
             log.error(errorMessage, e);

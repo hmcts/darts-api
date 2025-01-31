@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -495,7 +496,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(ingestedArmEods).hasSize(1);
         var failedEod = failedArmEods.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(3);
-        assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
+        assertNull(failedEod.getManifestFile());
     }
 
     @Test
@@ -525,7 +526,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
-        assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
+        assertNull(failedEod.getManifestFile());
 
         verify(armDataManagementApi, never()).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
     }
