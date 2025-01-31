@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import java.time.OffsetDateTime;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Component
@@ -71,7 +72,10 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         if (confidenceAware != null) {
             RetentionConfidenceScoreEnum confidenceScore = confidenceAware.getRetConfScore();
             String confidenceReason = confidenceAware.getRetConfReason();
-
+            if (isNull(externalObjectDirectory.getExternalRecordId())) {
+                log.error("External Record Id is not available for EOD: {}", externalObjectDirectoryId);
+                return false;
+            }
             if (confidenceScore != null) {
                 UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
                     externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);

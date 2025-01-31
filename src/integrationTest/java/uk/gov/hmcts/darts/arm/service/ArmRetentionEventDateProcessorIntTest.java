@@ -193,6 +193,59 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     }
 
     @Test
+    void calculateEventDates_FailsToUpdateRetention_WithNullExternalRecordId() {
+        final String confidenceReason = "reason";
+        final Integer confidenceScore = 232;
+        String externalRecordId = null;
+
+        // given
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
+
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
+
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
+                hearing.getCourtroom(),
+                START_TIME,
+                END_TIME,
+                1,
+                "mp2",
+                confidenceScore,
+                confidenceReason
+            ));
+        savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
+        dartsPersistence.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(savedMedia)
+            .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(STORED))
+            .externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM))
+            .externalLocation(UUID.randomUUID()).build().getEntity();
+
+        armEod.setExternalRecordId(externalRecordId);
+        armEod.setEventDateTs(END_TIME);
+        armEod.setUpdateRetention(true);
+        dartsPersistence.save(armEod);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(400).isError(false).build();
+        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+
+        // when
+        armRetentionEventDateProcessor.calculateEventDates(1000);
+
+        // then
+        var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
+        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
+        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
+        assertTrue(persistedEod.isUpdateRetention());
+        assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
+
+    }
+
+    @Test
     void calculateEventDates_NoEodsToProcess() {
 
         // given
