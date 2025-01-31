@@ -281,6 +281,7 @@ public class DartsDatabaseStub {
     public void clearDatabaseInThisOrder() {
         TestUtils.retryLoop(10, 500, () -> {
             removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
+            entityManager.createNativeQuery("UPDATE darts.revinfo set audit_user = null").executeUpdate();
             dataAnonymisationRepository.deleteAll();
             armRpoExecutionDetailRepository.deleteAll();
             objectAdminActionRepository.deleteAll();
@@ -765,16 +766,22 @@ public class DartsDatabaseStub {
         return save(mediaRequestEntity);
     }
 
-    public void createTestUserAccount() {
-        if (userAccountRepository.findFirstByEmailAddressIgnoreCase("test.user@example.com").isEmpty()) {
+    public UserAccountEntity createTestUserAccount() {
+        Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findFirstByEmailAddressIgnoreCase("test.user@example.com");
+        if (userAccountEntity.isEmpty()) {
             UserAccountEntity testUser = new UserAccountEntity();
             testUser.setEmailAddress("test.user@example.com");
             testUser.setUserFullName("testuser");
             testUser.setAccountGuid(UUID.randomUUID().toString());
             testUser.setIsSystemUser(false);
             testUser.setActive(true);
-            userAccountRepository.saveAndFlush(testUser);
+            testUser.setCreatedById(0);
+            testUser.setCreatedDateTime(OffsetDateTime.now());
+            testUser.setLastModifiedById(0);
+            testUser.setLastModifiedDateTime(OffsetDateTime.now());
+            return userAccountRepository.saveAndFlush(testUser);
         }
+        return userAccountEntity.get();
     }
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
