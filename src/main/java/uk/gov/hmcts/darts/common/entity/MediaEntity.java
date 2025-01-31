@@ -143,6 +143,9 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @Column(name = "data_ticket")
     private Integer dataTicket;
 
+    @Column(name = "storage_id")
+    private String storageId;
+
     public List<CourtCaseEntity> associatedCourtCases() {
         var cases = hearingList.stream().map(HearingEntity::getCourtCase);
         return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
