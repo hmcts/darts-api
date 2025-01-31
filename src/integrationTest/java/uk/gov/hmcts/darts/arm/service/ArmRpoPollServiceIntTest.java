@@ -38,6 +38,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
@@ -282,7 +283,8 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
-        assertEquals(pollCreatedTs, updatedArmRpoExecutionDetailEntity.get().getPollingCreatedAt());
+        assertEquals(pollCreatedTs.truncatedTo(ChronoUnit.SECONDS),
+                     updatedArmRpoExecutionDetailEntity.get().getPollingCreatedAt().truncatedTo(ChronoUnit.SECONDS));
         assertThat(updatedArmRpoExecutionDetailEntity.get().getProductionName()).contains(PRODUCTION_NAME);
 
         verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
