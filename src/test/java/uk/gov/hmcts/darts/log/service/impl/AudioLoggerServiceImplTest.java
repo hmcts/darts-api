@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 import uk.gov.hmcts.darts.util.TestClock;
 
@@ -45,7 +46,7 @@ class AudioLoggerServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        audioLoggerService = new AudioLoggerServiceImpl(new TestClock(STARTED_AT));
+        audioLoggerService = new AudioLoggerServiceImpl(new CurrentTimeHelper(new TestClock(STARTED_AT)));
     }
 
     @Test
