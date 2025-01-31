@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Limit;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -53,7 +52,6 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
     List<TransformedMediaDetailsDto> findTransformedMediaDetails(Integer userId, boolean expired);
 
 
-    @EntityGraph(attributePaths = {"mediaRequest.currentOwner.securityGroupEntities"})
     @Query("""
         SELECT tm FROM MediaRequestEntity mr, TransformedMediaEntity tm
                JOIN tm.transientObjectDirectoryEntities tod

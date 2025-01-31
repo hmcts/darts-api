@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.RetentionConfidenceCategoryMapperEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.builder.TestRetentionConfidenceCategoryMapperEntity;
 
 import java.time.OffsetDateTime;
@@ -11,7 +11,6 @@ public class RetentionConfidenceCategoryMapperTestData
     RetentionConfidenceCategoryMapperEntity,
     TestRetentionConfidenceCategoryMapperEntity.TestRetentionConfidenceCategoryMapperEntityBuilder> {
 
-    private static final UserAccountEntity USER_ACCOUNT = UserAccountTestData.minimalUserAccount();
 
     @Override
     public RetentionConfidenceCategoryMapperEntity someMinimal() {
@@ -27,9 +26,9 @@ public class RetentionConfidenceCategoryMapperTestData
 
         retrieve.getBuilder()
             .createdAt(someDateTime)
-            .createdBy(USER_ACCOUNT)
+            .createdById(TestUtils.AUTOMATION_USER_ID)
             .lastModifiedAt(someDateTime)
-            .lastModifiedBy(USER_ACCOUNT);
+            .lastModifiedById(TestUtils.AUTOMATION_USER_ID);
 
         return retrieve;
     }
