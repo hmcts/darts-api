@@ -78,7 +78,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableCheckTest {
     @Test
     void checkCreateExportBasedOnSearchResultsInProgress_PollingStillInProgress() {
         //
-        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusMinutes(10));
+        armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusMinutes(10));
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
 
         // when
@@ -93,7 +93,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableCheckTest {
     @Test
     void checkCreateExportBasedOnSearchResultsInProgress_PollingExceeded() {
         //given
-        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusHours(5));
+        armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusHours(5));
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
 
         // when
