@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:10.22.0")
+    classpath("org.flywaydb:flyway-database-postgresql:11.3.0")
   }
 }
 
@@ -17,7 +17,7 @@ plugins {
   id 'org.sonarqube' version '6.0.1.5171'
   id "io.freefair.lombok" version "8.12"
   id "org.openapi.generator" version "7.11.0"
-  id "org.flywaydb.flyway" version "10.22.0"
+  id "org.flywaydb.flyway" version "11.3.0"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "4.0.0"
 }
@@ -438,12 +438,12 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.22.0'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.22.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.3.0'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.3.0'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.0'
 
   //database
-  implementation 'org.postgresql:postgresql:42.7.4'
+  implementation 'org.postgresql:postgresql:42.7.5'
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE'
 
@@ -469,7 +469,7 @@ dependencies {
 
   testImplementation 'org.testcontainers:postgresql:1.20.4'
   testImplementation 'com.h2database:h2:2.3.232'
-  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.4'
+  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
