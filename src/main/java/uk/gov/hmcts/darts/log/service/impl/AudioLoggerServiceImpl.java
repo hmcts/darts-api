@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 import uk.gov.hmcts.darts.util.DataUtil;
 
@@ -19,7 +20,7 @@ import static uk.gov.hmcts.darts.util.DateTimeHelper.getDateTimeIsoFormatted;
 @AllArgsConstructor
 public class AudioLoggerServiceImpl implements AudioLoggerService {
 
-    private final Clock clock;
+    private final CurrentTimeHelper currentTimeHelper;
 
     @Override
     public void audioUploaded(AddAudioMetadataRequest request) {
@@ -46,6 +47,6 @@ public class AudioLoggerServiceImpl implements AudioLoggerService {
         log.warn("Courthouse not found: courthouse={}, courtroom={}, timestamp={}",
                  DataUtil.toUpperCase(courthouse),
                  DataUtil.toUpperCase(courtroom),
-                 getDateTimeIsoFormatted(OffsetDateTime.now(clock)));
+                 getDateTimeIsoFormatted(currentTimeHelper.currentOffsetDateTime()));
     }
 }
