@@ -873,7 +873,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                                          String objectChecksum,
                                                          UserAccountEntity userAccount) {
         externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
-        externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+        if (nonNull(armResponseUploadFileRecord.getA360RecordId())) {
+            externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+        } else {
+            log.warn("External object id {} has no A360 record id", externalObjectDirectory.getId());
+        }
         externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armRpoPendingStatus(), userAccount);
     }
