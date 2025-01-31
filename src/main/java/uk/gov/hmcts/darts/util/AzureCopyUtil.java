@@ -27,15 +27,18 @@ public class AzureCopyUtil {
             Process p = builder.start();
             int exitValue = p.waitFor();
             var endTime = Instant.now();
-            log.info("Copy of blob completed at {}. Total duration in seconds: {}", endTime, Duration.between(startTime, endTime).getSeconds());
+            log.info("Copy of blob completed at {}. Total duration in seconds: {}. Exit value: {}",
+                     endTime, Duration.between(startTime, endTime).getSeconds(), exitValue);
             if (exitValue != 0) {
                 String result = new String(p.getInputStream().readAllBytes());
-                throw new DartsException(
-                    String.format("Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Command: '%s'. Result: %s",
-                                  source,
-                                  destination,
-                                  builder.command(),
-                                  result));
+                String errorMessage = String.format(
+                    "Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Command: '%s'. Result: %s",
+                    source,
+                    destination,
+                    builder.command(),
+                    result);
+                log.error(errorMessage);
+                throw new DartsException(errorMessage);
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
