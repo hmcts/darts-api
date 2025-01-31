@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
@@ -39,10 +39,10 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
     @Autowired
     private ProcessE2EArmRpoPendingAutomatedTask task;
 
-    @MockBean
+    @MockitoBean
     private ArmApiService armApiService;
 
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
 
     private static final String BEARER_TOKEN = "SOME BEARER TOKEN";
