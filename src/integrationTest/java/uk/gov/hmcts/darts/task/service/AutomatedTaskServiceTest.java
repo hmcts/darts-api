@@ -7,8 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
@@ -17,6 +15,8 @@ import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
@@ -60,8 +60,8 @@ import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
+import uk.gov.hmcts.darts.task.model.AutomatedTaskTrigger;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRpoPollingAutomatedTask;
@@ -130,7 +130,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     private CloseOldCasesProcessor closeOldCasesProcessor;
     @Autowired
     private DailyListService dailyListService;
-    @SpyBean
+    @MockitoSpyBean
     private CaseRepository caseRepository;
     @Autowired
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
@@ -156,7 +156,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
     private UserAccountEntity testUser;
 
@@ -192,7 +192,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                     );
                 } else if (task instanceof TriggerTask triggerTask) {
 
-                    if (triggerTask.getRunnable() instanceof AbstractLockableAutomatedTask automatedTask) {
+                    if (triggerTask instanceof AutomatedTaskTrigger automatedTaskTrigger) {
+                        AutomatedTask automatedTask = automatedTaskTrigger.getAutomatedTask();
                         log.info("TriggerTask name: {}, cron expression: {}",
                                  automatedTask.getTaskName(), automatedTask.getLastCronExpression());
                     } else {

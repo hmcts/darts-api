@@ -169,9 +169,6 @@ public class DartsPersistence {
         retentionConfidenceCategoryMapperEntity = (RetentionConfidenceCategoryMapperEntity) preCheckPersist(retentionConfidenceCategoryMapperEntity);
 
         if (retentionConfidenceCategoryMapperEntity.getId() == null) {
-            retentionConfidenceCategoryMapperEntity.setLastModifiedBy(save(retentionConfidenceCategoryMapperEntity.getLastModifiedBy()));
-            retentionConfidenceCategoryMapperEntity.setCreatedBy(save(retentionConfidenceCategoryMapperEntity.getCreatedBy()));
-
             retentionConfidenceCategoryMapperEntity = retentionConfidenceCategoryMapperRepository.save(retentionConfidenceCategoryMapperEntity);
         } else {
             retentionConfidenceCategoryMapperEntity = entityManager.merge(retentionConfidenceCategoryMapperEntity);
