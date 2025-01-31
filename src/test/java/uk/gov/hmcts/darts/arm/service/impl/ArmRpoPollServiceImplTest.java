@@ -288,7 +288,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState());
         armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
-        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusMinutes(10));
+        armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusMinutes(10));
 
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.getExtendedProductionsByMatter(anyString(), anyInt(), anyString(), any(UserAccountEntity.class))).thenReturn(true);

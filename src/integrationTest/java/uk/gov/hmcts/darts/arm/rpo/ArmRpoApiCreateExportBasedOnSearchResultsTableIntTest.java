@@ -63,7 +63,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
         armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
         assertNull(armRpoExecutionDetail.getProductionName());
-        assertNull(armRpoExecutionDetail.getPollingCreatedTs());
+        assertNull(armRpoExecutionDetail.getPollingCreatedAt());
 
         var bearerAuth = "Bearer some-token";
 
@@ -76,8 +76,8 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(PRODUCTION_NAME, armRpoExecutionDetailEntityUpdated.getProductionName());
-        assertEquals(pollCreatedTs, armRpoExecutionDetailEntityUpdated.getPollingCreatedTs());
-        assertThat(armRpoExecutionDetailEntityUpdated.getPollingCreatedTs()).isNotNull();
+        assertEquals(pollCreatedTs, armRpoExecutionDetailEntityUpdated.getPollingCreatedAt());
+        assertThat(armRpoExecutionDetailEntityUpdated.getPollingCreatedAt()).isNotNull();
         assertEquals(ArmRpoStateEnum.CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 
@@ -115,7 +115,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertNull(armRpoExecutionDetailEntityUpdated.getProductionName());
-        assertEquals(pollCreatedTs, armRpoExecutionDetailEntityUpdated.getPollingCreatedTs());
+        assertEquals(pollCreatedTs, armRpoExecutionDetailEntityUpdated.getPollingCreatedAt());
         assertEquals(ArmRpoStateEnum.CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.IN_PROGRESS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 

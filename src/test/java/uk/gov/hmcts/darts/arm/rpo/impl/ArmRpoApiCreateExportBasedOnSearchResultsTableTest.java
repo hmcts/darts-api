@@ -132,7 +132,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
-        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now());
+        armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now());
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
         // when
@@ -153,7 +153,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
-        armRpoExecutionDetailEntity.setPollingCreatedTs(OffsetDateTime.now().minusHours(5));
+        armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusHours(5));
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
         // when

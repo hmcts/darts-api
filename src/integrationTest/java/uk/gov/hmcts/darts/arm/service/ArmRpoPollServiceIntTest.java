@@ -252,7 +252,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setStorageAccountId(STORAGE_ACCOUNT_ID);
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         OffsetDateTime pollCreatedTs = OffsetDateTime.now().minusMinutes(10);
-        armRpoExecutionDetailEntity.setPollingCreatedTs(pollCreatedTs);
+        armRpoExecutionDetailEntity.setPollingCreatedAt(pollCreatedTs);
         armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
@@ -282,9 +282,9 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
-        assertEquals(pollCreatedTs, updatedArmRpoExecutionDetailEntity.get().getPollingCreatedTs());
+        assertEquals(pollCreatedTs, updatedArmRpoExecutionDetailEntity.get().getPollingCreatedAt());
         assertThat(updatedArmRpoExecutionDetailEntity.get().getProductionName()).contains(PRODUCTION_NAME);
-        
+
         verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
         verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
