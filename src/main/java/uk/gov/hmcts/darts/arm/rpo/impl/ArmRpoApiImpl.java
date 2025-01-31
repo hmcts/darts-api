@@ -132,7 +132,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-
+        log.debug("ARM RPO Response - IndexesByMatterIdResponse: {}", indexesByMatterIdResponse);
         processIndexesByMatterIdResponse(matterId, userAccount, indexesByMatterIdResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 
@@ -176,7 +176,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-
+        log.debug("ARM RPO Response - StorageAccountResponse: {}", storageAccountResponse);
         processGetStorageAccountsResponse(userAccount, storageAccountResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 
@@ -403,7 +403,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             log.error(errorMessage.append("Unable to save background search").append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-
+        log.debug("ARM RPO Response - SaveBackgroundSearchResponse: {}", saveBackgroundSearchResponse);
         handleResponseStatus(userAccount, saveBackgroundSearchResponse, errorMessage, armRpoExecutionDetailEntity);
 
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
