@@ -52,7 +52,7 @@ class TemplateIdHelperTest extends IntegrationBase {
     @Test
     void okRequestTranscriptionAvailable() throws TemplateNotFoundException {
         String templateId = templateIdHelper.findTemplateId("transcription_available");
-        assertEquals("96d3b32c-6a6a-45ae-8c0e-91e9d04d2eb0", templateId);
+        assertEquals("3adfe57d-094a-47e8-a4f0-1a234466b8ce", templateId);
     }
 
     @Test
