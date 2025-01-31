@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.arm.rpo;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("PMD.CloseResource")
 class ArmRpoApiDownloadProductionIntTest extends IntegrationBase {
 
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
 
     @Autowired

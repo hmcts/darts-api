@@ -10,8 +10,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -60,10 +60,10 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     private static final URI ENDPOINT = URI.create("/audio-requests/download");
 
     private static final Integer DOWNLOAD_AUDIT_ACTIVITY_ID = AuditActivity.EXPORT_AUDIO.getId();
-    @MockBean
+    @MockitoBean
     private Authorisation mockAuthorisation;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Autowired
@@ -78,7 +78,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     @Autowired
     private AuditRepository auditRepository;
 
-    @MockBean
+    @MockitoBean
     private DataManagementAzureClientFactory factory;
 
     @Value("${darts.storage.blob.temp-blob-workspace}")
