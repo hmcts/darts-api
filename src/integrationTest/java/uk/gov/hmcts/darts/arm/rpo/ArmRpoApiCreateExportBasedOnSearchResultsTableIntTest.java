@@ -34,7 +34,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
     @MockitoBean
     private ArmRpoClient armRpoClient;
 
-    @MockBean
+    @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
 
     @Autowired
