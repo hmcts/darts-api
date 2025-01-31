@@ -7,7 +7,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
+import uk.gov.hmcts.darts.util.TestClock;
 
 import java.time.OffsetDateTime;
 import java.util.Locale;
@@ -44,7 +46,7 @@ class AudioLoggerServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        audioLoggerService = new AudioLoggerServiceImpl();
+        audioLoggerService = new AudioLoggerServiceImpl(new CurrentTimeHelper(new TestClock(STARTED_AT)));
     }
 
     @Test
@@ -59,6 +61,17 @@ class AudioLoggerServiceImplTest {
                                       "2021-01-01T01:00:00Z",
                                       "2021-01-01T02:00:00Z");
         assertThat(logCaptor.getInfoLogs()).containsExactly(expectedLogEntry);
+    }
+
+    @Test
+    void missingCourthouse_shouldLog() {
+        audioLoggerService.missingCourthouse(SOME_COURTHOUSE, SOME_COURTROOM);
+        var expectedLogEntry = format("Courthouse not found: courthouse=%s, courtroom=%s, timestamp=%s",
+                                      SOME_COURTHOUSE.toUpperCase(Locale.ROOT),
+                                      SOME_COURTROOM.toUpperCase(Locale.ROOT),
+                                      "2021-01-01T01:00:00Z"
+        );
+        assertThat(logCaptor.getWarnLogs()).containsExactly(expectedLogEntry);
     }
 
     private AddAudioMetadataRequest someAddAudioMetadataRequest() {
