@@ -66,7 +66,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @Column(name = "end_ts", nullable = false)
     private OffsetDateTime end;
 
-    @OneToMany(mappedBy = MediaLinkedCaseEntity_.MEDIA)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = MediaLinkedCaseEntity_.MEDIA)
     private List<MediaLinkedCaseEntity> mediaLinkedCaseList = new ArrayList<>();
 
     @Column(name = "version_label", length = 32)
