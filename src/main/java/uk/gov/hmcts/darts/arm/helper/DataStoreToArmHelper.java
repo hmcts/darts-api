@@ -240,7 +240,7 @@ public class DataStoreToArmHelper {
             incrementTransferAttempts(armEod);
             updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus(), userAccount);
         } else {
-            log.error("Unable to find matching external object directory for {}", armEod.getId());
+            log.error("Unable to find matching external object directory for {} - manifest {}", armEod.getId(), archiveRecordsFileName);
             updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
             throw new DartsException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }
