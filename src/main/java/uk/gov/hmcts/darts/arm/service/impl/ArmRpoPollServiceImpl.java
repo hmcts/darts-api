@@ -47,8 +47,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private List<Integer> allowableInProgressStates;
 
     @Override
-    public void pollArmRpo(boolean isManualRun) {
-        log.info("Polling ARM RPO service - isManualRun: {}", isManualRun);
+    public void pollArmRpo(boolean isManualRun, int batchSize) {
+        log.info("Polling ARM RPO - isManualRun: {} batchSize: {}", isManualRun, batchSize);
         setupFailedStatuses();
         setupAllowableInProgressStates();
         Integer executionId = null;
@@ -85,7 +85,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             boolean createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(
                 bearerToken, executionId, headerColumns, uniqueProductionName, userAccount);
             if (createExportBasedOnSearchResultsTable) {
-                processProductions(bearerToken, executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity);
+                processProductions(bearerToken, executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity,
+                                   batchSize);
             } else {
                 log.warn("ARM RPO Polling is still in-progress for createExportBasedOnSearchResultsTable");
             }
@@ -102,7 +103,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
 
     private void processProductions(String bearerToken, Integer executionId, String uniqueProductionName, UserAccountEntity userAccount,
-                                    ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) throws IOException {
+                                    ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
+                                    int batchSize) throws IOException {
         // step to call ARM RPO API to get the extended productions by matter
         boolean getExtendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, uniqueProductionName, userAccount);
         if (getExtendedProductionsByMatter) {
@@ -116,7 +118,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 // step to call ARM RPO API to remove the production
                 armRpoApi.removeProduction(bearerToken, executionId, userAccount);
                 log.debug("About to reconcile production files");
-                armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles);
+                armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles, batchSize);
             } else {
                 log.warn("No production export files found");
             }

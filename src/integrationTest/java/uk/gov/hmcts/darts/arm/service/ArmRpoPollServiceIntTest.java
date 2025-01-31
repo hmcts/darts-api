@@ -85,6 +85,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private String uniqueProductionName;
+    private int batchSize = 10;
 
     @Autowired
     private ArmRpoPollServiceImpl armRpoPollService;
@@ -115,6 +116,8 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
+        batchSize = 5;
+
         when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
         when(armRpoClient.getExtendedSearchesByMatter(any(), any()))
             .thenReturn(getExtendedSearchesByMatterResponse());
@@ -134,7 +137,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -183,7 +186,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -223,7 +226,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getCreateExportBasedOnSearchResultsTableResponseInProgress());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -268,7 +271,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -318,7 +321,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -368,7 +371,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(true);
+        armRpoPollService.pollArmRpo(true, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
