@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.RetentionConfidenceCategoryMapperEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -23,8 +22,8 @@ public class TestRetentionConfidenceCategoryMapperEntity extends RetentionConfid
                                                        RetentionConfidenceReasonEnum confidenceReason,
                                                        RetentionConfidenceCategoryEnum confidenceCategory,
                                                        String description, OffsetDateTime createdAt,
-                                                       OffsetDateTime lastModifiedAt, UserAccountEntity createdBy,
-                                                       UserAccountEntity lastModifiedBy) {
+                                                       OffsetDateTime lastModifiedAt, Integer createdById,
+                                                       Integer lastModifiedById) {
         super();
         setConfidenceScore(confidenceScore);
         setConfidenceReason(confidenceReason);
@@ -32,8 +31,8 @@ public class TestRetentionConfidenceCategoryMapperEntity extends RetentionConfid
         setDescription(description);
         setCreatedDateTime(createdAt);
         setLastModifiedDateTime(lastModifiedAt);
-        setCreatedBy(createdBy);
-        setLastModifiedBy(lastModifiedBy);
+        setCreatedById(createdById);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override
