@@ -51,6 +51,7 @@ import static org.mockito.Mockito.when;
 class ArmRpoPollServiceImplTest {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    private static final int BATCH_SIZE = 10;
 
     @Mock
     private ArmRpoApi armRpoApi;
