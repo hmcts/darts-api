@@ -13,8 +13,6 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.Duration;
 
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 class ArmRpoPollAutomatedTaskTest {
 
@@ -45,6 +43,6 @@ class ArmRpoPollAutomatedTaskTest {
         armRpoPollAutomatedTask.runTask();
 
         // then
-        verify(armRpoPollService, Mockito.times(1)).pollArmRpo(false, 0);
+        Mockito.verify(armRpoPollService, Mockito.times(1)).pollArmRpo(false, Duration.ofSeconds(5), 1);
     }
 }
