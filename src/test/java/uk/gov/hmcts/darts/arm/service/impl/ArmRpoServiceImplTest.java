@@ -49,6 +49,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ArmRpoServiceImplTest {
 
+    private static final int BATCH_SIZE = 10;
+
     @Mock
     private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
 
@@ -71,7 +73,6 @@ class ArmRpoServiceImplTest {
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccountEntity;
-    private final int batchSize = 10;
 
     @BeforeEach
     void setUp() {
@@ -188,7 +189,7 @@ class ArmRpoServiceImplTest {
         File file = TestUtils.getFile("Tests/arm/rpo/armRpoCsvData.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize);
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), BATCH_SIZE);
 
         // then
         assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
@@ -205,16 +206,16 @@ class ArmRpoServiceImplTest {
     @Test
     void reconcileArmRpoCsvData_NoCsvFoundError() {
         // given
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = createExternalObjectDirectoryEntity(1);
+        createExternalObjectDirectoryEntity(1);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
         when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
         File file = new File("Tests/arm/rpo/noFile.csv");
-        
+
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize));
+            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), BATCH_SIZE));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
