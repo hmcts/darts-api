@@ -104,7 +104,8 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     }
 
     @Override
-    public void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles) {
+    public void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles,
+                                       int batchSize) {
         ObjectRecordStatusEntity armRpoPending = EodHelper.armRpoPendingStatus();
         StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO CSV Reconciliation: ");
 
@@ -116,6 +117,28 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
             armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()));
 
+        List<Integer> csvEodList = getEodsListFromCsvFiles(csvFiles, errorMessage);
+
+        externalObjectDirectoryEntities.forEach(
+            externalObjectDirectoryEntity -> {
+                if (csvEodList.contains(externalObjectDirectoryEntity.getId())) {
+                    externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
+                } else {
+                    externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
+                }
+            }
+        );
+
+        List<Integer> missingEods = csvEodList.stream()
+            .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
+            .collect(Collectors.toList());
+
+        log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
+
+        externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
+    }
+
+    private static List<Integer> getEodsListFromCsvFiles(List<File> csvFiles, StringBuilder errorMessage) {
         List<Integer> csvEodList = new ArrayList<>();
         Integer counter = 0;
         for (File csvFile : csvFiles) {
@@ -142,24 +165,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 throw new ArmRpoException(errorMessage.toString());
             }
         }
-
-        externalObjectDirectoryEntities.forEach(
-            externalObjectDirectoryEntity -> {
-                if (csvEodList.contains(externalObjectDirectoryEntity.getId())) {
-                    externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
-                } else {
-                    externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
-                }
-            }
-        );
-
-        List<Integer> missingEods = csvEodList.stream()
-            .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
-            .collect(Collectors.toList());
-
-        log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
-
-        externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
+        return csvEodList;
     }
 
 }

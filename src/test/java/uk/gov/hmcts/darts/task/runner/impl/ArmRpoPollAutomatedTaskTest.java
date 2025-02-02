@@ -42,6 +42,6 @@ class ArmRpoPollAutomatedTaskTest {
         armRpoPollAutomatedTask.runTask();
 
         // then
-        Mockito.verify(armRpoPollService, Mockito.times(1)).pollArmRpo(false, Duration.ofSeconds(5));
+        Mockito.verify(armRpoPollService, Mockito.times(1)).pollArmRpo(false, Duration.ofSeconds(5), 1);
     }
 }

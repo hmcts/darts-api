@@ -70,6 +70,7 @@ class ArmRpoServiceImplTest {
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccountEntity;
+    private final int batchSize = 10;
 
     @BeforeEach
     void setUp() {
@@ -186,7 +187,7 @@ class ArmRpoServiceImplTest {
         File file = TestUtils.getFile("Tests/arm/rpo/armRpoCsvData.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file));
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize);
 
         // then
         assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
@@ -211,7 +212,7 @@ class ArmRpoServiceImplTest {
         File file = new File("Tests/arm/rpo/noFile.csv");
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file)));
+            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
