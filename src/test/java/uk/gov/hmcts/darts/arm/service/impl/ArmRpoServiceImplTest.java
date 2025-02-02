@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -181,8 +182,8 @@ class ArmRpoServiceImplTest {
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
         when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
-        when(externalObjectDirectoryRepository.findByStatusAndIngestionDate(any(), any(), any()))
-            .thenReturn(externalObjectDirectoryEntities);
+        when(externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(any(), any(), any(), any()))
+            .thenReturn(externalObjectDirectoryEntities).thenReturn(Collections.emptyList());
 
         File file = TestUtils.getFile("Tests/arm/rpo/armRpoCsvData.csv");
 
@@ -193,9 +194,11 @@ class ArmRpoServiceImplTest {
         assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
         assertEquals(EodHelper.armReplayStatus(), externalObjectDirectoryEntity2.getStatus());
 
-        verify(externalObjectDirectoryRepository).findByStatusAndIngestionDate(EodHelper.armRpoPendingStatus(),
-                                                                               armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_END_HOUR),
-                                                                               armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_START_HOUR));
+        verify(externalObjectDirectoryRepository, times(2)).findByStatusAndIngestionDateTsWithPaging(
+            eq(EodHelper.armRpoPendingStatus()),
+            eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_END_HOUR)),
+            eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_START_HOUR)),
+            any());
         verify(externalObjectDirectoryRepository, times(1)).saveAllAndFlush(externalObjectDirectoryEntities);
     }
 
@@ -207,9 +210,8 @@ class ArmRpoServiceImplTest {
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
         when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
-        when(externalObjectDirectoryRepository.findByStatusAndIngestionDate(any(), any(), any()))
-            .thenReturn(Collections.singletonList(externalObjectDirectoryEntity));
         File file = new File("Tests/arm/rpo/noFile.csv");
+        
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize));
