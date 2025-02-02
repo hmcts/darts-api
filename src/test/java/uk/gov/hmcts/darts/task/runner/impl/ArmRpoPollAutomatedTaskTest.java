@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -12,6 +11,10 @@ import uk.gov.hmcts.darts.task.config.ArmRpoPollAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.Duration;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArmRpoPollAutomatedTaskTest {
@@ -29,8 +32,10 @@ class ArmRpoPollAutomatedTaskTest {
 
     @Test
     void runTask() {
-        armRpoPollAutomatedTaskConfig.setPollDuration(Duration.ofSeconds(5));
         // given
+        Duration pollDuration = Duration.ofSeconds(5);
+        when(armRpoPollAutomatedTaskConfig.getPollDuration()).thenReturn(pollDuration);
+
         ArmRpoPollingAutomatedTask armRpoPollAutomatedTask = new ArmRpoPollingAutomatedTask(
             automatedTaskRepository,
             armRpoPollAutomatedTaskConfig,
@@ -43,6 +48,6 @@ class ArmRpoPollAutomatedTaskTest {
         armRpoPollAutomatedTask.runTask();
 
         // then
-        Mockito.verify(armRpoPollService, Mockito.times(1)).pollArmRpo(false, Duration.ofSeconds(5), 1);
+        verify(armRpoPollService, times(1)).pollArmRpo(false, pollDuration, 0);
     }
 }

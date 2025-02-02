@@ -14,4 +14,5 @@ import java.time.Duration;
 public class ArmRpoPollAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
 
     private Duration pollDuration;
+
 }
