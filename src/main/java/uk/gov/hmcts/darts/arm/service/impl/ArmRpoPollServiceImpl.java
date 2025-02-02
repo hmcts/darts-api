@@ -51,7 +51,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     @Override
     public void pollArmRpo(boolean isManualRun, Duration pollDuration, int batchSize) {
-        log.info("Polling ARM RPO service - isManualRun: {}", isManualRun);
+        log.info("Polling ARM RPO - isManualRun: {} poll duration: {}, batchSize: {}", isManualRun, pollDuration, batchSize);
         setupFailedStatuses();
         setupAllowableInProgressStates();
         Integer executionId = null;
