@@ -50,7 +50,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private List<Integer> allowableInProgressStates;
 
     @Override
-    public void pollArmRpo(boolean isManualRun, Duration pollDuration) {
+    public void pollArmRpo(boolean isManualRun, Duration pollDuration, int batchSize) {
         log.info("Polling ARM RPO service - isManualRun: {}", isManualRun);
         setupFailedStatuses();
         setupAllowableInProgressStates();
@@ -96,7 +96,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 uniqueProductionName = armRpoExecutionDetailEntity.getProductionName();
             }
             if (createExportBasedOnSearchResultsTable) {
-                processProductions(bearerToken, executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity);
+                processProductions(bearerToken, executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity,
+                                   batchSize);
             } else {
                 log.warn("ARM RPO Polling is still in-progress for createExportBasedOnSearchResultsTable");
             }
@@ -120,7 +121,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     }
 
     private void processProductions(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount,
-                                    ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) throws IOException {
+                                    ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, int batchSize) throws IOException {
         // step to call ARM RPO API to get the extended productions by matter
         boolean getExtendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, productionName, userAccount);
         if (getExtendedProductionsByMatter) {
@@ -134,7 +135,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 // step to call ARM RPO API to remove the production
                 armRpoApi.removeProduction(bearerToken, executionId, userAccount);
                 log.debug("About to reconcile production files");
-                armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles);
+                armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles, batchSize);
             } else {
                 log.warn("No production export files found");
             }
@@ -208,7 +209,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     private ArmRpoExecutionDetailEntity getArmRpoExecutionDetailEntity(boolean isManualRun) {
         var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity();
-        if (isNull(armRpoExecutionDetailEntity)) {
+        if (isNull(armRpoExecutionDetailEntity) || isNull(armRpoExecutionDetailEntity.getArmRpoState())) {
             return null;
         }
 
@@ -229,20 +230,17 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     }
 
     private boolean pollServiceFailed(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
-            && ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId())
+        return ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId())
             && allowableFailedStates.contains(armRpoExecutionDetailEntity.getArmRpoState().getId());
     }
 
     private boolean pollServiceInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetail) {
-        return nonNull(armRpoExecutionDetail.getArmRpoState())
-            && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetail.getArmRpoStatus().getId())
+        return ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetail.getArmRpoStatus().getId())
             && allowableInProgressStates.contains(armRpoExecutionDetail.getArmRpoState().getId());
     }
 
     private boolean saveBackgroundSearchCompleted(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
-        return nonNull(armRpoExecutionDetailEntity.getArmRpoState())
-            && ArmRpoHelper.saveBackgroundSearchRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
+        return ArmRpoHelper.saveBackgroundSearchRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
             && ArmRpoHelper.completedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
     }
 }

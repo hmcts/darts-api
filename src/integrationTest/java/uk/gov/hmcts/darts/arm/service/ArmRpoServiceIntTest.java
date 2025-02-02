@@ -46,6 +46,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private MediaEntity media1;
     private MediaEntity media2;
+    private int batchSize = 10;
 
     @BeforeEach
     void setUp() {
@@ -116,7 +117,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvData.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file));
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList1 = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -161,7 +162,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvData.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file));
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList1 = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -197,7 +198,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvData.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file));
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -225,7 +226,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvDataNotFoundEods.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file));
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -253,7 +254,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvDataNotFoundEods.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file));
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), batchSize);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()

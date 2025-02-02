@@ -4,6 +4,6 @@ import java.time.Duration;
 
 public interface ArmRpoPollService {
 
-    void pollArmRpo(boolean isManualRun, Duration pollDuration);
+    void pollArmRpo(boolean isManualRun, Duration pollDuration, int batchSize);
 
 }
