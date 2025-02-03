@@ -49,7 +49,7 @@ class ArmRpoReplayServiceImplTest {
     void replayArmRpo_noEodsFound() {
         // given
         ArmAutomatedTaskEntity armAutomatedTaskEntity = mock(ArmAutomatedTaskEntity.class);
-        when(automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME))
+        when(automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.ARM_RPO_REPLAY_TASK_NAME))
             .thenReturn(armAutomatedTaskEntity);
         when(externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
             any(), any(), any(), any(), any(Limit.class)
@@ -70,7 +70,7 @@ class ArmRpoReplayServiceImplTest {
         OffsetDateTime endTs = OffsetDateTime.now().plusHours(10);
         when(armAutomatedTaskEntity.getArmReplayStartTs()).thenReturn(startTs);
         when(armAutomatedTaskEntity.getArmReplayEndTs()).thenReturn(endTs);
-        when(automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME))
+        when(automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.ARM_RPO_REPLAY_TASK_NAME))
             .thenReturn(armAutomatedTaskEntity);
         when(externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
             any(), eq(startTs), eq(endTs), any(), any(Limit.class)

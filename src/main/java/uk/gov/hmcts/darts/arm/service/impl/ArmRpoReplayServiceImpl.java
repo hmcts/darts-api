@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 
 import java.util.List;
 
-import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_REPLAY_TASK_NAME;
 
 @Service
 @Slf4j
@@ -34,7 +34,7 @@ public class ArmRpoReplayServiceImpl implements ArmRpoReplayService {
     @Transactional
     @Override
     public void replayArmRpo(int batchSize) {
-        ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTaskService.getArmAutomatedTaskEntity(PROCESS_E2E_ARM_PENDING_TASK_NAME);
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTaskService.getArmAutomatedTaskEntity(ARM_RPO_REPLAY_TASK_NAME);
 
         List<Integer> eodIdsToBeUpdated = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
             EodHelper.armRpoPendingStatus(),

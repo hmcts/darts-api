@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_REPLAY_TASK_NAME;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
 @Slf4j
@@ -89,7 +90,8 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
     }
 
     private void populateArmAutomatedTaskEntity() {
-        ArmAutomatedTaskEntity taskEntity = dartsPersistence.getArmAutomatedTaskRepository().findById(1).orElseThrow();
+        ArmAutomatedTaskEntity taskEntity = dartsPersistence.getArmAutomatedTaskRepository()
+            .findByAutomatedTask_taskName(ARM_RPO_REPLAY_TASK_NAME.getTaskName()).orElseThrow();
         taskEntity.setArmReplayStartTs(startTs);
         taskEntity.setArmReplayEndTs(endTs);
         armAutomatedTaskEntity = dartsPersistence.getArmAutomatedTaskRepository().saveAndFlush(taskEntity);

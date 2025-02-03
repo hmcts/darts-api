@@ -84,7 +84,7 @@ class ArmRpoReplayAutomatedTaskTest {
         when(armAutomatedTaskEntity.getArmReplayStartTs()).thenReturn(startTs);
         when(armAutomatedTaskEntity.getArmReplayEndTs()).thenReturn(endTs);
 
-        when(automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME))
+        when(automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.ARM_RPO_REPLAY_TASK_NAME))
             .thenReturn(armAutomatedTaskEntity);
         when(externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
             EodHelper.armRpoPendingStatus(),
@@ -101,7 +101,7 @@ class ArmRpoReplayAutomatedTaskTest {
         armRpoReplayAutomatedTask.runTask();
 
         // then
-        verify(automatedTaskService).getArmAutomatedTaskEntity(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME);
+        verify(automatedTaskService).getArmAutomatedTaskEntity(AutomatedTaskName.ARM_RPO_REPLAY_TASK_NAME);
         verify(armAutomatedTaskEntity).getArmReplayStartTs();
         verify(armAutomatedTaskEntity).getArmReplayEndTs();
         verify(userIdentity).getUserAccount();
