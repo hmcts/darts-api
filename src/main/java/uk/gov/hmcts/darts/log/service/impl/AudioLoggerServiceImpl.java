@@ -26,7 +26,7 @@ public class AudioLoggerServiceImpl implements AudioLoggerService {
     @Override
     public void addAudioSmallFileWithLongDuration(String courthouse, String courtroom, OffsetDateTime startDate, OffsetDateTime finishDate,
                                                   Integer medId, Long fileSize) {
-        log.warn("Audio file size problem: courthouse={}, courtroom={}, started_at={}, ended_at={}, med_id={} file_size={}",
+        log.warn("Audio file size problem: courthouse={}, courtroom={}, started_at={}, ended_at={}, med_id={}, file_size={}",
                  DataUtil.toUpperCase(courthouse),
                  DataUtil.toUpperCase(courtroom),
                  getDateTimeIsoFormatted(startDate),
