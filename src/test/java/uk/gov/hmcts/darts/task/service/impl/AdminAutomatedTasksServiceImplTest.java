@@ -208,7 +208,7 @@ class AdminAutomatedTasksServiceImplTest {
 
         verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
         verify(automatedTaskRepository).save(automatedTaskEntity);
-        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Arm reply start ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - ARM replay start ts updated");
         verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv start hour updated");
         verifyNoMoreInteractions(auditApi);
     }
