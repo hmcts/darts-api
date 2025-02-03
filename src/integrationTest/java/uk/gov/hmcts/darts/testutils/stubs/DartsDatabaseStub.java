@@ -93,6 +93,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -207,6 +208,7 @@ public class DartsDatabaseStub {
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
     private final RetentionConfidenceCategoryMapperRepository retentionConfidenceCategoryMapperRepository;
+    private final TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -281,6 +283,7 @@ public class DartsDatabaseStub {
     public void clearDatabaseInThisOrder() {
         TestUtils.retryLoop(10, 500, () -> {
             removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
+            transcriptionLinkedCaseRepository.deleteAll();
             dataAnonymisationRepository.deleteAll();
             armRpoExecutionDetailRepository.deleteAll();
             objectAdminActionRepository.deleteAll();
