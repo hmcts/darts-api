@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.nonNull;
@@ -102,7 +101,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
 
             try {
-                AsyncUtil.invokeAllAwaitTermination(tasks, automatedTaskConfigurationProperties.getThreads(), 90, TimeUnit.MINUTES);
+                AsyncUtil.invokeAllAwaitTermination(tasks, automatedTaskConfigurationProperties);
             } catch (Exception e) {
                 log.error("Dets to arm batch unexpected exception", e);
                 if (e instanceof InterruptedException) {
