@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.envers.AuditTable;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
@@ -284,6 +285,7 @@ public class DartsDatabaseStub {
         TestUtils.retryLoop(10, 500, () -> {
             removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
             transcriptionLinkedCaseRepository.deleteAll();
+            removeAudits(UserAccountEntity.class);
             dataAnonymisationRepository.deleteAll();
             armRpoExecutionDetailRepository.deleteAll();
             objectAdminActionRepository.deleteAll();
@@ -322,6 +324,15 @@ public class DartsDatabaseStub {
             transcriptionRepository.deleteAll();
             transcriptionWorkflowRepository.deleteAll();
             retentionConfidenceCategoryMapperRepository.deleteAll();
+        });
+    }
+
+    private void removeAudits(Class<?>... classes) {
+        entityManager.createNativeQuery("UPDATE darts.revinfo set audit_user = null").executeUpdate();
+        stream(classes).forEach(tClass -> {
+            AuditTable table = tClass.getAnnotation(AuditTable.class);
+            entityManager.createNativeQuery("delete from darts." + table.value())
+                .executeUpdate();
         });
     }
 
