@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -34,7 +34,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
 
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
-    @SpyBean
+    @MockitoSpyBean
     ExternalObjectDirectoryRepository eodRepository;
 
     @Autowired

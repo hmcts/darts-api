@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.casedocument.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
 import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
@@ -26,9 +26,9 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("checkstyle:linelength")
 class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
-    @SpyBean
+    @MockitoSpyBean
     ExternalObjectDirectoryRepository eodRepository;
-    @SpyBean
+    @MockitoSpyBean
     CaseDocumentRepository caseDocumentRepository;
     @Autowired
     CourtCaseStub courtCaseStub;

@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.arm.rpo;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
@@ -24,10 +24,10 @@ class ArmRpoApiGetExtendedProductionsByMatterIntTest extends IntegrationBase {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
     public static final String END_PRODUCTION_TIME = "2025-01-16T12:30:09.9129726+00:00";
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
 
-    @MockBean
+    @MockitoBean
     private ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @Autowired
