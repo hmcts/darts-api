@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.repository;
 import jakarta.persistence.Column;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -82,7 +81,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         String courtroomName,
         LocalDate hearingStartDate,
         LocalDate hearingEndDate,
-        Pageable pageable);
+        Limit limit);
 
     @Query(value = """
         SELECT distinct e2.event_id

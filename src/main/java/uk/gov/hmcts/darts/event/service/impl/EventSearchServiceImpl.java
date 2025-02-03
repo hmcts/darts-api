@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -37,10 +37,10 @@ public class EventSearchServiceImpl implements EventSearchService {
             adminEventSearch.getCourtroomName(),
             adminEventSearch.getHearingStartAt(),
             adminEventSearch.getHearingEndAt(),
-            PageRequest.of(0, maxResults)
+            Limit.of(maxResults + 1)
         );
 
-        if (eventSearchResults.hasNext()) {
+        if (eventSearchResults.getSize() > maxResults) {
             throw new DartsApiException(
                 TOO_MANY_SEARCH_RESULTS,
                 "Number of results exceeded " + maxResults + " please narrow your search."
@@ -54,7 +54,7 @@ public class EventSearchServiceImpl implements EventSearchService {
 
     private static List<Integer> getNonEmptyOrNull(List<Integer> integerList) {
         if (integerList != null && integerList.isEmpty()) {
-           return null;
+            return null;
         }
         return integerList;
     }
