@@ -65,9 +65,8 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                 }
             }
             archiveRecordsString = archiveRecordsStringBuilder.toString();
-            log.info("Contents of manifest file {} for EOD {}\n{}",
+            log.info("Contents of manifest file {} \n{}",
                      archiveFileName,
-                     archiveRecords.get(0).getArchiveRecordOperation().getRelationId(),
                      archiveRecordsString);
         }
         return archiveRecordsString;

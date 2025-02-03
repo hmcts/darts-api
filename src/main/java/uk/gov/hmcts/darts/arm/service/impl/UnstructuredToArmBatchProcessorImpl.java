@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -123,13 +122,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
 
         try {
-            if (CollectionUtils.isNotEmpty(batchItems.getFailed())) {
-                batchItems.getFailed().forEach(batchItem -> {
-                    var eod = batchItem.getArmEod();
-                    eod.setManifestFile(null);
-                    externalObjectDirectoryRepository.save(eod);
-                });
-            }
             if (!batchItems.getSuccessful().isEmpty()) {
                 String manifestFileContents = unstructuredToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
                 unstructuredToArmHelper.copyMetadataToArm(manifestFileContents, archiveRecordsFileName);
@@ -140,9 +132,13 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             return;
         }
 
-        for (var batchItem : batchItems.getSuccessful()) {
-            unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
-            logApi.armPushSuccessful(batchItem.getArmEod().getId());
+        for (var batchItem : batchItems.getItems()) {
+            if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null) {
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
+                logApi.armPushSuccessful(batchItem.getArmEod().getId());
+            } else {
+                recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
+            }
         }
     }
 

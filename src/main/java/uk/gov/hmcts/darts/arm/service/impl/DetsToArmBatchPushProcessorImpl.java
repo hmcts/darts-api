@@ -26,7 +26,6 @@ import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.DetsToArmPushAutomatedTaskConfig;
@@ -56,7 +55,6 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     private final LogApi logApi;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final FileOperationService fileOperationService;
     private final ArmDataManagementApi armDataManagementApi;
     private final DetsToArmProcessorConfiguration detsToArmProcessorConfiguration;
     private final ObjectStateRecordRepository objectStateRecordRepository;
@@ -99,7 +97,6 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                     return null;
                 })
                 .toList();
-
 
             try {
                 AsyncUtil.invokeAllAwaitTermination(tasks, automatedTaskConfigurationProperties);
@@ -150,7 +147,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         var batchItems = new ArmBatchItems();
 
         for (var currentEod : eodsForBatch) {
-            ObjectStateRecordEntity objectStateRecord = null;
+            ObjectStateRecordEntity objectStateRecord;
             var batchItem = new ArmBatchItem();
             try {
                 ExternalObjectDirectoryEntity armEod;
@@ -194,9 +191,13 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             return;
         }
 
-        for (var batchItem : batchItems.getSuccessful()) {
-            dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
-            logApi.armPushSuccessful(batchItem.getArmEod().getId());
+        for (var batchItem : batchItems.getItems()) {
+            if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null) {
+                dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
+                logApi.armPushSuccessful(batchItem.getArmEod().getId());
+            } else {
+                dataStoreToArmHelper.recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
+            }
         }
     }
 
@@ -269,10 +270,8 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 objectStateRecord.setObjectStatus(errorMessage);
             }
             objectStateRecordRepository.save(objectStateRecord);
-        } else {
-            if (nonNull(externalObjectDirectory)) {
-                log.error("Unable to find ObjectStateRecordEntity for ARM EOD ID: {}", externalObjectDirectory.getId());
-            }
+        } else if (nonNull(externalObjectDirectory)) {
+            log.error("Unable to find ObjectStateRecordEntity for ARM EOD ID: {}", externalObjectDirectory.getId());
         }
     }
 
