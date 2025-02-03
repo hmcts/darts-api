@@ -12,11 +12,13 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "transcription_linked_case")
 @Data
 @Builder
+@NoArgsConstructor
 public class TranscriptionLinkedCaseEntity {
 
     @Id
