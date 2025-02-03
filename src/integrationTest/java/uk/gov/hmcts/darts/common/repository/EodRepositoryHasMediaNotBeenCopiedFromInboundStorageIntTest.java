@@ -16,7 +16,6 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.DELETED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.NEW;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -96,7 +95,7 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
 
     @Test
     void testMediaInInboundNotStoredAndArm() {
-        eodStub.createAndSaveEod(media, DELETED, INBOUND);
+        eodStub.createAndSaveEod(media, NEW, INBOUND);
         eodStub.createAndSaveEod(media, ARM_INGESTION, ARM);
 
         var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,

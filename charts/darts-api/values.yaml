@@ -116,6 +116,7 @@ java:
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
     ARM_RPO_THREAD_SLEEP_DURATION: 60s
+    ARM_RPO_POLL_DURATION: 4h
 
 function:
   scaleType: Job
@@ -232,6 +233,7 @@ function:
     FEIGN_LOG_LEVEL: none
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
     ARM_RPO_THREAD_SLEEP_DURATION: 60s
+    ARM_RPO_POLL_DURATION: 4h
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:

@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.arm.rpo;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
@@ -29,7 +29,7 @@ import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS
 @SuppressWarnings("checkstyle:linelength")
 class ArmRpoApiGetProductionOutputFilesIntTest extends PostgresIntegrationBase {
 
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
 
     @Autowired

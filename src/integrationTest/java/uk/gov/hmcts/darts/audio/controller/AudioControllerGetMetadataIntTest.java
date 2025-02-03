@@ -5,13 +5,14 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -36,7 +37,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Test
@@ -94,6 +95,8 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         dartsPersistence.save(PersistableFactory.getExternalObjectDirectoryTestData().eodStoredInUnstructuredLocationForMedia(mediaChannel1));
+        dartsPersistence.save(
+            PersistableFactory.getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.DETS, mediaChannel2));
 
         var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
 
@@ -123,7 +126,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
                   "media_start_timestamp": "2023-01-01T12:05:00Z",
                   "media_end_timestamp": "2023-01-01T13:05:00Z",
                   "is_archived": false,
-                  "is_available": false
+                  "is_available": true
                 },
                 {
                   "id": 3,

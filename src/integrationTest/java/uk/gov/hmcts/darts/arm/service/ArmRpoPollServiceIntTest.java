@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
@@ -36,9 +36,13 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -67,24 +71,25 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     private static final int HTTP_STATUS_OK = 200;
     private static final int HTTP_STATUS_400 = 400;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
-    @MockBean
+    @MockitoBean
     private ArmApiServiceImpl armApiService;
-    @MockBean
+    @MockitoBean
     private ArmRpoDownloadProduction armRpoDownloadProduction;
-    @MockBean
+    @MockitoBean
     private ArmRpoUtil armRpoUtil;
 
-    @SpyBean
+    @MockitoSpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @TempDir
     protected File tempDirectory;
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private String uniqueProductionName;
+    private final Duration pollDuration = Duration.ofHours(4);
 
     @Autowired
     private ArmRpoPollServiceImpl armRpoPollService;
@@ -134,7 +139,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -183,7 +188,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -223,7 +228,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getCreateExportBasedOnSearchResultsTableResponseInProgress());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -247,6 +252,9 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setSearchId(SEARCH_ID);
         armRpoExecutionDetailEntity.setStorageAccountId(STORAGE_ACCOUNT_ID);
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
+        OffsetDateTime pollCreatedTs = OffsetDateTime.now().minusMinutes(10);
+        armRpoExecutionDetailEntity.setPollingCreatedAt(pollCreatedTs);
+        armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
         when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
@@ -268,13 +276,16 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
+        assertEquals(pollCreatedTs.truncatedTo(ChronoUnit.SECONDS),
+                     updatedArmRpoExecutionDetailEntity.get().getPollingCreatedAt().truncatedTo(ChronoUnit.SECONDS));
+        assertThat(updatedArmRpoExecutionDetailEntity.get().getProductionName()).contains(PRODUCTION_NAME);
 
         verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
         verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
@@ -318,7 +329,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -368,7 +379,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(true);
+        armRpoPollService.pollArmRpo(true, pollDuration);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
