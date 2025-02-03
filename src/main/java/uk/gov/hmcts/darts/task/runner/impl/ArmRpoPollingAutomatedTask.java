@@ -37,6 +37,6 @@ public class ArmRpoPollingAutomatedTask
 
     @Override
     protected void runTask() {
-        armRpoPollService.pollArmRpo(isManualRun());
+        armRpoPollService.pollArmRpo(isManualRun(), getConfig().getPollDuration());
     }
 }
