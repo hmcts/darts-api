@@ -9,5 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-public class InboundToUnstructuredAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
+public class InboundToUnstructuredAutomatedTaskConfig extends AbstractAsyncAutomatedTaskConfig {
 }
