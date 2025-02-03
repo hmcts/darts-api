@@ -9,13 +9,14 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
-import uk.gov.hmcts.darts.util.TestClock;
 
 import java.time.OffsetDateTime;
 import java.util.Locale;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AudioLoggerServiceImplTest {
 
@@ -46,7 +47,9 @@ class AudioLoggerServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        audioLoggerService = new AudioLoggerServiceImpl(new CurrentTimeHelper(new TestClock(STARTED_AT)));
+        CurrentTimeHelper currentTimeHelper = mock(CurrentTimeHelper.class);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(STARTED_AT);
+        audioLoggerService = new AudioLoggerServiceImpl(currentTimeHelper);
     }
 
     @Test

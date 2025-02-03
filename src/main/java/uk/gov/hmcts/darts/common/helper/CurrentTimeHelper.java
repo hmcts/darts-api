@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.helper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
@@ -15,14 +14,12 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class CurrentTimeHelper {
 
-    private final Clock clock;
-
     public OffsetDateTime currentOffsetDateTime() {
-        return OffsetDateTime.now(clock);
+        return OffsetDateTime.now();
     }
 
     public LocalDate currentLocalDate() {
-        return LocalDate.now(clock);
+        return LocalDate.now();
     }
 
 }
