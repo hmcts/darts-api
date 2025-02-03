@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 
 public interface ArmRpoApi {
@@ -29,9 +30,9 @@ public interface ArmRpoApi {
 
     boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
                                                   List<MasterIndexFieldByRecordClassSchema> headerColumns, String uniqueProductionName,
-                                                  UserAccountEntity userAccount);
+                                                  Duration pollDuration, UserAccountEntity userAccount);
 
-    boolean getExtendedProductionsByMatter(String bearerToken, Integer executionId, String uniqueProductionName, UserAccountEntity userAccount);
+    boolean getExtendedProductionsByMatter(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount);
 
     List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
