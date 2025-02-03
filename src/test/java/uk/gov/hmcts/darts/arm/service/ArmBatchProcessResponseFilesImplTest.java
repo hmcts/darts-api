@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,6 +120,11 @@ class ArmBatchProcessResponseFilesImplTest {
 
     }
 
+    @BeforeAll
+    public static void beforeAll() {
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+    }
+
     @AfterAll
     public static void close() {
         EOD_HELPER_MOCKS.close();
@@ -167,6 +173,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
+
 
         // then
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);
