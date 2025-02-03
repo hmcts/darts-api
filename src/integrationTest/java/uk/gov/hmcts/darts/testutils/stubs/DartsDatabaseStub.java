@@ -290,20 +290,6 @@ public class DartsDatabaseStub {
                              CaseDocumentEntity.class,
                              MediaEntity.class,
                              TranscriptionDocumentEntity.class);
-            removeAudits(UserAccountEntity.class,
-                         MediaRequestEntity.class,
-                         ArmAutomatedTaskEntity.class,
-                         AutomatedTaskEntity.class,
-                         CourthouseEntity.class,
-                         EventHandlerEntity.class,
-                         NodeRegisterEntity.class,
-                         RetentionPolicyTypeEntity.class,
-                         SecurityGroupEntity.class,
-                         TranscriptionCommentEntity.class,
-                         TranscriptionEntity.class,
-                         TranscriptionWorkflowEntity.class,
-                         UserAccountEntity.class);
-
             transcriptionLinkedCaseRepository.deleteAll();
             dataAnonymisationRepository.deleteAll();
             armRpoExecutionDetailRepository.deleteAll();
@@ -344,6 +330,22 @@ public class DartsDatabaseStub {
             transcriptionWorkflowRepository.deleteAll();
             retentionConfidenceCategoryMapperRepository.deleteAll();
         });
+    }
+
+    public void removeAllAudits() {
+        removeAudits(UserAccountEntity.class,
+                     MediaRequestEntity.class,
+                     ArmAutomatedTaskEntity.class,
+                     AutomatedTaskEntity.class,
+                     CourthouseEntity.class,
+                     EventHandlerEntity.class,
+                     NodeRegisterEntity.class,
+                     RetentionPolicyTypeEntity.class,
+                     SecurityGroupEntity.class,
+                     TranscriptionCommentEntity.class,
+                     TranscriptionEntity.class,
+                     TranscriptionWorkflowEntity.class,
+                     UserAccountEntity.class);
     }
 
     private void removeAudits(Class<?>... classes) {
@@ -1141,5 +1143,13 @@ public class DartsDatabaseStub {
             courthouseName,
             MediaLinkedCaseSourceType.LEGACY
         );
+    }
+
+    @Transactional
+    public void clearDb() {
+        resetSequences();
+        clearDatabaseInThisOrder();
+        resetTablesWithPredefinedTestData();
+        removeAllAudits();
     }
 }
