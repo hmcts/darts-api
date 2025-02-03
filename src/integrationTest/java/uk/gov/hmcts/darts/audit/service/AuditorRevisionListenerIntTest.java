@@ -52,8 +52,9 @@ class AuditorRevisionListenerIntTest extends PostgresIntegrationBase {
 
         AuditReader reader = AuditReaderFactory.get(sessionFactory.createEntityManager());
 
+
         List<Object[]> audits = reader.createQuery()
-            .forRevisionsOfEntity(UserAccountEntity.class, false, true)
+            .forRevisionsOfEntity(UserAccountEntity.class, false, false)
             .add(AuditEntity.property("id").eq(createdUser.getId()))
             .getResultList();
 
