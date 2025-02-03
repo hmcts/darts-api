@@ -9,16 +9,21 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.envers.AuditJoinTable;
 import org.hibernate.envers.AuditTable;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.util.AnnotationUtils;
 import org.springframework.data.history.Revisions;
+import org.springframework.data.util.ReflectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -283,9 +288,25 @@ public class DartsDatabaseStub {
     @Transactional
     public void clearDatabaseInThisOrder() {
         TestUtils.retryLoop(10, 500, () -> {
-            removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
+            removeDeleteFlag(AnnotationDocumentEntity.class,
+                             CaseDocumentEntity.class,
+                             MediaEntity.class,
+                             TranscriptionDocumentEntity.class);
+            removeAudits(UserAccountEntity.class,
+                         MediaRequestEntity.class,
+                         ArmAutomatedTaskEntity.class,
+                         AutomatedTaskEntity.class,
+                         CourthouseEntity.class,
+                         EventHandlerEntity.class,
+                         NodeRegisterEntity.class,
+                         RetentionPolicyTypeEntity.class,
+                         SecurityGroupEntity.class,
+                         TranscriptionCommentEntity.class,
+                         TranscriptionEntity.class,
+                         TranscriptionWorkflowEntity.class,
+                         UserAccountEntity.class);
+
             transcriptionLinkedCaseRepository.deleteAll();
-            removeAudits(UserAccountEntity.class);
             dataAnonymisationRepository.deleteAll();
             armRpoExecutionDetailRepository.deleteAll();
             objectAdminActionRepository.deleteAll();
@@ -328,12 +349,21 @@ public class DartsDatabaseStub {
     }
 
     private void removeAudits(Class<?>... classes) {
-        entityManager.createNativeQuery("UPDATE darts.revinfo set audit_user = null").executeUpdate();
         stream(classes).forEach(tClass -> {
             AuditTable table = tClass.getAnnotation(AuditTable.class);
-            entityManager.createNativeQuery("delete from darts." + table.value())
-                .executeUpdate();
+            if (table != null) {
+                entityManager.createNativeQuery("delete from darts." + table.value())
+                    .executeUpdate();
+            }
+            AnnotationUtils.findAnnotatedFields(tClass, AuditJoinTable.class, field -> true)
+                .forEach(field -> {
+                    AuditJoinTable auditJoinTable = field.getAnnotation(AuditJoinTable.class);
+                    entityManager.createNativeQuery("delete from darts." + auditJoinTable.name())
+                        .executeUpdate();
+                });
         });
+        entityManager.createNativeQuery("delete from darts.revinfo")
+            .executeUpdate();
     }
 
     @SafeVarargs
