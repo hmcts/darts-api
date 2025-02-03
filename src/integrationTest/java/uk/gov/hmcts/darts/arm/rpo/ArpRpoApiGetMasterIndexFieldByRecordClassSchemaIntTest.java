@@ -33,8 +33,7 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
 
     @Autowired
     private ArmRpoApi armRpoApi;
-
-
+    
     @Test
     void getMasterIndexFieldByRecordClassSchemaSuccess() {
 

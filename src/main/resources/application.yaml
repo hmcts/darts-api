@@ -378,6 +378,7 @@ darts:
           at-most-for: PT120M
       arm-rpo-poll:
         system-user-email: system_ArmRpoPolling@hmcts.net
+        poll-duration: ${ARM_RPO_POLL_DURATION:4h}
         lock:
           at-least-for: PT1M
           at-most-for: PT30M
@@ -436,6 +437,7 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
+        async-timeout: 90M
       external-datastore-deleter:
         system-user-email: system_ExternalDataStoreDeleter@hmcts.net
         lock:
@@ -470,6 +472,7 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
+        async-timeout: 60M
       manual-deletion:
         system-user-email: system_ManualDeletion@hmcts.net
         lock:

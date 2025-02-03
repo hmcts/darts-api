@@ -12,15 +12,14 @@ import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -29,8 +28,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -111,10 +108,11 @@ public class AudioServiceImpl implements AudioService {
     public void setIsAvailable(List<AudioMetadata> audioMetadataList) {
         if (!isEmpty(audioMetadataList)) {
             List<Integer> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
-            ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
-            ExternalLocationTypeEntity unstructuredLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
-            List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(mediaIdList, storedStatus,
-                                                                                                                                unstructuredLocationType);
+            List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(
+                mediaIdList,
+                EodHelper.storedStatus(),
+                EodHelper.unstructuredLocation(), EodHelper.detsLocation());
+
             for (AudioMetadata audioMetadataItem : audioMetadataList) {
                 audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));
             }
