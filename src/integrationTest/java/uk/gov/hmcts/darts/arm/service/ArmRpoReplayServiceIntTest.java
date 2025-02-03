@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -24,7 +24,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 @Slf4j
 class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     private final OffsetDateTime startTs = OffsetDateTime.now().minusMinutes(60);
