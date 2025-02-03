@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -114,7 +114,8 @@ class DetsToArmBatchPushProcessorImplTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        lenient().when(detsToArmPushAutomatedTaskConfig.getThreads()).thenReturn(2);
+        lenient().when(detsToArmPushAutomatedTaskConfig.getThreads()).thenReturn(1);
+        lenient().when(detsToArmPushAutomatedTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
         detsToArmBatchPushProcessor = new DetsToArmBatchPushProcessorImpl(
             archiveRecordService,
             dataStoreToArmHelper,
@@ -261,7 +262,7 @@ class DetsToArmBatchPushProcessorImplTest {
         doReturn(List.of(1)).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
 
         try (MockedStatic<AsyncUtil> asyncUtilMockedStatic = Mockito.mockStatic(AsyncUtil.class)) {
-            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), anyInt(), anyLong(), any()))
+            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), any()))
                 .thenThrow(new RuntimeException("Test exception"));
             detsToArmBatchPushProcessor.processDetsToArm(5);
             LogUtil.waitUntilMessage(output, "Dets to arm batch unexpected exception", 5);

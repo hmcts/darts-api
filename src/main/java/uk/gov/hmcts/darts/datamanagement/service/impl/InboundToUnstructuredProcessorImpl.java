@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -15,11 +14,11 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
+import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
 import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -53,9 +52,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final InboundToUnstructuredProcessorSingleElement singleElementProcessor;
-
-    @Value("${darts.automated.task.inbound-to-unstructured.threads:20}")
-    private final Integer threads;
+    private final InboundToUnstructuredAutomatedTaskConfig asyncTaskConfig;
 
 
     @Override
@@ -75,7 +72,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 return null;
             }).toList();
         try {
-            AsyncUtil.invokeAllAwaitTermination(tasks, threads, 1, TimeUnit.HOURS);
+            AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
         } catch (Exception e) {
             log.error("Inbound to Unstructured unexpected exception", e);
             if (e instanceof InterruptedException) {
