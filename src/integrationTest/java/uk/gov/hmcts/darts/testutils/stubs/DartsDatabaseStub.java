@@ -1151,6 +1151,6 @@ public class DartsDatabaseStub {
         resetSequences();
         clearDatabaseInThisOrder();
         resetTablesWithPredefinedTestData();
-        removeAllAudits();
+        removeAllAudits();//Ensures any newly added delete audits are removed
     }
 }
