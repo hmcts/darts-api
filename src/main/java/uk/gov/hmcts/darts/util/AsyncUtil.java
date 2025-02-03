@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -29,6 +30,11 @@ public final class AsyncUtil {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+
+    public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
+                                                 AsyncTaskConfig config) throws InterruptedException {
+        invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
