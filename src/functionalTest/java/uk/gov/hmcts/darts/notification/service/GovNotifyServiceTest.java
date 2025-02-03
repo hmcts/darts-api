@@ -111,7 +111,7 @@ class GovNotifyServiceTest {
         compare("""
                     Your transcript request for case ID TheCaseId at TheCourthouse has been completed and is available for download.
 
-                    To access the transcript, [Sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
+                    To access the transcript, [sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
     }
 
     @Test
