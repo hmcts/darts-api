@@ -412,47 +412,46 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     default List<Integer> findEodsNotInOtherStorage(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                     ExternalLocationTypeEntity notExistsLocation, Integer limitRecords) {
         Set<Integer> results = new HashSet<>();//Ensures no duplicates
-        results.addAll(findEodsNotInOtherStorageOnlyMedia(status, type, notExistsLocation, limitRecords));
+        results.addAll(findEodsNotInOtherStorageOnlyMedia(status.getId(), type.getId(), notExistsLocation.getId(), limitRecords));
         if (results.size() < limitRecords) {
-            results.addAll(findEodsNotInOtherStorageExcludingMedia(status, type, notExistsLocation, limitRecords - results.size()));
+            results.addAll(findEodsNotInOtherStorageExcludingMedia(status.getId(), type.getId(), notExistsLocation.getId(), limitRecords - results.size()));
         }
         return new ArrayList<>(results);
     }
 
     @Query(
-        """
-            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status = :status
-            AND eod.externalLocationType = :type
-            AND eod.media is not null          
-            AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
-            WHERE eod2.externalLocationType = :notExistsLocation
-            AND eod.media = eod2.media)
-            ORDER BY eod.id
-            LIMIT :limitRecords
-            """
+        value = """
+            select eode1_0.eod_id from darts.external_object_directory eode1_0
+            where eode1_0.ors_id=:status
+            and eode1_0.elt_id=:type
+            and eode1_0.med_id is not null 
+            and not exists(select 1 from darts.external_object_directory eode2_0 
+                where eode2_0.elt_id=:notExistsLocation 
+                and eode1_0.med_id=eode2_0.med_id)
+            fetch first :limitRecords rows only                 
+            """,
+        nativeQuery = true
     )
-    List<Integer> findEodsNotInOtherStorageOnlyMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
-                                                     ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
-
+    List<Integer> findEodsNotInOtherStorageOnlyMedia(Integer status, Integer type,
+                                                     Integer notExistsLocation, Integer limitRecords);
 
     @Query(
-        """
-            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status = :status
-            AND eod.externalLocationType = :type
-            AND eod.media is null          
-            AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
-            where eod2.externalLocationType = :notExistsLocation
-            and ((eod.transcriptionDocumentEntity is not null and eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
-              OR (eod.annotationDocumentEntity is not null and eod.annotationDocumentEntity = eod2.annotationDocumentEntity)
-              OR (eod.caseDocument is not null and eod.caseDocument = eod2.caseDocument )))
-            order by eod.id
-            LIMIT :limitRecords
-            """
+        value = """
+            select eode1_0.eod_id from darts.external_object_directory eode1_0
+            where eode1_0.ors_id=:status
+            and eode1_0.elt_id=:type
+            and eode1_0.med_id is null 
+            and not exists(select 1 from darts.external_object_directory eode2_0 
+                where eode2_0.elt_id=:notExistsLocation 
+                and ((eode1_0.trd_id is not null and eode1_0.trd_id = eode2_0.trd_id)
+                    or (eode1_0.ado_id is not null and eode1_0.ado_id = eode2_0.ado_id)
+                    or (eode1_0.cad_id is not null and eode1_0.cad_id = eode2_0.cad_id)))
+            fetch first :limitRecords rows only                 
+            """,
+        nativeQuery = true
     )
-    List<Integer> findEodsNotInOtherStorageExcludingMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
-                                                          ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
+    List<Integer> findEodsNotInOtherStorageExcludingMedia(Integer status, Integer type,
+                                                          Integer notExistsLocation, Integer limitRecords);
 
     @Query(
         """
