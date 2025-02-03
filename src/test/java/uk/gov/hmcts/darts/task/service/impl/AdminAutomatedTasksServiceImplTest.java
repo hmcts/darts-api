@@ -167,8 +167,8 @@ class AdminAutomatedTasksServiceImplTest {
 
         verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB, "some-task-name disabled");
         verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Batch size updated");
-        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Arm reply start ts updated");
-        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Arm reply end ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - ARM replay start ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - ARM replay end ts updated");
         verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv start hour updated");
         verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv end hour updated");
         verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
