@@ -28,7 +28,6 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -54,7 +53,6 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -81,8 +79,6 @@ class DetsToArmBatchPushProcessorImplTest {
 
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntityDets;
 
-    @Mock
-    private FileOperationService fileOperationService;
     @Mock
     private ArchiveRecordService archiveRecordService;
     @Mock
@@ -123,7 +119,6 @@ class DetsToArmBatchPushProcessorImplTest {
             logApi,
             armDataManagementConfiguration,
             externalObjectDirectoryRepository,
-            fileOperationService,
             armDataManagementApi,
             detsToArmProcessorConfiguration,
             objectStateRecordRepository,
@@ -171,7 +166,6 @@ class DetsToArmBatchPushProcessorImplTest {
         }
         externalObjectDirectoryEntityArm.setManifestFile(manifestFile.getName());
 
-        lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFile.toPath());
         lenient().when(detsToArmProcessorConfiguration.getManifestFilePrefix()).thenReturn("DETS");
     }
 
@@ -256,7 +250,7 @@ class DetsToArmBatchPushProcessorImplTest {
     }
 
     @Test
-    void processDetsToArm_asyncException(CapturedOutput output) throws Exception {
+    void processDetsToArm_asyncException(CapturedOutput output) {
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
         detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
         doReturn(List.of(1)).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
@@ -265,11 +259,11 @@ class DetsToArmBatchPushProcessorImplTest {
             asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), any()))
                 .thenThrow(new RuntimeException("Test exception"));
             detsToArmBatchPushProcessor.processDetsToArm(5);
-            LogUtil.waitUntilMessage(output, "Dets to arm batch unexpected exception", 5);
+            LogUtil.waitUntilMessage(output, "DETS to ARM batch unexpected exception", 5);
 
             assertThat(output)
-                .contains("Dets to arm batch unexpected exception")
-                .contains("DetsToArmBatchPushProcessorImpljava.lang.RuntimeException: Test exception");
+                .contains("DETS to ARM batch unexpected exception")
+                .contains("DETSToArmBatchPushProcessorImpljava.lang.RuntimeException: Test exception");
         }
     }
 }
