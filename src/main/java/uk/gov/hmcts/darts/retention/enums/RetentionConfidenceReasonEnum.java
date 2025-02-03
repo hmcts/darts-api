@@ -7,5 +7,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum RetentionConfidenceReasonEnum {
 
-    CASE_CLOSED, MANUAL_OVERRIDE, AGED_CASE;
+    // Modernised values
+    CASE_CLOSED, MANUAL_OVERRIDE, AGED_CASE,
+
+    // Legacy values
+    MAX_EVENT_CLOSED,
+    MAX_MEDIA_CLOSED,
+    CASE_CREATION_CLOSED;
+
 }

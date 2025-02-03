@@ -22,6 +22,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.when;
 class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    private static final String BEARER_TOKEN = "token";
 
     @Mock
     private ArmRpoClient armRpoClient;
@@ -50,15 +53,19 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
     private ArmRpoApiImpl armRpoApi;
 
+    @Mock
     private UserAccountEntity userAccount;
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
+
     private static final Integer EXECUTION_ID = 1;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
+    private final Duration pollDuration = Duration.ofHours(4);
 
     @BeforeEach
     void setUp() {
         var armAutomatedTaskRepository = mock(ArmAutomatedTaskRepository.class);
-        var currentTimeHelper = mock(CurrentTimeHelper.class);
         var armRpoDownloadProduction = mock(ArmRpoDownloadProduction.class);
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
@@ -76,23 +83,23 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         armRpoExecutionDetailEntity.setProductionId("productionId");
         armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
+
     }
 
     @Test
     void createExportBasedOnSearchResultsTable_Success() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(200);
-        response.setIsError(false);
-        response.setResponseStatus(0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(200, false, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
         boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
-            "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount);
+            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertTrue(result);
+        // assert that the productionName of armRpoExecutionDetailEntity contains the production name
+        assertThat(armRpoExecutionDetailEntity.getProductionName(), containsString(PRODUCTION_NAME));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
@@ -104,15 +111,12 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ReturnsInProgress() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(400);
-        response.setIsError(false);
-        response.setResponseStatus(2);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
         boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
-            "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount);
+            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertFalse(result);
@@ -120,6 +124,51 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ReturnsInProgress_WithPollingCreatedTimestampInRange() {
+        // given
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now());
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        // when
+        boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
+            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
+
+        // then
+        assertFalse(result);
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ThrowsException_WhenPollingCreatedTimestampOutOfRange() {
+        // given
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusHours(5));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.createExportBasedOnSearchResultsTable(
+                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM createExportBasedOnSearchResultsTable: Polling can only run for a maximum of"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -132,7 +181,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // when
         boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
-            "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount);
+            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertFalse(result);
@@ -147,15 +196,12 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus200IsErrorTrueResponseStatusZero() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(200);
-        response.setIsError(true);
-        response.setResponseStatus(0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(200, true, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -180,7 +226,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.createExportBasedOnSearchResultsTable(
-                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -198,16 +244,13 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus400IsErrorTrueResponseStatusZero() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(400);
-        response.setIsError(true);
-        response.setResponseStatus(0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, true, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.createExportBasedOnSearchResultsTable(
-                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -231,7 +274,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -249,15 +292,12 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus400IsErrorFalseResponseStatusZero() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(400);
-        response.setIsError(false);
-        response.setResponseStatus(0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -281,7 +321,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -299,15 +339,12 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus500IsErrorFalseResponseStatus500() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(500);
-        response.setIsError(false);
-        response.setResponseStatus(500);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(500, false, 500);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -331,7 +368,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -354,7 +391,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.createExportBasedOnSearchResultsTable(
-                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -377,7 +414,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.createExportBasedOnSearchResultsTable(
-                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -401,7 +438,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -425,7 +462,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -449,7 +486,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+            armRpoApi.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -474,7 +511,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.createExportBasedOnSearchResultsTable(
-                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -499,7 +536,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.createExportBasedOnSearchResultsTable(
-                "token", 1, createHeaderColumns(), PRODUCTION_NAME, userAccount));
+                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -545,6 +582,14 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
             .isMasked(isMasked)
             .build();
 
+    }
+
+    private CreateExportBasedOnSearchResultsTableResponse createResponse(int status, boolean isError, int responseStatus) {
+        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
+        response.setStatus(status);
+        response.setIsError(isError);
+        response.setResponseStatus(responseStatus);
+        return response;
     }
 
     @AfterAll

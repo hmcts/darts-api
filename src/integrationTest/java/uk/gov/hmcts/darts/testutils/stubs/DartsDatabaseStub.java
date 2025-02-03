@@ -93,6 +93,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -207,6 +208,7 @@ public class DartsDatabaseStub {
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
     private final RetentionConfidenceCategoryMapperRepository retentionConfidenceCategoryMapperRepository;
+    private final TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -281,6 +283,7 @@ public class DartsDatabaseStub {
     public void clearDatabaseInThisOrder() {
         TestUtils.retryLoop(10, 500, () -> {
             removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
+            transcriptionLinkedCaseRepository.deleteAll();
             dataAnonymisationRepository.deleteAll();
             armRpoExecutionDetailRepository.deleteAll();
             objectAdminActionRepository.deleteAll();
@@ -825,33 +828,32 @@ public class DartsDatabaseStub {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity =
             getRetentionPolicyTypeEntity(RetentionPolicyEnum.MANUAL);
 
-        CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
+        CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(courtCase, retentionPolicyTypeEntity, "a_state");
         caseRetentionEntity1 = dartsDatabaseSaveStub.save(caseRetentionEntity1);
         Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
-        CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(2, courtCase, retentionPolicyTypeEntity, "b_state");
+        CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(courtCase, retentionPolicyTypeEntity, "b_state");
         caseRetentionEntity2 = dartsDatabaseSaveStub.save(caseRetentionEntity2);
         Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
-        CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity, "c_state");
+        CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(courtCase, retentionPolicyTypeEntity, "c_state");
         caseRetentionEntity3 = dartsDatabaseSaveStub.save(caseRetentionEntity3);
         Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
         return List.of(caseRetentionEntity1, caseRetentionEntity2, caseRetentionEntity3);
     }
 
-    public CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
+    public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
                                                          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
 
-        return createCaseRetentionObject(id, courtCase,
+        return createCaseRetentionObject(courtCase,
                                          OffsetDateTime.now().plusYears(7),
                                          retentionPolicyTypeEntity, state, false);
     }
 
-    public CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
+    public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
                                                          OffsetDateTime retainUntil,
                                                          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state,
                                                          boolean save) {
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
         caseRetentionEntity.setCourtCase(courtCase);
-        caseRetentionEntity.setId(id);
         caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
         caseRetentionEntity.setTotalSentence("10y0m0d");
         caseRetentionEntity.setRetainUntil(retainUntil);

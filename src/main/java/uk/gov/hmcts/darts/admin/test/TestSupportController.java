@@ -468,10 +468,11 @@ public class TestSupportController {
         courtCase.setCaseNumber(caseNumber);
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
+        UserAccountEntity userAccount = userAccountRepository.getReferenceById(0);
 
-        courtCase.setCreatedBy(userAccountRepository.getReferenceById(0));
+        courtCase.setCreatedBy(userAccount);
         courtCase.setCreatedDateTime(OffsetDateTime.now());
-        courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        courtCase.setLastModifiedBy(userAccount);
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
         String courtroomName = "FUNC-" + randomAlphanumeric(7).toUpperCase(Locale.ENGLISH);
@@ -487,17 +488,16 @@ public class TestSupportController {
         if (retentionPolicyTypeEntity.isPresent()) {
             CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
             caseRetentionEntity.setCourtCase(courtCase);
-            caseRetentionEntity.setId(1);
             caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity.get());
             caseRetentionEntity.setTotalSentence("10y0m0d");
-            caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
+            caseRetentionEntity.setSubmittedBy(userAccount);
             caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
             caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
             caseRetentionEntity.setCurrentState("a_state");
             caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
-            caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+            caseRetentionEntity.setCreatedBy(userAccount);
             caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
-            caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+            caseRetentionEntity.setLastModifiedBy(userAccount);
 
             caseRetentionRepository.saveAndFlush(caseRetentionEntity);
         }

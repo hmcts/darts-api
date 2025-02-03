@@ -105,4 +105,10 @@ public class TranscriptionDocumentEntity extends ModifiedBaseEntity
     @Column(name = "subcontent_position")
     private Integer subcontentPosition;
 
+    @Column(name = "data_ticket")
+    private Integer dataTicket;
+
+    @Column(name = "storage_id")
+    private String storageId;
+
 }

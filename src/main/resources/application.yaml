@@ -224,7 +224,7 @@ darts:
         error_processing_audio: 10d7e02d-360c-47b7-a97c-a98c13f3c122
         request_to_transcriber: 463e63c5-9521-46c7-a0f0-5c40ad7a2240
         requested_audio_is_available: a6747899-08e9-4cbf-86d3-a3b871a66e86
-        transcription_available: 96d3b32c-6a6a-45ae-8c0e-91e9d04d2eb0
+        transcription_available: 3adfe57d-094a-47e8-a4f0-1a234466b8ce
         transcription_request_approved: 2e0a929b-6939-4d26-99d2-01cdb7454065
         transcription_request_rejected: 9b48d057-5dda-4e36-8727-81a01e3a39ec
   retention:
@@ -378,6 +378,7 @@ darts:
           at-most-for: PT120M
       arm-rpo-poll:
         system-user-email: system_ArmRpoPolling@hmcts.net
+        poll-duration: ${ARM_RPO_POLL_DURATION:4h}
         lock:
           at-least-for: PT1M
           at-most-for: PT30M
@@ -436,6 +437,7 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
+        async-timeout: 90M
       external-datastore-deleter:
         system-user-email: system_ExternalDataStoreDeleter@hmcts.net
         lock:
@@ -470,6 +472,7 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
+        async-timeout: 60M
       manual-deletion:
         system-user-email: system_ManualDeletion@hmcts.net
         lock:

@@ -8,7 +8,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -79,7 +79,7 @@ class CourthouseServiceImplTest {
     @Mock
     AuditApi auditApi;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Captor
