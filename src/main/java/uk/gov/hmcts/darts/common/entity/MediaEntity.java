@@ -51,9 +51,6 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @Column(name = "media_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "folder_path")
-    private String folderPath;
-
     @Column(name = "channel", nullable = false)
     private Integer channel;
 
@@ -142,6 +139,12 @@ public class MediaEntity extends CreatedModifiedBaseEntity
 
     @Column(name = "subcontent_position")
     private Integer subcontentPosition;
+
+    @Column(name = "data_ticket")
+    private Integer dataTicket;
+
+    @Column(name = "storage_id")
+    private String storageId;
 
     public List<CourtCaseEntity> associatedCourtCases() {
         var cases = hearingList.stream().map(HearingEntity::getCourtCase);

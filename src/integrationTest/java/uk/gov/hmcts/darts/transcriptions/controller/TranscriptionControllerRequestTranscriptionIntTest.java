@@ -9,7 +9,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -21,10 +21,12 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -72,7 +74,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Autowired
@@ -86,6 +88,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Autowired
     private AuditRepository auditRepository;
+    @Autowired
+    private TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
 
     private CourtCaseEntity courtCase;
     private HearingEntity hearing;
@@ -161,6 +165,16 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertTrue(templateList.contains(COURT_MANAGER_APPROVE_TRANSCRIPT.toString()));
 
         assertAudit(1);
+        assertTranscriptionLinkedCase(transcriptionEntity, courtCase);
+    }
+
+    private void assertTranscriptionLinkedCase(TranscriptionEntity transcriptionEntity, CourtCaseEntity courtCase) {
+        List<TranscriptionLinkedCaseEntity> transcriptionLinkedCaseEntities = transcriptionLinkedCaseRepository.findAll();
+        assertThat(transcriptionLinkedCaseEntities).hasSize(1);
+        TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity = transcriptionLinkedCaseEntities.get(0);
+
+        assertThat(transcriptionLinkedCaseEntity.getTranscription()).isEqualTo(transcriptionEntity);
+        assertThat(transcriptionLinkedCaseEntity.getCourtCase()).isEqualTo(courtCase);
     }
 
     private void assertTranscriptionWorkflow(TranscriptionWorkflowEntity transcriptionWorkflowToCheck,
@@ -631,6 +645,4 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         transcriptionRequestDetails.setEndDateTime(endDateTime);
         return transcriptionRequestDetails;
     }
-
-
 }
