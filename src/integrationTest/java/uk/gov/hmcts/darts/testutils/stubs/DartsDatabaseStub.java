@@ -1147,6 +1147,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void clearDb() {
+        removeAllAudits();
         resetSequences();
         clearDatabaseInThisOrder();
         resetTablesWithPredefinedTestData();
