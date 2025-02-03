@@ -37,9 +37,6 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "event_object_id", unique = true, length = 16)
     private String legacyObjectId;
 
-    @Column(name = "folder_path")
-    private String folderPath;
-
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "evh_id")
     private EventHandlerEntity eventType;
