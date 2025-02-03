@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -31,7 +30,7 @@ public class EventSearchServiceImpl implements EventSearchService {
 
     @Override
     public List<AdminSearchEventResponseResult> searchForEvents(AdminEventSearch adminEventSearch) {
-        Page<EventSearchResult> eventSearchResults = eventRepository.searchEventsFilteringOn(
+        List<EventSearchResult> eventSearchResults = eventRepository.searchEventsFilteringOn(
             getNonEmptyOrNull(adminEventSearch.getCourthouseIds()),
             adminEventSearch.getCaseNumber(),
             adminEventSearch.getCourtroomName(),
@@ -40,7 +39,7 @@ public class EventSearchServiceImpl implements EventSearchService {
             Limit.of(maxResults + 1)
         );
 
-        if (eventSearchResults.getSize() > maxResults) {
+        if (eventSearchResults.size() > maxResults) {
             throw new DartsApiException(
                 TOO_MANY_SEARCH_RESULTS,
                 "Number of results exceeded " + maxResults + " please narrow your search."
