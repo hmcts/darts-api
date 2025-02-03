@@ -122,7 +122,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
                 if (!automatedTaskPatch.getArmReplayStartTs().equals(armAutomatedTaskEntity.getArmReplayStartTs())) {
                     armAutomatedTaskEntity.setArmReplayStartTs(automatedTaskPatch.getArmReplayStartTs());
-                    registerConfiguredAutomatedTaskAudit(automatedTask, "Arm reply start ts updated");
+                    registerConfiguredAutomatedTaskAudit(automatedTask, "ARM reply start ts updated");
                     log.info("ARM replay start timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayStartTs());
                 }
             });
@@ -132,7 +132,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
                 if (!automatedTaskPatch.getArmReplayEndTs().equals(armAutomatedTaskEntity.getArmReplayEndTs())) {
                     armAutomatedTaskEntity.setArmReplayEndTs(automatedTaskPatch.getArmReplayEndTs());
-                    registerConfiguredAutomatedTaskAudit(automatedTask, "Arm reply end ts updated");
+                    registerConfiguredAutomatedTaskAudit(automatedTask, "ARM reply end ts updated");
                     log.info("ARM replay end timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayEndTs());
                 }
             });
