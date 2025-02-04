@@ -92,7 +92,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processDetsToArmWithDetsEodReturnsSuccess() {
+    void processDetsToArm_Success_WithDetsEod() {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
             .save(createObjectStateRecordEntity(111L));
@@ -143,7 +143,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processDetsToArmWithFailedRawDataStatusArmEodSuccess() {
+    void processDetsToArm_Success_WithFailedRawDataStatusArmEod() {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
             .save(createObjectStateRecordEntity(111L));
@@ -290,7 +290,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processDetsToArm_WithDetsEodReturnsSuccess() {
+    void processDetsToArm_ThrowsException_WhenSaveManifestFails() {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
             .save(createObjectStateRecordEntity(111L));
@@ -372,7 +372,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         assertNotNull(objectStateRecordEntityModified.getDateFileMfstCreated());
         assertNotNull(objectStateRecordEntityModified.getIdManifestFile());
     }
-    
+
     private ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);

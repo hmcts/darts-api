@@ -189,6 +189,10 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             return;
         }
 
+        updateBatchedItemsStatuses(userAccount, batchItems);
+    }
+
+    private void updateBatchedItemsStatuses(UserAccountEntity userAccount, ArmBatchItems batchItems) {
         for (var batchItem : batchItems.getItems()) {
             if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null) {
                 dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
