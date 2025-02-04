@@ -132,11 +132,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             return;
         }
 
-        for (var batchItem : batchItems.getItems()) {
-            if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null) {
-                unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
-                logApi.armPushSuccessful(batchItem.getArmEod().getId());
-            }
+        for (var batchItem : batchItems.getSuccessful()) {
+            unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
+            logApi.armPushSuccessful(batchItem.getArmEod().getId());
         }
     }
 
