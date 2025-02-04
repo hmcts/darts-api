@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Service
@@ -187,6 +188,12 @@ public class LogApiImpl implements LogApi {
     @Override
     public void armRpoPollingFailed(Integer executionId) {
         armLoggerService.armRpoPollingFailed(executionId);
+    }
+
+    @Override
+    public void addAudioSmallFileWithLongDuration(String courthouse, String courtroom, OffsetDateTime startDate, OffsetDateTime finishDate,
+                                                  Integer medId, Long fileSize) {
+        audioLoggerService.addAudioSmallFileWithLongDuration(courthouse, courtroom, startDate, finishDate, medId, fileSize);
     }
 
 }

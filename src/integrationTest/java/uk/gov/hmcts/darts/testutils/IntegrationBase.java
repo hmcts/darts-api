@@ -99,7 +99,7 @@ public class IntegrationBase {
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 
     private static final GenericContainer<?> REDIS = new GenericContainer<>(
-        "redis:7.2.4-alpine"
+        "hmctspublic.azurecr.io/imported/redis"
     ).withExposedPorts(6379);
 
     @DynamicPropertySource
@@ -116,9 +116,7 @@ public class IntegrationBase {
 
     @BeforeEach
     void clearDb() {
-        dartsDatabase.resetSequences();
-        dartsDatabase.clearDatabaseInThisOrder();
-        dartsDatabase.resetTablesWithPredefinedTestData();
+        dartsDatabase.clearDb();
     }
 
     @AfterEach

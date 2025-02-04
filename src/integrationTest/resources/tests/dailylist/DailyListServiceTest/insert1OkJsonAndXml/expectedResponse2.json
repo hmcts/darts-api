@@ -25,5 +25,6 @@
   "externalLocationTypeEntity": null,
   "subcontentObjectId": null,
   "subcontentPosition": null,
-  "dataTicket": null
+  "dataTicket": null,
+  "storageId": null
 }

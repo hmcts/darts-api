@@ -9,7 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.envers.AuditJoinTable;
+import org.hibernate.envers.AuditTable;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.util.AnnotationUtils;
 import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -93,6 +97,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -207,6 +212,7 @@ public class DartsDatabaseStub {
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
     private final RetentionConfidenceCategoryMapperRepository retentionConfidenceCategoryMapperRepository;
+    private final TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -280,7 +286,11 @@ public class DartsDatabaseStub {
     @Transactional
     public void clearDatabaseInThisOrder() {
         TestUtils.retryLoop(10, 500, () -> {
-            removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
+            removeDeleteFlag(AnnotationDocumentEntity.class,
+                             CaseDocumentEntity.class,
+                             MediaEntity.class,
+                             TranscriptionDocumentEntity.class);
+            transcriptionLinkedCaseRepository.deleteAll();
             dataAnonymisationRepository.deleteAll();
             armRpoExecutionDetailRepository.deleteAll();
             objectAdminActionRepository.deleteAll();
@@ -320,6 +330,40 @@ public class DartsDatabaseStub {
             transcriptionWorkflowRepository.deleteAll();
             retentionConfidenceCategoryMapperRepository.deleteAll();
         });
+    }
+
+    public void removeAllAudits() {
+        removeAudits(UserAccountEntity.class,
+                     MediaRequestEntity.class,
+                     ArmAutomatedTaskEntity.class,
+                     AutomatedTaskEntity.class,
+                     CourthouseEntity.class,
+                     EventHandlerEntity.class,
+                     NodeRegisterEntity.class,
+                     RetentionPolicyTypeEntity.class,
+                     SecurityGroupEntity.class,
+                     TranscriptionCommentEntity.class,
+                     TranscriptionEntity.class,
+                     TranscriptionWorkflowEntity.class,
+                     UserAccountEntity.class);
+    }
+
+    private void removeAudits(Class<?>... classes) {
+        stream(classes).forEach(tClass -> {
+            AuditTable table = tClass.getAnnotation(AuditTable.class);
+            if (table != null) {
+                entityManager.createNativeQuery("delete from darts." + table.value())
+                    .executeUpdate();
+            }
+            AnnotationUtils.findAnnotatedFields(tClass, AuditJoinTable.class, field -> true)
+                .forEach(field -> {
+                    AuditJoinTable auditJoinTable = field.getAnnotation(AuditJoinTable.class);
+                    entityManager.createNativeQuery("delete from darts." + auditJoinTable.name())
+                        .executeUpdate();
+                });
+        });
+        entityManager.createNativeQuery("delete from darts.revinfo")
+            .executeUpdate();
     }
 
     @SafeVarargs
@@ -765,16 +809,22 @@ public class DartsDatabaseStub {
         return save(mediaRequestEntity);
     }
 
-    public void createTestUserAccount() {
-        if (userAccountRepository.findFirstByEmailAddressIgnoreCase("test.user@example.com").isEmpty()) {
+    public UserAccountEntity createTestUserAccount() {
+        Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findFirstByEmailAddressIgnoreCase("test.user@example.com");
+        if (userAccountEntity.isEmpty()) {
             UserAccountEntity testUser = new UserAccountEntity();
             testUser.setEmailAddress("test.user@example.com");
             testUser.setUserFullName("testuser");
             testUser.setAccountGuid(UUID.randomUUID().toString());
             testUser.setIsSystemUser(false);
             testUser.setActive(true);
-            userAccountRepository.saveAndFlush(testUser);
+            testUser.setCreatedById(0);
+            testUser.setCreatedDateTime(OffsetDateTime.now());
+            testUser.setLastModifiedById(0);
+            testUser.setLastModifiedDateTime(OffsetDateTime.now());
+            return userAccountRepository.saveAndFlush(testUser);
         }
+        return userAccountEntity.get();
     }
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
@@ -1093,5 +1143,14 @@ public class DartsDatabaseStub {
             courthouseName,
             MediaLinkedCaseSourceType.LEGACY
         );
+    }
+
+    @Transactional
+    public void clearDb() {
+        removeAllAudits();
+        resetSequences();
+        clearDatabaseInThisOrder();
+        resetTablesWithPredefinedTestData();
+        removeAllAudits();//Ensures any newly added delete audits are removed
     }
 }

@@ -9,12 +9,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
-
-import java.util.List;
 
 /**
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
@@ -48,11 +47,11 @@ public class PostgresIntegrationBase {
 
     static {
         POSTGRES = new PostgreSQLContainer<>(
-            "postgres:16-alpine"
+            DockerImageName.parse("hmctspublic.azurecr.io/imported/postgres")
+                .asCompatibleSubstituteFor("postgres")
         ).withDatabaseName("darts")
             .withUsername("darts")
             .withPassword("darts");
-        POSTGRES.setPortBindings(List.of("5433:5432"));
     }
 
     @DynamicPropertySource
@@ -71,9 +70,7 @@ public class PostgresIntegrationBase {
 
     @BeforeEach
     void clearDb() {
-        dartsDatabase.resetSequences();
-        dartsDatabase.clearDatabaseInThisOrder();
-        dartsDatabase.resetTablesWithPredefinedTestData();
+        dartsDatabase.clearDb();
     }
 
     @AfterEach

@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -150,6 +152,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
     private final TranscriptionResponseMapper transcriptionResponseMapper;
     private final TranscriptionDownloader transcriptionDownloader;
+    private final TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
 
     @Value("${darts.manual-deletion.enabled:false}")
     @Getter(AccessLevel.PACKAGE)
@@ -175,6 +178,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             getTranscriptionUrgencyById(transcriptionRequestDetails.getTranscriptionUrgencyId()),
             isManual
         );
+
+        transcriptionLinkedCaseRepository.save(
+            TranscriptionLinkedCaseEntity.builder()
+                .transcription(transcription)
+                .courtCase(transcription.getCourtCase())
+                .build());
 
         transcription.getTranscriptionWorkflowEntities().add(
             saveTranscriptionWorkflow(
