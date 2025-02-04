@@ -136,8 +136,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null) {
                 unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
                 logApi.armPushSuccessful(batchItem.getArmEod().getId());
-            } else {
-                //set manifest file back to null if it was set
             }
         }
     }
