@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.noderegistration.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,7 +12,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -34,7 +35,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 
 @Slf4j
 @AutoConfigureMockMvc
-@Transactional
 class NodeRegistrationControllerTest extends IntegrationBase {
 
     @Autowired
@@ -43,6 +43,15 @@ class NodeRegistrationControllerTest extends IntegrationBase {
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
+    @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void testPostRegisterDevices() throws Exception {
