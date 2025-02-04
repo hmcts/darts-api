@@ -70,9 +70,7 @@ public class PostgresIntegrationBase {
 
     @BeforeEach
     void clearDb() {
-        dartsDatabase.resetSequences();
-        dartsDatabase.clearDatabaseInThisOrder();
-        dartsDatabase.resetTablesWithPredefinedTestData();
+        dartsDatabase.clearDb();
     }
 
     @AfterEach

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -175,6 +176,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
 
         verify(mockUserIdentity).getUserAccount();
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDICIARY, SUPER_ADMIN, DARTS));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -201,6 +203,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
 
         verify(mockUserIdentity).getUserAccount();
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDICIARY, SUPER_ADMIN, DARTS));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
