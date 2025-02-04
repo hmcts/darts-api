@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.data.domain.Limit;
@@ -73,7 +74,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                                                                       taskBatchSize);
 
         log.info("Found {} DETS pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
-        if (!eodsForTransfer.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
             List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer,
                                                                     detsToArmProcessorConfiguration.getMaxArmManifestItems());
@@ -99,11 +100,12 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
             try {
                 AsyncUtil.invokeAllAwaitTermination(tasks, automatedTaskConfigurationProperties);
+            } catch (InterruptedException e) {
+                log.error("DETS to ARM batch processing interrupted", e);
+                Thread.currentThread().interrupt();
+                return;
             } catch (Exception e) {
                 log.error("DETS to ARM batch unexpected exception", e);
-                if (e instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
                 return;
             }
         } else {
@@ -177,11 +179,11 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                     batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
                 }
             } catch (Exception e) {
-                String errorMessage = String.format("Error during batch push DETS EOD %s to ARM", currentEod.getId());
-                log.error(errorMessage, e);
+                StringBuilder errorMessage = new StringBuilder(String.format("Error during batch push DETS EOD %s to ARM", currentEod.getId()));
+                log.error(errorMessage.toString(), e);
                 dataStoreToArmHelper.recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
-                errorMessage = errorMessage + " - " + ExceptionUtils.getStackTrace(e);
-                updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage);
+                errorMessage.append(" - ").append(ExceptionUtils.getStackTrace(e));
+                updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage.toString());
             }
         }
 
@@ -206,7 +208,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     private boolean writeManifestAndCopyToArm(UserAccountEntity userAccount, ArmBatchItems batchItems, String archiveRecordsFileName) {
         try {
 
-            if (!batchItems.getSuccessful().isEmpty()) {
+            if (CollectionUtils.isNotEmpty(batchItems.getSuccessful())) {
                 String archiveRecordsContents = dataStoreToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
 
                 updateObjectStateRecordManifestCreated(batchItems, archiveRecordsFileName);
