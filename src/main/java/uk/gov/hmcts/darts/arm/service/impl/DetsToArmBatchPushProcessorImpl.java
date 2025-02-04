@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.data.domain.Limit;
@@ -101,7 +100,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             try {
                 AsyncUtil.invokeAllAwaitTermination(tasks, automatedTaskConfigurationProperties);
             } catch (Exception e) {
-                log.error("Dets to arm batch unexpected exception", e);
+                log.error("DETS to ARM batch unexpected exception", e);
                 if (e instanceof InterruptedException) {
                     Thread.currentThread().interrupt();
                 }
@@ -203,13 +202,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
     private boolean writeManifestAndCopyToArm(UserAccountEntity userAccount, ArmBatchItems batchItems, String archiveRecordsFileName) {
         try {
-            if (CollectionUtils.isNotEmpty(batchItems.getFailed())) {
-                batchItems.getFailed().forEach(batchItem -> {
-                    var eod = batchItem.getArmEod();
-                    eod.setManifestFile(null);
-                    externalObjectDirectoryRepository.save(eod);
-                });
-            }
+
             if (!batchItems.getSuccessful().isEmpty()) {
                 String archiveRecordsContents = dataStoreToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
 

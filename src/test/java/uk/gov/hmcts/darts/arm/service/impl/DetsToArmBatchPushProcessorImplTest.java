@@ -178,7 +178,7 @@ class DetsToArmBatchPushProcessorImplTest {
             log.info("Files left: {}", filesStream.count());
         }
     }
-    
+
     @Test
     void processDetsToArmSetObjectStatusNoMatchingDetsRecordErrorMessage() {
         //given
@@ -249,7 +249,7 @@ class DetsToArmBatchPushProcessorImplTest {
     }
 
     @Test
-    void processDetsToArm_asyncException(CapturedOutput output) {
+    void processDetsToArm_asyncException(CapturedOutput output) throws Exception {
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
         detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
         doReturn(List.of(1)).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
@@ -262,7 +262,7 @@ class DetsToArmBatchPushProcessorImplTest {
 
             assertThat(output)
                 .contains("DETS to ARM batch unexpected exception")
-                .contains("DETSToArmBatchPushProcessorImpljava.lang.RuntimeException: Test exception");
+                .contains("DetsToArmBatchPushProcessorImpljava.lang.RuntimeException: Test exception");
         }
     }
 }
