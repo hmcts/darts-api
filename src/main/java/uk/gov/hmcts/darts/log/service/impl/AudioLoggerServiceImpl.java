@@ -8,9 +8,6 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 import uk.gov.hmcts.darts.util.DataUtil;
 
-import java.time.Clock;
-import java.time.OffsetDateTime;
-
 import java.time.OffsetDateTime;
 
 import static uk.gov.hmcts.darts.util.DateTimeHelper.getDateTimeIsoFormatted;
