@@ -73,7 +73,7 @@ public class EventLoggerServiceImpl implements EventLoggerService {
 
     @Override
     public void missingCourthouse(DartsEvent event) {
-        log.error("Courthouse not found: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
+        log.error("Courthouse not found: message_id={}, event_id={}, courthouse={}, courtroom={}, timestamp={}",
                   event.getMessageId(),
                   event.getEventId(),
                   DataUtil.toUpperCase(event.getCourthouse()),

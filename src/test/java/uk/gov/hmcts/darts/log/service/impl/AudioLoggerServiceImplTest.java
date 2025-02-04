@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 
 import java.time.OffsetDateTime;
@@ -14,6 +15,8 @@ import java.util.Locale;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AudioLoggerServiceImplTest {
 
@@ -44,7 +47,9 @@ class AudioLoggerServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        audioLoggerService = new AudioLoggerServiceImpl();
+        CurrentTimeHelper currentTimeHelper = mock(CurrentTimeHelper.class);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(STARTED_AT);
+        audioLoggerService = new AudioLoggerServiceImpl(currentTimeHelper);
     }
 
     @Test
@@ -59,6 +64,17 @@ class AudioLoggerServiceImplTest {
                                       "2021-01-01T01:00:00Z",
                                       "2021-01-01T02:00:00Z");
         assertThat(logCaptor.getInfoLogs()).containsExactly(expectedLogEntry);
+    }
+
+    @Test
+    void missingCourthouse_shouldLog() {
+        audioLoggerService.missingCourthouse(SOME_COURTHOUSE, SOME_COURTROOM);
+        var expectedLogEntry = format("Courthouse not found: courthouse=%s, courtroom=%s, timestamp=%s",
+                                      SOME_COURTHOUSE.toUpperCase(Locale.ROOT),
+                                      SOME_COURTROOM.toUpperCase(Locale.ROOT),
+                                      "2021-01-01T01:00:00Z"
+        );
+        assertThat(logCaptor.getWarnLogs()).containsExactly(expectedLogEntry);
     }
 
     @Test
