@@ -137,7 +137,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
                 logApi.armPushSuccessful(batchItem.getArmEod().getId());
             } else {
-                batchItem.getArmEod().setManifestFile(null);
                 recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
             }
         }
