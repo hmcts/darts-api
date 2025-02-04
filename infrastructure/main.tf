@@ -120,4 +120,5 @@ module "armsa" {
   common_tags              = var.common_tags
   cross_tenant_replication_enabled   = true
   private_endpoint_subnet_id = data.azurerm_subnet.private_endpoints.id
+  default_action           = "Allow"
 }
