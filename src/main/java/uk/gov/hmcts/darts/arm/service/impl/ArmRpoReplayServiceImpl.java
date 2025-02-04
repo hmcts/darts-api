@@ -37,7 +37,7 @@ public class ArmRpoReplayServiceImpl implements ArmRpoReplayService {
         ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTaskService.getArmAutomatedTaskEntity(ARM_RPO_REPLAY_TASK_NAME);
 
         List<Integer> eodIdsToBeUpdated = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
-            EodHelper.armRpoPendingStatus(),
+            EodHelper.armReplayStatus(),
             armAutomatedTaskEntity.getArmReplayStartTs(),
             armAutomatedTaskEntity.getArmReplayEndTs(),
             EodHelper.armLocation(),

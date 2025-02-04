@@ -18,7 +18,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_REPLAY_TASK_NAME;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
@@ -55,14 +55,14 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
         OffsetDateTime invalidDateTime = OffsetDateTime.now().minusMinutes(200);
 
         var validEods = dartsDatabase.getExternalObjectDirectoryStub().generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(validDateTime));
+            ExternalLocationTypeEnum.ARM, ARM_REPLAY, 2, Optional.of(validDateTime));
         validEods.forEach(eod -> {
             eod.setTransferAttempts(1);
             dartsPersistence.getExternalObjectDirectoryRepository().saveAndFlush(eod);
         });
 
         var invalidEods = dartsDatabase.getExternalObjectDirectoryStub().generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(invalidDateTime));
+            ExternalLocationTypeEnum.ARM, ARM_REPLAY, 2, Optional.of(invalidDateTime));
         invalidEods.forEach(eod -> {
             eod.setTransferAttempts(1);
             dartsPersistence.getExternalObjectDirectoryRepository().saveAndFlush(eod);
@@ -84,7 +84,7 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
         });
 
         invalidEodResults.forEach(eod -> {
-            assertEquals(ARM_RPO_PENDING.getId(), eod.getStatus().getId());
+            assertEquals(ARM_REPLAY.getId(), eod.getStatus().getId());
             assertEquals(1, eod.getTransferAttempts());
         });
     }
