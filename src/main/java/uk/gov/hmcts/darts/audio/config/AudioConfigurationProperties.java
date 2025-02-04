@@ -8,7 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @ConfigurationProperties("darts.audio")
@@ -31,12 +30,6 @@ public class AudioConfigurationProperties {
     @NotEmpty
     private String tempBlobWorkspace;
 
-    private List<String> allowedMediaExtensions = new ArrayList<>();
-    private List<String> allowedMediaMimeTypes = new ArrayList<>();
-    private List<String> allowedMediaFormats = new ArrayList<>();
-    private List<String> allowedContentTypes = new ArrayList<>();
-
-    private Integer maxFileSize;
     private Duration allowableAudioGapDuration;
     private Integer preAmbleDuration;
     private Integer postAmbleDuration;

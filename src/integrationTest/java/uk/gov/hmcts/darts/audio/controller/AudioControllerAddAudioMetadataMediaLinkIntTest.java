@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -47,10 +46,6 @@ import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10Second
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {
-    "spring.servlet.multipart.max-file-size=4MB",
-    "spring.servlet.multipart.max-request-size=4MB",
-})
 class AudioControllerAddAudioMetadataMediaLinkIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audios");

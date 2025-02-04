@@ -67,11 +67,6 @@ spring:
             logout-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/logout
             reset-password-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
 
-  servlet:
-    multipart:
-      max-file-size: ${MAX_FILE_UPLOAD_SIZE_MEGABYTES:350}MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
-      max-request-size: ${MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES:360}MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
-
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:5432/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
@@ -123,34 +118,6 @@ darts:
   audio:
     small-file-size: ${SMALL_FILE_SIZE:1024}
     small-file-max-length: ${SMALL_FILE_SIZE_MAX_LENGTH:2S}
-    allowed-media-mime-types:
-      - "audio/mpeg"
-      - "application/octet-stream"
-    allowed-media-formats:
-      - "mpeg2"
-      - "mp2"
-    allowed-content-types:
-      - "audio/mpeg"
-      - "application/octet-stream"
-    allowed-media-extensions:
-      - "mp2"
-      - "a00"
-      - "a01"
-      - "a02"
-      - "a03"
-      - "a04"
-      - "a05"
-      - "a06"
-      - "a07"
-      - "b00"
-      - "b01"
-      - "b02"
-      - "b03"
-      - "b04"
-      - "b05"
-      - "b06"
-      - "b07"
-      - "b08"
     admin-search:
       max-results: 1000
     allowable-audio-gap-duration: 1s
@@ -158,8 +125,6 @@ darts:
     ffmpeg-executable: ffmpeg
     handheld-audio-courtroom-numbers:
       - 199
-    max-file-duration: 1440m
-    max-file-size: 524288000
     merge-workspace: ${user.home}/audiotransform/merge
     outbounddeleter:
       last-accessed-deletion-day: 2
