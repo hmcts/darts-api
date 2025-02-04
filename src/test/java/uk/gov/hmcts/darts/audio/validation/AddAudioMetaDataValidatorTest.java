@@ -5,9 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.unit.DataSize;
-import org.springframework.util.unit.DataUnit;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
@@ -15,9 +12,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,9 +51,6 @@ class AddAudioMetaDataValidatorTest {
 
     @Test
     void validate_hasCourtHouse_shouldNotErrorOrLog() {
-        ReflectionTestUtils.setField(addAudioMetaDataValidator, "fileSizeThreshold", DataSize.of(10, DataUnit.GIGABYTES));
-        ReflectionTestUtils.setField(addAudioMetaDataValidator, "maxAllowableAudioDuration", Duration.ofDays(1));
-
         AddAudioMetadataRequest request = new AddAudioMetadataRequest();
         request.setCourthouse("INVALID");
         request.setCourtroom("COURTROOM_123");
@@ -66,7 +58,6 @@ class AddAudioMetaDataValidatorTest {
         request.setFileSize(123L);
         request.setStartedAt(OffsetDateTime.now());
         request.setEndedAt(OffsetDateTime.now().plusHours(1));
-        when(properties.getAllowedMediaFormats()).thenReturn(List.of("mp3"));
 
         addAudioMetaDataValidator.validate(request);
 

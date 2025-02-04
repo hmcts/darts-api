@@ -1132,9 +1132,6 @@ components:
         - "AUDIO_103"
         - "AUDIO_104"
         - "AUDIO_105"
-        - "AUDIO_106"
-        - "AUDIO_107"
-        - "AUDIO_108"
         - "AUDIO_109"
         - "AUDIO_110"
         - "AUDIO_111"
@@ -1154,9 +1151,6 @@ components:
                          FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER,
                          AUDIO_NOT_PROVIDED,
-                         UNEXPECTED_FILE_TYPE,
-                         FILE_DURATION_OUT_OF_BOUNDS,
-                         FILE_SIZE_OUT_OF_BOUNDS,
                          ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
                          MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
@@ -1181,9 +1175,6 @@ components:
         - "Failed to store uploaded audio file"
         - "Failed to mark audio(s) for deletion as system user was not found"
         - "Audio not found"
-        - "The file type is not acceptable"
-        - "The duration of the audio exceeds maximum threshold"
-        - "The audio metadata size exceeds maximum threshold"
         - "Required request parameter 'transformed_media_id' for method parameter type Integer is not present"
         - "Media is already hidden"
         - "Hide media action payload not correct"
@@ -1203,9 +1194,6 @@ components:
                          FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER,
                          AUDIO_NOT_PROVIDED,
-                         UNEXPECTED_FILE_TYPE,
-                         FILE_DURATION_OUT_OF_BOUNDS,
-                         FILE_SIZE_OUT_OF_BOUNDS,
                          ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
                          MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
