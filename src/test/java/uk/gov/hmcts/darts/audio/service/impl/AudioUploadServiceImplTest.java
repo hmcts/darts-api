@@ -9,12 +9,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
-import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -39,6 +39,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +51,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -87,19 +94,20 @@ class AudioUploadServiceImplTest {
     private DataManagementApi dataManagementApi;
     @Mock
     private LogApi logApi;
-    private AudioUploadService audioService;
+    private AudioUploadServiceImpl audioService;
     @Mock
     private AudioAsyncService audioAsyncService;
     @Mock
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
     private MediaLinkedCaseRepository mediaLinkedCaseRepository;
+    private AddAudioRequestMapper mapper;
 
     @BeforeEach
     void setUp() {
-        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity, mediaLinkedCaseHelper, mediaRepository);
+        mapper = spy(new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity, mediaLinkedCaseHelper, mediaRepository));
         FileContentChecksum fileContentChecksum = new FileContentChecksum();
-        audioService = new AudioUploadServiceImpl(
+        audioService = spy(new AudioUploadServiceImpl(
             externalObjectDirectoryRepository,
             objectRecordStatusRepository,
             externalLocationTypeRepository,
@@ -112,7 +120,9 @@ class AudioUploadServiceImplTest {
             fileContentChecksum,
             logApi,
             mediaLinkedCaseRepository,
-            audioAsyncService);
+            audioAsyncService));
+        ReflectionTestUtils.setField(audioService, "smallFileSizeMaxLength", Duration.ofSeconds(2));
+        ReflectionTestUtils.setField(audioService, "smallFileSize", 1024);
     }
 
     @Test
@@ -269,7 +279,7 @@ class AudioUploadServiceImplTest {
 
         // Then
         verify(mediaRepository, times(1))
-            .findMediaByDetails(courtroomEntity, mediaEntity.getChannel(),mediaEntity.getMediaFile(), startedAt, endedAt);
+            .findMediaByDetails(courtroomEntity, mediaEntity.getChannel(), mediaEntity.getMediaFile(), startedAt, endedAt);
         verifyNoMoreInteractions(mediaRepository);
         verifyNoInteractions(hearingRepository);
         verifyNoInteractions(logApi);
@@ -454,5 +464,60 @@ class AudioUploadServiceImplTest {
         verify(hearingRepository, times(2)).saveAndFlush(any());
         assertEquals(1, hearing1.getMediaList().size());
         assertEquals(1, hearing2.getMediaList().size());
+    }
+
+    @Test
+    void versionUpload_shouldLogSmallFileWithLongDurationWarning_whenFileIs1024BytesAndDurationIsMoreThan2Seconds() {
+        AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(3, 1024L);
+
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+
+        verify(logApi).addAudioSmallFileWithLongDuration(
+            "COURTHOUSE_123",
+            "COURTROOM_123",
+            addAudioMetadataRequest.getStartedAt(),
+            addAudioMetadataRequest.getEndedAt(),
+            123,
+            1024L
+        );
+    }
+
+    @Test
+    void versionUpload_shouldNotLogSmallFileWithLongDurationWarning_whenFileIs1024BytesAndDurationIsEqualTo2Seconds() {
+        AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(2, 1024L);
+
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+
+        verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void versionUpload_shouldLogSmallFileWithLongDurationWarning_whenFileIs1025BytesAndDurationIsMoreThan2Seconds() {
+        AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(3, 1025L);
+
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+
+        verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
+    }
+
+
+    private AddAudioMetadataRequest setupVersionUploadTest(int endTimeOffset, long fileSize) {
+        MediaEntity mediaEntity = mock(MediaEntity.class);
+        when(mediaEntity.getId()).thenReturn(123);
+        doReturn(mediaEntity).when(mapper).mapToMedia(any(), any());
+
+        AddAudioMetadataRequest addAudioMetadataRequest = mock(AddAudioMetadataRequest.class);
+        OffsetDateTime startTime = OffsetDateTime.now();
+        OffsetDateTime endTime = startTime.plusSeconds(endTimeOffset);
+        when(addAudioMetadataRequest.getStartedAt()).thenReturn(startTime);
+        when(addAudioMetadataRequest.getEndedAt()).thenReturn(endTime);
+        when(addAudioMetadataRequest.getFileSize()).thenReturn(fileSize);
+        lenient().when(addAudioMetadataRequest.getCourthouse()).thenReturn("COURTHOUSE_123");
+        lenient().when(addAudioMetadataRequest.getCourtroom()).thenReturn("COURTROOM_123");
+
+        doNothing().when(audioService).linkAudioToHearingInMetadata(any(), any());
+        doNothing().when(audioService).saveExternalObjectDirectory(any(), any(), any(), any());
+
+        return addAudioMetadataRequest;
     }
 }
