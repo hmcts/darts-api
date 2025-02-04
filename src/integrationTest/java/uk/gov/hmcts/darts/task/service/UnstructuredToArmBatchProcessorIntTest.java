@@ -453,7 +453,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         List<ExternalObjectDirectoryEntity> failedArmEods = eodRepository.findByMediaStatusAndType(
             medias.getFirst(), EodHelper.failedArmManifestFileStatus(), EodHelper.armLocation());
         assertThat(failedArmEods).hasSize(1);
-        assertThat(failedArmEods.getFirst().getManifestFile()).isEqualTo("existingManifestFile");
+        assertNull(failedArmEods.getFirst().getManifestFile());
         assertThat(failedArmEods.getFirst().getTransferAttempts()).isEqualTo(2);
         assertThat(eodRepository.findByMediaStatusAndType(medias.get(1), EodHelper.armDropZoneStatus(), EodHelper.armLocation())).hasSize(1);
 
@@ -554,7 +554,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.getFirst();
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
-        assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
+        assertNull(failedEod.getManifestFile());
 
         verify(armDataManagementApi, never()).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
     }
@@ -583,6 +583,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.getFirst();
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
-        assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
+        assertNull(failedEod.getManifestFile());
     }
 }

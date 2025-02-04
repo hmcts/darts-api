@@ -178,8 +178,7 @@ class DetsToArmBatchPushProcessorImplTest {
             log.info("Files left: {}", filesStream.count());
         }
     }
-
-
+    
     @Test
     void processDetsToArmSetObjectStatusNoMatchingDetsRecordErrorMessage() {
         //given
