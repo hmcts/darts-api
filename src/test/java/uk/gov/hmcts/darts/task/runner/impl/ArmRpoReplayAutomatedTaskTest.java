@@ -87,7 +87,7 @@ class ArmRpoReplayAutomatedTaskTest {
         when(automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.ARM_RPO_REPLAY_TASK_NAME))
             .thenReturn(armAutomatedTaskEntity);
         when(externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
-            EodHelper.armRpoPendingStatus(),
+            EodHelper.armReplayStatus(),
             startTs,
             endTs,
             EodHelper.armLocation(),
