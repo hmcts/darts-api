@@ -31,11 +31,10 @@ public class RevisionInfo implements Serializable {
 
     @Id
     @GeneratedValue(generator = GENERATOR_NAME, strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name = GENERATOR_NAME, sequenceName = "revinfo_seq",
-        allocationSize = 1)
+    @SequenceGenerator(name = GENERATOR_NAME, sequenceName = "revinfo_seq")
     @RevisionNumber
     @Column(name = "rev")
-    private Long revision;
+    private Integer revision;
 
     @RevisionTimestamp
     @Column(name = "revtstmp")
