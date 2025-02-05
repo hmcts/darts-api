@@ -123,6 +123,8 @@ class AudioUploadServiceImplTest {
             audioAsyncService));
         ReflectionTestUtils.setField(audioService, "smallFileSizeMaxLength", Duration.ofSeconds(2));
         ReflectionTestUtils.setField(audioService, "smallFileSize", 1024);
+
+        lenient().doAnswer(invocation -> invocation.getArgument(0)).when(mediaRepository).saveAndFlush(any());
     }
 
     @Test
@@ -154,7 +156,7 @@ class AudioUploadServiceImplTest {
 
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
         mediaEntity.setId(10);
-        when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
+        when(mediaRepository.saveAndFlush(any(MediaEntity.class))).thenReturn(mediaEntity);
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "addAudio",
@@ -171,7 +173,7 @@ class AudioUploadServiceImplTest {
 
         // Then
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
-        verify(mediaRepository, times(2)).save(mediaEntityArgumentCaptor.capture());
+        verify(mediaRepository, times(1)).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
         verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
         verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
@@ -217,7 +219,7 @@ class AudioUploadServiceImplTest {
 
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
         mediaEntity.setId(10);
-        when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
+        when(mediaRepository.saveAndFlush(any(MediaEntity.class))).thenReturn(mediaEntity);
 
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
         when(dataManagementApi.getChecksum(any(), any()))
@@ -228,7 +230,7 @@ class AudioUploadServiceImplTest {
         audioService.addAudio(externalLocation, addAudioMetadataRequest);
 
         // Then
-        verify(mediaRepository, times(2)).save(mediaEntityArgumentCaptor.capture());
+        verify(mediaRepository, times(1)).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
         verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
         verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
