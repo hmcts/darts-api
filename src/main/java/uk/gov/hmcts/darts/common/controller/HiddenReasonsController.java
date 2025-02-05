@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
@@ -17,6 +18,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @RestController
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class HiddenReasonsController implements HiddenReasonApi {
 
     private final HiddenReasonsService hiddenReasonsService;
