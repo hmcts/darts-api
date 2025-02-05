@@ -456,6 +456,7 @@ darts:
           at-least-for: PT1M
           at-most-for: PT90M
         threads: 20
+        async-timeout: 80M
       process-arm-rpo-pending:
         system-user-email: system_ProcessARMRPOPending@hmcts.net
         arm-rpo-duration: ${ARM_RPO_DURATION:1h}
@@ -481,6 +482,7 @@ darts:
           at-least-for: PT1M
           at-most-for: PT90M
         threads: 20
+        async-timeout: 80M
       unstructured-transcription-annotation-deleter:
         system-user-email: system_UnstructuredTranscriptionAnnotationDeleter@hmcts.net
         lock:
