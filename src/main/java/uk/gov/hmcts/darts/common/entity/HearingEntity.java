@@ -127,6 +127,6 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     }
 
     public boolean containsMedia(MediaEntity mediaEntity) {
-        return mediaList.stream().anyMatch(media -> media.getId().equals(mediaEntity.getId()));
+        return mediaEntity.getId() != null && mediaList.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
     }
 }
