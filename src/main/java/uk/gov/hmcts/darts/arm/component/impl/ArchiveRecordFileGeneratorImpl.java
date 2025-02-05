@@ -3,10 +3,12 @@ package uk.gov.hmcts.darts.arm.component.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 
 import java.io.BufferedWriter;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
@@ -65,11 +68,21 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                 }
             }
             archiveRecordsString = archiveRecordsStringBuilder.toString();
-            log.info("Contents of manifest file {} for EOD {}\n{}",
+            List<String> relationIds = getRelationIds(archiveRecords);
+            log.info("Contents of manifest file {} for EOD's {}\n{}",
                      archiveFileName,
-                     archiveRecords.get(0).getArchiveRecordOperation().getRelationId(),
+                     StringUtils.join(relationIds, ", "),
                      archiveRecordsString);
         }
         return archiveRecordsString;
+    }
+
+    private static List<String> getRelationIds(List<ArchiveRecord> archiveRecords) {
+        return archiveRecords.stream()
+            .map(ArchiveRecord::getArchiveRecordOperation)
+            .filter(Objects::nonNull)
+            .map(ArchiveRecordOperation::getRelationId)
+            .filter(Objects::nonNull)
+            .toList();
     }
 }
