@@ -43,6 +43,7 @@ public interface RetrieveCoreObjectService {
      * Retrieve or create a case and link to media.
      * @deprecated This method is only used by tests. Tests should be refactored and this method should be removed.
      */
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     @Deprecated(since = "04/02/2025")
     HearingEntity retrieveOrCreateHearingWithMedia(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                                    UserAccountEntity userAccount, MediaEntity mediaEntity);
@@ -52,6 +53,7 @@ public interface RetrieveCoreObjectService {
      * @deprecated This method is only used by tests.
      *     Tests should be refactored to use the other `retrieveOrCreateCourtroom` method, and this method should be removed.
      */
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     @Deprecated(since = "04/02/2025")
     CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount);
 
@@ -87,6 +89,7 @@ public interface RetrieveCoreObjectService {
      * @deprecated This method is only used by tests.
      *     Tests should be refactored to use the other `retrieveOrCreateCase` method, and this method should be removed.
      */
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     @Deprecated(since = "04/02/2025")
     CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount);
 
