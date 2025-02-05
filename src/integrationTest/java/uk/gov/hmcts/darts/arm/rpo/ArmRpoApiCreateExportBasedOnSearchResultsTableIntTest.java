@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo;
 
 import org.hamcrest.MatcherAssert;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -60,12 +61,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(pollCreatedTs);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
-        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
-        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
-        armRpoExecutionDetailEntity.setSearchId("searchId");
-        armRpoExecutionDetailEntity.setSearchItemCount(6);
-        armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = createArmRpoExecutionDetailEntity(userAccount);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
         assertNull(armRpoExecutionDetail.getProductionName());
         assertNull(armRpoExecutionDetail.getPollingCreatedAt());
@@ -101,12 +97,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(pollCreatedTs);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
-        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
-        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
-        armRpoExecutionDetailEntity.setSearchId("searchId");
-        armRpoExecutionDetailEntity.setSearchItemCount(6);
-        armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = createArmRpoExecutionDetailEntity(userAccount);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
 
         var bearerAuth = "Bearer some-token";
@@ -135,16 +126,11 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
         response.setResponseStatus(2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
-        OffsetDateTime pollCreatedTs = OffsetDateTime.now().minus(Duration.ofHours(5));
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
+        OffsetDateTime pollCreatedTs = OffsetDateTime.now().minus(Duration.ofHours(5));
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
-        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
-        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
-        armRpoExecutionDetailEntity.setSearchId("searchId");
-        armRpoExecutionDetailEntity.setSearchItemCount(6);
-        armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = createArmRpoExecutionDetailEntity(userAccount);
         armRpoExecutionDetailEntity.setPollingCreatedAt(pollCreatedTs);
         armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
@@ -187,4 +173,15 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
             .isMasked(isMasked)
             .build();
     }
+
+    private static @NotNull ArmRpoExecutionDetailEntity createArmRpoExecutionDetailEntity(UserAccountEntity userAccount) {
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        armRpoExecutionDetailEntity.setSearchId("searchId");
+        armRpoExecutionDetailEntity.setSearchItemCount(6);
+        armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
+        return armRpoExecutionDetailEntity;
+    }
+
 }
