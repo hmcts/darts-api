@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -43,7 +42,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -62,10 +60,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {
-    "spring.servlet.multipart.max-file-size=4MB",
-    "spring.servlet.multipart.max-request-size=4MB",
-})
 class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
 
     @Value("${local.server.port}")
@@ -82,9 +76,6 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
     private static final Path AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE = DataGenerator.createUniqueFile(DataSize.ofMegabytes(5),
                                                                                                                  DataGenerator.FileType.MP2);
 
-    @Value("${darts.audio.max-file-duration}")
-    private Duration maxFileDuration;
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -99,11 +90,10 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
     @MockitoBean
     AudioAsyncService audioAsyncService;
 
-    @Value("${spring.servlet.multipart.max-file-size}")
-    private DataSize addAudioThreshold;
-
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
+
+    private static final long END_FILE_DURATION = 1440;
 
 
     @BeforeEach
@@ -135,7 +125,7 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
     void addAudioMetadata() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -173,7 +163,7 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
             MediaEntity media = mediaEntities.get(0);
             assertEquals(1, mediaEntities.size());
             assertEquals(STARTED_AT, media.getStart());
-            assertEquals(STARTED_AT.plus(maxFileDuration), media.getEnd());
+            assertEquals(STARTED_AT.plusMinutes(END_FILE_DURATION), media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
             List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
@@ -200,7 +190,7 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
     void addAudioMetadata_courtHouseNotFound_404ShouldBeReturned() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "Bristol", "1");
         addAudioMetadataRequest.setCourthouse("UNKNOWN_COURTHOUSE");
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -329,30 +319,10 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
     }
 
     @Test
-    void addAudioBeyondAudioFileSizeThresholdExceeded() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        MvcResult mvcResult = makeAddAudioCall(AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE)
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {
-              "type": "AUDIO_108",
-              "title": "The audio metadata size exceeds maximum threshold",
-              "status": 400
-            }
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
     void addAudioMetadataNonExistingCourthouse() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "TEST", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "TEST", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -383,45 +353,10 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
     }
 
     @Test
-    void addAudioUnsupportedType() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        String unknownType = "unsupportedType";
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1", unknownType);
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.mp2",
-            "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
-        );
-
-        MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
-        );
-
-        MvcResult mvcResult = mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(problem.getType(), AudioApiError.UNEXPECTED_FILE_TYPE.getType());
-        assertEquals(problem.getTitle(), AudioApiError.UNEXPECTED_FILE_TYPE.getTitle());
-    }
-
-    @Test
     void addAudioNotProvided() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -451,45 +386,12 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
         assertEquals(AudioApiError.AUDIO_NOT_PROVIDED.getTitle(), problem.getTitle());
     }
 
-    @Test
-    void addAudioDurationOutOfBounds() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration).plusSeconds(1), "Bristol", "1");
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.mp2",
-            "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE))
-        );
-
-        MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
-        );
-
-        MvcResult mvcResult = mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(AudioApiError.FILE_DURATION_OUT_OF_BOUNDS.getType(), problem.getType());
-        assertEquals(AudioApiError.FILE_DURATION_OUT_OF_BOUNDS.getTitle(), problem.getTitle());
-    }
 
     @Test
     void addFailedToUploadAudio() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "Bristol", "1");
 
         // create an audio file that throws an exception
         MockMultipartFile audioFile = new MockMultipartFile(
@@ -533,149 +435,10 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
     }
 
     @Test
-    void addAudioSizeOutsideOfBoundaries() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
-
-        // set the file size to be greater than the maximum threshold
-        addAudioMetadataRequest.setFileSize(addAudioThreshold.toBytes() + 1);
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.mp2",
-            "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
-        );
-
-        MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
-        );
-
-        MvcResult mvcResult = mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS.getType(), problem.getType());
-        assertEquals(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS.getTitle(), problem.getTitle());
-    }
-
-    @Test
-    void addAudioFileExtensionIncorrect() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.incorrect",
-            "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
-        );
-
-        MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
-        );
-
-        MvcResult mvcResult = mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getType(), problem.getType());
-        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getTitle(), problem.getTitle());
-    }
-
-    @Test
-    void addAudioFileExtensionContentType() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.mp2",
-            "audio/mpegincorrect",
-            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
-        );
-
-        MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
-        );
-
-        MvcResult mvcResult = mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getType(), problem.getType());
-        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getTitle(), problem.getTitle());
-    }
-
-    @Test
-    void addAudioFileSignatureException() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.mp2",
-            "audio/mpeg",
-            "Not an mp2 signature".getBytes()
-        );
-
-        MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
-        );
-
-        MvcResult mvcResult = mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getType(), problem.getType());
-        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getTitle(), problem.getTitle());
-    }
-
-    @Test
     void addAudioReturnForbiddenError() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.DAR_PC);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "TEST", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "TEST", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -704,12 +467,6 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
             {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
-                                                          OffsetDateTime endedAt, String courthouse, String courtroom, String filetype) throws IOException {
-        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, filetype,
-                                     AUDIO_BINARY_PAYLOAD_1, "case1", "case2", "case3");
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,

@@ -41,10 +41,6 @@ spring:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
-  servlet:
-    multipart:
-      max-file-size: 1KB
-      max-request-size: 10KB #this affects addAudio as well, so needs to handle a 350mb mp2 file
   datasource:
     hikari:
       maximum-pool-size: 10 # Overrides the value in `application.yaml` to a smaller value more appropriate for integration tests, sized below the `max_connections` limit specified in PostgresIntegrationBase.
@@ -61,16 +57,11 @@ darts:
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:${wiremock.server.port}}
   audio:
-    max-file-duration-minutes: 1440
     concat-workspace: ${java.io.tmpdir}/audiotransform/concatenate
     merge-workspace: ${java.io.tmpdir}/audiotransform/merge
     trim-workspace: ${java.io.tmpdir}/audiotransform/trim
     re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
     temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
-    allowed-media-formats:
-      - "mpeg2"
-      - "mp2"
-      - "audio/mpeg"
   transformation:
     service:
       audio:

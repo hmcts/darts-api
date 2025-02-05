@@ -21,7 +21,7 @@ public class ArmBatchItem {
     }
 
     public void undoManifestFileChange() {
-        this.armEod.setManifestFile(this.previousManifestFile);
+        this.armEod.setManifestFile(null);
     }
 
     public boolean isRawFilePushNotNeededOrSuccessfulWhenNeeded() {

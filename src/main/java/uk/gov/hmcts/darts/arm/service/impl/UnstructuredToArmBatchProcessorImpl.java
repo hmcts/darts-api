@@ -132,9 +132,13 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             return;
         }
 
-        for (var batchItem : batchItems.getSuccessful()) {
-            unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
-            logApi.armPushSuccessful(batchItem.getArmEod().getId());
+        for (var batchItem : batchItems.getItems()) {
+            if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null) {
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
+                logApi.armPushSuccessful(batchItem.getArmEod().getId());
+            } else {
+                recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
+            }
         }
     }
 
@@ -148,7 +152,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             unstructuredToArmHelper.incrementTransferAttempts(armEod);
             unstructuredToArmHelper.updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus(), userAccount);
         } else {
-            log.error("Unable to find matching external object directory for {}", armEod.getId());
+            log.error("Unable to find matching external object directory {} for manifest {}", armEod.getId(), archiveRecordsFileName);
             unstructuredToArmHelper.updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
             throw new RuntimeException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }

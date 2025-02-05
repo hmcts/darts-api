@@ -64,7 +64,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
             .collect(Collectors.toList());
         eventsToBeSuperseded.removeFirst();
         if (CollectionUtils.isNotEmpty(eventsToBeSuperseded)) {
-            List<Integer> eveIdsThatHaveBeenSuperseded = new ArrayList<>();
+            List<EventEntity> eventsThatHaveBeenSuperseded = new ArrayList<>();
             for (EventEntity eventToBeSuperseded : eventsToBeSuperseded) {
                 if (eventToBeSuperseded.getCreatedDateTime().isBefore(earliestIsCurrentClearUpDate)) {
                     log.info("Event version with event id {} received into modernised DARTS is for a legacy event. Skipping event is_current cleanup " +
@@ -75,15 +75,22 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                 }
                 eventToBeSuperseded.setIsCurrent(false);
                 eventToBeSuperseded.setHearingEntities(new ArrayList<>());
-                eveIdsThatHaveBeenSuperseded.add(eventToBeSuperseded.getId());
+                eventsThatHaveBeenSuperseded.add(eventToBeSuperseded);
             }
 
-            eventRepository.saveAllAndFlush(eventsToBeSuperseded);
-            log.debug("Updated following events for event id {} excluding primary key {} where hearings match {}, {}",
-                      eventIdAndHearingIds.getEventId(),
-                      eventIdAndHearingIds.getEveId(),
-                      eventIdAndHearingIds.getHearingIds(),
-                      eveIdsThatHaveBeenSuperseded);
+            if (!eventsThatHaveBeenSuperseded.isEmpty()) {
+                eventRepository.saveAllAndFlush(eventsThatHaveBeenSuperseded);
+
+                List<Integer> eventIds = eventsThatHaveBeenSuperseded.stream()
+                    .map(EventEntity::getId)
+                    .toList();
+
+                log.info("Updated the following events for event id {} excluding primary key {} where hearings match {}, {}",
+                         eventIdAndHearingIds.getEventId(),
+                         eventIdAndHearingIds.getEveId(),
+                         eventIdAndHearingIds.getHearingIds(),
+                         eventIds);
+            }
         }
     }
 

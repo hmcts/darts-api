@@ -40,7 +40,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.util.unit.DataSize.ofMegabytes;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -117,9 +116,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         UserAccountEntity testUser = authorisationStub.getSeparateIntegrationUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
-
-        when(mockMultipartProperties.getMaxFileSize()).thenReturn(ofMegabytes(10));
-        when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofMegabytes(10));
 
         doNothing().when(mockAuditApi)
             .record(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());

@@ -28,7 +28,6 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -54,7 +53,6 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -81,8 +79,6 @@ class DetsToArmBatchPushProcessorImplTest {
 
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntityDets;
 
-    @Mock
-    private FileOperationService fileOperationService;
     @Mock
     private ArchiveRecordService archiveRecordService;
     @Mock
@@ -123,7 +119,6 @@ class DetsToArmBatchPushProcessorImplTest {
             logApi,
             armDataManagementConfiguration,
             externalObjectDirectoryRepository,
-            fileOperationService,
             armDataManagementApi,
             detsToArmProcessorConfiguration,
             objectStateRecordRepository,
@@ -171,7 +166,6 @@ class DetsToArmBatchPushProcessorImplTest {
         }
         externalObjectDirectoryEntityArm.setManifestFile(manifestFile.getName());
 
-        lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFile.toPath());
         lenient().when(detsToArmProcessorConfiguration.getManifestFilePrefix()).thenReturn("DETS");
     }
 
@@ -185,9 +179,8 @@ class DetsToArmBatchPushProcessorImplTest {
         }
     }
 
-
     @Test
-    void processDetsToArmSetObjectStatusNoMatchingDetsRecordErrorMessage() {
+    void processDetsToArm_SetObjectStatusNoMatchingDetsRecordErrorMessage() {
         //given
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
@@ -199,11 +192,11 @@ class DetsToArmBatchPushProcessorImplTest {
         //Before this method was made async EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true); was used to enforce the ELT to match
         //This is no longer possible as mockito static mocks don't work well with threads. By setting ELt to ARM it simulates this behavior
         externalObjectDirectoryEntityDets.setExternalLocationType(EOD_HELPER_MOCKS.getArmLocation());
+
         //when
         detsToArmBatchPushProcessor.processDetsToArm(200);
 
-
-        //then
+        // then
         assertTrue(
             objectStateRecordEntity
                 .getObjectStatus()
@@ -214,7 +207,51 @@ class DetsToArmBatchPushProcessorImplTest {
 
     }
 
-    public ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
+    @Test
+    void processDetsToArm_noEodsForTransfer(CapturedOutput output) {
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+        detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
+        doReturn(new ArrayList<>()).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
+        // given
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+        // when
+        LogUtil.waitUntilMessage(output, "No DETS EODs to process", 5);
+        assertThat(output).contains("No DETS EODs to process");
+    }
+
+    @Test
+    void processDetsToArm_asyncException(CapturedOutput output) {
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+        detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
+        doReturn(List.of(1)).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
+
+        try (MockedStatic<AsyncUtil> asyncUtilMockedStatic = Mockito.mockStatic(AsyncUtil.class)) {
+            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), any()))
+                .thenThrow(new RuntimeException("Test exception"));
+            detsToArmBatchPushProcessor.processDetsToArm(5);
+            LogUtil.waitUntilMessage(output, "DETS to ARM batch unexpected exception", 5);
+
+            assertThat(output)
+                .contains("DETS to ARM batch unexpected exception")
+                .contains("DetsToArmBatchPushProcessorImpljava.lang.RuntimeException: Test exception");
+        }
+    }
+
+    @Test
+    void processDetsToArm_emptyList(CapturedOutput output) {
+        // given
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+        detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
+        doReturn(new ArrayList<>()).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
+
+        // when
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+
+        // then
+        assertThat(output).contains("No DETS EODs to process");
+    }
+    
+    private ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);
         objectStateRecordEntity.setEodId(String.valueOf(detsEodId));
@@ -240,36 +277,5 @@ class DetsToArmBatchPushProcessorImplTest {
         objectStateRecordEntity.setFlagFileDetsCleanupStatus(false);
         objectStateRecordEntity.setFlagFileRetainedInOds(false);
         return objectStateRecordEntity;
-    }
-
-    @Test
-    void processDetsToArm_noEodsForTransfer(CapturedOutput output) {
-        EOD_HELPER_MOCKS.simulateInitWithMockedData();
-        detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
-        doReturn(new ArrayList<>()).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
-        // given
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-        // when
-        LogUtil.waitUntilMessage(output, "No DETS EODs to process", 5);
-        assertThat(output)
-            .contains("No DETS EODs to process");
-    }
-
-    @Test
-    void processDetsToArm_asyncException(CapturedOutput output) throws Exception {
-        EOD_HELPER_MOCKS.simulateInitWithMockedData();
-        detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
-        doReturn(List.of(1)).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
-
-        try (MockedStatic<AsyncUtil> asyncUtilMockedStatic = Mockito.mockStatic(AsyncUtil.class)) {
-            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), any()))
-                .thenThrow(new RuntimeException("Test exception"));
-            detsToArmBatchPushProcessor.processDetsToArm(5);
-            LogUtil.waitUntilMessage(output, "Dets to arm batch unexpected exception", 5);
-
-            assertThat(output)
-                .contains("Dets to arm batch unexpected exception")
-                .contains("DetsToArmBatchPushProcessorImpljava.lang.RuntimeException: Test exception");
-        }
     }
 }

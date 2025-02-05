@@ -648,6 +648,21 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         OffsetDateTime startTime, OffsetDateTime endTime,
         UserAccountEntity currentUser);
 
+    @Modifying(clearAutomatically = true)
+    @Query(
+        """
+            update ExternalObjectDirectoryEntity eod
+            set eod.status = :newStatus,
+                eod.transferAttempts = :transferAttempts,
+                eod.lastModifiedBy = :currentUser,
+                eod.lastModifiedDateTime = current_timestamp
+            where eod.id in :idsToUpdate
+            """
+    )
+    void updateEodStatusAndTransferAttemptsWhereIdIn(ObjectRecordStatusEntity newStatus, Integer transferAttempts, UserAccountEntity currentUser,
+                                                     List<Integer> idsToUpdate);
+
+
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
@@ -668,4 +683,18 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                          @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
                                                                                          @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
                                                                                          Limit limit);
+
+    @Query("""
+        SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+        WHERE eod.status = :status
+        AND eod.lastModifiedDateTime BETWEEN :startDateTime AND :endDateTime
+        AND eod.externalLocationType = :locationType
+        """)
+    List<Integer> findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(@Param("status") ObjectRecordStatusEntity status,
+                                                                           @Param("startDateTime") OffsetDateTime startDateTime,
+                                                                           @Param("endDateTime") OffsetDateTime endDateTime,
+                                                                           @Param("locationType") ExternalLocationTypeEntity locationType,
+                                                                           Limit limit);
+
+
 }

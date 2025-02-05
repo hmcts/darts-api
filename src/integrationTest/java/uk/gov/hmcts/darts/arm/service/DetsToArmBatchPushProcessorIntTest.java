@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -31,7 +33,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
@@ -90,7 +94,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processDetsToArmWithDetsEodReturnsSuccess() {
+    void processDetsToArm_Success_WithDetsEod() {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
             .save(createObjectStateRecordEntity(111L));
@@ -141,7 +145,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processDetsToArmWithFailedRawDataStatusArmEodSuccess() {
+    void processDetsToArm_Success_WithFailedRawDataStatusArmEod() {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
             .save(createObjectStateRecordEntity(111L));
@@ -264,23 +268,6 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
 
     }
 
-    private void verifyObjectStateRecordSuccessfullyUpdated(ExternalObjectDirectoryEntity foundArmEod, ExternalObjectDirectoryEntity detsEod,
-                                                            ObjectStateRecordEntity objectStateRecordEntity) {
-        ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
-            .findById(foundArmEod.getOsrUuid()).orElseThrow();
-        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
-        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
-        assertTrue(objectStateRecordEntityModified.getFlagFileTransfToarml());
-        assertNotNull(objectStateRecordEntityModified.getDateFileTransfToarml());
-        assertEquals(detsEod.getChecksum(), objectStateRecordEntityModified.getMd5FileTransfArml());
-        assertEquals(savedMedia.getFileSize(), objectStateRecordEntity.getFileSizeBytesArml());
-        assertTrue(objectStateRecordEntityModified.getFlagFileMfstCreated());
-        assertNotNull(objectStateRecordEntityModified.getDateFileMfstCreated());
-        assertNotNull(objectStateRecordEntityModified.getIdManifestFile());
-        assertTrue(objectStateRecordEntityModified.getFlagMfstTransfToArml());
-        assertNotNull(objectStateRecordEntityModified.getDateMfstTransfToArml());
-    }
-
     @Test
     void processDetsToArmWithNoOsrUuid(CapturedOutput output) {
         // given
@@ -302,6 +289,141 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         //Error is gracefully handled and logged
         assertThat(output)
             .contains("uk.gov.hmcts.darts.common.exception.DartsException: Unable to find ObjectStateRecordEntity for ARM EOD ID: 2 as OSR UUID is null");
+    }
+
+    @Test
+    void processDetsToArm_ThrowsException_WhenSaveManifestFails() {
+        // given
+        ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
+            .save(createObjectStateRecordEntity(111L));
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
+
+        ExternalObjectDirectoryEntity detsEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            STORED,
+            DETS,
+            UUID.randomUUID()
+        );
+        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
+        detsEod.setLastModifiedDateTime(latestDateTime);
+        detsEod.setTransferAttempts(1);
+        detsEod.setResponseCleaned(false);
+        detsEod.setOsrUuid(objectStateRecordEntity.getUuid());
+        detsEod = dartsDatabase.save(detsEod);
+
+        objectStateRecordEntity.setEodId(String.valueOf(detsEod.getId()));
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
+
+        String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
+        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation().toString(), rawFilename);
+        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(new BlobStorageException("Error", null, 500));
+
+        // when
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+
+        // then
+        Optional<ExternalObjectDirectoryEntity> foundArmEodOptional = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findMatchingExternalObjectDirectoryEntityByLocation(
+                EodHelper.failedArmManifestFileStatus(),
+                EodHelper.armLocation(),
+                savedMedia,
+                null,
+                null,
+                null
+            );
+        assertTrue(foundArmEodOptional.isPresent());
+        ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
+        assertEquals(EodHelper.failedArmManifestFileStatus(), foundArmEod.getStatus());
+        assertNotNull(foundArmEod.getOsrUuid());
+
+        ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
+            .findById(objectStateRecordEntity.getUuid()).orElseThrow();
+        verifyObjectStateRecordFailed(foundArmEod, detsEod, objectStateRecord);
+
+    }
+
+    @Test
+    void processDetsToArm_ThrowsException_WhenSaveRawDataFails() {
+        // given
+        ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
+            .save(createObjectStateRecordEntity(111L));
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
+
+        ExternalObjectDirectoryEntity detsEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            STORED,
+            DETS,
+            UUID.randomUUID()
+        );
+        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
+        detsEod.setLastModifiedDateTime(latestDateTime);
+        detsEod.setTransferAttempts(1);
+        detsEod.setResponseCleaned(false);
+        detsEod.setOsrUuid(objectStateRecordEntity.getUuid());
+        detsEod = dartsDatabase.save(detsEod);
+
+        objectStateRecordEntity.setEodId(String.valueOf(detsEod.getId()));
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
+
+        doThrow(new DartsException("")).when(armDataManagementApi).copyDetsBlobDataToArm(any(), any());
+
+        // when
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+
+        // then
+        Optional<ExternalObjectDirectoryEntity> foundArmEodOptional = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findMatchingExternalObjectDirectoryEntityByLocation(
+                EodHelper.failedArmRawDataStatus(),
+                EodHelper.armLocation(),
+                savedMedia,
+                null,
+                null,
+                null
+            );
+        assertTrue(foundArmEodOptional.isPresent());
+        ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
+        assertEquals(EodHelper.failedArmRawDataStatus(), foundArmEod.getStatus());
+        assertNotNull(foundArmEod.getOsrUuid());
+
+        ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
+            .findById(foundArmEod.getOsrUuid()).orElseThrow();
+        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
+        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
+
+    }
+
+    private void verifyObjectStateRecordSuccessfullyUpdated(ExternalObjectDirectoryEntity foundArmEod, ExternalObjectDirectoryEntity detsEod,
+                                                            ObjectStateRecordEntity objectStateRecordEntity) {
+        ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
+            .findById(foundArmEod.getOsrUuid()).orElseThrow();
+        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
+        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
+        assertTrue(objectStateRecordEntityModified.getFlagFileTransfToarml());
+        assertNotNull(objectStateRecordEntityModified.getDateFileTransfToarml());
+        assertEquals(detsEod.getChecksum(), objectStateRecordEntityModified.getMd5FileTransfArml());
+        assertEquals(savedMedia.getFileSize(), objectStateRecordEntity.getFileSizeBytesArml());
+        assertTrue(objectStateRecordEntityModified.getFlagFileMfstCreated());
+        assertNotNull(objectStateRecordEntityModified.getDateFileMfstCreated());
+        assertNotNull(objectStateRecordEntityModified.getIdManifestFile());
+        assertTrue(objectStateRecordEntityModified.getFlagMfstTransfToArml());
+        assertNotNull(objectStateRecordEntityModified.getDateMfstTransfToArml());
+    }
+
+    private void verifyObjectStateRecordFailed(ExternalObjectDirectoryEntity foundArmEod, ExternalObjectDirectoryEntity detsEod,
+                                               ObjectStateRecordEntity objectStateRecordEntity) {
+        ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
+            .findById(foundArmEod.getOsrUuid()).orElseThrow();
+        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
+        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
+        assertTrue(objectStateRecordEntityModified.getFlagFileTransfToarml());
+        assertNotNull(objectStateRecordEntityModified.getDateFileTransfToarml());
+        assertEquals(detsEod.getChecksum(), objectStateRecordEntityModified.getMd5FileTransfArml());
+        assertEquals(savedMedia.getFileSize(), objectStateRecordEntity.getFileSizeBytesArml());
+        assertTrue(objectStateRecordEntityModified.getFlagFileMfstCreated());
+        assertNotNull(objectStateRecordEntityModified.getDateFileMfstCreated());
+        assertNotNull(objectStateRecordEntityModified.getIdManifestFile());
     }
 
     private ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {

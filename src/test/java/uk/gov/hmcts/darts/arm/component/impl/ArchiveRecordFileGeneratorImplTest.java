@@ -54,6 +54,9 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 class ArchiveRecordFileGeneratorImplTest {
 
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
+    public static final String READING_FILE = "Reading file {}";
+    public static final String ACTUAL_RESPONSE = "actual Response {}";
+    public static final String EXPECT_RESPONSE = "expect Response {}";
     @TempDir
     private File tempDirectory;
 
@@ -70,7 +73,9 @@ class ArchiveRecordFileGeneratorImplTest {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void clean() throws Exception {
         FileStore.getFileStore().remove();
-        Assertions.assertEquals(0, Files.list(tempDirectory.toPath()).count());
+        try (var filesStream = Files.list(tempDirectory.toPath())) {
+            Assertions.assertEquals(0, filesStream.count());
+        }
     }
 
     @Test
@@ -81,12 +86,12 @@ class ArchiveRecordFileGeneratorImplTest {
 
         archiveRecordFileGenerator.generateArchiveRecord(createMediaArchiveRecord(relationId), archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
 
-        log.info("Reading file {}", archiveFile.getAbsolutePath());
+        log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveMediaMetadata/expectedResponse.a360");
-        log.info("actual Response {}", actualResponse);
-        log.info("expect Response {}", expectedResponse);
+        log.info(ACTUAL_RESPONSE, actualResponse);
+        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -99,12 +104,12 @@ class ArchiveRecordFileGeneratorImplTest {
         archiveRecordFileGenerator.generateArchiveRecord(createTranscriptionArchiveRecord(relationId), archiveFile,
                                                          ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE);
 
-        log.info("Reading file {}", archiveFile.getAbsolutePath());
+        log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveTranscriptionMetadata/expectedResponse.a360");
-        log.info("actual Response {}", actualResponse);
-        log.info("expect Response {}", expectedResponse);
+        log.info(ACTUAL_RESPONSE, actualResponse);
+        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -116,12 +121,12 @@ class ArchiveRecordFileGeneratorImplTest {
 
         archiveRecordFileGenerator.generateArchiveRecord(createAnnotationArchiveRecord(relationId), archiveFile, ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE);
 
-        log.info("Reading file {}", archiveFile.getAbsolutePath());
+        log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveAnnotationMetadata/expectedResponse.a360");
-        log.info("actual Response {}", actualResponse);
-        log.info("expect Response {}", expectedResponse);
+        log.info(ACTUAL_RESPONSE, actualResponse);
+        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -134,12 +139,12 @@ class ArchiveRecordFileGeneratorImplTest {
 
         archiveRecordFileGenerator.generateArchiveRecord(createCaseArchiveRecord(relationId), archiveFile, ArchiveRecordType.CASE_ARCHIVE_TYPE);
 
-        log.info("Reading file {}", archiveFile.getAbsolutePath());
+        log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveCaseMetadata/expectedResponse.a360");
-        log.info("actual Response {}", actualResponse);
-        log.info("expect Response {}", expectedResponse);
+        log.info(ACTUAL_RESPONSE, actualResponse);
+        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -148,8 +153,7 @@ class ArchiveRecordFileGeneratorImplTest {
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("test-media-arm.a360"));
 
-        ArchiveRecord archiveRecord = null;
-        boolean result = archiveRecordFileGenerator.generateArchiveRecord(archiveRecord, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
+        boolean result = archiveRecordFileGenerator.generateArchiveRecord(null, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
         assertFalse(result);
     }
 
