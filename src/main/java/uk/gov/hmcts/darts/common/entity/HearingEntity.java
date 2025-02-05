@@ -95,7 +95,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     public void addMedia(MediaEntity mediaEntity) {
         if (!containsMedia(mediaEntity)) {
             mediaList.add(mediaEntity);
-            if (mediaEntity.getHearingList().stream().noneMatch(hearing -> hearing.getId().equals(this.id))) {
+            if (this.id == null || mediaEntity.getHearingList().stream().noneMatch(hearing -> this.id.equals(hearing.getId()))) {
                 mediaEntity.getHearingList().add(this);
             }
         }
