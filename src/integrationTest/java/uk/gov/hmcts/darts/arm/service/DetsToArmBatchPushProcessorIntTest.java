@@ -367,7 +367,6 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         objectStateRecordEntity.setEodId(String.valueOf(detsEod.getId()));
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
-        String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
         doThrow(new DartsException("")).when(armDataManagementApi).copyDetsBlobDataToArm(any(), any());
 
         // when
