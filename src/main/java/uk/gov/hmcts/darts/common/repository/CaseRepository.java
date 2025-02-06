@@ -97,7 +97,7 @@ public interface CaseRepository
         SELECT cc
         FROM CourtCaseEntity cc
         WHERE cc.id in :ids
-        ORDER BY cc.id DESC        
+        ORDER BY cc.caseNumber DESC        
         """)
     List<CourtCaseEntity> findAllWithIdMatchingOneOf(List<Integer> ids);
 }
