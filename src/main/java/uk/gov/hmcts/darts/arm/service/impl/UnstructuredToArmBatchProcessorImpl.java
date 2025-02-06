@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
@@ -33,8 +35,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
-
+public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor, DisposableBean {
     private final ArchiveRecordService archiveRecordService;
     private final DataStoreToArmHelper unstructuredToArmHelper;
     private final UserIdentity userIdentity;
@@ -42,6 +43,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
+
+    private List<Integer> eodsForTransfer;
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
@@ -52,9 +55,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<Integer> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                                                          EodHelper.armLocation(),
-                                                                                          taskBatchSize);
+        unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
+                                                          EodHelper.armLocation(),
+                                                          taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
@@ -201,4 +204,13 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
     }
 
+    @Override
+    public void destroy() throws Exception {
+        if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
+            unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
+                                                           EodHelper.armProcessingResponseFilesStatus(),
+                                                           EodHelper.armDropZoneStatus(),
+                                                           userIdentity.getUserAccount());
+        }
+    }
 }
