@@ -121,7 +121,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
         securityRoles = {TRANSCRIBER},
-        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<AddAudioResponse> addAudioRequestDownload(AudioRequestDetails audioRequestDetails) {
         audioRequestDetails.setRequestType(AudioRequestType.DOWNLOAD);
         return addAudioRequest(audioRequestDetails);

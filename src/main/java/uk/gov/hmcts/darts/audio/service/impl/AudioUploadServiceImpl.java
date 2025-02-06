@@ -178,7 +178,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             log.info("Revised version of media added with filename {} and antecedent media id {}", newMediaEntity.getMediaFile(),
                      newMediaEntity.getId().toString());
         }
-        mediaRepository.save(newMediaEntity);
+        newMediaEntity = mediaRepository.saveAndFlush(newMediaEntity);
         log.info("Saved media id {}", newMediaEntity.getId());
 
         OffsetDateTime startDate = addAudioMetadataRequest.getStartedAt();
@@ -268,9 +268,9 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     }
 
     void saveExternalObjectDirectory(UUID externalLocation,
-                                             String checksum,
-                                             UserAccountEntity userAccountEntity,
-                                             MediaEntity mediaEntity) {
+                                     String checksum,
+                                     UserAccountEntity userAccountEntity,
+                                     MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
         externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
