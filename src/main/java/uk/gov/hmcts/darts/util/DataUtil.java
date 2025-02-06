@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.util;
 
+import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -7,10 +8,8 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import java.util.List;
 import java.util.Optional;
 
+@UtilityClass
 public final class DataUtil {
-    private DataUtil() {
-        // Utility class
-    }
 
     public static String toUpperCase(String value) {
         return Optional.ofNullable(value).map(String::toUpperCase).orElse(null);
