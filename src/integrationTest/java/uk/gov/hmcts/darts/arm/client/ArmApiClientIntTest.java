@@ -86,13 +86,13 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
 
         // Then
         verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
-                                  .withHeader(AUTHORIZATION, equalTo(bearerAuth))
-                                  .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                                  .withRequestBody(
-                                      matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
-                                          .and(matchingJsonPath("$.manifest.event_date", equalTo(eventTimestamp.toString())))
-                                          .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
-                                  ));
+                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                   .withRequestBody(
+                       matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
+                           .and(matchingJsonPath("$.manifest.event_date", equalTo(eventTimestamp.toString())))
+                           .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
+                   ));
 
         assertEquals(UUID.fromString(externalRecordId), updateMetadataResponse.getItemId());
     }

@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 public class UpdateMetadataRequest {
 
     @JsonProperty("UseGuidsForFields")
-    private boolean useGuidsForFields;
+    private Boolean useGuidsForFields;
 
     @JsonProperty("manifest")
     private Manifest manifest;
