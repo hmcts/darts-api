@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,8 +49,10 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
 
-    private List<Integer> eodsForTransfer;
+    private List<Integer> eodsForTransfer = Collections.synchronizedList(new ArrayList<>());
     private UserAccountEntity userAccount;
+    // Create thread safe list of eodsAlreadyTransferred
+    private final List<Integer> eodsAlreadyTransferred = Collections.synchronizedList(new ArrayList<>());
 
     @PostConstruct
     public void init() {
@@ -80,11 +84,14 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 .map(eodsForBatch -> (Callable<Void>) () -> {
                     int batchNumber = batchCounter.getAndIncrement();
                     try {
-                        TimeUnit.SECONDS.sleep(5);
+                        //TODO remove test sleep
+                        log.info("Sleeping");
+                        TimeUnit.SECONDS.sleep(50);
                         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
                         log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
                         createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
                         log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
+                        eodsAlreadyTransferred.addAll(eodsForBatch);
 
                     } catch (Exception e) {
                         log.error("Unexpected exception when processing batch {}", batchNumber, e);
@@ -223,15 +230,17 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private void resetEodStatusOnShutdown() {
         log.info("UnstructuredToArmBatchProcessorImpl shutting down.");
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
-            log.info("Reverting EODs to failed status for potentially EODs {}", eodsForTransfer.size());
-            String eodsIds = eodsForTransfer.stream().map(String::valueOf).collect(Collectors.joining(","));
-            log.info("EODs {} will be reverted to pod recycled status", eodsIds);
+            //create a new list based on the  eodsForTransfer minus eodsAlreadyTransferred
+            List<Integer> missingEods = eodsForTransfer.stream().filter(eod -> !eodsAlreadyTransferred.contains(eod)).collect(Collectors.toList());
+            log.info("Reverting EODs to failed status for potentially EODs {}", missingEods.size());
+            String missingEodIds = missingEods.stream().map(String::valueOf).collect(Collectors.joining(","));
+            log.info("EODs {} will need be reverted to arm raw data failed", missingEodIds);
 
-            externalObjectDirectoryRepository.updateEodByIdAndStatus(
-                eodsForTransfer, EodHelper.armPushPodRecycledStatus(), EodHelper.armIngestionStatus(), userAccount);
-            log.error("Updated eods from {} to {}", EodHelper.armIngestionStatus().getDescription(), EodHelper.armPushPodRecycledStatus().getDescription());
-
-            eodsForTransfer.forEach(eodId -> log.info("EOD ID: {} has been reverted to pod recycled status", eodId));
+            //externalObjectDirectoryRepository.updateEodByIdAndStatus(
+            //    eodsForTransfer, EodHelper.armPushPodRecycledStatus(), EodHelper.armIngestionStatus(), userAccount);
+            //log.error("Updated eods from {} to {}", EodHelper.armIngestionStatus().getDescription(), EodHelper.armPushPodRecycledStatus().getDescription());
+            missingEods.forEach(eodId -> log.info("EOD ID: {} has been reverted to arm raw data failed status", eodId));
+            //eodsForTransfer.forEach(eodId -> log.info("EOD ID: {} has been reverted to pod recycled status", eodId));
         } else {
             log.info("No EODs to revert to failed status");
         }
