@@ -5,23 +5,21 @@
 --v5    amend tablespace to pg_default
 --v6    add revinfo table, as another externally defined object
 --v7    add audit_user to revinfo and FK to user_account
+--v8    add storage_id and data_ticket to object_state_record
+--      add primary key to object_state_record
+--      add various indexes to object_state_record
+--      remove id_case,courthouse_name,date_last_accessed,flag_file_retained_in_ods from object_state_record
+--      remove relation_id,cas_id,parent_id,object_type from object_state_record
 
 
 CREATE TABLE object_state_record
 (osr_uuid                      BIGINT                     NOT NULL
 ,eod_id                        CHARACTER VARYING
 ,arm_eod_id                    CHARACTER VARYING
-,parent_id                     CHARACTER VARYING --
-,parent_object_id              CHARACTER VARYING --
-,content_object_id             CHARACTER VARYING --
-,object_type                   CHARACTER VARYING --  
+,parent_object_id              CHARACTER VARYING 
+,content_object_id             CHARACTER VARYING   
 ,id_clip                       CHARACTER VARYING
-,id_case                       CHARACTER VARYING
-,courthouse_name               CHARACTER VARYING
-,cas_id                        INTEGER
-,date_last_accessed            TIMESTAMP WITH TIME ZONE
-,relation_id                   CHARACTER VARYING
-,dets_location                 CHARACTER VARYING -- 
+,dets_location                 CHARACTER VARYING  
 ,flag_file_transfer_to_dets    BOOLEAN
 ,date_file_transfer_to_dets    TIMESTAMP WITH TIME ZONE
 ,md5_doc_transfer_to_dets      CHARACTER VARYING
@@ -49,9 +47,28 @@ CREATE TABLE object_state_record
 ,id_response_uf_file           CHARACTER VARYING
 ,flag_file_dets_cleanup_status BOOLEAN
 ,date_file_dets_cleanup        TIMESTAMP WITH TIME ZONE
-,flag_file_retained_in_ods     BOOLEAN
 ,object_status                 CHARACTER VARYING
+,storage_id                    CHARACTER VARYING
+,data_ticket                   INTEGER
 ) TABLESPACE pg_default;
+
+CREATE UNIQUE INDEX object_state_record_pk              ON object_state_record(osr_uuid) TABLESPACE pg_default; 
+ALTER TABLE object_state_record                         ADD PRIMARY KEY USING INDEX object_state_record_pk;
+
+-- multicolumn index, as two columns will be referenced together
+CREATE INDEX osr_storage_id_data_ticket                 ON object_state_record(storage_id,data_ticket) TABLESPACE pg_default;
+
+-- only one of the following two indexes should be retained
+CREATE INDEX osr_id_clip                                ON object_state_record(id_clip) TABLESPACE pg_default;
+-- if the queries that neccesitate this index remain, remove single column, otherwise retain this one,and remove id_clip.
+CREATE INDEX osr_id_clip_md5_doc_tx_dets                ON object_state_record(id_clip,md5_doc_transfer_to_dets) TABLESPACE pg_default;
+
+-- obviously if the md5 column is not needed in the 2 column index above, the following would also be redundant
+CREATE INDEX osr_md5_doc_tx_dets                        ON object_state_record(md5_doc_transfer_to_dets) TABLESPACE pg_default;
+
+CREATE INDEX osr_content_object_id                      ON object_state_record(content_object_id) TABLESPACE pg_default;
+CREATE INDEX osr_flag_file_transfer_to_dets             ON object_state_record(flag_file_transfer_to_dets) TABLESPACE pg_default;
+
 
 CREATE TABLE revinfo
 (rev                           INT4                       NOT NULL

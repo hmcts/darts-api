@@ -346,6 +346,7 @@
 --    remove folder_path from event,media & transcription
 --    add production_name to arm_rpo_execution_detail
 --    add is_dets to external_object_directory
+--v72.5 add storage_id to media, transcription_document, daily_list,annotation_document, object_retrieval_queue
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -479,6 +480,7 @@ CREATE TABLE annotation_document
 ,subcontent_object_id        CHARACTER VARYING(16)
 ,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
+,storage_id                  CHARACTER VARYING(16)
 ,data_ticket                 INTEGER
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
@@ -846,6 +848,7 @@ CREATE TABLE daily_list
 ,subcontent_object_id        CHARACTER VARYING(16)
 ,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING
+,storage_id                  CHARACTER VARYING(16)
 ,data_ticket                 INTEGER
 ,external_location           UUID
 ,elt_id                      INTEGER
@@ -1224,6 +1227,7 @@ CREATE TABLE media
 ,subcontent_object_id        CHARACTER VARYING(16)
 ,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
+,storage_id                  CHARACTER VARYING(16)
 ,data_ticket                 INTEGER
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
 ,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
@@ -1426,6 +1430,7 @@ CREATE TABLE object_retrieval_queue
 ,trd_id                      INTEGER
 ,parent_object_id            CHARACTER VARYING
 ,content_object_id           CHARACTER VARYING
+,storage_id                  CHARACTER VARYING(16)
 ,clip_id                     CHARACTER VARYING
 ,data_ticket                 INTEGER
 ,acknowledged_ts             TIMESTAMP WITH TIME ZONE
@@ -1594,6 +1599,7 @@ CREATE TABLE transcription_document
 ,subcontent_object_id        CHARACTER VARYING(16)
 ,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
+,storage_id                  CHARACTER VARYING(16)
 ,data_ticket                 INTEGER
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL

@@ -43,6 +43,7 @@
 -- v17 replace definition of case_retention_extra
 --     add pk to retention_policy_type_heritage_mapping
 --     amend manual_retention_override and actual_case_closed_flag to int from bool
+--v18  add default to created_ts on case_overflow
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -194,33 +195,13 @@ CREATE TABLE case_overflow
 ,end_of_sentence_date_ts     TIMESTAMP WITH TIME ZONE
 ,manual_retention_override   INTEGER
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE
---,is_standard_policy          BOOLEAN
---,is_permanent_policy         BOOLEAN
---,checked_ts                  TIMESTAMP WITH TIME ZONE
---,corrected_ts                TIMESTAMP WITH TIME ZONE
 ,c_closed_pre_live           INTEGER
 ,c_case_closed_date_pre_live TIMESTAMP WITH TIME ZONE
 ,case_created_ts             TIMESTAMP WITH TIME ZONE
 ,audio_folder_object_id      CHARACTER VARYING(16)
---,case_object_name            CHARACTER VARYING(255)                  -- to accommodate dm_sysobject_s.object_name
---,case_closed_eve_id          INTEGER                                 -- unenforced fk to event
---,tol_case_closed_ts          TIMESTAMP WITH TIME ZONE
---,tol_case_closed_type        CHARACTER VARYING                       -- enumerated type, not normalised
---,ret_retain_until_ts         TIMESTAMP WITH TIME ZONE
---,aud_retain_until_ts         TIMESTAMP WITH TIME ZONE
---,migration_type              CHARACTER VARYING                       -- to indicate how we've got to this point with this record
---,migration_error_1           CHARACTER VARYING
---,migration_error_2           CHARACTER VARYING
---,migration_error_3           CHARACTER VARYING
---,migration_error_4           CHARACTER VARYING
---,ret_conf_score              INTEGER
---,ret_conf_reason             CHARACTER VARYING
---,ret_conf_updated_ts         TIMESTAMP WITH TIME ZONE
---,tol_diff_c_close_in_days    INTEGER
---,tol_diff_ret_dt_in_days     INTEGER 
 ,case_last_modified_ts       TIMESTAMP WITH TIME ZONE                -- to support delta, when case changed
 ,audio_last_modified_ts      TIMESTAMP WITH TIME ZONE                -- to suppor delta, when moj_audio_folder changes
-,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL     DEFAULT current_timestamp
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE pg_default;
 
