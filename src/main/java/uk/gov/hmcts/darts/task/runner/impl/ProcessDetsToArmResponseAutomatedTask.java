@@ -37,6 +37,6 @@ public class ProcessDetsToArmResponseAutomatedTask
 
     @Override
     protected void runTask() {
-        detsToArmBatchProcessResponseFiles.processResponseFiles(getAutomatedTaskBatchSize());
+        detsToArmBatchProcessResponseFiles.processResponseFiles(getAutomatedTaskBatchSize(), getConfig());
     }
 }

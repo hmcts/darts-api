@@ -28,7 +28,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtIss
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uk.gov.hmcts.darts.authentication.component.DartsJwt;
-import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
 import uk.gov.hmcts.darts.authentication.config.DefaultAuthConfigurationPropertiesStrategy;
@@ -208,7 +207,6 @@ public class SecurityConfig {
             String token = authHeader.replace(TOKEN_BEARER_PREFIX, "").trim();
             String issuer = JWTParser.parse(token).getJWTClaimsSet().getIssuer();
 
-            AuthConfigurationProperties authconfig = getAuthConfig(issuer);
             AuthProviderConfigurationProperties authProviderConfig = getAuthProviderConfig(issuer);
 
             var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(authProviderConfig.getJwkSetUri())
@@ -228,16 +226,6 @@ public class SecurityConfig {
         }
         if (issuer.equals(internalAuthConfigurationProperties.getIssuerUri())) {
             return internalAuthProviderConfigurationProperties;
-        }
-        throw new IllegalArgumentException("Issuer not found");
-    }
-
-    private AuthConfigurationProperties getAuthConfig(String issuer) {
-        if (issuer.equals(externalAuthConfigurationProperties.getIssuerUri())) {
-            return externalAuthConfigurationProperties;
-        }
-        if (issuer.equals(internalAuthConfigurationProperties.getIssuerUri())) {
-            return internalAuthConfigurationProperties;
         }
         throw new IllegalArgumentException("Issuer not found");
     }
