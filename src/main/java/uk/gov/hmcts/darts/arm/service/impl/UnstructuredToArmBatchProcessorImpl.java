@@ -229,18 +229,19 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     }
 
     private void resetEodStatusOnShutdown() {
-        log.info("UnstructuredToArmBatchProcessorImpl shutting down.");
+        System.out.println("UnstructuredToArmBatchProcessorImpl shutting down.");
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
+
             //create a new list based on the  eodsForTransfer minus eodsAlreadyTransferred
             List<Integer> missingEods = eodsForTransfer.stream().filter(eod -> !eodsAlreadyTransferred.contains(eod)).collect(Collectors.toList());
-            log.info("Reverting EODs to failed status for potentially EODs {}", missingEods.size());
+            System.out.println("Reverting EODs to failed status for potentially EODs " + missingEods.size());
             String missingEodIds = missingEods.stream().map(String::valueOf).collect(Collectors.joining(","));
-            log.info("EODs {} will need be reverted to arm raw data failed", missingEodIds);
+            System.out.println("EODs will need be reverted to arm raw data failed " + missingEodIds);
 
-            missingEods.forEach(eodId -> log.info("EOD ID: {} has been reverted to arm raw data failed status", eodId));
+            missingEods.forEach(eodId -> System.out.println("EOD ID: {} has been reverted to arm raw data failed status " + eodId));
         } else {
-            log.info("No EODs to revert to failed status");
+            System.out.println("No EODs to revert to failed status");
         }
-        log.info("UnstructuredToArmBatchProcessorImpl has shut down.");
+        System.out.println("UnstructuredToArmBatchProcessorImpl has shut down.");
     }
 }
