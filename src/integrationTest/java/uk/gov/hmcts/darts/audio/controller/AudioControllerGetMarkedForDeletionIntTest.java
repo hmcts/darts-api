@@ -82,7 +82,7 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
 
         // And a media that's marked for deletion, but not yet approved for deletion (not marked for manual deletion)
         var expectedMediaEntity = createAndSaveMediaEntity(courtroomEntity, 1);
-        var expectedObjectAdminActionEntity = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
                                                                                       .media(expectedMediaEntity)
                                                                                       .objectHiddenReason(
                                                                                           objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
@@ -130,8 +130,7 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
                                            ]
                                          }
                                        }
-                                     ]""".formatted(expectedMediaEntity.getId(),
-                                                    expectedObjectAdminActionEntity.getId()),
+                                     ]""",
                                 mvcResult.getResponse().getContentAsString(),
                                 JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -148,30 +147,30 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
         var expectedMediaEntity1 = createAndSaveMediaEntity(courtroomEntity, 2);
         var expectedMediaEntity2 = createAndSaveMediaEntity(courtroomEntity, 1);
         var expectedMediaEntity3 = createAndSaveMediaEntity(courtroomEntity, 3);
-        var expectedObjectAdminActionEntity1 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                                                                                       .media(expectedMediaEntity1)
-                                                                                       .objectHiddenReason(
-                                                                                           objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
-                                                                                       .markedForManualDeletion(false)
-                                                                                       .markedForManualDelBy(null)
-                                                                                       .markedForManualDelDateTime(null)
-                                                                                       .build());
-        var expectedObjectAdminActionEntity2 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                                                                                       .media(expectedMediaEntity2)
-                                                                                       .objectHiddenReason(
-                                                                                           objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
-                                                                                       .markedForManualDeletion(false)
-                                                                                       .markedForManualDelBy(null)
-                                                                                       .markedForManualDelDateTime(null)
-                                                                                       .build());
-        var expectedObjectAdminActionEntity3 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                                                                                       .media(expectedMediaEntity3)
-                                                                                       .objectHiddenReason(
-                                                                                           objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
-                                                                                       .markedForManualDeletion(false)
-                                                                                       .markedForManualDelBy(null)
-                                                                                       .markedForManualDelDateTime(null)
-                                                                                       .build());
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                .media(expectedMediaEntity1)
+                                                .objectHiddenReason(
+                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                .markedForManualDeletion(false)
+                                                .markedForManualDelBy(null)
+                                                .markedForManualDelDateTime(null)
+                                                .build());
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                .media(expectedMediaEntity2)
+                                                .objectHiddenReason(
+                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                .markedForManualDeletion(false)
+                                                .markedForManualDelBy(null)
+                                                .markedForManualDelDateTime(null)
+                                                .build());
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                .media(expectedMediaEntity3)
+                                                .objectHiddenReason(
+                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                .markedForManualDeletion(false)
+                                                .markedForManualDelBy(null)
+                                                .markedForManualDelDateTime(null)
+                                                .build());
 
         // When
         MvcResult mvcResult = mockMvc.perform(

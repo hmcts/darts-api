@@ -318,9 +318,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     void getMediaById_shouldSortByCaseNumberDecending() throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_USER);
-        UserAccountEntity userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
-            .findFirst()
-            .orElseThrow();
+
 
         // Create hearing and mark it as actual
         var hearingEntity1 = databaseStub.createHearing(COURTHOUSE_NAME, COURTROOM_NAME, "CASE_B", HEARING_START_AT.toLocalDateTime());
@@ -334,6 +332,11 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         var hearingEntity3 = databaseStub.createHearing(COURTHOUSE_NAME, COURTROOM_NAME, "CASE_A", HEARING_START_AT.toLocalDateTime());
         hearingEntity3.setHearingIsActual(true);
         databaseStub.getHearingRepository().save(hearingEntity3);
+
+        UserAccountEntity userAccountEntity = databaseStub.getUserAccountRepository().findAll()
+            .stream()
+            .findFirst()
+            .orElseThrow();
 
         // Create media and link it to hearing
         var mediaEntity = createAndSaveMediaEntity(List.of(hearingEntity1, hearingEntity2, hearingEntity3), userAccountEntity, false);
