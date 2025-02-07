@@ -22,7 +22,9 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
@@ -313,6 +315,48 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     @Test
+    void getMediaById_shouldSortByCaseNumberDecending() throws Exception {
+        // Given
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_USER);
+        UserAccountEntity userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
+            .findFirst()
+            .orElseThrow();
+
+        // Create hearing and mark it as actual
+        var hearingEntity1 = databaseStub.createHearing(COURTHOUSE_NAME, COURTROOM_NAME, "CASE_B", HEARING_START_AT.toLocalDateTime());
+        hearingEntity1.setHearingIsActual(true);
+        databaseStub.getHearingRepository().save(hearingEntity1);
+
+        var hearingEntity2 = databaseStub.createHearing(COURTHOUSE_NAME, COURTROOM_NAME, "CASE_C", HEARING_START_AT.toLocalDateTime());
+        hearingEntity2.setHearingIsActual(true);
+        databaseStub.getHearingRepository().save(hearingEntity2);
+
+        var hearingEntity3 = databaseStub.createHearing(COURTHOUSE_NAME, COURTROOM_NAME, "CASE_A", HEARING_START_AT.toLocalDateTime());
+        hearingEntity3.setHearingIsActual(true);
+        databaseStub.getHearingRepository().save(hearingEntity3);
+
+        // Create media and link it to hearing
+        var mediaEntity = createAndSaveMediaEntity(List.of(hearingEntity1, hearingEntity2, hearingEntity3), userAccountEntity, false);
+
+        // Create media linked case with court case
+        databaseStub.createMediaLinkedCase(mediaEntity, hearingEntity1.getCourtCase());
+        databaseStub.createMediaLinkedCase(mediaEntity, hearingEntity2.getCourtCase());
+        databaseStub.createMediaLinkedCase(mediaEntity, hearingEntity3.getCourtCase());
+
+        // When
+        mockMvc.perform(get(ENDPOINT.resolve(String.valueOf(mediaEntity.getId()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.cases", hasSize(3)))
+            .andExpect(jsonPath("$.cases[0].case_number").value("CASE_C"))
+            .andExpect(jsonPath("$.cases[1].case_number").value("CASE_B"))
+            .andExpect(jsonPath("$.cases[2].case_number").value("CASE_A"))
+            .andExpect(jsonPath("$.hearings", hasSize(3)))
+            .andExpect(jsonPath("$.hearings[0].case_number").value("CASE_C"))
+            .andExpect(jsonPath("$.hearings[1].case_number").value("CASE_B"))
+            .andExpect(jsonPath("$.hearings[2].case_number").value("CASE_A"));
+    }
+
+    @Test
     void getMediaById_shouldReturnCaseWithBaseDetails_whenCaseHasNoCourtCaseRecord() throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_USER);
@@ -321,7 +365,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .orElseThrow();
 
         // Create media without hearing
-        var mediaEntity = createAndSaveMediaEntity(null, userAccountEntity, false);
+        var mediaEntity = createAndSaveMediaEntity(new ArrayList<>(), userAccountEntity, false);
 
         // Create media linked case without court case
         databaseStub.createMediaLinkedCase(
@@ -342,6 +386,10 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     private MediaEntity createAndSaveMediaEntity(HearingEntity hearingEntity, UserAccountEntity userAccountEntity, boolean isDeleted) {
+        return createAndSaveMediaEntity(List.of(hearingEntity), userAccountEntity, isDeleted);
+    }
+
+    private MediaEntity createAndSaveMediaEntity(List<HearingEntity> hearingEntities, UserAccountEntity userAccountEntity, boolean isDeleted) {
         MediaEntity mediaEntity = databaseStub.createMediaEntity(COURTHOUSE_NAME,
                                                                  COURTROOM_NAME,
                                                                  MEDIA_START_AT,
@@ -361,12 +409,10 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         mediaEntity.setLastModifiedBy(userAccountEntity);
         mediaEntity.setIsCurrent(true);
 
-        mediaEntity.setHearingList(Collections.singletonList(hearingEntity));
-        if (hearingEntity != null) {
-            mediaEntity.setHearingList(Collections.singletonList(hearingEntity));
+        mediaEntity.setHearingList(hearingEntities);
+        for (HearingEntity hearingEntity : hearingEntities) {
             hearingEntity.setMediaList(Collections.singletonList(mediaEntity));
-            databaseStub.getHearingRepository()
-                .save(hearingEntity);
+            databaseStub.getHearingRepository().save(hearingEntity);
         }
 
         return databaseStub.getMediaRepository()
@@ -374,7 +420,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     private MediaEntity createAndSaveMediaEntityWithHiddenAndDeletedAndCurrentSetFalse(HearingEntity hearingEntity, UserAccountEntity userAccountEntity) {
-        var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity, false);
+        var mediaEntity = createAndSaveMediaEntity(List.of(hearingEntity), userAccountEntity, false);
 
         mediaEntity.setHidden(false);
         mediaEntity.setIsCurrent(false);
