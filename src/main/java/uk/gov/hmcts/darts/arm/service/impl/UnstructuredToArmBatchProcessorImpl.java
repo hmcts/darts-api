@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
@@ -22,9 +24,14 @@ import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
@@ -33,7 +40,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
+public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor, DisposableBean {
 
     private final ArchiveRecordService archiveRecordService;
     private final DataStoreToArmHelper unstructuredToArmHelper;
@@ -42,6 +49,16 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
+    private List<Integer> eodsForTransfer = Collections.synchronizedList(new ArrayList<>());
+    private UserAccountEntity userAccount;
+    // Create thread safe list of eodsAlreadyTransferred
+    private final List<Integer> eodsAlreadyTransferred = Collections.synchronizedList(new ArrayList<>());
+
+    @PostConstruct
+    public void init() {
+        Runtime.getRuntime().addShutdownHook(new Thread(this::resetEodStatusOnShutdown));
+    }
+
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
@@ -50,11 +67,11 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
 
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
-
+        userAccount = userIdentity.getUserAccount();
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<Integer> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                                                          EodHelper.armLocation(),
-                                                                                          taskBatchSize);
+        eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
+                                                                            EodHelper.armLocation(),
+                                                                            taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
@@ -71,6 +88,10 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                         log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
                         createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
                         log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
+                        eodsAlreadyTransferred.addAll(eodsForBatch);
+                        //TODO remove test sleep
+                        log.info("Sleeping");
+                        TimeUnit.SECONDS.sleep(50);
                     } catch (Exception e) {
                         log.error("Unexpected exception when processing batch {}", batchNumber, e);
                     }
@@ -201,4 +222,25 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
     }
 
+    @Override
+    public void destroy() throws Exception {
+        log.info("Shutting down UnstructuredToArmBatchProcessorImpl");
+        resetEodStatusOnShutdown();
+    }
+
+    private void resetEodStatusOnShutdown() {
+        log.info("UnstructuredToArmBatchProcessorImpl shutting down.");
+        if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
+            //create a new list based on the  eodsForTransfer minus eodsAlreadyTransferred
+            List<Integer> missingEods = eodsForTransfer.stream().filter(eod -> !eodsAlreadyTransferred.contains(eod)).collect(Collectors.toList());
+            log.info("Reverting EODs to failed status for potentially EODs {}", missingEods.size());
+            String missingEodIds = missingEods.stream().map(String::valueOf).collect(Collectors.joining(","));
+            log.info("EODs {} will need be reverted to arm raw data failed", missingEodIds);
+
+            missingEods.forEach(eodId -> log.info("EOD ID: {} has been reverted to arm raw data failed status", eodId));
+        } else {
+            log.info("No EODs to revert to failed status");
+        }
+        log.info("UnstructuredToArmBatchProcessorImpl has shut down.");
+    }
 }

@@ -7,12 +7,16 @@ management:
   endpoint:
     health:
       show-details: "always"
+    shutdown.enabled: true
   endpoints:
     web:
       base-path: /
       exposure:
         include: health, info, prometheus
-
+endpoints:
+  shutdown:
+    enabled: true
+    
 springdoc:
   packagesToScan: uk.gov.hmcts.darts
 
