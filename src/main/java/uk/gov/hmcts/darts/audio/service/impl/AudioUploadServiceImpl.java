@@ -251,12 +251,15 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                 userIdentity.getUserAccount()
             );
             //TEMP logging to support defect analysis
-            log.info("Attempting to caseNumber {} with media {} to hearing {} current linked hearings {}",
+            log.info("Attempting to link caseNumber {} with media {} to hearing {} current meida linked to hearing {}. Current hearings linked to media {}",
                      caseNumber,
                      mediaEntity.getId(), hearing.getId(),
                      hearing.getMediaList().stream()
                          .map(mediaEntity1 -> String.valueOf(mediaEntity1.getId()))
-                         .collect(Collectors.joining())
+                         .collect(Collectors.joining(",")),
+                     mediaEntity.getHearingList().stream()
+                         .map(mediaEntity1 -> String.valueOf(mediaEntity1.getId()))
+                         .collect(Collectors.joining(","))
             );
             // add the new media
             hearing.addMedia(mediaEntity);
