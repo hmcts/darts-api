@@ -44,6 +44,8 @@
 --     add pk to retention_policy_type_heritage_mapping
 --     amend manual_retention_override and actual_case_closed_flag to int from bool
 --v18  add default to created_ts on case_overflow
+--     drop cas_id
+--     add case_object_id and audio_folder_object_id
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -68,11 +70,12 @@ CREATE TABLE case_management_retention
 
 CREATE TABLE rps_retainer
 (rpr_id                         INTEGER                       NOT NULL
-,cas_id                         INTEGER                       
 ,rpt_id                         INTEGER                       NOT NULL
 ,rps_retainer_object_id         CHARACTER VARYING             NOT NULL -- all data will be from legacy
-,is_current                     BOOLEAN 
-,dm_retainer_root_id            CHARACTER VARYING      
+,is_current                     BOOLEAN
+,case_object_id                 CHARACTER VARYING
+,audio_folder_object_id         CHARACTER VARYING
+,dm_retainer_root_id            CHARACTER VARYING
 ,dm_retention_rule_type         INTEGER
 ,dm_retention_date              TIMESTAMP WITH TIME ZONE               -- retaining _date to indictate source
 ,dmc_current_phase_id           CHARACTER VARYING
@@ -110,8 +113,6 @@ COMMENT ON TABLE  rps_retainer
 IS 'is essentially a legacy table, based on the component tables necessary to derive the dmc_rps_retainer object';
 COMMENT ON COLUMN rps_retainer.rpr_id
 IS 'primary key of case_rps_retainer';
-COMMENT ON COLUMN rps_retainer.cas_id
-IS 'foreign key to court_case';
 
 CREATE TABLE case_retention
 (car_id                      INTEGER                       NOT NULL
@@ -293,11 +294,7 @@ CREATE SEQUENCE rpt_seq CACHE 20;
 CREATE SEQUENCE rah_seq CACHE 20;
 CREATE SEQUENCE rhm_seq CACHE 20;
 
-ALTER TABLE rps_retainer            
-ADD CONSTRAINT rps_retainer_court_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
-
-ALTER TABLE rps_retainer      
+ALTER TABLE rps_retainer
 ADD CONSTRAINT rps_retainer_retention_policy_type_fk
 FOREIGN KEY (rpt_id) REFERENCES retention_policy_type(rpt_id);
 
