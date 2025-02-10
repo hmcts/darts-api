@@ -1,0 +1,8 @@
+update courthouse_region_ae set reg_id = (select reg_id from region where region_name = 'London') where cth_id = (select cth_id from courthouse where courthouse_name = 'CROWN COURT SITTING AT BARCLAY ROAD');
+update courthouse_region_ae set reg_id = (select reg_id from region where region_name = 'London') where cth_id = (select cth_id from courthouse where courthouse_name = 'CROYDON');
+update courthouse_region_ae set reg_id = (select reg_id from region where region_name = 'London') where cth_id = (select cth_id from courthouse where courthouse_name = 'FIELD HOUSE');
+update courthouse_region_ae set reg_id = (select reg_id from region where region_name = 'South East') where cth_id = (select cth_id from courthouse where courthouse_name = 'GUILDFORD');
+update courthouse_region_ae set reg_id = (select reg_id from region where region_name = 'South East') where cth_id = (select cth_id from courthouse where courthouse_name = 'GUILDFORD CROWN COURT SITE B');
+update courthouse_region_ae set reg_id = (select reg_id from region where region_name = 'London') where cth_id = (select cth_id from courthouse where courthouse_name = 'HATTON CROSS');
+update courthouse_region_ae set reg_id = (select reg_id from region where region_name = 'North West') where cth_id = (select cth_id from courthouse where courthouse_name = 'KNUTSFORD');
+update courthouse_region_ae set reg_id = (select reg_id from region where region_name = 'London') where cth_id = (select cth_id from courthouse where courthouse_name = 'TAYLOR HOUSE');
