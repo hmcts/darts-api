@@ -382,7 +382,7 @@ repositories {
 
 ext {
   log4JVersion = "2.24.3"
-  tomcatEmbedVersion = "10.1.34"
+  tomcatEmbedVersion = "11.0.2"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -424,7 +424,7 @@ dependencies {
   implementation 'net.javacrumbs.shedlock:shedlock-spring:6.2.0'
   implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.2.0'
 
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.7'
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.8'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
   implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.4.0'
