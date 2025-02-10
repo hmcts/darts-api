@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,7 +42,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     private Integer id;
 
     @JoinColumn(name = "ctr_id")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
 
     @Column(name = "hearing_date", nullable = false)
@@ -55,7 +54,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @Column(name = "hearing_is_actual", nullable = false)
     private Boolean hearingIsActual;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "hearing_judge_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
@@ -67,7 +66,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARINGS)
+    @ManyToMany(mappedBy = TranscriptionEntity_.HEARINGS)
     private List<TranscriptionEntity> transcriptions = new ArrayList<>();
 
     @OneToMany(mappedBy = MediaRequestEntity_.HEARING)
