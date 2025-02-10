@@ -44,6 +44,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -249,7 +250,14 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                 DateConverterUtil.toLocalDateTime(addAudioMetadataRequest.getStartedAt()),
                 userIdentity.getUserAccount()
             );
-
+            //TEMP logging to support defect analysis
+            log.info("Attempting to caseNumber {} with media {} to hearing {} current linked hearings {}",
+                     caseNumber,
+                     mediaEntity.getId(), hearing.getId(),
+                     hearing.getMediaList().stream()
+                         .map(mediaEntity1 -> String.valueOf(mediaEntity1.getId()))
+                         .collect(Collectors.joining())
+            );
             // add the new media
             hearing.addMedia(mediaEntity);
             hearing.setHearingIsActual(true);
