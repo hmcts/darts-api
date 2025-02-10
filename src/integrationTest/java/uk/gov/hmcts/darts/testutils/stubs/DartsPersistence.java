@@ -611,9 +611,9 @@ public class DartsPersistence {
                 media.setMediaLinkedCaseList(saveLinkedCaseList(media.getMediaLinkedCaseList()));
             }
 
-            media = mediaRepository.saveAndFlush(media);
+            media = mediaRepository.save(media);
         } else {
-            media = mediaRepository.saveAndFlush(media);
+            media = mediaRepository.save(media);
         }
         return media;
     }
