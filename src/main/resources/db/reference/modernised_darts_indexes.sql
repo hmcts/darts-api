@@ -13,6 +13,7 @@
 -- v9 add 2 event and 2 media indexes
 -- v10 amend index on user_account from user_name to user_full_name
 -- v11 add numerous indexes to accommodate all FKs
+-- v12 add index on media for chronicle_id
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -310,5 +311,5 @@ CREATE INDEX cas_cn_trgm_idx ON court_case USING gin (case_number gin_trgm_ops);
 
 CREATE INDEX ctr_cn_trgm_idx ON courtroom USING gin (courtroom_name gin_trgm_ops);
 
-
-
+-- v12
+CREATE INDEX med_chronicle_id_idx ON media (chronicle_id);
