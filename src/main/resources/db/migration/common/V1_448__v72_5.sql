@@ -12,3 +12,6 @@ ALTER TABLE object_retrieval_queue
 
 ALTER TABLE transcription_document
     ALTER COLUMN storage_id TYPE CHARACTER VARYING(16);
+
+
+CREATE INDEX med_chronicle_id_idx ON media (chronicle_id);
