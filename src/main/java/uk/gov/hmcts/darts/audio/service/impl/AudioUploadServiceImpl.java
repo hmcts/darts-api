@@ -262,10 +262,10 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                          .collect(Collectors.joining(","))
             );
             // add the new media
-            hearing.addMedia(mediaEntity);
-            hearing.setHearingIsActual(true);
-
-            hearingRepository.saveAndFlush(hearing);
+            if (hearing.addMedia(mediaEntity)) {
+                hearing.setHearingIsActual(true);
+                hearingRepository.saveAndFlush(hearing);
+            }
         }
     }
 

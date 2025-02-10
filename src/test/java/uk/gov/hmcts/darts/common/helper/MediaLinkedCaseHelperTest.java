@@ -46,9 +46,9 @@ class MediaLinkedCaseHelperTest {
         HearingEntity hearingEntity3 = mock(HearingEntity.class);
 
 
-        when(hearingEntity1.containsMedia(any())).thenReturn(false);
-        when(hearingEntity2.containsMedia(any())).thenReturn(false);
-        when(hearingEntity3.containsMedia(any())).thenReturn(false);
+        when(hearingEntity1.addMedia(any())).thenReturn(true);
+        when(hearingEntity2.addMedia(any())).thenReturn(true);
+        when(hearingEntity3.addMedia(any())).thenReturn(true);
 
         CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
         CourtCaseEntity courtCaseEntity2 = mock(CourtCaseEntity.class);
@@ -66,10 +66,6 @@ class MediaLinkedCaseHelperTest {
 
         MediaEntity mediaEntity = mock(MediaEntity.class);
         mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, AUDIO_LINKING_TASK, userAccount);
-
-        verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity3, times(1)).containsMedia(mediaEntity);
 
         verify(hearingEntity1, times(1)).addMedia(mediaEntity);
         verify(hearingEntity2, times(1)).addMedia(mediaEntity);
@@ -97,9 +93,9 @@ class MediaLinkedCaseHelperTest {
         HearingEntity hearingEntity2 = mock(HearingEntity.class);
         HearingEntity hearingEntity3 = mock(HearingEntity.class);
 
-        when(hearingEntity1.containsMedia(any())).thenReturn(false);
-        when(hearingEntity2.containsMedia(any())).thenReturn(true);
-        when(hearingEntity3.containsMedia(any())).thenReturn(true);
+        when(hearingEntity1.addMedia(any())).thenReturn(true);
+        when(hearingEntity2.addMedia(any())).thenReturn(false);
+        when(hearingEntity3.addMedia(any())).thenReturn(false);
 
         CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
         when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
@@ -114,13 +110,10 @@ class MediaLinkedCaseHelperTest {
         MediaEntity mediaEntity = mock(MediaEntity.class);
         mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, AUDIO_LINKING_TASK, userAccount);
 
-        verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity3, times(1)).containsMedia(mediaEntity);
 
-        verify(hearingEntity1, times(1)).addMedia(mediaEntity);
-        verify(hearingEntity2, never()).addMedia(mediaEntity);
-        verify(hearingEntity3, never()).addMedia(mediaEntity);
+        verify(hearingEntity1).addMedia(mediaEntity);
+        verify(hearingEntity2).addMedia(mediaEntity);
+        verify(hearingEntity3).addMedia(mediaEntity);
 
         verify(hearingEntity1, times(1)).getCourtCase();
         verify(hearingEntity2, never()).getCourtCase();

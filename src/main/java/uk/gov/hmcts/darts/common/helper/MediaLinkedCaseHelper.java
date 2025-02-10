@@ -40,8 +40,7 @@ public class MediaLinkedCaseHelper {
         Set<HearingEntity> hearingsToSave = new HashSet<>();
         event.getHearingEntities().forEach(hearingEntity -> {
             try {
-                if (!hearingEntity.containsMedia(mediaEntity)) {
-                    hearingEntity.addMedia(mediaEntity);
+                if (hearingEntity.addMedia(mediaEntity)) {
                     hearingsToSave.add(hearingEntity);
 
                     linkMediaToCase(mediaEntity, hearingEntity.getCourtCase(), sourceType, userAccount);

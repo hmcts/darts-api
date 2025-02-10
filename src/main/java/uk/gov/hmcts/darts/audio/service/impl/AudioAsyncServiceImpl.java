@@ -51,15 +51,13 @@ public class AudioAsyncServiceImpl implements AudioAsyncService {
         );
 
         var associatedHearings = courtLogs.stream()
-            .flatMap(h -> h.getHearingEntities().stream())
+            .flatMap(eventEntity -> eventEntity.getHearingEntities().stream())
             .distinct()
             .toList();
 
         for (var hearing : associatedHearings) {
             mediaLinkedCaseHelper.linkMediaToCase(savedMedia, hearing.getCourtCase(), MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
-            List<Integer> mediaIdList = hearing.getMediaList().stream().map(MediaEntity::getId).toList();
-            if (!mediaIdList.contains(savedMedia.getId())) {
-                hearing.addMedia(savedMedia);
+            if (hearing.addMedia(savedMedia)) {
                 hearing.setHearingIsActual(true);
                 hearingRepository.saveAndFlush(hearing);
             }

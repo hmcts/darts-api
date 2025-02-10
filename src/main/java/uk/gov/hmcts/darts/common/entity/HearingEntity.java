@@ -92,14 +92,18 @@ public class HearingEntity extends CreatedModifiedBaseEntity
         inverseJoinColumns = {@JoinColumn(name = "ann_id")})
     private List<AnnotationEntity> annotations = new ArrayList<>();
 
-    public void addMedia(MediaEntity mediaEntity) {
-        if (!containsMedia(mediaEntity)) {
-            mediaList.add(mediaEntity);
-            /*TODO review if this is required or not if not remove comments
-            if (this.id == null || mediaEntity.getHearingList().stream().noneMatch(hearing -> this.id.equals(hearing.getId()))) {
-                mediaEntity.getHearingList().add(this);
-            }*/
+    /**
+     * Adds a media to the hearing.
+     *
+     * @param mediaEntity the media to add
+     * @return true if the media was added, false if it was already present
+     */
+    public boolean addMedia(MediaEntity mediaEntity) {
+        if (containsMedia(mediaEntity)) {
+            return false;
         }
+        mediaList.add(mediaEntity);
+        return true;
     }
 
     public void addJudge(JudgeEntity judgeEntity, boolean isFromDailyList) {
