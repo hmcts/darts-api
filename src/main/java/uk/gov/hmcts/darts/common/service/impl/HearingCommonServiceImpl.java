@@ -30,8 +30,7 @@ public class HearingCommonServiceImpl implements HearingCommonService {
                                                  UserAccountEntity userAccount) {
         Optional<HearingEntity> foundHearing = hearingRepository.findHearing(courthouseName, courtroomName, caseNumber, hearingDate.toLocalDate());
 
-        return foundHearing.map(hearingEntity -> setHearingLastDateModifiedBy(hearingEntity, userAccount))
-            .orElseGet(() -> createHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, null));
+        return foundHearing.orElseGet(() -> createHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, null));
     }
 
     @Override
@@ -40,9 +39,7 @@ public class HearingCommonServiceImpl implements HearingCommonService {
     public HearingEntity retrieveOrCreateHearingWithMedia(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                                           UserAccountEntity userAccount, MediaEntity mediaEntity) {
         Optional<HearingEntity> foundHearing = hearingRepository.findHearing(courthouseName, courtroomName, caseNumber, hearingDate.toLocalDate());
-
-        return foundHearing.map(hearingEntity -> setHearingLastDateModifiedBy(hearingEntity, userAccount))
-            .orElseGet(() -> createHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity));
+        return foundHearing.orElseGet(() -> createHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity));
     }
 
     private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
@@ -63,10 +60,5 @@ public class HearingCommonServiceImpl implements HearingCommonService {
             hearing.getMediaList().add(mediaEntity);
         }
         return hearingRepository.saveAndFlush(hearing);
-    }
-
-    private HearingEntity setHearingLastDateModifiedBy(final HearingEntity hearingEntity, final UserAccountEntity userAccountEntity) {
-        hearingEntity.setLastModifiedBy(userAccountEntity);
-        return hearingRepository.saveAndFlush(hearingEntity);
     }
 }
