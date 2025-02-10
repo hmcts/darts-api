@@ -360,10 +360,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
 
 
-    default List<ExternalObjectDirectoryEntity> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    default List<Integer> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                                     ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                                                     Integer maxTransferAttempts, Limit limit) {
-        Set<ExternalObjectDirectoryEntity> results = new HashSet<>();//Ensures no duplicates
+        List<Integer> results = new ArrayList<>();//Ensures no duplicates
         results.addAll(findEodsForTransferOnlyMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts, limit));
         if (results.size() < limit.max()) {
             results.addAll(findEodsForTransferExcludingMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts,
@@ -374,7 +374,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status
             AND eod.externalLocationType = :type
             AND eod.media is not null            
@@ -385,13 +385,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             order by eod.lastModifiedDateTime
             """
     )
-    List<ExternalObjectDirectoryEntity> findEodsForTransferOnlyMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    List<Integer> findEodsForTransferOnlyMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                                      ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                                                      Integer maxTransferAttempts, Limit limit);
 
     @Query(
         """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status
             AND eod.externalLocationType = :type
             AND eod.media is null            
@@ -404,7 +404,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             order by eod.lastModifiedDateTime
             """
     )
-    List<ExternalObjectDirectoryEntity> findEodsForTransferExcludingMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    List<Integer> findEodsForTransferExcludingMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                                           ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                                                           Integer maxTransferAttempts, Limit limit);
 

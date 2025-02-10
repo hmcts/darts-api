@@ -53,7 +53,7 @@ class InboundToUnstructuredProcessorImplTest {
         ExternalObjectDirectoryEntity eod2 = new ExternalObjectDirectoryEntity();
         eod2.setId(2);
         when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any()))
-            .thenReturn(List.of(eod1, eod2));
+            .thenReturn(List.of(1, 2));
 
         doThrow(new RuntimeException("some exception"))
             .doNothing()
