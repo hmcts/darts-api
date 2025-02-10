@@ -26,35 +26,14 @@ public class ObjectStateRecordEntity {
     @Column(name = "arm_eod_id")
     private String armEodId;
 
-    @Column(name = "parent_id")
-    private String parentId;
-
     @Column(name = "parent_object_id")
     private String parentObjectId;
 
     @Column(name = "content_object_id")
     private String contentObjectId;
 
-    @Column(name = "object_type")
-    private String objectType;
-
     @Column(name = "id_clip")
     private String idClip;
-
-    @Column(name = "id_case")
-    private String idCase;
-
-    @Column(name = "courthouse_name")
-    private String courthouseName;
-
-    @Column(name = "cas_id")
-    private Integer casId;
-
-    @Column(name = "date_last_accessed")
-    private OffsetDateTime dateLastAccessed;
-
-    @Column(name = "relation_id")
-    private String relationId;
 
     @Column(name = "dets_location")
     private String detsLocation;
@@ -140,10 +119,13 @@ public class ObjectStateRecordEntity {
     @Column(name = "date_file_dets_cleanup")
     private OffsetDateTime dateFileDetsCleanup;
 
-    @Column(name = "flag_file_retained_in_ods")
-    private Boolean flagFileRetainedInOds;
-
     @Column(name = "object_status")
     private String objectStatus;
+
+    @Column(name = "storage_id")
+    private String storageId;
+
+    @Column(name = "data_ticket")
+    private Integer dataTicket;
 
 }
