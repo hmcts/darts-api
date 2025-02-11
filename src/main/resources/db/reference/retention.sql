@@ -46,6 +46,7 @@
 --v18  add default to created_ts on case_overflow
 --     drop cas_id
 --     add case_object_id and audio_folder_object_id
+--     add new pk to case_overflow, relegate old pk to fk, and add field case_object_id
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -187,7 +188,8 @@ CREATE TABLE retention_policy_type
 ) TABLESPACE pg_default;
 
 CREATE TABLE case_overflow
-(cas_id                      INTEGER                       NOT NULL
+(cof_id                      INTEGER NOT NULL
+,cas_id                      INTEGER
 ,rpt_id                      INTEGER
 ,case_total_sentence         CHARACTER VARYING
 ,retention_event_ts          TIMESTAMP WITH TIME ZONE     
@@ -199,6 +201,7 @@ CREATE TABLE case_overflow
 ,c_closed_pre_live           INTEGER
 ,c_case_closed_date_pre_live TIMESTAMP WITH TIME ZONE
 ,case_created_ts             TIMESTAMP WITH TIME ZONE
+,case_object_id              CHARACTER VARYING
 ,audio_folder_object_id      CHARACTER VARYING(16)
 ,case_last_modified_ts       TIMESTAMP WITH TIME ZONE                -- to support delta, when case changed
 ,audio_last_modified_ts      TIMESTAMP WITH TIME ZONE                -- to suppor delta, when moj_audio_folder changes
@@ -273,7 +276,7 @@ ALTER TABLE retention_policy_type ADD PRIMARY KEY USING INDEX retention_policy_t
 CREATE UNIQUE INDEX rps_retainer_pk ON rps_retainer(rpr_id) TABLESPACE pg_default; 
 ALTER TABLE rps_retainer ADD PRIMARY KEY USING INDEX rps_retainer_pk;
 
-CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE pg_default; 
+CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cof_id) TABLESPACE pg_default;
 ALTER TABLE case_overflow ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
 CREATE UNIQUE INDEX case_retention_extra_pk ON case_retention_extra(cas_id) TABLESPACE pg_default; 
@@ -293,6 +296,7 @@ CREATE SEQUENCE rcc_seq CACHE 20;
 CREATE SEQUENCE rpt_seq CACHE 20;
 CREATE SEQUENCE rah_seq CACHE 20;
 CREATE SEQUENCE rhm_seq CACHE 20;
+CREATE SEQUENCE cof_seq CACHE 20;
 
 ALTER TABLE rps_retainer
 ADD CONSTRAINT rps_retainer_retention_policy_type_fk
@@ -411,3 +415,4 @@ GRANT SELECT,UPDATE ON  rcc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rpt_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rah_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rhm_seq TO darts_user;
+GRANT SELECT,UPDATE ON cof_seq TO darts_user;
