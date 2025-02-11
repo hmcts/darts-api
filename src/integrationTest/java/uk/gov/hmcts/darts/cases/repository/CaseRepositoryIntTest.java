@@ -176,7 +176,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
     private @NotNull Function<Boolean, CourtCaseEntity> getCourtCaseEntityFunction() {
         AtomicInteger suffix = new AtomicInteger(1);
-        Function<Boolean, CourtCaseEntity> createValidCourtCase = (isRetentionUpdated) -> {
+        return (isRetentionUpdated) -> {
             String caseNumber = "CASE" + suffix.getAndIncrement();
             CourtCaseEntity courtCase = dartsDatabase.createCase(SOME_COURTHOUSE, caseNumber);
 
@@ -194,7 +194,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
             courtCase.setRetentionUpdated(isRetentionUpdated);
             return dartsDatabase.save(courtCase);
         };
-        return createValidCourtCase;
+
     }
 
     @Test
