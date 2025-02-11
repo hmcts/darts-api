@@ -92,9 +92,6 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     private LogApi logApi;
 
-    @Mock
-    private EodHelper eodHelper;
-
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
     @AfterAll
