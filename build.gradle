@@ -496,7 +496,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.117.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.118.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
