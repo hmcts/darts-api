@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -443,14 +444,14 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
                                                                                  OffsetDateTime.parse("2024-01-01T00:00:00Z"),
                                                                                  1,
                                                                                  "MP2");
-        hearingEntity.setMediaList(new ArrayList<>(List.of(mediaEntity)));
+        hearingEntity.setMedias(new TreeSet<>(List.of(mediaEntity)));
         mediaLinkedCaseStub.createCaseLinkedMedia(mediaEntity, hearingEntity.getCourtCase());
         dartsDatabase.getHearingRepository().save(hearingEntity);
     }
 
     private void linkExistingMediaToHearing(List<MediaEntity> mediaList, HearingEntity hearingEntity, CourtCaseEntity courtCase) {
         transactionalUtil.executeInTransaction(() -> {
-            hearingEntity.setMediaList(mediaList);
+            hearingEntity.setMedias(new TreeSet<>(mediaList));
             dartsDatabase.getHearingRepository().save(hearingEntity);
 
             mediaLinkedCaseStub.createCaseLinkedMedia(mediaList.get(0), courtCase);

@@ -17,16 +17,21 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.SortNatural;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 @Table(name = "media")
@@ -35,7 +40,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @SQLRestriction("is_deleted = false")
 public class MediaEntity extends CreatedModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities {
+    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities,
+    Comparable<MediaEntity> {
     public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
     @Id
@@ -115,8 +121,9 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @Column(name = "media_status")//leaving nullable for now
     private String mediaStatus;
 
-    @ManyToMany(mappedBy = HearingEntity_.MEDIA_LIST)
-    private List<HearingEntity> hearingList = new ArrayList<>();
+    @ManyToMany(mappedBy = HearingEntity_.MEDIAS)
+    @SortNatural
+    private SortedSet<HearingEntity> hearings = new TreeSet<>();
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
@@ -146,14 +153,27 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @Column(name = "storage_id", length = 16)
     private String storageId;
 
+
+    /**
+     * @deprecated use {@link #getHearings()} instead
+     */
+    @Deprecated(since = "2025-02-11")
+    public List<HearingEntity> getHearingList() {
+        List<HearingEntity> hearingEntities = new ArrayList<>();
+        if (hearings != null) {
+            hearingEntities.addAll(hearings);
+        }
+        return Collections.unmodifiableList(hearingEntities);
+    }
+
     public List<CourtCaseEntity> associatedCourtCases() {
-        var cases = hearingList.stream().map(HearingEntity::getCourtCase);
+        var cases = hearings.stream().map(HearingEntity::getCourtCase);
         return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
     }
 
     public void removeHearing(HearingEntity hearing) {
-        hearing.getMediaList().remove(this);
-        getHearingList().remove(this);
+        hearing.getMedias().remove(this);
+        getHearings().remove(this);
     }
 
     @Override
@@ -165,4 +185,10 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     public OffsetDateTime getDeletedTs() {
         return getDeletedTimestamp();
     }
+
+    @Override
+    public int compareTo(MediaEntity o) {
+        return DataUtil.compareInteger(this.id, o.id);
+    }
+
 }

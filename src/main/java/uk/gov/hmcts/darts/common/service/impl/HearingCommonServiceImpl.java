@@ -57,7 +57,7 @@ public class HearingCommonServiceImpl implements HearingCommonService {
         hearing.setCreatedBy(userAccount);
         hearing.setLastModifiedBy(userAccount);
         if (mediaEntity != null) {
-            hearing.getMediaList().add(mediaEntity);
+            hearing.addMedia(mediaEntity);
         }
         return hearingRepository.saveAndFlush(hearing);
     }

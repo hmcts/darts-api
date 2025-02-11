@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 @RequiredArgsConstructor
 public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEntity> {
@@ -57,7 +58,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
         setDeletedBy(deletedBy);
         setDeletedTimestamp(deletedTimestamp);
         setMediaStatus(mediaStatus);
-        setHearingList(hearingList != null ? hearingList : new ArrayList<>());
+        setHearings(hearingList != null ? new TreeSet<>(hearingList) : new TreeSet<>());
         setRetainUntilTs(retainUntilTs);
         setAdminActionReasons(adminActionReasons != null ? adminActionReasons : new ArrayList<>());
         setRetConfScore(retConfScore);

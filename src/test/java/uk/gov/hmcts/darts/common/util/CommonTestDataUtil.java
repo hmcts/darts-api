@@ -42,6 +42,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
@@ -265,7 +266,7 @@ public class CommonTestDataUtil {
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
-        mediaEntity.setHearingList(List.of(hearing));
+        mediaEntity.setHearings(new TreeSet<>(List.of(hearing)));
         mediaEntity.setCourtroom(hearing.getCourtroom());
         mediaEntity.setId(getStringId("MEDIA_ID" + caseNumber));
         return mediaEntity;
@@ -283,7 +284,7 @@ public class CommonTestDataUtil {
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
-        mediaEntity.setHearingList(hearings);
+        mediaEntity.setHearings(new TreeSet<>(List.of(hearing)));
         mediaEntity.setCourtroom(hearing.getCourtroom());
         mediaEntity.setId(mediaId);
         return mediaEntity;

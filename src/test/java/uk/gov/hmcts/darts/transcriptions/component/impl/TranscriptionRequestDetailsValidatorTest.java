@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -71,10 +72,10 @@ class TranscriptionRequestDetailsValidatorTest {
     @ParameterizedTest
     @NullSource
     @EmptySource
-    void validateShouldThrowExceptionWhenProvidedHearingHasNoAudio(List<MediaEntity> mediaEntityList) {
+    void validateShouldThrowExceptionWhenProvidedHearingHasNoAudio(TreeSet<MediaEntity> mediaEntityList) {
         // Given
         var hearingEntity = new HearingEntity();
-        hearingEntity.setMediaList(mediaEntityList);
+        hearingEntity.setMedias(mediaEntityList);
 
         Mockito.when(hearingsServiceMock.getHearingById(DUMMY_HEARING_ID))
             .thenReturn(hearingEntity);
@@ -142,7 +143,7 @@ class TranscriptionRequestDetailsValidatorTest {
     void validateShouldSucceedWhenRequestHasHearingIdAndValidDates() {
         // Given
         var hearingEntity = new HearingEntity();
-        hearingEntity.setMediaList(createMediaList());
+        hearingEntity.setMedias(new TreeSet<>(createMediaList()));
         Mockito.when(hearingsServiceMock.getHearingById(DUMMY_HEARING_ID))
             .thenReturn(hearingEntity);
 

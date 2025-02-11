@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 @RequiredArgsConstructor
 public class TestHearingEntity extends HearingEntity implements DbInsertable<HearingEntity> {
@@ -51,7 +52,7 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         setScheduledStartTime(scheduledStartTime);
         setHearingIsActual(hearingIsActual);
         setJudges(judges != null ? judges : new ArrayList<>());
-        setMediaList(mediaList != null ? mediaList : new ArrayList<>());
+        setMedias(mediaList != null ? new TreeSet<>(mediaList) : new TreeSet<>());
         setTranscriptions(transcriptions != null ? transcriptions : new ArrayList<>());
         setMediaRequests(mediaRequests != null ? mediaRequests : new ArrayList<>());
         setNew(isNew);

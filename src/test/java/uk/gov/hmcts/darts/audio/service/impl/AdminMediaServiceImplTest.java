@@ -507,7 +507,7 @@ class AdminMediaServiceImplTest {
         mediaEntity.setStart(startDateTime);
         mediaEntity.setEnd(endDateTime);
 
-        mediaEntity.getHearingList().add(hearing);
+        mediaEntity.getHearings().add(hearing);
 
         when(mediaRepository.findMediaByDetails(List.of(hearing.getId()), null, null))
             .thenReturn(List.of(mediaEntity));
@@ -529,7 +529,7 @@ class AdminMediaServiceImplTest {
         mediaEntity.setChannel(6);
         mediaEntity.setStart(startDateTime);
         mediaEntity.setEnd(endDateTime);
-        mediaEntity.getHearingList().addAll(List.of(hearing, hearing2));
+        mediaEntity.getHearings().addAll(List.of(hearing, hearing2));
 
         when(mediaRepository.findMediaByDetails(List.of(hearing.getId(), hearing2.getId()), startDateTime, endDateTime))
             .thenReturn(List.of(mediaEntity));

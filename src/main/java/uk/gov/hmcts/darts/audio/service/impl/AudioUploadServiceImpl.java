@@ -250,7 +250,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                 DateConverterUtil.toLocalDateTime(addAudioMetadataRequest.getStartedAt()),
                 userIdentity.getUserAccount()
             );
-            //TODO TEMP logging to support defect analysis
+            //TEMP logging to support defect analysis
             log.info("Attempting to link caseNumber {} with media {} to hearing {} current media linked to hearing {}. Current hearings linked to media {}",
                      caseNumber,
                      mediaEntity.getId(), hearing.getId(),
@@ -258,7 +258,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                          .map(mediaEntity1 -> String.valueOf(mediaEntity1.getId()))
                          .collect(Collectors.joining(",")),
                      mediaEntity.getHearingList().stream()
-                         .map(hearingEntity -> String.valueOf(hearingEntity.getId()))
+                         .map(mediaEntity1 -> String.valueOf(mediaEntity1.getId()))
                          .collect(Collectors.joining(","))
             );
             // add the new media

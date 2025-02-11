@@ -148,9 +148,9 @@ public class PostAdminMediasSearchHelper {
     @SuppressWarnings("unchecked")
     private Join<MediaEntity, HearingEntity> getHearingJoin(Root<MediaEntity> mediaRoot) {
         Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            MediaEntity_.HEARING_LIST)).findAny();
+            MediaEntity_.HEARINGS)).findAny();
         return foundJoin.map(join -> (Join<MediaEntity, HearingEntity>) join)
-            .orElseGet(() -> mediaRoot.join(MediaEntity_.HEARING_LIST, JoinType.INNER));
+            .orElseGet(() -> mediaRoot.join(MediaEntity_.HEARINGS, JoinType.INNER));
     }
 
     @SuppressWarnings("unchecked")

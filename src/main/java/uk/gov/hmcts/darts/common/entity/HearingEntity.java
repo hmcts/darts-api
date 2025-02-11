@@ -19,15 +19,20 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.annotations.SortNatural;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 @Table(name = "hearing")
@@ -35,7 +40,7 @@ import java.util.List;
 @Setter
 @Slf4j
 public class HearingEntity extends CreatedModifiedBaseEntity
-    implements HasIntegerId {
+    implements HasIntegerId, Comparable<HearingEntity> {
 
     public static final String HEA_ID = "hea_id";
     @Id
@@ -67,7 +72,8 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @JoinTable(name = "hearing_media_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
-    private List<MediaEntity> mediaList = new ArrayList<>();
+    @SortNatural
+    private SortedSet<MediaEntity> medias = new TreeSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARINGS)
     private List<TranscriptionEntity> transcriptions = new ArrayList<>();
@@ -106,8 +112,20 @@ public class HearingEntity extends CreatedModifiedBaseEntity
             return false;
         }
         log.info("Added media {} to hearing {}", mediaEntity.getId(), id);
-        mediaList.add(mediaEntity);
+        medias.add(mediaEntity);
         return true;
+    }
+
+    /**
+     * @deprecated use {@link #getMedias()} instead
+     */
+    @Deprecated(since = "2025-02-11")
+    public List<MediaEntity> getMediaList() {
+        List<MediaEntity> mediaEntities = new ArrayList<>();
+        if (medias != null) {
+            mediaEntities.addAll(medias);
+        }
+        return Collections.unmodifiableList(mediaEntities);
     }
 
     public void addJudge(JudgeEntity judgeEntity, boolean isFromDailyList) {
@@ -136,6 +154,11 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     }
 
     public boolean containsMedia(MediaEntity mediaEntity) {
-        return mediaEntity.getId() != null && mediaList.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
+        return mediaEntity.getId() != null && medias.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
+    }
+
+    @Override
+    public int compareTo(HearingEntity o) {
+        return DataUtil.compareInteger(this.id, o.id);
     }
 }

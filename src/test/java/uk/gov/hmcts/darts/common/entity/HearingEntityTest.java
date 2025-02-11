@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.common.entity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,14 +13,14 @@ class HearingEntityTest {
     @Test
     void positiveContainsMedia() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMediaList(List.of(createMedia(1), createMedia(2), createMedia(3)));
+        hearing.setMedias(new TreeSet<>(List.of(createMedia(1), createMedia(2), createMedia(3))));
         Assertions.assertTrue(hearing.containsMedia(createMedia(1)));
     }
 
     @Test
     void negativeContainsHearing() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMediaList(List.of(createMedia(1), createMedia(2), createMedia(3)));
+        hearing.setMedias(new TreeSet<>(List.of(createMedia(1), createMedia(2), createMedia(3))));
         Assertions.assertFalse(hearing.containsMedia(createMedia(4)));
 
     }
@@ -28,7 +28,7 @@ class HearingEntityTest {
     @Test
     void addMedia() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMediaList(new ArrayList<>(List.of(createMedia(1), createMedia(2), createMedia(3))));
+        hearing.setMedias(new TreeSet<>(List.of(createMedia(1), createMedia(2), createMedia(3))));
 
         assertThat(hearing.getMediaList()).hasSize(3);
         List<MediaEntity> mediaEntities = hearing.getMediaList();
