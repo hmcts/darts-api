@@ -185,7 +185,7 @@ public class TranscriptionStub {
         return transcriptionType;
     }
 
-    private TranscriptionStatusEntity mapToTranscriptionStatusEntity(TranscriptionStatusEnum statusEnum) {
+    public TranscriptionStatusEntity mapToTranscriptionStatusEntity(TranscriptionStatusEnum statusEnum) {
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(statusEnum.getId());
         transcriptionStatus.setStatusType(statusEnum.name());
