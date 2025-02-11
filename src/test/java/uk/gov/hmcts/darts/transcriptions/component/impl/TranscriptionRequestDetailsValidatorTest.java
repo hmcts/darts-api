@@ -72,6 +72,7 @@ class TranscriptionRequestDetailsValidatorTest {
     @ParameterizedTest
     @NullSource
     @EmptySource
+    @SuppressWarnings("PMD.LooseCoupling")//Needs to be a treeSet fo the insert
     void validateShouldThrowExceptionWhenProvidedHearingHasNoAudio(TreeSet<MediaEntity> mediaEntityList) {
         // Given
         var hearingEntity = new HearingEntity();

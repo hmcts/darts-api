@@ -155,6 +155,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity
 
 
     /**
+     * Returns a unmodifiable list of hearings associated with this media.
      * @deprecated use {@link #getHearings()} instead
      */
     @Deprecated(since = "2025-02-11")
