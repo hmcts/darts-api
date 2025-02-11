@@ -36,7 +36,6 @@ import java.util.UUID;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 
@@ -58,13 +57,13 @@ public class DataStoreToArmHelper {
 
     public List<Integer> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                    ExternalLocationTypeEntity armLocation, int maxResultSize) {
-        ObjectRecordStatusEntity armRawStatusFailed = objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId());
-        ObjectRecordStatusEntity armManifestFailed = objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId());
 
-        List<ObjectRecordStatusEntity> failedArmStatuses = List.of(armRawStatusFailed, armManifestFailed);
+        List<ObjectRecordStatusEntity> statusEntityList = List.of(
+            EodHelper.failedArmRawDataStatus(), EodHelper.failedArmManifestFileStatus(),
+            EodHelper.armIngestionStatus(), EodHelper.armRawDataPushedStatus());
 
         var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
-            failedArmStatuses,
+            statusEntityList,
             armLocation,
             armDataManagementConfiguration.getMaxRetryAttempts(),
             Pageable.ofSize(maxResultSize)
@@ -201,6 +200,7 @@ public class DataStoreToArmHelper {
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
                 armExternalObjectDirectory.setLastModifiedBy(userAccount);
+                armExternalObjectDirectory.setStatus(EodHelper.armRawDataPushedStatus());
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
             }
         } catch (Exception e) {

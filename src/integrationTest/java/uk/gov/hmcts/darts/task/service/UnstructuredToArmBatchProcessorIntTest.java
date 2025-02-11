@@ -9,27 +9,19 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
-import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
-import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmBatchProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.time.Duration;
@@ -55,8 +47,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_PUSHED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -67,25 +61,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     @MockitoSpyBean
     private ArmDataManagementApi armDataManagementApi;
-
-    @Autowired
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    @Autowired
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Autowired
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @MockitoSpyBean
-    private DataManagementApi dataManagementApi;
     @MockitoBean
     private UserIdentity userIdentity;
-    @Autowired
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @MockitoSpyBean
-    private FileOperationService fileOperationService;
-    @MockitoSpyBean
-    private ArchiveRecordService archiveRecordService;
-    @Autowired
-    private AuthorisationStub authorisationStub;
     @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
     @MockitoSpyBean
@@ -104,9 +81,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     @Autowired
     private LogApi logApi;
-
-    @Autowired
-    private ExternalObjectDirectoryService eodService;
 
     @Autowired
     private UnstructuredToArmBatchProcessor unstructuredToArmProcessor;
@@ -157,10 +131,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
             EodHelper.armLocation()
         );
         assertThat(foundMediaList.size()).isEqualTo(BATCH_SIZE);
-        assertThat(
-            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.getFirst().getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())
-        )
-            .hasSize(1);
+        assertThat(eodRepository.findMediaIdsByInMediaIdStatusAndType(
+            List.of(medias.getFirst().getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())).hasSize(1);
     }
 
     @Test
@@ -267,7 +239,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
 
-
         DartsException dartsException = new DartsException("Exception copying file");
         String failedFilename1 = format("^%s_%s_%s.*", 7, eod1.getMedia().getId(), eod1.getTransferAttempts());
         doThrow(dartsException).when(armDataManagementApi).copyBlobDataToArm(any(), matches(failedFilename1));
@@ -368,7 +339,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
 
-
         ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
         verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
         String manifestFileContent = manifestFileContentCaptor.getValue();
@@ -402,12 +372,16 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), ARM_MANIFEST_FAILED, ARM, eod -> eod.setTransferAttempts(5));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(3), ARM_RESPONSE_MANIFEST_FAILED, ARM, eod -> eod.setTransferAttempts(1));
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_INGESTION, ARM, eod -> eod.setTransferAttempts(1));
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_RAW_DATA_PUSHED, ARM, eod -> eod.setTransferAttempts(1));
 
         //when
-        unstructuredToArmProcessor.processUnstructuredToArm(5);
+        unstructuredToArmProcessor.processUnstructuredToArm(10);
 
         //then
-        verify(armDataManagementApi, times(1)).copyBlobDataToArm(any(), matches(".+_.+_"));
+        verify(armDataManagementApi, times(2)).copyBlobDataToArm(any(), matches(".+_.+_"));
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(any(), any());
 
@@ -417,7 +391,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropzoneEodsMedia1).hasSize(1);
         var armDropzoneEodsMedia3 = eodRepository.findByMediaStatusAndType(medias.get(3), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
         assertThat(armDropzoneEodsMedia3).hasSize(0);
-
+        var armDropzoneEodsMedia4 = eodRepository.findByMediaStatusAndType(medias.get(4), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
+        assertThat(armDropzoneEodsMedia4).hasSize(1);
+        var armDropzoneEodsMedia5 = eodRepository.findByMediaStatusAndType(medias.get(5), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
+        assertThat(armDropzoneEodsMedia5).hasSize(0);
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
         String manifestFileName = manifestFileNameCaptor.getValue();
@@ -429,7 +406,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
         verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
         String manifestFileContent = manifestFileContentCaptor.getValue();
-        assertThat(manifestFileContent.lines().count()).isEqualTo(4);
+        assertThat(manifestFileContent.lines().count()).isEqualTo(6);
         assertThat(manifestFileContent).contains(
             format("_%d_", medias.getFirst().getId()),
             format("_%d_", medias.get(1).getId())
