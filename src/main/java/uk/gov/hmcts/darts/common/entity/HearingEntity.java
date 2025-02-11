@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
@@ -32,6 +33,7 @@ import java.util.List;
 @Table(name = "hearing")
 @Getter
 @Setter
+@Slf4j
 public class HearingEntity extends CreatedModifiedBaseEntity
     implements HasIntegerId {
 
@@ -100,8 +102,10 @@ public class HearingEntity extends CreatedModifiedBaseEntity
      */
     public boolean addMedia(MediaEntity mediaEntity) {
         if (containsMedia(mediaEntity)) {
+            log.info("Media {} already exists in hearing {}", mediaEntity.getId(), id);
             return false;
         }
+        log.info("Added media {} to hearing {}", mediaEntity.getId(), id);
         mediaList.add(mediaEntity);
         return true;
     }
