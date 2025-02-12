@@ -330,7 +330,7 @@ sonarqube {
     property "sonar.projectName", "DARTS :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
     property "sonar.exclusions", coverageExclusions.join(', ')
-    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*,**/AzureCopyUtil.java,**/TestSupportController.java,**/*Paginated.java,**/IsPageable.java,**/PaginatedList.java,**/PaginationUtil.java,**/SortMethod.java,**/AdvancedSearchResponseMapper.java,**/CaseController.java,**/CaseServiceImpl.java"
+    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*,**/AzureCopyUtil.java,**/TestSupportController.java,**/*Paginated.java,**/IsPageable.java,**/PaginatedList.java,**/PaginationUtil.java,**/SortMethod.java,**/AdvancedSearchResponseMapper.java,**/CaseController.java,**/CaseServiceImpl.java,**/KeepAliveTestController.java"
     //duplicate code here due to OpenAPI codegen that creates identical
     // objects (Transcript) in different packages
     property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
