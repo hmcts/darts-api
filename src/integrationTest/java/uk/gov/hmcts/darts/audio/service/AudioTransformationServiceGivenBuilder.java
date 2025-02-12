@@ -64,6 +64,11 @@ public class AudioTransformationServiceGivenBuilder {
         mediaEntity3 = mediaTestData3.build().getEntity();
         mediaEntity4 = mediaTestData4.build().getEntity();
 
+        dartsPersistence.save(mediaEntity1);
+        dartsPersistence.save(mediaEntity2);
+        dartsPersistence.save(mediaEntity3);
+        dartsPersistence.save(mediaEntity4);
+
         hearingEntityWithMedia1.addMedia(mediaEntity1);
         hearingEntityWithMedia1.addMedia(mediaEntity2);
         hearingEntityWithMedia3.addMedia(mediaEntity3);

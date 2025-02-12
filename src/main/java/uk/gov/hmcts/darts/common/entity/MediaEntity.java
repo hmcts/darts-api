@@ -173,8 +173,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     }
 
     public void removeHearing(HearingEntity hearing) {
-        hearing.getMedias().remove(this);
-        getHearings().remove(this);
+        hearing.removeMedia(this);
     }
 
     @Override

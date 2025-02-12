@@ -68,7 +68,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(name = "hearing_media_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
@@ -161,5 +161,9 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @Override
     public int compareTo(HearingEntity o) {
         return DataUtil.compareInteger(this.id, o.id);
+    }
+
+    public void removeMedia(MediaEntity mediaEntity) {
+        medias.remove(mediaEntity);
     }
 }

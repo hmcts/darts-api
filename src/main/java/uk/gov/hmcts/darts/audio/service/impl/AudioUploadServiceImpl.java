@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.HearingToMediaEntityRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -42,6 +43,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -69,6 +71,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final LogApi logApi;
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final AudioAsyncService audioAsyncService;
+    private final HearingToMediaEntityRepository hearingToMediaEntityRepository;
 
     @Value("${darts.audio.small-file-max-length}")
     private Duration smallFileSizeMaxLength;
@@ -270,12 +273,11 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     }
 
     void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
-        List<HearingEntity> hearingList = mediaEntity.getHearingList();
-        for (HearingEntity hearing : hearingList) {
-            mediaEntity.removeHearing(hearing);
-        }
-        mediaEntity.setIsCurrent(false);
-        mediaRepository.save(mediaEntity);
+        MediaEntity mediaEntityToSetCurrent = mediaRepository.findById(mediaEntity.getId()).orElseThrow();
+        mediaEntityToSetCurrent.setIsCurrent(false);
+        mediaEntityToSetCurrent.setHearings(new TreeSet<>());
+        mediaRepository.saveAndFlush(mediaEntityToSetCurrent);
+        hearingToMediaEntityRepository.deleteAllByMedia(mediaEntityToSetCurrent.getId());
     }
 
     void saveExternalObjectDirectory(UUID externalLocation,

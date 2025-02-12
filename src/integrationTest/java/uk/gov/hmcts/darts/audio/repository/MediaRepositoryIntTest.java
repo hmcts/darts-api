@@ -60,12 +60,14 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         var media0 = PersistableFactory.getMediaTestData().someMinimalMedia();
         var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
         var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        dartsPersistence.save(media0);
+        dartsPersistence.save(media1);
+        dartsPersistence.save(media2);
 
         hearA1.addMedia(media0);
         hearA1.addMedia(media1);
         hearA2.addMedia(media2);
         hearB.addMedia(media0);
-
         dartsPersistence.saveAll(hearA1, hearA2, hearA3, hearB);
 
         // when

@@ -283,7 +283,7 @@ public class DartsDatabaseStub {
         );
     }
 
-    @Transactional
+//    @Transactional
     public void clearDatabaseInThisOrder() {
         TestUtils.retryLoop(10, 500, () -> {
             removeDeleteFlag(AnnotationDocumentEntity.class,
