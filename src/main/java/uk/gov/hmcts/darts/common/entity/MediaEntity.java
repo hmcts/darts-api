@@ -190,5 +190,4 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     public int compareTo(MediaEntity o) {
         return DataUtil.compareInteger(this.id, o.id);
     }
-
 }

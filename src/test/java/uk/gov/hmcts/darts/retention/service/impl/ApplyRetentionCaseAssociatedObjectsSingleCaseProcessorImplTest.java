@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.retention.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -54,7 +53,6 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getExternal
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 @SuppressWarnings({"checkstyle:LineLength", "PMD.NcssCount"})
-@Disabled //TODO temp disable to verify if set change fixes the issue
 class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
     private static final OffsetDateTime DATETIME_2025 = OffsetDateTime.of(2025, 1, 1, 10, 10, 0, 0, UTC);
@@ -130,7 +128,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case1PerfectlyClosed.setRetConfScore(CASE_PERFECTLY_CLOSED);
         case1PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case1PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case1PerfectlyClosed, 1, 3);
+        CommonTestDataUtil.createHearingsForCase(case1PerfectlyClosed, 1, 3, 0);
 
         case2PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 102);
         case2PerfectlyClosed.setRetentionUpdated(true);
@@ -139,7 +137,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case2PerfectlyClosed.setRetConfScore(CASE_PERFECTLY_CLOSED);
         case2PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case2PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case2PerfectlyClosed, 1, 1);
+        CommonTestDataUtil.createHearingsForCase(case2PerfectlyClosed, 1, 1, 10);
 
         case3NotPerfectlyClosed = CommonTestDataUtil.createCaseWithId("case3", 103);
         case3NotPerfectlyClosed.setRetentionUpdated(true);
@@ -148,7 +146,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case3NotPerfectlyClosed.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
         case3NotPerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
         case3NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case3NotPerfectlyClosed, 1, 3);
+        CommonTestDataUtil.createHearingsForCase(case3NotPerfectlyClosed, 1, 3, 20);
 
         case4NotPerfectlyClosed = CommonTestDataUtil.createCaseWithId("case4", 104);
         case4NotPerfectlyClosed.setRetentionUpdated(true);
@@ -157,7 +155,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case4NotPerfectlyClosed.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
         case4NotPerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
         case4NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case4NotPerfectlyClosed, 1, 1);
+        CommonTestDataUtil.createHearingsForCase(case4NotPerfectlyClosed, 1, 1, 30);
 
         case5PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case5", 105);
         case5PerfectlyClosed.setRetentionUpdated(true);
@@ -166,7 +164,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case5PerfectlyClosed.setRetConfScore(CASE_PERFECTLY_CLOSED);
         case5PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case5PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case5PerfectlyClosed, 1, 1);
+        CommonTestDataUtil.createHearingsForCase(case5PerfectlyClosed, 1, 1, 40);
 
         var hearA1 = case1PerfectlyClosed.getHearings().get(0);
         hearA1.setScheduledStartTime(LocalTime.NOON);
