@@ -21,8 +21,8 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 class TranscriptionRepositoryTest extends IntegrationBase {
@@ -100,23 +100,22 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     @Test
     void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore() {
         // given
-        TranscriptionStatusEntity completeTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED);
-
+        TranscriptionStatusEntity completeTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(COMPLETE);
         TranscriptionEntity transcriptionCompleteOld =
             PersistableFactory.getTranscriptionTestData().minimalRawTranscription(completeTranscriptionStatus);
         transcriptionCompleteOld = dartsDatabase.save(transcriptionCompleteOld);
         transcriptionCompleteOld.setCreatedDateTime(OffsetDateTime.now().minusHours(2));
-        transcriptionCompleteOld = dartsDatabase.save(transcriptionCompleteOld);
+        dartsDatabase.save(transcriptionCompleteOld);
 
         TranscriptionEntity transcriptionCompleteNew =
             PersistableFactory.getTranscriptionTestData().minimalRawTranscription(completeTranscriptionStatus);
-        transcriptionCompleteNew = dartsDatabase.save(transcriptionCompleteNew);
+        dartsDatabase.save(transcriptionCompleteNew);
 
         TranscriptionStatusEntity approvedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED);
         TranscriptionEntity transcriptionApproved = PersistableFactory.getTranscriptionTestData().minimalRawTranscription(approvedTranscriptionStatus);
         transcriptionApproved = dartsDatabase.save(transcriptionApproved);
         transcriptionApproved.setCreatedDateTime(OffsetDateTime.now().minusHours(2));
-        transcriptionApproved = dartsDatabase.save(transcriptionApproved);
+        dartsDatabase.save(transcriptionApproved);
 
         OffsetDateTime createdDateTime = OffsetDateTime.now().minusHours(1);
 
@@ -129,8 +128,9 @@ class TranscriptionRepositoryTest extends IntegrationBase {
 
         // then
         assertEquals(1, result.size());
-        assertTrue(result.contains(transcriptionCompleteOld.getId()));
+        assertEquals(transcriptionCompleteOld.getId(), result.get(0));
     }
+
 
     @Test
     void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_NotFound() {
