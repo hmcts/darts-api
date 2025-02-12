@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
@@ -104,18 +107,53 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     }
 
     @Override
-    public void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles) {
+    public void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles, int batchSize) {
         ObjectRecordStatusEntity armRpoPending = EodHelper.armRpoPendingStatus();
         StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO CSV Reconciliation: ");
 
         ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTask_taskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
             .orElseThrow(() -> new ArmRpoException(errorMessage.append("Automated task ProcessE2EArmRpoPending not found.").toString()));
 
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findByStatusAndIngestionDate(
-            armRpoPending,
-            armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
-            armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()));
+        List<Integer> csvEodList = getEodsListFromCsvFiles(csvFiles, errorMessage);
 
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
+        Pageable pageRequest = PageRequest.of(0, batchSize);
+        Page<ExternalObjectDirectoryEntity> pages;
+
+        do {
+            pages
+                = externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(
+                armRpoPending,
+                armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
+                armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()),
+                pageRequest
+            );
+            log.info("Found number of elements {}, total elements {}, total pages {} for batch size {}",
+                     pages.getNumberOfElements(), pages.getTotalElements(), pages.getTotalPages(), batchSize);
+            externalObjectDirectoryEntities.addAll(pages.getContent());
+            pageRequest = pageRequest.next();
+        } while (pages.hasNext());
+
+        externalObjectDirectoryEntities.forEach(
+            externalObjectDirectoryEntity -> {
+                if (csvEodList.contains(externalObjectDirectoryEntity.getId())) {
+                    externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
+                } else {
+                    externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
+                }
+            }
+        );
+
+        List<Integer> missingEods = csvEodList.stream()
+            .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
+            .collect(Collectors.toList());
+
+        log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
+
+        externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
+    }
+
+    private static List<Integer> getEodsListFromCsvFiles(List<File> csvFiles, StringBuilder errorMessage) {
         List<Integer> csvEodList = new ArrayList<>();
         Integer counter = 0;
         for (File csvFile : csvFiles) {
@@ -142,24 +180,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 throw new ArmRpoException(errorMessage.toString());
             }
         }
-
-        externalObjectDirectoryEntities.forEach(
-            externalObjectDirectoryEntity -> {
-                if (csvEodList.contains(externalObjectDirectoryEntity.getId())) {
-                    externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
-                } else {
-                    externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
-                }
-            }
-        );
-
-        List<Integer> missingEods = csvEodList.stream()
-            .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
-            .collect(Collectors.toList());
-
-        log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
-
-        externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
+        return csvEodList;
     }
 
 }
