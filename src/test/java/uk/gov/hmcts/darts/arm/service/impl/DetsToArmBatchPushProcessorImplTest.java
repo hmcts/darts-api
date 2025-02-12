@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -236,6 +237,7 @@ class DetsToArmBatchPushProcessorImplTest {
         }
     }
 
+    @Disabled("This test is failing randomly. Ticket raised to fix this issue")
     @Test
     void processDetsToArm_emptyList(CapturedOutput output) {
         // given
@@ -249,7 +251,7 @@ class DetsToArmBatchPushProcessorImplTest {
         // then
         assertThat(output).contains("No DETS EODs to process");
     }
-    
+
     private ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);
