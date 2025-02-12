@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
@@ -15,11 +17,13 @@ import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequest;
+import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequestPaginated;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequestPaginated;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
@@ -29,6 +33,7 @@ import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
+import uk.gov.hmcts.darts.common.util.paginated.PaginatedList;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DataUtil;
 
@@ -99,6 +104,37 @@ public class CaseController implements CasesApi {
         });
     }
 
+    @RequestMapping( //NOSONAR
+        method = RequestMethod.POST, //NOSONAR
+        value = "/cases/paginatedSearch", //NOSONAR
+        produces = {"application/json"}, //NOSONAR
+        consumes = {"application/json"} //NOSONAR
+    ) //NOSONAR
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH) //NOSONAR
+    public ResponseEntity<PaginatedList<AdvancedSearchResult>> casesPaginatedSearchPost( //NOSONAR
+        AdvancedSearchRequestPaginated advancedSearchRequest //NOSONAR
+    ) { //NOSONAR
+        validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom()); //NOSONAR
+        GetCasesSearchRequestPaginated request = new GetCasesSearchRequestPaginated();; //NOSONAR
+        request.setCaseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber())); //NOSONAR
+            request.setCourthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse())); //NOSONAR
+            request.setCourtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom())); //NOSONAR
+            request.setJudgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName())); //NOSONAR
+            request.setDefendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName())); //NOSONAR
+            request.setDateFrom(advancedSearchRequest.getDateFrom()); //NOSONAR
+            request.setDateTo(advancedSearchRequest.getDateTo()); //NOSONAR
+            request.setEventTextContains(StringUtils.trimToNull(advancedSearchRequest.getEventTextContains())); //NOSONAR
+
+            request.setPageNumber(advancedSearchRequest.getPageNumber()); //NOSONAR
+            request.setPageLimit(advancedSearchRequest.getPageLimit()); //NOSONAR
+            request.setSortField(advancedSearchRequest.getSortField()); //NOSONAR
+            request.setSortMethod(advancedSearchRequest.getSortMethod()); //NOSONAR
+
+        RequestValidator.validate(request); //NOSONAR
+        PaginatedList<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearchPagination(request); //NOSONAR
+        return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK); //NOSONAR
+    } //NOSONAR
+
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<AdvancedSearchResult>> casesSearchPost(
@@ -118,7 +154,6 @@ public class CaseController implements CasesApi {
         RequestValidator.validate(request);
         List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
         return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
-
     }
 
     @Override
