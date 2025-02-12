@@ -9,6 +9,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
@@ -40,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -47,6 +50,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArmRpoServiceImplTest {
+
+    private static final int BATCH_SIZE = 10;
 
     @Mock
     private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
@@ -167,51 +172,53 @@ class ArmRpoServiceImplTest {
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void reconcileArmRpoCsvData_Success() {
         // given
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = createExternalObjectDirectoryEntity(1);
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = createExternalObjectDirectoryEntity(2);
-
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity1);
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity2);
+        Page<ExternalObjectDirectoryEntity> pagedEods = new PageImpl<>(externalObjectDirectoryEntities);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
         when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
-        when(externalObjectDirectoryRepository.findByStatusAndIngestionDate(any(), any(), any()))
-            .thenReturn(externalObjectDirectoryEntities);
+        when(externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(any(), any(), any(), any()))
+            .thenReturn(pagedEods);
 
         File file = TestUtils.getFile("Tests/arm/rpo/armRpoCsvData.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file));
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), BATCH_SIZE);
 
         // then
         assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
         assertEquals(EodHelper.armReplayStatus(), externalObjectDirectoryEntity2.getStatus());
 
-        verify(externalObjectDirectoryRepository).findByStatusAndIngestionDate(EodHelper.armRpoPendingStatus(),
-                                                                               armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_END_HOUR),
-                                                                               armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_START_HOUR));
-        verify(externalObjectDirectoryRepository, times(1)).saveAllAndFlush(externalObjectDirectoryEntities);
+        verify(externalObjectDirectoryRepository).findByStatusAndIngestionDateTsWithPaging(
+            eq(EodHelper.armRpoPendingStatus()),
+            eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_END_HOUR)),
+            eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_START_HOUR)),
+            any());
+        verify(externalObjectDirectoryRepository).saveAllAndFlush(externalObjectDirectoryEntities);
     }
 
     @Test
     void reconcileArmRpoCsvData_NoCsvFoundError() {
         // given
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = createExternalObjectDirectoryEntity(1);
+        createExternalObjectDirectoryEntity(1);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
         when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
-        when(externalObjectDirectoryRepository.findByStatusAndIngestionDate(any(), any(), any()))
-            .thenReturn(Collections.singletonList(externalObjectDirectoryEntity));
         File file = new File("Tests/arm/rpo/noFile.csv");
+
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file)));
+            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), BATCH_SIZE));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
