@@ -22,7 +22,8 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
-import java.util.Collections;
+import java.util.List;
+import java.util.TreeSet;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
@@ -361,10 +362,10 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         mediaEntity.setLastModifiedBy(userAccountEntity);
         mediaEntity.setIsCurrent(true);
 
-        mediaEntity.setHearingList(Collections.singletonList(hearingEntity));
+        mediaEntity.setHearings(new TreeSet<>(List.of(hearingEntity)));
         if (hearingEntity != null) {
-            mediaEntity.setHearingList(Collections.singletonList(hearingEntity));
-            hearingEntity.setMediaList(Collections.singletonList(mediaEntity));
+            mediaEntity.setHearings(new TreeSet<>(List.of(hearingEntity)));
+            hearingEntity.setMedias(new TreeSet<>(List.of(mediaEntity)));
             databaseStub.getHearingRepository()
                 .save(hearingEntity);
         }

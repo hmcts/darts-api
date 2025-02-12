@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +42,7 @@ class HearingServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateHearingExistingHearingShouldUpdateAndReturn() {
+    void retrieveOrCreateHearingExistingHearing() {
         String courthouseName = "Test Courthouse";
         String courtroomName = "Test Courtroom";
         String caseNumber = "Case123";
@@ -51,12 +52,11 @@ class HearingServiceImplTest {
 
         when(hearingRepository.findHearing(courthouseName, courtroomName, caseNumber, hearingDate.toLocalDate()))
             .thenReturn(Optional.of(existingHearing));
-        when(hearingRepository.saveAndFlush(existingHearing)).thenReturn(existingHearing);
 
         HearingEntity result = hearingService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
 
         assertEquals(existingHearing, result);
-        verify(hearingRepository).saveAndFlush(existingHearing);
+        verify(hearingRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -83,7 +83,7 @@ class HearingServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateHearingWithMediaExistingHearingShouldUpdateAndReturn() {
+    void retrieveOrCreateHearingWithMediaExistingHearingShouldReturn() {
         String courthouseName = "Test Courthouse";
         String courtroomName = "Test Courtroom";
         String caseNumber = "Case123";
@@ -94,13 +94,12 @@ class HearingServiceImplTest {
 
         when(hearingRepository.findHearing(courthouseName, courtroomName, caseNumber, hearingDate.toLocalDate()))
             .thenReturn(Optional.of(existingHearing));
-        when(hearingRepository.saveAndFlush(existingHearing)).thenReturn(existingHearing);
 
         HearingEntity result = hearingService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount,
                                                                                mediaEntity);
 
         assertEquals(existingHearing, result);
-        verify(hearingRepository).saveAndFlush(existingHearing);
+        verify(hearingRepository, never()).saveAndFlush(any());
     }
 
     @Test

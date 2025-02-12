@@ -41,7 +41,7 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
 
     @Query("""
         SELECT h FROM HearingEntity h
-        JOIN h.mediaList media
+        JOIN h.medias media
         WHERE media.id = :mediaId
         """
     )
@@ -88,7 +88,7 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     @Query("""
         SELECT hearing 
         FROM HearingEntity hearing, CourtCaseEntity case
-        LEFT JOIN FETCH hearing.mediaList 
+        LEFT JOIN FETCH hearing.medias 
         WHERE case.id = :caseId
         AND hearing.courtCase = case
         """)

@@ -47,4 +47,17 @@ public final class DataUtil {
         metadata.setCourthouse(DataUtil.toUpperCase(metadata.getCourthouse()));
         metadata.setCourtroom(DataUtil.toUpperCase(metadata.getCourtroom()));
     }
+
+    public static int compareInteger(Integer id, Integer id1) {
+        if (id == null && id1 == null) {
+            return 0;
+        }
+        if (id1 == null) {
+            return -1;
+        }
+        if (id == null) {
+            return 1;
+        }
+        return id.compareTo(id1);
+    }
 }

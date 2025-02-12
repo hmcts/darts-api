@@ -266,7 +266,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
-        hearing.setMediaList(null);
+        hearing.setMedias(null);
         dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)

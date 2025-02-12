@@ -140,6 +140,7 @@ public class ExternalObjectDirectoryStub {
             externalLocation
         );
 
+
         externalObjectDirectory.setMedia(mediaEntity);
         externalObjectDirectory = eodRepository.save(externalObjectDirectory);
         eodRepository.flush();

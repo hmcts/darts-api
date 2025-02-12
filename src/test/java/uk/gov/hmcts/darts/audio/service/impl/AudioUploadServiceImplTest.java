@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.HearingToMediaEntityRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -101,6 +102,8 @@ class AudioUploadServiceImplTest {
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
     private MediaLinkedCaseRepository mediaLinkedCaseRepository;
+    @Mock
+    private HearingToMediaEntityRepository hearingToMediaEntityRepository;
     private AddAudioRequestMapper mapper;
 
     @BeforeEach
@@ -120,7 +123,8 @@ class AudioUploadServiceImplTest {
             fileContentChecksum,
             logApi,
             mediaLinkedCaseRepository,
-            audioAsyncService));
+            audioAsyncService,
+            hearingToMediaEntityRepository));
         ReflectionTestUtils.setField(audioService, "smallFileSizeMaxLength", Duration.ofSeconds(2));
         ReflectionTestUtils.setField(audioService, "smallFileSize", 1024);
 
@@ -173,9 +177,9 @@ class AudioUploadServiceImplTest {
 
         // Then
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
-        verify(mediaRepository, times(1)).save(mediaEntityArgumentCaptor.capture());
-        verify(hearingRepository, times(3)).saveAndFlush(any());
-        verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
+        verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
+        verify(hearingRepository).saveAndFlush(any());
+        verify(logApi).audioUploaded(addAudioMetadataRequest);
         verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
 
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
@@ -230,11 +234,11 @@ class AudioUploadServiceImplTest {
         audioService.addAudio(externalLocation, addAudioMetadataRequest);
 
         // Then
-        verify(mediaRepository, times(1)).save(mediaEntityArgumentCaptor.capture());
-        verify(hearingRepository, times(3)).saveAndFlush(any());
-        verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
+        verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
+        verify(hearingRepository).saveAndFlush(any());
+        verify(logApi).audioUploaded(addAudioMetadataRequest);
         verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
-        verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
+        verify(dataManagementApi).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
         assertEquals(endedAt, savedMedia.getEnd());
@@ -280,13 +284,13 @@ class AudioUploadServiceImplTest {
         audioService.addAudio(externalLocation, addAudioMetadataRequest);
 
         // Then
-        verify(mediaRepository, times(1))
+        verify(mediaRepository)
             .findMediaByDetails(courtroomEntity, mediaEntity.getChannel(), mediaEntity.getMediaFile(), startedAt, endedAt);
         verifyNoMoreInteractions(mediaRepository);
         verifyNoInteractions(hearingRepository);
         verifyNoInteractions(logApi);
         verifyNoInteractions(externalObjectDirectoryRepository);
-        verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
+        verify(dataManagementApi).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
         verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
         verifyNoMoreInteractions(dataManagementApi);
     }
@@ -308,7 +312,7 @@ class AudioUploadServiceImplTest {
             .hasMessage("Failed to add audio meta data. Checksum for blob '123' does not match the one passed in the API request '123456'.")
             .hasFieldOrPropertyWithValue("error", AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA);
 
-        verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
+        verify(dataManagementApi).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
 
         // Then
         verifyNoInteractions(mediaRepository, hearingRepository, logApi, externalObjectDirectoryRepository);

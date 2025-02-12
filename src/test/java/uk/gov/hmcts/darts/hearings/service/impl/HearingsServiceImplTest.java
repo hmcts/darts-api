@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -156,7 +157,7 @@ class HearingsServiceImplTest {
     void removeMediaLinkToHearing_shouldRemoveLinkToHearing_whenAllAssociatedCasesAreAnonymised() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
-        hearingEntity.setMediaList(List.of(mediaEntity));
+        hearingEntity.setMedias(new TreeSet<>(List.of(mediaEntity)));
 
         when(hearingRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(Optional.of(hearingEntity));
         when(mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(any())).thenReturn(true);
@@ -170,7 +171,7 @@ class HearingsServiceImplTest {
     void removeMediaLinkToHearing_shouldNotRemoveLinkToHearing_whenAllAssociatedCasesAreNotAnonymised() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
-        hearingEntity.setMediaList(List.of(mediaEntity));
+        hearingEntity.setMedias(new TreeSet<>(List.of(mediaEntity)));
 
         when(hearingRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(Optional.of(hearingEntity));
         when(mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(any())).thenReturn(false);

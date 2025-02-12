@@ -42,6 +42,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
@@ -210,9 +211,15 @@ public class CommonTestDataUtil {
         return prosecutorEntity;
     }
 
+
     public HearingEntity createHearing(CourtCaseEntity courtcase, CourtroomEntity courtroom, LocalDate date, boolean isHearingActual) {
+        return createHearing(courtcase, courtroom, date, isHearingActual, 0);
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtcase, CourtroomEntity courtroom, LocalDate date, boolean isHearingActual,
+                                       int id) {
         HearingEntity hearing1 = new HearingEntity();
-        hearing1.setId(1);
+        hearing1.setId(id);
         hearing1.setCourtCase(courtcase);
         hearing1.setCourtroom(courtroom);
         hearing1.setHearingDate(date);
@@ -265,7 +272,8 @@ public class CommonTestDataUtil {
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
-        mediaEntity.setHearingList(List.of(hearing));
+        hearing.addMedia(mediaEntity);
+        mediaEntity.setHearings(new TreeSet<>(List.of(hearing)));
         mediaEntity.setCourtroom(hearing.getCourtroom());
         mediaEntity.setId(getStringId("MEDIA_ID" + caseNumber));
         return mediaEntity;
@@ -283,7 +291,7 @@ public class CommonTestDataUtil {
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
-        mediaEntity.setHearingList(hearings);
+        mediaEntity.setHearings(new TreeSet<>(hearings));
         mediaEntity.setCourtroom(hearing.getCourtroom());
         mediaEntity.setId(mediaId);
         return mediaEntity;
@@ -448,12 +456,17 @@ public class CommonTestDataUtil {
     }
 
     public void createHearingsForCase(CourtCaseEntity courtCase, int numOfCourtrooms, int numOfHearingsPerCourtroom) {
+        createHearingsForCase(courtCase, numOfCourtrooms, numOfHearingsPerCourtroom, 0);
+    }
+
+    public void createHearingsForCase(CourtCaseEntity courtCase, int numOfCourtrooms, int numOfHearingsPerCourtroom,
+                                      int idOffSet) {
         LocalDate startDate = LocalDate.of(2020, 10, 10);
         List<HearingEntity> hearings = new ArrayList<>();
         for (int courtroomCounter = 1; courtroomCounter <= numOfCourtrooms; courtroomCounter++) {
             CourtroomEntity courtroom = createCourtroom("courtroom" + courtroomCounter);
             for (int hearingCounter = 1; hearingCounter <= numOfHearingsPerCourtroom; hearingCounter++) {
-                HearingEntity hearing = createHearing(courtCase, courtroom, startDate, true);
+                HearingEntity hearing = createHearing(courtCase, courtroom, startDate, true, idOffSet + hearingCounter);
                 hearings.add(hearing);
                 startDate = startDate.plusDays(1);
             }
