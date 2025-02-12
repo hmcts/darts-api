@@ -131,7 +131,6 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         assertEquals(transcriptionCompleteOld.getId(), result.get(0));
     }
 
-
     @Test
     void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_NotFound() {
         // given
