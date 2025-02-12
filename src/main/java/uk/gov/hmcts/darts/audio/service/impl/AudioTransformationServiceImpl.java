@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
@@ -96,6 +97,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
+    @Transactional
     public void handleKedaInvocationForMediaRequests() {
         int counter = 1;
         /*

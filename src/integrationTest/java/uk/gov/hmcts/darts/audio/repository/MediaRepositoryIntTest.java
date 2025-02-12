@@ -49,6 +49,14 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void testFindMediasByCaseId() {
         // given
+        var media0 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        dartsPersistence.save(media0);
+        dartsPersistence.save(media1);
+        dartsPersistence.save(media2);
+
+
         var caseA = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         var hearA1 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
         var hearA2 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
@@ -56,13 +64,6 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
         var caseB = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         var hearB = PersistableFactory.getHearingTestData().createHearingFor(caseB);
-
-        var media0 = PersistableFactory.getMediaTestData().someMinimalMedia();
-        var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
-        var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
-        dartsPersistence.save(media0);
-        dartsPersistence.save(media1);
-        dartsPersistence.save(media2);
 
         hearA1.addMedia(media0);
         hearA1.addMedia(media1);

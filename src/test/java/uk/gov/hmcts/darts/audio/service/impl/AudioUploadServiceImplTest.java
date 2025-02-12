@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.HearingToMediaEntityRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -101,6 +102,8 @@ class AudioUploadServiceImplTest {
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
     private MediaLinkedCaseRepository mediaLinkedCaseRepository;
+    @Mock
+    private HearingToMediaEntityRepository hearingToMediaEntityRepository;
     private AddAudioRequestMapper mapper;
 
     @BeforeEach
@@ -120,7 +123,8 @@ class AudioUploadServiceImplTest {
             fileContentChecksum,
             logApi,
             mediaLinkedCaseRepository,
-            audioAsyncService));
+            audioAsyncService,
+            hearingToMediaEntityRepository));
         ReflectionTestUtils.setField(audioService, "smallFileSizeMaxLength", Duration.ofSeconds(2));
         ReflectionTestUtils.setField(audioService, "smallFileSize", 1024);
 
