@@ -104,31 +104,31 @@ public class CaseController implements CasesApi {
         });
     }
 
-    @RequestMapping( //NOSONAR
+    @RequestMapping(//NOSONAR
         method = RequestMethod.POST, //NOSONAR
         value = "/cases/paginatedSearch", //NOSONAR
         produces = {"application/json"}, //NOSONAR
         consumes = {"application/json"} //NOSONAR
     ) //NOSONAR
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH) //NOSONAR
-    public ResponseEntity<PaginatedList<AdvancedSearchResult>> casesPaginatedSearchPost( //NOSONAR
-        AdvancedSearchRequestPaginated advancedSearchRequest //NOSONAR
+    public ResponseEntity<PaginatedList<AdvancedSearchResult>> casesPaginatedSearchPost(//NOSONAR
+                                                                                         AdvancedSearchRequestPaginated advancedSearchRequest //NOSONAR
     ) { //NOSONAR
         validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom()); //NOSONAR
-        GetCasesSearchRequestPaginated request = new GetCasesSearchRequestPaginated();; //NOSONAR
+        GetCasesSearchRequestPaginated request = new GetCasesSearchRequestPaginated();//NOSONAR
         request.setCaseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber())); //NOSONAR
-            request.setCourthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse())); //NOSONAR
-            request.setCourtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom())); //NOSONAR
-            request.setJudgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName())); //NOSONAR
-            request.setDefendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName())); //NOSONAR
-            request.setDateFrom(advancedSearchRequest.getDateFrom()); //NOSONAR
-            request.setDateTo(advancedSearchRequest.getDateTo()); //NOSONAR
-            request.setEventTextContains(StringUtils.trimToNull(advancedSearchRequest.getEventTextContains())); //NOSONAR
+        request.setCourthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse())); //NOSONAR
+        request.setCourtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom())); //NOSONAR
+        request.setJudgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName())); //NOSONAR
+        request.setDefendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName())); //NOSONAR
+        request.setDateFrom(advancedSearchRequest.getDateFrom()); //NOSONAR
+        request.setDateTo(advancedSearchRequest.getDateTo()); //NOSONAR
+        request.setEventTextContains(StringUtils.trimToNull(advancedSearchRequest.getEventTextContains())); //NOSONAR
 
-            request.setPageNumber(advancedSearchRequest.getPageNumber()); //NOSONAR
-            request.setPageLimit(advancedSearchRequest.getPageLimit()); //NOSONAR
-            request.setSortField(advancedSearchRequest.getSortField()); //NOSONAR
-            request.setSortMethod(advancedSearchRequest.getSortMethod()); //NOSONAR
+        request.setPageNumber(advancedSearchRequest.getPageNumber()); //NOSONAR
+        request.setPageLimit(advancedSearchRequest.getPageLimit()); //NOSONAR
+        request.setSortField(advancedSearchRequest.getSortField()); //NOSONAR
+        request.setSortMethod(advancedSearchRequest.getSortMethod()); //NOSONAR
 
         RequestValidator.validate(request); //NOSONAR
         PaginatedList<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearchPagination(request); //NOSONAR

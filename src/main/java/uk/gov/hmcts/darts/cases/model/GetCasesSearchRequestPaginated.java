@@ -5,18 +5,17 @@ import com.querydsl.core.types.Expression;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.QHearingEntity;
 import uk.gov.hmcts.darts.common.util.paginated.IsPageable;
 import uk.gov.hmcts.darts.common.util.paginated.SortMethod;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@Builder
+@Getter
+@Setter
 public class GetCasesSearchRequestPaginated extends GetCasesSearchRequest implements IsPageable {
 
     @JsonProperty("sort_method")
