@@ -222,7 +222,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
             automatedTaskRepository, mock(GenerateCaseDocumentAutomatedTaskConfig.class), logApi, lockService,
             generateCaseDocumentProcessor
         );
-        doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
+        doThrow(ArithmeticException.class).when(caseRepository).findCasesIdsNeedingCaseDocumentGenerated(any(), any());
 
         automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), true, "*/7 * * * * *");
 
