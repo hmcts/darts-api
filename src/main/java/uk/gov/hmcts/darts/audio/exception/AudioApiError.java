@@ -36,16 +36,6 @@ public enum AudioApiError implements DartsApiError {
         null,
         AddAudioTitleErrors.MISSING_SYSTEM_USER.toString()
     ),
-    AUDIO_NOT_PROVIDED(
-        AddAudioErrorCode.AUDIO_NOT_PROVIDED.getValue(),
-        HttpStatus.BAD_REQUEST,
-        AddAudioTitleErrors.AUDIO_NOT_PROVIDED.toString()
-    ),
-    ADMIN_SEARCH_CRITERIA_NOT_PROVIDED(
-        AddAudioErrorCode.ADMIN_SEARCH_CRITERIA_NOT_PROVIDED.getValue(),
-        HttpStatus.BAD_REQUEST,
-        AddAudioTitleErrors.ADMIN_SEARCH_CRITERIA_NOT_PROVIDED.toString()
-    ),
     MEDIA_ALREADY_HIDDEN(
         AddAudioErrorCode.MEDIA_ALREADY_HIDDEN.getValue(),
         HttpStatus.CONFLICT,
