@@ -22,7 +22,8 @@ import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetails;
+import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import uk.gov.hmcts.darts.event.model.AdminObfuscateEveByIdsRequest;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
 import uk.gov.hmcts.darts.event.model.CourtLog;
@@ -54,7 +55,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 @RequiredArgsConstructor
 @RestController
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
-@SuppressWarnings({"checkstyle.LineLengthCheck"})
+@SuppressWarnings({"checkstyle.LineLengthCheck", "PMD.TooManyMethods"})
 public class EventsController implements EventApi {
 
     private final CourtLogsService courtLogsService;
@@ -180,8 +181,16 @@ public class EventsController implements EventApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<AdminGetEventForIdResponseResult> adminGetEventById(Integer eventId) {
+    public ResponseEntity<AdminGetEventResponseDetails> adminGetEventById(Integer eventId) {
         return new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<AdminGetVersionsByEventIdResponseResult> adminGetVersionsByEventId(Integer eventId) {
+        return new ResponseEntity<>(eventService.adminGetVersionsByEventId(eventId), HttpStatus.OK);
     }
 
     @Override
