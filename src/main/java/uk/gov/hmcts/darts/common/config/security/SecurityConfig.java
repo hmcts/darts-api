@@ -82,7 +82,8 @@ public class SecurityConfig {
                 "/external-user/reset-password",
                 "/internal-user/login-or-refresh",
                 "/internal-user/handle-oauth-code",
-                "/"
+                "/",
+                "/keep-alive-test" // temporarily added to test the keep-alive code
             )
             .authorizeHttpRequests().anyRequest().permitAll();
 

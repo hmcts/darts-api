@@ -83,7 +83,10 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         var mediaEntity = mediaRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
 
-        return adminMediaMapper.toApiModel(mediaEntity);
+        AdminMediaResponse adminMediaResponse = adminMediaMapper.toApiModel(mediaEntity);
+        adminMediaResponse.getCases().sort((o1, o2) -> o2.getCaseNumber().compareTo(o1.getCaseNumber()));
+        adminMediaResponse.getHearings().sort((o1, o2) -> o2.getCaseNumber().compareTo(o1.getCaseNumber()));
+        return adminMediaResponse;
     }
 
     @Override
@@ -151,7 +154,12 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .stream()
             .filter(objectAdminActionEntities -> !objectAdminActionEntities.isEmpty())
             .map(actions -> toGetAdminMediasMarkedForDeletionItem(actions))
-            .toList();
+            .peek(getAdminMediasMarkedForDeletionItem -> {
+                //We need to add the Media Entities to a List that supports sorting as the default one from Hibernate does not
+                List<GetAdminMediasMarkedForDeletionMediaItem> mediaEntities = new ArrayList<>(getAdminMediasMarkedForDeletionItem.getMedia());
+                mediaEntities.sort((o1, o2) -> o1.getChannel().compareTo(o2.getChannel()));
+                getAdminMediasMarkedForDeletionItem.setMedia(mediaEntities);
+            }).toList();
     }
 
     GetAdminMediasMarkedForDeletionItem toGetAdminMediasMarkedForDeletionItem(List<ObjectAdminActionEntity> actions) {

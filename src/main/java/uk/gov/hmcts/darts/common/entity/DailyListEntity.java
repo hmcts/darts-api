@@ -114,7 +114,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @Column(name = "data_ticket")
     private Integer dataTicket;
 
-    @Column(name = "storage_id")
+    @Column(name = "storage_id", length = 16)
     private String storageId;
 
 }
