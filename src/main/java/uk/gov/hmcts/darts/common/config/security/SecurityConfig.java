@@ -83,7 +83,9 @@ public class SecurityConfig {
                 "/internal-user/login-or-refresh",
                 "/internal-user/handle-oauth-code",
                 "/",
-                "/keep-alive-test" // temporarily added to test the keep-alive code
+                // temporarily added to test the keep-alive code
+                "/keep-alive-test",
+                "/keep-alive-test-stream"
             )
             .authorizeHttpRequests().anyRequest().permitAll();
 
