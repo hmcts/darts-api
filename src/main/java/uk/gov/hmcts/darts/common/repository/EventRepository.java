@@ -84,29 +84,29 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 
     @Query(value = """
         SELECT distinct e2.event_id
-        from (
-          SELECT e.event_id, he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
-          LEFT JOIN darts.hearing_event_ae he
-          ON he.eve_id = e.eve_id
-          where e.is_current = true
+        FROM (
+          SELECT e.event_id, he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids
+          FROM darts.event e
+          LEFT JOIN darts.hearing_event_ae he ON he.eve_id = e.eve_id
+          WHERE e.is_current = true
           AND e.event_id <> 0
           AND e.event_id IS NOT null
           GROUP by he.eve_id, e.event_id
         ) e2
         GROUP BY e2.event_id, e2.hearing_ids
-        having count(e2.event_id) > 1
-        limit :limit
+        HAVING count(e2.event_id) > 1
+        LIMIT :limit
         """, nativeQuery = true)
     List<Integer> findCurrentEventIdsWithDuplicates(long limit);
 
     @Query(value = """
         select distinct on (event_id, hearing_ids) e.* from (
-            SELECT e.eve_id, event_id, e.created_ts, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
-            left join darts.hearing_event_ae he
-            on he.eve_id = e.eve_id
+            SELECT e.eve_id, event_id, e.created_ts, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids
+            FROM darts.event e
+            LEFT JOIN darts.hearing_event_ae he ON he.eve_id = e.eve_id
             WHERE e.event_id=:eventId
-            group by e.eve_id, event_id
-        ) e order by event_id, hearing_ids, e.created_ts DESC
+            GROUP BY e.eve_id, event_id
+        ) e ORDER BY event_id, hearing_ids, e.created_ts DESC
         """, nativeQuery = true)
     List<EventIdAndHearingIds> getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 
@@ -122,19 +122,20 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     @Modifying
     @Query(value = """
         UPDATE darts.event e
-            SET is_current = false,
+        SET is_current = false,
             last_modified_ts = current_timestamp,
             last_modified_by = :userId
         FROM (
-           SELECT he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
-           LEFT JOIN darts.hearing_event_ae he
-           ON he.eve_id = e.eve_id
-           WHERE e.event_id=:eventId
+           SELECT he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids
+           FROM darts.event e
+           LEFT JOIN darts.hearing_event_ae he ON he.eve_id = e.eve_id
+           WHERE e.event_id = :eventId
            GROUP by he.eve_id
-        ) h WHERE e.eve_id != :eventIdsPrimaryKey
-                AND e.event_id = :eventId
-                AND h.hearing_ids = :hearingIds
-                AND h.eve_id = e.eve_id
+        ) h
+        WHERE e.eve_id != :eventIdsPrimaryKey
+        AND e.event_id = :eventId
+        AND h.hearing_ids = :hearingIds
+        AND h.eve_id = e.eve_id
         """, nativeQuery = true)
     void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
         Integer eventIdsPrimaryKey, Integer eventId, String hearingIds, int userId);
