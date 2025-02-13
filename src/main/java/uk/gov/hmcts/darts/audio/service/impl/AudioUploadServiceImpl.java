@@ -22,13 +22,10 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.common.util.MediaEntityTreeNodeImpl;
 import uk.gov.hmcts.darts.common.util.Tree;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -57,7 +54,6 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 public class AudioUploadServiceImpl implements AudioUploadService {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final MediaRepository mediaRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
@@ -65,9 +61,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final AddAudioRequestMapper mapper;
     private final DataManagementApi dataManagementApi;
     private final UserIdentity userIdentity;
-    private final FileContentChecksum fileContentChecksum;
     private final LogApi logApi;
-    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final AudioAsyncService audioAsyncService;
 
     @Value("${darts.audio.small-file-max-length}")
@@ -75,18 +69,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     @Value("${darts.audio.small-file-size}")
     private long smallFileSize;
 
-
-    @Override
-    public void addAudio(MultipartFile audioMultipartFile, AddAudioMetadataRequest addAudioMetadataRequest) {
-        String incomingChecksum;
-        try {
-            incomingChecksum = fileContentChecksum.calculate(audioMultipartFile.getInputStream());
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, "Failed to compute incoming checksum", e);
-        }
-        //No need to delete guid on duplicate as the file is never uploaded to the blob store unless the duplicate check has passed in this flow
-        addAudio(incomingChecksum, () -> saveAudioToInbound(audioMultipartFile), addAudioMetadataRequest, false);
-    }
 
     @Override
     public void addAudio(UUID guid, AddAudioMetadataRequest addAudioMetadataRequest) {
