@@ -28,7 +28,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetails;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
@@ -130,8 +130,8 @@ class EventsControllerTest extends IntegrationBase {
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
-        AdminGetEventForIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                                                 AdminGetEventForIdResponseResult.class);
+        AdminGetEventResponseDetails responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
+                                                                                 AdminGetEventResponseDetails.class);
 
         // Then
         Assertions.assertEquals(eventEntity.getId(), responseResult.getId());
