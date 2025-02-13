@@ -36,6 +36,6 @@ public class ProcessArmResponseFilesAutomatedTask
 
     @Override
     protected void runTask() {
-        armBatchProcessResponseFiles.processResponseFiles(getAutomatedTaskBatchSize());
+        armBatchProcessResponseFiles.processResponseFiles(getAutomatedTaskBatchSize(),getConfig());
     }
 }
