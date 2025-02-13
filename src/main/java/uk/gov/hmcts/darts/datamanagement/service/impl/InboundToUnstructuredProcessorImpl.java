@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -58,17 +57,16 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     @Override
     public void processInboundToUnstructured(int batchSize) {
         log.debug("Processing Inbound data store");
-        List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
-                                                                                                                getStatus(STORED), getType(UNSTRUCTURED), 3,
-                                                                                                                Limit.of(batchSize));
+        List<Integer> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
+                                                                                          getStatus(STORED), getType(UNSTRUCTURED), 3,
+                                                                                          Limit.of(batchSize));
         AtomicInteger count = new AtomicInteger(1);
 
         List<Callable<Void>> tasks = inboundList.stream()
-            .map(inboundObject -> (Callable<Void>) () -> {
+            .map(inboundObjectId -> (Callable<Void>) () -> {
                 log.debug("Processing Inbound to Unstructured record {} of {} with EOD id {}",
-                          count.getAndIncrement(), inboundList.size(), inboundObject.getId());
-
-                processInboundToUnstructured(inboundObject);
+                          count.getAndIncrement(), inboundList.size(), inboundObjectId);
+                processInboundToUnstructured(inboundObjectId);
                 return null;
             }).toList();
         try {
@@ -81,11 +79,11 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         }
     }
 
-    private void processInboundToUnstructured(ExternalObjectDirectoryEntity inboundObject) {
+    private void processInboundToUnstructured(Integer inboundObjectId) {
         try {
-            singleElementProcessor.processSingleElement(inboundObject);
+            singleElementProcessor.processSingleElement(inboundObjectId);
         } catch (Exception exception) {
-            log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundObject.getId(), exception);
+            log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundObjectId, exception);
         }
     }
 
