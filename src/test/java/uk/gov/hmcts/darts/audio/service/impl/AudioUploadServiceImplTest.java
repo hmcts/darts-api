@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -80,7 +79,6 @@ class AudioUploadServiceImplTest {
     @BeforeEach
     void setUp() {
         mapper = spy(new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity, mediaLinkedCaseHelper, mediaRepository));
-        FileContentChecksum fileContentChecksum = new FileContentChecksum();
         audioService = spy(new AudioUploadServiceImpl(
             externalObjectDirectoryRepository,
             externalLocationTypeRepository,
