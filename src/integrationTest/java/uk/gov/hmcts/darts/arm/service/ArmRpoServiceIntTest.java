@@ -47,6 +47,8 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private MediaEntity media1;
     private MediaEntity media2;
+    private MediaEntity media3;
+    private MediaEntity media4;
 
     @BeforeEach
     void setUp() {
@@ -77,6 +79,25 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
                 2
             ));
         media2 = dartsDatabase.save(media2);
+
+        media3 = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                3
+            ));
+        media3 = dartsDatabase.save(media3);
+
+        media4 = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                4
+            ));
+        media4 = dartsDatabase.save(media4);
+
 
         armRpoExecutionDetailEntity = dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
@@ -110,6 +131,24 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         externalObjectDirectoryEntity2.setDataIngestionTs(OffsetDateTime.now().minusHours(6));
         dartsDatabase.save(externalObjectDirectoryEntity2);
 
+        var externalObjectDirectoryEntity3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media3,
+            ARM_RPO_PENDING,
+            ARM,
+            UUID.randomUUID()
+        );
+        externalObjectDirectoryEntity3.setDataIngestionTs(OffsetDateTime.now().minusHours(26));
+        dartsDatabase.save(externalObjectDirectoryEntity3);
+
+        var externalObjectDirectoryEntity4 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media4,
+            ARM_RPO_PENDING,
+            ARM,
+            UUID.randomUUID()
+        );
+        externalObjectDirectoryEntity4.setDataIngestionTs(OffsetDateTime.now().minusHours(28));
+        dartsDatabase.save(externalObjectDirectoryEntity4);
+
         log.info("eod 1: {}, eod 2: {}", externalObjectDirectoryEntity1.getId(), externalObjectDirectoryEntity2.getId());
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
@@ -117,7 +156,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvData.csv");
 
         // when
-        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), BATCH_SIZE);
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), 2);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList1 = dartsDatabase.getExternalObjectDirectoryRepository()
