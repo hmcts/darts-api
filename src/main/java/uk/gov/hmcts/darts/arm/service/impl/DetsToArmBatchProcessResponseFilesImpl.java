@@ -26,6 +26,8 @@ import uk.gov.hmcts.darts.util.DurationUtil;
 
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 
 @Slf4j
 @Component
@@ -85,8 +87,10 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                     userAccount);
 
         getObjectStateRecord(armEod.getId())
-            .ifPresent(osr ->
-                           updateOsrFileIngestStatusToSuccess(batchUploadFileFilenameProcessor, armResponseBatchData, objectChecksum, osr)
+            .ifPresent(
+                osr -> updateOsrFileIngestStatusToSuccess(
+                    batchUploadFileFilenameProcessor, armResponseBatchData, objectChecksum, osr, armResponseUploadFileRecord
+                )
             );
     }
 
@@ -143,10 +147,14 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     private void updateOsrFileIngestStatusToSuccess(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
                                                     ArmResponseBatchData armResponseBatchData,
                                                     String objectChecksum,
-                                                    ObjectStateRecordEntity osr) {
+                                                    ObjectStateRecordEntity osr,
+                                                    ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         osr.setFlagFileIngestStatus(true);
         osr.setDateFileIngestToArm(timeHelper.currentOffsetDateTime());
         osr.setMd5FileIngestToArm(objectChecksum);
+        if (nonNull(armResponseUploadFileRecord.getFileSize())) {
+            osr.setFileSizeIngestToArm(Long.valueOf(armResponseUploadFileRecord.getFileSize()));
+        }
         osr.setIdResponseFile(batchUploadFileFilenameProcessor.getBatchMetadataFilename());
         osr.setIdResponseCrFile(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilename());
         osr.setIdResponseUfFile(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilename());

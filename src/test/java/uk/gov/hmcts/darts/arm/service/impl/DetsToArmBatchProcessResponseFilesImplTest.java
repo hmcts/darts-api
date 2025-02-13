@@ -158,6 +158,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         uploadFileRecord.setA360FileId("a360FileId");
         String checksum = "checksum";
         uploadFileRecord.setMd5(checksum);
+        uploadFileRecord.setFileSize(100);
         ArmResponseCreateRecord armResponseCreateRecord = new ArmResponseCreateRecord();
 
         ArmResponseBatchData batchData = ArmResponseBatchData.builder()
