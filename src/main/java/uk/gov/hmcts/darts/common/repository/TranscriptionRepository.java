@@ -63,7 +63,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     List<TranscriptionEntity> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
         List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime, Limit limit);
 
-    // native query to bypass @SQLRestriction on TranscriptionDocumentEntity
+    // native query to bypass @SQLRestriction on TranscriptionDocumentEntity in NOT EXISTS sub-query
     @Query(value = """
         SELECT t.*
         FROM darts.transcription t
