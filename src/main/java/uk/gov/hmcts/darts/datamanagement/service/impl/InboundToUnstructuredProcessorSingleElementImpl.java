@@ -38,7 +38,8 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream"})
     @Override
     @Transactional
-    public void processSingleElement(ExternalObjectDirectoryEntity inboundEodEntity) {
+    public void processSingleElement(Integer inboundEodEntityId) {
+        ExternalObjectDirectoryEntity inboundEodEntity = externalObjectDirectoryRepository.findById(inboundEodEntityId).orElseThrow();
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundEodEntity);
 
         unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.awaitingVerificationStatus());

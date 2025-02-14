@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 
 import java.util.List;
@@ -22,9 +21,9 @@ class ExternalObjectDirectoryRepositoryTest {
     @Test
     void findEodsForTransfer_mediaItemsArelessThanLimit_shouldReturnBothMediaAndNonMedia() {
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        ExternalObjectDirectoryEntity mediaEod1 = new ExternalObjectDirectoryEntity();
-        ExternalObjectDirectoryEntity mediaEod2 = new ExternalObjectDirectoryEntity();
-        ExternalObjectDirectoryEntity nonMediaEod1 = new ExternalObjectDirectoryEntity();
+        int mediaEod1 = 1;
+        int mediaEod2 = 2;
+        int nonMediaEod1 = 3;
         doReturn(List.of(mediaEod1, mediaEod2))
             .when(externalObjectDirectoryRepository)
             .findEodsForTransferOnlyMedia(any(), any(), any(), any(), any(), any());
@@ -38,7 +37,7 @@ class ExternalObjectDirectoryRepositoryTest {
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
         int maxTransferAttempts = 5;
 
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryRepository.findEodsForTransfer(
+        List<Integer> eods = externalObjectDirectoryRepository.findEodsForTransfer(
             status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(5));
 
         assertThat(eods)
@@ -54,8 +53,8 @@ class ExternalObjectDirectoryRepositoryTest {
     @Test
     void findEodsForTransfer_mediaItemsAreEqualToLimit_shouldReturnOnlyMedia() {
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        ExternalObjectDirectoryEntity mediaEod1 = new ExternalObjectDirectoryEntity();
-        ExternalObjectDirectoryEntity mediaEod2 = new ExternalObjectDirectoryEntity();
+        int mediaEod1 = 1;
+        int mediaEod2 = 2;
         doReturn(List.of(mediaEod1, mediaEod2))
             .when(externalObjectDirectoryRepository)
             .findEodsForTransferOnlyMedia(any(), any(), any(), any(), any(), any());
@@ -66,7 +65,7 @@ class ExternalObjectDirectoryRepositoryTest {
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
         int maxTransferAttempts = 5;
 
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryRepository.findEodsForTransfer(
+        List<Integer> eods = externalObjectDirectoryRepository.findEodsForTransfer(
             status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(2));
 
         assertThat(eods)
