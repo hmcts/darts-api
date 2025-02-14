@@ -1100,7 +1100,6 @@ components:
         - "AUDIO_102"
         - "AUDIO_103"
         - "AUDIO_104"
-        - "AUDIO_109"
         - "AUDIO_110"
         - "AUDIO_111"
         - "AUDIO_112"
@@ -1118,7 +1117,6 @@ components:
                          MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER,
-                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
                          MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
@@ -1141,7 +1139,6 @@ components:
         - "The requested media cannot be found"
         - "Failed to store uploaded audio file"
         - "Failed to mark audio(s) for deletion as system user was not found"
-        - "Required request parameter 'transformed_media_id' for method parameter type Integer is not present"
         - "Media is already hidden"
         - "Hide media action payload not correct"
         - "Showing media action payload not correct"
@@ -1159,7 +1156,6 @@ components:
                          MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER,
-                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
                          MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
