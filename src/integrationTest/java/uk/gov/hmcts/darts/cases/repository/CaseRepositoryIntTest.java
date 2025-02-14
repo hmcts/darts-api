@@ -55,6 +55,10 @@ class CaseRepositoryIntTest extends IntegrationBase {
             courtCase.setRetentionUpdated(true);
             courtCase.setRetentionRetries(1);
         });
+        CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+            matchingCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject1);
+
 
         // when
         var result = caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(1000));
