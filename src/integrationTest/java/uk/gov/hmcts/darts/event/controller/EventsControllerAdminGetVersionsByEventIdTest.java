@@ -23,6 +23,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -136,7 +137,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
                                                                                          AdminGetVersionsByEventIdResponseResult.class);
 
         // Then
-        Assertions.assertNull(responseResult.getPreviousVersions());
+        assertThat(responseResult.getPreviousVersions()).hasSize(0);
 
         assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
         assertEquals(currentEventEntity.getLegacyObjectId(), responseResult.getCurrentVersion().getDocumentumId());
