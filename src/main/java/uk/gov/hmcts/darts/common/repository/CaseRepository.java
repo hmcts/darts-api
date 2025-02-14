@@ -63,9 +63,12 @@ public interface CaseRepository
                 GROUP by cr2.courtCase.id) latest_case_retention
         WHERE cr.courtCase.id = cc.id
         AND cc.closed = true
+        AND cc.caseClosedTimestamp <= :caseClosedBeforeTimestamp
+        AND latest_case_retention.latest_ts = cr.createdDateTime
         AND latest_case_retention.caseId = cr.courtCase.id
-        AND NOT EXISTS (select cde FROM CaseDocumentEntity cde WHERE (cde.courtCase.id = courtCase.id))
-        AND latest_case_retention.caseId = cr.courtCase.id
+        AND cr.retainUntil is not null
+        AND NOT EXISTS 
+            (select cde FROM CaseDocumentEntity cde WHERE (cde.courtCase.id = courtCase.id))
         """)
     List<Integer> findCasesIdsNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
 
