@@ -3,6 +3,9 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -507,5 +510,48 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         );
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findByStatusAndIngestionDateTsWithPaging_ReturnsResults() throws Exception {
+        // Given
+        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
+        OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
+        OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(20);
+
+        List<ExternalObjectDirectoryEntity> matchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 11, Optional.of(pastCurrentDateTime1));
+        matchingEods.forEach(eod -> {
+            eod.setDataIngestionTs(pastCurrentDateTime1);
+        });
+        dartsPersistence.saveAll(matchingEods);
+        assertEquals(11, matchingEods.size());
+
+        List<ExternalObjectDirectoryEntity> nonMatchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 4, Optional.of(pastCurrentDateTime2));
+        nonMatchingEods.forEach(eod -> {
+            eod.setDataIngestionTs(pastCurrentDateTime2);
+        });
+        dartsPersistence.saveAll(nonMatchingEods);
+        assertEquals(4, nonMatchingEods.size());
+
+        OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(10);
+        OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(1);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // When
+        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(
+            status, startDateTime, endDateTime, pageable
+        );
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(10);
+        assertThat(result.getTotalElements()).isEqualTo(11);
+        result.getContent().forEach(entity -> {
+            assertThat(entity.getStatus()).isEqualTo(status);
+            assertThat(entity.getDataIngestionTs()).isBetween(startDateTime, endDateTime);
+        });
     }
 }
