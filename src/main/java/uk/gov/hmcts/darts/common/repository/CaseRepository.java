@@ -68,7 +68,7 @@ public interface CaseRepository
         AND latest_case_retention.caseId = cr.courtCase.id
         AND cr.retainUntil is not null
         AND NOT EXISTS 
-            (select cde FROM CaseDocumentEntity cde WHERE (cde.courtCase.id = courtCase.id))
+            (select cde FROM CaseDocumentEntity cde WHERE (cde.courtCase.id = cc.id))
         """)
     List<Integer> findCasesIdsNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
 

@@ -168,16 +168,30 @@ class CaseRepositoryIntTest extends IntegrationBase {
         assertThat(result.get(2)).isEqualTo(matchingCase3.getId());
     }
 
-
     @Test
-    void findCasesNeedingCaseDocumentForRetentionDateGeneration_PagedSuccess() {
+    void findCasesNeedingCaseDocumentForRetentionDateGeneration_AllSuccess() {
         // given
         Function<Boolean, CourtCaseEntity> createValidCourtCase = getCourtCaseEntityFunction();
 
         CourtCaseEntity courtCase1 = createValidCourtCase.apply(true);
+        CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+            courtCase1, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject1);
+
         CourtCaseEntity courtCase2 = createValidCourtCase.apply(false);
+        CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
+            courtCase2, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject2);
+
         CourtCaseEntity courtCase3 = createValidCourtCase.apply(true);
+        CaseRetentionEntity caseRetentionObject3 = dartsDatabase.createCaseRetentionObject(
+            courtCase3, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject3);
+
         CourtCaseEntity courtCase4 = createValidCourtCase.apply(false);
+        CaseRetentionEntity caseRetentionObject4 = dartsDatabase.createCaseRetentionObject(
+            courtCase4, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject4);
 
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
         // when
@@ -204,12 +218,12 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
             CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
                 courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
-
             dartsDatabase.save(caseRetentionObject1);
 
             CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
                 courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(20), false);
             dartsDatabase.save(caseRetentionObject2);
+
             courtCase.setRetentionUpdated(isRetentionUpdated);
             return dartsDatabase.save(courtCase);
         };
