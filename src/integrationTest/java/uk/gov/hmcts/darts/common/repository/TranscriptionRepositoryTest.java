@@ -98,7 +98,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore() {
+    void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_ShouldSucceed() {
         // given
         TranscriptionStatusEntity completeTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(COMPLETE);
         TranscriptionEntity transcriptionCompleteOld =
@@ -132,7 +132,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_NotFound() {
+    void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_NoResultsFound() {
         // given
         TranscriptionEntity transcriptionApproved = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         OffsetDateTime createdDateTime = OffsetDateTime.now().minusDays(1);
