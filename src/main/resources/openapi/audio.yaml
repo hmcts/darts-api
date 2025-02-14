@@ -146,38 +146,7 @@ paths:
                 type: "AUDIO_101"
                 title: "The requested data cannot be located"
                 status: 500
-  /audios:
-    post:
-      tags:
-        - Audio
-      summary: Upload audio file and metadata
-      operationId: addAudio
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-                metadata:
-                  $ref: '#/components/schemas/AddAudioMetadataRequest'
-      responses:
-        200:
-          description: Audio file and metadata accepted
-        400:
-          description: Bad request
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-        500:
-          description: Internal server error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
+
   /audios/metadata:
     post:
       tags:
@@ -468,7 +437,7 @@ components:
         media:
           type: array
           items:
-              $ref: '#/components/schemas/GetAdminMediasMarkedForDeletionMediaItem'
+            $ref: '#/components/schemas/GetAdminMediasMarkedForDeletionMediaItem'
         start_at:
           type: string
           format: date-time
@@ -1131,8 +1100,6 @@ components:
         - "AUDIO_102"
         - "AUDIO_103"
         - "AUDIO_104"
-        - "AUDIO_105"
-        - "AUDIO_109"
         - "AUDIO_110"
         - "AUDIO_111"
         - "AUDIO_112"
@@ -1150,8 +1117,6 @@ components:
                          MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER,
-                         AUDIO_NOT_PROVIDED,
-                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
                          MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
@@ -1174,8 +1139,6 @@ components:
         - "The requested media cannot be found"
         - "Failed to store uploaded audio file"
         - "Failed to mark audio(s) for deletion as system user was not found"
-        - "Audio not found"
-        - "Required request parameter 'transformed_media_id' for method parameter type Integer is not present"
         - "Media is already hidden"
         - "Hide media action payload not correct"
         - "Showing media action payload not correct"
@@ -1193,8 +1156,6 @@ components:
                          MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER,
-                         AUDIO_NOT_PROVIDED,
-                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
                          MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
