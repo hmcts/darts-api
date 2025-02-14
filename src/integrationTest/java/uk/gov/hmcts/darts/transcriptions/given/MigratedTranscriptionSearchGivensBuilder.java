@@ -84,6 +84,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         dartsDatabase.save(courtroom);
         transcription.setHearings(new ArrayList<>());
         transcription.setCourtroom(courtroom);
+        transcription.setIsCurrent(true);
         dartsDatabase.save(transcription.getCourtCase());
         return dartsDatabase.save(transcription);
     }
@@ -101,6 +102,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         UserAccountEntity user = dartsDatabase.save(transcription.getCreatedBy());
         transcription.setCreatedBy(user);
         transcription.setLastModifiedBy(user);
+        transcription.setIsCurrent(true);
         return dartsDatabase.save(transcription);
     }
 }
