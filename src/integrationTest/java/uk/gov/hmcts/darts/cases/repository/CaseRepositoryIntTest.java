@@ -132,7 +132,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
             courtCase.setRetentionRetries(1);
         });
         CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
-            matchingCase1, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+            matchingCase1, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
         dartsDatabase.save(caseRetentionObject1);
 
         var matchingCase2 = caseStub.createAndSaveCourtCase(courtCase -> {
@@ -142,12 +142,12 @@ class CaseRepositoryIntTest extends IntegrationBase {
             courtCase.setRetentionRetries(1);
         });
         CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
-            matchingCase2, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+            matchingCase2, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(29), false);
         dartsDatabase.save(caseRetentionObject2);
 
         var matchingCase3 = caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(30));
             courtCase.setRetentionUpdated(true);
             courtCase.setRetentionRetries(1);
         });
