@@ -81,7 +81,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
         securityRoles = {TRANSCRIBER},
-        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<Resource> download(Integer transformedMediaId) {
         DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.download(transformedMediaId);
         return ResponseEntity.ok().body(downloadResponseMetadata.getResource());
