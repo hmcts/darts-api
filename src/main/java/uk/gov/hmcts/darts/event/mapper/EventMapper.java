@@ -71,9 +71,7 @@ public class EventMapper {
             previousVersions.add(mapToAdminGetEventsResponseForId(eventEntity));
         }
 
-        if (!previousVersions.isEmpty()) {
-            adminGetEventsForIdResponse.setPreviousVersions(previousVersions);
-        }
+        adminGetEventsForIdResponse.setPreviousVersions(previousVersions);
 
         return adminGetEventsForIdResponse;
     }

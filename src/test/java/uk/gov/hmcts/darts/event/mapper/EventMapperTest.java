@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -101,7 +102,7 @@ class EventMapperTest {
         assertEquals(eventEntity1.getLastModifiedBy().getId(), currentVersion.getLastModifiedBy());
         assertEquals(eventEntity1.isDataAnonymised(), currentVersion.getIsDataAnonymised());
 
-        assertNull(responseResult.getPreviousVersions());
+        assertThat(responseResult.getPreviousVersions()).hasSize(0);
     }
 
     @Test
@@ -226,6 +227,46 @@ class EventMapperTest {
         assertEquals(eventEntity3.getLastModifiedDateTime(), previousVersions.get(2).getLastModifiedAt());
         assertEquals(eventEntity3.getLastModifiedBy().getId(), previousVersions.get(2).getLastModifiedBy());
         assertEquals(eventEntity3.isDataAnonymised(), previousVersions.get(2).getIsDataAnonymised());
+    }
+
+    @Test
+    void whenSingleVersionForAnEventIsNotCurrent_mapsEventVersionToAdminGetEventVersionsResponseResultAndVersionSetInPreviousEvent() {
+        // When
+        OffsetDateTime now = OffsetDateTime.now();
+        EventEntity eventEntity1 = setGenericEventDataForTest();
+        eventEntity1.setId(1);
+        eventEntity1.setCreatedDateTime(now.minusDays(1));
+        eventEntity1.setIsCurrent(false);
+
+        List<EventEntity> eventEntities = List.of(eventEntity1);
+
+        // Given
+        AdminGetVersionsByEventIdResponseResult responseResult = eventMapper.mapToAdminGetEventVersionsResponseForId(eventEntities);
+
+        AdminGetEventResponseDetails previousVersion = responseResult.getPreviousVersions().get(0);
+        // Then
+        assertNull(responseResult.getCurrentVersion());
+        assertEquals(eventEntity1.getId(), previousVersion.getId());
+        assertEquals(eventEntity1.getLegacyObjectId(), previousVersion.getDocumentumId());
+        assertEquals(eventEntity1.getEventId(), previousVersion.getSourceId());
+        assertEquals(eventEntity1.getMessageId(), previousVersion.getMessageId());
+        assertEquals(eventEntity1.getEventText(), previousVersion.getText());
+        assertEquals(eventEntity1.getEventType().getId(), previousVersion.getEventMapping().getId());
+        assertEquals(eventEntity1.isLogEntry(), previousVersion.getIsLogEntry());
+        assertEquals(eventEntity1.getCourtroom().getId(), previousVersion.getCourtroom().getId());
+        assertEquals(eventEntity1.getCourtroom().getName(), previousVersion.getCourtroom().getName());
+        assertEquals(eventEntity1.getCourtroom().getCourthouse().getId(), previousVersion.getCourthouse().getId());
+        assertEquals(eventEntity1.getCourtroom().getCourthouse().getDisplayName(), previousVersion.getCourthouse().getDisplayName());
+        assertEquals(eventEntity1.getLegacyVersionLabel(), previousVersion.getVersion());
+        assertEquals(eventEntity1.getChronicleId(), previousVersion.getChronicleId());
+        assertEquals(eventEntity1.getAntecedentId(), previousVersion.getAntecedentId());
+        assertEquals(eventEntity1.getTimestamp(), previousVersion.getEventTs());
+        assertEquals(eventEntity1.getIsCurrent(), previousVersion.getIsCurrent());
+        assertEquals(eventEntity1.getCreatedDateTime(), previousVersion.getCreatedAt());
+        assertEquals(eventEntity1.getCreatedBy().getId(), previousVersion.getCreatedBy());
+        assertEquals(eventEntity1.getLastModifiedDateTime(), previousVersion.getLastModifiedAt());
+        assertEquals(eventEntity1.getLastModifiedBy().getId(), previousVersion.getLastModifiedBy());
+        assertEquals(eventEntity1.isDataAnonymised(), previousVersion.getIsDataAnonymised());
     }
     
     private EventEntity setGenericEventDataForTest() {

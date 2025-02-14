@@ -46,7 +46,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
     private static final OffsetDateTime EVENT_TS = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
 
     @Test
-    void adminEventsApiGetVersionsByEventIdEndpointSuccess() throws Exception {
+    void adminEventsApiGetVersionsByEventIdEndpoint_shouldReturnCurrentEventAndPreviousEvents_whenEventIdIsNotZero() throws Exception {
 
         // Given
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(2, 2, false, EVENT_TS);
@@ -114,20 +114,52 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(previousEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
                                 responseResult.getPreviousVersions().getFirst().getLastModifiedAt());
         assertEquals(previousEventEntity.getLastModifiedBy().getId(), responseResult.getPreviousVersions().getFirst().getLastModifiedBy());
+    }
+
+    @Test
+    void adminEventsApiGetVersionsByEventIdEndpoint_shouldReturnCurrentEventAndNoPreviousEvents_whenEventIdIsZero() throws Exception {
+
+        // Given
+        Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(1, 2, false, EVENT_TS);
+        EventEntity currentEventEntity = eventEntityVersions.get(0).get(0);
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         // When
         EventEntity eventIdZeroEventEntity = eventEntityVersions.get(0).getFirst();
-        MockHttpServletRequestBuilder requestBuilder2 = get("/admin/events/" + eventIdZeroEventEntity.getId() + "/versions")
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/events/" + eventIdZeroEventEntity.getId() + "/versions")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
-        MvcResult response2 = mockMvc.perform(requestBuilder2).andExpect(status().is2xxSuccessful()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
-        AdminGetVersionsByEventIdResponseResult responseResult2 = objectMapper.readValue(response2.getResponse().getContentAsString(),
-                                                                                        AdminGetVersionsByEventIdResponseResult.class);
+        AdminGetVersionsByEventIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
+                                                                                         AdminGetVersionsByEventIdResponseResult.class);
 
         // Then
-        Assertions.assertNull(responseResult2.getPreviousVersions());
-        assertEquals(eventIdZeroEventEntity.getId(), responseResult2.getCurrentVersion().getId());
+        Assertions.assertNull(responseResult.getPreviousVersions());
+
+        assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
+        assertEquals(currentEventEntity.getLegacyObjectId(), responseResult.getCurrentVersion().getDocumentumId());
+        assertEquals(currentEventEntity.getEventId(), responseResult.getCurrentVersion().getSourceId());
+        assertEquals(currentEventEntity.getMessageId(), responseResult.getCurrentVersion().getMessageId());
+        assertEquals(currentEventEntity.getEventText(), responseResult.getCurrentVersion().getText());
+        assertEquals(currentEventEntity.getEventType().getId(), responseResult.getCurrentVersion().getEventMapping().getId());
+        assertEquals(currentEventEntity.getEventType().getEventName(), responseResult.getCurrentVersion().getEventMapping().getName());
+        assertEquals(currentEventEntity.isLogEntry(), responseResult.getCurrentVersion().getIsLogEntry());
+        assertEquals(currentEventEntity.getCourtroom().getId(), responseResult.getCurrentVersion().getCourtroom().getId());
+        assertEquals(currentEventEntity.getCourtroom().getName(), responseResult.getCurrentVersion().getCourtroom().getName());
+        assertEquals(currentEventEntity.getCourtroom().getCourthouse().getId(), responseResult.getCurrentVersion().getCourthouse().getId());
+        assertEquals(currentEventEntity.getCourtroom().getCourthouse().getDisplayName(),
+                     responseResult.getCurrentVersion().getCourthouse().getDisplayName());
+        assertEquals(currentEventEntity.getLegacyVersionLabel(), responseResult.getCurrentVersion().getVersion());
+        assertEquals(currentEventEntity.getTimestamp(), responseResult.getCurrentVersion().getEventTs());
+        assertEquals(currentEventEntity.getIsCurrent(), responseResult.getCurrentVersion().getIsCurrent());
+        assertEquals(currentEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
+                     responseResult.getCurrentVersion().getCreatedAt());
+        assertEquals(currentEventEntity.getCreatedBy().getId(), responseResult.getCurrentVersion().getCreatedBy());
+        assertEquals(currentEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
+                     responseResult.getCurrentVersion().getLastModifiedAt());
+        assertEquals(currentEventEntity.getLastModifiedBy().getId(), responseResult.getCurrentVersion().getLastModifiedBy());
     }
 
     @Test
