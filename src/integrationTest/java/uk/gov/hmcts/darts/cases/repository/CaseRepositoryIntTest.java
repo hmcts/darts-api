@@ -128,17 +128,32 @@ class CaseRepositoryIntTest extends IntegrationBase {
         var matchingCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
             courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(1);
         });
+        CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+            matchingCase1, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject1);
 
         var matchingCase2 = caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
             courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(1);
         });
+        CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
+            matchingCase2, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject2);
 
         var matchingCase3 = caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
             courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(1);
         });
+        CaseRetentionEntity caseRetentionObject3 = dartsDatabase.createCaseRetentionObject(
+            matchingCase3, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject3);
 
         assertThat(dartsDatabase.getCaseRepository().findAll()).hasSize(6);
 
@@ -240,13 +255,13 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
+        assertThat(result.getFirst()).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
         assertThat(result.get(1)).isEqualTo(courtCaseEntityWithCaseDocument.getId());
 
     }
 
     @Test
-    void testFindCasesNeedingCaseDocumentForRetentionDateGenerationPagedWhereRetentionDateToFarInTheFuture() {
+    void findCasesNeedingCaseDocumentForRetentionDateGeneration_WhereRetentionDateToFarInTheFuture() {
         // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
