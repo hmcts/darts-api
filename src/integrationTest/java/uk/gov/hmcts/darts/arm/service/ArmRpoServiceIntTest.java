@@ -161,18 +161,27 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList1 = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
-
         assertEquals(1, foundMediaList1.size());
         ExternalObjectDirectoryEntity foundMedia1 = foundMediaList1.getFirst();
         assertEquals(STORED.getId(), foundMedia1.getStatus().getId());
 
         List<ExternalObjectDirectoryEntity> foundMediaList2 = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
-
         assertEquals(1, foundMediaList2.size());
         ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
         assertEquals(ARM_RPO_PENDING.getId(), foundMedia2.getStatus().getId());
 
+        List<ExternalObjectDirectoryEntity> foundMediaList3 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media3, dartsDatabase.getExternalLocationTypeEntity(ARM));
+        assertEquals(1, foundMediaList3.size());
+        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList1.getFirst();
+        assertEquals(STORED.getId(), foundMedia3.getStatus().getId());
+
+        List<ExternalObjectDirectoryEntity> foundMediaList4 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+        assertEquals(1, foundMediaList4.size());
+        ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.getFirst();
+        assertEquals(STORED.getId(), foundMedia4.getStatus().getId());
     }
 
     @Test
