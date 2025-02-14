@@ -148,6 +148,14 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         """)
     List<EventEntity> findAllBetweenDateTimesInclusive(OffsetDateTime startDateTime, OffsetDateTime endDateTime);
 
+    @Query("""
+        SELECT ee
+        FROM EventEntity ee
+        WHERE ee.eventId = :eventId
+        AND ee.eventId <> 0
+        """)
+    List<EventEntity> findAllByEventIdExcludingEventIdZero(Integer eventId);
+
     @Query("select e.id from EventEntity e where e.eventStatus = :statusNumber")
     List<Integer> findAllByEventStatus(Integer statusNumber, Limit limit);
 

@@ -528,7 +528,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminGetEventForIdResponseResult'
+                $ref: '#/components/schemas/AdminGetEventResponseDetails'
+        '404':
+          description: Not Found - Event id
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+  /admin/events/{event_id}/versions:
+    get:
+      tags:
+        - Event
+      summary: Gets versions of an event
+      description: |-
+        Retrieves a version of an event for a given event_id
+      operationId: adminGetVersionsByEventId
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          description: "event_id is the internal event_id of the event."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminGetVersionsByEventIdResponseResult'
         '404':
           description: Not Found - Event id
           content:
@@ -798,13 +826,7 @@ components:
         name:
           type: string
 
-    EventMappingDetails:
-      type: object
-      properties:
-        id:
-          type: integer
-
-    AdminGetEventForIdResponseResult:
+    AdminGetEventResponseDetails:
       type: object
       properties:
         id:
@@ -818,7 +840,7 @@ components:
         text:
           type: string
         event_mapping:
-          $ref: '#/components/schemas/EventMappingDetails'
+          $ref: '#/components/schemas/EventMapping'
         is_log_entry:
           type: boolean
         courthouse:
@@ -848,6 +870,16 @@ components:
           format: date-time
         last_modified_by:
           type: integer
+
+    AdminGetVersionsByEventIdResponseResult:
+      type: object
+      properties:
+        current_version:
+          $ref: '#/components/schemas/AdminGetEventResponseDetails'
+        previous_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminGetEventResponseDetails'
 
     GetCourtLogsErrorCode:
       type: string
