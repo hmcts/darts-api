@@ -134,6 +134,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
              AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
              AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+             AND t.isCurrent = true
         """)
     List<TranscriptionSearchResult> searchModernisedTranscriptionsFilteringOn(
         List<Integer> ids,
@@ -172,6 +173,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
              AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
              AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+             AND t.isCurrent = true
         """)
     List<TranscriptionSearchResult> searchMigratedTranscriptionsFilteringOn(
         List<Integer> ids,
