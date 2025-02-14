@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryQueryTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.time.Duration;
@@ -23,7 +22,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProcessor {
-    private final UserAccountRepository userAccountRepository;
+
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final UserIdentity userIdentity;
