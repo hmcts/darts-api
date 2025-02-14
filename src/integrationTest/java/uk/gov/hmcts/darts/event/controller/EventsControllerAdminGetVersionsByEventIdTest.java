@@ -23,6 +23,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
@@ -63,56 +64,56 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
                                                                                  AdminGetVersionsByEventIdResponseResult.class);
 
         // Then
-        Assertions.assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
-        Assertions.assertEquals(currentEventEntity.getLegacyObjectId(), responseResult.getCurrentVersion().getDocumentumId());
-        Assertions.assertEquals(currentEventEntity.getEventId(), responseResult.getCurrentVersion().getSourceId());
-        Assertions.assertEquals(currentEventEntity.getMessageId(), responseResult.getCurrentVersion().getMessageId());
-        Assertions.assertEquals(currentEventEntity.getEventText(), responseResult.getCurrentVersion().getText());
-        Assertions.assertEquals(currentEventEntity.getEventType().getId(), responseResult.getCurrentVersion().getEventMapping().getId());
-        Assertions.assertEquals(currentEventEntity.getEventType().getEventName(), responseResult.getCurrentVersion().getEventMapping().getName());
-        Assertions.assertEquals(currentEventEntity.isLogEntry(), responseResult.getCurrentVersion().getIsLogEntry());
-        Assertions.assertEquals(currentEventEntity.getCourtroom().getId(), responseResult.getCurrentVersion().getCourtroom().getId());
-        Assertions.assertEquals(currentEventEntity.getCourtroom().getName(), responseResult.getCurrentVersion().getCourtroom().getName());
-        Assertions.assertEquals(currentEventEntity.getCourtroom().getCourthouse().getId(), responseResult.getCurrentVersion().getCourthouse().getId());
-        Assertions.assertEquals(currentEventEntity.getCourtroom().getCourthouse().getDisplayName(),
+        assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
+        assertEquals(currentEventEntity.getLegacyObjectId(), responseResult.getCurrentVersion().getDocumentumId());
+        assertEquals(currentEventEntity.getEventId(), responseResult.getCurrentVersion().getSourceId());
+        assertEquals(currentEventEntity.getMessageId(), responseResult.getCurrentVersion().getMessageId());
+        assertEquals(currentEventEntity.getEventText(), responseResult.getCurrentVersion().getText());
+        assertEquals(currentEventEntity.getEventType().getId(), responseResult.getCurrentVersion().getEventMapping().getId());
+        assertEquals(currentEventEntity.getEventType().getEventName(), responseResult.getCurrentVersion().getEventMapping().getName());
+        assertEquals(currentEventEntity.isLogEntry(), responseResult.getCurrentVersion().getIsLogEntry());
+        assertEquals(currentEventEntity.getCourtroom().getId(), responseResult.getCurrentVersion().getCourtroom().getId());
+        assertEquals(currentEventEntity.getCourtroom().getName(), responseResult.getCurrentVersion().getCourtroom().getName());
+        assertEquals(currentEventEntity.getCourtroom().getCourthouse().getId(), responseResult.getCurrentVersion().getCourthouse().getId());
+        assertEquals(currentEventEntity.getCourtroom().getCourthouse().getDisplayName(),
                                 responseResult.getCurrentVersion().getCourthouse().getDisplayName());
-        Assertions.assertEquals(currentEventEntity.getLegacyVersionLabel(), responseResult.getCurrentVersion().getVersion());
-        Assertions.assertEquals(currentEventEntity.getTimestamp(), responseResult.getCurrentVersion().getEventTs());
-        Assertions.assertEquals(currentEventEntity.getIsCurrent(), responseResult.getCurrentVersion().getIsCurrent());
-        Assertions.assertEquals(currentEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
+        assertEquals(currentEventEntity.getLegacyVersionLabel(), responseResult.getCurrentVersion().getVersion());
+        assertEquals(currentEventEntity.getTimestamp(), responseResult.getCurrentVersion().getEventTs());
+        assertEquals(currentEventEntity.getIsCurrent(), responseResult.getCurrentVersion().getIsCurrent());
+        assertEquals(currentEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
                                 responseResult.getCurrentVersion().getCreatedAt());
-        Assertions.assertEquals(currentEventEntity.getCreatedBy().getId(), responseResult.getCurrentVersion().getCreatedBy());
-        Assertions.assertEquals(currentEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
+        assertEquals(currentEventEntity.getCreatedBy().getId(), responseResult.getCurrentVersion().getCreatedBy());
+        assertEquals(currentEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
                                 responseResult.getCurrentVersion().getLastModifiedAt());
-        Assertions.assertEquals(currentEventEntity.getLastModifiedBy().getId(), responseResult.getCurrentVersion().getLastModifiedBy());
+        assertEquals(currentEventEntity.getLastModifiedBy().getId(), responseResult.getCurrentVersion().getLastModifiedBy());
 
         // Previous version
         EventEntity previousEventEntity = eventEntityVersions.get(1).get(1);
-        Assertions.assertEquals(1, responseResult.getPreviousVersions().size());
-        Assertions.assertEquals(previousEventEntity.getId(), responseResult.getPreviousVersions().getFirst().getId());
-        Assertions.assertEquals(previousEventEntity.getLegacyObjectId(), responseResult.getPreviousVersions().getFirst().getDocumentumId());
-        Assertions.assertEquals(previousEventEntity.getEventId(), responseResult.getPreviousVersions().getFirst().getSourceId());
-        Assertions.assertEquals(previousEventEntity.getMessageId(), responseResult.getPreviousVersions().getFirst().getMessageId());
-        Assertions.assertEquals(previousEventEntity.getEventText(), responseResult.getPreviousVersions().getFirst().getText());
-        Assertions.assertEquals(previousEventEntity.getEventType().getId(), responseResult.getPreviousVersions().getFirst().getEventMapping().getId());
-        Assertions.assertEquals(previousEventEntity.getEventType().getEventName(),
+        assertEquals(1, responseResult.getPreviousVersions().size());
+        assertEquals(previousEventEntity.getId(), responseResult.getPreviousVersions().getFirst().getId());
+        assertEquals(previousEventEntity.getLegacyObjectId(), responseResult.getPreviousVersions().getFirst().getDocumentumId());
+        assertEquals(previousEventEntity.getEventId(), responseResult.getPreviousVersions().getFirst().getSourceId());
+        assertEquals(previousEventEntity.getMessageId(), responseResult.getPreviousVersions().getFirst().getMessageId());
+        assertEquals(previousEventEntity.getEventText(), responseResult.getPreviousVersions().getFirst().getText());
+        assertEquals(previousEventEntity.getEventType().getId(), responseResult.getPreviousVersions().getFirst().getEventMapping().getId());
+        assertEquals(previousEventEntity.getEventType().getEventName(),
                                 responseResult.getPreviousVersions().getFirst().getEventMapping().getName());
-        Assertions.assertEquals(previousEventEntity.isLogEntry(), responseResult.getPreviousVersions().getFirst().getIsLogEntry());
-        Assertions.assertEquals(previousEventEntity.getCourtroom().getId(), responseResult.getPreviousVersions().getFirst().getCourtroom().getId());
-        Assertions.assertEquals(previousEventEntity.getCourtroom().getName(), responseResult.getPreviousVersions().getFirst().getCourtroom().getName());
-        Assertions.assertEquals(previousEventEntity.getCourtroom().getCourthouse().getId(),
+        assertEquals(previousEventEntity.isLogEntry(), responseResult.getPreviousVersions().getFirst().getIsLogEntry());
+        assertEquals(previousEventEntity.getCourtroom().getId(), responseResult.getPreviousVersions().getFirst().getCourtroom().getId());
+        assertEquals(previousEventEntity.getCourtroom().getName(), responseResult.getPreviousVersions().getFirst().getCourtroom().getName());
+        assertEquals(previousEventEntity.getCourtroom().getCourthouse().getId(),
                                 responseResult.getPreviousVersions().getFirst().getCourthouse().getId());
-        Assertions.assertEquals(previousEventEntity.getCourtroom().getCourthouse().getDisplayName(),
+        assertEquals(previousEventEntity.getCourtroom().getCourthouse().getDisplayName(),
                                 responseResult.getPreviousVersions().getFirst().getCourthouse().getDisplayName());
-        Assertions.assertEquals(previousEventEntity.getLegacyVersionLabel(), responseResult.getPreviousVersions().getFirst().getVersion());
-        Assertions.assertEquals(previousEventEntity.getTimestamp(), responseResult.getPreviousVersions().getFirst().getEventTs());
-        Assertions.assertEquals(previousEventEntity.getIsCurrent(), responseResult.getPreviousVersions().getFirst().getIsCurrent());
-        Assertions.assertEquals(previousEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
+        assertEquals(previousEventEntity.getLegacyVersionLabel(), responseResult.getPreviousVersions().getFirst().getVersion());
+        assertEquals(previousEventEntity.getTimestamp(), responseResult.getPreviousVersions().getFirst().getEventTs());
+        assertEquals(previousEventEntity.getIsCurrent(), responseResult.getPreviousVersions().getFirst().getIsCurrent());
+        assertEquals(previousEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
                                 responseResult.getPreviousVersions().getFirst().getCreatedAt());
-        Assertions.assertEquals(previousEventEntity.getCreatedBy().getId(), responseResult.getPreviousVersions().getFirst().getCreatedBy());
-        Assertions.assertEquals(previousEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
+        assertEquals(previousEventEntity.getCreatedBy().getId(), responseResult.getPreviousVersions().getFirst().getCreatedBy());
+        assertEquals(previousEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
                                 responseResult.getPreviousVersions().getFirst().getLastModifiedAt());
-        Assertions.assertEquals(previousEventEntity.getLastModifiedBy().getId(), responseResult.getPreviousVersions().getFirst().getLastModifiedBy());
+        assertEquals(previousEventEntity.getLastModifiedBy().getId(), responseResult.getPreviousVersions().getFirst().getLastModifiedBy());
 
         // When
         EventEntity eventIdZeroEventEntity = eventEntityVersions.get(0).getFirst();
@@ -126,7 +127,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
 
         // Then
         Assertions.assertNull(responseResult2.getPreviousVersions());
-        Assertions.assertEquals(eventIdZeroEventEntity.getId(), responseResult2.getCurrentVersion().getId());
+        assertEquals(eventIdZeroEventEntity.getId(), responseResult2.getCurrentVersion().getId());
     }
 
     @Test
@@ -142,7 +143,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
                                                         Problem.class);
 
         // Then
-        Assertions.assertEquals(CommonApiError.NOT_FOUND.getType(), responseResult.getType());
+        assertEquals(CommonApiError.NOT_FOUND.getType(), responseResult.getType());
     }
 
 }
