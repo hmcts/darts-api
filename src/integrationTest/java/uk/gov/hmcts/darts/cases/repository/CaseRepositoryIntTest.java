@@ -236,13 +236,13 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.getFirst()).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
+        assertThat(result.get(0)).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
         assertThat(result.get(1)).isEqualTo(courtCaseEntityWithCaseDocument.getId());
 
     }
 
     @Test
-    void findCasesNeedingCaseDocumentForRetentionDateGeneration_WhereRetentionDateToFarInTheFuture() {
+    void testFindCasesNeedingCaseDocumentForRetentionDateGenerationPagedWhereRetentionDateToFarInTheFuture() {
         // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
