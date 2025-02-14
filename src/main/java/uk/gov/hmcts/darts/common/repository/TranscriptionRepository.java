@@ -55,12 +55,12 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId, Boolean includeHidden);
 
     @Query("""
-           SELECT te
+           SELECT te.id
            FROM TranscriptionEntity te
            WHERE te.transcriptionStatus NOT IN (:transcriptionStatuses)
            and te.createdDateTime <= :createdDateTime
         """)
-    List<TranscriptionEntity> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+    List<Integer> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
         List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime, Limit limit);
 
     // native query to bypass @SQLRestriction on TranscriptionDocumentEntity in NOT EXISTS sub-query
