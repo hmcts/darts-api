@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,16 +23,9 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
-    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
-    private static final String SOME_ROOM = "some-room";
-    private static final String SOME_CASE_NUMBER_1 = "CASE1";
-    private static final String SOME_CASE_NUMBER_2 = "CASE2";
-
     @MockitoBean
     private UserIdentity mockUserIdentity;
-
-    private final OffsetDateTime testTime = OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
-
+    
     @Autowired
     private GenerateCaseDocumentProcessor generateCaseDocumentProcessor;
 
