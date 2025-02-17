@@ -65,6 +65,15 @@ public class HearingsServiceImpl implements HearingsService {
     }
 
     @Override
+    public HearingEntity getHearingById(Integer hearingId) {
+        Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
+        if (foundHearingOpt.isEmpty()) {
+            throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
+        }
+        return foundHearingOpt.get();
+    }
+
+    @Override
     public List<EventResponse> getEvents(Integer hearingId) {
         validateCaseIsNotExpiredFromHearingId(hearingId);
         List<EventEntity> eventEntities = eventRepository.findAllByHearingId(hearingId);

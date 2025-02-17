@@ -201,7 +201,7 @@ class TranscriptionServiceImplTest {
         doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer hearingId = 1;
-        when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
+        when(mockHearingsService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearing);
 
         Integer caseId = 1;
         when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
@@ -373,7 +373,7 @@ class TranscriptionServiceImplTest {
         doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer hearingId = 1;
-        when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
+        when(mockHearingsService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearing);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
@@ -459,7 +459,7 @@ class TranscriptionServiceImplTest {
         doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer hearingId = 1;
-        when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
+        when(mockHearingsService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearing);
 
         Integer caseId = 1;
         when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);

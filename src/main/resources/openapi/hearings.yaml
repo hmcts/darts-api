@@ -215,6 +215,32 @@ paths:
           description: Unauthorised Error
         '403':
           description: Forbidden Error
+  /admin/hearings/{id}:
+    get:
+      tags:
+        - Hearings
+      summary: |-
+        Return details of a hearing
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HearingsResponse'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
 
 components:
   schemas:
@@ -304,6 +330,125 @@ components:
           type: string
           format: date
           example: '2023-07-31'
+    NameAndIdResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "John Doe"
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "John Doe"
+      required:
+        - id
+        - name
+    Audit:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          $ref: "#/components/schemas/User"
+        updated_at:
+          type: string
+          format: date-time
+        updated_by:
+          $ref: "#/components/schemas/User"
+      required:
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+    HearingsResponse:
+      type: object
+      properties:
+        case:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            number:
+              type: string
+              example: "C123"
+            defendants:
+              type: array
+              items:
+                $ref: "#/components/schemas/NameAndIdResponse"
+            prosecutors:
+              type: array
+              items:
+                $ref: "#/components/schemas/NameAndIdResponse"
+            defence:
+              type: array
+              items:
+                $ref: "#/components/schemas/NameAndIdResponse"
+        hearing:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            date:
+              type: string
+              format: date
+              example: '2023-07-31'
+            scheduled_start_time:
+              type: string
+              format: time
+              example: '10:00'
+            hearing_took_place:
+              type: boolean
+              example: true
+            audit:
+              $ref: "#/components/schemas/Audit"
+            judges:
+              type: array
+              items:
+                $ref: "#/components/schemas/NameAndIdResponse"
+            location:
+              $ref: "#/components/schemas/Location"
+    Location:
+      type: object
+      properties:
+        courthouse:
+          $ref: "#/components/schemas/Courthouse"
+        courtroom:
+          $ref: "#/components/schemas/Courtroom"
+    Courthouse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        code:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Swansea Crown Court"
+        display_name:
+          type: string
+          example: "Swansea Crown Court"
+    Courtroom:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Courtroom 1"
     HearingsSearchResponse:
       type: object
       properties:
