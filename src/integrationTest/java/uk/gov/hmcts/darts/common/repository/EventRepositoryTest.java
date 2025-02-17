@@ -166,6 +166,32 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         assertThat(duplicates).isEmpty();
     }
 
+    @Test
+    void findAllByEventIdExcludingEventIdZero_whenEventIdIsSetAboveZero_willReturnVersions() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        event1.setEventText("eventText");
+        event2.setEventText("eventText");
+        event1.setEventId(1);
+        event2.setEventId(1);
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+
+        List<EventEntity> eventVersions = eventRepository.findAllByEventIdExcludingEventIdZero(event1.getEventId());
+        assertThat(eventVersions).hasSize(2);
+    }
+
+    @Test
+    void findAllByEventIdExcludingEventIdZero_whenEventIdIsSetToZero_willNotReturnVersions() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        event1.setEventText("eventText");
+        event1.setEventId(0);
+        dartsDatabase.save(event1);
+
+        List<EventEntity> eventVersions = eventRepository.findAllByEventIdExcludingEventIdZero(event1.getEventId());
+        assertThat(eventVersions).isEmpty();
+    }
+
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
         event.setCreatedDateTime(offsetDateTime);
         dartsDatabase.save(event);

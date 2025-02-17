@@ -38,6 +38,7 @@ public class TranscriptionTestData
         minimalTranscription.setIsManualTranscription(false);
         minimalTranscription.setLastModifiedById(0);
         minimalTranscription.setCreatedById(0);
+        minimalTranscription.setIsCurrent(true);
         return minimalTranscription;
     }
 
@@ -89,7 +90,8 @@ public class TranscriptionTestData
             .hideRequestFromRequestor(false)
             .isManualTranscription(false)
             .lastModifiedBy(userAccount)
-            .createdBy(userAccount);
+            .createdBy(userAccount)
+            .isCurrent(true);
 
         return builder;
     }

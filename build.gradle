@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:11.3.1")
+    classpath("org.flywaydb:flyway-database-postgresql:11.3.2")
   }
 }
 
@@ -17,7 +17,7 @@ plugins {
   id 'org.sonarqube' version '6.0.1.5171'
   id "io.freefair.lombok" version "8.12.1"
   id "org.openapi.generator" version "7.11.0"
-  id "org.flywaydb.flyway" version "11.3.1"
+  id "org.flywaydb.flyway" version "11.3.2"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "4.0.0"
 }
@@ -417,7 +417,7 @@ dependencies {
   implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.4'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.5'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.2.0'
   implementation 'org.springframework.retry:spring-retry:2.0.11'
 
@@ -438,8 +438,8 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.3.1'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.3.1'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.3.2'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.3.2'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.2'
 
   //database
@@ -456,7 +456,7 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
-  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.2'
+  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.3'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.7.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.5.Final'
 
@@ -466,7 +466,7 @@ dependencies {
 
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.7.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.8.Final')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
