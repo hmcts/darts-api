@@ -174,10 +174,7 @@ class DarStartHandlerTest extends HandlerTestData {
     }
 
     @Test
-    /*
-    Should not Notify DAR PC when case is closed.
-     */
-    void shouldNotNotifyDarStartRecordingForHearingStartedCaseClosed() {
+    void shouldNotifyDarStartRecordingForHearingStartedCaseClosed() {
         dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
@@ -201,42 +198,9 @@ class DarStartHandlerTest extends HandlerTestData {
 
         eventDispatcher.receive(dartsEvent);
 
-        dartsGateway.verifyDoesntReceiveDarEvent();
-    }
-
-    @Test
-    /*
-    Should not Notify DAR PC when case is closed. Same case number exists at another courthouse.
-     */
-    void shouldNotNotifyDarStartRecordingForHearingStartedCaseClosedOtherCourthouse() {
-        dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
-
-        List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            DAR_START_HANDLER);
-        assertThat(eventHandlerEntityList.size()).isEqualTo(6);
-
-
-        CourtCaseEntity createdCase = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CLOSED_CASE_NUMBER);
-        createdCase.setClosed(true);
-        dartsDatabase.getCaseRepository().saveAndFlush(createdCase);
-
-        //create another case at a different courthouse, but same case number thats still open.
-        dartsDatabase.createCase("another courthouse", SOME_CLOSED_CASE_NUMBER);
-
-        EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
-
-        DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingStartedEventHandler.getType())
-            .subType(hearingStartedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
-            .dateTime(today);
-
-        eventDispatcher.receive(dartsEvent);
-
-        dartsGateway.verifyDoesntReceiveDarEvent();
+        dartsGateway.verifyReceivedNotificationType(1);
+        dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
     }
 
     private static DartsEvent someMinimalDartsEvent() {
