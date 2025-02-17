@@ -466,7 +466,7 @@ dependencies {
 
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.7.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.8.Final')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
