@@ -22,13 +22,10 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.common.util.MediaEntityTreeNodeImpl;
 import uk.gov.hmcts.darts.common.util.Tree;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -44,6 +41,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -56,7 +54,6 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 public class AudioUploadServiceImpl implements AudioUploadService {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final MediaRepository mediaRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
@@ -64,9 +61,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final AddAudioRequestMapper mapper;
     private final DataManagementApi dataManagementApi;
     private final UserIdentity userIdentity;
-    private final FileContentChecksum fileContentChecksum;
     private final LogApi logApi;
-    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final AudioAsyncService audioAsyncService;
 
     @Value("${darts.audio.small-file-max-length}")
@@ -74,18 +69,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     @Value("${darts.audio.small-file-size}")
     private long smallFileSize;
 
-
-    @Override
-    public void addAudio(MultipartFile audioMultipartFile, AddAudioMetadataRequest addAudioMetadataRequest) {
-        String incomingChecksum;
-        try {
-            incomingChecksum = fileContentChecksum.calculate(audioMultipartFile.getInputStream());
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, "Failed to compute incoming checksum", e);
-        }
-        //No need to delete guid on duplicate as the file is never uploaded to the blob store unless the duplicate check has passed in this flow
-        addAudio(incomingChecksum, () -> saveAudioToInbound(audioMultipartFile), addAudioMetadataRequest, false);
-    }
 
     @Override
     public void addAudio(UUID guid, AddAudioMetadataRequest addAudioMetadataRequest) {
@@ -178,7 +161,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             log.info("Revised version of media added with filename {} and antecedent media id {}", newMediaEntity.getMediaFile(),
                      newMediaEntity.getId().toString());
         }
-        mediaRepository.save(newMediaEntity);
+        newMediaEntity = mediaRepository.saveAndFlush(newMediaEntity);
         log.info("Saved media id {}", newMediaEntity.getId());
 
         OffsetDateTime startDate = addAudioMetadataRequest.getStartedAt();
@@ -249,7 +232,17 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                 DateConverterUtil.toLocalDateTime(addAudioMetadataRequest.getStartedAt()),
                 userIdentity.getUserAccount()
             );
-
+            //TEMP logging to support defect analysis
+            log.info("Attempting to link caseNumber {} with media {} to hearing {} current media linked to hearing {}. Current hearings linked to media {}",
+                     caseNumber,
+                     mediaEntity.getId(), hearing.getId(),
+                     hearing.getMediaList().stream()
+                         .map(mediaEntity1 -> String.valueOf(mediaEntity1.getId()))
+                         .collect(Collectors.joining(",")),
+                     mediaEntity.getHearingList().stream()
+                         .map(mediaEntity1 -> String.valueOf(mediaEntity1.getId()))
+                         .collect(Collectors.joining(","))
+            );
             // add the new media
             hearing.addMedia(mediaEntity);
             hearing.setHearingIsActual(true);
@@ -268,9 +261,9 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     }
 
     void saveExternalObjectDirectory(UUID externalLocation,
-                                             String checksum,
-                                             UserAccountEntity userAccountEntity,
-                                             MediaEntity mediaEntity) {
+                                     String checksum,
+                                     UserAccountEntity userAccountEntity,
+                                     MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
         externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());

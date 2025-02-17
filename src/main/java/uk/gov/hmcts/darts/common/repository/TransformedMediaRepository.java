@@ -80,7 +80,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            (:requestedBy IS NULL OR (tm.createdBy.userFullName ILIKE CONCAT('%', cast (:requestedBy as text), '%'))) AND
            ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR media.createdDateTime >= :requestedAtFrom) AND
            ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
-           ORDER BY media.id DESC
+           ORDER BY tm.id DESC
         """)
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,

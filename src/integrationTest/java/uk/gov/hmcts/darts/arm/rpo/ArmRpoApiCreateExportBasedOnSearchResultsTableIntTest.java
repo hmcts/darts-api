@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.arm.rpo;
 
+import org.hamcrest.MatcherAssert;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -19,9 +22,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,12 +61,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(pollCreatedTs);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
-        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
-        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
-        armRpoExecutionDetailEntity.setSearchId("searchId");
-        armRpoExecutionDetailEntity.setSearchItemCount(6);
-        armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = createArmRpoExecutionDetailEntity(userAccount);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
         assertNull(armRpoExecutionDetail.getProductionName());
         assertNull(armRpoExecutionDetail.getPollingCreatedAt());
@@ -97,12 +97,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(pollCreatedTs);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
-        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
-        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
-        armRpoExecutionDetailEntity.setSearchId("searchId");
-        armRpoExecutionDetailEntity.setSearchItemCount(6);
-        armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = createArmRpoExecutionDetailEntity(userAccount);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
 
         var bearerAuth = "Bearer some-token";
@@ -119,6 +114,40 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
         assertEquals(pollCreatedTs.truncatedTo(ChronoUnit.SECONDS), armRpoExecutionDetailEntityUpdated.getPollingCreatedAt().truncatedTo(ChronoUnit.SECONDS));
         assertEquals(ArmRpoStateEnum.CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.IN_PROGRESS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
+
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ReturnsFalse_WhenPollingOutOfRange() {
+        // given
+        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
+        response.setStatus(400);
+        response.setIsError(false);
+        response.setResponseStatus(2);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        OffsetDateTime pollCreatedTs = OffsetDateTime.now().minus(Duration.ofHours(5));
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = createArmRpoExecutionDetailEntity(userAccount);
+        armRpoExecutionDetailEntity.setPollingCreatedAt(pollCreatedTs);
+        armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
+        var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        var bearerAuth = "Bearer some-token";
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.createExportBasedOnSearchResultsTable(
+            bearerAuth, armRpoExecutionDetail.getId(), createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+
+        // then
+        MatcherAssert.assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM createExportBasedOnSearchResultsTable: Polling can only run for a maximum of PT4H"));
+
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
+        assertEquals(ArmRpoStateEnum.CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 
     }
 
@@ -144,4 +173,15 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
             .isMasked(isMasked)
             .build();
     }
+
+    private static @NotNull ArmRpoExecutionDetailEntity createArmRpoExecutionDetailEntity(UserAccountEntity userAccount) {
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        armRpoExecutionDetailEntity.setSearchId("searchId");
+        armRpoExecutionDetailEntity.setSearchItemCount(6);
+        armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
+        return armRpoExecutionDetailEntity;
+    }
+
 }

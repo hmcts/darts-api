@@ -158,6 +158,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         uploadFileRecord.setA360FileId("a360FileId");
         String checksum = "checksum";
         uploadFileRecord.setMd5(checksum);
+        uploadFileRecord.setFileSize(100);
         ArmResponseCreateRecord armResponseCreateRecord = new ArmResponseCreateRecord();
 
         ArmResponseBatchData batchData = ArmResponseBatchData.builder()
@@ -278,16 +279,9 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         objectStateRecordEntity.setUuid(uuid);
         objectStateRecordEntity.setEodId(String.valueOf(detsEodId));
         objectStateRecordEntity.setArmEodId(String.valueOf(armEodId));
-        objectStateRecordEntity.setParentId("Parent123");
         objectStateRecordEntity.setParentObjectId("ParentObject123");
         objectStateRecordEntity.setContentObjectId("ContentObject123");
-        objectStateRecordEntity.setObjectType("Type123");
         objectStateRecordEntity.setIdClip("Clip123");
-        objectStateRecordEntity.setIdCase("Case123");
-        objectStateRecordEntity.setCourthouseName("Courthouse123");
-        objectStateRecordEntity.setCasId(123);
-        objectStateRecordEntity.setDateLastAccessed(OffsetDateTime.now());
-        objectStateRecordEntity.setRelationId("Relation123");
         objectStateRecordEntity.setDetsLocation("DetsLocation123");
         objectStateRecordEntity.setFlagFileTransferToDets(false);
         objectStateRecordEntity.setFlagFileAvScanPass(false);
@@ -297,7 +291,6 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         objectStateRecordEntity.setFlagRspnRecvdFromArml(false);
         objectStateRecordEntity.setFlagFileIngestStatus(false);
         objectStateRecordEntity.setFlagFileDetsCleanupStatus(false);
-        objectStateRecordEntity.setFlagFileRetainedInOds(false);
         return objectStateRecordEntity;
     }
 }

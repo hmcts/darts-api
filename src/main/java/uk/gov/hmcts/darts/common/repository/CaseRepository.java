@@ -54,13 +54,13 @@ public interface CaseRepository
     List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries, Limit limit);
 
     @Query("""
-        SELECT courtCase FROM CourtCaseEntity courtCase
+        SELECT courtCase.id FROM CourtCaseEntity courtCase
         WHERE courtCase.closed = true
         AND courtCase.caseClosedTimestamp <= :caseClosedBeforeTimestamp
         AND NOT EXISTS (select cde from CaseDocumentEntity cde
             where (cde.courtCase.id = courtCase.id))
         """)
-    List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
+    List<Integer> findCasesIdsNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
 
     @Query("""
             SELECT cc.id
@@ -97,7 +97,7 @@ public interface CaseRepository
         SELECT cc
         FROM CourtCaseEntity cc
         WHERE cc.id in :ids
-        ORDER BY cc.id DESC        
+        ORDER BY cc.caseNumber DESC
         """)
     List<CourtCaseEntity> findAllWithIdMatchingOneOf(List<Integer> ids);
 }

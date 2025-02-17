@@ -81,8 +81,8 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
                                                                         userAccountStub.getSystemUserAccountEntity());
 
         // And a media that's marked for deletion, but not yet approved for deletion (not marked for manual deletion)
-        var expectedMediaEntity = createAndSaveMediaEntity(courtroomEntity);
-        var expectedObjectAdminActionEntity = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+        var expectedMediaEntity = createAndSaveMediaEntity(courtroomEntity, 1);
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
                                                                                       .media(expectedMediaEntity)
                                                                                       .objectHiddenReason(
                                                                                           objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
@@ -130,8 +130,104 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
                                            ]
                                          }
                                        }
-                                     ]""".formatted(expectedMediaEntity.getId(),
-                                                   expectedObjectAdminActionEntity.getId()),
+                                     ]""",
+                                mvcResult.getResponse().getContentAsString(),
+                                JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediasMarkedForDeletion_shouldSortMediaByChannelAscending() throws Exception {
+        // Given
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        var courtroomEntity = courtroomStub.createCourtroomUnlessExists("Test Courthouse", "Test Courtroom",
+                                                                        userAccountStub.getSystemUserAccountEntity());
+
+        // And a media that's marked for deletion, but not yet approved for deletion (not marked for manual deletion)
+        var expectedMediaEntity1 = createAndSaveMediaEntity(courtroomEntity, 2);
+        var expectedMediaEntity2 = createAndSaveMediaEntity(courtroomEntity, 1);
+        var expectedMediaEntity3 = createAndSaveMediaEntity(courtroomEntity, 3);
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                .media(expectedMediaEntity1)
+                                                .objectHiddenReason(
+                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                .markedForManualDeletion(false)
+                                                .markedForManualDelBy(null)
+                                                .markedForManualDelDateTime(null)
+                                                .build());
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                .media(expectedMediaEntity2)
+                                                .objectHiddenReason(
+                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                .markedForManualDeletion(false)
+                                                .markedForManualDelBy(null)
+                                                .markedForManualDelDateTime(null)
+                                                .build());
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                .media(expectedMediaEntity3)
+                                                .objectHiddenReason(
+                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                .markedForManualDeletion(false)
+                                                .markedForManualDelBy(null)
+                                                .markedForManualDelDateTime(null)
+                                                .build());
+
+        // When
+        MvcResult mvcResult = mockMvc.perform(
+                get(ENDPOINT)
+                    .contentType("application/json"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // Then
+        JSONAssert.assertEquals("""
+                                    [
+                                       {
+                                         "media": [
+                                           {
+                                             "id": 2,
+                                             "channel": 1,
+                                             "total_channels": 2,
+                                             "is_current": true,
+                                             "version_count": 0
+                                           },
+                                           {
+                                             "id": 1,
+                                             "channel": 2,
+                                             "total_channels": 2,
+                                             "is_current": true,
+                                             "version_count": 0
+                                           },
+                                           {
+                                             "id": 3,
+                                             "channel": 3,
+                                             "total_channels": 2,
+                                             "is_current": true,
+                                             "version_count": 0
+                                           }
+                                         ],
+                                         "start_at": "2024-01-01T00:00:00Z",
+                                         "end_at": "2024-01-01T00:00:00Z",
+                                         "courthouse": {
+                                           "id": 1,
+                                           "display_name": "TEST COURTHOUSE"
+                                         },
+                                         "courtroom": {
+                                           "id": 1,
+                                           "name": "TEST COURTROOM"
+                                         },
+                                         "admin_action": {
+                                           "ticket_reference": "Some ticket reference",
+                                           "hidden_by_id": 0,
+                                           "reason_id": 1,
+                                           "comments": [
+                                             "Some comment",
+                                             "Some comment",
+                                             "Some comment"
+                                           ]
+                                         }
+                                       }
+                                     ]""",
                                 mvcResult.getResponse().getContentAsString(),
                                 JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -160,12 +256,12 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
                                 JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    private MediaEntity createAndSaveMediaEntity(CourtroomEntity courtroomEntity) {
+    private MediaEntity createAndSaveMediaEntity(CourtroomEntity courtroomEntity, int channel) {
         return mediaStub.createMediaEntity(courtroomEntity.getCourthouse().getCourthouseName(),
                                            courtroomEntity.getName(),
                                            OffsetDateTime.parse("2024-01-01T00:00:00Z"),
                                            OffsetDateTime.parse("2024-01-01T00:00:00Z"),
-                                           1,
+                                           channel,
                                            "MP2");
     }
 

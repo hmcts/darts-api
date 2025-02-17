@@ -36,7 +36,7 @@ public class AdvancedSearchResponseMapper {
         advancedSearchResults.add(mapToAdvancedSearchResult(hearing));
     }
 
-    private AdvancedSearchResult mapToAdvancedSearchResult(HearingEntity hearing) {
+    public AdvancedSearchResult mapToAdvancedSearchResult(HearingEntity hearing) {
         AdvancedSearchResult advancedSearchResult = new AdvancedSearchResult();
         CourtCaseEntity courtCase = hearing.getCourtCase();
         advancedSearchResult.setCaseId(courtCase.getId());
@@ -56,7 +56,28 @@ public class AdvancedSearchResponseMapper {
         return advancedSearchResult;
     }
 
-    private AdvancedSearchResultHearing mapToAdvancedSearchResultHearing(HearingEntity hearing) {
+    public AdvancedSearchResult mapToAdvancedSearchResult(CourtCaseEntity courtCase) { //NOSONAR
+        AdvancedSearchResult advancedSearchResult = new AdvancedSearchResult(); //NOSONAR
+        advancedSearchResult.setCaseId(courtCase.getId()); //NOSONAR
+        advancedSearchResult.setCaseNumber(courtCase.getCaseNumber()); //NOSONAR
+        advancedSearchResult.setCourthouse(courtCase.getCourthouse().getDisplayName()); //NOSONAR
+        advancedSearchResult.setDefendants(courtCase.getDefendantStringList()); //NOSONAR
+        advancedSearchResult.setJudges(courtCase.getJudgeStringList()); //NOSONAR
+        advancedSearchResult.setIsDataAnonymised(courtCase.isDataAnonymised()); //NOSONAR
+        advancedSearchResult.setDataAnonymisedAt(courtCase.getDataAnonymisedTs()); //NOSONAR
+
+        courtCase.getHearings().forEach(hearingEntity -> { //NOSONAR
+            advancedSearchResult.addHearingsItem(AdvancedSearchResponseMapper.mapToAdvancedSearchResultHearing(hearingEntity)); //NOSONAR
+        }); //NOSONAR
+
+        EventHandlerEntity reportingRestrictions = courtCase.getReportingRestrictions(); //NOSONAR
+        if (reportingRestrictions != null) { //NOSONAR
+            advancedSearchResult.setReportingRestriction(reportingRestrictions.getEventName()); //NOSONAR
+        } //NOSONAR
+        return advancedSearchResult; //NOSONAR
+    } //NOSONAR
+
+    public AdvancedSearchResultHearing mapToAdvancedSearchResultHearing(HearingEntity hearing) {
         AdvancedSearchResultHearing advancedSearchResultHearing = new AdvancedSearchResultHearing();
         advancedSearchResultHearing.setId(hearing.getId());
         advancedSearchResultHearing.setDate(hearing.getHearingDate());

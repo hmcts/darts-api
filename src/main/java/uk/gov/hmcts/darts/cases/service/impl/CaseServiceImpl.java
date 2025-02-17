@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.cases.exception.AdvancedSearchNoResultsException;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
+import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelperPaginated;
 import uk.gov.hmcts.darts.cases.mapper.AdminCasesSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CaseTranscriptionMapper;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.cases.model.CaseTranscriptModel;
 import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequestPaginated;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
@@ -48,6 +50,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.util.paginated.PaginatedList;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.ArrayList;
@@ -71,6 +74,7 @@ public class CaseServiceImpl implements CaseService {
     private final AnnotationRepository annotationRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
+    private final AdvancedSearchRequestHelperPaginated advancedSearchRequestHelperPaginated;
     private final AdminCasesSearchRequestHelper adminCasesSearchRequestHelper;
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
@@ -179,9 +183,13 @@ public class CaseServiceImpl implements CaseService {
             .filter(HearingEntity::getHearingIsActual)
             .sorted((o1, o2) -> o2.getCourtCase().getCaseNumber().compareTo(o1.getCourtCase().getCaseNumber()))
             .toList();
-
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
+
+    @Override //NOSONAR
+    public PaginatedList<AdvancedSearchResult> advancedSearchPagination(GetCasesSearchRequestPaginated request) { //NOSONAR
+        return advancedSearchRequestHelperPaginated.getMatchingCourtCases(request, MAX_RESULTS); //NOSONAR
+    } //NOSONAR
 
     @Override
     @Transactional

@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -360,10 +361,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
 
 
-    default List<ExternalObjectDirectoryEntity> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    default List<Integer> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                                     ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                                                     Integer maxTransferAttempts, Limit limit) {
-        Set<ExternalObjectDirectoryEntity> results = new HashSet<>();//Ensures no duplicates
+        List<Integer> results = new ArrayList<>();//Ensures no duplicates
         results.addAll(findEodsForTransferOnlyMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts, limit));
         if (results.size() < limit.max()) {
             results.addAll(findEodsForTransferExcludingMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts,
@@ -374,7 +375,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status
             AND eod.externalLocationType = :type
             AND eod.media is not null            
@@ -385,13 +386,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             order by eod.lastModifiedDateTime
             """
     )
-    List<ExternalObjectDirectoryEntity> findEodsForTransferOnlyMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    List<Integer> findEodsForTransferOnlyMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                                      ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                                                      Integer maxTransferAttempts, Limit limit);
 
     @Query(
         """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status
             AND eod.externalLocationType = :type
             AND eod.media is null            
@@ -404,7 +405,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             order by eod.lastModifiedDateTime
             """
     )
-    List<ExternalObjectDirectoryEntity> findEodsForTransferExcludingMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    List<Integer> findEodsForTransferExcludingMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                                           ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                                                           Integer maxTransferAttempts, Limit limit);
 
@@ -421,14 +422,18 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         value = """
-            select eode1_0.eod_id from darts.external_object_directory eode1_0
-            where eode1_0.ors_id=:status
-            and eode1_0.elt_id=:type
-            and eode1_0.med_id is not null 
-            and not exists(select 1 from darts.external_object_directory eode2_0 
-                where eode2_0.elt_id=:notExistsLocation 
-                and eode1_0.med_id=eode2_0.med_id)
-            fetch first :limitRecords rows only                 
+            SELECT eod1.eod_id
+            FROM darts.external_object_directory eod1
+            WHERE eod1.ors_id = :status
+            AND eod1.elt_id = :type
+            AND eod1.med_id IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1
+                FROM darts.external_object_directory eod2
+                WHERE eod2.elt_id = :notExistsLocation
+                AND eod1.med_id = eod2.med_id
+            )
+            FETCH FIRST :limitRecords rows only
             """,
         nativeQuery = true
     )
@@ -437,16 +442,22 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         value = """
-            select eode1_0.eod_id from darts.external_object_directory eode1_0
-            where eode1_0.ors_id=:status
-            and eode1_0.elt_id=:type
-            and eode1_0.med_id is null 
-            and not exists(select 1 from darts.external_object_directory eode2_0 
-                where eode2_0.elt_id=:notExistsLocation 
-                and ((eode1_0.trd_id is not null and eode1_0.trd_id = eode2_0.trd_id)
-                    or (eode1_0.ado_id is not null and eode1_0.ado_id = eode2_0.ado_id)
-                    or (eode1_0.cad_id is not null and eode1_0.cad_id = eode2_0.cad_id)))
-            fetch first :limitRecords rows only                 
+            SELECT eod1.eod_id
+            FROM darts.external_object_directory eod1
+            WHERE eod1.ors_id = :status
+            AND eod1.elt_id = :type
+            AND eod1.med_id IS NULL
+            AND NOT EXISTS (
+                SELECT 1
+                FROM darts.external_object_directory eod2
+                WHERE eod2.elt_id = :notExistsLocation
+                AND (
+                    (eod1.trd_id IS NOT NULL AND eod1.trd_id = eod2.trd_id) OR
+                    (eod1.ado_id IS NOT NULL AND eod1.ado_id = eod2.ado_id) OR
+                    (eod1.cad_id IS NOT NULL AND eod1.cad_id = eod2.cad_id)
+                )
+            )
+            fetch first :limitRecords rows only            
             """,
         nativeQuery = true
     )
@@ -602,30 +613,34 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                       Limit limit);
 
     @Query(value = """
-        select fileSize from
-        (
+        SELECT fileSize
+        FROM (
             (
-                select file_size as fileSize from darts.media as med
-                join darts.external_object_directory as eod on eod.med_id = med.med_id
-                where eod.eod_id = :externalObjectDirectoryId
+                SELECT file_size fileSize
+                FROM darts.media med
+                JOIN darts.external_object_directory eod ON eod.med_id = med.med_id
+                WHERE eod.eod_id = :externalObjectDirectoryId
             )
-            union
+            UNION
             (
-                select file_size as fileSize from darts.annotation_document as ado
-                join darts.external_object_directory as eod on eod.ado_id = ado.ado_id
-                where eod.eod_id = :externalObjectDirectoryId
+                SELECT file_size fileSize
+                FROM darts.annotation_document as ado
+                JOIN darts.external_object_directory eod ON eod.ado_id = ado.ado_id
+                WHERE eod.eod_id = :externalObjectDirectoryId
             )
-            union
+            UNION
             (
-                select file_size as fileSize from darts.case_document as cad
-                join darts.external_object_directory as eod on eod.cad_id = cad.cad_id
-                where eod.eod_id = :externalObjectDirectoryId
+                SELECT file_size fileSize
+                FROM darts.case_document as cad
+                JOIN darts.external_object_directory eod ON eod.cad_id = cad.cad_id
+                WHERE eod.eod_id = :externalObjectDirectoryId
             )
-            union
+            UNION
             (
-                select file_size as fileSize from darts.transcription_document as trd
-                join darts.external_object_directory as eod on eod.trd_id = trd.trd_id
-                where eod.eod_id = :externalObjectDirectoryId
+                SELECT file_size fileSize
+                FROM darts.transcription_document trd
+                JOIN darts.external_object_directory eod ON eod.trd_id = trd.trd_id
+                WHERE eod.eod_id = :externalObjectDirectoryId
             )
         ) a
         """, nativeQuery = true)
@@ -670,9 +685,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
-    List<ExternalObjectDirectoryEntity> findByStatusAndIngestionDate(ObjectRecordStatusEntity status,
-                                                                     OffsetDateTime rpoCsvStartTime,
-                                                                     OffsetDateTime rpoCsvEndTime);
+    Page<ExternalObjectDirectoryEntity> findByStatusAndIngestionDateTsWithPaging(ObjectRecordStatusEntity status,
+                                                                                 OffsetDateTime rpoCsvStartTime,
+                                                                                 OffsetDateTime rpoCsvEndTime,
+                                                                                 Pageable pageable);
 
     @Query("""
         SELECT eod FROM ExternalObjectDirectoryEntity eod

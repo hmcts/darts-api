@@ -4,9 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.file.Path;
 
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 
@@ -36,10 +34,6 @@ public class FileContentChecksum {
         return encodeToString(md5(inputStream));
     }
 
-    @SneakyThrows
-    public String calculate(Path filePath) {
-        return calculate(new FileInputStream(filePath.toFile()));
-    }
 
     public String encodeToString(byte[] bytes) {
         StringBuilder result = new StringBuilder();

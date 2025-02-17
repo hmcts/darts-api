@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,25 +34,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
-import static uk.gov.hmcts.darts.common.util.EodHelper.awaitingVerificationStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.inboundLocation;
-import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalObjectDirectoryServiceImplTest {
 
     @Mock(lenient = true)
-    ExternalObjectDirectoryRepository eodRepository;
+    private ExternalObjectDirectoryRepository eodRepository;
     @Mock
-    ArmDataManagementConfiguration armConfig;
+    private ArmDataManagementConfiguration armConfig;
     @Mock
-    ExternalObjectDirectoryEntity eod;
+    private ExternalObjectDirectoryEntity eod;
     @Mock
-    MediaEntity media1;
+    private MediaEntity media1;
     @Mock
-    MediaEntity media2;
+    private MediaEntity media2;
     @Mock
     private AnnotationDocumentEntity annotationDocument;
     @Mock
@@ -70,11 +66,11 @@ class ExternalObjectDirectoryServiceImplTest {
     private AnnotationDocumentRepository annotationDocumentRepository;
 
     @Captor
-    ArgumentCaptor<ExternalObjectDirectoryEntity> eodCaptor;
+    private ArgumentCaptor<ExternalObjectDirectoryEntity> eodCaptor;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
-    ExternalObjectDirectoryServiceImpl eodService;
+    private ExternalObjectDirectoryServiceImpl eodService;
 
     @AfterAll
     public static void close() {
@@ -108,10 +104,10 @@ class ExternalObjectDirectoryServiceImplTest {
         assertThat(result).isEqualTo(expectedResult);
         verify(eodRepository).hasMediaNotBeenCopiedFromInboundStorage(
             media1,
-            storedStatus(),
-            inboundLocation(),
-            awaitingVerificationStatus(),
-            List.of(unstructuredLocation(), armLocation())
+            EodHelper.storedStatus(),
+            EodHelper.inboundLocation(),
+            EodHelper.awaitingVerificationStatus(),
+            List.of(EodHelper.unstructuredLocation(), EodHelper.armLocation())
         );
     }
 
@@ -125,7 +121,7 @@ class ExternalObjectDirectoryServiceImplTest {
             externalLocation,
             userAccountEntity,
             caseDocumentEntity,
-            unstructuredLocation()
+            EodHelper.unstructuredLocation()
         );
 
         verify(eodRepository).save(eodCaptor.capture());
@@ -138,8 +134,8 @@ class ExternalObjectDirectoryServiceImplTest {
         assertThat(savedEod.getExternalLocation()).isEqualTo(externalLocation);
         assertThat(savedEod.getTransferAttempts()).isNull();
         assertThat(savedEod.getVerificationAttempts()).isEqualTo(1);
-        assertThat(savedEod.getStatus()).isEqualTo(storedStatus());
-        assertThat(savedEod.getExternalLocationType()).isEqualTo(unstructuredLocation());
+        assertThat(savedEod.getStatus()).isEqualTo(EodHelper.storedStatus());
+        assertThat(savedEod.getExternalLocationType()).isEqualTo(EodHelper.unstructuredLocation());
         assertThat(savedEod.getCreatedBy()).isEqualTo(userAccountEntity);
         assertThat(savedEod.getLastModifiedBy()).isEqualTo(userAccountEntity);
     }
