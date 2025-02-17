@@ -8,7 +8,13 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
-import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
+import uk.gov.hmcts.darts.arm.rpo.CreateExportBasedOnSearchResultsTableService;
+import uk.gov.hmcts.darts.arm.rpo.DownloadProductionService;
+import uk.gov.hmcts.darts.arm.rpo.GetExtendedProductionsByMatterService;
+import uk.gov.hmcts.darts.arm.rpo.GetExtendedSearchesByMatterService;
+import uk.gov.hmcts.darts.arm.rpo.GetMasterIndexFieldByRecordClassSchemaService;
+import uk.gov.hmcts.darts.arm.rpo.GetProductionOutputFilesService;
+import uk.gov.hmcts.darts.arm.rpo.RemoveProductionService;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
@@ -35,7 +41,6 @@ import static uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum.GET_EXTENDED_PRODU
 @Slf4j
 public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
-    private final ArmRpoApi armRpoApi;
     private final ArmApiService armApiService;
     private final ArmRpoService armRpoService;
     private final UserIdentity userIdentity;
@@ -43,6 +48,13 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final LogApi logApi;
     private final ArmRpoUtil armRpoUtil;
+    private final GetExtendedSearchesByMatterService getExtendedSearchesByMatterService;
+    private final GetMasterIndexFieldByRecordClassSchemaService getMasterIndexFieldByRecordClassSchemaService;
+    private final CreateExportBasedOnSearchResultsTableService createExportBasedOnSearchResultsTableService;
+    private final GetExtendedProductionsByMatterService getExtendedProductionsByMatterService;
+    private final GetProductionOutputFilesService getProductionOutputFilesService;
+    private final DownloadProductionService downloadProductionService;
+    private final RemoveProductionService removeProductionService;
 
     private List<File> tempProductionFiles;
 
@@ -77,19 +89,19 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             boolean createExportBasedOnSearchResultsTable;
             String uniqueProductionName;
             if (!skipSteps(armRpoExecutionDetailEntity)) {
-                // step to call ARM RPO API to get the extended searches by matter
-                productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
+                // step to call ARM RPO client to get the extended searches by matter
+                productionName = getExtendedSearchesByMatterService.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
 
                 uniqueProductionName = armRpoUtil.generateUniqueProductionName(productionName);
 
-                // step to call ARM RPO API to get the master index field by record class schema
-                List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
+                // step to call ARM RPO client to get the master index field by record class schema
+                List<MasterIndexFieldByRecordClassSchema> headerColumns = getMasterIndexFieldByRecordClassSchemaService.getMasterIndexFieldByRecordClassSchema(
                     bearerToken, executionId,
                     ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
                     userAccount);
 
-                // step to call ARM RPO API to create export based on search results table
-                createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(
+                // step to call ARM RPO client to create export based on search results table
+                createExportBasedOnSearchResultsTable = createExportBasedOnSearchResultsTableService.createExportBasedOnSearchResultsTable(
                     bearerToken, executionId, headerColumns, uniqueProductionName, pollDuration, userAccount);
             } else {
                 createExportBasedOnSearchResultsTable = true;
@@ -122,18 +134,19 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     private void processProductions(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount,
                                     ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, int batchSize) throws IOException {
-        // step to call ARM RPO API to get the extended productions by matter
-        boolean getExtendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, productionName, userAccount);
+        // step to call ARM RPO client to get the extended productions by matter
+        boolean getExtendedProductionsByMatter = getExtendedProductionsByMatterService.getExtendedProductionsByMatter(bearerToken, executionId, productionName,
+                                                                                                                      userAccount);
         if (getExtendedProductionsByMatter) {
-            // step to call ARM RPO API to get the production output files
-            var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
+            // step to call ARM RPO client to get the production output files
+            var productionOutputFiles = getProductionOutputFilesService.getProductionOutputFiles(bearerToken, executionId, userAccount);
 
             for (var productionExportFileId : productionOutputFiles) {
                 processProductionFiles(productionExportFileId, bearerToken, executionId, userAccount);
             }
             if (CollectionUtils.isNotEmpty(tempProductionFiles)) {
-                // step to call ARM RPO API to remove the production
-                armRpoApi.removeProduction(bearerToken, executionId, userAccount);
+                // step to call ARM RPO client to remove the production
+                removeProductionService.removeProduction(bearerToken, executionId, userAccount);
                 log.debug("About to reconcile production files");
                 armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles, batchSize);
             } else {
@@ -148,8 +161,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private void processProductionFiles(String productionExportFileId, String bearerToken, Integer executionId,
                                         UserAccountEntity userAccount) throws IOException {
         String productionExportFilename = generateTempProductionExportFilename(productionExportFileId);
-        // step to call ARM RPO API to download the production export file
-        try (var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount)) {
+        // step to call ARM RPO client to download the production export file
+        try (var inputStream = downloadProductionService.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount)) {
             log.info("About to save production export file to temp workspace {}", productionExportFilename);
             Path tempProductionFile = fileOperationService.saveFileToTempWorkspace(
                 inputStream,
