@@ -70,15 +70,15 @@ public class AdvancedSearchRequestHelperPaginated {
 
     private void addCourtroomNameCriteria(JPQLQuery<HearingEntity> query, GetCasesSearchRequestPaginated request) {
         if (StringUtils.isNotBlank(request.getCourtroom())) {
-            query.where(QHearingEntity.hearingEntity.courtroom.name.likeIgnoreCase(surroundWithPercentages(request.getCourtroom())));
+            query.where(QHearingEntity.hearingEntity.courtroom.name.toUpperCase().like(surroundWithPercentages(request.getCourtroom(), true)));
         }
     }
 
     private void addCourthouseIdCriteria(JPQLQuery<HearingEntity> query, GetCasesSearchRequestPaginated request) {
         if (StringUtils.isNotBlank(request.getCourthouse())) {
             query.where(Expressions.anyOf(
-                QHearingEntity.hearingEntity.courtCase.courthouse.courthouseName.likeIgnoreCase(surroundWithPercentages(request.getCourthouse())),
-                QHearingEntity.hearingEntity.courtCase.courthouse.displayName.likeIgnoreCase(surroundWithPercentages(request.getCourthouse()))
+                QHearingEntity.hearingEntity.courtCase.courthouse.courthouseName.toUpperCase().like(surroundWithPercentages(request.getCourthouse(), true)),
+                QHearingEntity.hearingEntity.courtCase.courthouse.displayName.toUpperCase().like(surroundWithPercentages(request.getCourthouse(), true))
             ));
         }
     }
@@ -91,12 +91,16 @@ public class AdvancedSearchRequestHelperPaginated {
 
     private void addCaseCriteria(JPQLQuery<HearingEntity> query, GetCasesSearchRequestPaginated request) {
         if (StringUtils.isNotBlank(request.getCaseNumber())) {
-            query.where(QHearingEntity.hearingEntity.courtCase.caseNumber.likeIgnoreCase(surroundWithPercentages(request.getCaseNumber())));
+            query.where(QHearingEntity.hearingEntity.courtCase.caseNumber.toUpperCase().like(surroundWithPercentages(request.getCaseNumber(), true)));
         }
     }
 
-    private String surroundWithPercentages(String value) {
-        return surroundValue(value, "%");
+    private String surroundWithPercentages(String value, boolean makeUpperCase) {
+        String updatedValue = surroundValue(value, "%");
+        if (makeUpperCase) {
+            updatedValue = updatedValue.toUpperCase();
+        }
+        return updatedValue;
     }
 
     private String surroundValue(String value, String surroundWith) {
@@ -106,21 +110,21 @@ public class AdvancedSearchRequestHelperPaginated {
     private void addDefendantCriteria(JPQLQuery<HearingEntity> query, GetCasesSearchRequestPaginated request) {
         if (StringUtils.isNotBlank(request.getDefendantName())) {
             query = joinDefendantEntity(query);
-            query.where(QDefendantEntity.defendantEntity.name.likeIgnoreCase(surroundWithPercentages(request.getDefendantName())));
+            query.where(QDefendantEntity.defendantEntity.name.toUpperCase().like(surroundWithPercentages(request.getDefendantName(), true)));
         }
     }
 
     private void addEventCriteria(JPQLQuery<HearingEntity> query, GetCasesSearchRequestPaginated request) {
         if (StringUtils.isNotBlank(request.getEventTextContains())) {
             query = joinEventEntity(query);
-            query.where(QEventEntity.eventEntity.eventText.likeIgnoreCase(surroundWithPercentages(request.getEventTextContains())));
+            query.where(QEventEntity.eventEntity.eventText.toUpperCase().like(surroundWithPercentages(request.getEventTextContains(), true)));
         }
     }
 
     private void addJudgeCriteria(JPQLQuery<HearingEntity> query, GetCasesSearchRequestPaginated request) {
         if (StringUtils.isNotBlank(request.getJudgeName())) {
             query = joinJudge(query);
-            query.where(QJudgeEntity.judgeEntity.name.likeIgnoreCase(surroundWithPercentages(request.getJudgeName())));
+            query.where(QJudgeEntity.judgeEntity.name.toUpperCase().like(surroundWithPercentages(request.getJudgeName(), true)));
         }
     }
 
