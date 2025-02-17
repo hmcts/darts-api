@@ -68,49 +68,9 @@ class CaseRepositoryIntTest extends IntegrationBase {
         assertThat(result.getFirst().getId()).isEqualTo(matchingCase.getId());
     }
 
-    @Test
-    void findCasesIdsNeedingCaseDocumentGenerated_Paged() {
-        // given
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
-
-        var matchingCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
-        });
-
-        var matchingCase2 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
-
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
-
-        var courtCaseWithCaseDocument = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
-        dartsDatabase.getCaseDocumentStub().createCaseDocumentEntity(courtCaseWithCaseDocument, courtCaseWithCaseDocument.getCreatedBy());
-
-        caseStub.createAndSaveCourtCase(courtCase -> courtCase.setClosed(false));
-
-        // when
-        List<Integer> result = caseRepository.findCasesIdsNeedingCaseDocumentGenerated(
-            OffsetDateTime.now().minusDays(28), Limit.of(2));
-
-        // then
-        assertThat(result).hasSize(2);
-        assertThat(result.getFirst()).isEqualTo(matchingCase1.getId());
-        assertThat(result.get(1)).isEqualTo(matchingCase2.getId());
-    }
 
     @Test
-    void findCasesIdsNeedingCaseDocumentGenerated_Unpaged() {
+    void findCasesIdsNeedingCaseDocumentGenerated_ReturnsMatchingCases() {
         // given
         caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
@@ -355,38 +315,6 @@ class CaseRepositoryIntTest extends IntegrationBase {
         // then
         assertThat(result).hasSize(0);
 
-    }
-
-    @Test
-    void findCasesNeedingCaseDocumentGenerated_FindOpenCasesToClosePaged() {
-        // given
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
-
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
-
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(30));
-        });
-
-        var foundCourtCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(30));
-        });
-
-        // when
-        List<Integer> result = caseRepository.findCasesIdsNeedingCaseDocumentGenerated(
-            OffsetDateTime.now().minusDays(28), Limit.of(2));
-
-        // then
-        assertThat(result).hasSize(1);
-        assertThat(result.getFirst()).isEqualTo(foundCourtCase1.getId());
     }
 
     @Test
