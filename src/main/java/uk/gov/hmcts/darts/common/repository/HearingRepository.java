@@ -32,6 +32,15 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     List<HearingEntity> findByCaseIds(List<Integer> caseIds);
 
     @Query("""
+        SELECT h FROM HearingEntity h
+        WHERE h.courtCase.id in :caseIds
+        AND h.hearingIsActual = :hearingIsActual
+        ORDER BY h.courtCase.caseNumber desc
+        """
+    )
+    List<HearingEntity> findByCaseIds(List<Integer> caseIds, boolean hearingIsActual);
+
+    @Query("""
         SELECT h.id FROM HearingEntity h
         JOIN h.eventList event
         WHERE event.id = :eventId
@@ -80,7 +89,7 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
             AND (cast(:endDate as LocalDate) IS NULL OR hearing.hearingDate <= :endDate)
             ORDER BY hearing.hearingDate DESC
             LIMIT :numberOfRecords
-          """)
+        """)
     List<HearingEntity> findHearingDetails(List<Integer> courthouseIds, String caseNumber,
                                            String courtroomName,
                                            LocalDate startDate, LocalDate endDate, Integer numberOfRecords);
