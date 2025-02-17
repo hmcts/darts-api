@@ -8,12 +8,20 @@ import lombok.RequiredArgsConstructor;
 public enum RetentionConfidenceCategoryEnum {
 
     // Modernised values
-    CASE_CLOSED(1), MANUAL_OVERRIDE(2), AGED_CASE(3),
+    CASE_CLOSED(1),
+    MANUAL_OVERRIDE(2),
+    AGED_CASE(3),
+
+    AGED_CASE_CASE_CLOSE(4),
+    AGED_CASE_MAX_EVENT_CLOSED(5),
+    AGED_CASE_MAX_MEDIA_CLOSED(6),
+    AGED_CASE_MAX_HEARING_CLOSED(7),
+    AGED_CASE_CASE_CREATION_CLOSED(8),
 
     // Legacy values
-    LEGACY_MANUAL_OVERRIDE_21(21),
     LEGACY_MANUAL_OVERRIDE_22(22),
     LEGACY_CASE_CLOSED_23(23),
+    LEGACY_MANUAL_OVERRIDE_21(21),
     LEGACY_CASE_CLOSED_42(42),
     LEGACY_CASE_CLOSED_43(43),
     LEGACY_CASE_CLOSED_31(31),
@@ -30,5 +38,5 @@ public enum RetentionConfidenceCategoryEnum {
     LEGACY_CASE_CREATION_CLOSED_64(64);
 
     private final Integer id;
-    }
+}
 

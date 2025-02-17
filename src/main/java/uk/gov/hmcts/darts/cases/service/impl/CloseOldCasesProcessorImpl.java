@@ -100,14 +100,16 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                     eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
 
                 if (closedEvent.isPresent()) {
-                    closeCaseInDbAndAddRetention(courtCase, closedEvent.get().getCreatedDateTime(), userAccount);
+                    closeCaseInDbAndAddRetention(courtCase, closedEvent.get().getCreatedDateTime(), RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSE, userAccount);
                 } else {
                     //look for the last event and use that date
-                    closeCaseInDbAndAddRetention(courtCase, eventList.getFirst().getCreatedDateTime(), userAccount);
+                    closeCaseInDbAndAddRetention(courtCase, eventList.getFirst().getCreatedDateTime(),
+                                                 RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, userAccount);
                 }
             } else if (courtCase.getHearings().isEmpty()) {
                 //set to created date
-                closeCaseInDbAndAddRetention(courtCase, courtCase.getCreatedDateTime(), userAccount);
+                closeCaseInDbAndAddRetention(courtCase, courtCase.getCreatedDateTime(), RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED,
+                                             userAccount);
             } else {
                 //look for the last audio and use its recorded date
                 List<MediaEntity> mediaList = new ArrayList<>();
@@ -118,20 +120,22 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                     //look for the last hearing date and use that
                     courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
                     HearingEntity lastHearingEntity = courtCase.getHearings().getFirst();
-                    closeCaseInDbAndAddRetention(courtCase, OffsetDateTime.of(lastHearingEntity.getHearingDate().atStartOfDay(), ZoneOffset.UTC), userAccount);
+                    closeCaseInDbAndAddRetention(courtCase, OffsetDateTime.of(lastHearingEntity.getHearingDate().atStartOfDay(), ZoneOffset.UTC),
+                                                 RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED, userAccount);
                 } else {
                     mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
-                    closeCaseInDbAndAddRetention(courtCase, mediaList.getFirst().getCreatedDateTime(), userAccount);
+                    closeCaseInDbAndAddRetention(courtCase, mediaList.getFirst().getCreatedDateTime(),
+                                                 RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED, userAccount);
                 }
             }
             log.info("Successfully closed case with ID: {}", courtCase.getId());
         }
 
         private void closeCaseInDbAndAddRetention(CourtCaseEntity courtCase, OffsetDateTime caseClosedDate,
+                                                  RetentionConfidenceCategoryEnum retentionConfidenceCategory,
                                                   UserAccountEntity userAccount) {
             courtCase.setClosed(TRUE);
             courtCase.setCaseClosedTimestamp(caseClosedDate);
-            final RetentionConfidenceCategoryEnum retentionConfidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;//TODO remove
             courtCase = retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, retentionConfidenceCategory);
             caseService.saveCase(courtCase);
             log.info("Closed court case id {}", courtCase.getId());
