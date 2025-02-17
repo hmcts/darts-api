@@ -65,11 +65,6 @@ public class DataManagementApiImpl implements DataManagementApi {
         dataManagementService.deleteBlobData(getUnstructuredContainerName(), blobId);
     }
 
-    @Override
-    public UUID saveBlobDataToInboundContainer(InputStream inputStream) {
-        return dataManagementService.saveBlobData(getInboundContainerName(), inputStream).getBlobName();
-    }
-
     /**
      * @deprecated This implementation is not memory-efficient with large files, use saveBlobDataToInboundContainer(InputStream inputStream) instead.
      */
