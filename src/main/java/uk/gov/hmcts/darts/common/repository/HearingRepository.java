@@ -24,9 +24,8 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     List<HearingEntity> findByCourthouseCourtroomAndDate(String courthouse, String courtroom, LocalDate date);
 
     @Query("""
-        SELECT h FROM HearingEntity h, CourtCaseEntity case
-        WHERE case.id in :caseIds
-        AND h.courtCase = case
+        SELECT h FROM HearingEntity h
+        WHERE h.courtCase.id in :caseIds
         """
     )
     List<HearingEntity> findByCaseIds(List<Integer> caseIds);
@@ -34,11 +33,11 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     @Query("""
         SELECT h FROM HearingEntity h
         WHERE h.courtCase.id in :caseIds
-        AND h.hearingIsActual = :hearingIsActual
+        AND h.hearingIsActual = true
         ORDER BY h.courtCase.caseNumber desc
         """
     )
-    List<HearingEntity> findByCaseIds(List<Integer> caseIds, boolean hearingIsActual);
+    List<HearingEntity> findByIsActualCaseIds(List<Integer> caseIds);
 
     @Query("""
         SELECT h.id FROM HearingEntity h

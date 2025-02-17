@@ -179,7 +179,7 @@ public class CaseServiceImpl implements CaseService {
         if (caseIds.isEmpty()) {
             return new ArrayList<>();
         }
-        List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds, true);
+        List<HearingEntity> hearings = hearingRepository.findByIsActualCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
 
