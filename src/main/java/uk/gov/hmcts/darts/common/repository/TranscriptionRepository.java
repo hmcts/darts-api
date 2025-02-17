@@ -55,15 +55,15 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId, Boolean includeHidden);
 
     @Query("""
-           SELECT te
+           SELECT te.id
            FROM TranscriptionEntity te
            WHERE te.transcriptionStatus NOT IN (:transcriptionStatuses)
            and te.createdDateTime <= :createdDateTime
         """)
-    List<TranscriptionEntity> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+    List<Integer> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
         List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime, Limit limit);
 
-    // native query to bypass @SQLRestriction on TranscriptionDocumentEntity
+    // native query to bypass @SQLRestriction on TranscriptionDocumentEntity in NOT EXISTS sub-query
     @Query(value = """
         SELECT t.*
         FROM darts.transcription t
@@ -134,6 +134,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
              AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
              AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+             AND t.isCurrent = true
         """)
     List<TranscriptionSearchResult> searchModernisedTranscriptionsFilteringOn(
         List<Integer> ids,
@@ -172,6 +173,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
              AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
              AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+             AND t.isCurrent = true
         """)
     List<TranscriptionSearchResult> searchMigratedTranscriptionsFilteringOn(
         List<Integer> ids,

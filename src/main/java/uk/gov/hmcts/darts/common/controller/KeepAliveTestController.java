@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,8 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
@@ -19,6 +22,27 @@ import java.util.Map;
 public class KeepAliveTestController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @GetMapping(value = "/keep-alive-test-stream", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    public Flux<MyData> streamLongTaskSingleResult() {
+        AtomicInteger counter = new AtomicInteger(0);
+
+        Mono<MyData> longTask = Mono.fromFuture(CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(45000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return new MyData("Final Data", 100);
+        }));
+
+        Flux<MyData> interimData = Flux.interval(Duration.ofSeconds(1))
+            .map(i -> new MyData("Interim Data " + i, counter.incrementAndGet() * 5))
+            .takeUntilOther(longTask)
+            .onBackpressureDrop();
+
+        return Flux.concat(interimData, longTask).delayElements(Duration.ofMillis(500));
+    }
 
     @GetMapping("/keep-alive-test")
     public Flux<ServerSentEvent<String>> keepAliveTest() {
@@ -67,5 +91,23 @@ public class KeepAliveTestController {
             });
 
         return Flux.merge(periodicEvents, longSearchSimulation);
+    }
+
+    static class MyData {
+        private String name;
+        private int value;
+
+        public MyData(String name, int value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 }

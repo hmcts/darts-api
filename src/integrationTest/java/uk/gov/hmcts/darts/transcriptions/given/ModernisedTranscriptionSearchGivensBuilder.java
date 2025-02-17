@@ -82,6 +82,7 @@ public class ModernisedTranscriptionSearchGivensBuilder extends TranscriptionSea
         UserAccountEntity userAccount = dartsDatabase.save(UserAccountTestData.minimalUserAccount());
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
+        transcription.setIsCurrent(true);
         return dartsDatabase.save(transcription);
     }
 

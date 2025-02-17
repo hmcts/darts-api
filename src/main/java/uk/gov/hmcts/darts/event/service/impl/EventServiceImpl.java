@@ -11,7 +11,8 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetails;
+import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventService;
 
 import java.util.HashSet;
@@ -27,8 +28,13 @@ public class EventServiceImpl implements EventService {
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
 
     @Override
-    public AdminGetEventForIdResponseResult adminGetEventById(Integer eventId) {
+    public AdminGetEventResponseDetails adminGetEventById(Integer eventId) {
         return eventMapper.mapToAdminGetEventsResponseForId(getEventByEveId(eventId));
+    }
+
+    @Override
+    public AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Integer eventId) {
+        return eventMapper.mapToAdminGetEventVersionsResponseForId(getEventVersionsForEveIdExcludingEventIdZero(eventId));
     }
 
     @Override
@@ -36,6 +42,18 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findById(eveId)
             .orElseThrow(() -> new DartsApiException(CommonApiError.NOT_FOUND,
                                                      String.format("Event with id %s not found", eveId)));
+    }
+
+    @Override
+    public List<EventEntity> getEventVersionsForEveIdExcludingEventIdZero(Integer eveId) {
+        EventEntity event = getEventByEveId(eveId);
+        List<EventEntity> events =  eventRepository.findAllByEventIdExcludingEventIdZero(event.getEventId());
+
+        if (events.isEmpty()) {
+            // must be event id zero (XHIBIT issue) so return the event itself so it is added as the current event
+            events.add(event);
+        }
+        return events;
     }
 
     @Override

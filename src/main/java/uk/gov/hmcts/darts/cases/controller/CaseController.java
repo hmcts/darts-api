@@ -1,12 +1,15 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -104,36 +107,37 @@ public class CaseController implements CasesApi {
         });
     }
 
-    @RequestMapping(//NOSONAR
-        method = RequestMethod.POST, //NOSONAR
-        value = "/cases/paginatedSearch", //NOSONAR
-        produces = {"application/json"}, //NOSONAR
-        consumes = {"application/json"} //NOSONAR
-    ) //NOSONAR
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH) //NOSONAR
-    public ResponseEntity<PaginatedList<AdvancedSearchResult>> casesPaginatedSearchPost(//NOSONAR
-                                                                                         AdvancedSearchRequestPaginated advancedSearchRequest //NOSONAR
-    ) { //NOSONAR
-        validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom()); //NOSONAR
-        GetCasesSearchRequestPaginated request = new GetCasesSearchRequestPaginated();//NOSONAR
-        request.setCaseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber())); //NOSONAR
-        request.setCourthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse())); //NOSONAR
-        request.setCourtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom())); //NOSONAR
-        request.setJudgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName())); //NOSONAR
-        request.setDefendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName())); //NOSONAR
-        request.setDateFrom(advancedSearchRequest.getDateFrom()); //NOSONAR
-        request.setDateTo(advancedSearchRequest.getDateTo()); //NOSONAR
-        request.setEventTextContains(StringUtils.trimToNull(advancedSearchRequest.getEventTextContains())); //NOSONAR
+    @RequestMapping(
+        method = RequestMethod.POST,
+        value = "/cases/paginatedSearch",
+        produces = {"application/json"},
+        consumes = {"application/json"}
+    )
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<PaginatedList<AdvancedSearchResult>> casesPaginatedSearchPost(
+        @Parameter(name = "AdvancedSearchRequestPaginated", description = "", required = true)
+        @Valid @RequestBody AdvancedSearchRequestPaginated advancedSearchRequest
+    ) {
+        validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom());
+        GetCasesSearchRequestPaginated request = new GetCasesSearchRequestPaginated();
+        request.setCaseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber()));
+        request.setCourthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()));
+        request.setCourtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()));
+        request.setJudgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()));
+        request.setDefendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName()));
+        request.setDateFrom(advancedSearchRequest.getDateFrom());
+        request.setDateTo(advancedSearchRequest.getDateTo());
+        request.setEventTextContains(StringUtils.trimToNull(advancedSearchRequest.getEventTextContains()));
 
-        request.setPageNumber(advancedSearchRequest.getPageNumber()); //NOSONAR
-        request.setPageLimit(advancedSearchRequest.getPageLimit()); //NOSONAR
-        request.setSortField(advancedSearchRequest.getSortField()); //NOSONAR
-        request.setSortMethod(advancedSearchRequest.getSortMethod()); //NOSONAR
+        request.setPageNumber(advancedSearchRequest.getPageNumber());
+        request.setPageLimit(advancedSearchRequest.getPageLimit());
+        request.setSortField(advancedSearchRequest.getSortField());
+        request.setSortMethod(advancedSearchRequest.getSortMethod());
 
-        RequestValidator.validate(request); //NOSONAR
-        PaginatedList<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearchPagination(request); //NOSONAR
-        return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK); //NOSONAR
-    } //NOSONAR
+        RequestValidator.validate(request);
+        PaginatedList<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearchPagination(request);
+        return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
+    }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)

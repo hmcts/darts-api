@@ -29,6 +29,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFES
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MISSING_RESPONSE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_PUSHED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
@@ -76,6 +77,8 @@ public class EodHelperMocks implements Closeable {
     private ObjectRecordStatusEntity armRpoPendingStatus;
     @Mock
     private ObjectRecordStatusEntity armResponseManifestFailedStatus;
+    @Mock
+    private ObjectRecordStatusEntity armRawDataPushedStatus;
 
     @Mock
     private ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
@@ -152,6 +155,8 @@ public class EodHelperMocks implements Closeable {
         lenient().when(armReplayStatus.getDescription()).thenReturn("Arm Replay");
         lenient().when(armMissingResponseStatus.getId()).thenReturn(ARM_MISSING_RESPONSE.getId());
         lenient().when(armMissingResponseStatus.getDescription()).thenReturn("Arm Missing Response");
+        lenient().when(armRawDataPushedStatus.getId()).thenReturn(ARM_RAW_DATA_PUSHED.getId());
+        lenient().when(armRawDataPushedStatus.getDescription()).thenReturn("Arm Raw Data Pushed");
 
         lenient().when(unstructuredLocation.getId()).thenReturn(UNSTRUCTURED.getId());
         lenient().when(unstructuredLocation.getDescription()).thenReturn("unstructured");
@@ -179,6 +184,7 @@ public class EodHelperMocks implements Closeable {
         mockedEodHelper.when(EodHelper::armResponseChecksumVerificationFailedStatus).thenReturn(armResponseChecksumVerificationFailedStatus);
         mockedEodHelper.when(EodHelper::armReplayStatus).thenReturn(armReplayStatus);
         mockedEodHelper.when(EodHelper::armMissingResponseStatus).thenReturn(armMissingResponseStatus);
+        mockedEodHelper.when(EodHelper::armRawDataPushedStatus).thenReturn(armRawDataPushedStatus);
     }
 
     private void setupLocationTypes() {
@@ -224,6 +230,7 @@ public class EodHelperMocks implements Closeable {
             Optional.of(armResponseChecksumVerificationFailedStatus));
         lenient().when(orsRepository.findById(ARM_REPLAY.getId())).thenReturn(Optional.of(armReplayStatus));
         lenient().when(orsRepository.findById(ARM_MISSING_RESPONSE.getId())).thenReturn(Optional.of(armMissingResponseStatus));
+        lenient().when(orsRepository.findById(ARM_RAW_DATA_PUSHED.getId())).thenReturn(Optional.of(armRawDataPushedStatus));
 
         lenient().when(eltRepository.findById(INBOUND.getId())).thenReturn(Optional.of(inboundLocation));
         lenient().when(eltRepository.findById(ARM.getId())).thenReturn(Optional.of(armLocation));

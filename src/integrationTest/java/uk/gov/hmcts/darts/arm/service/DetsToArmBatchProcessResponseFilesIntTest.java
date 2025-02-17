@@ -247,6 +247,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr1.getIdResponseCrFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp");
         assertThat(dbOsr1.getIdResponseUfFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
         assertThat(dbOsr1.getObjectStatus()).isNull();
+        assertThat(dbOsr1.getFileSizeIngestToArm()).isEqualTo(11_997);
 
         ObjectStateRecordEntity dbOsr2 = osrRepository.findByArmEodId(String.valueOf(armEod2.getId())).orElseThrow();
         assertThat(dbOsr2.getFlagRspnRecvdFromArml()).isTrue();
@@ -260,6 +261,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr2.getIdResponseUfFile()).isNull();
         assertThat(dbOsr2.getFlagFileDetsCleanupStatus()).isNull();
         assertThat(dbOsr2.getDateFileDetsCleanup()).isNull();
+        assertThat(dbOsr2.getFileSizeIngestToArm()).isNull();
         assertThat(externalObjectDirectoryRepository.findById(detsEod2.getId())).isPresent();
 
         ObjectStateRecordEntity dbOsr3 = osrRepository.findByArmEodId(String.valueOf(armEod3.getId())).orElseThrow();
@@ -274,6 +276,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr3.getIdResponseUfFile()).isNull();
         assertThat(dbOsr3.getFlagFileDetsCleanupStatus()).isNull();
         assertThat(dbOsr3.getDateFileDetsCleanup()).isNull();
+        assertThat(dbOsr3.getFileSizeIngestToArm()).isNull();
 
         ObjectStateRecordEntity dbOsr5 = osrRepository.findByArmEodId(String.valueOf(armEod5.getId())).orElseThrow();
         assertThat(dbOsr5.getFlagRspnRecvdFromArml()).isNull();
@@ -287,6 +290,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr5.getIdResponseUfFile()).isNull();
         assertThat(dbOsr5.getFlagFileDetsCleanupStatus()).isNull();
         assertThat(dbOsr5.getDateFileDetsCleanup()).isNull();
+        assertThat(dbOsr5.getFileSizeIngestToArm()).isNull();
     }
 
     @Test

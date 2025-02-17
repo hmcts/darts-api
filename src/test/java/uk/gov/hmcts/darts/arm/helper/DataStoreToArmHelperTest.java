@@ -98,13 +98,11 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void testGetEodEntitiesToSendToArm() {
+    void getEodEntitiesToSendToArm_success() {
         // given
-        ExternalLocationTypeEntity sourceLocation = mock(ExternalLocationTypeEntity.class);
-        ExternalLocationTypeEntity armLocation = mock(ExternalLocationTypeEntity.class);
-        ObjectRecordStatusEntity armRawStatusFailed = mock(ObjectRecordStatusEntity.class);
-        ObjectRecordStatusEntity armManifestFailed = mock(ObjectRecordStatusEntity.class);
-        when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(armRawStatusFailed).thenReturn(armManifestFailed);
+        ExternalLocationTypeEntity sourceLocation = EodHelper.unstructuredLocation();
+        ExternalLocationTypeEntity armLocation = EodHelper.armLocation();
+
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(anyList(), any(), anyInt(), any(Pageable.class)))
             .thenReturn(List.of(123));
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -226,7 +224,6 @@ class DataStoreToArmHelperTest {
         // then
         assertEquals(1000L, result);
     }
-
 
 
     @Test
