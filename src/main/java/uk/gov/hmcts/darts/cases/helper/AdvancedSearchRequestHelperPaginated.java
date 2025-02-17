@@ -24,11 +24,15 @@ import uk.gov.hmcts.darts.common.util.paginated.PaginationUtil;
 import uk.gov.hmcts.darts.common.util.paginated.SortMethod;
 
 import java.util.List;
+import java.util.Locale;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @Component
-@SuppressWarnings({"PMD.TooManyMethods"})
+@SuppressWarnings({
+    "PMD.TooManyMethods",
+    "PMD.LawOfDemeter"//QueryDSL requires chaining
+})
 @RequiredArgsConstructor
 @Slf4j
 public class AdvancedSearchRequestHelperPaginated {
@@ -49,7 +53,7 @@ public class AdvancedSearchRequestHelperPaginated {
             request,
             GetCasesSearchRequestPaginated.SortField.CASE_NUMBER,
             SortMethod.DESC,
-            courtCase -> AdvancedSearchResponseMapper.mapToAdvancedSearchResult(courtCase),
+            AdvancedSearchResponseMapper::mapToAdvancedSearchResult,
             Long.valueOf(maxResults)
         );
     }
@@ -98,7 +102,7 @@ public class AdvancedSearchRequestHelperPaginated {
     private String surroundWithPercentages(String value, boolean makeUpperCase) {
         String updatedValue = surroundValue(value, "%");
         if (makeUpperCase) {
-            updatedValue = updatedValue.toUpperCase();
+            updatedValue = updatedValue.toUpperCase(Locale.getDefault());
         }
         return updatedValue;
     }
