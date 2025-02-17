@@ -12,6 +12,8 @@ public interface HearingsService {
 
     GetHearingResponse getHearings(Integer hearingId);
 
+    HearingEntity getHearingByIdWithValidation(Integer hearingId);
+
     HearingEntity getHearingById(Integer hearingId);
 
     List<EventResponse> getEvents(Integer hearingId);
