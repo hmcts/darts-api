@@ -69,14 +69,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 processInboundToUnstructured(inboundObjectId);
                 return null;
             }).toList();
-        try {
-            AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
-        } catch (Exception e) {
-            log.error("Inbound to Unstructured unexpected exception", e);
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
-        }
+        AsyncUtil.invokeAllAwaitTerminationGraceful(tasks, asyncTaskConfig, getClass());
     }
 
     private void processInboundToUnstructured(Integer inboundObjectId) {

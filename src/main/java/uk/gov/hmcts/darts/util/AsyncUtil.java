@@ -37,6 +37,17 @@ public final class AsyncUtil {
         invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
 
+    public static void invokeAllAwaitTerminationGraceful(List<Callable<Void>> tasks, AsyncTaskConfig config, Class<?> clazz) {
+        try {
+            AsyncUtil.invokeAllAwaitTermination(tasks, config);
+        } catch (Exception e) {
+            log.error(clazz.getName() + " failed with unexpected exception", e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
         log.info("Starting {} tasks with {} threads", tasks.size(), threads);

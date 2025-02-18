@@ -77,16 +77,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                     return null;
                 })
                 .toList();
-
-            try {
-                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
-            } catch (Exception e) {
-                log.error("Unstructured to arm batch unexpected exception", e);
-                if (e instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-                return;
-            }
+            AsyncUtil.invokeAllAwaitTerminationGraceful(tasks, unstructuredToArmProcessorConfiguration, getClass());
         }
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
     }

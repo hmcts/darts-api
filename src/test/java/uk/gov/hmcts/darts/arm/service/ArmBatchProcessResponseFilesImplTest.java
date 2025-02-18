@@ -121,12 +121,12 @@ class ArmBatchProcessResponseFilesImplTest {
     }
 
     @BeforeAll
-    public static void beforeAll() {
+    static void beforeAll() {
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
     }
 
     @AfterAll
-    public static void close() {
+    static void close() {
         EOD_HELPER_MOCKS.close();
     }
 
