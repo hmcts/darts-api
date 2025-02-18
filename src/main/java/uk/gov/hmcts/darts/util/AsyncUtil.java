@@ -32,10 +32,6 @@ public final class AsyncUtil {
         }
     }
 
-    public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
-                                                 AsyncTaskConfig config) throws InterruptedException {
-        invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
-    }
 
     public static void invokeAllAwaitTerminationGraceful(List<Callable<Void>> tasks, AsyncTaskConfig config, Class<?> clazz) {
         try {
@@ -46,6 +42,11 @@ public final class AsyncUtil {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
+                                                 AsyncTaskConfig config) throws InterruptedException {
+        invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
