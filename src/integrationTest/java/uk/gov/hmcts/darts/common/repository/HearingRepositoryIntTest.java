@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HearingRepositoryIntTest extends PostgresIntegrationBase {
@@ -256,4 +258,33 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
         assertEquals(1, hearingIdList.getFirst());
     }
 
+    @Test
+    void findByIsActualCaseIds_shouldReturnHearingEntities() {
+        HearingEntity hearing1 = generatedHearingEntities.get(0);
+        HearingEntity hearing2 = generatedHearingEntities.get(1);
+        HearingEntity hearing3 = generatedHearingEntities.get(2);
+        HearingEntity hearing4 = generatedHearingEntities.get(3);
+
+        CourtCaseEntity courtCase = hearing1.getCourtCase();
+
+        hearing1.setHearingIsActual(true);
+        hearing2.setHearingIsActual(false);
+        hearing2.setCourtCase(courtCase);
+        hearing3.setHearingIsActual(true);
+        hearing3.setCourtCase(courtCase);
+        hearing4.setHearingIsActual(true);
+
+        dartsDatabase.save(hearing1);
+        dartsDatabase.save(hearing2);
+        dartsDatabase.save(hearing3);
+        dartsDatabase.save(hearing4);
+
+        List<HearingEntity> hearingEntities = hearingRepository.findByIsActualCaseIds(List.of(
+            hearing1.getCourtCase().getId(),
+            hearing4.getCourtCase().getId()
+        ));
+        assertThat(hearingEntities).hasSize(3);
+        assertThat(hearingEntities.stream().map(hearingEntity -> hearingEntity.getId()).toList())
+            .containsExactlyInAnyOrder(hearing1.getId(), hearing3.getId(), hearing4.getId());
+    }
 }
