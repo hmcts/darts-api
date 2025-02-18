@@ -135,7 +135,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-            return;
         }
     }
 
