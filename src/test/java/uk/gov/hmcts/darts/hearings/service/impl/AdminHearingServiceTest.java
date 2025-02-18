@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -13,15 +15,21 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
+import uk.gov.hmcts.darts.hearings.mapper.AdminHearingMapper;
+import uk.gov.hmcts.darts.hearings.model.HearingsResponse;
 import uk.gov.hmcts.darts.hearings.model.HearingsSearchRequest;
 import uk.gov.hmcts.darts.hearings.model.HearingsSearchResponse;
+import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +37,8 @@ import static org.mockito.Mockito.when;
 class AdminHearingServiceTest {
     @Mock
     private HearingRepository hearingRepository;
+    @Mock
+    private HearingsService hearingsService;
 
     @InjectMocks
     private AdminHearingsServiceImpl adminHearingsService;
@@ -50,7 +60,7 @@ class AdminHearingServiceTest {
         LocalDate endDate = LocalDate.now().plusDays(1);
         String courtroomName = "mycourtroom";
         String caseNumber = "casenumber";
-        List<Integer> courthouseidsLst = List.of(2,3,4);
+        List<Integer> courthouseidsLst = List.of(2, 3, 4);
 
 
         when(hearingRepository.findHearingDetails(courthouseidsLst,
@@ -93,7 +103,7 @@ class AdminHearingServiceTest {
         LocalDate endDate = LocalDate.now().plusDays(1);
         String courtroomName = "mycourtroom";
         String caseNumber = "casenumber";
-        List<Integer> courthouseidsLst = List.of(2,3,4);
+        List<Integer> courthouseidsLst = List.of(2, 3, 4);
 
         when(hearingRepository.findHearingDetails(courthouseidsLst,
                                                   caseNumber,
@@ -111,7 +121,21 @@ class AdminHearingServiceTest {
         assertEquals(HearingApiError.TOO_MANY_RESULTS, actualException.getError());
     }
 
-    public static  HearingEntity setupHearing(Integer id) {
+    @Test
+    void getAdminHearings_shouldReturnHearingResponse() {
+        HearingsResponse expectedHearingsResponse = mock(HearingsResponse.class);
+        HearingEntity hearingEntity = mock(HearingEntity.class);
+        when(hearingsService.getHearingById(123)).thenReturn(hearingEntity);
+        MockedStatic<AdminHearingMapper> adminHearingMapperMockedStatic = Mockito.mockStatic(AdminHearingMapper.class);
+        adminHearingMapperMockedStatic.when(() -> AdminHearingMapper.mapToHearingsResponse(hearingEntity)).thenReturn(expectedHearingsResponse);
+
+        assertThat(adminHearingsService.getAdminHearings(123)).isEqualTo(expectedHearingsResponse);
+        verify(hearingsService).getHearingById(123);
+        adminHearingMapperMockedStatic.verify(() -> AdminHearingMapper.mapToHearingsResponse(hearingEntity));
+        adminHearingMapperMockedStatic.close();
+    }
+
+    public static HearingEntity setupHearing(Integer id) {
         return setupHearing(id, id, id, id);
     }
 
