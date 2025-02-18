@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -38,6 +40,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -88,11 +91,15 @@ class ArmBatchProcessResponseFilesImplTest {
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
     @Mock
     private DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
+    @Mock
+    private AsyncTaskConfig asyncTaskConfig;
 
     private ArmBatchProcessResponseFilesImplProtectedMethodSupport armBatchProcessResponseFiles;
 
     @BeforeEach
     void setupData() {
+        lenient().when(asyncTaskConfig.getThreads()).thenReturn(1);
+        lenient().when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofSeconds(10));
 
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
@@ -113,8 +120,13 @@ class ArmBatchProcessResponseFilesImplTest {
 
     }
 
+    @BeforeAll
+    static void beforeAll() {
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+    }
+
     @AfterAll
-    public static void close() {
+    static void close() {
         EOD_HELPER_MOCKS.close();
     }
 
@@ -160,7 +172,8 @@ class ArmBatchProcessResponseFilesImplTest {
             .thenReturn(inboundList1, inboundList2);
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
+
 
         // then
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);
@@ -235,7 +248,7 @@ class ArmBatchProcessResponseFilesImplTest {
             .thenReturn(List.of(externalObjectDirectoryEntity1), List.of(externalObjectDirectoryEntity2));
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);

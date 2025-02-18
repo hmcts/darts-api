@@ -35,6 +35,8 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -44,6 +46,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -80,7 +83,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected DateTimeFormatter dateTimeFormatter;
 
     @Override
-    public void processResponseFiles(int batchSize) {
+    public void processResponseFiles(int batchSize, AsyncTaskConfig asyncTaskConfig) {
         UserAccountEntity userAccount = userIdentity.getUserAccount();
         ArrayList<String> inputUploadResponseFiles = new ArrayList<>();
         String prefix = getManifestFilePrefix();
@@ -107,8 +110,15 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         } catch (Exception e) {
             log.error("Unable to find response file for prefix: {}", prefix, e);
         }
-        if (CollectionUtils.isNotEmpty(inputUploadResponseFiles)) {
-            for (String inputUploadBlob : inputUploadResponseFiles) {
+
+
+        if (CollectionUtils.isEmpty(inputUploadResponseFiles)) {
+            log.warn("No response files found with prefix: {}", prefix);
+            return;
+        }
+        List<Callable<Void>> tasks = inputUploadResponseFiles
+            .stream()
+            .map(inputUploadBlob -> (Callable<Void>) () -> {
                 Instant start = Instant.now();
                 log.info("ARM PERFORMANCE PULL START for manifest {} started at {}", inputUploadBlob, start);
                 processInputUploadBlob(inputUploadBlob, userAccount);
@@ -116,9 +126,19 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 long timeElapsed = Duration.between(start, finish).toMillis();
                 log.info("ARM PERFORMANCE PULL END for manifest {} ended at {}", inputUploadBlob, finish);
                 log.info("ARM PERFORMANCE PULL ELAPSED TIME for manifest {} took {} ms", inputUploadBlob, timeElapsed);
+                return null;
+            }).toList();
+        runTasksAsync(tasks, asyncTaskConfig);
+    }
+
+    void runTasksAsync(List<Callable<Void>> tasks, AsyncTaskConfig asyncTaskConfig) {
+        try {
+            AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
+        } catch (Exception e) {
+            log.error(getClass().getName() + " failed with unexpected exception", e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
             }
-        } else {
-            log.warn("No response files found with prefix: {}", prefix);
         }
     }
 
