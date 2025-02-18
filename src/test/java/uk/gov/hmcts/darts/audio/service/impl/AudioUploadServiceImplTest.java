@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.util.LogUtil;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -39,6 +42,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -47,6 +51,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -57,7 +62,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioUploadServiceImplTest {
 
@@ -502,5 +507,26 @@ class AudioUploadServiceImplTest {
         verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
         // Then
         verifyNoInteractions(mediaRepository, hearingRepository, logApi, externalObjectDirectoryRepository);
+    }
+
+    @Test
+    void deleteUploadedAudio_whenValidDataIsProvided_shouldDeleteUploadedAudio(CapturedOutput output) throws AzureDeleteBlobException {
+        UUID externalLocation = UUID.randomUUID();
+        audioService.deleteUploadedAudio(externalLocation);
+        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
+        assertThat(output)
+            .doesNotContain("Failed to delete blob");
+    }
+
+    @Test
+    void deleteUploadedAudio_whenAnExceptionOccures_shouldLogAndConsume(CapturedOutput output) throws AzureDeleteBlobException {
+        AzureDeleteBlobException exception = new AzureDeleteBlobException("Failed to delete blob");
+        doThrow(exception).when(dataManagementApi).deleteBlobDataFromInboundContainer(any());
+
+        UUID externalLocation = UUID.randomUUID();
+        audioService.deleteUploadedAudio(externalLocation);
+        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
+        LogUtil.waitUntilMessage(output, "Failed to delete blob", 5);
+        LogUtil.waitUntilMessage(output, "Failed to delete blob data from inbound container", 5);
     }
 }
