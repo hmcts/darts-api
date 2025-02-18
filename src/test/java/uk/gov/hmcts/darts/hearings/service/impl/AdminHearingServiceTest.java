@@ -126,13 +126,13 @@ class AdminHearingServiceTest {
         HearingsResponse expectedHearingsResponse = mock(HearingsResponse.class);
         HearingEntity hearingEntity = mock(HearingEntity.class);
         when(hearingsService.getHearingById(123)).thenReturn(hearingEntity);
-        MockedStatic<AdminHearingMapper> adminHearingMapperMockedStatic = Mockito.mockStatic(AdminHearingMapper.class);
-        adminHearingMapperMockedStatic.when(() -> AdminHearingMapper.mapToHearingsResponse(hearingEntity)).thenReturn(expectedHearingsResponse);
+        try (MockedStatic<AdminHearingMapper> adminHearingMapperMockedStatic = Mockito.mockStatic(AdminHearingMapper.class)) {
+            adminHearingMapperMockedStatic.when(() -> AdminHearingMapper.mapToHearingsResponse(hearingEntity)).thenReturn(expectedHearingsResponse);
 
-        assertThat(adminHearingsService.getAdminHearings(123)).isEqualTo(expectedHearingsResponse);
-        verify(hearingsService).getHearingById(123);
-        adminHearingMapperMockedStatic.verify(() -> AdminHearingMapper.mapToHearingsResponse(hearingEntity));
-        adminHearingMapperMockedStatic.close();
+            assertThat(adminHearingsService.getAdminHearings(123)).isEqualTo(expectedHearingsResponse);
+            verify(hearingsService).getHearingById(123);
+            adminHearingMapperMockedStatic.verify(() -> AdminHearingMapper.mapToHearingsResponse(hearingEntity));
+        }
     }
 
     public static HearingEntity setupHearing(Integer id) {

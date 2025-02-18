@@ -3,7 +3,11 @@ package uk.gov.hmcts.darts.hearings.mapper;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.hearings.model.HearingsResponse;
 import uk.gov.hmcts.darts.hearings.model.HearingsResponseCase;
 import uk.gov.hmcts.darts.hearings.model.HearingsResponseCaseCourthouse;
@@ -17,7 +21,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class AdminHearingMapper {
+public final class AdminHearingMapper {
+
+    private AdminHearingMapper() {
+
+    }
 
     public static HearingsResponse mapToHearingsResponse(HearingEntity hearingEntity) {
         if (hearingEntity == null) {
@@ -29,7 +37,7 @@ public class AdminHearingMapper {
         hearingsResponse.setHearingIsActual(hearingEntity.getHearingIsActual());
         hearingsResponse.setCase(mapToHearingsResponseCase(hearingEntity.getCourtCase()));
         hearingsResponse.setCourtroom(mapToCourtroom(hearingEntity.getCourtroom()));
-        hearingsResponse.setJudges(asList(hearingEntity.getJudges(), entity -> entity.getName()));
+        hearingsResponse.setJudges(asList(hearingEntity.getJudges(), JudgeEntity::getName));
         hearingsResponse.setCreatedAt(hearingEntity.getCreatedDateTime());
         hearingsResponse.setCreatedBy(hearingEntity.getCreatedById());
         hearingsResponse.setLastModifiedAt(hearingEntity.getLastModifiedDateTime());
@@ -45,10 +53,10 @@ public class AdminHearingMapper {
         hearingsResponseCase.setId(courtCaseEntity.getId());
         hearingsResponseCase.setCaseNumber(courtCaseEntity.getCaseNumber());
         hearingsResponseCase.setCourthouse(mapToCourtHouse(courtCaseEntity.getCourthouse()));
-        hearingsResponseCase.setDefendants(asList(courtCaseEntity.getDefendantList(), entity -> entity.getName()));
-        hearingsResponseCase.setProsecutors(asList(courtCaseEntity.getProsecutorList(), entity -> entity.getName()));
-        hearingsResponseCase.setDefenders(asList(courtCaseEntity.getDefenceList(), entity -> entity.getName()));
-        hearingsResponseCase.setJudges(asList(courtCaseEntity.getJudges(), entity -> entity.getName()));
+        hearingsResponseCase.setDefendants(asList(courtCaseEntity.getDefendantList(), DefendantEntity::getName));
+        hearingsResponseCase.setProsecutors(asList(courtCaseEntity.getProsecutorList(), ProsecutorEntity::getName));
+        hearingsResponseCase.setDefenders(asList(courtCaseEntity.getDefenceList(), DefenceEntity::getName));
+        hearingsResponseCase.setJudges(asList(courtCaseEntity.getJudges(), JudgeEntity::getName));
         return hearingsResponseCase;
     }
 
@@ -72,21 +80,21 @@ public class AdminHearingMapper {
         return courtroom;
     }
 
-    
+
     public static <R, P> List<R> asList(List<P> data, Function<P, R> mapperFunction) {
         if (data == null) {
             return new ArrayList<>();
         }
         return data.stream()
             .filter(p -> p != null)
-            .map(p -> mapperFunction.apply(p))
+            .map(mapperFunction::apply)
             .toList();
     }
 
     public static String toTimeString(OffsetDateTime offsetDateTime) {
         return toTimeString(
             Optional.ofNullable(offsetDateTime)
-                .map(time -> time.toLocalTime())
+                .map(OffsetDateTime::toLocalTime)
                 .orElse(null));
     }
 
