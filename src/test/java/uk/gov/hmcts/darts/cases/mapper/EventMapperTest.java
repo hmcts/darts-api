@@ -41,7 +41,6 @@ class EventMapperTest {
 
     }
 
-
     @Test
     void testMapGetVersionedEventsByCaseId() {
         EventHandlerEntity eventType = new EventHandlerEntity();
@@ -62,8 +61,7 @@ class EventMapperTest {
         assertEquals(2, events.size());
         assertEquals(2, events.get(0).getId());
         assertEquals(5, events.get(1).getId());
-
-
+        
     }
 
 }
