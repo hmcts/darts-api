@@ -24,10 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends IntegrationBase {
-    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
-    private static final String SOME_ROOM = "some-room";
-    private static final String SOME_CASE_NUMBER_1 = "CASE1";
-    private static final String SOME_CASE_NUMBER_2 = "CASE2";
+    protected static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
+    protected static final String SOME_ROOM = "some-room";
+    protected static final String SOME_CASE_NUMBER_1 = "CASE1";
+    protected static final String SOME_CASE_NUMBER_2 = "CASE2";
 
     @MockitoBean
     private UserIdentity mockUserIdentity;
@@ -47,7 +47,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     }
 
     @Test
-    void processGenerateCaseDocumentForRetentionDate_Success() {
+    void testProcessGenerateCaseDocumentForRetentionDateSuccess() {
         // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
@@ -100,7 +100,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     }
 
     @Test
-    void processGenerateCaseDocumentForRetentionDateRetentionDate_TooFarInTheFutureNoDocumentGenerated() {
+    void testProcessGenerateCaseDocumentForRetentionDateRetentionDateTooFarInTheFutureNoDocumentGenerated() {
         // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
@@ -141,7 +141,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     }
 
     @Test
-    void processGenerateCaseDocumentForRetentionDate_WithRecentDocumentsNoDocumentGenerated() {
+    void testProcessGenerateCaseDocumentForRetentionDateWithRecentDocumentsNoDocumentGenerated() {
         // given
         CourtCaseEntity courtCaseEntityWithCaseDocuments1 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
@@ -191,7 +191,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     }
 
     @Test
-    void processGenerateCaseDocumentForRetentionDate_WithIsRetentionUpdateTrueNoDocumentGenerated() {
+    void testProcessGenerateCaseDocumentForRetentionDateWithIsRetentionUpdateTrueNoDocumentGenerated() {
         // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
         courtCaseEntityWithNoCaseDocuments.setRetentionUpdated(true);
