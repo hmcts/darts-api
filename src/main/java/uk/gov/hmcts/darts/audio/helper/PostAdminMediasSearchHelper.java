@@ -139,16 +139,18 @@ public class PostAdminMediasSearchHelper {
 
     @SuppressWarnings("unchecked")
     private Join<MediaEntity, CourtroomEntity> getCourtroomJoin(Root<MediaEntity> mediaRoot) {
-        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            MediaEntity_.COURTROOM)).findAny();
+        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream()
+            .filter(join -> join.getAttribute().getName().equals(MediaEntity_.COURTROOM)).findAny();
+
         return foundJoin.map(join -> (Join<MediaEntity, CourtroomEntity>) join)
             .orElseGet(() -> mediaRoot.join(MediaEntity_.COURTROOM, JoinType.INNER));
     }
 
     @SuppressWarnings("unchecked")
     private Join<MediaEntity, HearingEntity> getHearingJoin(Root<MediaEntity> mediaRoot) {
-        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            MediaEntity_.HEARING_LIST)).findAny();
+        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream()
+            .filter(join -> join.getAttribute().getName().equals(MediaEntity_.HEARING_LIST)).findAny();
+        
         return foundJoin.map(join -> (Join<MediaEntity, HearingEntity>) join)
             .orElseGet(() -> mediaRoot.join(MediaEntity_.HEARING_LIST, JoinType.INNER));
     }

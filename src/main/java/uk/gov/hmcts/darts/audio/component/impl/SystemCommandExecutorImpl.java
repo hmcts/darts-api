@@ -21,8 +21,10 @@ public class SystemCommandExecutorImpl implements SystemCommandExecutor {
     public Boolean execute(CommandLine command) throws ExecutionException, InterruptedException {
         try {
             log.debug("Command line {} - {}", command.getExecutable(), StringUtils.join(command.getArguments(), " "));
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<String> future = executor.submit(new CommandRunner(command));
+            Future<String> future;
+            try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+                future = executor.submit(new CommandRunner(command));
+            }
             future.get();
         } catch (ExecutionException e) {
             log.error("Failed to execute system command {} due to ", command, e);

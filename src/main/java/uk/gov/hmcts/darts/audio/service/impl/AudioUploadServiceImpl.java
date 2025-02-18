@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -32,8 +31,6 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DurationUtil;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -45,7 +42,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 
 @Service
@@ -132,14 +128,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
         // version the file upload to the database
         versionUpload(mediaToSupersede, addAudioMetadataRequest, externalLocation, incomingChecksum, currentUser);
-    }
-
-    private UUID saveAudioToInbound(MultipartFile audioFileStream) {
-        try (var bufferedInputStream = new BufferedInputStream(audioFileStream.getInputStream())) {
-            return dataManagementApi.saveBlobDataToInboundContainer(bufferedInputStream);
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
-        }
     }
 
     void versionUpload(List<MediaEntity> mediaToSupersede,
