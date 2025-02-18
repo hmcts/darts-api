@@ -12,7 +12,7 @@ plugins {
   id 'idea'
   id 'io.spring.dependency-management' version '1.1.7'
   id 'org.springframework.boot' version '3.4.2'
-  id 'org.owasp.dependencycheck' version '12.0.2'
+  id 'org.owasp.dependencycheck' version '12.1.0'
   id 'com.github.ben-manes.versions' version '0.52.0'
   id 'org.sonarqube' version '6.0.1.5171'
   id "io.freefair.lombok" version "8.12.1"
@@ -382,7 +382,7 @@ repositories {
 
 ext {
   log4JVersion = "2.24.3"
-  tomcatEmbedVersion = "11.0.3"
+  tomcatEmbedVersion = "11.0.4"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -421,8 +421,8 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.2.0'
   implementation 'org.springframework.retry:spring-retry:2.0.11'
 
-  implementation 'net.javacrumbs.shedlock:shedlock-spring:6.2.0'
-  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.2.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-spring:6.3.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.3.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.8'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
@@ -457,7 +457,7 @@ dependencies {
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.3'
-  implementation 'org.hibernate.orm:hibernate-ant:6.6.7.Final'
+  implementation 'org.hibernate.orm:hibernate-ant:6.6.8.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.5.Final'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
