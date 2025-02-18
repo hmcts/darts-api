@@ -197,8 +197,8 @@ class DataManagementFacadeImplTest {
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
-            assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.ARM, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
@@ -221,8 +221,8 @@ class DataManagementFacadeImplTest {
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
-            assertEquals(DatastoreContainerType.UNSTRUCTURED, downloadResponseMetaData.getContainerTypeUsedToDownload());
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.UNSTRUCTURED, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
@@ -247,9 +247,9 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -276,8 +276,8 @@ class DataManagementFacadeImplTest {
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
-            assertEquals(DatastoreContainerType.DETS, downloadResponseMetaData.getContainerTypeUsedToDownload());
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.DETS, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
@@ -304,9 +304,9 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -337,9 +337,9 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -363,9 +363,9 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -391,9 +391,9 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -429,9 +429,9 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -463,9 +463,9 @@ class DataManagementFacadeImplTest {
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -489,23 +489,10 @@ class DataManagementFacadeImplTest {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(1);
-        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
-        transcriptionEntity.setId(1);
-        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
-        transcriptionDocumentEntity.setId(1);
-        transcriptionDocumentEntity.setContentObjectId("2");
-        transcriptionDocumentEntity.setClipId("clip-id");
-        transcriptionDocumentEntity.setUploadedBy(userAccount);
-        transcriptionDocumentEntity.setLastModifiedBy(userAccount);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(userAccount);
 
-        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
-        objectRetrievalQueueEntity.setTranscriptionDocument(transcriptionDocumentEntity);
-        objectRetrievalQueueEntity.setCreatedBy(userAccount);
-        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
-        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(transcriptionDocumentEntity.getId()));
-        objectRetrievalQueueEntity.setContentObjectId(transcriptionDocumentEntity.getContentObjectId());
-        objectRetrievalQueueEntity.setClipId(transcriptionDocumentEntity.getClipId());
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = getObjectRetrievalQueueEntity(transcriptionDocumentEntity,
+                                                                                              userAccount);
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
@@ -516,14 +503,39 @@ class DataManagementFacadeImplTest {
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
 
         verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
+    }
+
+    private static @NotNull ObjectRetrievalQueueEntity getObjectRetrievalQueueEntity(TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                                                                     UserAccountEntity userAccount) {
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+        objectRetrievalQueueEntity.setTranscriptionDocument(transcriptionDocumentEntity);
+        objectRetrievalQueueEntity.setCreatedBy(userAccount);
+        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
+        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(transcriptionDocumentEntity.getId()));
+        objectRetrievalQueueEntity.setContentObjectId(transcriptionDocumentEntity.getContentObjectId());
+        objectRetrievalQueueEntity.setClipId(transcriptionDocumentEntity.getClipId());
+        return objectRetrievalQueueEntity;
+    }
+
+    private static @NotNull TranscriptionDocumentEntity createTranscriptionDocumentEntity(UserAccountEntity userAccount) {
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(1);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+        transcriptionDocumentEntity.setId(1);
+        transcriptionDocumentEntity.setContentObjectId("2");
+        transcriptionDocumentEntity.setClipId("clip-id");
+        transcriptionDocumentEntity.setUploadedBy(userAccount);
+        transcriptionDocumentEntity.setLastModifiedBy(userAccount);
+        return transcriptionDocumentEntity;
     }
 
     @Test
@@ -545,9 +557,9 @@ class DataManagementFacadeImplTest {
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -574,9 +586,9 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -603,9 +615,9 @@ class DataManagementFacadeImplTest {
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -628,9 +640,9 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
@@ -657,9 +669,9 @@ class DataManagementFacadeImplTest {
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
                     // add for try close with resources
-                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaData);
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
             }
         );
