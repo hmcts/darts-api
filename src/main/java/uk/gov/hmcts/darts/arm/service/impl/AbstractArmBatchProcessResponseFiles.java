@@ -128,7 +128,18 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 log.info("ARM PERFORMANCE PULL ELAPSED TIME for manifest {} took {} ms", inputUploadBlob, timeElapsed);
                 return null;
             }).toList();
-        AsyncUtil.invokeAllAwaitTerminationGraceful(tasks, asyncTaskConfig, getClass());
+        runTasksAsync(tasks, asyncTaskConfig);
+    }
+
+    void runTasksAsync(List<Callable<Void>> tasks, AsyncTaskConfig asyncTaskConfig) {
+        try {
+            AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
+        } catch (Exception e) {
+            log.error(getClass().getName() + " failed with unexpected exception", e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     private void processInputUploadBlob(String inputUploadBlob, UserAccountEntity userAccount) {
