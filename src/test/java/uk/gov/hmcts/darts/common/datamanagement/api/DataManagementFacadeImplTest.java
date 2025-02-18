@@ -452,13 +452,7 @@ class DataManagementFacadeImplTest {
         mediaEntity.setCreatedBy(userAccount);
         mediaEntity.setLastModifiedBy(userAccount);
 
-        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
-        objectRetrievalQueueEntity.setMedia(mediaEntity);
-        objectRetrievalQueueEntity.setCreatedBy(userAccount);
-        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
-        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
-        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
-        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = createObjectRetrievalQueueEntity(mediaEntity, userAccount);
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
@@ -477,6 +471,17 @@ class DataManagementFacadeImplTest {
         );
 
         verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
+    }
+
+    private static @NotNull ObjectRetrievalQueueEntity createObjectRetrievalQueueEntity(MediaEntity mediaEntity, UserAccountEntity userAccount) {
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+        objectRetrievalQueueEntity.setMedia(mediaEntity);
+        objectRetrievalQueueEntity.setCreatedBy(userAccount);
+        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
+        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
+        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
+        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
+        return objectRetrievalQueueEntity;
     }
 
     @Test
@@ -766,8 +771,8 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
+    //False positive as resources are mocked
     @SuppressWarnings("PMD.CloseResource")
-        //False positive as resources are mocked
     void processUnstructuredData_downloadResponseMetaDataIsFileBased_shouldNotCreateSecondTempFile() throws IOException {
         DatastoreContainerType datastoreContainerType = DatastoreContainerType.ARM;
         FileBasedDownloadResponseMetaData downloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
@@ -792,8 +797,8 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
+    //False positive as resources are mocked
     @SuppressWarnings("PMD.CloseResource")
-        //False positive as resources are mocked
     void processUnstructuredData_downloadResponseMetaDataIsNotFileBased_shouldCreateTempFile() throws IOException {
         DatastoreContainerType datastoreContainerType = DatastoreContainerType.ARM;
         DownloadResponseMetaData downloadResponseMetaData = mock(DownloadResponseMetaData.class);
