@@ -1,0 +1,56 @@
+package uk.gov.hmcts.darts.test.common.data.builder;
+
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.beanutils.BeanUtils;
+import org.hibernate.AssertionFailure;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.OffsetDateTime;
+
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
+@RequiredArgsConstructor
+public class TestCourtroomEntity extends CourtroomEntity implements DbInsertable<CourtroomEntity> {
+
+    @lombok.Builder
+    public TestCourtroomEntity(Integer id,
+                               String name,
+                               CourthouseEntity courthouse,
+                               UserAccountEntity createdBy,
+                               OffsetDateTime createdDateTime) {
+        setId(id);
+        setName(name);
+        setCourthouse(courthouse);
+        setCreatedBy(createdBy);
+        setCreatedDateTime(createdDateTime);
+    }
+
+    @Override
+    public CourtroomEntity getEntity() {
+        try {
+            CourtroomEntity courtroomEntity = new CourtroomEntity();
+            BeanUtils.copyProperties(courtroomEntity, this);
+            return courtroomEntity;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new AssertionFailure("Assumed that there would be no error on mapping data", e);
+        }
+    }
+
+    public static class TestCourtroomEntityBuilderRetrieve implements BuilderHolder<TestCourtroomEntity, TestCourtroomEntity.TestCourtroomEntityBuilder> {
+
+        private final TestCourtroomEntity.TestCourtroomEntityBuilder builder = TestCourtroomEntity.builder();
+
+        @Override
+        public TestCourtroomEntity build() {
+            return builder.build();
+        }
+
+        @Override
+        public TestCourtroomEntity.TestCourtroomEntityBuilder getBuilder() {
+            return builder;
+        }
+    }
+
+}
