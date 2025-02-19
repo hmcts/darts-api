@@ -395,9 +395,9 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom())
             && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom().getCourthouse())) {
             courthouse = transcriptionDocument.getTranscription().getHearing().getCourtroom().getCourthouse().getDisplayName();
-        } else if (nonNull(transcriptionDocument.getTranscription().getCourtroom())
-            && nonNull(transcriptionDocument.getTranscription().getCourtroom().getCourthouse())) {
-            courthouse = transcriptionDocument.getTranscription().getCourtroom().getCourthouse().getDisplayName();
+        } else if (nonNull(transcriptionDocument.getTranscription().getCourtCase().getCourthouse())
+            && nonNull(transcriptionDocument.getTranscription().getCourtCase().getCourthouse())) {
+            courthouse = transcriptionDocument.getTranscription().getCourtCase().getCourthouse().getDisplayName();
         }
         return courthouse;
     }

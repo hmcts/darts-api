@@ -162,9 +162,8 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
          FROM TranscriptionEntity t
          JOIN t.transcriptionStatus ts
          JOIN t.createdBy ua
-         LEFT JOIN t.courtroom cr
          LEFT JOIN t.courtCases cc
-         LEFT JOIN cr.courthouse cth
+         LEFT JOIN cc.courthouse cth
          WHERE (:ids IS NULL OR t.id IN :ids)
              AND (:caseNumber IS NULL OR cc.caseNumber = :caseNumber)
              AND (cth.displayName ILIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
