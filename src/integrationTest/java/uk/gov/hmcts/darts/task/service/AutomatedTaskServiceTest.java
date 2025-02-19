@@ -985,7 +985,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskInboundTranscriptionAndAnnotationDeleterAutomatedTask() throws Exception {
+    void givenConfiguredTaskInboundTranscriptionAndAnnotationDeleterAutomatedTask() {
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 
@@ -1000,7 +1000,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() throws Exception {
+    void givenConfiguredTaskUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() {
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 
