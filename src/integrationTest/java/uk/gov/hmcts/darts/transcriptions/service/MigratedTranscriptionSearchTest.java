@@ -68,7 +68,7 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
         var transcriptionResponse = adminTranscriptionSearchService.searchTranscriptions(transcriptionSearchRequest);
 
         assertThat(transcriptionResponse).extracting("courthouseId")
-            .containsExactly(transcription.getCourtroom().getCourthouse().getId());
+            .containsExactly(transcription.getCourtCase().getCourthouse().getId());
     }
 
     @Test
