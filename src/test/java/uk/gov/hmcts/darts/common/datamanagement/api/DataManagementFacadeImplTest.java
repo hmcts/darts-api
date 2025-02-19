@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.common.datamanagement.api;
 
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.BlobClient;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +36,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRetrievalQueueRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
@@ -49,11 +48,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.IOUtils.toInputStream;
@@ -65,6 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
@@ -75,7 +77,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
+@Slf4j
 class DataManagementFacadeImplTest {
+
+    private static final String SOME_TEMP_WORKSPACE = "some/temp/workspace";
+    private static final String DOWNLOAD_RESPONSE_META_DATA = "DownloadResponseMetaData: {}";
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -88,8 +94,6 @@ class DataManagementFacadeImplTest {
     @Mock
     private UnstructuredDataHelper unstructuredDataHelper;
     @Mock
-    private DataManagementApi dataManagementApi;
-    @Mock
     private DataManagementService dataManagementService;
     @Mock
     private DataManagementConfiguration dataManagementConfiguration;
@@ -99,8 +103,6 @@ class DataManagementFacadeImplTest {
     private ArmApiServiceImpl armApiService;
     @Mock
     private ObjectRetrievalQueueRepository objectRetrievalQueueRepository;
-    @Mock
-    private BlobClient blobClient;
     @Mock
     private DownloadResponseMetaData downloadResponseMetaDataMock;
     @Mock
@@ -167,7 +169,9 @@ class DataManagementFacadeImplTest {
 
         FileStore.getFileStore().remove();
 
-        assertEquals(0, Files.list(tempDirectory.toPath()).count());
+        try (Stream<Path> files = Files.list(tempDirectory.toPath())) {
+            assertEquals(0, files.count());
+        }
     }
 
     @Test
@@ -182,7 +186,7 @@ class DataManagementFacadeImplTest {
 
         ExternalObjectDirectoryEntity arm = createEodEntity(armLocationEntity);
 
-        List<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(arm);
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(arm);
 
         UnstructuredDataHelper unstructuredDataHelperTest = getUnstructuredDataHelper();
 
@@ -194,8 +198,8 @@ class DataManagementFacadeImplTest {
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
-            assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.ARM, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
@@ -210,7 +214,7 @@ class DataManagementFacadeImplTest {
 
         ExternalObjectDirectoryEntity dets = createEodEntity(unstructuredLocationEntity);
 
-        List<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(dets);
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(dets);
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
@@ -218,13 +222,13 @@ class DataManagementFacadeImplTest {
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
-            assertEquals(DatastoreContainerType.UNSTRUCTURED, downloadResponseMetaData.getContainerTypeUsedToDownload());
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.UNSTRUCTURED, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
     @Test
-    void testThrowErrorNoStoredEodEntities() throws Exception {
+    void testThrowErrorNoStoredEodEntities() {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
@@ -233,7 +237,7 @@ class DataManagementFacadeImplTest {
         ExternalObjectDirectoryEntity dets = createEodEntity(unstructuredLocationEntity);
         dets.getStatus().setId(ObjectRecordStatusEnum.FAILURE.getId());
 
-        List<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(dets);
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(dets);
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
@@ -243,7 +247,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(entitiesToDownload)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         assertTrue(exception.getMessage().contains("Supplied list of EodEntities does not have any that are stored"));
@@ -260,7 +269,7 @@ class DataManagementFacadeImplTest {
 
         ExternalObjectDirectoryEntity dets = createEodEntity(detsLocationEntity);
 
-        List<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(dets);
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(dets);
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
@@ -268,8 +277,8 @@ class DataManagementFacadeImplTest {
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
-            assertEquals(DatastoreContainerType.DETS, downloadResponseMetaData.getContainerTypeUsedToDownload());
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.DETS, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
@@ -285,7 +294,7 @@ class DataManagementFacadeImplTest {
         // create the payload to be tested
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
 
-        List<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(inboundEntity);
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(inboundEntity);
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
@@ -295,7 +304,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(entitiesToDownload)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         assertTrue(exception.getMessage().contains("matching eodEntity not found for ARM"));
@@ -323,7 +337,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(entitiesToDownload)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         assertTrue(exception.getMessage().contains("checking container ARM"));
@@ -344,7 +363,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(entitiesToDownload)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         assertTrue(exception.getMessage().contains("Supplied list of EodEntities is empty"));
@@ -367,7 +391,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(mediaEntity)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(any());
@@ -400,7 +429,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(mediaEntity)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         verify(objectRetrievalQueueRepository, times(0)).saveAndFlush(any());
@@ -408,7 +442,7 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
-    void insertMediaEntityInObjectRetrievalQueueWhenNotFoundIn() throws Exception {
+    void insertMediaEntityInObjectRetrievalQueueWhenNotFoundIn() {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(1);
@@ -419,13 +453,7 @@ class DataManagementFacadeImplTest {
         mediaEntity.setCreatedBy(userAccount);
         mediaEntity.setLastModifiedBy(userAccount);
 
-        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
-        objectRetrievalQueueEntity.setMedia(mediaEntity);
-        objectRetrievalQueueEntity.setCreatedBy(userAccount);
-        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
-        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
-        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
-        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = createObjectRetrievalQueueEntity(mediaEntity, userAccount);
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
@@ -435,17 +463,70 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(mediaEntity)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
     }
 
+    private static @NotNull ObjectRetrievalQueueEntity createObjectRetrievalQueueEntity(MediaEntity mediaEntity, UserAccountEntity userAccount) {
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+        objectRetrievalQueueEntity.setMedia(mediaEntity);
+        objectRetrievalQueueEntity.setCreatedBy(userAccount);
+        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
+        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
+        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
+        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
+        return objectRetrievalQueueEntity;
+    }
+
     @Test
-    void insertTranscriptionEntityInObjectRetrievalQueueWhenNotFoundIn() throws Exception {
+    void insertTranscriptionEntityInObjectRetrievalQueueWhenNotFoundIn() {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(1);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(userAccount);
+
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = getObjectRetrievalQueueEntity(transcriptionDocumentEntity,
+                                                                                              userAccount);
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
+                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+
+        // make the assertion on the response
+        assertThrows(
+            FileNotDownloadedException.class,
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
+        );
+
+        verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
+    }
+
+    private static @NotNull ObjectRetrievalQueueEntity getObjectRetrievalQueueEntity(TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                                                                     UserAccountEntity userAccount) {
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+        objectRetrievalQueueEntity.setTranscriptionDocument(transcriptionDocumentEntity);
+        objectRetrievalQueueEntity.setCreatedBy(userAccount);
+        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
+        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(transcriptionDocumentEntity.getId()));
+        objectRetrievalQueueEntity.setContentObjectId(transcriptionDocumentEntity.getContentObjectId());
+        objectRetrievalQueueEntity.setClipId(transcriptionDocumentEntity.getClipId());
+        return objectRetrievalQueueEntity;
+    }
+
+    private static @NotNull TranscriptionDocumentEntity createTranscriptionDocumentEntity(UserAccountEntity userAccount) {
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.setId(1);
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
@@ -455,27 +536,7 @@ class DataManagementFacadeImplTest {
         transcriptionDocumentEntity.setClipId("clip-id");
         transcriptionDocumentEntity.setUploadedBy(userAccount);
         transcriptionDocumentEntity.setLastModifiedBy(userAccount);
-
-        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
-        objectRetrievalQueueEntity.setTranscriptionDocument(transcriptionDocumentEntity);
-        objectRetrievalQueueEntity.setCreatedBy(userAccount);
-        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
-        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(transcriptionDocumentEntity.getId()));
-        objectRetrievalQueueEntity.setContentObjectId(transcriptionDocumentEntity.getContentObjectId());
-        objectRetrievalQueueEntity.setClipId(transcriptionDocumentEntity.getClipId());
-
-        // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
-
-        // make the assertion on the response
-        assertThrows(
-            FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)
-        );
-
-        verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
+        return transcriptionDocumentEntity;
     }
 
     @Test
@@ -496,7 +557,12 @@ class DataManagementFacadeImplTest {
 
         assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(mediaEntity)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
     }
 
@@ -520,7 +586,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         assertTrue(exception.getMessage().contains("No storedEodEntities found for transcriptionDocumentId"));
@@ -544,7 +615,12 @@ class DataManagementFacadeImplTest {
 
         assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
     }
 
@@ -564,7 +640,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(annotationDocumentEntity)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         assertTrue(exception.getMessage().contains("No storedEodEntities found for annotationDocumentId"));
@@ -588,16 +669,21 @@ class DataManagementFacadeImplTest {
 
         assertThrows(
             FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(annotationDocumentEntity)
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
     }
 
     @Test
-    void testUnstructuredDataHelperCreate() throws Exception {
+    void testUnstructuredDataHelperCreate() {
         when(blobClientUploadResponseImpl.getBlobName()).thenReturn(UUID.randomUUID());
 
         when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn("unstructured");
-        when(dataManagementService.saveBlobData((String) any(), (InputStream) any())).thenReturn(blobClientUploadResponseImpl);
+        when(dataManagementService.saveBlobData(anyString(), (InputStream) any())).thenReturn(blobClientUploadResponseImpl);
 
         UnstructuredDataHelper unstructuredDataHelperTest = getUnstructuredDataHelper();
 
@@ -617,7 +703,7 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
-    void testUnstructuredDataHelperCreateFailed() throws Exception {
+    void testUnstructuredDataHelperCreateFailed() {
 
         UnstructuredDataHelper unstructuredDataHelperTest = getUnstructuredDataHelper();
 
@@ -665,7 +751,6 @@ class DataManagementFacadeImplTest {
     void createCopyInUnstructuredDatastore_whenDeleteFileOnCompletionIsTrue_shouldDeleteFile() throws IOException {
         ExternalObjectDirectoryEntity eodEntityToUpload = mock(ExternalObjectDirectoryEntity.class);
         ExternalObjectDirectoryEntity eodEntityToDelete = mock(ExternalObjectDirectoryEntity.class);
-        UnstructuredDataHelper unstructuredDataHelper = mock(UnstructuredDataHelper.class);
         File targetFile = Files.createTempFile("test", "txt").toFile();
 
 
@@ -684,7 +769,6 @@ class DataManagementFacadeImplTest {
     void createCopyInUnstructuredDatastore_whenDeleteFileOnCompletionIsFalse_shouldNotDeleteFile() throws IOException {
         ExternalObjectDirectoryEntity eodEntityToUpload = mock(ExternalObjectDirectoryEntity.class);
         ExternalObjectDirectoryEntity eodEntityToDelete = mock(ExternalObjectDirectoryEntity.class);
-        UnstructuredDataHelper unstructuredDataHelper = mock(UnstructuredDataHelper.class);
         File targetFile = Files.createTempFile("test", "txt").toFile();
 
 
@@ -700,7 +784,8 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.CloseResource") //False positive as resources are mocked
+    //False positive as resources are mocked
+    @SuppressWarnings("PMD.CloseResource")
     void processUnstructuredData_downloadResponseMetaDataIsFileBased_shouldNotCreateSecondTempFile() throws IOException {
         DatastoreContainerType datastoreContainerType = DatastoreContainerType.ARM;
         FileBasedDownloadResponseMetaData downloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
@@ -725,7 +810,8 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.CloseResource") //False positive as resources are mocked
+    //False positive as resources are mocked
+    @SuppressWarnings("PMD.CloseResource")
     void processUnstructuredData_downloadResponseMetaDataIsNotFileBased_shouldCreateTempFile() throws IOException {
         DatastoreContainerType datastoreContainerType = DatastoreContainerType.ARM;
         DownloadResponseMetaData downloadResponseMetaData = mock(DownloadResponseMetaData.class);
@@ -738,9 +824,8 @@ class DataManagementFacadeImplTest {
         InputStream stream = new ByteArrayInputStream("Test String".getBytes(UTF_8));
         when(resource.getInputStream()).thenReturn(stream);
 
-
         DataManagementConfiguration dataManagementConfiguration = mock(DataManagementConfiguration.class);
-        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("some/temp/workspace");
+        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn(SOME_TEMP_WORKSPACE);
         final DataManagementFacadeImpl dmFacade = spy(new DataManagementFacadeImpl(null, null,
                                                                                    null, null, null,
                                                                                    dataManagementConfiguration, null, null));
@@ -758,7 +843,7 @@ class DataManagementFacadeImplTest {
         verify(dmFacade).createCopyInUnstructuredDatastore(eq(eodEntityToUpload), eq(eodEntityToDelete), targetFileArgumentCaptor.capture(), eq(true));
 
         File targetFileActual = targetFileArgumentCaptor.getValue();
-        assertThat(targetFileActual.getAbsolutePath()).matches(".*/some/temp/workspace/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        assertThat(targetFileActual.getAbsolutePath()).matches(".*/" + SOME_TEMP_WORKSPACE + "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
     }
 
     @NotNull
