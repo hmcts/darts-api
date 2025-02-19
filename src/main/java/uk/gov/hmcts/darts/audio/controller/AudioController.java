@@ -127,7 +127,6 @@ public class AudioController implements AudioApi {
         var transformedMedia = mediaRequestService.getTransformedMediaById(transformedMediaId);
         GetTransformedMediaResponse response = transformedMediaMapper.mapToGetTransformedMediaResponse(transformedMedia);
         return new ResponseEntity<>(response, HttpStatus.OK);
-
     }
 
     @Override

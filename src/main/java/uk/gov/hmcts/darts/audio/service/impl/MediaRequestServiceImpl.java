@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
+import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
+import uk.gov.hmcts.darts.audio.component.impl.RemoveAdminActionComponent;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
@@ -52,7 +54,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -64,7 +65,6 @@ import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -92,7 +92,6 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUDIO_PLAYBACK;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.CHANGE_AUDIO_OWNERSHIP;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.EXPORT_AUDIO;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_AUDIO;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
@@ -124,8 +123,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final MediaRepository mediaRepository;
     private final MediaHideOrShowValidator mediaHideOrShowValidator;
     private final ObjectAdminActionRepository objectAdminActionRepository;
-    private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
     private final SystemUserHelper systemUserHelper;
+    private final ApplyAdminActionComponent applyAdminActionComponent;
+    private final RemoveAdminActionComponent removeAdminActionComponent;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -527,57 +527,21 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     @Transactional
     public MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest) {
-        MediaHideResponse response;
-
         IdRequest<MediaHideRequest> request = new IdRequest<>(mediaHideRequest, mediaId);
         mediaHideOrShowValidator.validate(request);
 
-        Optional<MediaEntity> mediaEntityOptional
-            = mediaRepository.findByIdIncludeDeleted(mediaId);
-        if (mediaEntityOptional.isPresent()) {
-            MediaEntity mediaEntity = mediaEntityOptional.get();
+        final MediaEntity targetedMedia = mediaRepository.findByIdIncludeDeleted(mediaId)
+            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
 
-            mediaEntity.setHidden(mediaHideRequest.getIsHidden());
-            mediaRepository.saveAndFlush(mediaEntity);
-
-            if (request.getPayload().getIsHidden()) {
-                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity
-                    = objectHiddenReasonRepository.findById(mediaHideRequest.getAdminAction().getReasonId());
-
-                if (objectHiddenReasonEntity.isEmpty()) {
-                    throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
-                }
-
-                auditApi.record(HIDE_AUDIO);
-
-                // on hiding add the relevant hide record
-                ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
-                objectAdminActionEntity.setObjectHiddenReason(objectHiddenReasonEntity.get());
-                objectAdminActionEntity.setTicketReference(mediaHideRequest.getAdminAction().getTicketReference());
-                objectAdminActionEntity.setComments(mediaHideRequest.getAdminAction().getComments());
-                objectAdminActionEntity.setMedia(mediaEntity);
-                objectAdminActionEntity.setHiddenBy(userIdentity.getUserAccount());
-                objectAdminActionEntity.setHiddenDateTime(currentTimeHelper.currentOffsetDateTime());
-                objectAdminActionEntity.setMarkedForManualDeletion(false);
-
-                objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
-
-                response = GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntity, objectAdminActionEntity);
-            } else {
-                List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByMedia_Id(mediaId);
-
-                response = GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntityOptional.get(), null);
-
-                for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
-                    auditApi.record(AuditActivity.UNHIDE_AUDIO, buildUnhideAudioAdditionalDataString(objectAdminActionEntity));
-                    objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
-                }
-            }
+        Boolean isToBeHidden = mediaHideRequest.getIsHidden();
+        if (isToBeHidden) {
+            ObjectAdminActionEntity adminActionForTargetedMedia = applyAdminActionComponent.applyAdminActionFromAllVersions(targetedMedia, mediaHideRequest.getAdminAction());
+            return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, adminActionForTargetedMedia);
         } else {
-            throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
+            removeAdminActionComponent.removeAdminActionFromAllVersions(targetedMedia);
+            return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, null);
         }
 
-        return response;
     }
 
     private String buildUnhideAudioAdditionalDataString(ObjectAdminActionEntity objectAdminActionEntity) {

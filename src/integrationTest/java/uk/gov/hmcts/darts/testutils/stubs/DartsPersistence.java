@@ -725,7 +725,6 @@ public class DartsPersistence {
         externalObjectDirectoryEntities.forEach(this::save);
     }
 
-
     private void saveMediaList(List<MediaEntity> mediaList) {
         mediaList.forEach(media -> {
             if (media.getId() == null) {
