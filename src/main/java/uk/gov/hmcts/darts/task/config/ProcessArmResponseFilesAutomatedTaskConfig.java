@@ -9,5 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-public class ProcessArmResponseFilesAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
+public class ProcessArmResponseFilesAutomatedTaskConfig extends AbstractAsyncAutomatedTaskConfig {
 }
