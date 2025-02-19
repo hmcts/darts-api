@@ -337,7 +337,12 @@ class DataManagementFacadeImplTest {
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
-            dmFacade.retrieveFileFromStorage(entitiesToDownload)::close
+            () -> {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                    // add for try close with resources
+                    log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
+                }
+            }
         );
 
         assertTrue(exception.getMessage().contains("checking container ARM"));
