@@ -122,7 +122,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private void applyRetentionToCaseDocuments(CourtCaseEntity courtCase) {
         var caseDocuments = caseDocumentRepository.findByCourtCase(courtCase);
-
         for (var caseDocument : caseDocuments) {
             if (allClosed(List.of(courtCase))) {
                 setLongestRetentionDateForCaseDocument(courtCase, caseDocument);

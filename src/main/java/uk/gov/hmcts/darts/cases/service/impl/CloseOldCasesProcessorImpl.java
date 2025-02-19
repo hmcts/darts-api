@@ -101,7 +101,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
                 if (closedEvent.isPresent()) {
                     closeCaseInDbAndAddRetention(courtCase, closedEvent.get().getCreatedDateTime(),
-                                                 RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSE, userAccount);
+                                                 RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED, userAccount);
                 } else {
                     //look for the last event and use that date
                     closeCaseInDbAndAddRetention(courtCase, eventList.getFirst().getCreatedDateTime(),

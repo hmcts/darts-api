@@ -75,7 +75,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     private void createAndSaveRetentionConfidenceCategoryMappings() {
         createRetentionConfidenceCategoryMapperEntity(
-            RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSE,
+            RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED,
             RetentionConfidenceReasonEnum.AGED_CASE,
             RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
         );
@@ -148,7 +148,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(closeDate.plusYears(7).truncatedTo(ChronoUnit.DAYS), caseRetentionEntity.getRetainUntil());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSE, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
     }
 
     @Test
