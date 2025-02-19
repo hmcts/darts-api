@@ -80,8 +80,9 @@ import static org.mockito.Mockito.when;
 @Slf4j
 class DataManagementFacadeImplTest {
 
-    public static final String SOME_TEMP_WORKSPACE = "some/temp/workspace";
-    public static final String DOWNLOAD_RESPONSE_META_DATA = "DownloadResponseMetaData: {}";
+    private static final String SOME_TEMP_WORKSPACE = "some/temp/workspace";
+    private static final String DOWNLOAD_RESPONSE_META_DATA = "DownloadResponseMetaData: {}";
+
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
