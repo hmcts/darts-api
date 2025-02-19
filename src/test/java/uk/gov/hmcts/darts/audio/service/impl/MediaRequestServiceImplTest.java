@@ -14,9 +14,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
-import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
-import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
@@ -54,7 +52,6 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,15 +79,11 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUDIO_PLAYBACK;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.CHANGE_AUDIO_OWNERSHIP;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.EXPORT_AUDIO;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_AUDIO;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.UNHIDE_AUDIO;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
-import static uk.gov.hmcts.darts.test.common.data.ObjectAdminActionTestData.objectAdminActionWithDefaults;
-import static uk.gov.hmcts.darts.test.common.data.ObjectHiddenReasonTestData.classified;
 import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
 
 @ExtendWith(MockitoExtension.class)
@@ -798,33 +791,4 @@ class MediaRequestServiceImplTest {
         verifyNoInteractions(auditApi);
     }
 
-    @Test
-    @SuppressWarnings("java:S1874")
-    void auditsWhenAudioHidden() {
-        var media = withIdsPopulated(mediaTestData.someMinimalMedia());
-        media.setHidden(false);
-        when(mediaRepository.findByIdIncludeDeleted(any())).thenReturn(Optional.of(media));
-        when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.of(classified()));
-
-        var mediaHideRequest = new MediaHideRequest()
-            .isHidden(true)
-            .adminAction(new AdminActionRequest().reasonId(1));
-
-        mediaRequestService.adminHideOrShowMediaById(media.getId(), mediaHideRequest);
-
-        verify(auditApi).record(HIDE_AUDIO);
-    }
-
-    @Test
-    @SuppressWarnings("java:S1874")
-    void auditsWhenAudioMadeVisible() {
-        var media = withIdsPopulated(mediaTestData.someMinimalMedia());
-        media.setHidden(true);
-        when(mediaRepository.findByIdIncludeDeleted(any())).thenReturn(Optional.of(media));
-        when(objectAdminActionRepository.findByMedia_Id(any())).thenReturn(Arrays.asList(objectAdminActionWithDefaults()));
-
-        mediaRequestService.adminHideOrShowMediaById(media.getId(), new MediaHideRequest().isHidden(false));
-
-        verify(auditApi).record(UNHIDE_AUDIO, "Ticket reference: Ticket-123, Comments: some comment");
-    }
 }

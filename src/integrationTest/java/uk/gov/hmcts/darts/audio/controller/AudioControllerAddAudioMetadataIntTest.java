@@ -21,15 +21,21 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequestWithStorageGUID;
 import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.test.common.LogUtil;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
@@ -53,6 +59,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,6 +98,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
+
+    @Autowired
+    private AuditRepository auditRepository;
 
     private String guid = UUID.randomUUID().toString();
 
@@ -341,6 +351,158 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void shouldHideIncomingMedia_whenIncomingMediaHasExistingVersionThatIsHiddenButHasNoExistingAdminAction() throws Exception {
+        // Given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
+
+        CourtroomEntity existingCourtroom = PersistableFactory.getCourtroomTestData().someMinimalBuilderHolder().getBuilder()
+            .courthouse(PersistableFactory.getCourthouseTestData().someMinimal())
+            .build()
+            .getEntity();
+        dartsPersistence.save(existingCourtroom);
+
+        final OffsetDateTime startAt = OffsetDateTime.parse("2024-10-10T10:00:00Z");
+        final OffsetDateTime endAt = OffsetDateTime.parse("2024-10-10T10:15:00Z");
+        MediaEntity initialMedia = PersistableFactory.getMediaTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .isHidden(true)
+            // The following attributes must align with the data that gets created by createAddAudioRequest(), so that we get a duplicate metadata scenario
+            .courtroom(existingCourtroom)
+            .channel(1)
+            .mediaFile("test")
+            .start(startAt)
+            .end(endAt)
+            .build()
+            .getEntity();
+        dartsPersistence.save(initialMedia);
+        String chronicleId = initialMedia.getId().toString();
+        initialMedia.setChronicleId(chronicleId);
+        dartsPersistence.save(initialMedia);
+
+        AddAudioMetadataRequest request = createAddAudioRequest(startAt,
+                                                                endAt,
+                                                                existingCourtroom.getCourthouse().getCourthouseName(),
+                                                                existingCourtroom.getName(),
+                                                                AUDIO_BINARY_PAYLOAD_1);
+
+        // When
+        mockMvc.perform(
+                post(ENDPOINT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk());
+
+        // Then, assert DB state
+        List<MediaEntity> allMedias = dartsDatabase.getMediaRepository().findAll();
+
+        List<MediaEntity> allVersions = allMedias.stream()
+            .filter(media -> chronicleId.equals(media.getChronicleId()))
+            .toList();
+        assertEquals(2, allVersions.size());
+        assertTrue(allVersions.stream().allMatch(MediaEntity::isHidden));
+
+        // Identify the newly added version
+        List<MediaEntity> newMediaVersions = allMedias.stream()
+            .filter(media -> String.valueOf(initialMedia.getId()).equals(media.getAntecedentId()))
+            .toList();
+        assertEquals(1, newMediaVersions.size());
+        MediaEntity newMediaVersion = newMediaVersions.getFirst();
+
+        Optional<ObjectAdminActionEntity> adminActionOptional = newMediaVersion.getObjectAdminAction();
+        assertTrue(adminActionOptional.isPresent());
+        ObjectAdminActionEntity adminAction = adminActionOptional.get();
+        assertNull(adminAction.getTicketReference());
+        assertEquals("Prior version had no admin action, so no details are available", adminAction.getComments());
+        assertNull(adminAction.getObjectHiddenReason());
+
+        List<AuditEntity> hideAudio = dartsDatabase.getAuditRepository().findAll().stream()
+            .filter(audit -> AuditActivity.HIDE_AUDIO.getId().equals(audit.getAuditActivity().getId()))
+            .toList();
+        assertEquals(1, hideAudio.size());
+    }
+
+    @Test
+    void shouldHideIncomingMediaAndCopyExistingAdminAction_whenIncomingMediaHasExistingVersionThatIsHiddenAndHasExistingAdminAction() throws Exception {
+        // Given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
+
+        CourtroomEntity existingCourtroom = PersistableFactory.getCourtroomTestData().someMinimalBuilderHolder().getBuilder()
+            .courthouse(PersistableFactory.getCourthouseTestData().someMinimal())
+            .build()
+            .getEntity();
+        dartsPersistence.save(existingCourtroom);
+
+        final OffsetDateTime startAt = OffsetDateTime.parse("2024-10-10T10:00:00Z");
+        final OffsetDateTime endAt = OffsetDateTime.parse("2024-10-10T10:15:00Z");
+        MediaEntity initialMedia = PersistableFactory.getMediaTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .isHidden(true)
+            // The following attributes must align with the data that gets created by createAddAudioRequest(), so that we get a duplicate metadata scenario
+            .courtroom(existingCourtroom)
+            .channel(1)
+            .mediaFile("test")
+            .start(startAt)
+            .end(endAt)
+            .build()
+            .getEntity();
+        dartsPersistence.save(initialMedia);
+
+        ObjectAdminActionEntity adminActionForInitialMedia = PersistableFactory.getObjectAdminActionTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .ticketReference("Some ticket ref")
+            .comments("Some comments")
+            .media(initialMedia)
+            .build()
+            .getEntity();
+        dartsPersistence.save(adminActionForInitialMedia);
+
+        String chronicleId = initialMedia.getId().toString();
+        initialMedia.setChronicleId(chronicleId);
+        initialMedia.setObjectAdminAction(adminActionForInitialMedia);
+        dartsPersistence.save(initialMedia);
+
+        AddAudioMetadataRequest request = createAddAudioRequest(startAt,
+                                                                endAt,
+                                                                existingCourtroom.getCourthouse().getCourthouseName(),
+                                                                existingCourtroom.getName(),
+                                                                AUDIO_BINARY_PAYLOAD_1);
+
+        // When
+        mockMvc.perform(
+                post(ENDPOINT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk());
+
+        // Then, assert DB state
+        List<MediaEntity> allMedias = dartsDatabase.getMediaRepository().findAll();
+
+        List<MediaEntity> allVersions = allMedias.stream()
+            .filter(media -> chronicleId.equals(media.getChronicleId()))
+            .toList();
+        assertEquals(2, allVersions.size());
+        assertTrue(allVersions.stream().allMatch(MediaEntity::isHidden));
+
+        // Identify the newly added version
+        List<MediaEntity> newMediaVersions = allMedias.stream()
+            .filter(media -> String.valueOf(initialMedia.getId()).equals(media.getAntecedentId()))
+            .toList();
+        assertEquals(1, newMediaVersions.size());
+        MediaEntity newMediaVersion = newMediaVersions.getFirst();
+
+        Optional<ObjectAdminActionEntity> adminActionOptional = newMediaVersion.getObjectAdminAction();
+        assertTrue(adminActionOptional.isPresent());
+        ObjectAdminActionEntity adminAction = adminActionOptional.get();
+        assertEquals(adminActionForInitialMedia.getTicketReference(), adminAction.getTicketReference());
+        assertEquals(adminActionForInitialMedia.getComments(), adminAction.getComments());
+
+        List<AuditEntity> hideAudio = dartsDatabase.getAuditRepository().findAll().stream()
+            .filter(audit -> AuditActivity.HIDE_AUDIO.getId().equals(audit.getAuditActivity().getId()))
+            .toList();
+        assertEquals(1, hideAudio.size());
     }
 
     private AddAudioMetadataRequestWithStorageGUID createAddAudioRequest(OffsetDateTime startedAt,
