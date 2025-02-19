@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.service;
+package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
 import lombok.SneakyThrows;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
-import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -233,7 +232,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
         ObjectStateRecordEntity dbOsr1 = osrRepository.findByArmEodId(String.valueOf(armEod1.getId())).orElseThrow();
@@ -369,7 +368,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
         ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
@@ -456,7 +455,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
         ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
@@ -521,7 +520,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -576,7 +575,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = dartsDatabase.getExternalObjectDirectoryRepository()
