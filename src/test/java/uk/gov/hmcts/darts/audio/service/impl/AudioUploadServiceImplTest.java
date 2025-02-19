@@ -223,7 +223,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldLogSmallFileWithLongDurationWarning_whenFileIs1024BytesAndDurationIsMoreThan2Seconds() {
         AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(3, 1024L);
 
-        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
 
         verify(logApi).addAudioSmallFileWithLongDuration(
             "COURTHOUSE_123",
@@ -239,7 +239,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldNotLogSmallFileWithLongDurationWarning_whenFileIs1024BytesAndDurationIsEqualTo2Seconds() {
         AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(2, 1024L);
 
-        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
 
         verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
     }
@@ -248,7 +248,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldLogSmallFileWithLongDurationWarning_whenFileIs1025BytesAndDurationIsMoreThan2Seconds() {
         AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(3, 1025L);
 
-        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
 
         verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
     }

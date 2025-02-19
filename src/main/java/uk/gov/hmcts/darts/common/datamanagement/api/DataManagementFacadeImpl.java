@@ -214,7 +214,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             targetFile = fileBasedDownloadResponseMetaData.getFileToBeDownloadedTo();
             deleteFileOnCompletion = false;
         } else {
-            String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
+            String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID().toString();
             targetFile = new File(tempBlobPath);
             FileUtils.copyInputStreamToFile(downloadResponseMetaData.getResource().getInputStream(), targetFile);
         }

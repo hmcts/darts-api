@@ -95,56 +95,56 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
                     mediaEntity,
                     storedStatus,
                     inboundLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
             var inboundExternalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity2,
                     storedStatus,
                     inboundLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
             var inboundExternalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity3,
                     storedStatus,
                     inboundLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
             var inboundExternalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity4,
                     storedStatus,
                     inboundLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
             var inboundExternalObjectDirectoryEntity5 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity5,
                     storedStatus,
                     inboundLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
             var unstructuredExternalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity,
                     storedStatus,
                     unstructuredLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
             var unstructuredExternalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity2,
                     storedStatus,
                     unstructuredLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
             var unstructuredExternalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity3,
                     storedStatus,
                     unstructuredLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
 
             var unstructuredExternalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
@@ -152,7 +152,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
                     mediaEntity4,
                     storedStatus,
                     unstructuredLocation,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 );
 
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity);

@@ -36,8 +36,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -67,7 +65,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
 
     @Override
-    public void deleteUploadedAudio(UUID guid) {
+    public void deleteUploadedAudio(String guid) {
         try {
             dataManagementApi.deleteBlobDataFromInboundContainer(guid);
         } catch (AzureDeleteBlobException azureDeleteBlobException) {
@@ -76,21 +74,14 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     }
 
     @Override
-    public void addAudio(UUID guid, AddAudioMetadataRequest addAudioMetadataRequest) {
-        String checksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, guid);
-        if (!checksum.equals(addAudioMetadataRequest.getChecksum())) {
-            deleteUploadedAudio(guid);
+    public void addAudio(String blodId, AddAudioMetadataRequest addAudioMetadataRequest) {
+        String incomingChecksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, blodId);
+        if (!incomingChecksum.equals(addAudioMetadataRequest.getChecksum())) {
+            deleteUploadedAudio(blodId);
             throw new DartsApiException(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA,
                                         String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
-                                                      checksum, addAudioMetadataRequest.getChecksum()));
+                                                      incomingChecksum, addAudioMetadataRequest.getChecksum()));
         }
-        addAudio(checksum, () -> guid, addAudioMetadataRequest, true);
-    }
-
-    private void addAudio(String incomingChecksum,
-                          Supplier<UUID> externalLocationSupplier,
-                          AddAudioMetadataRequest addAudioMetadataRequest,
-                          boolean deleteGuidOnDuplicate) {
         log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
         //remove duplicate cases as they can appear more than once, e.g. if they broke for lunch.
@@ -102,22 +93,18 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         List<MediaEntity> duplicatesWithDifferentChecksum = filterForMediaWithMismatchingChecksum(duplicatesToBeSuperseded, incomingChecksum);
 
         if (isNotEmpty(duplicatesToBeSuperseded) && isEmpty(duplicatesWithDifferentChecksum)) {
-            if (deleteGuidOnDuplicate) {
-                UUID uuid = externalLocationSupplier.get();
-                try {
-                    dataManagementApi.deleteBlobDataFromInboundContainer(uuid);
-                } catch (AzureDeleteBlobException e) {
-                    log.error("Failed to delete blob from inbound container with guid: ", uuid, e);
-                }
+            try {
+                dataManagementApi.deleteBlobDataFromInboundContainer(blodId);
+            } catch (AzureDeleteBlobException e) {
+                log.error("Failed to delete blob from inbound container with guid: ", blodId, e);
             }
+
             if (log.isInfoEnabled()) {
                 log.info("Exact duplicate detected based upon media metadata and checksum for media entity ids {}. Returning 200 with no changes.",
                          duplicatesToBeSuperseded.stream().map(MediaEntity::getId).toList());
             }
             return;
         }
-
-        UUID externalLocation = externalLocationSupplier.get();
 
         UserAccountEntity currentUser = userIdentity.getUserAccount();
 
@@ -128,7 +115,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             mediaToSupersede.addAll(duplicatesWithDifferentChecksum);
             if (log.isInfoEnabled()) {
                 log.info("Duplicate audio file has been found with difference in checksum for guid {} latest checksum {}. But found {}",
-                         externalLocation, incomingChecksum,
+                         blodId, incomingChecksum,
                          duplicatesWithDifferentChecksum
                              .stream()
                              .map(mediaEntity -> "Media Id " + mediaEntity.getId().toString() + " with checksum " + mediaEntity.getChecksum())
@@ -137,12 +124,20 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
 
         // version the file upload to the database
-        versionUpload(mediaToSupersede, addAudioMetadataRequest, externalLocation, incomingChecksum, currentUser);
+        versionUpload(mediaToSupersede, addAudioMetadataRequest, blodId, incomingChecksum, currentUser);
+    }
+
+    private String saveAudioToInbound(MultipartFile audioFileStream) {
+        try (var bufferedInputStream = new BufferedInputStream(audioFileStream.getInputStream())) {
+            return dataManagementApi.saveBlobDataToInboundContainer(bufferedInputStream);
+        } catch (IOException e) {
+            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+        }
     }
 
     void versionUpload(List<MediaEntity> mediaToSupersede,
                        AddAudioMetadataRequest addAudioMetadataRequest,
-                       UUID externalLocation, String checksum,
+                       String externalLocation, String checksum,
                        UserAccountEntity userAccount) {
 
         MediaEntity newMediaEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);
@@ -258,7 +253,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         mediaRepository.save(mediaEntity);
     }
 
-    void saveExternalObjectDirectory(UUID externalLocation,
+    void saveExternalObjectDirectory(String externalLocation,
                                      String checksum,
                                      UserAccountEntity userAccountEntity,
                                      MediaEntity mediaEntity) {

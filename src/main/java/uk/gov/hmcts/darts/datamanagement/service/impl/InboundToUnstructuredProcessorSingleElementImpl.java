@@ -45,8 +45,8 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.awaitingVerificationStatus());
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
         try {
-            UUID inboundExternalLocation = inboundEodEntity.getExternalLocation();
-            UUID unstructuredExternalLocation = UUID.randomUUID();
+            String inboundExternalLocation = inboundEodEntity.getExternalLocation();
+            String unstructuredExternalLocation = UUID.randomUUID().toString();
             dataManagementService.copyBlobData(
                 getInboundContainerName(), getUnstructuredContainerName(), inboundExternalLocation.toString(), unstructuredExternalLocation.toString());
             unstructuredExternalObjectDirectoryEntity.setChecksum(inboundEodEntity.getChecksum());

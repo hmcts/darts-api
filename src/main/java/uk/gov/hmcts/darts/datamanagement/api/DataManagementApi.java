@@ -11,11 +11,10 @@ import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.UUID;
 
 public interface DataManagementApi extends BlobContainerDownloadable {
 
-    DownloadResponseMetaData getBlobDataFromOutboundContainer(UUID blobId) throws FileNotDownloadedException;
+    DownloadResponseMetaData getBlobDataFromOutboundContainer(String blobId) throws FileNotDownloadedException;
 
     BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata);
 
@@ -23,15 +22,17 @@ public interface DataManagementApi extends BlobContainerDownloadable {
 
     BlobClientUploadResponse saveBlobToContainer(InputStream inputStream, DatastoreContainerType container);
 
-    void deleteBlobDataFromOutboundContainer(UUID blobId) throws AzureDeleteBlobException;
+    void deleteBlobDataFromOutboundContainer(String blobId) throws AzureDeleteBlobException;
 
-    void deleteBlobDataFromInboundContainer(UUID blobId) throws AzureDeleteBlobException;
+    void deleteBlobDataFromInboundContainer(String blobId) throws AzureDeleteBlobException;
 
-    void deleteBlobDataFromUnstructuredContainer(UUID blobId) throws AzureDeleteBlobException;
+    void deleteBlobDataFromUnstructuredContainer(String blobId) throws AzureDeleteBlobException;
 
-    UUID saveBlobDataToInboundContainer(BinaryData binaryData);
+    String saveBlobDataToInboundContainer(BinaryData binaryData);
 
-    UUID saveBlobDataToUnstructuredContainer(BinaryData binaryData);
+    String saveBlobDataToInboundContainer(InputStream inputStream);
 
-    String getChecksum(DatastoreContainerType datastoreContainerType, UUID guid);
+    String saveBlobDataToUnstructuredContainer(BinaryData binaryData);
+
+    String getChecksum(DatastoreContainerType datastoreContainerType, String guid);
 }

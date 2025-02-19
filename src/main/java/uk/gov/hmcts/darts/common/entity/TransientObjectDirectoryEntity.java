@@ -15,8 +15,6 @@ import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "transient_object_directory")
 @Getter
@@ -39,7 +37,7 @@ public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity im
 
     @NaturalId
     @Column(name = "external_location", unique = true, nullable = false)
-    private UUID externalLocation;
+    private String externalLocation;
 
     @Column(name = "checksum")
     private String checksum;
@@ -53,7 +51,7 @@ public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity im
     }
 
     @Override
-    public UUID getLocation() {
+    public String getLocation() {
         return externalLocation;
     }
 

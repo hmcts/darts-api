@@ -104,7 +104,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
@@ -118,7 +118,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
-        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation().toString(), rawFilename);
+        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation(), rawFilename);
 
         // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
@@ -155,7 +155,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
@@ -168,7 +168,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             savedMedia,
             ARM_RAW_DATA_FAILED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         armEod.setLastModifiedDateTime(latestDateTime);
         armEod.setTransferAttempts(1);
@@ -180,7 +180,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
-        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation().toString(), rawFilename);
+        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation(), rawFilename);
 
         // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
@@ -217,7 +217,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
@@ -230,7 +230,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             savedMedia,
             ARM_MANIFEST_FAILED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         armEod.setLastModifiedDateTime(latestDateTime);
         armEod.setTransferAttempts(1);
@@ -242,7 +242,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
-        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation().toString(), rawFilename);
+        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation(), rawFilename);
 
         // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
@@ -275,7 +275,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
@@ -302,7 +302,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
@@ -316,7 +316,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
-        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation().toString(), rawFilename);
+        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation(), rawFilename);
         when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(new BlobStorageException("Error", null, 500));
 
         // when
@@ -354,7 +354,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 

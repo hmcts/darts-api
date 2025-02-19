@@ -5,14 +5,12 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
-import java.util.UUID;
-
 public interface DetsApiService {
-    DownloadResponseMetaData downloadData(UUID blobId) throws FileNotDownloadedException;
+    DownloadResponseMetaData downloadData(String blobId) throws FileNotDownloadedException;
 
-    UUID saveBlobData(BinaryData binaryData);
+    String saveBlobData(BinaryData binaryData);
 
-    boolean deleteBlobDataFromContainer(UUID blobId) throws AzureDeleteBlobException;
+    boolean deleteBlobDataFromContainer(String blobId) throws AzureDeleteBlobException;
 
     void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName);
 }

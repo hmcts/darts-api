@@ -329,7 +329,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 log.info("ARM PERFORMANCE PUSH ELAPSED TIME for DETS EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
 
                 armExternalObjectDirectory.setChecksum(detsExternalObjectDirectory.getChecksum());
-                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());
                 armExternalObjectDirectory.setLastModifiedBy(userAccount);
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
 

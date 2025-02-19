@@ -187,7 +187,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setVerificationAttempts(1);
         armEod1.setManifestFile(manifestFile1);
@@ -196,7 +196,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media2).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod2.setTransferAttempts(1);
         armEod2.setManifestFile(manifestFile1);
         OffsetDateTime armEod2InputUploadProcessedTs = OffsetDateTime.parse("2027-06-10T13:30:00Z");
@@ -208,7 +208,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media3).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod3.setTransferAttempts(1);
         armEod3.setManifestFile(manifestFile1);
         armEod3.setVerificationAttempts(1);
@@ -217,7 +217,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod4 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media4).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod4.setTransferAttempts(1);
         armEod4.setManifestFile(manifestFile1);
         armEod4.setVerificationAttempts(1);
@@ -227,7 +227,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod5 = PersistableFactory
             .getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media5).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod5.setTransferAttempts(1);
         armEod5.setManifestFile(manifestFile2);
         armEod5.setVerificationAttempts(1);
@@ -450,7 +450,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setVerificationAttempts(1);
         armEod1.setManifestFile(manifestFile1);
@@ -550,7 +550,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setVerificationAttempts(1);
         armEod1.setManifestFile(manifestFile1);
@@ -640,7 +640,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setVerificationAttempts(1);
         armEod1.setManifestFile(manifestFile1);
@@ -728,7 +728,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setVerificationAttempts(1);
         armEod1.setManifestFile(manifestFile1);
@@ -837,28 +837,28 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String manifestFile1 = prefix() + "_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            media1, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+            media1, ARM_DROP_ZONE, ARM, UUID.randomUUID().toString());
         armEod1.setTransferAttempts(1);
         armEod1.setManifestFile(manifestFile1);
         armEod1.setChecksum("7017013d05bcc5032e142049081821d6");
         dartsDatabase.save(armEod1);
 
         ExternalObjectDirectoryEntity armEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            media2, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+            media2, ARM_DROP_ZONE, ARM, UUID.randomUUID().toString());
         armEod2.setTransferAttempts(1);
         armEod2.setManifestFile(manifestFile1);
         armEod2.setChecksum("7017013d05bcc5032e142049081821d6");
         dartsDatabase.save(armEod2);
 
         ExternalObjectDirectoryEntity armEod3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            media3, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+            media3, ARM_DROP_ZONE, ARM, UUID.randomUUID().toString());
         armEod3.setTransferAttempts(1);
         armEod3.setManifestFile(manifestFile1);
         dartsDatabase.save(armEod3);
 
         String manifestFile2 = prefix() + "_" + manifest2Uuid + ".a360";
         ExternalObjectDirectoryEntity armEod5 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            media5, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+            media5, ARM_DROP_ZONE, ARM, UUID.randomUUID().toString());
         armEod5.setTransferAttempts(1);
         armEod5.setManifestFile(manifestFile2);
         dartsDatabase.save(armEod5);
@@ -1042,7 +1042,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
                 .verificationAttempts(1).transferAttempts(1)
-                .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+                .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
 
         armEod1.setManifestFile(manifestFile1);
         dartsPersistence.save(armEod1);
@@ -1051,7 +1051,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .someMinimalBuilder().media(media2).status(dartsDatabase
                                                            .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
 
         armEod2.setTransferAttempts(1);
         armEod2.setManifestFile(manifestFile1);
@@ -1060,7 +1060,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().media(media3).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
 
         armEod3.setTransferAttempts(1);
         armEod3.setManifestFile(manifestFile1);
@@ -1071,7 +1071,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .someMinimalBuilder().media(media4).status(dartsDatabase
                                                            .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
 
         armEod4.setTransferAttempts(1);
         armEod4.setManifestFile(manifestFile1);
@@ -1082,7 +1082,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media5).status(dartsDatabase
                                                                                                 .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod5.setTransferAttempts(1);
         armEod5.setManifestFile(manifestFile2);
         dartsPersistence.save(armEod5);
@@ -1224,7 +1224,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setManifestFile(manifestFile1);
         armEod1 = dartsPersistence.save(armEod1);
@@ -1233,7 +1233,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .someMinimalBuilder().media(media2).status(dartsDatabase
                                                            .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod2.setTransferAttempts(1);
         armEod2.setManifestFile(manifestFile1);
         armEod2 = dartsPersistence.save(armEod2);
@@ -1242,7 +1242,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .someMinimalBuilder().media(media3).status(dartsDatabase
                                                            .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod3.setTransferAttempts(1);
         armEod3.setManifestFile(manifestFile1);
         armEod3 = dartsPersistence.save(armEod3);
@@ -1251,7 +1251,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media4).status(dartsDatabase
                                                                                                 .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod4.setTransferAttempts(1);
         armEod4.setManifestFile(manifestFile1);
         armEod4 = dartsPersistence.save(armEod4);
@@ -1261,7 +1261,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media5).status(dartsDatabase
                                                                                                 .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod5.setTransferAttempts(1);
         armEod5.setManifestFile(manifestFile2);
         dartsPersistence.save(armEod5);
@@ -1403,7 +1403,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setManifestFile(manifestFile1);
         armEod1 = dartsPersistence.save(armEod1);
@@ -1412,7 +1412,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media2).status(dartsDatabase
                                                                                                 .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod2.setTransferAttempts(1);
         armEod2.setManifestFile(manifestFile1);
         armEod2 = dartsPersistence.save(armEod2);
@@ -1514,7 +1514,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).build();
+            .externalLocation(UUID.randomUUID().toString()).build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
@@ -1617,7 +1617,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).build();
+            .externalLocation(UUID.randomUUID().toString()).build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
@@ -1694,7 +1694,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).build();
+            .externalLocation(UUID.randomUUID().toString()).build();
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
         armEod.setChecksum(checksum);
@@ -1793,7 +1793,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).checksum("xC3CCA7021CF79B42F245AF350601C284").build();
+            .externalLocation(UUID.randomUUID().toString()).checksum("xC3CCA7021CF79B42F245AF350601C284").build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
@@ -1883,7 +1883,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).checksum("xC3CCA7021CF79B42F245AF350601C284").build();
+            .externalLocation(UUID.randomUUID().toString()).checksum("xC3CCA7021CF79B42F245AF350601C284").build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
@@ -2076,7 +2076,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).build();
+            .externalLocation(UUID.randomUUID().toString()).build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
@@ -2150,7 +2150,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).build();
+            .externalLocation(UUID.randomUUID().toString()).build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
@@ -2220,7 +2220,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .verificationAttempts(1).externalLocation(UUID.randomUUID()).build();
+            .verificationAttempts(1).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setManifestFile(manifestFile1);
         dartsPersistence.save(armEod1);
@@ -2270,7 +2270,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media1).status(dartsDatabase
                                                                                                 .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setManifestFile(manifestFile1);
         dartsPersistence.save(armEod1);
@@ -2320,7 +2320,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
@@ -2397,7 +2397,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .getExternalObjectDirectoryTestData().someMinimalBuilder().annotationDocumentEntity(annotationDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
@@ -2545,7 +2545,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID().toString()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setVerificationAttempts(1);
         armEod1.setManifestFile(manifestFile1);

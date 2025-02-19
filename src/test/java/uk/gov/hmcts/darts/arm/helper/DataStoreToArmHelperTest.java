@@ -85,7 +85,7 @@ class DataStoreToArmHelperTest {
             mediaEntity1,
             ARM,
             ARM_INGESTION,
-            UUID.randomUUID());
+            UUID.randomUUID().toString());
         externalObjectDirectoryEntity.setId(345);
         externalObjectDirectoryEntity.setStatus(EodHelper.armIngestionStatus());
         externalObjectDirectoryEntity.setOsrUuid(1234L);

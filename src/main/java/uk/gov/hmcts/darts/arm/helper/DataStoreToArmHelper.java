@@ -198,7 +198,7 @@ public class DataStoreToArmHelper {
                 log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
 
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
-                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());
                 armExternalObjectDirectory.setLastModifiedBy(userAccount);
                 armExternalObjectDirectory.setStatus(EodHelper.armRawDataPushedStatus());
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
@@ -223,7 +223,7 @@ public class DataStoreToArmHelper {
         String fileNameFormat = "%s_%s.%s";
         return String.format(fileNameFormat,
                              manifestFilePrefix,
-                             UUID.randomUUID(),
+                             UUID.randomUUID().toString(),
                              armDataManagementConfiguration.getFileExtension()
         );
     }
