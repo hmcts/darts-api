@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -22,7 +23,12 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,7 +73,7 @@ class ApplyAdminActionComponentTest {
 
         userAccountEntity = PersistableFactory.getUserAccountTestData().someMinimal();
         when(userIdentity.getUserAccount())
-            .thenReturn(PersistableFactory.getUserAccountTestData().someMinimal());
+            .thenReturn(userAccountEntity);
 
         someDateTime = OffsetDateTime.parse("2025-01-01T00:00:00Z");
         when(currentTimeHelper.currentOffsetDateTime())
@@ -78,6 +84,7 @@ class ApplyAdminActionComponentTest {
     public void applyAdminAction_shouldHideTargetedMediaAndSetAdminAction_whenTargetedMediaHasNoChronicleId() {
         // Given
         MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
+            .id(1)
             .build()
             .getEntity();
 
@@ -95,17 +102,85 @@ class ApplyAdminActionComponentTest {
 
         assertTrue(updatedMedia.isHidden());
 
-        List<ObjectAdminActionEntity> adminActions = updatedMedia.getObjectAdminActions();
-        assertEquals(1, adminActions.size()); // TODO: Fails because adminActions does not get set explicitly in the MediaEntity
-        ObjectAdminActionEntity adminAction = adminActions.getFirst();
+        Optional<ObjectAdminActionEntity> adminActionOptional = updatedMedia.getObjectAdminAction();
+        assertTrue(adminActionOptional.isPresent());
+        ObjectAdminActionEntity adminAction = adminActionOptional.get();
 
         assertEquals("Some ticket reference", adminAction.getTicketReference());
         assertEquals("Some comments", adminAction.getComments());
-        assertEquals(targetedMedia, adminAction.getMedia());
+        assertEquals(targetedMedia.getId(), adminAction.getMedia().getId());
         assertEquals(objectHiddenReasonEntity, adminAction.getObjectHiddenReason());
         assertEquals(userAccountEntity, adminAction.getHiddenBy());
         assertEquals(someDateTime, adminAction.getHiddenDateTime());
         assertFalse(adminAction.isMarkedForManualDeletion());
+
+        verify(removeAdminActionComponent).removeAdminAction(List.of(targetedMedia));
+        verify(adminActionRepository).saveAndFlush(adminAction);
+        verify(mediaRepository).saveAndFlush(updatedMedia);
+        verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 1; Ticket ref: Some ticket reference");
+    }
+
+    @Test
+    public void applyAdminAction_shouldHideTargetedMediaAndSetAdminActionForAllVersions_whenTargetedMediaHasOtherVersions() {
+        // Given
+        final String commonChronicleId = "1000";
+
+        MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
+            .id(1)
+            .chronicleId(commonChronicleId)
+            .build()
+            .getEntity();
+        MediaEntity otherVersion = PersistableFactory.getMediaTestData().someMinimalBuilder()
+            .id(2)
+            .chronicleId(commonChronicleId)
+            .build()
+            .getEntity();
+        when(mediaRepository.findAllByChronicleId(commonChronicleId))
+            .thenReturn(List.of(targetedMedia, otherVersion));
+
+        AdminActionRequest adminActionRequest = new AdminActionRequest();
+        adminActionRequest.setReasonId(0);
+        adminActionRequest.setComments("Some comments");
+        adminActionRequest.setTicketReference("Some ticket reference");
+
+        // When
+        List<MediaEntity> mediaEntities = applyAdminActionComponent.applyAdminAction(targetedMedia, adminActionRequest);
+
+        // Then
+        assertEquals(2, mediaEntities.size());
+
+        // Assert what we expect to be common across all versions
+        for (MediaEntity updatedMedia : mediaEntities) {
+            assertTrue(updatedMedia.isHidden());
+
+            Optional<ObjectAdminActionEntity> adminActionOptional = updatedMedia.getObjectAdminAction();
+            assertTrue(adminActionOptional.isPresent());
+            ObjectAdminActionEntity adminAction = adminActionOptional.get();
+
+            assertEquals("Some ticket reference", adminAction.getTicketReference());
+            assertEquals("Some comments", adminAction.getComments());
+            assertEquals(objectHiddenReasonEntity, adminAction.getObjectHiddenReason());
+            assertEquals(userAccountEntity, adminAction.getHiddenBy());
+            assertEquals(someDateTime, adminAction.getHiddenDateTime());
+            assertFalse(adminAction.isMarkedForManualDeletion());
+
+            verify(adminActionRepository).saveAndFlush(adminAction);
+            verify(mediaRepository).saveAndFlush(updatedMedia);
+        }
+
+        verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 1; Ticket ref: Some ticket reference");
+        verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 2; Ticket ref: Some ticket reference");
+
+        // And verify the back-links
+        List<Integer> backLinkedMediaIds = mediaEntities.stream()
+            .map(MediaEntity::getObjectAdminActions)
+            .flatMap(List::stream)
+            .map(ObjectAdminActionEntity::getMedia)
+            .map(MediaEntity::getId)
+            .toList();
+        assertThat(backLinkedMediaIds, containsInAnyOrder(targetedMedia.getId(), otherVersion.getId()));
+
+        verify(removeAdminActionComponent).removeAdminAction(List.of(targetedMedia, otherVersion));
     }
 
 }

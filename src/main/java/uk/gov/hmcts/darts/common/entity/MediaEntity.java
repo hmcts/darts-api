@@ -176,4 +176,9 @@ public class MediaEntity extends CreatedModifiedBaseEntity
         return objectAdminActions.stream().findFirst();
     }
 
+    public void setObjectAdminAction(ObjectAdminActionEntity adminAction) {
+        objectAdminActions.clear();
+        objectAdminActions.add(adminAction);
+    }
+
 }

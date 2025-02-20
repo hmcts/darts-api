@@ -48,13 +48,13 @@ public class ApplyAdminActionComponent {
 
         List<MediaEntity> allMediaVersions;
         if (StringUtils.isBlank(targetedMedia.getChronicleId())) {
-            log.debug("Attempting to apply admin action {} to non-versioned media with id {}",
-                      adminActionRequest,
+            log.debug("Attempting to apply admin action with ticket ref {} to non-versioned media with id {}",
+                      adminActionRequest.getTicketReference(),
                       targetedMedia.getId());
             allMediaVersions = Collections.singletonList(targetedMedia);
         } else {
-            log.debug("Attempting to apply admin action {} to all versioned medias with chronicle id {}",
-                      adminActionRequest,
+            log.debug("Attempting to apply admin action with ticket ref {} to all versioned medias with chronicle id {}",
+                      adminActionRequest.getTicketReference(),
                       targetedMedia.getChronicleId());
             allMediaVersions = mediaRepository.findAllByChronicleId(targetedMedia.getChronicleId());
         }
@@ -64,39 +64,36 @@ public class ApplyAdminActionComponent {
         removeAdminActionComponent.removeAdminAction(allMediaVersions);
 
         final String ticketReference = adminActionRequest.getTicketReference();
-
-        for (MediaEntity media : allMediaVersions) {
-            auditApi.record(HIDE_AUDIO, AUDIT_TEMPLATE.formatted(media.getId(), ticketReference));
-            // TODO it may be cleaner to just create the action entity here and call media.setObjectAdminAction here
-            media.setHidden(true);
-        }
-        mediaRepository.saveAllAndFlush(allMediaVersions);
-
         final String comments = adminActionRequest.getComments();
         final ObjectHiddenReasonEntity objectHiddenReason = hiddenReasonRepository.findById(adminActionRequest.getReasonId())
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND));
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
-        List<ObjectAdminActionEntity> adminActions = allMediaVersions.stream()
-            .map(media -> createAndLinkAdminAction(ticketReference,
-                                                   comments,
-                                                   media,
-                                                   objectHiddenReason,
-                                                   userAccount))
-            .toList();
-        adminActionRepository.saveAllAndFlush(adminActions);
+
+        for (MediaEntity media : allMediaVersions) {
+            auditApi.record(HIDE_AUDIO, AUDIT_TEMPLATE.formatted(media.getId(), ticketReference));
+
+            ObjectAdminActionEntity adminAction = createAdminAction(ticketReference,
+                                                                    comments,
+                                                                    objectHiddenReason,
+                                                                    userAccount);
+            adminAction.setMedia(media);
+            adminActionRepository.saveAndFlush(adminAction);
+
+            media.setObjectAdminAction(adminAction);
+            media.setHidden(true);
+            mediaRepository.saveAndFlush(media);
+        }
 
         return allMediaVersions;
     }
 
-    private ObjectAdminActionEntity createAndLinkAdminAction(String ticketReference,
-                                                             String comments,
-                                                             MediaEntity media,
-                                                             ObjectHiddenReasonEntity hiddenReason,
-                                                             UserAccountEntity userAccount) {
+    private ObjectAdminActionEntity createAdminAction(String ticketReference,
+                                                      String comments,
+                                                      ObjectHiddenReasonEntity hiddenReason,
+                                                      UserAccountEntity userAccount) {
         var objectAdminActionEntity = new ObjectAdminActionEntity();
         objectAdminActionEntity.setTicketReference(ticketReference);
         objectAdminActionEntity.setComments(comments);
-        objectAdminActionEntity.setMedia(media);
         objectAdminActionEntity.setObjectHiddenReason(hiddenReason);
         objectAdminActionEntity.setHiddenBy(userAccount);
         objectAdminActionEntity.setHiddenDateTime(currentTimeHelper.currentOffsetDateTime());
