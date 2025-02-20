@@ -81,6 +81,9 @@ class CaseServiceImplTest {
 
     CaseServiceImpl service;
 
+    CasesMapper mapper;
+    CasesAnnotationMapper annotationMapper;
+
     @Mock
     CaseRepository caseRepository;
 
@@ -92,10 +95,6 @@ class CaseServiceImplTest {
 
     @Mock
     HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
-
-    CasesMapper mapper;
-
-    CasesAnnotationMapper annotationMapper;
 
     @Mock
     RetrieveCoreObjectService retrieveCoreObjectService;
@@ -130,6 +129,7 @@ class CaseServiceImplTest {
         Pattern unallocatedCaseRegex = Pattern.compile(".*\\d{8}-\\d{6}.*");
         mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi, logApi,
                                  unallocatedCaseRegex);
+
         service = new CaseServiceImpl(
             mapper,
             annotationMapper,

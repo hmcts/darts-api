@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.cases.http.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
+import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
@@ -176,6 +177,14 @@ public class CaseController implements CasesApi {
     public ResponseEntity<List<AdminCasesSearchResponseItem>> adminCasesSearchPost(AdminCasesSearchRequest adminCasesSearchRequest) {
         validateUppercase(null, adminCasesSearchRequest.getCourtroomName());
         return new ResponseEntity<>(caseService.adminCaseSearch(adminCasesSearchRequest), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    public ResponseEntity<AdminSingleCaseResponseItem> adminCasesCaseIdGet(Integer id) {
+        return new ResponseEntity<>(caseService.adminGetCaseById(id), HttpStatus.OK);
     }
 
     private void validateUppercase(String courthouse, String courtroom) {
