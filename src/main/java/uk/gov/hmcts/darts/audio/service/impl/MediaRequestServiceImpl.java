@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
@@ -527,23 +528,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     @Transactional
     public MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest) {
-        IdRequest<MediaHideRequest> request = new IdRequest<>(mediaHideRequest, mediaId);
-        mediaHideOrShowValidator.validate(request);
-
-        final MediaEntity targetedMedia = mediaRepository.findByIdIncludeDeleted(mediaId)
-            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
-
-        Boolean isToBeHidden = mediaHideRequest.getIsHidden();
-        if (isToBeHidden) {
-            applyAdminActionComponent.applyAdminAction(targetedMedia,
-                                                       mediaHideRequest.getAdminAction());
-            ObjectAdminActionEntity adminActionForTargetedMedia = objectAdminActionRepository.findByMedia_Id(targetedMedia.getId())
-                .getFirst();
-            return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, adminActionForTargetedMedia);
-        } else {
-            removeAdminActionComponent.removeAdminAction(targetedMedia);
-            return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, null);
-        }
+        throw new NotImplementedException("moved"); // TODO remove
     }
 
 }

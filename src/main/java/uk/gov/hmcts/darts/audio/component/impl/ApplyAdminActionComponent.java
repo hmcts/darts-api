@@ -30,21 +30,21 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
 @RequiredArgsConstructor
 public class ApplyAdminActionComponent {
 
-    private final AuditApi auditApi;
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
+    private final RemoveAdminActionComponent removeAdminActionComponent;
 
     private final MediaRepository mediaRepository;
     private final ObjectAdminActionRepository adminActionRepository;
     private final ObjectHiddenReasonRepository hiddenReasonRepository;
 
-    private final RemoveAdminActionComponent removeAdminActionComponent;
+    private final AuditApi auditApi;
 
     public static final String AUDIT_TEMPLATE = "Media id: %d; Ticket ref: %s";
 
     @Transactional
-    public void applyAdminAction(@NonNull MediaEntity targetedMedia,
-                                 @NonNull AdminActionRequest adminActionRequest) {
+    public List<MediaEntity> applyAdminAction(@NonNull MediaEntity targetedMedia,
+                                              @NonNull AdminActionRequest adminActionRequest) {
 
         List<MediaEntity> allMediaVersions;
         if (StringUtils.isBlank(targetedMedia.getChronicleId())) {
@@ -84,6 +84,8 @@ public class ApplyAdminActionComponent {
                                                    userAccount))
             .toList();
         adminActionRepository.saveAllAndFlush(adminActions);
+
+        return allMediaVersions;
     }
 
     private ObjectAdminActionEntity createAndLinkAdminAction(String ticketReference,

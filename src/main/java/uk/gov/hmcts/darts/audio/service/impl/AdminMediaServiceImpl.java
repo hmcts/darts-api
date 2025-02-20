@@ -7,6 +7,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
+import uk.gov.hmcts.darts.audio.component.impl.RemoveAdminActionComponent;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.PostAdminMediasSearchHelper;
@@ -23,11 +25,14 @@ import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionMediaItem;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
+import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
+import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
 import uk.gov.hmcts.darts.audio.validation.MediaApproveMarkForDeletionValidator;
+import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
@@ -42,6 +47,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -55,22 +61,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminMediaServiceImpl implements AdminMediaService {
 
-    private final MediaRepository mediaRepository;
-    private final AdminMediaMapper adminMediaMapper;
-    private final PostAdminMediasSearchHelper postAdminMediasSearchHelper;
     private final SearchMediaValidator searchMediaValidator;
-    private final TransformedMediaRepository transformedMediaRepository;
-    private final ObjectAdminActionRepository objectAdminActionRepository;
     private final MediaApproveMarkForDeletionValidator mediaApproveMarkForDeletionValidator;
+    private final MediaHideOrShowValidator mediaHideOrShowValidator;
+
+    private final PostAdminMediasSearchHelper postAdminMediasSearchHelper;
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
-    private final AuditApi auditApi;
-    private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
+    private final ApplyAdminActionComponent applyAdminActionComponent;
+    private final RemoveAdminActionComponent removeAdminActionComponent;
 
+    private final AdminMediaMapper adminMediaMapper;
+    private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
     private final CourthouseMapper courthouseMapper;
     private final CourtroomMapper courtroomMapper;
     private final ObjectActionMapper objectActionMapper;
 
+    private final MediaRepository mediaRepository;
+    private final TransformedMediaRepository transformedMediaRepository;
+    private final ObjectAdminActionRepository objectAdminActionRepository;
+
+    private final AuditApi auditApi;
 
     @Value("${darts.audio.admin-search.max-results}")
     private Integer adminSearchMaxResults;
@@ -135,6 +146,28 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .filter(item -> uniqueIds.add(item.getId()))
             .sorted((o1, o2) -> o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()))
             .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest) {
+        IdRequest<MediaHideRequest> request = new IdRequest<>(mediaHideRequest, mediaId);
+        mediaHideOrShowValidator.validate(request);
+
+        final MediaEntity targetedMedia = mediaRepository.findByIdIncludeDeleted(mediaId)
+            .orElseThrow(() -> new IllegalStateException("Media not found, expected this to be pre-validated"));
+
+        Boolean isToBeHidden = mediaHideRequest.getIsHidden();
+        if (isToBeHidden) {
+            applyAdminActionComponent.applyAdminAction(targetedMedia,
+                                                       mediaHideRequest.getAdminAction());
+            ObjectAdminActionEntity adminActionForTargetedMedia = objectAdminActionRepository.findByMedia_Id(targetedMedia.getId())
+                .getFirst();
+            return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, adminActionForTargetedMedia);
+        } else {
+            removeAdminActionComponent.removeAdminAction(targetedMedia);
+            return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, null);
+        }
     }
 
     @Override
