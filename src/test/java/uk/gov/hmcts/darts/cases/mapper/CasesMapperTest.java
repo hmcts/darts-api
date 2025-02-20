@@ -28,7 +28,6 @@ import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsReposito
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -262,8 +261,7 @@ class CasesMapperTest {
         UserAccountEntity testUser = CommonTestDataUtil.createUserAccount();
         CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
         caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
-        when(caseRetentionRepository.findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(
-            courtCase, String.valueOf(CaseRetentionStatus.COMPLETE)))
+        when(caseRetentionRepository.findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(courtCase, String.valueOf(COMPLETE)))
             .thenReturn(Optional.of(caseRetention));
 
         // When
