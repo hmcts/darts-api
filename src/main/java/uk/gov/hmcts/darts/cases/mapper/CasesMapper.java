@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.mapper;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,9 +48,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 public class CasesMapper {
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;
-    @Getter
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
-    @Getter
     private final CaseRetentionRepository caseRetentionRepository;
     private final AuthorisationApi authorisationApi;
     private final LogApi logApi;
@@ -265,7 +262,7 @@ public class CasesMapper {
 
 
     private void populateReportingRestrictions(CourtCaseEntity courtCase, AdminSingleCaseResponseItem adminCase) {
-        var reportingRestrictions = getHearingReportingRestrictionsRepository()
+        var reportingRestrictions = hearingReportingRestrictionsRepository
             .findAllByCaseId(courtCase.getId()).stream()
             .map(this::toReportingRestriction)
             .collect(toList());
@@ -279,7 +276,7 @@ public class CasesMapper {
     }
 
     private void populateRetentionDetails(CourtCaseEntity courtCase, AdminSingleCaseResponseItem adminCase) {
-        Optional<CaseRetentionEntity> caseRetentionOptional = getCaseRetentionRepository()
+        Optional<CaseRetentionEntity> caseRetentionOptional = caseRetentionRepository
             .findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(
                 courtCase,
                 String.valueOf(CaseRetentionStatus.COMPLETE)

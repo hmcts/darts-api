@@ -246,18 +246,17 @@ class CasesMapperTest {
             courtCase, courtroomEntity, LocalDate.of(2023, Month.JULY, 7), true
         );
 
+        OffsetDateTime createdDateTime = courtCase.getCreatedDateTime();
         EventHandlerEntity reportingRestriction = new EventHandlerEntity();
         reportingRestriction.setEventName("test reporting restriction name");
-        courtCase.setReportingRestrictions(reportingRestriction);
-        OffsetDateTime createdDateTime = courtCase.getCreatedDateTime();
-
         createEventWith(
             1, 1, "Event1", hearingEntity, reportingRestriction, createdDateTime, createdDateTime, false);
         createEventWith(
             2, 1, "Event2", hearingEntity, reportingRestriction, createdDateTime, createdDateTime.plusHours(1), true);
 
-        var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
+        courtCase.setReportingRestrictions(reportingRestriction);
 
+        var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
         UserAccountEntity testUser = CommonTestDataUtil.createUserAccount();
         CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
         caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
