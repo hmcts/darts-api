@@ -31,7 +31,7 @@ public class ArmResponseUploadFileMapper {
         if (StringUtils.isEmpty(input)) {
             String errorMessage = "\"input\" String is empty, so cannot parse.";
             log.warn(errorMessage);
-            throw new UnableToReadArmFileException();
+            throw new UnableToReadArmFileException(null);
         }
         try {
             uploadNewFileRecord = objectMapper.readValue(input, UploadNewFileRecord.class);
