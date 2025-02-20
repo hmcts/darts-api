@@ -70,4 +70,16 @@ public class PersistableFactory {
         return new RetentionConfidenceCategoryMapperTestData();
     }
 
+    public static UserAccountTestData getUserAccountTestData() {
+        return new UserAccountTestData();
+    }
+
+    public static CourthouseTestData getCourthouseTestData() {
+        return new CourthouseTestData();
+    }
+
+    public static CourtroomTestData getCourtroomTestData() {
+        return new CourtroomTestData();
+    }
+
 }
