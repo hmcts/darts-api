@@ -183,7 +183,7 @@ public class CaseController implements CasesApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
-    public ResponseEntity<AdminSingleCaseResponseItem> adminCasesCaseIdGet(Integer id) {
+    public ResponseEntity<AdminSingleCaseResponseItem> adminCasesIdGet(Integer id) {
         return new ResponseEntity<>(caseService.adminGetCaseById(id), HttpStatus.OK);
     }
 
