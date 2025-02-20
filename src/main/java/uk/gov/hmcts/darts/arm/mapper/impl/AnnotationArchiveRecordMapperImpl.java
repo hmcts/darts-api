@@ -183,6 +183,9 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
                     case BF_018_KEY -> metadata.setBf018(value);
                     case BF_019_KEY -> metadata.setBf019(value);
                     case BF_020_KEY -> metadata.setBf020(value);
+                    default -> {
+                        // ignore unknown properties - comment to fix PMD warning
+                    }
                 }
             }
         }
