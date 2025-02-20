@@ -123,7 +123,7 @@ public class ArmApiServiceImpl implements ArmApiService {
             if (!availableEntitlementProfile.isError()) {
                 Optional<String> profileId = availableEntitlementProfile.getProfiles().stream()
                     .filter(p -> armApiConfigurationProperties.getArmServiceProfile().equalsIgnoreCase(p.getProfileName()))
-                    .map(p -> p.getProfileId())
+                    .map(AvailableEntitlementProfile.Profiles::getProfileId)
                     .findAny();
                 if (profileId.isPresent()) {
                     log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());

@@ -153,7 +153,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .values()
             .stream()
             .filter(objectAdminActionEntities -> !objectAdminActionEntities.isEmpty())
-            .map(actions -> toGetAdminMediasMarkedForDeletionItem(actions))
+            .map(this::toGetAdminMediasMarkedForDeletionItem)
             .peek(getAdminMediasMarkedForDeletionItem -> {
                 //We need to add the Media Entities to a List that supports sorting as the default one from Hibernate does not
                 List<GetAdminMediasMarkedForDeletionMediaItem> mediaEntities = new ArrayList<>(getAdminMediasMarkedForDeletionItem.getMedia());
@@ -165,7 +165,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     GetAdminMediasMarkedForDeletionItem toGetAdminMediasMarkedForDeletionItem(List<ObjectAdminActionEntity> actions) {
         ObjectAdminActionEntity base = actions.get(0);
         List<GetAdminMediasMarkedForDeletionMediaItem> media = actions.stream()
-            .map(action -> action.getMedia())
+            .map(ObjectAdminActionEntity::getMedia)
             .map(mediaEntity -> {
                 GetAdminMediasMarkedForDeletionMediaItem item = adminMarkedForDeletionMapper.toGetAdminMediasMarkedForDeletionMediaItem(mediaEntity);
                 item.setVersionCount(mediaRepository.getVersionCount(mediaEntity.getChronicleId()));
