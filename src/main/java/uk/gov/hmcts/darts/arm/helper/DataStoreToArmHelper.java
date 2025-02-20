@@ -34,7 +34,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
@@ -135,9 +134,8 @@ public class DataStoreToArmHelper {
     public ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                                                 ObjectRecordStatusEntity status,
                                                                                 UserAccountEntity userAccount) {
-
         ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        armExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(ARM.getId()));
+        armExternalObjectDirectoryEntity.setExternalLocationType(EodHelper.armLocation());
         armExternalObjectDirectoryEntity.setStatus(status);
         armExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
         armExternalObjectDirectoryEntity.setVerificationAttempts(1);
