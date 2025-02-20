@@ -95,7 +95,7 @@ class CloseOldCasesProcessorImplTest {
         when(retentionApi.createRetention(any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
         assertFalse(courtCase.getClosed());
 
-        when(retentionApi.updateCourtCaseConfidenceAttributesForRetention(any(), eq(RetentionConfidenceCategoryEnum.AGED_CASE)))
+        when(retentionApi.updateCourtCaseConfidenceAttributesForRetention(any(), eq(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED)))
             .thenReturn(courtCase);
 
         // when
