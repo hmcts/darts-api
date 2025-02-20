@@ -6,13 +6,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
-import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequestWithStorageGUID;
+import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +31,8 @@ class AddAudioMetaDataValidatorTest {
     private AudioConfigurationProperties properties;
     @Mock
     private AudioLoggerService audioLoggerService;
+    @Mock
+    private AudioUploadService audioUploadService;
 
     @InjectMocks
     private AddAudioMetaDataValidator addAudioMetaDataValidator;
@@ -36,9 +40,10 @@ class AddAudioMetaDataValidatorTest {
 
     @Test
     void validate_missingCourtHouse_shouldErrorAndLog() {
-        AddAudioMetadataRequest request = new AddAudioMetadataRequest();
+        AddAudioMetadataRequestWithStorageGUID request = new AddAudioMetadataRequestWithStorageGUID();
         request.setCourthouse("INVALID");
         request.setCourtroom("COURTROOM_123");
+        request.setStorageGuid(UUID.randomUUID());
         DartsApiException expectedException = new DartsApiException(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST);
         when(retrieveCoreObjectService.retrieveCourthouse("INVALID")).thenThrow(expectedException);
 
@@ -46,12 +51,13 @@ class AddAudioMetaDataValidatorTest {
 
         assertThat(actualException).isEqualTo(expectedException);
         verify(audioLoggerService).missingCourthouse("INVALID", "COURTROOM_123");
+        verify(audioUploadService).deleteUploadedAudio(request.getStorageGuid());
     }
 
 
     @Test
     void validate_hasCourtHouse_shouldNotErrorOrLog() {
-        AddAudioMetadataRequest request = new AddAudioMetadataRequest();
+        AddAudioMetadataRequestWithStorageGUID request = new AddAudioMetadataRequestWithStorageGUID();
         request.setCourthouse("INVALID");
         request.setCourtroom("COURTROOM_123");
         request.setFormat("mp3");
@@ -62,5 +68,6 @@ class AddAudioMetaDataValidatorTest {
         addAudioMetaDataValidator.validate(request);
 
         verifyNoInteractions(audioLoggerService);
+        verifyNoInteractions(audioUploadService);
     }
 }
