@@ -27,6 +27,8 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -43,12 +45,13 @@ public class ArmApiServiceImpl implements ArmApiService {
                                                  RetentionConfidenceScoreEnum retConfScore,
                                                  String retConfReason) {
 
+        Integer retConfScoreId = nonNull(retConfScore) ? retConfScore.getId() : null;
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(eventTimestamp)
                           .retConfReason(retConfReason)
-                          .retConfScore(retConfScore.getId())
+                          .retConfScore(retConfScoreId)
                           .build())
             .useGuidsForFields(false)
             .build();
