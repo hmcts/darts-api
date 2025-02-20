@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestCourtroomEntity extends CourtroomEntity implements DbInsertable<CourtroomEntity> {
 

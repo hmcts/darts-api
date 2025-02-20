@@ -354,31 +354,31 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getHearings().get(0).getMediaList().get(0).getRetainUntilTs()),
 
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getId()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getId()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getAnnotationDocument()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getAnnotationDocument().getId()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getAnnotationDocument().getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getCaseDocument()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getCaseDocument().getId()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getCaseDocument().getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getMedia()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getMedia().getId()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getMedia().getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getTranscriptionDocument()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getTranscriptionDocument().getId()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getTranscriptionDocument().getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getHiddenBy()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getHiddenBy().getId()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getHiddenBy().getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getHiddenDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getHiddenDateTime()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getHiddenDateTime()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).isMarkedForManualDeletion()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).isMarkedForManualDeletion()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).isMarkedForManualDeletion()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getMarkedForManualDelBy()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getMarkedForManualDelBy().getId()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getMarkedForManualDelBy().getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getMarkedForManualDelDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getMarkedForManualDelDateTime()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getMarkedForManualDelDateTime()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getTicketReference()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getTicketReference()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getTicketReference()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getComments()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getComments()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getComments()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAdminActionReasons().get(0).getObjectHiddenReason()).isNotNull().isEqualTo(
-                cc.getHearings().get(0).getMediaList().get(0).getAdminActionReasons().get(0).getObjectHiddenReason()),
+                cc.getHearings().get(0).getMediaList().get(0).getObjectAdminActions().get(0).getObjectHiddenReason()),
 
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getId()).isNotNull().isEqualTo(
                 mediaEodEntity.getId()),

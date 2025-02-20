@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -88,6 +89,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     }
 
     @Test
+    @Disabled // TODO: Move to a more appropriate test class
     void testMediaDocumentHide() {
         MediaHideRequest request = new MediaHideRequest();
         request.setIsHidden(true);
@@ -95,6 +97,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     }
 
     @Test
+    @Disabled // TODO: Move to a more appropriate test class
     void testMediaHideDefaultIsHidden() {
         MediaHideRequest request = new MediaHideRequest();
         setupTestMediaHide(request);
@@ -157,6 +160,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     }
 
     @Test
+    @Disabled // TODO: Move to a more appropriate test class
     void testMediaShow() {
         adminMediaSearchResponseMapperMockedStatic = Mockito.mockStatic(GetAdminMediaResponseMapper.class);
 

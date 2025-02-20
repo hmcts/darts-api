@@ -27,6 +27,7 @@ public abstract class CaseObjectsCaseDocumentMapper {
 
     @Mappings({
         @Mapping(expression = "java(mapEods(eodRepository.findByMedia(mediaEntity)))", target = "externalObjectDirectories"),
+        @Mapping(source = "objectAdminActions", target = "adminActionReasons"),
     })
     public abstract MediaCaseDocument map(MediaEntity mediaEntity);
 

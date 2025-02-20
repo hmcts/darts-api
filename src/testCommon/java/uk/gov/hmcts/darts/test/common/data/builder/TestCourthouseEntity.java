@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestCourthouseEntity extends CourthouseEntity implements DbInsertable<CourthouseEntity> {
 
@@ -75,3 +76,4 @@ public class TestCourthouseEntity extends CourthouseEntity implements DbInsertab
     }
 
 }
+

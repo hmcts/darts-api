@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestUserAccountEntity extends UserAccountEntity implements DbInsertable<UserAccountEntity> {
 

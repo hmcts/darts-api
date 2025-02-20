@@ -59,7 +59,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
         setMediaStatus(mediaStatus);
         setHearingList(hearingList != null ? hearingList : new ArrayList<>());
         setRetainUntilTs(retainUntilTs);
-        setAdminActionReasons(adminActionReasons != null ? adminActionReasons : new ArrayList<>());
+        setObjectAdminActions(adminActionReasons != null ? adminActionReasons : new ArrayList<>());
         setRetConfScore(retConfScore);
         setRetConfReason(retConfReason);
         setCreatedDateTime(createdDateTime);

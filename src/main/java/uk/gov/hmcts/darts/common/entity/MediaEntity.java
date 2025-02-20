@@ -126,7 +126,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity
 
     @OneToMany(mappedBy = ObjectAdminActionEntity_.MEDIA,
         fetch = FetchType.LAZY)
-    private List<ObjectAdminActionEntity> adminActionReasons = new ArrayList<>();
+    private List<ObjectAdminActionEntity> objectAdminActions = new ArrayList<>();
 
     @Column(name = "ret_conf_score")
     private RetentionConfidenceScoreEnum retConfScore;
@@ -170,10 +170,10 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     }
 
     public Optional<ObjectAdminActionEntity> getObjectAdminAction() {
-        if (adminActionReasons.size() > 1) {
-            log.warn("Media id {} has more than one admin action", id);
+        if (objectAdminActions.size() > 1) {
+            log.warn("Media id {} has more than one admin action, yet the application logic expects Media->ObjectAdminAction is 1:1", id);
         }
-        return adminActionReasons.stream().findFirst();
+        return objectAdminActions.stream().findFirst();
     }
 
 }

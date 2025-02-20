@@ -1,12 +1,9 @@
 package uk.gov.hmcts.darts.common.repository;
 
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 
 import java.time.OffsetDateTime;
@@ -18,14 +15,6 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
     List<ObjectAdminActionEntity> findByTranscriptionDocument_Id(Integer transcriptionDocumentId);
 
     List<ObjectAdminActionEntity> findByMedia_Id(Integer mediaId);
-
-    @Modifying
-    @Transactional
-    @Query("""
-        DELETE FROM ObjectAdminActionEntity o
-        WHERE o.media IN :medias
-        """)
-    int deleteObjectAdminActionEntitiesByMedias(List<MediaEntity> medias);
 
     List<ObjectAdminActionEntity> findByMediaIdAndMarkedForManualDeletionTrue(Integer mediaId);
 

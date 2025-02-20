@@ -6,7 +6,6 @@ import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
-import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtroomStub;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
@@ -128,21 +127,6 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         // Then
         assertEquals(1, result.size());
         assertEquals(markedForManualDeletionAction.getId(), result.getFirst().getId());
-    }
-
-    @Test
-    void temp() {
-        MediaEntity mediaEntity = PersistableFactory.getMediaTestData().someMinimal();
-        dartsPersistence.save(mediaEntity);
-
-        objectAdminActionStub.createAndSave(
-            ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                .media(mediaEntity)
-                .build());
-
-        int i = repository.deleteObjectAdminActionEntitiesByMedias(List.of(mediaEntity));
-
-        assertEquals(1, i);
     }
 
     @Test

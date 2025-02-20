@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
@@ -19,7 +20,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
@@ -42,51 +43,40 @@ public class ApplyAdminActionComponent {
     public static final String AUDIT_TEMPLATE = "Media id: %d; Ticket ref: %s";
 
     @Transactional
-    public ObjectAdminActionEntity applyAdminAction(@NonNull MediaEntity targetedMedia,
-                                                    @NonNull List<MediaEntity> otherMediaVersions,
-                                                    @NonNull AdminActionRequest adminActionRequest) {
-        log.debug("Attempting to apply admin action {} to all medias with chronicle id {}",
-                  adminActionRequest,
-                  targetedMedia.getChronicleId());
+    public void applyAdminAction(@NonNull MediaEntity targetedMedia,
+                                 @NonNull AdminActionRequest adminActionRequest) {
 
-        final String ticketReference = adminActionRequest.getTicketReference();
-
-        auditApi.record(HIDE_AUDIO, AUDIT_TEMPLATE.formatted(targetedMedia.getId(), ticketReference));
-
-        // We need to first remove any admin actions that are linked to any version of the targeted media so that we can link a new admin action reflecting
-        // the details in the incoming adminActionRequest
-        {
-            ArrayList<MediaEntity> allMediaVersions = new ArrayList<>(otherMediaVersions);
-            allMediaVersions.add(targetedMedia);
-            removeAdminActionComponent.removeAdminAction(allMediaVersions);
+        List<MediaEntity> allMediaVersions;
+        if (StringUtils.isBlank(targetedMedia.getChronicleId())) {
+            log.debug("Attempting to apply admin action {} to non-versioned media with id {}",
+                      adminActionRequest,
+                      targetedMedia.getId());
+            allMediaVersions = Collections.singletonList(targetedMedia);
+        } else {
+            log.debug("Attempting to apply admin action {} to all versioned medias with chronicle id {}",
+                      adminActionRequest,
+                      targetedMedia.getChronicleId());
+            allMediaVersions = mediaRepository.findAllByChronicleId(targetedMedia.getChronicleId());
         }
 
-        targetedMedia.setHidden(true);
-        mediaRepository.saveAndFlush(targetedMedia);
+        // We need to first remove any admin actions that may be linked to any version of the targeted media so that we can link a new admin action reflecting
+        // the details in the incoming adminActionRequest
+        removeAdminActionComponent.removeAdminAction(allMediaVersions);
 
         final ObjectHiddenReasonEntity objectHiddenReason = hiddenReasonRepository.findById(adminActionRequest.getReasonId())
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND));
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
         final String comments = adminActionRequest.getComments();
+        final String ticketReference = adminActionRequest.getTicketReference();
 
-        final ObjectAdminActionEntity adminActionForTargetedMedia = createAndLinkAdminAction(ticketReference,
-                                                                                       comments,
-                                                                                       targetedMedia,
-                                                                                       objectHiddenReason,
-                                                                                       userAccount);
-        adminActionRepository.saveAndFlush(adminActionForTargetedMedia);
-
-        if (otherMediaVersions.isEmpty()) {
-            return adminActionForTargetedMedia;
-        }
-
-        for (MediaEntity media : otherMediaVersions) {
+        for (MediaEntity media : allMediaVersions) {
             auditApi.record(HIDE_AUDIO, AUDIT_TEMPLATE.formatted(media.getId(), ticketReference));
+            // TODO it may be cleaner to just create the action entity here and call media.setObjectAdminAction here
             media.setHidden(true);
         }
-        mediaRepository.saveAllAndFlush(otherMediaVersions);
+        mediaRepository.saveAllAndFlush(allMediaVersions);
 
-        List<ObjectAdminActionEntity> adminActions = otherMediaVersions.stream()
+        List<ObjectAdminActionEntity> adminActions = allMediaVersions.stream()
             .map(media -> createAndLinkAdminAction(ticketReference,
                                                    comments,
                                                    media,
@@ -94,8 +84,6 @@ public class ApplyAdminActionComponent {
                                                    userAccount))
             .toList();
         adminActionRepository.saveAllAndFlush(adminActions);
-
-        return adminActionForTargetedMedia;
     }
 
     private ObjectAdminActionEntity createAndLinkAdminAction(String ticketReference,

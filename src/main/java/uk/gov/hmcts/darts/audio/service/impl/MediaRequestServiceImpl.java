@@ -533,26 +533,17 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         final MediaEntity targetedMedia = mediaRepository.findByIdIncludeDeleted(mediaId)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
 
-        List<MediaEntity> allMediaVersions = mediaRepository.findAllByChronicleId(targetedMedia.getChronicleId());
-
         Boolean isToBeHidden = mediaHideRequest.getIsHidden();
         if (isToBeHidden) {
-            List<MediaEntity> allOtherMediaVersions = allMediaVersions.stream()
-                .filter(media -> !media.getId().equals(targetedMedia.getId()))
-                .toList();
-            ObjectAdminActionEntity adminActionForTargetedMedia = applyAdminActionComponent.applyAdminAction(targetedMedia,
-                                                                                                             allOtherMediaVersions,
-                                                                                                             mediaHideRequest.getAdminAction());
+            applyAdminActionComponent.applyAdminAction(targetedMedia,
+                                                       mediaHideRequest.getAdminAction());
+            ObjectAdminActionEntity adminActionForTargetedMedia = objectAdminActionRepository.findByMedia_Id(targetedMedia.getId())
+                .getFirst();
             return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, adminActionForTargetedMedia);
         } else {
-            removeAdminActionComponent.removeAdminAction(allMediaVersions);
+            removeAdminActionComponent.removeAdminAction(targetedMedia);
             return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, null);
         }
-
-    }
-
-    private String buildUnhideAudioAdditionalDataString(ObjectAdminActionEntity objectAdminActionEntity) {
-        return "Ticket reference: " + objectAdminActionEntity.getTicketReference() + ", Comments: " + objectAdminActionEntity.getComments();
     }
 
 }
