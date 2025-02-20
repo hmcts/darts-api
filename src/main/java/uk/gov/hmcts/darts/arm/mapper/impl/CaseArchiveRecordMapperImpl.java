@@ -163,67 +163,41 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             metadata.setRetentionConfidenceScore(caseDocument.getRetConfScore().getId());
         }
 
-        if (caseRecordProperties.containsKey(BF_001_KEY)) {
-            metadata.setBf001(mapToString(caseRecordProperties.getProperty(BF_001_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_002_KEY)) {
-            metadata.setBf002(mapToString(caseRecordProperties.getProperty(BF_002_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_003_KEY)) {
-            metadata.setBf003(mapToString(caseRecordProperties.getProperty(BF_003_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_004_KEY)) {
-            metadata.setBf004(mapToString(caseRecordProperties.getProperty(BF_004_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_005_KEY)) {
-            metadata.setBf005(mapToString(caseRecordProperties.getProperty(BF_005_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_006_KEY)) {
-            metadata.setBf006(mapToString(caseRecordProperties.getProperty(BF_006_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_007_KEY)) {
-            metadata.setBf007(mapToString(caseRecordProperties.getProperty(BF_007_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_008_KEY)) {
-            metadata.setBf008(mapToString(caseRecordProperties.getProperty(BF_008_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_009_KEY)) {
-            metadata.setBf009(mapToString(caseRecordProperties.getProperty(BF_009_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_010_KEY)) {
-            metadata.setBf010(mapToString(caseRecordProperties.getProperty(BF_010_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_011_KEY)) {
-            metadata.setBf011(mapToString(caseRecordProperties.getProperty(BF_011_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_012_KEY)) {
-            metadata.setBf012(mapToInt(caseRecordProperties.getProperty(BF_012_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_013_KEY)) {
-            metadata.setBf013(mapToInt(caseRecordProperties.getProperty(BF_013_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_014_KEY)) {
-            metadata.setBf014(mapToInt(caseRecordProperties.getProperty(BF_014_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_015_KEY)) {
-            metadata.setBf015(mapToInt(caseRecordProperties.getProperty(BF_015_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_016_KEY)) {
-            metadata.setBf016(mapToString(caseRecordProperties.getProperty(BF_016_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_017_KEY)) {
-            metadata.setBf017(mapToString(caseRecordProperties.getProperty(BF_017_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_018_KEY)) {
-            metadata.setBf018(mapToString(caseRecordProperties.getProperty(BF_018_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_019_KEY)) {
-            metadata.setBf019(mapToString(caseRecordProperties.getProperty(BF_019_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_020_KEY)) {
-            metadata.setBf020(mapToString(caseRecordProperties.getProperty(BF_020_KEY), caseDocument));
-        }
+        setMetadataProperties(metadata, caseDocument);
         return metadata;
+    }
+
+    private void setMetadataProperties(RecordMetadata metadata, CaseDocumentEntity caseDocument) {
+        for (String key : caseRecordProperties.stringPropertyNames()) {
+            String value = mapToString(caseRecordProperties.getProperty(key), caseDocument);
+            if (value != null) {
+                switch (key) {
+                    case BF_001_KEY -> metadata.setBf001(value);
+                    case BF_002_KEY -> metadata.setBf002(value);
+                    case BF_003_KEY -> metadata.setBf003(value);
+                    case BF_004_KEY -> metadata.setBf004(value);
+                    case BF_005_KEY -> metadata.setBf005(value);
+                    case BF_006_KEY -> metadata.setBf006(value);
+                    case BF_007_KEY -> metadata.setBf007(value);
+                    case BF_008_KEY -> metadata.setBf008(value);
+                    case BF_009_KEY -> metadata.setBf009(value);
+                    case BF_010_KEY -> metadata.setBf010(value);
+                    case BF_011_KEY -> metadata.setBf011(value);
+                    case BF_012_KEY -> metadata.setBf012(mapToInt(value, caseDocument));
+                    case BF_013_KEY -> metadata.setBf013(mapToInt(value, caseDocument));
+                    case BF_014_KEY -> metadata.setBf014(mapToInt(value, caseDocument));
+                    case BF_015_KEY -> metadata.setBf015(mapToInt(value, caseDocument));
+                    case BF_016_KEY -> metadata.setBf016(value);
+                    case BF_017_KEY -> metadata.setBf017(value);
+                    case BF_018_KEY -> metadata.setBf018(value);
+                    case BF_019_KEY -> metadata.setBf019(value);
+                    case BF_020_KEY -> metadata.setBf020(value);
+                    default -> {
+                        // ignore unknown properties - comment to fix PMD warning
+                    }
+                }
+            }
+        }
     }
 
     private String mapToString(String key, CaseDocumentEntity caseDocument) {
