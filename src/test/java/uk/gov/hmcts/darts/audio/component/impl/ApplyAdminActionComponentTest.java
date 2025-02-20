@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,8 +54,8 @@ class ApplyAdminActionComponentTest {
 
     private ApplyAdminActionComponent applyAdminActionComponent;
 
-    private UserAccountEntity userAccountEntity;
     private ObjectHiddenReasonEntity objectHiddenReasonEntity;
+    private UserAccountEntity userAccountEntity;
     private OffsetDateTime someDateTime;
 
     @BeforeEach
@@ -115,9 +116,16 @@ class ApplyAdminActionComponentTest {
         assertFalse(adminAction.isMarkedForManualDeletion());
 
         verify(removeAdminActionComponent).removeAdminAction(List.of(targetedMedia));
+        verifyNoMoreInteractions(removeAdminActionComponent);
+
         verify(adminActionRepository).saveAndFlush(adminAction);
+        verifyNoMoreInteractions(adminActionRepository);
+
         verify(mediaRepository).saveAndFlush(updatedMedia);
+        verifyNoMoreInteractions(mediaRepository);
+
         verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 1; Ticket ref: Some ticket reference");
+        verifyNoMoreInteractions(auditApi);
     }
 
     @Test
@@ -168,8 +176,12 @@ class ApplyAdminActionComponentTest {
             verify(mediaRepository).saveAndFlush(updatedMedia);
         }
 
+        verifyNoMoreInteractions(adminActionRepository);
+        verifyNoMoreInteractions(mediaRepository);
+
         verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 1; Ticket ref: Some ticket reference");
         verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 2; Ticket ref: Some ticket reference");
+        verifyNoMoreInteractions(auditApi);
 
         // And verify the back-links
         List<Integer> backLinkedMediaIds = mediaEntities.stream()
@@ -181,6 +193,7 @@ class ApplyAdminActionComponentTest {
         assertThat(backLinkedMediaIds, containsInAnyOrder(targetedMedia.getId(), otherVersion.getId()));
 
         verify(removeAdminActionComponent).removeAdminAction(List.of(targetedMedia, otherVersion));
+        verifyNoMoreInteractions(removeAdminActionComponent);
     }
 
 }
