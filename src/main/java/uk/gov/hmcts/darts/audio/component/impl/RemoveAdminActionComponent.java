@@ -7,15 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -23,39 +22,48 @@ import java.util.List;
 public class RemoveAdminActionComponent {
 
     private final AuditApi auditApi;
-    private final UserIdentity userIdentity;
-    private final CurrentTimeHelper currentTimeHelper;
 
     private final MediaRepository mediaRepository;
     private final ObjectAdminActionRepository adminActionRepository;
-    private final ObjectHiddenReasonRepository hiddenReasonRepository;
 
-    public static final String AUDIT_TEMPLATE = "Media id: %d, Ticket ref: %d, Comments: %s";
+    public static final String AUDIT_TEMPLATE = "Media id: %d, Ticket ref: %s, Comments: %s";
 
     @Transactional
-    public boolean removeAdminActionFromAllVersions(@NonNull MediaEntity targetedMedia) {
-        log.debug("Attempting to remove all admin actions from all media versions with chronicle id {}",
-                  targetedMedia.getChronicleId());
-
-        List<MediaEntity> allMediaVersions = mediaRepository.findAllByChronicleId(targetedMedia.getChronicleId());
-
-
-        for (MediaEntity media : allMediaVersions) {
-            auditApi.record(AuditActivity.UNHIDE_AUDIO, AUDIT_TEMPLATE.formatted(media.getId(), 0, ""));
-            media.setHidden(false);
-        }
-        mediaRepository.saveAllAndFlush(allMediaVersions);
-
-        adminActionRepository.deleteObjectAdminActionEntitiesByMedias(allMediaVersions);
-
-        for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionRepository.findByMedia_Id(mediaId)) {
-            objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
+    public void removeAdminAction(@NonNull List<MediaEntity> mediaVersions) {
+        List<String> chronicleIds = mediaVersions.stream()
+            .map(MediaEntity::getChronicleId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .filter(chronicleId -> !chronicleId.isEmpty())
+            .toList();
+        if (chronicleIds.size() != 1) {
+            throw new IllegalStateException("All media versions must have the same chronicle id");
         }
 
-    }
+        String chronicleId = chronicleIds.getFirst();
+        log.debug("Attempting to remove all admin actions from all medias with chronicle id {}",
+                  chronicleId);
 
-    private String buildUnhideAudioAdditionalDataString(ObjectAdminActionEntity objectAdminActionEntity) {
-        return "Ticket reference: " + objectAdminActionEntity.getTicketReference() + ", Comments: " + objectAdminActionEntity.getComments();
+        for (MediaEntity media : mediaVersions) {
+            Optional<ObjectAdminActionEntity> adminActionOptional = media.getObjectAdminAction();
+            if (media.isHidden() || adminActionOptional.isPresent()) {
+                String comments = null;
+                String ticketReference = null;
+                if (adminActionOptional.isPresent()) {
+                    ObjectAdminActionEntity adminAction = adminActionOptional.get();
+                    comments = adminAction.getComments();
+                    ticketReference = adminAction.getTicketReference();
+                }
+
+                auditApi.record(AuditActivity.UNHIDE_AUDIO, AUDIT_TEMPLATE.formatted(media.getId(), ticketReference, comments));
+
+                adminActionOptional.ifPresent(objectAdminActionEntity ->
+                                                  adminActionRepository.deleteById(objectAdminActionEntity.getId()));
+
+                media.setHidden(false);
+                mediaRepository.saveAndFlush(media);
+            }
+        }
     }
 
 }

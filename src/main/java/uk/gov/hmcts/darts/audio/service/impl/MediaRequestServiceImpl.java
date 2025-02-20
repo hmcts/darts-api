@@ -533,12 +533,19 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         final MediaEntity targetedMedia = mediaRepository.findByIdIncludeDeleted(mediaId)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
 
+        List<MediaEntity> allMediaVersions = mediaRepository.findAllByChronicleId(targetedMedia.getChronicleId());
+
         Boolean isToBeHidden = mediaHideRequest.getIsHidden();
         if (isToBeHidden) {
-            ObjectAdminActionEntity adminActionForTargetedMedia = applyAdminActionComponent.applyAdminActionFromAllVersions(targetedMedia, mediaHideRequest.getAdminAction());
+            List<MediaEntity> allOtherMediaVersions = allMediaVersions.stream()
+                .filter(media -> !media.getId().equals(targetedMedia.getId()))
+                .toList();
+            ObjectAdminActionEntity adminActionForTargetedMedia = applyAdminActionComponent.applyAdminAction(targetedMedia,
+                                                                                                             allOtherMediaVersions,
+                                                                                                             mediaHideRequest.getAdminAction());
             return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, adminActionForTargetedMedia);
         } else {
-            removeAdminActionComponent.removeAdminActionFromAllVersions(targetedMedia);
+            removeAdminActionComponent.removeAdminAction(allMediaVersions);
             return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, null);
         }
 

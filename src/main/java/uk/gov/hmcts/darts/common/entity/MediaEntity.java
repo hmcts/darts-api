@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -27,7 +28,9 @@ import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 @Entity
 @Table(name = "media")
 @Getter
@@ -165,4 +168,12 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     public OffsetDateTime getDeletedTs() {
         return getDeletedTimestamp();
     }
+
+    public Optional<ObjectAdminActionEntity> getObjectAdminAction() {
+        if (adminActionReasons.size() > 1) {
+            log.warn("Media id {} has more than one admin action", id);
+        }
+        return adminActionReasons.stream().findFirst();
+    }
+
 }

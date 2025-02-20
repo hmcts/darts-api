@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
@@ -41,10 +42,10 @@ public class ApplyAdminActionComponent {
     public static final String AUDIT_TEMPLATE = "Media id: %d; Ticket ref: %s";
 
     @Transactional
-    public ObjectAdminActionEntity applyAdminActionFromAllVersions(@NonNull MediaEntity targetedMedia,
-                                                                   @NonNull List<MediaEntity> otherMediaVersions,
-                                                                   @NonNull AdminActionRequest adminActionRequest) {
-        log.debug("Attempting to apply admin action {} to all media versions with chronicle id {}",
+    public ObjectAdminActionEntity applyAdminAction(@NonNull MediaEntity targetedMedia,
+                                                    @NonNull List<MediaEntity> otherMediaVersions,
+                                                    @NonNull AdminActionRequest adminActionRequest) {
+        log.debug("Attempting to apply admin action {} to all medias with chronicle id {}",
                   adminActionRequest,
                   targetedMedia.getChronicleId());
 
@@ -54,7 +55,11 @@ public class ApplyAdminActionComponent {
 
         // We need to first remove any admin actions that are linked to any version of the targeted media so that we can link a new admin action reflecting
         // the details in the incoming adminActionRequest
-        removeAdminActionComponent.removeAdminActionFromAllVersions(targetedMedia);
+        {
+            ArrayList<MediaEntity> allMediaVersions = new ArrayList<>(otherMediaVersions);
+            allMediaVersions.add(targetedMedia);
+            removeAdminActionComponent.removeAdminAction(allMediaVersions);
+        }
 
         targetedMedia.setHidden(true);
         mediaRepository.saveAndFlush(targetedMedia);
@@ -71,21 +76,17 @@ public class ApplyAdminActionComponent {
                                                                                        userAccount);
         adminActionRepository.saveAndFlush(adminActionForTargetedMedia);
 
-        List<MediaEntity> allOtherMediaVersions = mediaRepository.findAllByChronicleId(targetedMedia.getChronicleId()).stream()
-            .filter(media -> !media.getId().equals(targetedMedia.getId()))
-            .toList();
-        if (allOtherMediaVersions.isEmpty()) {
+        if (otherMediaVersions.isEmpty()) {
             return adminActionForTargetedMedia;
         }
 
-        // adminActionRepository.deleteObjectAdminActionEntitiesByMedias(allOtherMediaVersions);
-        for (MediaEntity media : allOtherMediaVersions) {
+        for (MediaEntity media : otherMediaVersions) {
             auditApi.record(HIDE_AUDIO, AUDIT_TEMPLATE.formatted(media.getId(), ticketReference));
             media.setHidden(true);
         }
-        mediaRepository.saveAllAndFlush(allOtherMediaVersions);
+        mediaRepository.saveAllAndFlush(otherMediaVersions);
 
-        List<ObjectAdminActionEntity> adminActions = allOtherMediaVersions.stream()
+        List<ObjectAdminActionEntity> adminActions = otherMediaVersions.stream()
             .map(media -> createAndLinkAdminAction(ticketReference,
                                                    comments,
                                                    media,
