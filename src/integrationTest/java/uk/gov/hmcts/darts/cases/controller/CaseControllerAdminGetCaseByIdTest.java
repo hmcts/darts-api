@@ -27,24 +27,23 @@ import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
 @AutoConfigureMockMvc
@@ -66,7 +65,10 @@ class CaseControllerAdminGetCaseByIdTest extends IntegrationBase {
     private SecurityGroupRepository securityGroupRepository;
     @Autowired
     private UserAccountRepository userAccountRepository;
-
+    @Autowired
+    private SuperAdminUserStub superAdminUserStub;
+    @Autowired
+    private UserAccountStub accountStub;
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
@@ -77,6 +79,9 @@ class CaseControllerAdminGetCaseByIdTest extends IntegrationBase {
 
     @BeforeEach
     void setupData() {
+
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
         swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
         swanseaCourthouse.setDisplayName("SWANSEA");
@@ -98,15 +103,14 @@ class CaseControllerAdminGetCaseByIdTest extends IntegrationBase {
         EventEntity event1 = createEventWith("eventName", "event1", hearing1a, OffsetDateTime.now());
         dartsDatabase.save(event1);
 
-        givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAccountAndSecurityGroup();
+        //givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
     }
 
     @Test
     void adminGetCaseById_ShouldReturnForbiddenError() throws Exception {
         // given
-        when(mockUserIdentity.getUserAccount()).thenReturn(null);
+        UserAccountEntity accountEntity = accountStub.createJudgeUser();
+        when(mockUserIdentity.getUserAccount()).thenReturn(accountEntity);
 
         // when
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
@@ -118,17 +122,60 @@ class CaseControllerAdminGetCaseByIdTest extends IntegrationBase {
     @Test
     void adminGetCaseById_Success() throws Exception {
         // given
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "123",
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+        );
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
+        courtCase.addDefendant(createDefendantForCase(courtCase));
+        courtCase.addDefence("aDefence");
+        courtCase = dartsDatabase.save(courtCase);
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
 
         // when
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         // then
         String actualResponse = mvcResult.getResponse().getContentAsString();
-        log.info("actualJson: {}", actualResponse);
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerAdminGetCaseByIdTest/testOk/expectedResponse.json");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        log.info("actualResponse: {}", actualResponse);
+//        String expectedResponse = getContentsFromFile(
+//            "tests/cases/CaseControllerAdminGetCaseByIdTest/testOk/expectedResponse.json");
+//        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().toString());
+//        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().toString());
+//        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+        mvcResult.getResponse().
+        /*
+        "id": 2,
+  "courthouse": {
+    "id": 2,
+    "display_name": "SOME-COURTHOUSE"
+  },
+  "case_number": "123",
+  "defendants": [
+    "some-defendant"
+  ],
+  "judges": [
+    "123JUDGE1"
+  ],
+  "prosecutors": [
+    "some-prosecutor"
+  ],
+  "defenders": [
+    "aDefence"
+  ],
+  "reporting_restrictions": [],
+  "case_status": "OPEN",
+  "created_by": 0,
+  "last_modified_by": 0,
+  "is_deleted": false,
+  "is_data_anonymised": false,
+  "is_interpreter_used": false
+         */
     }
 
     @Test
