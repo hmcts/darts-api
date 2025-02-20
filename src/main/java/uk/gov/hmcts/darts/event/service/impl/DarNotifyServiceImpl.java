@@ -33,11 +33,11 @@ public class DarNotifyServiceImpl {
         List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
         if (openCaseNumbers.isEmpty()) {
             log.info("DarNotify sending for closed case: event_id={}, courthouse={}",
-                     DataUtil.toUpperCase(dartsEvent.getCourthouse()),
-                     event.getDartsEvent().getEventId());
+                     event.getDartsEvent().getEventId(),
+                     DataUtil.toUpperCase(dartsEvent.getCourthouse()));
         }
 
-        darNotifyAsyncHelper.notifyDarPcAsync(event, openCaseNumbers);
+        darNotifyAsyncHelper.notifyDarPcAsync(event, dartsEvent.getCaseNumbers());
     }
 
 
