@@ -82,7 +82,7 @@ class ApplyAdminActionComponentTest {
     }
 
     @Test
-    public void applyAdminAction_shouldHideTargetedMediaAndSetAdminAction_whenTargetedMediaHasNoChronicleId() {
+    void applyAdminAction_shouldHideTargetedMediaAndSetAdminAction_whenTargetedMediaHasNoChronicleId() {
         // Given
         MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
             .id(1)
@@ -129,7 +129,7 @@ class ApplyAdminActionComponentTest {
     }
 
     @Test
-    public void applyAdminAction_shouldHideTargetedMediaAndSetAdminActionForAllVersions_whenTargetedMediaHasOtherVersions() {
+    void applyAdminAction_shouldHideTargetedMediaAndSetAdminActionForAllVersions_whenTargetedMediaHasOtherVersions() {
         // Given
         final String commonChronicleId = "1000";
 
@@ -175,9 +175,11 @@ class ApplyAdminActionComponentTest {
             verify(adminActionRepository).saveAndFlush(adminAction);
             verify(mediaRepository).saveAndFlush(updatedMedia);
         }
-
         verifyNoMoreInteractions(adminActionRepository);
         verifyNoMoreInteractions(mediaRepository);
+
+        verify(removeAdminActionComponent).removeAdminAction(List.of(targetedMedia, otherVersion));
+        verifyNoMoreInteractions(removeAdminActionComponent);
 
         verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 1; Ticket ref: Some ticket reference");
         verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 2; Ticket ref: Some ticket reference");
@@ -191,9 +193,6 @@ class ApplyAdminActionComponentTest {
             .map(MediaEntity::getId)
             .toList();
         assertThat(backLinkedMediaIds, containsInAnyOrder(targetedMedia.getId(), otherVersion.getId()));
-
-        verify(removeAdminActionComponent).removeAdminAction(List.of(targetedMedia, otherVersion));
-        verifyNoMoreInteractions(removeAdminActionComponent);
     }
 
 }
