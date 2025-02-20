@@ -7,7 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
+import uk.gov.hmcts.darts.arm.rpo.AddAsyncSearchService;
+import uk.gov.hmcts.darts.arm.rpo.GetIndexesByMatterIdService;
+import uk.gov.hmcts.darts.arm.rpo.GetMasterIndexFieldByRecordClassSchemaService;
+import uk.gov.hmcts.darts.arm.rpo.GetProfileEntitlementsService;
+import uk.gov.hmcts.darts.arm.rpo.GetRecordManagementMatterService;
+import uk.gov.hmcts.darts.arm.rpo.GetStorageAccountsService;
+import uk.gov.hmcts.darts.arm.rpo.SaveBackgroundSearchService;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -40,7 +46,20 @@ class TriggerArmRpoSearchServiceImplTest {
     private static final String SEARCH_NAME = "some search name";
 
     @Mock
-    private ArmRpoApi armRpoApi;
+    private GetRecordManagementMatterService getRecordManagementMatterService;
+    @Mock
+    private GetIndexesByMatterIdService getIndexesByMatterIdService;
+    @Mock
+    private GetStorageAccountsService getStorageAccountsService;
+    @Mock
+    private GetProfileEntitlementsService getProfileEntitlementsService;
+    @Mock
+    private GetMasterIndexFieldByRecordClassSchemaService getMasterIndexFieldByRecordClassSchemaService;
+    @Mock
+    private AddAsyncSearchService addAsyncSearchService;
+    @Mock
+    private SaveBackgroundSearchService saveBackgroundSearchService;
+
     @Mock
     private ArmRpoService armRpoService;
     @Mock
@@ -56,11 +75,17 @@ class TriggerArmRpoSearchServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        triggerArmRpoSearchServiceImpl = new TriggerArmRpoSearchServiceImpl(armRpoApi,
-                                                                            armRpoService,
+        triggerArmRpoSearchServiceImpl = new TriggerArmRpoSearchServiceImpl(armRpoService,
                                                                             armApiService,
                                                                             userIdentity,
-                                                                            logApi);
+                                                                            logApi,
+                                                                            getRecordManagementMatterService,
+                                                                            getIndexesByMatterIdService,
+                                                                            getStorageAccountsService,
+                                                                            getProfileEntitlementsService,
+                                                                            getMasterIndexFieldByRecordClassSchemaService,
+                                                                            addAsyncSearchService,
+                                                                            saveBackgroundSearchService);
         userAccount = new UserAccountEntity();
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
@@ -79,7 +104,7 @@ class TriggerArmRpoSearchServiceImplTest {
         Duration threadSleepDuration = Duration.ofMillis(1);
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
 
-        when(armRpoApi.addAsyncSearch(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(SEARCH_NAME);
+        when(addAsyncSearchService.addAsyncSearch(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(SEARCH_NAME);
 
         // When
         triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(threadSleepDuration);
@@ -87,18 +112,25 @@ class TriggerArmRpoSearchServiceImplTest {
         // Then
         verify(armRpoService).createArmRpoExecutionDetailEntity(userAccount);
         verify(armApiService).getArmBearerToken();
-        verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
-        verify(armRpoApi).getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, MATTER_ID, userAccount);
-        verify(armRpoApi).getStorageAccounts(BEARER_TOKEN, EXECUTION_ID, userAccount);
-        verify(armRpoApi).getProfileEntitlements(BEARER_TOKEN, EXECUTION_ID, userAccount);
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), eq(EXECUTION_ID), any(), eq(userAccount));
-        verify(armRpoApi).addAsyncSearch(BEARER_TOKEN, EXECUTION_ID, userAccount);
-        verify(armRpoApi).saveBackgroundSearch(BEARER_TOKEN, EXECUTION_ID, SEARCH_NAME, userAccount);
+        verify(getRecordManagementMatterService).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
+        verify(getIndexesByMatterIdService).getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, MATTER_ID, userAccount);
+        verify(getStorageAccountsService).getStorageAccounts(BEARER_TOKEN, EXECUTION_ID, userAccount);
+        verify(getProfileEntitlementsService).getProfileEntitlements(BEARER_TOKEN, EXECUTION_ID, userAccount);
+        verify(getMasterIndexFieldByRecordClassSchemaService).getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), eq(EXECUTION_ID), any(),
+                                                                                                     eq(userAccount));
+        verify(addAsyncSearchService).addAsyncSearch(BEARER_TOKEN, EXECUTION_ID, userAccount);
+        verify(saveBackgroundSearchService).saveBackgroundSearch(BEARER_TOKEN, EXECUTION_ID, SEARCH_NAME, userAccount);
         verify(logApi).armRpoSearchSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
-        verifyNoMoreInteractions(armRpoApi);
+        verifyNoMoreInteractions(getRecordManagementMatterService);
+        verifyNoMoreInteractions(getIndexesByMatterIdService);
+        verifyNoMoreInteractions(getStorageAccountsService);
+        verifyNoMoreInteractions(getProfileEntitlementsService);
+        verifyNoMoreInteractions(getMasterIndexFieldByRecordClassSchemaService);
+        verifyNoMoreInteractions(addAsyncSearchService);
+        verifyNoMoreInteractions(saveBackgroundSearchService);
         verifyNoMoreInteractions(logApi);
     }
 
@@ -107,7 +139,7 @@ class TriggerArmRpoSearchServiceImplTest {
         // Given
         Duration threadSleepDuration = Duration.ofMillis(1);
         doThrow(new ArmRpoException("some message"))
-            .when(armRpoApi).getRecordManagementMatter(anyString(), anyInt(), any(UserAccountEntity.class));
+            .when(getRecordManagementMatterService).getRecordManagementMatter(anyString(), anyInt(), any(UserAccountEntity.class));
 
         // When
         triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(threadSleepDuration);
@@ -115,12 +147,12 @@ class TriggerArmRpoSearchServiceImplTest {
         // Then
         verify(armRpoService).createArmRpoExecutionDetailEntity(userAccount);
         verify(armApiService).getArmBearerToken();
-        verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
+        verify(getRecordManagementMatterService).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(logApi).armRpoSearchFailed(EXECUTION_ID);
 
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
-        verifyNoMoreInteractions(armRpoApi);
+        verifyNoMoreInteractions(getRecordManagementMatterService);
         verifyNoMoreInteractions(logApi);
     }
 
