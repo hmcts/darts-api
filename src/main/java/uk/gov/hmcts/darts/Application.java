@@ -8,7 +8,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 
@@ -20,7 +19,6 @@ import static java.time.ZoneOffset.UTC;
 @EnableTransactionManagement
 @Slf4j
 @RequiredArgsConstructor
-@EnableCaching
 public class Application implements CommandLineRunner {
 
     private final AudioApi audioApi;
