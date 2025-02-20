@@ -90,7 +90,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
     void processInboundTranscriptionDocumentToUnstructured() {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
 
         var existingUnstructuredStored = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
         assertThat(existingUnstructuredStored).isEmpty();
@@ -112,7 +112,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
             transcription.getTranscriptionDocumentEntities().get(0).getId(),
@@ -137,7 +137,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
             transcription.getTranscriptionDocumentEntities().get(0).getId(),

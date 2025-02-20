@@ -367,7 +367,7 @@ class MediaRequestServiceImplTest {
     @Test
     void whenAudioRequestHasBeenProcessedDeleteBlobDataAndAudioRequest() throws AzureDeleteBlobException {
         var mediaRequestId = 1;
-        UUID blobId = UUID.randomUUID();
+        String blobId = UUID.randomUUID().toString();
 
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(blobId);
@@ -385,7 +385,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
         verify(mockMediaRequestRepository).deleteById(mediaRequestId);
-        verify(dataManagementApi).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(dataManagementApi).deleteBlobDataFromOutboundContainer(any(String.class));
         verify(mockTransientObjectDirectoryRepository).deleteById(any());
     }
 
@@ -428,7 +428,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
         verify(mockMediaRequestRepository).deleteById(mediaRequestId);
-        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(String.class));
         verify(mockTransientObjectDirectoryRepository, times(0)).deleteById(any());
     }
 
@@ -449,7 +449,7 @@ class MediaRequestServiceImplTest {
         var objectRecordStatusEntity = new ObjectRecordStatusEntity();
         objectRecordStatusEntity.setId(STORED.getId());
 
-        var blobUuid = UUID.randomUUID();
+        var blobUuid = UUID.randomUUID().toString();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);
@@ -580,7 +580,7 @@ class MediaRequestServiceImplTest {
         var objectRecordStatusEntity = new ObjectRecordStatusEntity();
         objectRecordStatusEntity.setId(STORED.getId());
 
-        var blobUuid = UUID.randomUUID();
+        var blobUuid = UUID.randomUUID().toString();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);

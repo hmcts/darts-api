@@ -84,7 +84,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
@@ -450,9 +449,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
-            UUID.fromString(inboundBlobCLient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);
+            inboundBlobCLient.getBlobName(), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);
         final var externalObjectDirectoryUnstructuredEntity = saveExternalObjectDirectory(
-            UUID.fromString(unstructuredBlobClient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, UNSTRUCTURED);
+            unstructuredBlobClient.getBlobName(), checksum, userAccountEntity, transcriptionDocumentEntity, UNSTRUCTURED);
 
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryInboundEntity);
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryUnstructuredEntity);
@@ -534,7 +533,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(transcriptionWorkflows, migratedTranscriptionComments);
     }
 
-    private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
+    private ExternalObjectDirectoryEntity saveExternalObjectDirectory(String externalLocation,
                                                                       String checksum,
                                                                       UserAccountEntity userAccountEntity,
                                                                       TranscriptionDocumentEntity transcriptionDocumentEntity,

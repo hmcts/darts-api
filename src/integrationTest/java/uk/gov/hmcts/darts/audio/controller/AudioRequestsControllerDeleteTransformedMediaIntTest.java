@@ -46,7 +46,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
 
     @Test
     void transformedMediaDeleteShouldReturnSuccess() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
@@ -89,7 +89,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
     void transformedMediaDeleteShouldReturnSuccessOthersExist() throws Exception {
         //only deletes the one requested.
 
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);

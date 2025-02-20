@@ -318,7 +318,7 @@ abstract class AbstractBatchCleanupArmResponseFilesServiceIntTest extends Integr
             savedMedia,
             STORED,
             ARM,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         eodEntity.setLastModifiedDateTime(latestModifiedDateTime);
         eodEntity.setResponseCleaned(false);

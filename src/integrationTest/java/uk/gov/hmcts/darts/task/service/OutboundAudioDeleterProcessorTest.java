@@ -510,7 +510,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     private TransientObjectDirectoryEntity createStoredTransientDirectory(MediaRequestEntity currentMediaRequest, OffsetDateTime lastAccessedDate) {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var objectDirectoryStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
         return dartsDatabase.getTransientObjectDirectoryRepository()
@@ -536,7 +536,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         return dartsDatabase.save(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
             savedTM,
             objectDirectoryStatusEntity,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         ));
     }
 }

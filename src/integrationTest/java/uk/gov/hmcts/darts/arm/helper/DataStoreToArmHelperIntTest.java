@@ -111,7 +111,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
@@ -177,7 +177,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             ARM,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         armExternalObjectDirectory.setOsrUuid(objectStateRecordEntity.getUuid());
         dartsDatabase.save(armExternalObjectDirectory);

@@ -77,7 +77,7 @@ class DetsDataManagementServiceTest {
         String filename = String.format("functional_test_%s", UUID.randomUUID());
         String blobPathAndName = armSubmissionDropZone + filename;
 
-        dataManagementService.copyDetsBlobDataToArm(uuid.toString(), blobPathAndName);
+        dataManagementService.copyDetsBlobDataToArm(uuid, blobPathAndName);
 
         boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
 
@@ -88,12 +88,12 @@ class DetsDataManagementServiceTest {
 
     @Test
     void copyNonExistingDetsBlobDataToArm() throws AzureDeleteBlobException {
-        var uuid = UUID.randomUUID();
+        var uuid = UUID.randomUUID().toString();
 
         String filename = String.format("functional_test_%s", UUID.randomUUID());
         String blobPathAndName = armSubmissionDropZone + filename;
         assertThrows(DartsException.class,
-                     () -> dataManagementService.copyDetsBlobDataToArm(uuid.toString(), blobPathAndName));
+                     () -> dataManagementService.copyDetsBlobDataToArm(uuid, blobPathAndName));
 
     }
 

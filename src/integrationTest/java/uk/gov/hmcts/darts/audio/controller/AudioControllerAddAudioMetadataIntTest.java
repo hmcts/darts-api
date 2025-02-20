@@ -92,7 +92,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    private UUID guid = UUID.randomUUID();
+    private String guid = UUID.randomUUID().toString();
 
     private static final long END_FILE_DURATION = 1440;
 
@@ -289,9 +289,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
 
-        guid = UUID.randomUUID();
+        guid = UUID.randomUUID().toString();
         Integer newMedia = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_2, originalMedia.getId().toString(), originalMedia.getId().toString());
-        guid = UUID.randomUUID();
+        guid = UUID.randomUUID().toString();
         Integer newMedia2 = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_3, newMedia.toString(), originalMedia.getId().toString());
         assertNotEquals(newMedia, newMedia2);
         Optional<MediaEntity> newMediaEntity = dartsDatabase.getMediaRepository().findById(newMedia);
@@ -380,7 +380,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         addAudioMetadataRequest.setMediaFile("media file");
         addAudioMetadataRequest.setFileSize(Files.size(audioBinaryPayload));
         addAudioMetadataRequest.setChecksum("calculatedchecksum");
-        addAudioMetadataRequest.storageGuid(guid);
+        addAudioMetadataRequest.storageGuid(UUID.fromString(guid));
         addAudioMetadataRequest.setChecksum("checksum-" + guid);
         return addAudioMetadataRequest;
     }

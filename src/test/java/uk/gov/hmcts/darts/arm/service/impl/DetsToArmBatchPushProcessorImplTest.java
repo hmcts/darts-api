@@ -65,7 +65,7 @@ import static org.mockito.Mockito.when;
 class DetsToArmBatchPushProcessorImplTest {
 
     private static final Integer MAX_RETRY_ATTEMPTS = 3;
-    private static final UUID DETS_UUID = UUID.randomUUID();
+    private static final String DETS_UUID = UUID.randomUUID().toString();
     public static final long OSR_UUID = 987L;
 
     @Mock
@@ -147,7 +147,7 @@ class DetsToArmBatchPushProcessorImplTest {
                 mediaEntity1,
                 ExternalLocationTypeEnum.ARM,
                 ObjectRecordStatusEnum.ARM_INGESTION,
-                UUID.randomUUID());
+                UUID.randomUUID().toString());
         externalObjectDirectoryEntityArm.setId(345);
         externalObjectDirectoryEntityArm.setStatus(EodHelper.armIngestionStatus());
         objectStateRecordEntity = createMaxObjectStateRecordEntity(888L,

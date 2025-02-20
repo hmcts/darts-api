@@ -51,7 +51,7 @@ class AddAudioMetaDataValidatorTest {
 
         assertThat(actualException).isEqualTo(expectedException);
         verify(audioLoggerService).missingCourthouse("INVALID", "COURTROOM_123");
-        verify(audioUploadService).deleteUploadedAudio(request.getStorageGuid());
+        verify(audioUploadService).deleteUploadedAudio(request.getStorageGuid().toString());
     }
 
 

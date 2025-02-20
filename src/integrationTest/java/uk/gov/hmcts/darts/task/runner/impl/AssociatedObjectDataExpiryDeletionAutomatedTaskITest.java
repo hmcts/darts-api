@@ -571,7 +571,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assignExternalObjectDirectory(
             caseDocumentEntity,
             (caseDocument, objectRecordStatusEnum, externalLocationType) -> dartsDatabase.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(caseDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
+                .createExternalObjectDirectory(caseDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID().toString()),
             assignArm, storeArm);
     }
 
@@ -585,7 +585,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assignExternalObjectDirectory(
             annotationDocumentEntity,
             (annotationDocument, objectRecordStatusEnum, externalLocationType) -> dartsDatabase.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(annotationDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
+                .createExternalObjectDirectory(annotationDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID().toString()),
             assignArm, storeArm);
     }
 
@@ -599,7 +599,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assignExternalObjectDirectory(
             mediaEntity,
             (media, objectRecordStatusEnum, externalLocationType) -> dartsDatabase.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
+                .createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationType, UUID.randomUUID().toString()),
             assignArm, storeArm);
     }
 
@@ -613,7 +613,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assignExternalObjectDirectory(
             transcriptionDocumentEntity,
             (transcriptionDocument, objectRecordStatusEnum, externalLocationType) -> dartsDatabase.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(transcriptionDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
+                .createExternalObjectDirectory(transcriptionDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID().toString()),
             assignArm, storeArm);
     }
 

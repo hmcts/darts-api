@@ -67,7 +67,7 @@ public class ExternalObjectDirectoryStub {
                                                           ObjectRecordStatusEnum objectRecordStatusEnum,
                                                           ExternalLocationTypeEnum externalLocationTypeEnum
     ) {
-        UUID uuid = UUID.randomUUID();
+        String uuid = UUID.randomUUID().toString();
         var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
         return dartsDatabaseSaveStub.save(eod);
     }
@@ -77,7 +77,7 @@ public class ExternalObjectDirectoryStub {
                                                           ExternalLocationTypeEnum externalLocationTypeEnum,
                                                           OffsetDateTime lastModified
     ) {
-        UUID uuid = UUID.randomUUID();
+        String uuid = UUID.randomUUID().toString();
         var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
         eod.setLastModifiedDateTime(lastModified);
         return dartsDatabaseSaveStub.save(eod);
@@ -90,7 +90,7 @@ public class ExternalObjectDirectoryStub {
                                                           ObjectRecordStatusEnum objectRecordStatusEnum,
                                                           ExternalLocationTypeEnum externalLocationTypeEnum,
                                                           Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
-        UUID uuid = UUID.randomUUID();
+        String uuid = UUID.randomUUID().toString();
         var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
         createdEodConsumer.accept(eod);
         return dartsDatabaseSaveStub.save(eod);
@@ -100,7 +100,7 @@ public class ExternalObjectDirectoryStub {
                                                           ObjectRecordStatusEnum objectRecordStatus,
                                                           ExternalLocationTypeEnum externalLocationType,
                                                           Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
-        UUID uuid = UUID.randomUUID();
+        String uuid = UUID.randomUUID().toString();
         var eod = createExternalObjectDirectory(annotationDocument, getStatus(objectRecordStatus), getLocation(externalLocationType), uuid);
         createdEodConsumer.accept(eod);
         return dartsDatabaseSaveStub.save(eod);
@@ -111,7 +111,7 @@ public class ExternalObjectDirectoryStub {
                                                           ObjectRecordStatusEnum objectRecordStatus,
                                                           ExternalLocationTypeEnum externalLocationType,
                                                           Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
-        UUID uuid = UUID.randomUUID();
+        String uuid = UUID.randomUUID().toString();
         var eod = createExternalObjectDirectory(annotationDocument, getStatus(objectRecordStatus), getLocation(externalLocationType), uuid);
 
         if (transcriptionDocumentEntity != null) {
@@ -133,7 +133,7 @@ public class ExternalObjectDirectoryStub {
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                        ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                       UUID externalLocation) {
+                                                                       String externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
@@ -150,7 +150,7 @@ public class ExternalObjectDirectoryStub {
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(CaseDocumentEntity caseDocumentEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                        ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                       UUID externalLocation) {
+                                                                       String externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
@@ -167,7 +167,7 @@ public class ExternalObjectDirectoryStub {
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
                                                                        ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                        ExternalLocationTypeEnum externalLocationTypeEnum,
-                                                                       UUID externalLocation) {
+                                                                       String externalLocation) {
 
         return createExternalObjectDirectory(media, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
     }
@@ -175,7 +175,7 @@ public class ExternalObjectDirectoryStub {
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(CaseDocumentEntity caseDocumentEntity,
                                                                        ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                        ExternalLocationTypeEnum externalLocationTypeEnum,
-                                                                       UUID externalLocation) {
+                                                                       String externalLocation) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = createExternalObjectDirectory(
             caseDocumentEntity, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
@@ -189,7 +189,7 @@ public class ExternalObjectDirectoryStub {
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
                                                                        ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                        ExternalLocationTypeEnum externalLocationTypeEnum,
-                                                                       UUID externalLocation) {
+                                                                       String externalLocation) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = createExternalObjectDirectory(
             annotationDocumentEntity, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
@@ -202,7 +202,7 @@ public class ExternalObjectDirectoryStub {
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                        ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                       UUID externalLocation) {
+                                                                       String externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
@@ -219,7 +219,7 @@ public class ExternalObjectDirectoryStub {
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                                        ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                        ExternalLocationTypeEnum externalLocationTypeEnum,
-                                                                       UUID externalLocation) {
+                                                                       String externalLocation) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = createExternalObjectDirectory(
             transcriptionDocumentEntity, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
@@ -232,7 +232,7 @@ public class ExternalObjectDirectoryStub {
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                        ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                       UUID externalLocation) {
+                                                                       String externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
@@ -252,7 +252,7 @@ public class ExternalObjectDirectoryStub {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
 
         externalObjectDirectory.setTranscriptionDocumentEntity(transcriptionDocument);
@@ -269,7 +269,7 @@ public class ExternalObjectDirectoryStub {
 
     private ExternalObjectDirectoryEntity createMinimalExternalObjectDirectory(ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                                ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                               UUID externalLocation) {
+                                                                               String externalLocation) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setStatus(objectRecordStatusEntity);
         externalObjectDirectory.setExternalLocationType(externalLocationTypeEntity);

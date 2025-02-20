@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -55,7 +54,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
                 1
             ));
 
-        UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
+        String uuid = "075987ea-b34d-49c7-b8db-439bfbe2496c";
 
         ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -108,7 +107,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
                 1
             ));
 
-        UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
+        String uuid = "075987ea-b34d-49c7-b8db-439bfbe2496c";
 
         ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,

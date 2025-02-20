@@ -41,7 +41,7 @@ class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
 
     @Test
     void audioRequestDeleteShouldReturnSuccess() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);

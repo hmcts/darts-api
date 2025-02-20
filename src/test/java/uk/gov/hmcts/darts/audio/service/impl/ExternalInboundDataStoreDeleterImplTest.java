@@ -85,29 +85,29 @@ class ExternalInboundDataStoreDeleterImplTest {
             )
         );
         assertEquals(2, deletedItems.size());
-        verify(finder,times(1)).findMarkedForDeletion(100);
+        verify(finder, times(1)).findMarkedForDeletion(100);
     }
 
     @Test
     void deleteFromInboundDatastoreShouldNotThrowAzureDeleteBlobException() throws AzureDeleteBlobException {
-        doThrow(AzureDeleteBlobException.class).when(inboundDataStoreDeleter).delete(any(UUID.class));
+        doThrow(AzureDeleteBlobException.class).when(inboundDataStoreDeleter).delete(any(String.class));
 
         assertDoesNotThrow(() -> deleter.delete(100));
-        verify(finder,times(1)).findMarkedForDeletion(100);
+        verify(finder, times(1)).findMarkedForDeletion(100);
     }
 
     private List<ExternalObjectDirectoryEntity> createInboundData() {
         ExternalObjectDirectoryEntity inboundData1 = new ExternalObjectDirectoryEntity();
         inboundData1.setStatus(markedForDeletionStatus);
         inboundData1.setExternalLocationType(new ExternalLocationTypeEntity());
-        inboundData1.setExternalLocation(UUID.randomUUID());
+        inboundData1.setExternalLocation(UUID.randomUUID().toString());
         inboundData1.setId(1);
         inboundData1.setVerificationAttempts(1);
 
         ExternalObjectDirectoryEntity inboundData2 = new ExternalObjectDirectoryEntity();
         inboundData2.setStatus(markedForDeletionStatus);
         inboundData2.setExternalLocationType(new ExternalLocationTypeEntity());
-        inboundData2.setExternalLocation(UUID.randomUUID());
+        inboundData2.setExternalLocation(UUID.randomUUID().toString());
         inboundData2.setId(2);
         inboundData2.setVerificationAttempts(2);
 

@@ -26,5 +26,6 @@
   "subcontentObjectId": null,
   "subcontentPosition": null,
   "dataTicket": null,
-  "storageId": null
+  "storageId": null,
+  "osrUuid": null
 }

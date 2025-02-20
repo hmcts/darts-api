@@ -82,7 +82,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.DELETED;
@@ -256,7 +255,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByTransformedMediaId(transformedMediaId);
         for (TransientObjectDirectoryEntity mediaTransientObject : transientObjectDirectoryEntities) {
             log.debug("deleting TransientObjectDirectoryEntity with id {}.", mediaTransientObject.getId());
-            UUID blobId = mediaTransientObject.getExternalLocation();
+            String blobId = mediaTransientObject.getExternalLocation();
 
             if (blobId != null) {
                 try {
@@ -428,7 +427,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         MediaRequestEntity mediaRequestEntity = transformedMediaEntity.getMediaRequest();
         validateMediaRequestType(mediaRequestEntity, expectedType);
 
-        final UUID blobId = getBlobId(transformedMediaEntity);
+        final String blobId = getBlobId(transformedMediaEntity);
 
         auditApi.record(
             auditActivity,
@@ -438,7 +437,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId);
     }
 
-    private UUID getBlobId(TransformedMediaEntity transformedMediaEntity) {
+    private String getBlobId(TransformedMediaEntity transformedMediaEntity) {
         final List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transformedMediaEntity.getTransientObjectDirectoryEntities();
         if (transientObjectDirectoryEntities.isEmpty()) {
             throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
@@ -449,7 +448,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             .findFirst()
             .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
 
-        UUID blobId = transientObjectEntity.getExternalLocation();
+        String blobId = transientObjectEntity.getExternalLocation();
         if (blobId == null) {
             throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
         }

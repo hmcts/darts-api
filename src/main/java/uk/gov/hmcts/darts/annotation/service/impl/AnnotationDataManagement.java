@@ -17,7 +17,6 @@ import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
@@ -32,9 +31,9 @@ public class AnnotationDataManagement {
     private final DataManagementApi dataManagementApi;
     private final DataManagementFacade dataManagementFacade;
 
-    public Map<ExternalLocationTypeEnum, UUID> upload(BinaryData binaryData, String filename) {
-        UUID inboundLocation = null;
-        UUID unstructuredLocation;
+    public Map<ExternalLocationTypeEnum, String> upload(BinaryData binaryData, String filename) {
+        String inboundLocation = null;
+        String unstructuredLocation;
         try {
             inboundLocation = dataManagementApi.saveBlobDataToInboundContainer(binaryData);
             unstructuredLocation = dataManagementApi.saveBlobDataToUnstructuredContainer(binaryData);
@@ -66,11 +65,11 @@ public class AnnotationDataManagement {
         }
     }
 
-    public void attemptToDeleteDocuments(Map<ExternalLocationTypeEnum, UUID> documentLocations) {
+    public void attemptToDeleteDocuments(Map<ExternalLocationTypeEnum, String> documentLocations) {
         documentLocations.forEach(this::attemptToDeleteDocument);
     }
 
-    private void attemptToDeleteDocument(ExternalLocationTypeEnum type, UUID location) {
+    private void attemptToDeleteDocument(ExternalLocationTypeEnum type, String location) {
         try {
             switch (type) {
                 case INBOUND:

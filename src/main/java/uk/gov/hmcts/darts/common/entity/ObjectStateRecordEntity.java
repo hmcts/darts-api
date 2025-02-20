@@ -128,4 +128,7 @@ public class ObjectStateRecordEntity {
     @Column(name = "data_ticket")
     private Integer dataTicket;
 
+    @Column(name = "dal_id")
+    private Integer dalId;
+
 }

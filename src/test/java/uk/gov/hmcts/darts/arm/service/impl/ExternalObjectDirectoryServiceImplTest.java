@@ -114,7 +114,7 @@ class ExternalObjectDirectoryServiceImplTest {
     @Test
     void testCreateAndSaveExternalObjectDirectory() {
         String checksum = "checksum";
-        UUID externalLocation = UUID.randomUUID();
+        String externalLocation = UUID.randomUUID().toString();
         when(caseDocumentEntity.getChecksum()).thenReturn(checksum);
 
         eodService.createAndSaveCaseDocumentEod(

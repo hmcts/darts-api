@@ -6,7 +6,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -19,7 +18,7 @@ public class ExternalObjectDirectoryCaseDocument extends CreatedModifiedCaseDocu
     private final Integer caseDocument;
     private final ObjectRecordStatusEntity status;
     private final ExternalLocationTypeEntity externalLocationType;
-    private final UUID externalLocation;
+    private final String externalLocation;
     private final String externalFileId;
     private final String externalRecordId;
     private final String checksum;

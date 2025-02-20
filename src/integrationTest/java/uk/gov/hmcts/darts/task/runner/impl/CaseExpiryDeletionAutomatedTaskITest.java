@@ -476,7 +476,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             .createTransientObjectDirectoryEntity(
                 transformedMediaEntity,
                 dartsDatabase.getObjectRecordStatusEntity(ObjectRecordStatusEnum.STORED),
-                UUID.randomUUID()
+                UUID.randomUUID().toString()
             );
     }
 

@@ -223,7 +223,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldLogSmallFileWithLongDurationWarning_whenFileIs1024BytesAndDurationIsMoreThan2Seconds() {
         AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(3, 1024L);
 
-        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
 
         verify(logApi).addAudioSmallFileWithLongDuration(
             "COURTHOUSE_123",
@@ -239,7 +239,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldNotLogSmallFileWithLongDurationWarning_whenFileIs1024BytesAndDurationIsEqualTo2Seconds() {
         AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(2, 1024L);
 
-        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
 
         verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
     }
@@ -248,7 +248,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldLogSmallFileWithLongDurationWarning_whenFileIs1025BytesAndDurationIsMoreThan2Seconds() {
         AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(3, 1025L);
 
-        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID(), "123", mock(UserAccountEntity.class));
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
 
         verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
     }
@@ -308,7 +308,7 @@ class AudioUploadServiceImplTest {
         userAccount.setId(10);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
-        UUID blobId = UUID.randomUUID();
+        String blobId = UUID.randomUUID().toString();
         when(dataManagementApi.getChecksum(any(), any()))
             .thenReturn("123456");
 
@@ -355,7 +355,7 @@ class AudioUploadServiceImplTest {
             .thenReturn("123456");
 
         // When
-        UUID externalLocation = UUID.randomUUID();
+        String externalLocation = UUID.randomUUID().toString();
         audioService.addAudio(externalLocation, addAudioMetadataRequest);
 
         // Then
@@ -417,7 +417,7 @@ class AudioUploadServiceImplTest {
             .thenReturn(addAudioMetadataRequest.getChecksum());
 
         // When
-        UUID externalLocation = UUID.randomUUID();
+        String externalLocation = UUID.randomUUID().toString();
         audioService.addAudio(externalLocation, addAudioMetadataRequest);
 
         // Then
@@ -471,7 +471,7 @@ class AudioUploadServiceImplTest {
         when(dataManagementApi.getChecksum(any(), any())).thenReturn(addAudioMetadataRequest.getChecksum());
 
         // When
-        UUID externalLocation = UUID.randomUUID();
+        String externalLocation = UUID.randomUUID().toString();
         audioService.addAudio(externalLocation, addAudioMetadataRequest);
 
         // Then
@@ -496,7 +496,7 @@ class AudioUploadServiceImplTest {
             .thenReturn("123");
 
         // When
-        UUID externalLocation = UUID.randomUUID();
+        String externalLocation = UUID.randomUUID().toString();
 
         Assertions.assertThatThrownBy(() -> audioService.addAudio(externalLocation, addAudioMetadataRequest))
             .isInstanceOf(DartsApiException.class)
@@ -511,7 +511,7 @@ class AudioUploadServiceImplTest {
 
     @Test
     void deleteUploadedAudio_whenValidDataIsProvided_shouldDeleteUploadedAudio(CapturedOutput output) throws AzureDeleteBlobException {
-        UUID externalLocation = UUID.randomUUID();
+        String externalLocation = UUID.randomUUID().toString();
         audioService.deleteUploadedAudio(externalLocation);
         verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
         assertThat(output)
@@ -523,7 +523,7 @@ class AudioUploadServiceImplTest {
         AzureDeleteBlobException exception = new AzureDeleteBlobException("Failed to delete blob");
         doThrow(exception).when(dataManagementApi).deleteBlobDataFromInboundContainer(any());
 
-        UUID externalLocation = UUID.randomUUID();
+        String externalLocation = UUID.randomUUID().toString();
         audioService.deleteUploadedAudio(externalLocation);
         verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
         LogUtil.waitUntilMessage(output, "Failed to delete blob", 5);

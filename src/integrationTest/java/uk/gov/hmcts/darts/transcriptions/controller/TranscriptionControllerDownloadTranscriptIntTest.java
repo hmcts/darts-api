@@ -194,7 +194,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             STORED);
         final ExternalLocationTypeEntity unstructuredLocation = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
-        final UUID externalLocation = UUID.randomUUID();
+        final String externalLocation = UUID.randomUUID().toString();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
         final String confidenceReason = "reason";
         final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
@@ -268,7 +268,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             STORED);
         final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
-        final UUID externalLocation = UUID.randomUUID();
+        final String externalLocation = UUID.randomUUID().toString();
         final String checksum = "KQ9vVogyRdsnEvxyNQz77g==";
         final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         final String confidenceReason = "reason";

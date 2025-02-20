@@ -187,9 +187,9 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
               "user_ids": [<userId1>,<userId2>]
             }
             """;
-        String newName = "func-a-security-group-new-name " + UUID.randomUUID();
+        String newName = "func-a-security-group-new-name " + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<func-a-security-group-new-name>", newName);
-        String newDisplayName = "A security group new name " + UUID.randomUUID();
+        String newDisplayName = "A security group new name " + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<A security group new name>", newDisplayName);
         Integer id1 = createCourthouse(("FUNC-A-COURTHOUSE " + UUID.randomUUID()).toUpperCase(Locale.ENGLISH), "func-a-courthouse" + UUID.randomUUID());
         Integer id2 = createCourthouse(("FUNC-A-COURTHOUSE " + UUID.randomUUID()).toUpperCase(Locale.ENGLISH), "func-a-courthouse" + UUID.randomUUID());

@@ -40,6 +40,8 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.READY;
@@ -97,7 +99,7 @@ public class AudioController implements AudioApi {
 
         // validate the payloads
         addAudioMetaDataValidator.validate(metadata);
-        audioUploadService.addAudio(metadata.getStorageGuid(), metadata);
+        audioUploadService.addAudio(Optional.ofNullable(metadata.getStorageGuid()).map(UUID::toString).orElse(null), metadata);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
