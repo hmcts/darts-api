@@ -213,14 +213,14 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(mockHearingService.getHearingById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockMediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         doNothing().when(auditApi).record(any(), any(), any(CourtCaseEntity.class));
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
         assertEquals(request.getId(), mockMediaRequestEntity.getId());
-        verify(mockHearingService).getHearingById(hearingId);
+        verify(mockHearingService).getHearingByIdWithValidation(hearingId);
         verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
         verify(auditApi).record(REQUEST_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
@@ -239,7 +239,7 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(mockHearingService.getHearingById(hearingId))
+        when(mockHearingService.getHearingByIdWithValidation(hearingId))
             .thenThrow(new DartsApiException(HearingApiError.HEARING_NOT_FOUND));
 
         DartsApiException exception = assertThrows(DartsApiException.class,
@@ -264,7 +264,7 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(mockHearingService.getHearingById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         when(mockMediaRequestRepository.findDuplicateUserMediaRequests(
             mockHearingEntity,
@@ -293,7 +293,7 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(mockHearingService.getHearingById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         when(mockMediaRequestRepository.findDuplicateUserMediaRequests(
             mockHearingEntity,

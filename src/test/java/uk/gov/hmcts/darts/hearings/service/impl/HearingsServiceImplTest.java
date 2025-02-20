@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.HearingTranscriptionMapper;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
@@ -84,7 +85,7 @@ class HearingsServiceImplTest {
         HearingEntity hearingEntity = createHearingEntity(true);
         when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
 
-        HearingEntity result = service.getHearingById(hearingEntity.getId());
+        HearingEntity result = service.getHearingByIdWithValidation(hearingEntity.getId());
         assertEquals(1, result.getId());
     }
 
@@ -92,7 +93,7 @@ class HearingsServiceImplTest {
     void testGetHearingsByIdHearingNotFound() {
         when(hearingRepository.findById(1)).thenReturn(Optional.empty());
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(1));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingByIdWithValidation(1));
 
         assertEquals("HEARING_100", exception.getError().getErrorTypeNumeric());
     }
@@ -103,7 +104,7 @@ class HearingsServiceImplTest {
         hearingEntity.getCourtCase().setDataAnonymised(true);
         when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(1));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingByIdWithValidation(1));
 
         assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
         assertThat(exception.getMessage()).isEqualTo("Case has expired.");
@@ -114,7 +115,7 @@ class HearingsServiceImplTest {
         HearingEntity hearingEntity = createHearingEntity(false);
         when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(hearingEntity.getId()));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingByIdWithValidation(hearingEntity.getId()));
 
         assertEquals("HEARING_102", exception.getError().getErrorTypeNumeric());
     }
@@ -199,6 +200,25 @@ class HearingsServiceImplTest {
         service.removeMediaLinkToHearing(hearingEntity.getCourtCase().getId());
         verifyNoMoreInteractions(hearingRepository);
     }
+
+
+    @Test
+    void getHearingById_hearingFound_shouldReturnHearing() {
+        HearingEntity hearingEntity = createHearingEntity(true);
+        when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
+
+        HearingEntity result = service.getHearingById(hearingEntity.getId());
+        assertEquals(hearingEntity, result);
+    }
+
+    @Test
+    void getHearingById_hearingNotFound_exceptionShouldBeThrown() {
+        when(hearingRepository.findById(1)).thenReturn(Optional.empty());
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(1));
+        assertEquals(HearingApiError.HEARING_NOT_FOUND, exception.getError());
+    }
+
 
     private HearingEntity createHearingEntity(boolean isHearingActual) {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse("swansea");

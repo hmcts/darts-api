@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 import uk.gov.hmcts.darts.util.DataUtil;
 
@@ -21,7 +22,8 @@ import uk.gov.hmcts.darts.util.DataUtil;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class ProsecutorEntity extends CreatedModifiedBaseEntity implements IsNamedEntity {
+public class ProsecutorEntity extends CreatedModifiedBaseEntity
+    implements IsNamedEntity, HasIntegerId {
 
     public static final String TABLE_NAME = "prosecutor";
     public static final String ID = "prn_id";
