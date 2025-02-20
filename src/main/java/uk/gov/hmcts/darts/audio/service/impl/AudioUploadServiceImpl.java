@@ -67,9 +67,19 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
 
     @Override
+    public void deleteUploadedAudio(UUID guid) {
+        try {
+            dataManagementApi.deleteBlobDataFromInboundContainer(guid);
+        } catch (AzureDeleteBlobException azureDeleteBlobException) {
+            log.error("Failed to delete blob data from inbound container", azureDeleteBlobException);
+        }
+    }
+
+    @Override
     public void addAudio(UUID guid, AddAudioMetadataRequest addAudioMetadataRequest) {
         String checksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, guid);
         if (!checksum.equals(addAudioMetadataRequest.getChecksum())) {
+            deleteUploadedAudio(guid);
             throw new DartsApiException(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA,
                                         String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
                                                       checksum, addAudioMetadataRequest.getChecksum()));
