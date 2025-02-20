@@ -127,14 +127,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         versionUpload(mediaToSupersede, addAudioMetadataRequest, blodId, incomingChecksum, currentUser);
     }
 
-    private String saveAudioToInbound(MultipartFile audioFileStream) {
-        try (var bufferedInputStream = new BufferedInputStream(audioFileStream.getInputStream())) {
-            return dataManagementApi.saveBlobDataToInboundContainer(bufferedInputStream);
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
-        }
-    }
-
     void versionUpload(List<MediaEntity> mediaToSupersede,
                        AddAudioMetadataRequest addAudioMetadataRequest,
                        String externalLocation, String checksum,
