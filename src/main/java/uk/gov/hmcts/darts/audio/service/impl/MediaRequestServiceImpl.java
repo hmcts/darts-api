@@ -403,20 +403,18 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public List<SearchTransformedMediaResponse> searchRequest(SearchTransformedMediaRequest getTransformedMediaRequest) {
-        List<TransformedMediaEntity> mediaEntities = null;
         OffsetDateTime requestedAtFrom = getTransformedMediaRequest.getRequestedAtFrom()
             != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC) : null;
         OffsetDateTime requestedAtTo = getTransformedMediaRequest.getRequestedAtTo()
             != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtTo(), LocalTime.MAX, ZoneOffset.UTC) : null;
-
-        mediaEntities = transformedMediaRepository.findTransformedMedia(getTransformedMediaRequest.getMediaRequestId(),
-                                                                        getTransformedMediaRequest.getCaseNumber(),
-                                                                        getTransformedMediaRequest.getCourthouseDisplayName(),
-                                                                        getTransformedMediaRequest.getHearingDate(),
-                                                                        getTransformedMediaRequest.getOwner(),
-                                                                        getTransformedMediaRequest.getRequestedBy(),
-                                                                        requestedAtFrom,
-                                                                        requestedAtTo);
+        List<TransformedMediaEntity> mediaEntities = transformedMediaRepository.findTransformedMedia(getTransformedMediaRequest.getMediaRequestId(),
+                                                                                                     getTransformedMediaRequest.getCaseNumber(),
+                                                                                                     getTransformedMediaRequest.getCourthouseDisplayName(),
+                                                                                                     getTransformedMediaRequest.getHearingDate(),
+                                                                                                     getTransformedMediaRequest.getOwner(),
+                                                                                                     getTransformedMediaRequest.getRequestedBy(),
+                                                                                                     requestedAtFrom,
+                                                                                                     requestedAtTo);
 
 
         return getTransformedMediaDetailsMapper.mapSearchResults(mediaEntities);
@@ -499,7 +497,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         Optional<MediaRequestEntity> mediaRequestEntity = mediaRequestRepository.findById(mediaRequestId);
 
         // if we have an owner id then map it to the owner of the request id
-        Optional<UserAccountEntity> accountEntityToPatch = Optional.empty();
+        Optional<UserAccountEntity> accountEntityToPatch;
         if (mediaRequestEntity.isPresent() && request.getOwnerId() != null) {
             accountEntityToPatch = userAccountRepository.findById(request.getOwnerId());
 

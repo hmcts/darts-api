@@ -86,7 +86,7 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
         Long fileSize = null;
         if (nonNull(detsExternalObjectDirectory.getMedia())) {
             fileSize = mediaRepository.findById(detsExternalObjectDirectory.getMedia().getId()).map(
-                media -> media.getFileSize()).orElse(null);
+                MediaEntity::getFileSize).orElse(null);
         } else if (nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity())) {
             fileSize = annotationDocumentRepository.findById(detsExternalObjectDirectory.getAnnotationDocumentEntity().getId()).map(
                 annotationDocument -> Long.valueOf(annotationDocument.getFileSize())).orElse(null);

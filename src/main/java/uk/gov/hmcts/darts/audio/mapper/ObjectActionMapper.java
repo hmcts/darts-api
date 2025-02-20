@@ -17,6 +17,8 @@ import java.util.List;
     unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface ObjectActionMapper {
 
+    String TICKET_REFERENCE = "ticketReference";
+
     @Mappings({
         @Mapping(target = "id", source = "id"),
         @Mapping(target = "reasonId", source = "objectHiddenReason.id"),
@@ -25,7 +27,7 @@ public interface ObjectActionMapper {
         @Mapping(target = "isMarkedForManualDeletion", source = "markedForManualDeletion"),
         @Mapping(target = "markedForManualDeletionById", source = "markedForManualDelBy.id"),
         @Mapping(target = "markedForManualDeletionAt", source = "markedForManualDelDateTime"),
-        @Mapping(target = "ticketReference", source = "ticketReference"),
+        @Mapping(target = TICKET_REFERENCE, source = TICKET_REFERENCE),
         @Mapping(target = "comments", source = "comments")
     })
     AdminActionResponse toApiModel(ObjectAdminActionEntity objectAdminActionEntity);
@@ -50,7 +52,7 @@ public interface ObjectActionMapper {
     }
 
     @Mappings({
-        @Mapping(target = "ticketReference", source = "ticketReference"),
+        @Mapping(target = TICKET_REFERENCE, source = TICKET_REFERENCE),
         @Mapping(target = "reasonId", source = "objectHiddenReason.id"),
         @Mapping(target = "hiddenById", source = "hiddenBy.id"),
         @Mapping(target = "comments", ignore = true)
