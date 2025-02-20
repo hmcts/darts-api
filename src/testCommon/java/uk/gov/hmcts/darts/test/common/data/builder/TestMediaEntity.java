@@ -29,7 +29,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
                            boolean isDeleted, Boolean isCurrent, UserAccountEntity deletedBy,
                            OffsetDateTime deletedTimestamp, String mediaStatus,
                            List<HearingEntity> hearingList, OffsetDateTime retainUntilTs,
-                           List<ObjectAdminActionEntity> adminActionReasons, RetentionConfidenceScoreEnum retConfScore,
+                           List<ObjectAdminActionEntity> objectAdminActions, RetentionConfidenceScoreEnum retConfScore,
                            String retConfReason, OffsetDateTime createdDateTime,
                            UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
                            UserAccountEntity lastModifiedBy) {
@@ -59,7 +59,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
         setMediaStatus(mediaStatus);
         setHearingList(hearingList != null ? hearingList : new ArrayList<>());
         setRetainUntilTs(retainUntilTs);
-        setObjectAdminActions(adminActionReasons != null ? adminActionReasons : new ArrayList<>());
+        setObjectAdminActions(objectAdminActions != null ? objectAdminActions : new ArrayList<>());
         setRetConfScore(retConfScore);
         setRetConfReason(retConfReason);
         setCreatedDateTime(createdDateTime);

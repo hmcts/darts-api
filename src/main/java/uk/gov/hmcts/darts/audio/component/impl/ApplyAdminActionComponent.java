@@ -59,14 +59,10 @@ public class ApplyAdminActionComponent {
             allMediaVersions = mediaRepository.findAllByChronicleId(targetedMedia.getChronicleId());
         }
 
-        // We need to first remove any admin actions that may be linked to any version of the targeted media so that we can link a new admin action reflecting
-        // the details in the incoming adminActionRequest
+        // We need to first remove any admin actions that may be linked to any version of the targeted media so that we can then link a new admin action
+        // reflecting the details in the incoming adminActionRequest
         removeAdminActionComponent.removeAdminAction(allMediaVersions);
 
-        final ObjectHiddenReasonEntity objectHiddenReason = hiddenReasonRepository.findById(adminActionRequest.getReasonId())
-            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND));
-        final UserAccountEntity userAccount = userIdentity.getUserAccount();
-        final String comments = adminActionRequest.getComments();
         final String ticketReference = adminActionRequest.getTicketReference();
 
         for (MediaEntity media : allMediaVersions) {
@@ -76,6 +72,10 @@ public class ApplyAdminActionComponent {
         }
         mediaRepository.saveAllAndFlush(allMediaVersions);
 
+        final String comments = adminActionRequest.getComments();
+        final ObjectHiddenReasonEntity objectHiddenReason = hiddenReasonRepository.findById(adminActionRequest.getReasonId())
+            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND));
+        final UserAccountEntity userAccount = userIdentity.getUserAccount();
         List<ObjectAdminActionEntity> adminActions = allMediaVersions.stream()
             .map(media -> createAndLinkAdminAction(ticketReference,
                                                    comments,
