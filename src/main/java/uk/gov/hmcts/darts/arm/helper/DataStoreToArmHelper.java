@@ -287,10 +287,6 @@ public class DataStoreToArmHelper {
         }
     }
 
-    public Long getFileSize(int externalObjectDirectoryId) {
-        return externalObjectDirectoryRepository.findFileSize(externalObjectDirectoryId);
-    }
-
 
     public void copyMetadataToArm(String manifestFileContents, String archiveRecordsFileName) {
         try {

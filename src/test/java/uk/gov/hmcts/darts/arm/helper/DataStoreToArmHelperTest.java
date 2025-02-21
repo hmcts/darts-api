@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -212,19 +211,6 @@ class DataStoreToArmHelperTest {
         // then
         verify(archiveRecordFileGenerator).generateArchiveRecords(eq("fileName"), eq(archiveRecords));
     }
-
-    @Test
-    void getFileSize() {
-        // given
-        when(externalObjectDirectoryRepository.findFileSize(anyInt())).thenReturn(1000L);
-
-        // when
-        Long result = dataStoreToArmHelper.getFileSize(externalObjectDirectoryEntity.getId());
-
-        // then
-        assertEquals(1000L, result);
-    }
-
 
     @Test
     void getArchiveRecordsFileName_typical() throws IOException {
