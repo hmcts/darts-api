@@ -46,14 +46,12 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProse
 @AutoConfigureMockMvc
 class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
 
-    private static final String endpointUrl = "/admin/cases/{id}";
+    private static final String ENDPOINT_URL = "/admin/cases/{id}";
 
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
-
-    private HearingEntity hearingEntity;
 
     @Autowired
     private transient MockMvc mockMvc;
@@ -65,13 +63,10 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
-    private CourthouseEntity swanseaCourthouse;
-
-
     @BeforeEach
     void setupData() {
 
-        swanseaCourthouse = someMinimalCourthouse();
+        CourthouseEntity swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
         swanseaCourthouse.setDisplayName("SWANSEA");
 
@@ -100,7 +95,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(accountEntity);
 
         // when
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
         // then
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden());
@@ -111,7 +106,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         // given
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "123",
             SOME_COURTHOUSE,
             SOME_COURTROOM,
@@ -131,7 +126,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         courtCase.addDefence("aDefence");
         courtCase = dartsDatabase.save(courtCase);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCase.getId());
 
         // when
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
@@ -151,7 +146,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
     void adminGetCaseById_IsAnonymised() throws Exception {
         // given
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
-        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "123",
             SOME_COURTHOUSE,
             SOME_COURTROOM,
@@ -166,7 +161,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         courtCase.addDefence("aDefence");
         courtCase = dartsDatabase.save(courtCase);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId("123", SOME_COURTHOUSE));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId("123", SOME_COURTHOUSE));
 
         // when
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
@@ -188,7 +183,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         // when
-        mockMvc.perform(get(endpointUrl, 25))
+        mockMvc.perform(get(ENDPOINT_URL, 25))
             .andExpect(status().isNotFound());
     }
 
