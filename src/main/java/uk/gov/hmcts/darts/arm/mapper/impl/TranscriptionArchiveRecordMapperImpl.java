@@ -86,14 +86,12 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private Properties transcriptionRecordProperties;
 
     private DateTimeFormatter dateTimeFormatter;
-    private DateTimeFormatter dateFormatter;
 
 
     @Override
     public TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                                       String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
-        dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
 
         try {
             loadTranscriptionProperties();
@@ -244,7 +242,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         if (cases.isEmpty()) {
             return null;
         } else if (cases.size() == 1) {
-            return cases.get(0).getCaseNumber();
+            return cases.getFirst().getCaseNumber();
         } else {
             List<String> caseNumbers = cases
                 .stream()
@@ -346,7 +344,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         } else if (CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getHearings())) {
-            hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearings().get(0).getHearingDate().atTime(0, 0, 0),
+            hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearings().getFirst().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
