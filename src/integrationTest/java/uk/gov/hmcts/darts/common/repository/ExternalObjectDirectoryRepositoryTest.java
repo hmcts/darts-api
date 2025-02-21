@@ -382,54 +382,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findFileSizeForMedia() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
-        // given
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
-
-        ExternalObjectDirectoryEntity eod = eods.getFirst();
-
-        // when
-        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
-
-        // then
-        assertEquals(1000L, fileSize);
-    }
-
-    @Test
-    void findFileSizeForAnnotationDocument() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
-        // given
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndAnnotationAndLocation(
-            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
-
-        ExternalObjectDirectoryEntity eod = eods.getFirst();
-
-        // when
-        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
-
-        // then
-        assertEquals(123L, fileSize);
-    }
-
-    @Test
-    void findFileSizeForTranscriptionDocument() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
-        // given
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndLocation(
-            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
-
-        ExternalObjectDirectoryEntity eod = eods.getFirst();
-
-        // when
-        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
-
-        // then
-        assertEquals(100L, fileSize);
-    }
-
-    @Test
     void findAllByStatusAndDataIngestionTsBetweenAndLimit() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
         OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();

@@ -612,41 +612,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                       UserAccountEntity currentUser,
                                                       Limit limit);
 
-    @Query(value = """
-        SELECT fileSize
-        FROM (
-            (
-                SELECT file_size fileSize
-                FROM darts.media med
-                JOIN darts.external_object_directory eod ON eod.med_id = med.med_id
-                WHERE eod.eod_id = :externalObjectDirectoryId
-            )
-            UNION
-            (
-                SELECT file_size fileSize
-                FROM darts.annotation_document as ado
-                JOIN darts.external_object_directory eod ON eod.ado_id = ado.ado_id
-                WHERE eod.eod_id = :externalObjectDirectoryId
-            )
-            UNION
-            (
-                SELECT file_size fileSize
-                FROM darts.case_document as cad
-                JOIN darts.external_object_directory eod ON eod.cad_id = cad.cad_id
-                WHERE eod.eod_id = :externalObjectDirectoryId
-            )
-            UNION
-            (
-                SELECT file_size fileSize
-                FROM darts.transcription_document trd
-                JOIN darts.external_object_directory eod ON eod.trd_id = trd.trd_id
-                WHERE eod.eod_id = :externalObjectDirectoryId
-            )
-        ) a
-        """, nativeQuery = true)
-    Long findFileSize(Integer externalObjectDirectoryId);
-
-
     @Query("""
             update ExternalObjectDirectoryEntity eod
             set eod.status = :newStatus,
