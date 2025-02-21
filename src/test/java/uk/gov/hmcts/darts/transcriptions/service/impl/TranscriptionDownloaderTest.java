@@ -28,11 +28,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -254,7 +254,7 @@ class TranscriptionDownloaderTest {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setId(random.nextInt());
         externalObjectDirectory.setCreatedDateTime(createdDateTime);
-        externalObjectDirectory.setExternalLocation(randomUUID());
+        externalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());
         externalObjectDirectory.setExternalLocationType(someExternalLocation());
         return externalObjectDirectory;
     }

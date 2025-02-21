@@ -8,8 +8,6 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
-import java.util.UUID;
-
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Component
@@ -23,7 +21,7 @@ public class ExternalObjectDirectoryBuilder {
 
     public ExternalObjectDirectoryEntity buildFrom(
           AnnotationDocumentEntity annotationDocumentEntity,
-          UUID externalLocation,
+          String externalLocation,
           ExternalLocationTypeEnum externalLocationType) {
 
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();

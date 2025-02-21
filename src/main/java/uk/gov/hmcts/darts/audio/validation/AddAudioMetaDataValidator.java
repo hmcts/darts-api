@@ -30,7 +30,7 @@ public class AddAudioMetaDataValidator implements Validator<AddAudioMetadataRequ
             if (CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.equals(e.getError())) {
                 audioLoggerService.missingCourthouse(addAudioMetadataRequest.getCourthouse(), addAudioMetadataRequest.getCourtroom());
             }
-            audioUploadService.deleteUploadedAudio(addAudioMetadataRequest.getStorageGuid());
+            audioUploadService.deleteUploadedAudio(addAudioMetadataRequest.getStorageGuid().toString());
             throw e;
         }
     }
