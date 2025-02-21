@@ -34,7 +34,7 @@ class CaseArchiveRecordMapperImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    MockedStatic<PropertyFileLoader> propertyFileLoader;
+    private MockedStatic<PropertyFileLoader> propertyFileLoader;
 
     @BeforeEach
     void setUp() {
@@ -47,7 +47,6 @@ class CaseArchiveRecordMapperImplTest {
         @BeforeEach
         void setUp() {
             when(configuration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ssX");
-            when(configuration.getDateFormat()).thenReturn("yyyy-MM-dd");
 
             propertyFileLoader = mockStatic(PropertyFileLoader.class);
             propertyFileLoader.when(() -> PropertyFileLoader.loadPropertiesFromFile(any()))
@@ -65,8 +64,8 @@ class CaseArchiveRecordMapperImplTest {
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
                 .caseDocument(PersistableFactory.getCaseDocumentTestData()
-                                        .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
-                                        .build())
+                                  .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+                                  .build())
                 .build();
 
             // When
@@ -84,8 +83,8 @@ class CaseArchiveRecordMapperImplTest {
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
                 .caseDocument(PersistableFactory.getCaseDocumentTestData()
-                                        .someMinimalBuilder().retConfScore(null)
-                                        .build())
+                                  .someMinimalBuilder().retConfScore(null)
+                                  .build())
                 .build();
 
             // When
