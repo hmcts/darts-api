@@ -67,7 +67,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings({"PMD.GodClass"})
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     public static final String CASE_LIST_DELIMITER = "|";
@@ -118,7 +118,6 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             .build();
     }
 
-    @SuppressWarnings({"java:S3776", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         MediaEntity media = externalObjectDirectory.getMedia();
         OffsetDateTime retainUntilTs = media.getRetainUntilTs();
@@ -178,15 +177,12 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
                     case BF_018_KEY -> metadata.setBf018(value);
                     case BF_019_KEY -> metadata.setBf019(value);
                     case BF_020_KEY -> metadata.setBf020(value);
-                    default -> {
-                        // ignore unknown properties - comment to fix PMD warning
-                    }
+                    default -> log.warn("Annotation archive record unknown property key: {}", key);
                 }
             }
         }
     }
 
-    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     private String mapToString(String key, MediaEntity media) {
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription();

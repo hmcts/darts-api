@@ -149,7 +149,6 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             .build();
     }
 
-    @SuppressWarnings({"java:S3776", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
         OffsetDateTime retainUntilTs = transcriptionDocument.getRetainUntilTs();
@@ -208,9 +207,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                     case BF_018_KEY -> metadata.setBf018(value);
                     case BF_019_KEY -> metadata.setBf019(value);
                     case BF_020_KEY -> metadata.setBf020(value);
-                    default -> {
-                        // ignore unknown properties - comment to fix PMD warning
-                    }
+                    default -> log.warn("Annotation archive record unknown property key: {}", key);
                 }
             }
         }

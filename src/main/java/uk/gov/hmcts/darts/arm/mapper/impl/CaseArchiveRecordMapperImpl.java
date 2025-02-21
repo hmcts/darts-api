@@ -60,7 +60,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings({"PMD.GodClass"})
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private static final String CASE_LIST_DELIMITER = "|";
@@ -132,7 +132,6 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             .build();
     }
 
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
         OffsetDateTime retainUntilTs = caseDocument.getRetainUntilTs();
@@ -190,9 +189,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
                     case BF_018_KEY -> metadata.setBf018(value);
                     case BF_019_KEY -> metadata.setBf019(value);
                     case BF_020_KEY -> metadata.setBf020(value);
-                    default -> {
-                        // ignore unknown properties - comment to fix PMD warning
-                    }
+                    default -> log.warn("Annotation archive record unknown property key: {}", key);
                 }
             }
         }
