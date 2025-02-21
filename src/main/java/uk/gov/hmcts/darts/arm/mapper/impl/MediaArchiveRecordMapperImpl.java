@@ -77,8 +77,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private DateTimeFormatter dateTimeFormatter;
     private DateTimeFormatter dateFormatter;
-
-
+    
     @Override
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                       String rawFilename) {
