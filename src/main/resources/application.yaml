@@ -525,7 +525,7 @@ darts:
       - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       - "application/msword"
   testing-support-endpoints:
-    enabled: true
+    enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
   bank-holidays:
     api:
       baseurl: https://www.gov.uk
