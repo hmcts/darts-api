@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -177,7 +176,6 @@ public class TranscriptionDocumentStub {
      * Unique requested date with an incrementing hour for each transcription record
      *
      * @param count                 The number of transcription objects that are to be generated
-     * @param hearingCount          The number of hearing against the transcription
      * @param caseCount             The number of cases against the transcription
      * @param isManualTranscription The manual transcription flag
      * @param noCourtHouse          Ensure we do not have a court house against the transcription i.e. use hearing instead
@@ -262,8 +260,8 @@ public class TranscriptionDocumentStub {
             transcriptionDocumentEntity.setTranscription(transcriptionEntity);
             transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntity);
 
-            TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity = transcriptionStub.transcriptionLinkedCaseEntity(
-                transcriptionEntity, caseEntity, courtroomEntity.getCourthouse().getCourthouseName(), caseEntity.getCaseNumber());
+            transcriptionStub.transcriptionLinkedCaseEntity(transcriptionEntity, caseEntity, courtroomEntity.getCourthouse().getCourthouseName(),
+                                                            caseEntity.getCaseNumber());
 
 
             fileSize = fileSize + 1;

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.model;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 public record TranscriptionDocumentResult(
     Integer transcriptionDocumentId,
@@ -15,9 +14,4 @@ public record TranscriptionDocumentResult(
     boolean isManualTranscription,
     boolean isHidden
 ) {
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(transcriptionId);
-    }
 }

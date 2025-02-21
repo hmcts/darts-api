@@ -428,12 +428,11 @@ class TranscriptionDocumentModTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePrefix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMediaModenised(null,
-                                                                              null, null,
-                                                                              TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer
-                                                                                                                                                            .toString(
-                                                                                                                                                                nameMatchIndex))
-                                                                                  .toUpperCase(Locale.getDefault()), null, null, null, null);
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
+            null,
+            null, null,
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(nameMatchIndex))
+                .toUpperCase(Locale.getDefault()), null, null, null, null);
 
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
@@ -589,26 +588,19 @@ class TranscriptionDocumentModTest extends PostgresIntegrationBase {
     private TranscriptionDocumentResult getExpectedResult(TranscriptionDocumentEntity transcriptionDocumentEntity, CourtCaseEntity caseEntity) {
         Integer caseId = caseEntity != null ? caseEntity.getId() : null;
         String caseNumber = caseEntity != null ? caseEntity.getCaseNumber() : null;
-        Integer courthouseId = getCourthouseId(caseEntity);
         String courthouseDisplayName = getCourthouseDisplayName(caseEntity);
 
-        Integer hearingCourthouseId = null;
         String hearingCourthouseDisplayName = null;
-        Integer hearingId = null;
         LocalDate hearingDate = null;
-        Integer hearingCaseId = null;
         String hearingCaseNumber = null;
 
         if (transcriptionDocumentEntity.getTranscription().getHearing() != null) {
-            hearingCourthouseId = transcriptionDocumentEntity.getTranscription().getHearing().getCourtroom().getCourthouse().getId();
             hearingCourthouseDisplayName = transcriptionDocumentEntity.getTranscription().getHearing().getCourtroom().getCourthouse().getDisplayName();
-            hearingId = transcriptionDocumentEntity.getTranscription().getHearing().getId();
             hearingDate = transcriptionDocumentEntity.getTranscription().getHearing().getHearingDate();
         }
 
         if (transcriptionDocumentEntity.getTranscription().getHearing() != null
             && transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase() != null) {
-            hearingCaseId = transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getId();
             hearingCaseNumber = transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getCaseNumber();
         }
 
@@ -624,12 +616,6 @@ class TranscriptionDocumentModTest extends PostgresIntegrationBase {
                                                transcriptionDocumentEntity.isHidden()
         );
     }
-
-    private Integer getCourthouseId(CourtCaseEntity caseEntity) {
-        return caseEntity != null && caseEntity.getCourthouse().getCourthouseName() != null
-            ? caseEntity.getCourthouse().getId() : null;
-    }
-
 
     private String getCourthouseDisplayName(CourtCaseEntity caseEntity) {
         return caseEntity != null && caseEntity.getCourthouse().getCourthouseName() != null

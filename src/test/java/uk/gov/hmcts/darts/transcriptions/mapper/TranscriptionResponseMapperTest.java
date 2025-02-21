@@ -445,16 +445,12 @@ class TranscriptionResponseMapperTest {
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
-        Integer hearingCaseId = 1000;
         String hearingCaseNumber = "hearing case" + caseId;
 
-        Integer courthouseId = 906;
         String courthouseDisplayNumber = "courthouse" + caseId;
 
-        Integer hearingcourthouseId = 901;
         String hearingcourthouseDisplayName = "hearingcourthouse" + caseId;
 
-        Integer hearingid = 902;
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
 
         boolean isManualTranscription = true;
@@ -492,13 +488,10 @@ class TranscriptionResponseMapperTest {
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
-        Integer hearingCaseId = 1000;
         String hearingCaseNumber = "hearing case" + caseId;
 
-        Integer hearingid = 902;
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
 
-        Integer courthouseId = 906;
         String courthouseDisplayName = "courthouse" + caseId;
 
         boolean isManualTranscription = true;
@@ -533,10 +526,8 @@ class TranscriptionResponseMapperTest {
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
-        Integer hearingid = 902;
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
 
-        Integer courthouseId = 906;
         String courthouseDisplayName = "courthouse" + caseId;
 
         boolean isManualTranscription = true;

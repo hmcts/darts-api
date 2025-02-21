@@ -27,8 +27,6 @@ class TranscriptionDocumentLegacyTest extends PostgresIntegrationBase {
 
     private static final int GENERATION_COUNT = 2;
 
-    private static final int GENERATION_HEARING_PER_TRANSCRIPTION = 1;
-
     private static final int GENERATION_CASES_PER_TRANSCRIPTION = 2;
 
     @BeforeEach
@@ -237,7 +235,6 @@ class TranscriptionDocumentLegacyTest extends PostgresIntegrationBase {
 
     @Test
     void testFindTranscriptionDocumentWithHearingDate() {
-        int nameMatchIndex = 1;
         LocalDate hearingDate = generatedDocumentEntities.get(1).getTranscription().getHearingDate();
 
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -433,12 +430,11 @@ class TranscriptionDocumentLegacyTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePrefix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMediaLegacy(null,
-                                                                           null, null,
-                                                                           TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer
-                                                                                                                                                         .toString(
-                                                                                                                                                             nameMatchIndex))
-                                                                               .toUpperCase(Locale.getDefault()), null, null, null, null);
+            = transcriptionDocumentRepository.findTranscriptionMediaLegacy(
+            null,
+            null, null,
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(nameMatchIndex))
+                .toUpperCase(Locale.getDefault()), null, null, null, null);
 
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
@@ -588,20 +584,6 @@ class TranscriptionDocumentLegacyTest extends PostgresIntegrationBase {
     }
 
     private boolean assertResultEquals(List<TranscriptionDocumentResult> assertedResults, List<TranscriptionDocumentResult> expected) {
-        assertedResults.forEach(transcriptionDocumentResult -> {
-            System.out.println("TMP: " + transcriptionDocumentResult);
-        });
-
-        expected.stream().map(expectedItem -> {
-            boolean result = assertedResults.contains(expectedItem);
-            System.out.println("TMP: Not Found e:" + expectedItem);
-            assertedResults.stream().filter(transcriptionDocumentResult -> {
-                return transcriptionDocumentResult.transcriptionDocumentId().equals(expectedItem.transcriptionDocumentId());
-            }).forEach(transcriptionDocumentResult -> System.out.println("TMP: Not Found a:" + transcriptionDocumentResult));
-            return result;
-        }).allMatch(aBoolean -> true);
-
-
         return assertedResults.containsAll(expected);
     }
 
@@ -624,12 +606,6 @@ class TranscriptionDocumentLegacyTest extends PostgresIntegrationBase {
                                                transcriptionDocumentEntity.isHidden()
         );
     }
-
-    private Integer getCourthouseId(CourtCaseEntity caseEntity) {
-        return caseEntity != null && caseEntity.getCourthouse().getCourthouseName() != null
-            ? caseEntity.getCourthouse().getId() : null;
-    }
-
 
     private String getCourthouseDisplayName(CourtCaseEntity caseEntity) {
         return caseEntity != null && caseEntity.getCourthouse().getCourthouseName() != null
