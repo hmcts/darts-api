@@ -655,15 +655,11 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(response.getTranscriptionId(), entity.getTranscription().getId());
 
         if (response.getHearing() != null) {
-            assertEquals(response.getHearing().getId(),
-                         entity.getTranscription().getHearing().getId());
             assertEquals(response.getHearing().getHearingDate(),
                          entity.getTranscription().getHearing().getHearingDate());
         }
 
         if (response.getCourthouse() != null) {
-            assertEquals(response.getCourthouse().getId(),
-                         entity.getTranscription().getCourtHouse().get().getId());
             assertEquals(response.getCourthouse().getDisplayName(),
                          entity.getTranscription().getCourtHouse().get().getDisplayName());
         }

@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
@@ -759,5 +760,15 @@ public class TranscriptionStub {
 
     private ObjectRecordStatusEntity getStatusEntity(ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
+    }
+
+    public TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity(TranscriptionEntity transcriptionEntity, CourtCaseEntity courtCaseEntity,
+                                                                       String courthouseName, String caseNumber) {
+        TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity = new TranscriptionLinkedCaseEntity();
+        transcriptionLinkedCaseEntity.setTranscription(transcriptionEntity);
+        transcriptionLinkedCaseEntity.setCourtCase(courtCaseEntity);
+        transcriptionLinkedCaseEntity.setCourthouseName(courthouseName);
+        transcriptionLinkedCaseEntity.setCaseNumber(caseNumber);
+        return dartsDatabaseSaveStub.save(transcriptionLinkedCaseEntity);
     }
 }
