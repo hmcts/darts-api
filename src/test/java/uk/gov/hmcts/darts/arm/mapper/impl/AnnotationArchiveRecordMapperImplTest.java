@@ -47,8 +47,7 @@ class AnnotationArchiveRecordMapperImplTest {
         @BeforeEach
         void setUp() {
             when(configuration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ssX");
-            //when(configuration.getDateFormat()).thenReturn("yyyy-MM-dd");
-
+            
             propertyFileLoader = mockStatic(PropertyFileLoader.class);
             propertyFileLoader.when(() -> PropertyFileLoader.loadPropertiesFromFile(any()))
                 .thenReturn(new Properties());
