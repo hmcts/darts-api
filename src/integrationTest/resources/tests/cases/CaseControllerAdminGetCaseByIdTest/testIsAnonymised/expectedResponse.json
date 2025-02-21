@@ -17,21 +17,14 @@
   "defenders": [
     "aDefence"
   ],
-  "reporting_restrictions": [
-    {
-      "hearing_id": 4,
-      "event_id": 2,
-      "event_name": "Judge directed on reporting restrictions",
-      "event_text": "some-event-text-1",
-      "event_ts": "2023-06-26T13:00:00Z"
-    }
-  ],
+  "reporting_restrictions": [],
   "case_status": "OPEN",
   "created_at": "<CREATED_AT>",
   "created_by": 0,
   "last_modified_at": "<LAST_MODIFIED_AT>",
   "last_modified_by": 0,
   "is_deleted": false,
-  "is_data_anonymised": false,
+  "is_data_anonymised": true,
+  "data_anonymised_at": "2023-01-01T12:00:00Z",
   "is_interpreter_used": false
 }
