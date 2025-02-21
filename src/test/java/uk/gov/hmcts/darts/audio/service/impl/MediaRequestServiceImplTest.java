@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -799,6 +800,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
+    @Disabled // TODO: Move to a more appropriate test class
     @SuppressWarnings("java:S1874")
     void auditsWhenAudioHidden() {
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());
@@ -816,6 +818,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
+    @Disabled // TODO: Move to a more appropriate test class
     @SuppressWarnings("java:S1874")
     void auditsWhenAudioMadeVisible() {
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());

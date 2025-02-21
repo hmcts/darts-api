@@ -129,7 +129,6 @@ public class AudioController implements AudioApi {
         var transformedMedia = mediaRequestService.getTransformedMediaById(transformedMediaId);
         GetTransformedMediaResponse response = transformedMediaMapper.mapToGetTransformedMediaResponse(transformedMedia);
         return new ResponseEntity<>(response, HttpStatus.OK);
-
     }
 
     @Override
@@ -146,7 +145,7 @@ public class AudioController implements AudioApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<MediaHideResponse> postAdminHideMediaId(Integer mediaId, MediaHideRequest mediaHideRequest) {
-        MediaHideResponse audioResponse = mediaRequestService.adminHideOrShowMediaById(mediaId, mediaHideRequest);
+        MediaHideResponse audioResponse = adminMediaService.adminHideOrShowMediaById(mediaId, mediaHideRequest);
         return new ResponseEntity<>(audioResponse, HttpStatus.OK);
     }
 
