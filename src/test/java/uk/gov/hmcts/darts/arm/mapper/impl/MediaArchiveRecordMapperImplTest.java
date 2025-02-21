@@ -34,7 +34,7 @@ class MediaArchiveRecordMapperImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    MockedStatic<PropertyFileLoader> propertyFileLoader;
+    private MockedStatic<PropertyFileLoader> propertyFileLoader;
 
     @BeforeEach
     void setUp() {
@@ -65,13 +65,13 @@ class MediaArchiveRecordMapperImplTest {
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
                 .media(PersistableFactory.getMediaTestData()
-                                  .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
-                                  .build())
+                           .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+                           .build())
                 .build();
 
             // When
             MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                    "someFilename");
+                                                                                                     "someFilename");
 
             // Then
             assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
@@ -84,13 +84,13 @@ class MediaArchiveRecordMapperImplTest {
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
                 .media(PersistableFactory.getMediaTestData()
-                                  .someMinimalBuilder().retConfScore(null)
-                                  .build())
+                           .someMinimalBuilder().retConfScore(null)
+                           .build())
                 .build();
 
             // When
             MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                  "someFilename");
+                                                                                                     "someFilename");
 
             // Then
             assertNull(mediaArchiveRecord.getMediaCreateArchiveRecord().getRecordMetadata().getRetentionConfidenceScore());

@@ -151,67 +151,41 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             metadata.setRetentionConfidenceScore(media.getRetConfScore().getId());
         }
 
-        if (mediaRecordProperties.containsKey(BF_001_KEY)) {
-            metadata.setBf001(mapToString(mediaRecordProperties.getProperty(BF_001_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_002_KEY)) {
-            metadata.setBf002(mapToString(mediaRecordProperties.getProperty(BF_002_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_003_KEY)) {
-            metadata.setBf003(mapToString(mediaRecordProperties.getProperty(BF_003_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_004_KEY)) {
-            metadata.setBf004(mapToString(mediaRecordProperties.getProperty(BF_004_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_005_KEY)) {
-            metadata.setBf005(mapToString(mediaRecordProperties.getProperty(BF_005_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_006_KEY)) {
-            metadata.setBf006(mapToString(mediaRecordProperties.getProperty(BF_006_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_007_KEY)) {
-            metadata.setBf007(mapToString(mediaRecordProperties.getProperty(BF_007_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_008_KEY)) {
-            metadata.setBf008(mapToString(mediaRecordProperties.getProperty(BF_008_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_009_KEY)) {
-            metadata.setBf009(mapToString(mediaRecordProperties.getProperty(BF_009_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_010_KEY)) {
-            metadata.setBf010(mapToString(mediaRecordProperties.getProperty(BF_010_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_011_KEY)) {
-            metadata.setBf011(mapToString(mediaRecordProperties.getProperty(BF_011_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_012_KEY)) {
-            metadata.setBf012(mapToInt(mediaRecordProperties.getProperty(BF_012_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_013_KEY)) {
-            metadata.setBf013(mapToInt(mediaRecordProperties.getProperty(BF_013_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_014_KEY)) {
-            metadata.setBf014(mapToInt(mediaRecordProperties.getProperty(BF_014_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_015_KEY)) {
-            metadata.setBf015(mapToInt(mediaRecordProperties.getProperty(BF_015_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_016_KEY)) {
-            metadata.setBf016(mapToString(mediaRecordProperties.getProperty(BF_016_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_017_KEY)) {
-            metadata.setBf017(mapToString(mediaRecordProperties.getProperty(BF_017_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_018_KEY)) {
-            metadata.setBf018(mapToString(mediaRecordProperties.getProperty(BF_018_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_019_KEY)) {
-            metadata.setBf019(mapToString(mediaRecordProperties.getProperty(BF_019_KEY), media));
-        }
-        if (mediaRecordProperties.containsKey(BF_020_KEY)) {
-            metadata.setBf020(mapToString(mediaRecordProperties.getProperty(BF_020_KEY), media));
-        }
+        setMetadataProperties(metadata, media);
         return metadata;
+    }
+
+    private void setMetadataProperties(RecordMetadata metadata, MediaEntity mediaEntity) {
+        for (String key : mediaRecordProperties.stringPropertyNames()) {
+            String value = mapToString(mediaRecordProperties.getProperty(key), mediaEntity);
+            if (value != null) {
+                switch (key) {
+                    case BF_001_KEY -> metadata.setBf001(value);
+                    case BF_002_KEY -> metadata.setBf002(value);
+                    case BF_003_KEY -> metadata.setBf003(value);
+                    case BF_004_KEY -> metadata.setBf004(value);
+                    case BF_005_KEY -> metadata.setBf005(value);
+                    case BF_006_KEY -> metadata.setBf006(value);
+                    case BF_007_KEY -> metadata.setBf007(value);
+                    case BF_008_KEY -> metadata.setBf008(value);
+                    case BF_009_KEY -> metadata.setBf009(value);
+                    case BF_010_KEY -> metadata.setBf010(value);
+                    case BF_011_KEY -> metadata.setBf011(value);
+                    case BF_012_KEY -> metadata.setBf012(mapToInt(value, mediaEntity));
+                    case BF_013_KEY -> metadata.setBf013(mapToInt(value, mediaEntity));
+                    case BF_014_KEY -> metadata.setBf014(mapToInt(value, mediaEntity));
+                    case BF_015_KEY -> metadata.setBf015(mapToInt(value, mediaEntity));
+                    case BF_016_KEY -> metadata.setBf016(value);
+                    case BF_017_KEY -> metadata.setBf017(value);
+                    case BF_018_KEY -> metadata.setBf018(value);
+                    case BF_019_KEY -> metadata.setBf019(value);
+                    case BF_020_KEY -> metadata.setBf020(value);
+                    default -> {
+                        // ignore unknown properties - comment to fix PMD warning
+                    }
+                }
+            }
+        }
     }
 
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
