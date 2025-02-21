@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.audio.mapper.CourtroomMapper;
 import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
+import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
@@ -40,12 +41,14 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.validation.IdRequest;
 
@@ -80,6 +83,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private final MediaRepository mediaRepository;
     private final TransformedMediaRepository transformedMediaRepository;
     private final ObjectAdminActionRepository objectAdminActionRepository;
+    private final ObjectHiddenReasonRepository hiddenReasonRepository;
 
     private final AuditApi auditApi;
 
@@ -159,13 +163,14 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
         Boolean isToBeHidden = mediaHideRequest.getIsHidden();
         if (isToBeHidden) {
-            applyAdminActionComponent.applyAdminAction(targetedMedia,
-                                                       mediaHideRequest.getAdminAction());
+            AdminActionRequest adminActionRequest = mediaHideRequest.getAdminAction();
+            applyAdminActionComponent.applyAdminActionToAllVersions(targetedMedia,
+                                                                    mapToAdminActionProperties(adminActionRequest));
             ObjectAdminActionEntity adminActionForTargetedMedia = objectAdminActionRepository.findByMedia_Id(targetedMedia.getId())
                 .getFirst();
             return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, adminActionForTargetedMedia);
         } else {
-            removeAdminActionComponent.removeAdminAction(targetedMedia);
+            removeAdminActionComponent.removeAdminActionFromAllVersions(targetedMedia);
             return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, null);
         }
     }
@@ -259,4 +264,14 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
         return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
     }
+
+    private ApplyAdminActionComponent.AdminActionProperties mapToAdminActionProperties(AdminActionRequest adminActionRequest) {
+        final ObjectHiddenReasonEntity objectHiddenReason = hiddenReasonRepository.findById(adminActionRequest.getReasonId())
+            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND));
+
+        return new ApplyAdminActionComponent.AdminActionProperties(adminActionRequest.getTicketReference(),
+                                                                   adminActionRequest.getComments(),
+                                                                   objectHiddenReason);
+    }
+
 }

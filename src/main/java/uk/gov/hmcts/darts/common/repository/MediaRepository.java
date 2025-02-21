@@ -118,7 +118,6 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
               SELECT me
               FROM MediaEntity me
               WHERE me.chronicleId = :chronicleId
-              ORDER BY me.start
           """)
     List<MediaEntity> findAllByChronicleId(String chronicleId);
 

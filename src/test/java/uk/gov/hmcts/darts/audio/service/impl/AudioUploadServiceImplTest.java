@@ -12,6 +12,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
+import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
@@ -90,6 +91,8 @@ class AudioUploadServiceImplTest {
     private AudioAsyncService audioAsyncService;
     @Mock
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
+    @Mock
+    private ApplyAdminActionComponent applyAdminActionComponent;
     private AddAudioRequestMapper mapper;
 
     @BeforeEach
@@ -105,7 +108,9 @@ class AudioUploadServiceImplTest {
             dataManagementApi,
             userIdentity,
             logApi,
-            audioAsyncService));
+            audioAsyncService,
+            applyAdminActionComponent
+            ));
         ReflectionTestUtils.setField(audioService, "smallFileSizeMaxLength", Duration.ofSeconds(2));
         ReflectionTestUtils.setField(audioService, "smallFileSize", 1024);
 

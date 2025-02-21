@@ -24,15 +24,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RemoveAdminActionComponent {
 
-    private final AuditApi auditApi;
-
     private final MediaRepository mediaRepository;
     private final ObjectAdminActionRepository adminActionRepository;
+
+    private final AuditApi auditApi;
 
     public static final String AUDIT_TEMPLATE = "Media id: %d, Ticket ref: %s, Comments: %s";
 
     @Transactional
-    public void removeAdminAction(@NonNull MediaEntity targetedMedia) {
+    public void removeAdminActionFromAllVersions(@NonNull MediaEntity targetedMedia) {
         List<MediaEntity> allMediaVersions;
         if (StringUtils.isBlank(targetedMedia.getChronicleId())) {
             log.debug("Attempting to remove all admin actions from non-versioned media with id {}",
@@ -43,12 +43,11 @@ public class RemoveAdminActionComponent {
                       targetedMedia.getChronicleId());
             allMediaVersions = mediaRepository.findAllByChronicleId(targetedMedia.getChronicleId());
         }
-
-        removeAdminAction(allMediaVersions);
+        removeAdminActionFrom(allMediaVersions);
     }
 
     @Transactional
-    public void removeAdminAction(@NonNull List<MediaEntity> mediaVersions) {
+    public void removeAdminActionFrom(@NonNull List<MediaEntity> mediaVersions) {
         Set<String> uniqueChronicleIds = mediaVersions.stream()
             .map(MediaEntity::getChronicleId)
             .collect(Collectors.toSet());
