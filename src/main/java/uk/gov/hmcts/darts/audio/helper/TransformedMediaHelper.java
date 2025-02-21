@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.nonNull;
@@ -61,12 +60,12 @@ public class TransformedMediaHelper {
     private static final String NOT_AVAILABLE = "N/A";
 
     @Transactional
-    public UUID saveToStorage(MediaRequestEntity mediaRequest, InputStream inputStream, String filename, AudioFileInfo audioFileInfo) {
+    public String saveToStorage(MediaRequestEntity mediaRequest, InputStream inputStream, String filename, AudioFileInfo audioFileInfo) {
         //save in outbound datastore
         Map<String, String> metadata = new HashMap<>();
         metadata.put(MEDIA_REQUEST_ID, String.valueOf(mediaRequest.getId()));
         BlobClientUploadResponse blobClientUploadResponse = dataManagementApi.saveBlobToContainer(inputStream, DatastoreContainerType.OUTBOUND, metadata);
-        final UUID blobName = blobClientUploadResponse.getBlobName();
+        final String blobName = blobClientUploadResponse.getBlobName();
 
         OffsetDateTime startTime = audioFileInfo.getStartTime().atOffset(ZoneOffset.UTC);
         OffsetDateTime endTime = audioFileInfo.getEndTime().atOffset(ZoneOffset.UTC);

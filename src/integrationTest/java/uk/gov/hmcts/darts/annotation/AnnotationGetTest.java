@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -120,7 +119,7 @@ class AnnotationGetTest extends IntegrationBase {
             annotationDocumentEntity,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+            "665e00c8-5b82-4392-8766-e0c982f603d3"
         );
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
@@ -129,7 +128,7 @@ class AnnotationGetTest extends IntegrationBase {
             annotationDocumentEntity,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+            "665e00c8-5b82-4392-8766-e0c982f603d3"
         );
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod2);

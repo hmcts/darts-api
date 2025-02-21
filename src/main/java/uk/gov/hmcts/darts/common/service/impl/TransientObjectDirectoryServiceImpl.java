@@ -10,8 +10,6 @@ import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 
-import java.util.UUID;
-
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
@@ -24,7 +22,7 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
 
     @Override
     public TransientObjectDirectoryEntity saveTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
-                                                                             UUID blobName) {
+                                                                             String blobName) {
 
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);

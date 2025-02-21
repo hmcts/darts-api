@@ -192,7 +192,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         externalDetsDataStoreDeleter.delete(1000);
 
         verifyEntitiesDeleted(List.of(inboundEntity, unstructuredEntity, detsEntity), List.of(outboundEntity));
-        verify(detsApiService).deleteBlobDataFromContainer(any(UUID.class));
+        verify(detsApiService).deleteBlobDataFromContainer(any(String.class));
     }
 
     @SneakyThrows
@@ -236,7 +236,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         externalDetsDataStoreDeleter.delete(1000);
 
         verifyEntitiesNotChanged(List.of(unstructuredEntity, inboundEntity, detsEntity), List.of(outboundEntity));
-        verify(detsApiService, never()).deleteBlobDataFromContainer(any(UUID.class));
+        verify(detsApiService, never()).deleteBlobDataFromContainer(any(String.class));
     }
 
     private void verifyEntitiesNotChanged(List<ExternalObjectDirectoryEntity> inboundUnstructuredList, List<TransientObjectDirectoryEntity> outboundList) {
@@ -301,14 +301,14 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             mediaEntity,
             dartsDatabase.getObjectRecordStatusEntity(status),
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(dataStoreId),
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
 
         return dartsDatabase.save(externalObjectDirectoryEntity);
     }
 
     private TransientObjectDirectoryEntity createTransientDirectoryAndObjectStatus(MediaRequestEntity currentMediaRequest, ObjectRecordStatusEnum status) {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
 
         return dartsDatabase.getTransientObjectDirectoryRepository()

@@ -187,7 +187,7 @@ class AudioTransformationServiceImplTest {
         mediaRequestEntity.setCreatedBy(userAccount);
 
         BlobClientUploadResponse blobClientUploadResponse = mock(BlobClientUploadResponseImpl.class);
-        UUID blobName = UUID.randomUUID();
+        String blobName = UUID.randomUUID().toString();
         when(blobClientUploadResponse.getBlobName())
             .thenReturn(blobName);
         when(blobClientUploadResponse.getBlobSize())
@@ -218,7 +218,7 @@ class AudioTransformationServiceImplTest {
             .path(Path.of("test/b6b51cb7-9ff8-44de-bf53-62c2bd2e13f3.zip"))
             .build();
 
-        UUID returnedBlobName = transformedMediaHelper.saveToStorage(
+        String returnedBlobName = transformedMediaHelper.saveToStorage(
             mediaRequestEntity,
             new ByteArrayInputStream(TEST_BINARY_STRING.getBytes()), "filename",
             audioFileInfo

@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class DetsManagementServiceImplTest {
 
     public static final String BLOB_CONTAINER_NAME = "dummy_container";
-    public static final UUID BLOB_ID = UUID.randomUUID();
+    public static final String BLOB_ID = UUID.randomUUID().toString();
     @Mock
     private DataManagementAzureClientFactory dataManagementFactory;
     @Mock

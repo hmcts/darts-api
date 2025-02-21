@@ -47,7 +47,7 @@ public class DetsApiServiceImpl implements DetsApiService {
 
     @Override
     @SuppressWarnings({"PMD.CloseResource"})
-    public DownloadResponseMetaData downloadData(UUID blobId) throws FileNotDownloadedException {
+    public DownloadResponseMetaData downloadData(String blobId) throws FileNotDownloadedException {
         DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
@@ -72,8 +72,8 @@ public class DetsApiServiceImpl implements DetsApiService {
     }
 
     @Override
-    public UUID saveBlobData(BinaryData binaryData) {
-        UUID uniqueBlobId = UUID.randomUUID();
+    public String saveBlobData(BinaryData binaryData) {
+        String uniqueBlobId = UUID.randomUUID().toString();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
 
@@ -83,7 +83,7 @@ public class DetsApiServiceImpl implements DetsApiService {
     }
 
     @Override
-    public boolean deleteBlobDataFromContainer(UUID blobId) throws AzureDeleteBlobException {
+    public boolean deleteBlobDataFromContainer(String blobId) throws AzureDeleteBlobException {
         try {
             BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());
             BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);

@@ -287,7 +287,7 @@ class DailyListUpdaterTest {
         @Test
         void missingEltId() {
             DailyListEntity dailyListEntity = new DailyListEntity();
-            dailyListEntity.setExternalLocation(UUID.randomUUID());
+            dailyListEntity.setExternalLocation(UUID.randomUUID().toString());
             dailyListEntity.setExternalLocationTypeEntity(null);
 
             assertThat(dailyListUpdater.validateXmlElseUpdate(dailyListEntity))
@@ -302,7 +302,7 @@ class DailyListUpdaterTest {
         @EnumSource(value = ExternalLocationTypeEnum.class, mode = EnumSource.Mode.EXCLUDE, names = {"DETS"})
         void incorrectEltId(ExternalLocationTypeEnum externalLocationTypeEnum) {
             DailyListEntity dailyListEntity = new DailyListEntity();
-            dailyListEntity.setExternalLocation(UUID.randomUUID());
+            dailyListEntity.setExternalLocation(UUID.randomUUID().toString());
             ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();
             externalLocationTypeEntity.setId(externalLocationTypeEnum.getId());
             dailyListEntity.setExternalLocationTypeEntity(externalLocationTypeEntity);
@@ -317,7 +317,7 @@ class DailyListUpdaterTest {
 
         @Test
         void failedToDownloadFileFromDebts() throws Exception {
-            UUID externalLocation = UUID.randomUUID();
+            String externalLocation = UUID.randomUUID().toString();
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(externalLocation);
             ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();
@@ -339,7 +339,7 @@ class DailyListUpdaterTest {
         @SuppressWarnings("PMD.CloseResource")
         void positive() throws Exception {
             final String xml = "<has_xml>true</has_xml";
-            UUID externalLocation = UUID.randomUUID();
+            String externalLocation = UUID.randomUUID().toString();
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(externalLocation);
             ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();

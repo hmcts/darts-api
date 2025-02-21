@@ -100,7 +100,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     void audioRequestDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
@@ -148,7 +148,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     void audioRequestDownloadShouldReturnInternalServerErrorWhenExceptionDuringDownloadBlobData() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
