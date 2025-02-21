@@ -52,6 +52,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
+    public static final OffsetDateTime DATE_TIME = OffsetDateTime.parse("2023-06-26T13:00:00Z");
 
     @Autowired
     private transient MockMvc mockMvc;
@@ -102,7 +103,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
     }
 
     @Test
-    void adminGetCaseById_Success() throws Exception {
+    void adminGetCaseById_WithCaseOpenAndReportingRestrictions() throws Exception {
         // given
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
@@ -114,7 +115,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         );
 
         List<OffsetDateTime> eventDateTimes = new ArrayList<>();
-        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
+        eventDateTimes.add(DATE_TIME);
         var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, 54))
             .toList();
@@ -134,7 +135,49 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         // then
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerAdminGetCaseByIdTest/testOk/expectedResponse.json");
+            "tests/cases/CaseControllerAdminGetCaseByIdTest/testCaseOpen/expectedResponse.json");
+        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().toString());
+        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().toString());
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
+    @Test
+    void adminGetCaseById_WithCaseClosedAndReportingRestrictions() throws Exception {
+        // given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "123",
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+        );
+
+        List<OffsetDateTime> eventDateTimes = new ArrayList<>();
+        eventDateTimes.add(DATE_TIME);
+        var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
+            .map(eve -> dartsDatabase.addHandlerToEvent(eve, 54))
+            .toList();
+        hearingEntity = dartsDatabase.saveEventsForHearing(hearingEntity, reportingRestrictions);
+
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
+        courtCase.addDefendant(createDefendantForCase(courtCase));
+        courtCase.addDefence("aDefence");
+        courtCase.setClosed(true);
+        courtCase.setCaseClosedTimestamp(DATE_TIME);
+        courtCase = dartsDatabase.save(courtCase);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCase.getId());
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        // then
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminGetCaseByIdTest/testCaseClosed/expectedResponse.json");
         expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().toString());
         expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().toString());
         log.info("actualResponse: {}", actualResponse);
