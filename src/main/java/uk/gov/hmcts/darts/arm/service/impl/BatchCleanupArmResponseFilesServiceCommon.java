@@ -210,6 +210,10 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
                      loggingPrefix, inputUploadFilename, eodEntriesWithManifestFilename.stream().map(ExternalObjectDirectoryEntity::getId).toList());
         }
 
+        deleteInputUploadFile(deletedFileStatuses, inputUploadFilename);
+    }
+
+    private void deleteInputUploadFile(List<Boolean> deletedFileStatuses, String inputUploadFilename) {
         if (deletedFileStatuses.stream().allMatch(Boolean.TRUE::equals)) {
             log.info("{}: All associated Eod entries deleted, about to delete InputUpload file {}", loggingPrefix, inputUploadFilename);
             // Make sure to only delete the Input Upload filename after the other response files have been deleted as once this is deleted

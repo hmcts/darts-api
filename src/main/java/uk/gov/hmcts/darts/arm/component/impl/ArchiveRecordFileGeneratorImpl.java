@@ -38,7 +38,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
         try {
             String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
             String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
-            log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordFile.getAbsolutePath());
+            log.debug("About to write {} {} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordFile.getAbsolutePath());
             try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
                 printWriter.println(archiveRecordOperation);
                 printWriter.println(uploadNewFileRecord);
@@ -59,8 +59,10 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                 try {
                     String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
                     String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
-                    archiveRecordsStringBuilder.append(archiveRecordOperation).append(System.lineSeparator());
-                    archiveRecordsStringBuilder.append(uploadNewFileRecord).append(System.lineSeparator());
+                    archiveRecordsStringBuilder.append(archiveRecordOperation)
+                        .append(System.lineSeparator())
+                        .append(uploadNewFileRecord)
+                        .append(System.lineSeparator());
                 } catch (Exception e) {
                     log.error("Unable to write archive record for EOD {}",
                               archiveRecord.getArchiveRecordOperation().getRelationId());

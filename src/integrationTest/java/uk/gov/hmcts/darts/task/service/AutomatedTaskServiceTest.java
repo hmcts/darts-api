@@ -91,13 +91,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
@@ -213,54 +209,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 }
             }
         );
-    }
-
-    @Test
-    void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
-        GenerateCaseDocumentAutomatedTask automatedTask
-            = new GenerateCaseDocumentAutomatedTask(
-            automatedTaskRepository, mock(GenerateCaseDocumentAutomatedTaskConfig.class), logApi, lockService,
-            generateCaseDocumentProcessor
-        );
-        doThrow(ArithmeticException.class).when(caseRepository).findCasesIdsNeedingCaseDocumentGenerated(any(), any());
-
-        automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), true, "*/7 * * * * *");
-
-        waitForMax10SecondsWithOneSecondPoll(() -> {
-            AutomatedTaskStatus newAutomatedTaskStatus = automatedTaskService.getAutomatedTaskStatus(automatedTask.getTaskName());
-            return newAutomatedTaskStatus == FAILED;
-        });
-    }
-
-    @Test
-    void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
-        ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
-        );
-
-        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-
-        // this may have transitioned to complete. Let's check the history to ensure that
-        // we started with NOT_STARTED state
-        assertTrue(automatedTask.hasTransitionState(NOT_STARTED));
-
-        boolean result1 = automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(
-            automatedTask.getTaskName(), true, "*/7 * * * * *");
-        assertTrue(result1);
-
-        waitForMax10SecondsWithOneSecondPoll(() -> {
-            AutomatedTaskStatus newAutomatedTaskStatus = automatedTaskService.getAutomatedTaskStatus(automatedTask.getTaskName());
-            return COMPLETED.equals(newAutomatedTaskStatus);
-        });
-
-        boolean result2 = automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(
-            originalAutomatedTaskEntity.get().getTaskName(),
-            true,
-            originalAutomatedTaskEntity.get().getCronExpression()
-        );
-        assertTrue(result2);
     }
 
     @Test

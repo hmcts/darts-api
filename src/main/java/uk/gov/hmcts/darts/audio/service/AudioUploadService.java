@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public interface AudioUploadService {
 
+    void deleteUploadedAudio(UUID guid);
+
     void addAudio(UUID guid, AddAudioMetadataRequest addAudioMetadataRequest);
 
     void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity mediaEntity);

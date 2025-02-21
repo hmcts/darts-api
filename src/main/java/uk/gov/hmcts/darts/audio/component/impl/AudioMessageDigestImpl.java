@@ -15,8 +15,8 @@ public class AudioMessageDigestImpl implements AudioMessageDigest {
     private final String algorithm;
 
     @Override
-    public java.security.MessageDigest getMessageDigest() {
-        java.security.MessageDigest digest;
+    public MessageDigest getMessageDigest() {
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {

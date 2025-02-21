@@ -32,7 +32,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         var transcriptions = persistedTranscriptions(quantity);
         range(0, quantity).forEach(j -> {
             var transcription = transcriptions.get(j);
-            var courthouse = transcription.getCourtroom().getCourthouse();
+            var courthouse = transcription.getCourtCase().getCourthouse();
             courthouse.setDisplayName(displayNames[j]);
             dartsDatabase.save(courthouse);
         });
@@ -58,7 +58,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
     @Override
     public void allAtCourthousesWithDisplayName(List<TranscriptionEntity> transcriptionEntities, String courthouseDisplayName) {
         transcriptionEntities.forEach(t -> {
-            var courthouse = t.getCourtroom().getCourthouse();
+            var courthouse = t.getCourtCase().getCourthouse();
             courthouse.setDisplayName(courthouseDisplayName);
             dartsDatabase.save(courthouse);
         });

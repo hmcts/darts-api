@@ -27,6 +27,8 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -43,12 +45,13 @@ public class ArmApiServiceImpl implements ArmApiService {
                                                  RetentionConfidenceScoreEnum retConfScore,
                                                  String retConfReason) {
 
+        Integer retConfScoreId = nonNull(retConfScore) ? retConfScore.getId() : null;
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(eventTimestamp)
                           .retConfReason(retConfReason)
-                          .retConfScore(retConfScore.getId())
+                          .retConfScore(retConfScoreId)
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -120,7 +123,7 @@ public class ArmApiServiceImpl implements ArmApiService {
             if (!availableEntitlementProfile.isError()) {
                 Optional<String> profileId = availableEntitlementProfile.getProfiles().stream()
                     .filter(p -> armApiConfigurationProperties.getArmServiceProfile().equalsIgnoreCase(p.getProfileName()))
-                    .map(p -> p.getProfileId())
+                    .map(AvailableEntitlementProfile.Profiles::getProfileId)
                     .findAny();
                 if (profileId.isPresent()) {
                     log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
