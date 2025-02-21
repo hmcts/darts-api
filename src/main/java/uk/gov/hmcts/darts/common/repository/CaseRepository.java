@@ -54,11 +54,21 @@ public interface CaseRepository
     List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries, Limit limit);
 
     @Query("""
-        SELECT courtCase.id FROM CourtCaseEntity courtCase
-        WHERE courtCase.closed = true
-        AND courtCase.caseClosedTimestamp <= :caseClosedBeforeTimestamp
-        AND NOT EXISTS (select cde from CaseDocumentEntity cde
-            where (cde.courtCase.id = courtCase.id))
+        SELECT courtCase.id 
+        FROM CourtCaseEntity cc,
+        CaseRetentionEntity cr,
+        (select cr2.courtCase.id as caseId, max(cr2.createdDateTime) latest_ts
+                FROM CaseRetentionEntity cr2
+                WHERE cr2.currentState = 'COMPLETE'
+                GROUP by cr2.courtCase.id) latest_case_retention
+        WHERE cr.courtCase.id = cc.id
+        AND cc.closed = true
+        AND cc.caseClosedTimestamp <= :caseClosedBeforeTimestamp
+        AND latest_case_retention.latest_ts = cr.createdDateTime
+        AND latest_case_retention.caseId = cr.courtCase.id
+        AND cr.retainUntil is not null
+        AND NOT EXISTS 
+            (select cde FROM CaseDocumentEntity cde WHERE (cde.courtCase.id = cc.id))
         """)
     List<Integer> findCasesIdsNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
 
