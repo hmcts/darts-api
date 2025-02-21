@@ -96,6 +96,34 @@ module "postgresql_flexible" {
     {
       name  = "azure.extensions"
       value = "pg_stat_statements, pg_trgm"
+    },
+    {
+      name  = "effective_cache_size"
+      value = "3211264"
+    },
+    {
+      name  = "effective_io_concurrency"
+      value = "200"
+    },
+    {
+      name  = "maintenance_work_mem"
+      value = "2097152"
+    },
+    {
+      name  = "max_parallel_workers_per_gather"
+      value = "4"
+    },
+    {
+      name  = "max_wal_size"
+      value = "4GB"
+    },
+    {
+      name  = "min_wal_size"
+      value = "1GB"
+    },
+    {
+      name  = "random_page_cost"
+      value = "1.1"
     }
   ]
   pgsql_version = "16"
