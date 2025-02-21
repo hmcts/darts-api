@@ -107,7 +107,7 @@ module "postgresql_flexible" {
     },
     {
       name  = "maintenance_work_mem"
-      value = "2097152"
+      value = "2097151"
     },
     {
       name  = "max_parallel_workers_per_gather"
@@ -115,11 +115,11 @@ module "postgresql_flexible" {
     },
     {
       name  = "max_wal_size"
-      value = "4GB"
+      value = "4096"
     },
     {
       name  = "min_wal_size"
-      value = "1GB"
+      value = "1024"
     },
     {
       name  = "random_page_cost"
