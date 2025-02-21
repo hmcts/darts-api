@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-class TranscriptionDocumentTest extends PostgresIntegrationBase {
+class TranscriptionDocumentModTest extends PostgresIntegrationBase {
 
     @Autowired
     private TranscriptionDocumentStub transcriptionStub;
@@ -42,16 +42,16 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         int nameMatchIndex = 0;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository
-            .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
-                                        .getTranscription().getCourtCases().get(0).getCaseNumber(),null,null,null,null,null, null, null);
+            .findTranscriptionMediaModenised(generatedDocumentEntities.get(nameMatchIndex)
+                                                 .getTranscription().getCourtCases().get(0).getCaseNumber(), null, null, null, null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
     }
 
     @Test
     void testFindTranscriptionDocumentWithoutAnyParameters() {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(null,
-                                                                     null,null,null,null,null, null, null);
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(null,
+                                                                              null, null, null, null, null, null, null);
         Assertions.assertEquals(4, transcriptionDocumentResults.size());
     }
 
@@ -66,8 +66,8 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             .toList();
 
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(null,
-                                                                      null,null,null,null,null, null, null)
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(null,
+                                                                              null, null, null, null, null, null, null)
             .stream().sorted(Comparator.comparing(TranscriptionDocumentResult::transcriptionDocumentId))
             .toList();
 
@@ -83,7 +83,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithCourtDisplayNameSubstringPrefixMatchOne() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                 .getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -102,7 +102,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithCourtDisplayNameCaseInsensitiveSubstringPrefixMatchOne() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                 .getQueryStringPrefix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null, null);
@@ -119,7 +119,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithCourtDisplayNameSubstringPostFixMatchOne() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null, null, null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
@@ -137,7 +137,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithCourtDisplayNameCaseInsensitiveSubstringPostFixMatchOne() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                 .getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null, null);
@@ -155,24 +155,24 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     @Test
     void testFindTranscriptionDocumentWithCourtDisplayNameSubstringMatchAll() {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
 
-            Assertions.assertEquals(4, transcriptionDocumentResults.size());
-            Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+        Assertions.assertEquals(4, transcriptionDocumentResults.size());
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0)
-                                                                       .getTranscription().getCourtCases().get(0)),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0)
-                                                                       .getTranscription().getCourtCases().get(1)),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1)
-                                                                       .getTranscription().getCourtCases().get(0)),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1)
-                                                                       .getTranscription().getCourtCases().get(1)))));
+                                                                           generatedDocumentEntities.get(0)
+                                                                               .getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0)
+                                                                               .getTranscription().getCourtCases().get(1)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1)
+                                                                               .getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1)
+                                                                               .getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -183,7 +183,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             .generateTranscriptionEntities(GENERATION_COUNT, GENERATION_HEARING_PER_TRANSCRIPTION, GENERATION_CASES_PER_TRANSCRIPTION, false, true, true);
 
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
 
@@ -211,7 +211,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             .generateTranscriptionEntities(GENERATION_COUNT, 0, GENERATION_CASES_PER_TRANSCRIPTION, false, false, true);
 
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
 
@@ -235,7 +235,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithHearingDate() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null,
             generatedDocumentEntities.get(1).getTranscription().getHearings().get(0).getHearingDate(), null, null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -260,8 +260,8 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         List<TranscriptionDocumentEntity> generatedDocumentEntitiesWithManualTranscription = transcriptionStub
             .generateTranscriptionEntities(2, 0, 0, true, false, false);
 
-       List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+        List<TranscriptionDocumentResult> transcriptionDocumentResults
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null,
             null, null, null, null, true, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -278,9 +278,9 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithOwnerExact() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null, null, null,
-            null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(nameMatchIndex)));
+            null, null, null, TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(nameMatchIndex)));
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
@@ -296,9 +296,9 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithOwnerPrefix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null, null, null,
-            null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix(Integer.toString(nameMatchIndex)));
+            null, null, null, TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix(Integer.toString(nameMatchIndex)));
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
@@ -314,7 +314,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithOwnerCaseInsensitivePrefix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null, null, null,
             null, null, null,
             TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix(Integer.toString(nameMatchIndex).toLowerCase(Locale.getDefault())));
@@ -333,9 +333,9 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithOwnerPostfix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null, null, null,
-            null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)));
+            null, null, null, TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)));
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
@@ -351,7 +351,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithOwnerCaseInsensitivePostfix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null, null, null,
             null, null, null,
             TranscriptionDocumentSubStringQueryEnum.OWNER
@@ -370,9 +370,9 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     @Test
     void testFindTranscriptionDocumentWithOwnerSubstringMatchAll() {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null, null, null,
-            null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix());
+            null, null, null, TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix());
         Assertions.assertEquals(4, transcriptionDocumentResults.size());
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(generatedDocumentEntities.get(0),
@@ -389,9 +389,10 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedByExact() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(null,
-                                                                     null, null,
-            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryString(Integer.toString(nameMatchIndex)), null, null, null, null);
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(null,
+                                                                              null, null,
+                                                                              TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryString(
+                                                                                  Integer.toString(nameMatchIndex)), null, null, null, null);
 
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
@@ -408,9 +409,10 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedByPrefix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(null,
-                                                                     null, null,
-            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null);
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(null,
+                                                                              null, null,
+                                                                              TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(
+                                                                                  Integer.toString(nameMatchIndex)), null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
@@ -426,11 +428,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePrefix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(null,
-                                                                     null,  null,
-            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer
-                                                                                          .toString(nameMatchIndex))
-                                                                         .toUpperCase(Locale.getDefault()), null, null, null, null);
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(null,
+                                                                              null, null,
+                                                                              TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer
+                                                                                                                                                            .toString(
+                                                                                                                                                                nameMatchIndex))
+                                                                                  .toUpperCase(Locale.getDefault()), null, null, null, null);
 
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
@@ -447,8 +450,8 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedByPostfix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
-            null,  null, null,
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
+            null, null, null,
             TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(1)), null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
@@ -459,14 +462,14 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                          getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
-}
+    }
 
     @Test
     void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePostfix() {
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
-            null,  null, null,
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
+            null, null, null,
             TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY
                 .getQueryStringPostfix(Integer.toString(1).toLowerCase(Locale.getDefault())), null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -483,8 +486,8 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     @Test
     void testFindTranscriptionDocumentWithRequestedBySubstringMatchAll() {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
-            null,  null, null,
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
+            null, null, null,
             TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(), null, null, null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(generatedDocumentEntities.get(0),
@@ -501,7 +504,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedAtFromAndRequestedAtToSameDay() {
         int fromAtPosition = 0;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
             null, null, null, null,
             generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(),
             generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(), null, null);
@@ -518,8 +521,8 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedAtFrom() {
         int fromAtPosition = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(
-            null,  null, null,
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(
+            null, null, null,
             null, generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(), null, null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(generatedDocumentEntities.get(1),
@@ -532,11 +535,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithRequestedAtTo() {
         int toPosition = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
-            = transcriptionDocumentRepository.findTranscriptionMedia(null,
-                                                              null, null,
-                                                                     null, null,
-                                                                     generatedDocumentEntities.get(toPosition)
-                                                                         .getTranscription().getCreatedDateTime(), null, null);
+            = transcriptionDocumentRepository.findTranscriptionMediaModenised(null,
+                                                                              null, null,
+                                                                              null, null,
+                                                                              generatedDocumentEntities.get(toPosition)
+                                                                                  .getTranscription().getCreatedDateTime(), null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(generatedDocumentEntities.get(0),
                                                                            generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
@@ -552,30 +555,27 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     void testFindTranscriptionDocumentWithAllQueryParameters() {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository
-            .findTranscriptionMedia(generatedDocumentEntities.get(0).getTranscription()
-                                                                  .getCourtCase().getCaseNumber(),
-                                    generatedDocumentEntities.get(0).getTranscription().getCourtroom().getCourthouse().getDisplayName(),
-                                                                      generatedDocumentEntities.get(0).getTranscription().getHearings().get(0).getHearingDate(),
-                                                                      generatedDocumentEntities.get(0).getTranscription().getCreatedBy().getUserFullName(),
-                                                                      generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(),
-                                                                      generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(), false,
-                                                                      generatedDocumentEntities.get(0).getTranscription().getTranscriptionWorkflowEntities()
-                                        .get(0).getWorkflowActor().getUserFullName());
+            .findTranscriptionMediaModenised(generatedDocumentEntities.get(0).getTranscription()
+                                                 .getCourtCase().getCaseNumber(),
+                                             generatedDocumentEntities.get(0).getTranscription().getCourtroom().getCourthouse().getDisplayName(),
+                                             generatedDocumentEntities.get(0).getTranscription().getHearings().get(0).getHearingDate(),
+                                             generatedDocumentEntities.get(0).getTranscription().getCreatedBy().getUserFullName(),
+                                             generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(),
+                                             generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(), false,
+                                             generatedDocumentEntities.get(0).getTranscription().getTranscriptionWorkflowEntities()
+                                                 .get(0).getWorkflowActor().getUserFullName());
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
         Assertions.assertEquals(generatedDocumentEntities.get(0).getId(),
                                 transcriptionDocumentResults.get(0).transcriptionDocumentId());
     }
 
-    private boolean assertResultEquals(TranscriptionDocumentResult asserted,  TranscriptionDocumentResult expected) {
+    private boolean assertResultEquals(TranscriptionDocumentResult asserted, TranscriptionDocumentResult expected) {
         Assertions.assertEquals(expected.transcriptionDocumentId(), asserted.transcriptionDocumentId());
         Assertions.assertEquals(expected.transcriptionId(), asserted.transcriptionId());
         Assertions.assertEquals(expected.caseNumber(), asserted.caseNumber());
         Assertions.assertEquals(expected.caseId(), asserted.caseId());
-        Assertions.assertEquals(expected.courthouseId(), asserted.courthouseId());
         Assertions.assertEquals(expected.courthouseDisplayName(), asserted.courthouseDisplayName());
-        Assertions.assertEquals(expected.hearingCourthouseId(), asserted.hearingCourthouseId());
         Assertions.assertEquals(expected.hearingCourthouseDisplayName(), asserted.hearingCourthouseDisplayName());
-        Assertions.assertEquals(expected.hearingId(), asserted.hearingId());
         Assertions.assertEquals(expected.hearingDate(), asserted.hearingDate());
         Assertions.assertEquals(expected.isManualTranscription(), asserted.isManualTranscription());
         Assertions.assertEquals(expected.isHidden(), asserted.isHidden());
@@ -596,7 +596,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         String hearingCourthouseDisplayName = null;
         Integer hearingId = null;
         LocalDate hearingDate = null;
-        Integer hearingCaseId = null;   
+        Integer hearingCaseId = null;
         String hearingCaseNumber = null;
 
         if (transcriptionDocumentEntity.getTranscription().getHearing() != null) {
@@ -614,16 +614,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
         return new TranscriptionDocumentResult(transcriptionDocumentEntity.getId(),
                                                transcriptionDocumentEntity.getTranscription().getId(),
-                                                                             caseId,
-                                                                             caseNumber,
-                                                                             hearingCaseId,
-                                                                             hearingCaseNumber,
-                                                                             courthouseId,
-                                                                             courthouseDisplayName,
-                                                                             hearingCourthouseId,
-                                                                             hearingCourthouseDisplayName,
-                                                                             hearingId,
-                                                                             hearingDate,
+                                               caseId,
+                                               caseNumber,
+                                               hearingCaseNumber,
+                                               courthouseDisplayName,
+                                               hearingCourthouseDisplayName,
+                                               hearingDate,
                                                transcriptionDocumentEntity.getTranscription().getIsManualTranscription(),
                                                transcriptionDocumentEntity.isHidden()
         );
