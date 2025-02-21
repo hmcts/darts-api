@@ -76,13 +76,12 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private Properties mediaRecordProperties;
 
     private DateTimeFormatter dateTimeFormatter;
-    private DateTimeFormatter dateFormatter;
-    
+
     @Override
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                       String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
-        dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
+
         try {
             loadMediaProperties();
             MediaEntity media = externalObjectDirectory.getMedia();
@@ -215,7 +214,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private String getHearingDate(MediaEntity media) {
         String hearingDate = null;
         if (CollectionUtils.isNotEmpty(media.getHearingList())) {
-            hearingDate = OffsetDateTime.of(media.getHearingList().get(0).getHearingDate().atTime(0, 0, 0),
+            hearingDate = OffsetDateTime.of(media.getHearingList().getFirst().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
@@ -246,8 +245,8 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private static String getCourtroom(MediaEntity media) {
         String courtroom = null;
-        if (CollectionUtils.isNotEmpty(media.getHearingList()) && nonNull(media.getHearingList().get(0).getCourtroom())) {
-            courtroom = media.getHearingList().get(0).getCourtroom().getName();
+        if (CollectionUtils.isNotEmpty(media.getHearingList()) && nonNull(media.getHearingList().getFirst().getCourtroom())) {
+            courtroom = media.getHearingList().getFirst().getCourtroom().getName();
         } else if (nonNull(media.getCourtroom())) {
             courtroom = media.getCourtroom().getName();
         }
