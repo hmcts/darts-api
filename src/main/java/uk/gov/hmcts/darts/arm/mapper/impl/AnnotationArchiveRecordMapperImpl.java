@@ -66,22 +66,18 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings({"PMD.GodClass"})
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecordMapper {
 
     private static final String CASE_LIST_DELIMITER = "|";
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final CurrentTimeHelper currentTimeHelper;
     private Properties annotationRecordProperties;
-
     private DateTimeFormatter dateTimeFormatter;
 
-
     @Override
-    public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                String rawFilename) {
+    public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
-
         try {
             loadAnnotationProperties();
             AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
@@ -90,9 +86,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             return createAnnotationArchiveRecord(annotationCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error(
-                "Unable to read annotation property file {} - {}",
-                armDataManagementConfiguration.getAnnotationRecordPropertiesFile(),
-                e.getMessage());
+                "Unable to read annotation property file {} - {}", armDataManagementConfiguration.getAnnotationRecordPropertiesFile(), e.getMessage());
         }
         return null;
     }
@@ -121,7 +115,6 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             .build();
     }
 
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
         OffsetDateTime retainUntilTs = annotationDocument.getRetainUntilTs();
@@ -129,9 +122,10 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getAnnotationRecordClass())
             .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
-            .eventDate(formatDateTime(nonNull(retainUntilTs)
-                                          ? retainUntilTs.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears())
-                                          : annotationDocument.getUploadedDateTime()))
+            .eventDate(formatDateTime(
+                nonNull(retainUntilTs) ? retainUntilTs.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears())
+                    : annotationDocument.getUploadedDateTime()))
+
             .region(armDataManagementConfiguration.getRegion())
             .title(annotationDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
@@ -142,24 +136,20 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         if (nonNull(courthouse) && nonNull(courtroom)) {
             metadata.setContributor(courthouse + " & " + courtroom);
         }
-
         if (nonNull(annotationDocument.getRetConfReason())) {
             metadata.setRetentionConfidenceReason(annotationDocument.getRetConfReason());
         }
-
         if (nonNull(annotationDocument.getRetConfScore())) {
             metadata.setRetentionConfidenceScore(annotationDocument.getRetConfScore().getId());
         }
-
         setMetadataProperties(metadata, annotationDocument);
-
         return metadata;
     }
 
     private void setMetadataProperties(RecordMetadata metadata, AnnotationDocumentEntity annotationDocument) {
         for (String key : annotationRecordProperties.stringPropertyNames()) {
             String value = mapToString(annotationRecordProperties.getProperty(key), annotationDocument);
-            if (value != null) {
+            if (nonNull(value)) {
                 switch (key) {
                     case BF_001_KEY -> metadata.setBf001(value);
                     case BF_002_KEY -> metadata.setBf002(value);
@@ -181,15 +171,12 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
                     case BF_018_KEY -> metadata.setBf018(value);
                     case BF_019_KEY -> metadata.setBf019(value);
                     case BF_020_KEY -> metadata.setBf020(value);
-                    default -> {
-                        // ignore unknown properties - comment to fix PMD warning
-                    }
+                    default -> log.warn("Annotation archive record unknown property key: {}", key);
                 }
             }
         }
     }
 
-    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     private String mapToString(String key, AnnotationDocumentEntity annotationDocument) {
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE.getArchiveTypeDescription();
