@@ -166,10 +166,10 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
         ExternalObjectDirectoryEntity eodEntityToDelete = null;
         for (DatastoreContainerType datastoreContainerType : storageOrder) {
-            logBuilder.append("checking container " + datastoreContainerType.name() + "\n");
+            logBuilder.append("checking container ").append(datastoreContainerType.name()).append("\n");
             ExternalObjectDirectoryEntity eodEntity = findCorrespondingEodEntityForStorageLocation(storedEodEntities, datastoreContainerType);
             if (eodEntity == null) {
-                logBuilder.append("matching eodEntity not found for " + datastoreContainerType.name() + "\n");
+                logBuilder.append("matching eodEntity not found for ").append(datastoreContainerType.name()).append("\n");
                 continue;
             }
             if (datastoreContainerType.equals(DatastoreContainerType.UNSTRUCTURED)) {
@@ -177,7 +177,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             }
             Optional<BlobContainerDownloadable> container = getSupportedContainer(datastoreContainerType);
             if (container.isEmpty()) {
-                logBuilder.append("Supporting Container " + datastoreContainerType.name() + " not found\n");
+                logBuilder.append("Supporting Container ").append(datastoreContainerType.name()).append(" not found\n");
                 continue;
             }
             log.info("Downloading blob id {} from container {}", eodEntity.getExternalLocation(), datastoreContainerType.name());
@@ -203,7 +203,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         ExternalObjectDirectoryEntity eodEntityToUpload,
         ExternalObjectDirectoryEntity eodEntityToDelete) throws IOException {
 
-        if (!DatastoreContainerType.ARM.equals(datastoreContainerType)) {
+        if (!ARM.equals(datastoreContainerType)) {
             return;
         }
 
