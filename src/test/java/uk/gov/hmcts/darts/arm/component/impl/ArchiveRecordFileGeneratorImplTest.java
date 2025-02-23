@@ -57,6 +57,7 @@ class ArchiveRecordFileGeneratorImplTest {
     private static final String READING_FILE = "Reading file {}";
     private static final String ACTUAL_RESPONSE = "actual Response {}";
     private static final String EXPECT_RESPONSE = "expect Response {}";
+
     @TempDir
     private File tempDirectory;
 
