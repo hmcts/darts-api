@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -25,9 +25,9 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TranscriptionArchiveRecordMapperImplTest {
+class CaseArchiveRecordMapperImplPropertyTest {
 
-    private TranscriptionArchiveRecordMapperImpl transcriptionArchiveRecordMapper;
+    private CaseArchiveRecordMapperImpl caseArchiveRecordMapper;
 
     @Mock
     private ArmDataManagementConfiguration configuration;
@@ -38,16 +38,16 @@ class TranscriptionArchiveRecordMapperImplTest {
 
     @BeforeEach
     void setUp() {
-        transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(configuration, currentTimeHelper);
+        caseArchiveRecordMapper = new CaseArchiveRecordMapperImpl(configuration, currentTimeHelper);
     }
 
     @Nested
-    class MapToTranscriptionArchiveRecordTest {
+    class MapToCaseArchiveRecordTest {
 
         @BeforeEach
         void setUp() {
             when(configuration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ssX");
-           
+
             propertyFileLoader = mockStatic(PropertyFileLoader.class);
             propertyFileLoader.when(() -> PropertyFileLoader.loadPropertiesFromFile(any()))
                 .thenReturn(new Properties());
@@ -63,19 +63,18 @@ class TranscriptionArchiveRecordMapperImplTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .id(0)
-                .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
-                                                 .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
-                                                 .build())
+                .caseDocument(PersistableFactory.getCaseDocumentTestData()
+                                  .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+                                  .build())
                 .build();
 
             // When
-            TranscriptionArchiveRecord transcriptionRecord = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                                              "someFilename");
+            CaseArchiveRecord caseArchiveRecord = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectoryEntity,
+                                                                                                 "someFilename");
 
             // Then
             assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
-                         transcriptionRecord.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
+                         caseArchiveRecord.getCaseCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
         }
 
         @Test
@@ -83,18 +82,17 @@ class TranscriptionArchiveRecordMapperImplTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .id(0)
-                .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
-                                                 .someMinimalBuilder().retConfScore(null)
-                                                 .build())
+                .caseDocument(PersistableFactory.getCaseDocumentTestData()
+                                  .someMinimalBuilder().retConfScore(null)
+                                  .build())
                 .build();
 
             // When
-            TranscriptionArchiveRecord transcriptionRecord = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                                              "someFilename");
+            CaseArchiveRecord caseArchiveRecord = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectoryEntity,
+                                                                                                 "someFilename");
 
             // Then
-            assertNull(transcriptionRecord.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
+            assertNull(caseArchiveRecord.getCaseCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
         }
 
     }
