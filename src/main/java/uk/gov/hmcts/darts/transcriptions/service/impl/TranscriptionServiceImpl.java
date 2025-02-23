@@ -329,7 +329,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
 
         if (nonNull(transcriptionRequestDetails.getHearingId())) {
-            HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            HearingEntity hearing = hearingsService.getHearingByIdWithValidation(transcriptionRequestDetails.getHearingId());
             transcription.addHearing(hearing);
         }
 
