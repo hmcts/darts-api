@@ -32,8 +32,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DAT
 @Slf4j
 class MediaArchiveRecordMapperIntTest extends IntegrationBase {
 
-    public static final String T_10_30_00_Z = "2025-01-23T10:30:00Z";
-    public static final String T_11_30_00_Z = "2025-01-23T11:30:00Z";
+    private static final String T_10_30_00_Z = "2025-01-23T10:30:00Z";
+    private static final String T_11_30_00_Z = "2025-01-23T11:30:00Z";
     private static final OffsetDateTime END = OffsetDateTime.parse(T_11_30_00_Z);
     private static final OffsetDateTime START = OffsetDateTime.parse(T_10_30_00_Z);
 
@@ -86,7 +86,6 @@ class MediaArchiveRecordMapperIntTest extends IntegrationBase {
         MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(eod, rawFilename);
 
         // then
-        assertNotNull(mediaArchiveRecord);
         assertNotNull(mediaArchiveRecord);
         assertNotNull(mediaArchiveRecord.getMediaCreateArchiveRecord());
         assertNotNull(mediaArchiveRecord.getUploadNewFileRecord());
