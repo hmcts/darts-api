@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
  */
 @SpringBootTest
-@ActiveProfiles({"intTest"})
+@ActiveProfiles({"intTest", "in-memory-caching"})
 @Import(IntegrationTestConfiguration.class)
 public class PostgresIntegrationBase {
 
@@ -52,6 +52,10 @@ public class PostgresIntegrationBase {
         ).withDatabaseName("darts")
             .withUsername("darts")
             .withPassword("darts");
+        POSTGRES.setCommand("postgres", "-c", String.format("max_connections=%d", SERVER_MAX_CONNECTIONS));
+
+        // container will be automatically stopped
+        POSTGRES.start();
     }
 
     @DynamicPropertySource
@@ -61,12 +65,6 @@ public class PostgresIntegrationBase {
         registry.add("spring.datasource.password", POSTGRES::getPassword);
     }
 
-    static {
-        POSTGRES.setCommand("postgres", "-c", String.format("max_connections=%d", SERVER_MAX_CONNECTIONS));
-
-        // container will be automatically stopped
-        POSTGRES.start();
-    }
 
     @BeforeEach
     void clearDb() {
