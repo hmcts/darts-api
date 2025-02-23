@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
-import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelperPaginated;
 import uk.gov.hmcts.darts.cases.mapper.CaseTranscriptionMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
@@ -105,8 +104,6 @@ class CaseServiceImplTest {
     AdvancedSearchRequestHelper advancedSearchRequestHelper;
     @Mock
     AdminCasesSearchRequestHelper adminCasesSearchRequestHelper;
-    @Mock
-    AdvancedSearchRequestHelperPaginated advancedSearchRequestHelperPaginated;
 
     @Mock
     TranscriptionRepository transcriptionRepository;
@@ -142,7 +139,6 @@ class CaseServiceImplTest {
             annotationRepository,
             retrieveCoreObjectService,
             advancedSearchRequestHelper,
-            advancedSearchRequestHelperPaginated,
             adminCasesSearchRequestHelper,
             transcriptionRepository,
             transcriptionDocumentRepository,
