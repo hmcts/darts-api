@@ -4,6 +4,7 @@ import com.azure.storage.blob.BlobAsyncClient;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -91,7 +92,9 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         BlobServiceClient client = Mockito.mock(BlobServiceClient.class);
         BlobContainerClient containerClient = Mockito.mock(BlobContainerClient.class);
-        BlobClient blobClient = new DownloadableBlobClient(Mockito.mock(BlobAsyncClient.class));
+        BlobAsyncClient blobAsyncClient = Mockito.mock(BlobAsyncClient.class);
+        when(blobAsyncClient.getServiceVersion()).thenReturn(Mockito.mock(BlobServiceVersion.class));
+        BlobClient blobClient = new DownloadableBlobClient(blobAsyncClient);
 
         when(factory.getBlobServiceClient(notNull())).thenReturn(client);
         when(factory.getBlobContainerClient(notNull(), eq(client))).thenReturn(containerClient);
