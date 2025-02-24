@@ -8,7 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.log.service.AutomatedTaskLoggerService;
 
-import static java.util.UUID.randomUUID;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AutomatedTaskLoggerServiceTest {
@@ -40,7 +41,7 @@ class AutomatedTaskLoggerServiceTest {
 
     @Test
     void logsTaskStarted() {
-        var taskExecutionId = randomUUID();
+        var taskExecutionId = UUID.randomUUID();
 
         automatedTaskLoggerService.taskStarted(taskExecutionId, "some-started-task");
 
@@ -49,7 +50,7 @@ class AutomatedTaskLoggerServiceTest {
 
     @Test
     void logsTaskCompleted() {
-        var taskExecutionId = randomUUID();
+        var taskExecutionId = UUID.randomUUID();
 
         automatedTaskLoggerService.taskCompleted(taskExecutionId, "some-completed-task");
 
@@ -58,7 +59,7 @@ class AutomatedTaskLoggerServiceTest {
 
     @Test
     void logsTaskFailed() {
-        var taskExecutionId = randomUUID();
+        var taskExecutionId = UUID.randomUUID();
 
         automatedTaskLoggerService.taskFailed(taskExecutionId, "some-failed-task");
 

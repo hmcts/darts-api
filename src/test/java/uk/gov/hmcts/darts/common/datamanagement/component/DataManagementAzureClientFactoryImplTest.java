@@ -24,7 +24,7 @@ class DataManagementAzureClientFactoryImplTest {
     private DataManagementAzureClientFactoryImpl dataManagementFactoryImpl;
 
     public static final String BLOB_CONTAINER_NAME = "dummy_container";
-    public static final UUID BLOB_ID = UUID.randomUUID();
+    public static final String BLOB_ID = UUID.randomUUID().toString();
     private static final String CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
         "AccountKey=KBHBeksoGMGw;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
 

@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +28,7 @@ public class DataManagementApiImpl implements DataManagementApi {
     private final DataManagementConfiguration dataManagementConfiguration;
 
     @Override
-    public DownloadResponseMetaData getBlobDataFromOutboundContainer(UUID blobId) throws FileNotDownloadedException {
+    public DownloadResponseMetaData getBlobDataFromOutboundContainer(String blobId) throws FileNotDownloadedException {
         return dataManagementService.downloadData(DatastoreContainerType.OUTBOUND, getOutboundContainerName(), blobId);
     }
 
@@ -51,17 +50,17 @@ public class DataManagementApiImpl implements DataManagementApi {
     }
 
     @Override
-    public void deleteBlobDataFromOutboundContainer(UUID blobId) throws AzureDeleteBlobException {
+    public void deleteBlobDataFromOutboundContainer(String blobId) throws AzureDeleteBlobException {
         dataManagementService.deleteBlobData(getOutboundContainerName(), blobId);
     }
 
     @Override
-    public void deleteBlobDataFromInboundContainer(UUID blobId) throws AzureDeleteBlobException {
+    public void deleteBlobDataFromInboundContainer(String blobId) throws AzureDeleteBlobException {
         dataManagementService.deleteBlobData(getInboundContainerName(), blobId);
     }
 
     @Override
-    public void deleteBlobDataFromUnstructuredContainer(UUID blobId) throws AzureDeleteBlobException {
+    public void deleteBlobDataFromUnstructuredContainer(String blobId) throws AzureDeleteBlobException {
         dataManagementService.deleteBlobData(getUnstructuredContainerName(), blobId);
     }
 
@@ -70,17 +69,17 @@ public class DataManagementApiImpl implements DataManagementApi {
      */
     @Deprecated
     @Override
-    public UUID saveBlobDataToInboundContainer(BinaryData binaryData) {
+    public String saveBlobDataToInboundContainer(BinaryData binaryData) {
         return dataManagementService.saveBlobData(getInboundContainerName(), binaryData);
     }
 
     @Override
-    public UUID saveBlobDataToUnstructuredContainer(BinaryData binaryData) {
+    public String saveBlobDataToUnstructuredContainer(BinaryData binaryData) {
         return dataManagementService.saveBlobData(getUnstructuredContainerName(), binaryData);
     }
 
     @Override
-    public String getChecksum(DatastoreContainerType datastoreContainerType, UUID guid) {
+    public String getChecksum(DatastoreContainerType datastoreContainerType, String guid) {
         return dataManagementService.getChecksum(getContainerNameRequired(datastoreContainerType), guid);
     }
 

@@ -38,7 +38,6 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
@@ -533,7 +532,7 @@ public class TranscriptionStub {
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
                                                                ObjectRecordStatusEnum status,
                                                                ExternalLocationTypeEnum location,
-                                                               UUID eodExternalLocation) {
+                                                               String eodExternalLocation) {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 10;
@@ -563,7 +562,7 @@ public class TranscriptionStub {
                                                                UserAccountEntity testUser,
                                                                ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                               UUID externalLocation,
+                                                               String externalLocation,
                                                                String checksum,
                                                                RetentionConfidenceScoreEnum confScore,
                                                                String confReason

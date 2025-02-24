@@ -12,14 +12,13 @@ import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.UUID;
 
 public interface DataManagementService {
-    BinaryData getBlobData(String containerName, UUID blobId);
+    BinaryData getBlobData(String containerName, String blobId);
 
-    Path downloadBlobToFile(String containerName, UUID blobId, String inboundWorkspace);
+    Path downloadBlobToFile(String containerName, String blobId, String inboundWorkspace);
 
-    UUID saveBlobData(String containerName, BinaryData binaryData);
+    String saveBlobData(String containerName, BinaryData binaryData);
 
     BlobClientUploadResponse saveBlobData(String containerName, InputStream inputStream, Map<String, String> metadata);
 
@@ -31,9 +30,9 @@ public interface DataManagementService {
 
     void addMetaData(BlobClient client, Map<String, String> metadata);
 
-    String getChecksum(String containerName, UUID blobId);
+    String getChecksum(String containerName, String blobId);
 
-    Response<Boolean> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException;
+    Response<Boolean> deleteBlobData(String containerName, String blobId) throws AzureDeleteBlobException;
 
-    DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, UUID blobId) throws FileNotDownloadedException;
+    DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, String blobId) throws FileNotDownloadedException;
 }

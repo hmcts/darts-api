@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -158,10 +157,10 @@ class AnnotationUploadTest {
             annotationDocumentEntity);
     }
 
-    private Map<ExternalLocationTypeEnum, UUID> someExternalBlobLocations() {
+    private Map<ExternalLocationTypeEnum, String> someExternalBlobLocations() {
         return Map.of(
-            INBOUND, randomUUID(),
-            UNSTRUCTURED, randomUUID()
+            INBOUND, UUID.randomUUID().toString(),
+            UNSTRUCTURED, UUID.randomUUID().toString()
         );
     }
 

@@ -68,8 +68,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     void patchSecurityGroupShouldSucceedWhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        String name = "security group name" + UUID.randomUUID();
-        String displayName = "security group display name" + UUID.randomUUID();
+        String name = "security group name" + UUID.randomUUID().toString();
+        String displayName = "security group display name" + UUID.randomUUID().toString();
         Integer id = createSecurityGroup(name, displayName);
 
         String patchContent = """
@@ -78,7 +78,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
               "display_name": "<display_name>"
             }
               """;
-        String newName = "security group name" + UUID.randomUUID();
+        String newName = "security group name" + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<name>", newName);
         patchContent = patchContent.replace("<display_name>", NEW_DISPLAY_NAME);
 
@@ -110,14 +110,14 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
               "description": "<description>"
             }
               """;
-        String newName = "security group name" + UUID.randomUUID();
+        String newName = "security group name" + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<name>", newName);
-        String newDisplayName = "Security group display name new " + UUID.randomUUID();
+        String newDisplayName = "Security group display name new " + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<display_name>", newDisplayName);
         patchContent = patchContent.replace("<description>", NEW_DESCRIPTION);
 
-        String name = "security group name" + UUID.randomUUID();
-        String displayName = "security group display name" + UUID.randomUUID();
+        String name = "security group name" + UUID.randomUUID().toString();
+        String displayName = "security group display name" + UUID.randomUUID().toString();
         Integer id = createSecurityGroup(name, displayName);
 
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
@@ -177,8 +177,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithUserIds() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
-        String name = "security group name" + UUID.randomUUID();
-        String displayName = "security group display name" + UUID.randomUUID();
+        String name = "security group name" + UUID.randomUUID().toString();
+        String displayName = "security group display name" + UUID.randomUUID().toString();
         Integer id = createSecurityGroup(name, displayName);
 
         UserAccountEntity user1 = createEnabledUserAccountEntity(user, "email1");
@@ -208,8 +208,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
 
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
-        String name = "security group name" + UUID.randomUUID();
-        String displayName = "security group display name" + UUID.randomUUID();
+        String name = "security group name" + UUID.randomUUID().toString();
+        String displayName = "security group display name" + UUID.randomUUID().toString();
         Integer id = createSecurityGroup(name, displayName);
 
         UserAccountEntity user1 = createEnabledUserAccountEntity(user, "email1", false, false);
@@ -229,8 +229,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithEmptyUserIds() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
-        String name = "security group name" + UUID.randomUUID();
-        String displayName = "security group display name" + UUID.randomUUID();
+        String name = "security group name" + UUID.randomUUID().toString();
+        String displayName = "security group display name" + UUID.randomUUID().toString();
         Integer id = createSecurityGroup(name, displayName);
 
         String patchContent = String.format("{\"user_ids\": []}");
@@ -260,13 +260,13 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
               "display_name": "<display_name>"
             }
               """;
-        String newName = "security group name" + UUID.randomUUID();
+        String newName = "security group name" + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<name>", newName);
-        String newDisplayName = "Security group display name new " + UUID.randomUUID();
+        String newDisplayName = "Security group display name new " + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<display_name>", newDisplayName);
 
-        String name = "security group name" + UUID.randomUUID();
-        String displayName = "security group display name" + UUID.randomUUID();
+        String name = "security group name" + UUID.randomUUID().toString();
+        String displayName = "security group display name" + UUID.randomUUID().toString();
         Integer id = createSecurityGroup(name, displayName);
 
         superAdminUserStub.givenUserIsNotAuthorised(userIdentity);
@@ -290,9 +290,9 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
               "display_name": "<display_name>"
             }
               """;
-        String newName = "security group name" + UUID.randomUUID();
+        String newName = "security group name" + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<name>", newName);
-        String newDisplayName = "Security group display name new " + UUID.randomUUID();
+        String newDisplayName = "Security group display name new " + UUID.randomUUID().toString();
         patchContent = patchContent.replace("<display_name>", newDisplayName);
 
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
@@ -308,7 +308,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
 
-        Integer id = createSecurityGroup("security group name" + UUID.randomUUID(), "security group display name" + UUID.randomUUID());
+        Integer id = createSecurityGroup("security group name" + UUID.randomUUID().toString(), "security group display name" + UUID.randomUUID());
 
         String patchContent = """
             {
@@ -328,7 +328,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     void patchSecurityGroupShouldFailWithInvalidUserId() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        Integer id = createSecurityGroup("security group name " + UUID.randomUUID(), "security group name" + UUID.randomUUID());
+        Integer id = createSecurityGroup("security group name " + UUID.randomUUID().toString(), "security group name" + UUID.randomUUID());
 
         String patchContent = """
             {
@@ -348,9 +348,9 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     void patchSecurityGroupShouldFailWhenProvidedWithExistingName() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        String name1 = "security group name " + UUID.randomUUID();
+        String name1 = "security group name " + UUID.randomUUID().toString();
         createSecurityGroup(name1, "security group name" + UUID.randomUUID());
-        String name2 = "security group name " + UUID.randomUUID();
+        String name2 = "security group name " + UUID.randomUUID().toString();
         Integer id2 = createSecurityGroup(name2, "security group name" + UUID.randomUUID());
 
         String patchContent = """
@@ -374,11 +374,11 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     void patchSecurityGroupShouldFailWhenProvidedWithExistingDisplayName() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        String name1 = "security group name " + UUID.randomUUID();
-        String displayName1 = "security group display name " + UUID.randomUUID();
+        String name1 = "security group name " + UUID.randomUUID().toString();
+        String displayName1 = "security group display name " + UUID.randomUUID().toString();
         createSecurityGroup(name1, displayName1);
-        String name2 = "security group name " + UUID.randomUUID();
-        String displayName2 = "security group display name " + UUID.randomUUID();
+        String name2 = "security group name " + UUID.randomUUID().toString();
+        String displayName2 = "security group display name " + UUID.randomUUID().toString();
         Integer id2 = createSecurityGroup(name2, displayName2);
 
         String patchContent = """

@@ -189,7 +189,7 @@ public class DataStoreToArmHelper {
                 log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
 
                 log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-                armDataManagementApi.copyBlobDataToArm(unstructuredExternalObjectDirectory.getExternalLocation().toString(), filename);
+                armDataManagementApi.copyBlobDataToArm(unstructuredExternalObjectDirectory.getExternalLocation(), filename);
                 log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
 
                 Instant finish = Instant.now();
@@ -198,7 +198,7 @@ public class DataStoreToArmHelper {
                 log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
 
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
-                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());
                 armExternalObjectDirectory.setLastModifiedBy(userAccount);
                 armExternalObjectDirectory.setStatus(EodHelper.armRawDataPushedStatus());
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
@@ -223,7 +223,7 @@ public class DataStoreToArmHelper {
         String fileNameFormat = "%s_%s.%s";
         return String.format(fileNameFormat,
                              manifestFilePrefix,
-                             UUID.randomUUID(),
+                             UUID.randomUUID().toString(),
                              armDataManagementConfiguration.getFileExtension()
         );
     }

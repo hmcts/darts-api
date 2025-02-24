@@ -150,7 +150,7 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
             media,
             ExternalLocationTypeEnum.ARM,
             ObjectRecordStatusEnum.STORED,
-            UUID.randomUUID());
+            UUID.randomUUID().toString());
 
         eodEntityGroup1.setManifestFile("DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360");
 
@@ -169,7 +169,7 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
             media,
             ExternalLocationTypeEnum.ARM,
             ObjectRecordStatusEnum.STORED,
-            UUID.randomUUID());
+            UUID.randomUUID().toString());
         eodEntityForAssociatedFiles1.setId(1);
 
         InputUploadAndAssociatedFilenames inputUploadAndAssociatedFilenames = new InputUploadAndAssociatedFilenames();
