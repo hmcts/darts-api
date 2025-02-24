@@ -46,58 +46,58 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CourthouseServiceImplTest {
 
-    public static final String TEST_COURTHOUSE_NAME = "Test courthouse";
-    public static final int CODE = 123;
-    public static final int COURTHOUSE_ID = 11;
-    public static final String SWANSEA_NAME = "swansea";
-    public static final int SWANSEA_CODE = 457;
-    public static final String SWANSEA_NAME_UC = "SWANSEA";
+    private static final String TEST_COURTHOUSE_NAME = "Test courthouse";
+    private static final int CODE = 123;
+    private static final int COURTHOUSE_ID = 11;
+    private static final String SWANSEA_NAME = "swansea";
+    private static final int SWANSEA_CODE = 457;
+    private static final String SWANSEA_NAME_UC = "SWANSEA";
 
-    CourthouseServiceImpl courthouseService;
-
-    @Mock
-    CourthouseRepository courthouseRepository;
+    private CourthouseServiceImpl courthouseService;
 
     @Mock
-    CourthouseToCourthouseEntityMapper courthouseMapper;
+    private CourthouseRepository courthouseRepository;
 
     @Mock
-    RegionRepository regionRepository;
+    private CourthouseToCourthouseEntityMapper courthouseMapper;
 
     @Mock
-    AdminRegionToRegionEntityMapper regionMapper;
+    private RegionRepository regionRepository;
 
     @Mock
-    CourthousePatchValidator courthousePatchValidator;
+    private AdminRegionToRegionEntityMapper regionMapper;
 
     @Mock
-    CourthouseUpdateMapper courthouseUpdateMapper;
+    private CourthousePatchValidator courthousePatchValidator;
 
     @Mock
-    AuthorisationApi authorisationApi;
+    private CourthouseUpdateMapper courthouseUpdateMapper;
 
     @Mock
-    AuditApi auditApi;
+    private AuthorisationApi authorisationApi;
+
+    @Mock
+    private AuditApi auditApi;
 
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Captor
-    ArgumentCaptor<Integer> captorInteger;
+    private ArgumentCaptor<Integer> captorInteger;
 
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
 
     @Mock
-    HearingRepository hearingRepository;
+    private HearingRepository hearingRepository;
     @Mock
-    CaseRepository caseRepository;
+    private CaseRepository caseRepository;
     @Mock
-    SecurityRoleRepository securityRoleRepository;
+    private SecurityRoleRepository securityRoleRepository;
     @Mock
-    AdminCourthouseToCourthouseEntityMapper adminMapper;
+    private AdminCourthouseToCourthouseEntityMapper adminMapper;
     @Mock
-    UserManagementApi userManagementApi;
+    private UserManagementApi userManagementApi;
 
     @BeforeEach
     void setup() {
