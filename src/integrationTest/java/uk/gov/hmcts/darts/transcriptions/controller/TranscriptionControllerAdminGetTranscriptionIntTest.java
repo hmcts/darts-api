@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,11 +35,14 @@ import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentReques
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -488,6 +492,56 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         }
     }
 
+
+    @Test
+    void transcriptionDocumentSearch_onHearingDate_shouldBringBackLegacyEntries() throws Exception {
+        List<TranscriptionDocumentEntity> transcriptionDocumentResultsMod = transcriptionDocumentStub.generateTranscriptionEntities(2, 1, 1, true, false,
+                                                                                                                                    false);
+        List<TranscriptionDocumentEntity> transcriptionDocumentResultsLegacy = transcriptionDocumentStub.generateTranscriptionEntitiesLegacy(2, 1, true, false,
+                                                                                                                                             false);
+
+
+        LocalDate hearingDate = LocalDate.now();
+        //Check that only one for the two documents created for both legacy and mod have the same hearing date.
+        //Ensure legacy and mod entries are setup correctly
+        assertThat(transcriptionDocumentResultsLegacy.get(0).getTranscription().getHearings()).isNullOrEmpty();
+        assertThat(transcriptionDocumentResultsLegacy.get(0).getTranscription().getHearingDate()).isEqualTo(hearingDate);
+        assertThat(transcriptionDocumentResultsLegacy.get(1).getTranscription().getHearings()).isNullOrEmpty();
+        assertThat(transcriptionDocumentResultsLegacy.get(1).getTranscription().getHearingDate()).isNotEqualTo(hearingDate);
+
+
+        assertThat(transcriptionDocumentResultsMod.get(0).getTranscription().getHearings().getFirst().getHearingDate()).isEqualTo(hearingDate);
+        assertThat(transcriptionDocumentResultsMod.get(0).getTranscription().getHearingDate()).isNull();
+        assertThat(transcriptionDocumentResultsMod.get(1).getTranscription().getHearings().getFirst().getHearingDate()).isNotEqualTo(hearingDate);
+        assertThat(transcriptionDocumentResultsMod.get(1).getTranscription().getHearingDate()).isNull();
+
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+
+        List<TranscriptionDocumentEntity> transcriptionDocumentResults = new ArrayList<>();
+        transcriptionDocumentResults.add(transcriptionDocumentResultsLegacy.get(0));
+        transcriptionDocumentResults.add(transcriptionDocumentResultsMod.get(0));
+
+        SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
+        request.setHearingDate(hearingDate);
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_DOCUMENT_SEARCH)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        SearchTranscriptionDocumentResponse[] transformedMediaResponses
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
+        assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
+
+
+        for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
+            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
+        }
+    }
+
     @Test
     void testSearchForTranscriptionDocumentNoRequestPayloadReturnsABadRequest() throws Exception {
         mockMvc.perform(post(ENDPOINT_DOCUMENT_SEARCH)
@@ -655,8 +709,11 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(response.getTranscriptionId(), entity.getTranscription().getId());
 
         if (response.getHearing() != null) {
-            assertEquals(response.getHearing().getHearingDate(),
-                         entity.getTranscription().getHearing().getHearingDate());
+            if (CollectionUtils.isEmpty(entity.getTranscription().getHearings())) {
+                assertEquals(response.getHearing().getHearingDate(), entity.getTranscription().getHearingDate());
+            } else {
+                assertEquals(response.getHearing().getHearingDate(), entity.getTranscription().getHearing().getHearingDate());
+            }
         }
 
         if (response.getCourthouse() != null) {
