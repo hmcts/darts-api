@@ -17,6 +17,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
     SoftDeleteRepository<TranscriptionDocumentEntity, Integer> {
 
 
+    @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
     default List<TranscriptionDocumentResult> findTranscriptionMedia(String caseNumber,
                                                                      String courtHouseDisplayName,
                                                                      LocalDate hearingDate,
@@ -67,6 +68,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR t.createdDateTime <= :requestedAtTo)
           ORDER BY tmd.id DESC
         """)
+    @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
     List<TranscriptionDocumentResult> findTranscriptionMediaModenised(String caseNumber,
                                                                       String courtHouseDisplayName,
                                                                       LocalDate hearingDate,
@@ -105,6 +107,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR t.createdDateTime <= :requestedAtTo)
           ORDER BY tmd.id DESC
         """)
+    @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
     List<TranscriptionDocumentResult> findTranscriptionMediaLegacy(String caseNumber,
                                                                    String courtHouseDisplayName,
                                                                    LocalDate hearingDate,
