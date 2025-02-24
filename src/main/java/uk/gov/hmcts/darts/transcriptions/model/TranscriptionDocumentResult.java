@@ -1,10 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.model;
 
-import lombok.EqualsAndHashCode;
-
 import java.time.LocalDate;
 
-@EqualsAndHashCode
 public record TranscriptionDocumentResult(
     Integer transcriptionDocumentId,
     Integer transcriptionId,
