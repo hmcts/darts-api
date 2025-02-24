@@ -9,34 +9,12 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Repository
 public interface TranscriptionDocumentRepository extends JpaRepository<TranscriptionDocumentEntity, Integer>,
     SoftDeleteRepository<TranscriptionDocumentEntity, Integer> {
 
-
-    @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
-    default List<TranscriptionDocumentResult> findTranscriptionMedia(String caseNumber,
-                                                                     String courtHouseDisplayName,
-                                                                     LocalDate hearingDate,
-                                                                     String requestedBy,
-                                                                     OffsetDateTime requestedAtFrom,
-                                                                     OffsetDateTime requestedAtTo,
-                                                                     Boolean isManualTranscription,
-                                                                     String owner) {
-        Set<TranscriptionDocumentResult> data = new HashSet<>();
-        data.addAll(findTranscriptionMediaModernised(caseNumber, courtHouseDisplayName, hearingDate, requestedBy,
-                                                    requestedAtFrom, requestedAtTo, isManualTranscription, owner));
-        data.addAll(findTranscriptionMediaLegacy(caseNumber, courtHouseDisplayName, hearingDate, requestedBy,
-                                                 requestedAtFrom, requestedAtTo, isManualTranscription, owner));
-
-        return data.stream()
-            .sorted((o1, o2) -> o2.transcriptionDocumentId().compareTo(o1.transcriptionDocumentId()))
-            .toList();
-    }
 
     @Query("""
          SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
@@ -45,7 +23,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
          hearingCase.caseNumber,
          courthouse.displayName,
          hearingcourthouse.displayName,
-         hearings.hearingDate,
+         coalesce(hearings.hearingDate, t.hearingDate),
          t.isManualTranscription,
          tmd.isHidden)
               FROM TranscriptionDocumentEntity tmd
@@ -61,7 +39,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              (:caseNumber IS NULL OR ((courtCase.caseNumber=cast(:caseNumber as text) OR hearingCase.caseNumber=cast(:caseNumber as text)))) AND
              (:courtHouseDisplayName IS NULL OR ((courthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%')
              OR (hearingcourthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%'))))) AND
-             ((cast(:hearingDate AS LocalDate)) IS NULL OR (hearings.hearingDate=:hearingDate ))AND
+             ((cast(:hearingDate AS LocalDate)) IS NULL OR (coalesce(hearings.hearingDate, t.hearingDate)=:hearingDate ))AND
              (:isManualTranscription IS NULL OR t.isManualTranscription=:isManualTranscription) AND
              (:requestedBy IS NULL OR (t.requestedBy.userFullName ILIKE CONCAT('%', cast(:requestedBy as text), '%')))AND
              ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (t.createdDateTime >= :requestedAtFrom)) AND
@@ -70,53 +48,14 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
           ORDER BY tmd.id DESC
         """)
     @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
-    List<TranscriptionDocumentResult> findTranscriptionMediaModernised(String caseNumber,
-                                                                      String courtHouseDisplayName,
-                                                                      LocalDate hearingDate,
-                                                                      String requestedBy,
-                                                                      OffsetDateTime requestedAtFrom,
-                                                                      OffsetDateTime requestedAtTo,
-                                                                      Boolean isManualTranscription,
-                                                                      String owner);
-
-
-    @Query("""
-         SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
-         courtCase.id,
-         courtCase.caseNumber,
-         null,
-         courthouse.displayName,
-         null,
-         t.hearingDate,
-         t.isManualTranscription,
-         tmd.isHidden)
-              FROM TranscriptionDocumentEntity tmd
-              JOIN tmd.transcription t
-              JOIN TranscriptionLinkedCaseEntity tlc on tlc.transcription = t
-              LEFT JOIN t.courtCases courtCase                 
-              LEFT JOIN courtCase.courthouse courthouse
-              LEFT JOIN t.transcriptionWorkflowEntities wf
-              LEFT JOIN wf.workflowActor wfa
-          WHERE t.hearingDate IS NOT NULL AND t.courtroom IS NOT NULL AND
-             (:caseNumber IS NULL OR ((courtCase.caseNumber=cast(:caseNumber as text)))) AND
-             (:courtHouseDisplayName IS NULL OR ((courthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%')))) AND
-             ((cast(:hearingDate AS LocalDate)) IS NULL OR (t.hearingDate=:hearingDate ))AND
-             (:isManualTranscription IS NULL OR t.isManualTranscription=:isManualTranscription) AND
-             (:requestedBy IS NULL OR (t.requestedBy.userFullName ILIKE CONCAT('%', cast(:requestedBy as text), '%')))AND
-             ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (t.createdDateTime >= :requestedAtFrom)) AND
-             (:owner IS NULL OR (wfa.userFullName ILIKE CONCAT('%', cast(:owner as text), '%'))) AND
-             ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR t.createdDateTime <= :requestedAtTo)
-          ORDER BY tmd.id DESC
-        """)
-    @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
-    List<TranscriptionDocumentResult> findTranscriptionMediaLegacy(String caseNumber,
-                                                                   String courtHouseDisplayName,
-                                                                   LocalDate hearingDate,
-                                                                   String requestedBy,
-                                                                   OffsetDateTime requestedAtFrom,
-                                                                   OffsetDateTime requestedAtTo,
-                                                                   Boolean isManualTranscription,
-                                                                   String owner);
+    List<TranscriptionDocumentResult> findTranscriptionMedia(String caseNumber,
+                                                             String courtHouseDisplayName,
+                                                             LocalDate hearingDate,
+                                                             String requestedBy,
+                                                             OffsetDateTime requestedAtFrom,
+                                                             OffsetDateTime requestedAtTo,
+                                                             Boolean isManualTranscription,
+                                                             String owner);
 
 
     @Query("""

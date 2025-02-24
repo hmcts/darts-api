@@ -20,7 +20,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransactionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
@@ -52,7 +52,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBase {
+class TranscriptionControllerAdminGetTranscriptionIntTest extends PostgresIntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/transcriptions?user_id=${USERID}&requested_at_from=${REQUESTED_FROM}";
 
@@ -524,6 +524,41 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
         SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
         request.setHearingDate(hearingDate);
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_DOCUMENT_SEARCH)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        SearchTranscriptionDocumentResponse[] transformedMediaResponses
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
+        assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
+
+
+        for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
+            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
+        }
+    }
+
+
+    @Test
+    void transcriptionDocumentSearch_resultsShouldBeUnique_evenIfBothLegacyAndModCriteriaMatch() throws Exception {
+        List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1,
+                                                                                                                                 true, false, false);
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentResults.get(0);
+        transcriptionStub.transcriptionLinkedCaseEntity(transcriptionDocumentEntity.getTranscription(),
+                                                        transcriptionDocumentEntity.getTranscription().getCourtCase(),
+                                                        transcriptionDocumentEntity.getTranscription().getCourtroom().getCourthouse().getCourthouseName(),
+                                                        transcriptionDocumentEntity.getTranscription().getCourtCase().getCaseNumber());
+
+
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+
+        SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_DOCUMENT_SEARCH)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(request)))

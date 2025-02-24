@@ -259,10 +259,10 @@ public class TranscriptionDocumentStub {
             dartsDatabaseSaveStub.save(transcriptionEntity);
             transcriptionDocumentEntity.setTranscription(transcriptionEntity);
             transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntity);
-
-            transcriptionStub.transcriptionLinkedCaseEntity(transcriptionEntity, caseEntity, courtroomEntity.getCourthouse().getCourthouseName(),
-                                                            caseEntity.getCaseNumber());
-
+            if (caseEntity != null) {
+                transcriptionStub.transcriptionLinkedCaseEntity(transcriptionEntity, caseEntity, courtroomEntity.getCourthouse().getCourthouseName(),
+                                                                caseEntity.getCaseNumber());
+            }
 
             fileSize = fileSize + 1;
             hoursBefore = hoursBefore.minusHours(1);
