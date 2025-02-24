@@ -265,6 +265,33 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
     }
 
     @Test
+    void adminGetTranscriptions_shouldNotIncludedNonCurrentTranscriptions() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        CourtroomEntity courtroomAtNewcastleEntity = dartsDatabase.createCourtroomUnlessExists("Newcastle", "room_a");
+        HearingEntity headerEntity = dartsDatabase.createHearing(
+            courtroomAtNewcastleEntity.getCourthouse().getCourthouseName(),
+            courtroomAtNewcastleEntity.getName(),
+            "c1",
+            LocalDateTime.of(2020, 6, 20, 10, 0, 0)
+        );
+
+        TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
+        transcriptionEntity.setIsCurrent(false);
+        dartsDatabase.save(transcriptionEntity);
+
+        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
+                                                                               OffsetDateTime.now().minusMonths(2).toString())))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        GetTranscriptionDetailAdminResponse[] transcriptionResponses = objectMapper
+            .readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailAdminResponse[].class);
+
+        assertEquals(0, transcriptionResponses.length);
+    }
+
+    @Test
     void getTransactionsForUserBeyondOrEqualToDateNoTransactions() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
