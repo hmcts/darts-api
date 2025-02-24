@@ -330,7 +330,7 @@ sonarqube {
     property "sonar.projectName", "DARTS :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
     property "sonar.exclusions", coverageExclusions.join(', ')
-    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*,**/AzureCopyUtil.java,**/TestSupportController.java,**/*Paginated.java,**/IsPageable.java,**/PaginatedList.java,**/PaginationUtil.java,**/SortMethod.java,**/AdvancedSearchResponseMapper.java,**/CaseController.java,**/CaseServiceImpl.java,**/KeepAliveTestController.java"
+    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*,**/AzureCopyUtil.java,**/TestSupportController.java,**/KeepAliveTestController.java"
     //duplicate code here due to OpenAPI codegen that creates identical
     // objects (Transcript) in different packages
     property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
@@ -457,7 +457,7 @@ dependencies {
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.3'
-  implementation 'org.hibernate.orm:hibernate-ant:6.6.8.Final'
+  implementation 'org.hibernate.orm:hibernate-ant:6.6.9.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.5.Final'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
