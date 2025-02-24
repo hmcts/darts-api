@@ -9,8 +9,9 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface TranscriptionDocumentRepository extends JpaRepository<TranscriptionDocumentEntity, Integer>,
@@ -26,8 +27,8 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
                                                                      OffsetDateTime requestedAtTo,
                                                                      Boolean isManualTranscription,
                                                                      String owner) {
-        List<TranscriptionDocumentResult> data = new ArrayList<>();
-        data.addAll(findTranscriptionMediaModenised(caseNumber, courtHouseDisplayName, hearingDate, requestedBy,
+        Set<TranscriptionDocumentResult> data = new HashSet<>();
+        data.addAll(findTranscriptionMediaModernised(caseNumber, courtHouseDisplayName, hearingDate, requestedBy,
                                                     requestedAtFrom, requestedAtTo, isManualTranscription, owner));
         data.addAll(findTranscriptionMediaLegacy(caseNumber, courtHouseDisplayName, hearingDate, requestedBy,
                                                  requestedAtFrom, requestedAtTo, isManualTranscription, owner));
@@ -69,7 +70,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
           ORDER BY tmd.id DESC
         """)
     @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
-    List<TranscriptionDocumentResult> findTranscriptionMediaModenised(String caseNumber,
+    List<TranscriptionDocumentResult> findTranscriptionMediaModernised(String caseNumber,
                                                                       String courtHouseDisplayName,
                                                                       LocalDate hearingDate,
                                                                       String requestedBy,
