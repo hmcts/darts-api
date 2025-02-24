@@ -9,7 +9,7 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class CourtroomTestData {
+public final class CourtroomTestData {
 
     private CourtroomTestData() {
 

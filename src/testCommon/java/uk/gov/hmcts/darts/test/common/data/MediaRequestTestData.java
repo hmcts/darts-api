@@ -16,48 +16,43 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.TestMediaBuilderRetrieve, MediaRequestEntity,
+public final class MediaRequestTestData implements Persistable<TestMediaRequestEntity.TestMediaBuilderRetrieve, MediaRequestEntity,
     TestMediaRequestEntity.TestMediaRequestEntityBuilder> {
 
     private static final OffsetDateTime NOW = OffsetDateTime.now();
     private static final OffsetDateTime YESTERDAY = NOW.minusDays(1);
 
-    private Integer id;
+    private final HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
-    private HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
+    private final UserAccountEntity currentOwner = UserAccountTestData.minimalUserAccount();
 
-    private UserAccountEntity currentOwner = UserAccountTestData.minimalUserAccount();
+    private final UserAccountEntity requestor = UserAccountTestData.minimalUserAccount();
 
-    private UserAccountEntity requestor = UserAccountTestData.minimalUserAccount();
+    private final Integer attempts = 0;
 
-    private MediaRequestStatus status = OPEN;
+    private final OffsetDateTime startTime = YESTERDAY;
 
-    private AudioRequestType requestType = DOWNLOAD;
+    private final OffsetDateTime endTime = YESTERDAY.plusHours(1);
 
-    private Integer attempts = 0;
+    private final UserAccountEntity createdBy = UserAccountTestData.minimalUserAccount();
 
-    private OffsetDateTime startTime = YESTERDAY;
+    private final UserAccountEntity lastModifiedBy = UserAccountTestData.minimalUserAccount();
 
-    private OffsetDateTime endTime = YESTERDAY.plusHours(1);
+    private final OffsetDateTime createdAt = NOW;
 
-    private UserAccountEntity createdBy = UserAccountTestData.minimalUserAccount();
-
-    private UserAccountEntity lastModifiedBy = UserAccountTestData.minimalUserAccount();
-
-    private OffsetDateTime createdAt = NOW;
-
-    private OffsetDateTime lastModifiedAt = NOW;
+    private final OffsetDateTime lastModifiedAt = NOW;
 
     MediaRequestTestData() {
 
     }
 
     public MediaRequestEntity someMinimal() {
-       return someMinimalBuilder().build().getEntity();
+        return someMinimalBuilder().build().getEntity();
     }
 
     /**
      * gets a minimal set of data.
+     *
      * @deprecated do not use. Instead, use someMinimal().
      */
     @Deprecated
@@ -77,7 +72,8 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
     }
 
     /**
-     * creates a current media reqyest.
+     * creates a current media request.
+     *
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
     @Deprecated
@@ -89,6 +85,7 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
 
     /**
      * Create the media request.
+     *
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
     @Deprecated

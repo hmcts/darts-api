@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.test.common.data;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 
-public class ArmRpoStateEntityTestData {
+public final class ArmRpoStateEntityTestData {
 
     private ArmRpoStateEntityTestData() {
     }

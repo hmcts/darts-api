@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
-import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
+import static uk.gov.hmcts.darts.util.DataUtil.toUpperCase;
 import static uk.gov.hmcts.darts.util.DateTimeHelper.getDateTimeIsoFormatted;
 
 @Service
@@ -22,8 +22,8 @@ public class AudioLoggerServiceImpl implements AudioLoggerService {
     @Override
     public void audioUploaded(AddAudioMetadataRequest request) {
         log.info("Audio uploaded: courthouse={}, courtroom={}, started_at={}, ended_at={}",
-                 DataUtil.toUpperCase(request.getCourthouse()),
-                 DataUtil.toUpperCase(request.getCourtroom()),
+                 toUpperCase(request.getCourthouse()),
+                 toUpperCase(request.getCourtroom()),
                  getDateTimeIsoFormatted(request.getStartedAt()),
                  getDateTimeIsoFormatted(request.getEndedAt()));
     }
@@ -32,8 +32,8 @@ public class AudioLoggerServiceImpl implements AudioLoggerService {
     public void addAudioSmallFileWithLongDuration(String courthouse, String courtroom, OffsetDateTime startDate, OffsetDateTime finishDate,
                                                   Integer medId, Long fileSize) {
         log.warn("Audio file size problem: courthouse={}, courtroom={}, started_at={}, ended_at={}, med_id={}, file_size={}",
-                 DataUtil.toUpperCase(courthouse),
-                 DataUtil.toUpperCase(courtroom),
+                 toUpperCase(courthouse),
+                 toUpperCase(courtroom),
                  getDateTimeIsoFormatted(startDate),
                  getDateTimeIsoFormatted(finishDate),
                  medId, fileSize);
@@ -42,8 +42,8 @@ public class AudioLoggerServiceImpl implements AudioLoggerService {
     @Override
     public void missingCourthouse(String courthouse, String courtroom) {
         log.warn("Courthouse not found: courthouse={}, courtroom={}, timestamp={}",
-                 DataUtil.toUpperCase(courthouse),
-                 DataUtil.toUpperCase(courtroom),
+                 toUpperCase(courthouse),
+                 toUpperCase(courtroom),
                  getDateTimeIsoFormatted(currentTimeHelper.currentOffsetDateTime()));
     }
 }

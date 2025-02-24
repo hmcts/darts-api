@@ -15,20 +15,20 @@ import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuilderRetrieve,
+public final class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuilderRetrieve,
     MediaEntity,
     TestMediaEntity.TestMediaEntityBuilder> {
 
     private static final OffsetDateTime NOW = OffsetDateTime.now();
-    private static final OffsetDateTime YESTERDAY = NOW.minusDays(1);
 
-    public static final byte[] MEDIA_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
+    private static final String TEST_BINARY_DATA = "test binary data";
+    private static final byte[] MEDIA_TEST_DATA_BINARY_DATA = TEST_BINARY_DATA.getBytes();
 
-    private OffsetDateTime createdAt = NOW;
+    private final OffsetDateTime createdAt = NOW;
 
-    private OffsetDateTime lastModifiedAt = NOW;
+    private final OffsetDateTime lastModifiedAt = NOW;
 
-    private CourtroomEntity courtroomTestData = CourtroomTestData.someMinimalCourtRoom();
+    private final CourtroomEntity courtroomTestData = CourtroomTestData.someMinimalCourtRoom();
 
     MediaTestData() {
 

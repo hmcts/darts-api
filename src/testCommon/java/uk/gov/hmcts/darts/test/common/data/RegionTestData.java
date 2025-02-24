@@ -5,7 +5,7 @@ import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 
 
-public class RegionTestData {
+public final class RegionTestData {
 
     private RegionTestData() {
 

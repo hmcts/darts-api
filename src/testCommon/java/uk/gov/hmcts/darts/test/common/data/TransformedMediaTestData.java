@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class TransformedMediaTestData {
+public final class TransformedMediaTestData {
 
     private TransformedMediaTestData() {
 

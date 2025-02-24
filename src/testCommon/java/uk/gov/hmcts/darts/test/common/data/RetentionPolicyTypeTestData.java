@@ -6,8 +6,7 @@ import java.time.OffsetDateTime;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 
-
-public class RetentionPolicyTypeTestData {
+public final class RetentionPolicyTypeTestData {
 
     private RetentionPolicyTypeTestData() {
 

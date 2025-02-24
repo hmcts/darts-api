@@ -85,7 +85,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     @Override
     public void processResponseFiles(int batchSize, AsyncTaskConfig asyncTaskConfig) {
         UserAccountEntity userAccount = userIdentity.getUserAccount();
-        ArrayList<String> inputUploadResponseFiles = new ArrayList<>();
+        List<String> inputUploadResponseFiles = new ArrayList<>();
         String prefix = getManifestFilePrefix();
         int maxContinuationBatchSize = armDataManagementConfiguration.getMaxContinuationBatchSize();
 
