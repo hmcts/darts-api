@@ -50,6 +50,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 @SuppressWarnings("checkstyle:SummaryJavadoc")
 public class DataManagementServiceImpl implements DataManagementService {
 
+    public static final String BLOB_DOES_NOT_EXIST_IN_CONTAINER = "Blob {} does not exist in {} container";
     private final DataManagementConfiguration dataManagementConfiguration;
 
     private final DataManagementAzureClientFactory blobServiceFactory;
@@ -68,7 +69,7 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
         if (!blobClient.exists()) {
-            log.error("Blob {} does not exist in {} container", blobId, containerName);
+            log.error(BLOB_DOES_NOT_EXIST_IN_CONTAINER, blobId, containerName);
         }
 
         Date downloadStartDate = new Date();
@@ -86,7 +87,7 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
         if (!blobClient.exists()) {
-            log.error("Blob {} does not exist in {} container", blobId, containerName);
+            log.error(BLOB_DOES_NOT_EXIST_IN_CONTAINER, blobId, containerName);
         }
 
         Path workspacePath = Path.of(workspace);
@@ -191,7 +192,7 @@ public class DataManagementServiceImpl implements DataManagementService {
         boolean exists = blobClient.exists() != null && blobClient.exists();
 
         if (!exists) {
-            log.error("Blob {} does not exist in {} container", blobId, containerName);
+            log.error(BLOB_DOES_NOT_EXIST_IN_CONTAINER, blobId, containerName);
             throw new FileNotDownloadedException(blobId, containerName, "Blob doesn't exist in container.");
         }
 
