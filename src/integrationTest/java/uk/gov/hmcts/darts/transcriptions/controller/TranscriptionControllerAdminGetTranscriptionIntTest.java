@@ -20,7 +20,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
-import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransactionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
@@ -52,7 +52,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class TranscriptionControllerAdminGetTranscriptionIntTest extends PostgresIntegrationBase {
+class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/transcriptions?user_id=${USERID}&requested_at_from=${REQUESTED_FROM}";
 
