@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -28,8 +27,8 @@ public class DataManagementAzureClientFactoryImpl implements DataManagementAzure
     }
 
     @Override
-    public BlobClient getBlobClient(BlobContainerClient containerClient, UUID blobId) {
-        return containerClient.getBlobClient(String.valueOf(blobId));
+    public BlobClient getBlobClient(BlobContainerClient containerClient, String blobId) {
+        return containerClient.getBlobClient(blobId);
     }
 
     @Override

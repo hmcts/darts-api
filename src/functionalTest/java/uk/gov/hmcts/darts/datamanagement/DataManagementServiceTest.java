@@ -59,7 +59,7 @@ class DataManagementServiceTest {
 
         var uniqueBlobName = dataManagementService.saveBlobData(unstructuredStorageContainerName, data);
 
-        assertTrue(uniqueBlobName instanceof UUID);
+        assertTrue(uniqueBlobName instanceof String);
     }
 
     @Test
@@ -83,7 +83,7 @@ class DataManagementServiceTest {
         assertThrows(BlobStorageException.class, () ->
             dataManagementService.getBlobData(
                 "INVALID_CONTAINER_NAME",
-                UUID.fromString(TEST_BLOB_ID)
+                TEST_BLOB_ID
             ));
     }
 
@@ -132,11 +132,11 @@ class DataManagementServiceTest {
 
         var sourceUuid = dataManagementService.saveBlobData(dataManagementConfiguration.getInboundContainerName(), data);
 
-        UUID destinationLocation = UUID.randomUUID();
+        String destinationLocation = UUID.randomUUID().toString();
         dataManagementService.copyBlobData(
             dataManagementConfiguration.getInboundContainerName(),
             dataManagementConfiguration.getUnstructuredContainerName(),
-            sourceUuid.toString(), destinationLocation.toString());
+            sourceUuid, destinationLocation);
 
         var blobData = dataManagementService.getBlobData(
             dataManagementConfiguration.getUnstructuredContainerName(),

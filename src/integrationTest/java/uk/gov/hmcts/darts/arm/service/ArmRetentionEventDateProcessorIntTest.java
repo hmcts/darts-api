@@ -157,7 +157,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .someMinimalBuilder().media(savedMedia)
             .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(STORED))
             .externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM))
-            .externalLocation(UUID.randomUUID()).build().getEntity();
+            .externalLocation(UUID.randomUUID().toString()).build().getEntity();
 
         armEod.setExternalRecordId(externalRecordId);
         armEod.setEventDateTs(END_TIME);
@@ -220,7 +220,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryuilderRetrieve.getBuilder().media(savedMedia)
             .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM))
-            .externalLocation(UUID.randomUUID());
+            .externalLocation(UUID.randomUUID().toString());
 
         externalObjectDirectoryuilderRetrieve.getBuilder().eventDateTs(RETENTION_DATE_TIME).updateRetention(true);
         ExternalObjectDirectoryEntity armEod = dartsPersistence.save(externalObjectDirectoryuilderRetrieve.build().getEntity());
@@ -281,7 +281,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryuilderRetrieve.getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity)
             .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(STORED)).media(null)
             .externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM))
-            .externalLocation(UUID.randomUUID());
+            .externalLocation(UUID.randomUUID().toString());
 
         ExternalObjectDirectoryEntity armEod = externalObjectDirectoryuilderRetrieve.getBuilder()
             .transcriptionDocumentEntity(transcriptionDocumentEntity).build().getEntity();
@@ -359,7 +359,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .someMinimalBuilder().annotationDocumentEntity(annotationDocument).media(null)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).build().getEntity();
+            .externalLocation(UUID.randomUUID().toString()).build().getEntity();
 
         armEod.setExternalRecordId(externalRecordId);
         armEod.setEventDateTs(END_TIME);
@@ -417,7 +417,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .media(null).caseDocument(caseDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID())
+            .externalLocation(UUID.randomUUID().toString())
             .externalRecordId(externalRecordId)
             .updateRetention(true).build().getEntity();
 
@@ -473,7 +473,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .someMinimalBuilder().caseDocument(caseDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID())
+            .externalLocation(UUID.randomUUID().toString())
             .externalRecordId(externalRecordId)
             .updateRetention(true).build().getEntity();
 
@@ -520,7 +520,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .someMinimalBuilder().caseDocument(caseDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID())
+            .externalLocation(UUID.randomUUID().toString())
             .externalRecordId(externalRecordId)
             .eventDateTs(END_TIME)
             .updateRetention(true).build().getEntity();
@@ -568,7 +568,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .someMinimalBuilder().media(savedMedia)
             .status(dartsDatabase.getObjectRecordStatusEntity(ARM_INGESTION))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID())
+            .externalLocation(UUID.randomUUID().toString())
             .build().getEntity();
 
         armEod.setUpdateRetention(true);

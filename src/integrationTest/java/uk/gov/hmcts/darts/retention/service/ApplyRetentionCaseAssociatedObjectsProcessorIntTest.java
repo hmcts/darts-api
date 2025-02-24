@@ -332,9 +332,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         tr2.addHearing(hear2);
         transcriptionRepository.save(tr2);
 
-        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID());
-        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID());
-        transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND, UUID.randomUUID());
+        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID().toString());
+        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID().toString());
+        transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND, UUID.randomUUID().toString());
 
         var trDoc1 = tr1.getTranscriptionDocumentEntities().getFirst();
         eodStub.createAndSaveExternalObjectDirectory(trDoc1.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
@@ -378,9 +378,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         var caseDoc2 = caseDocumentStub.createAndSaveCaseDocumentEntity(caseA, testUser);
         var caseDoc3 = caseDocumentStub.createAndSaveCaseDocumentEntity(caseB, testUser);
 
-        eodStub.createExternalObjectDirectory(caseDoc1, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID());
-        eodStub.createExternalObjectDirectory(caseDoc2, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID());
-        eodStub.createExternalObjectDirectory(caseDoc3, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID());
+        eodStub.createExternalObjectDirectory(caseDoc1, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID().toString());
+        eodStub.createExternalObjectDirectory(caseDoc2, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID().toString());
+        eodStub.createExternalObjectDirectory(caseDoc3, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID().toString());
 
         // when
         processor.processApplyRetentionToCaseAssociatedObjects(1000);

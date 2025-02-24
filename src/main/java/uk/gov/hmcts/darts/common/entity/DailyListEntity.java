@@ -20,7 +20,6 @@ import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = DailyListEntity.TABLE_NAME)
@@ -99,7 +98,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     private String clipId;
 
     @Column(name = "external_location")
-    private UUID externalLocation;
+    private String externalLocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "elt_id")
@@ -117,4 +116,6 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @Column(name = "storage_id", length = 16)
     private String storageId;
 
+    @Column(name = "osr_uuid")
+    private Long osrUuid;
 }

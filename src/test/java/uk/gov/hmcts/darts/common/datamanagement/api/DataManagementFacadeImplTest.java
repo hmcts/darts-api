@@ -680,7 +680,7 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testUnstructuredDataHelperCreate() {
-        when(blobClientUploadResponseImpl.getBlobName()).thenReturn(UUID.randomUUID());
+        when(blobClientUploadResponseImpl.getBlobName()).thenReturn(UUID.randomUUID().toString());
 
         when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn("unstructured");
         when(dataManagementService.saveBlobData(anyString(), (InputStream) any())).thenReturn(blobClientUploadResponseImpl);

@@ -34,7 +34,7 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
         MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("Courthouse", "Courtroom", OffsetDateTime.now().minusHours(1),
                                                                            OffsetDateTime.now().plusHours(2), 1, "mediaType");
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityOriginal = dartsDatabase.getExternalObjectDirectoryStub()
-            .createExternalObjectDirectory(media, ObjectRecordStatusEnum.ARM_RPO_PENDING, ExternalLocationTypeEnum.ARM, UUID.randomUUID());
+            .createExternalObjectDirectory(media, ObjectRecordStatusEnum.ARM_RPO_PENDING, ExternalLocationTypeEnum.ARM, UUID.randomUUID().toString());
         externalObjectDirectoryEntityOriginal.setDataIngestionTs(OffsetDateTime.now().minusHours(1));
         dartsDatabase.save(externalObjectDirectoryEntityOriginal);
 
@@ -65,7 +65,7 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
         MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("Courthouse", "Courtroom", OffsetDateTime.now().minusHours(1),
                                                                            OffsetDateTime.now().plusHours(2), 1, "mediaType");
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityOriginal = dartsDatabase.getExternalObjectDirectoryStub()
-            .createExternalObjectDirectory(media, status, ExternalLocationTypeEnum.ARM, UUID.randomUUID());
+            .createExternalObjectDirectory(media, status, ExternalLocationTypeEnum.ARM, UUID.randomUUID().toString());
         externalObjectDirectoryEntityOriginal.setDataIngestionTs(OffsetDateTime.now().minusHours(1));
         dartsDatabase.save(externalObjectDirectoryEntityOriginal);
 
@@ -90,7 +90,7 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
         MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("Courthouse", "Courtroom", OffsetDateTime.now().minusHours(1),
                                                                            OffsetDateTime.now().plusHours(2), 1, "mediaType");
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityOriginal = dartsDatabase.getExternalObjectDirectoryStub()
-            .createExternalObjectDirectory(media, ObjectRecordStatusEnum.ARM_RPO_PENDING, ExternalLocationTypeEnum.ARM, UUID.randomUUID());
+            .createExternalObjectDirectory(media, ObjectRecordStatusEnum.ARM_RPO_PENDING, ExternalLocationTypeEnum.ARM, UUID.randomUUID().toString());
         externalObjectDirectoryEntityOriginal.setDataIngestionTs(OffsetDateTime.now());
         dartsDatabase.save(externalObjectDirectoryEntityOriginal);
 
