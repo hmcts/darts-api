@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
+import uk.gov.hmcts.darts.audio.model.AdminVersionedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
@@ -53,6 +55,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminMediaServiceImpl implements AdminMediaService {
 
     private final MediaRepository mediaRepository;
@@ -70,6 +73,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private final CourthouseMapper courthouseMapper;
     private final CourtroomMapper courtroomMapper;
     private final ObjectActionMapper objectActionMapper;
+    private final GetAdminMediaResponseMapper getAdminMediaResponseMapper;
 
 
     @Value("${darts.audio.admin-search.max-results}")
@@ -80,13 +84,17 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     @Override
     public AdminMediaResponse getMediasById(Integer id) {
-        var mediaEntity = mediaRepository.findById(id)
-            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
+        var mediaEntity = getMediaEntityById(id);
 
         AdminMediaResponse adminMediaResponse = adminMediaMapper.toApiModel(mediaEntity);
         adminMediaResponse.getCases().sort((o1, o2) -> o2.getCaseNumber().compareTo(o1.getCaseNumber()));
         adminMediaResponse.getHearings().sort((o1, o2) -> o2.getCaseNumber().compareTo(o1.getCaseNumber()));
         return adminMediaResponse;
+    }
+
+    MediaEntity getMediaEntityById(Integer id) {
+        return mediaRepository.findById(id)
+            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
     }
 
     @Override
@@ -224,6 +232,47 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
         auditApi.record(AuditActivity.MANUAL_DELETION, currentUser, objectAdminActionEntity.getId().toString());
 
-        return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
+        return getAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
+    }
+
+    @Override
+    public AdminVersionedMediaResponse getMediaVersionsById(Integer id) {
+        MediaEntity mediaEntityFromRequest = getMediaEntityById(id);
+
+        if (mediaEntityFromRequest.getChronicleId() == null) {
+            throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
+                                        "Media " + id + " has a Chronicle Id that is null. As such we can not ensure accurate results are returned");
+        }
+        List<MediaEntity> mediaVersions = mediaRepository.findAllByChronicleId(mediaEntityFromRequest.getChronicleId());
+
+
+        List<MediaEntity> currentMediaVersions = mediaVersions.stream()
+            .filter(mediaEntity -> mediaEntity.getIsCurrent() != null)
+            .filter(media -> media.getIsCurrent())
+            .sorted((o1, o2) -> o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime()))
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        List<MediaEntity> versionedMedia = mediaVersions.stream()
+            .filter(media -> media.getIsCurrent() == null || !media.getIsCurrent())
+            .sorted((o1, o2) -> o2.getCreatedDateTime().compareTo(o1.getCreatedDateTime()))
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        MediaEntity currentVersion;
+        if (currentMediaVersions.size() == 1) {
+            currentVersion = currentMediaVersions.getLast();
+        } else if (currentMediaVersions.size() == 0) {
+            currentVersion = null;
+            log.info("Media with id {} has {} current versions", id, currentMediaVersions.size());
+        } else {
+            log.warn("Media with id {} has {} current versions we only expect one", id, currentMediaVersions.size());
+            currentVersion = currentMediaVersions.getLast();
+            //Add any extra current events to top of versionedMedia so they still get displayed
+            currentMediaVersions.removeLast();
+            currentMediaVersions
+                .forEach(mediaEntity -> {
+                    versionedMedia.addFirst(mediaEntity);
+                });
+        }
+        return getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(currentVersion, versionedMedia);
     }
 }
