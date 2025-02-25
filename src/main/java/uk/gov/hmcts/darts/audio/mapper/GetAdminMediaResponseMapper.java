@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.mapper;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.model.AdminActionResponse;
 import uk.gov.hmcts.darts.audio.model.AdminMediaVersionResponse;
@@ -26,10 +28,11 @@ import java.util.Optional;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GetAdminMediaResponseMapper {
 
-    private CourtroomMapper courtroomMapper;
-    private CourthouseMapper courthouseMapper;
+    private final CourtroomMapper courtroomMapper;
+    private final CourthouseMapper courthouseMapper;
 
     public static List<GetAdminMediaResponseItem> createResponseItemList(List<MediaEntity> mediaEntities, HearingEntity hearing) {
         List<GetAdminMediaResponseItem> responseList = new ArrayList<>();
