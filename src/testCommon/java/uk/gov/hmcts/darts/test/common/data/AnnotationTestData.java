@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class AnnotationTestData  implements Persistable<TestAnnotationEntity.TestAnnotationEntityRetrieve,
+public final class AnnotationTestData implements Persistable<TestAnnotationEntity.TestAnnotationEntityRetrieve,
     AnnotationEntity, TestAnnotationEntity.TestAnnotationEntityBuilder> {
 
     AnnotationTestData() {

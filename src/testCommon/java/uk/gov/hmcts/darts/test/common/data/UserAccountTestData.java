@@ -8,7 +8,7 @@ import java.util.Set;
 
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
 
-public class UserAccountTestData {
+public final class UserAccountTestData {
 
     private UserAccountTestData() {
 

@@ -27,9 +27,10 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.util.CsvFileUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -109,7 +110,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     @Override
     public void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles, int batchSize) {
         ObjectRecordStatusEntity armRpoPending = EodHelper.armRpoPendingStatus();
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO CSV Reconciliation: ");
+        StringBuilder errorMessage = new StringBuilder(92).append("Failure during ARM RPO CSV Reconciliation: ");
 
         ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTask_taskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
             .orElseThrow(() -> new ArmRpoException(errorMessage.append("Automated task ProcessE2EArmRpoPending not found.").toString()));
@@ -157,7 +158,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         List<Integer> csvEodList = new ArrayList<>();
         Integer counter = 0;
         for (File csvFile : csvFiles) {
-            try (Reader reader = new FileReader(csvFile.getPath())) {
+            try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()))) {
                 Iterable<CSVRecord> records = CsvFileUtil.readCsv(reader);
                 while (records.iterator().hasNext()) {
                     CSVRecord csvRecord = records.iterator().next();
@@ -170,8 +171,8 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                     }
                 }
                 log.info("Finished reading CSV file: {}. Read {} rows", csvFile.getName(), counter);
-            } catch (FileNotFoundException e) {
-                log.info("Files not found only read {} rows for file {}", counter, csvFile.getName());
+            } catch (IOException e) {
+                log.info("File not found only read {} rows for file {}", counter, csvFile.getName());
                 log.error(errorMessage.append("Unable to find CSV file for Reconciliation ").toString(), e);
                 throw new ArmRpoException(errorMessage.toString());
             } catch (Exception e) {

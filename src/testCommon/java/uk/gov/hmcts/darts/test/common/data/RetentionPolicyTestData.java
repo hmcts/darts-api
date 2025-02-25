@@ -4,8 +4,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 
 import java.time.OffsetDateTime;
 
-
-public class RetentionPolicyTestData {
+public final class RetentionPolicyTestData {
 
     private RetentionPolicyTestData() {
 

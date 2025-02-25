@@ -26,10 +26,7 @@ public record TranscriptionDocumentResult(
         if (this == other) {
             return true;
         }
-        if (other == null) {
-            return false;
-        }
-        if (!(other instanceof TranscriptionDocumentResult transcriptionDocumentResult)) {
+        if (other == null || !(other instanceof TranscriptionDocumentResult transcriptionDocumentResult)) {
             return false;
         }
         return transcriptionDocumentResult.transcriptionDocumentId.equals(transcriptionDocumentId)

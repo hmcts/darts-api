@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
 import java.util.Collections;
@@ -17,16 +16,6 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class SecurityGroupCourthouseMapper {
-
-    private final SecurityGroupMapper securityGroupMapper;
-
-    public SecurityGroupWithIdAndRole mapToSecurityGroupWithIdAndRoleWithCourthouse(SecurityGroupEntity securityGroupEntity) {
-        SecurityGroupWithIdAndRole securityGroupWithIdAndRole = securityGroupMapper.mapToSecurityGroupWithIdAndRole(securityGroupEntity);
-        securityGroupWithIdAndRole.setSecurityRoleId(securityGroupEntity.getSecurityRoleEntity().getId());
-        List<Integer> courthouseIds = securityGroupEntity.getCourthouseEntities().stream().map(CourthouseEntity::getId).sorted().toList();
-        securityGroupWithIdAndRole.setCourthouseIds(courthouseIds);
-        return securityGroupWithIdAndRole;
-    }
 
     public SecurityGroupWithIdAndRoleAndUsers mapToSecurityGroupWithCourthousesAndUsers(SecurityGroupEntity securityGroupEntity) {
         if (securityGroupEntity == null) {
@@ -46,7 +35,6 @@ public class SecurityGroupCourthouseMapper {
         Set<CourthouseEntity> courthouseEntities = securityGroupEntity.getCourthouseEntities();
         securityGroupWithIdAndRoleAndUsers.setCourthouseIds(courthouseEntities
                                                                 .stream().map(CourthouseEntity::getId).sorted().collect(Collectors.toList()));
-        Set<UserAccountEntity> users = securityGroupEntity.getUsers();
 
         List<UserAccountEntity> nonSystemUsers = Optional.ofNullable(securityGroupEntity.getUsers())
             .map(usrs -> usrs.stream()
