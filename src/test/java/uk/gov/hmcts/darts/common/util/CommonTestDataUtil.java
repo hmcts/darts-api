@@ -168,6 +168,7 @@ public class CommonTestDataUtil {
         courtCase.setId(id);
         courtCase.setCreatedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
         courtCase.setLastModifiedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
+        courtCase.setClosed(false);
         return courtCase;
     }
 

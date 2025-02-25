@@ -419,6 +419,41 @@ paths:
         '500':
           description: Internal Server Error
 
+  /admin/cases/{id}:
+    get:
+      tags:
+        - Cases
+      summary: |-
+        Admin view for court case
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSingleCaseResponseItem'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Unauthorised Error
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_104"
+                title: "The requested case cannot be found"
+                status: 404
 components:
   schemas:
     add_case_request:
@@ -658,7 +693,7 @@ components:
           type: string
           example: "Case called on"
         is_data_anonymised:
-            $ref: '#/components/schemas/IsDataAnonymised'
+          $ref: '#/components/schemas/IsDataAnonymised'
         text:
           type: string
           example: "Record:New Case"
@@ -832,6 +867,91 @@ components:
           example: 'Event text'
           maxLength: 2000
 
+    AdminSingleCaseResponseItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique case identifier, used internally by DARTS.
+        courthouse:
+          $ref: '#/components/schemas/CourthouseResponseObject'
+        case_number:
+          type: string
+          example: 1234
+          maxLength: 32
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        courtrooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourtroomResponseObject'
+        prosecutors:
+          type: array
+          items:
+            $ref: '#/components/schemas/prosecutor'
+        defenders:
+          type: array
+          items:
+            $ref: '#/components/schemas/defence'
+        reporting_restrictions:
+          $ref: './common.yaml#/components/schemas/reporting_restrictions'
+        retain_until_date_time:
+          type: string
+          format: date-time
+          example: 2030-01-31T15:42:10.361Z
+        case_closed_date_time:
+          type: string
+          format: date-time
+          example: 2023-07-20T15:42:10.361Z
+        retention_date_time_applied:
+          type: string
+          format: date-time
+          example: 2023-07-20T15:42:10.361Z
+        retention_policy_applied:
+          type: string
+          example: "MANUAL"
+        case_object_id:
+          type: string
+          example: 12345
+        case_status:
+          $ref: '#/components/schemas/CaseOpenStatusEnum'
+          example: "OPEN"
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-01-01T00:00:00Z
+        created_by:
+          type: integer
+          example: 0
+        last_modified_at:
+          type: string
+          format: date-time
+          example: 2024-01-01T00:00:00Z
+        last_modified_by:
+          type: integer
+          example: 0
+        is_deleted:
+          type: boolean
+          example: false
+        case_deleted_at:
+          type: string
+          format: date-time
+          example: 2024-01-01T00:00:00Z
+        is_data_anonymised:
+          $ref: '#/components/schemas/IsDataAnonymised'
+        data_anonymised_at:
+          $ref: '#/components/schemas/DataAnonymisedAt'
+        is_interpreter_used:
+          type: boolean
+          example: false
+
     IsDataAnonymised:
       type: boolean
 
@@ -884,3 +1004,9 @@ components:
         - "Case has expired."
       x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET, HEARINGS_NOT_ACTUAL, CASE_EXPIRED ]
 
+    CaseOpenStatusEnum:
+      type: string
+      enum:
+        - "OPEN"
+        - "CLOSED"
+      x-enum-varnames: [ OPEN, CLOSED ]

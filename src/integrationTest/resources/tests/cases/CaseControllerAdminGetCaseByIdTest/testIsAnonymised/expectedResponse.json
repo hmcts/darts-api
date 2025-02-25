@@ -1,0 +1,30 @@
+{
+  "id": 2,
+  "courthouse": {
+    "id": 2,
+    "display_name": "SOME-COURTHOUSE"
+  },
+  "case_number": "123",
+  "defendants": [
+    "some-defendant"
+  ],
+  "judges": [
+    "123JUDGE1"
+  ],
+  "prosecutors": [
+    "some-prosecutor"
+  ],
+  "defenders": [
+    "aDefence"
+  ],
+  "reporting_restrictions": [],
+  "case_status": "OPEN",
+  "created_at": "<CREATED_AT>",
+  "created_by": 0,
+  "last_modified_at": "<LAST_MODIFIED_AT>",
+  "last_modified_by": 0,
+  "is_deleted": false,
+  "is_data_anonymised": true,
+  "data_anonymised_at": "2023-01-01T12:00:00Z",
+  "is_interpreter_used": false
+}
