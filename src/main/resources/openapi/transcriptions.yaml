@@ -1621,9 +1621,6 @@ components:
           type: object
           description: 'The case related details'
           properties:
-            id:
-              type: integer
-              description: 'The case  id'
             case_number:
               type: string
               description: 'The case number'
@@ -1631,9 +1628,6 @@ components:
           type: object
           description: 'The courthouse related details'
           properties:
-            id:
-              type: integer
-              description: 'The court house id'
             display_name:
               type: string
               description: 'The court house display name'
@@ -1641,9 +1635,6 @@ components:
           type: object
           description: 'The hearing details'
           properties:
-            id:
-              type: integer
-              description: 'The hearing id'
             hearing_date:
               type: date
               description: 'The hearing date'
