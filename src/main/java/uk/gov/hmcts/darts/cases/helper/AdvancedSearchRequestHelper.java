@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.cases.exception.AdvancedSearchNoResultsException;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity_;
@@ -72,7 +71,6 @@ public class AdvancedSearchRequestHelper {
     private List<Predicate> createPredicates(GetCasesSearchRequest request,
                                              HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
         List<Predicate> predicates = new ArrayList<>();
-        CollectionUtils.addAll(predicates, addCourthouseAccessCriteria(caseRoot));
         CollectionUtils.addAll(predicates, addCaseCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addCourtroomNameCriteria(criteriaBuilder, caseRoot, request));
@@ -101,23 +99,24 @@ public class AdvancedSearchRequestHelper {
 
     private List<Predicate> addCourthouseIdCriteria(Root<CourtCaseEntity> caseRoot, GetCasesSearchRequest request) throws AdvancedSearchNoResultsException {
         List<Predicate> predicateList = new ArrayList<>();
+        List<Integer> courthouseIdsUserHasAccessTo = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
+        List<Integer> courtHousesToFilterOn = new ArrayList<>();
+
         if (StringUtils.isNotBlank(request.getCourthouse())) {
             List<Integer> courthouseIdList = courthouseRepository.findAllIdByDisplayNameOrNameLike(request.getCourthouse());
             log.debug("Matching list of courthouse IDs for search = {}", courthouseIdList);
-            if (courthouseIdList.isEmpty()) {
+            //Ensure user has access to the courthouses they are searching for
+            courtHousesToFilterOn = courthouseIdList.stream()
+                .filter(integer -> courthouseIdsUserHasAccessTo.contains(integer))
+                .toList();
+            if (courtHousesToFilterOn.isEmpty()) {
                 throw new AdvancedSearchNoResultsException();
             }
-            predicateList.add(caseRoot.get(CourtroomEntity_.COURTHOUSE).get(CourthouseEntity_.ID).in(courthouseIdList));
+        } else {
+            courtHousesToFilterOn = courthouseIdsUserHasAccessTo;
         }
+        predicateList.add(caseRoot.get(CourtroomEntity_.COURTHOUSE).get(CourthouseEntity_.ID).in(courtHousesToFilterOn));
         return predicateList;
-    }
-
-    private Predicate addCourthouseAccessCriteria(Root<CourtCaseEntity> caseRoot) {
-
-        //add courthouse permissions
-        List<Integer> courthouseIdsUserHasAccessTo = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
-        Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
-        return courthouseJoin.get(CourthouseEntity_.ID).in(courthouseIdsUserHasAccessTo);
     }
 
     private List<Predicate> addCaseCriteria(GetCasesSearchRequest request, HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
@@ -230,14 +229,6 @@ public class AdvancedSearchRequestHelper {
 
     private Join<CourtCaseEntity, JudgeEntity> joinJudge(Root<CourtCaseEntity> caseRoot) {
         return caseRoot.join(CourtCaseEntity_.JUDGES, JoinType.INNER);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Join<CourtCaseEntity, CourthouseEntity> joinCourthouse(Root<CourtCaseEntity> caseRoot) {
-        Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            CourtroomEntity_.COURTHOUSE)).findAny();
-        return foundJoin.map(join -> (Join<CourtCaseEntity, CourthouseEntity>) join)
-            .orElseGet(() -> caseRoot.join(CourtroomEntity_.COURTHOUSE, JoinType.INNER));
     }
 
     private Join<CourtCaseEntity, DefendantEntity> joinDefendantEntity(Root<CourtCaseEntity> caseRoot) {
