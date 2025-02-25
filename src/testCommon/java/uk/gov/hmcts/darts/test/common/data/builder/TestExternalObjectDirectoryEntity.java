@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity> {
@@ -22,7 +21,7 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
     public TestExternalObjectDirectoryEntity(Integer id, MediaEntity media, TranscriptionDocumentEntity transcriptionDocumentEntity,
                                              AnnotationDocumentEntity annotationDocumentEntity, CaseDocumentEntity caseDocument,
                                              ObjectRecordStatusEntity status,
-                                             ExternalLocationTypeEntity externalLocationType, UUID externalLocation,
+                                             ExternalLocationTypeEntity externalLocationType, String externalLocation,
                                              String externalFileId, String externalRecordId,
                                              String checksum, Integer transferAttempts, Integer verificationAttempts,
                                              OffsetDateTime dataIngestionTs, String manifestFile,

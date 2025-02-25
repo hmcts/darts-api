@@ -38,4 +38,31 @@ public class ExternalObjectDirectoryProcessDetailEntity extends MandatoryCreated
     @Column(name = "update_retention", nullable = false)
     private boolean updateRetention;
 
+    @Column(name = "input_upload_filename")
+    private String inputUploadFilename;
+
+    @Column(name = "create_record_filename")
+    private String createRecordFilename;
+
+    @Column(name = "create_record_processed_ts")
+    private OffsetDateTime createRecordProcessedAt;
+
+    @Column(name = "upload_file_filename")
+    private String uploadFileFilename;
+
+    @Column(name = "upload_file_processed_ts")
+    private OffsetDateTime uploadFileProcessedAt;
+
+    @Column(name = "create_rec_inv_filename")
+    private String createRecInvFilename;
+
+    @Column(name = "create_rec_inv_processed_ts")
+    private OffsetDateTime createRecInvProcessedAt;
+
+    @Column(name = "upload_file_inv_filename")
+    private String uploadFileInvFilename;
+
+    @Column(name = "upload_file_inv_processed_ts")
+    private OffsetDateTime uploadFileInvProcessedAt;
+
 }

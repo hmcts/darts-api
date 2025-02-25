@@ -44,7 +44,7 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
 
     private static final int CASE_ID = 44;
     private static final String UNSTRUCTURED_CONTAINER_NAME = "unstructured";
-    private static final UUID UNSTRUCTURED_BLOB_UUID = UUID.randomUUID();
+    private static final String UNSTRUCTURED_BLOB_UUID = UUID.randomUUID().toString();
     private static final String CHECKSUM = "ssUxli";
     private static final String CASE_DOCUMENT_JSON = """
         {"createdDateTime":"2029-12-12T13:19:01.698514618Z", ...}
@@ -121,7 +121,7 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         when(caseRepository.save(any())).thenReturn(caseEntity);
         var fileName = String.format(FILE_NAME_FORMAT,
                                      FILE_NAME_PREFIX,
-                                     UNSTRUCTURED_BLOB_UUID.toString(),
+                                     UNSTRUCTURED_BLOB_UUID,
                                      FILE_EXTENSION
         );
         // when

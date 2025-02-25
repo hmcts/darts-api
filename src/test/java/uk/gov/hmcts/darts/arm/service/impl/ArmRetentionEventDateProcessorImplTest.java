@@ -58,7 +58,7 @@ class ArmRetentionEventDateProcessorImplTest {
             media,
             ARM,
             STORED,
-            UUID.randomUUID());
+            UUID.randomUUID().toString());
         externalObjectDirectoryEntity.setUpdateRetention(true);
 
     }

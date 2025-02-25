@@ -100,7 +100,7 @@ class ArmRpoApiRemoveProductionTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getRemoveProductionRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 

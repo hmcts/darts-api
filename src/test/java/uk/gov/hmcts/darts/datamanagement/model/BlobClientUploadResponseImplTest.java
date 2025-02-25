@@ -35,12 +35,11 @@ class BlobClientUploadResponseImplTest {
     @Test
     void shouldReturnExpectedBlobName() {
         // Given
-        final UUID someName = UUID.randomUUID();
-        Mockito.when(blobClient.getBlobName())
-            .thenReturn(someName.toString());
+        final String someName = UUID.randomUUID().toString();
+        Mockito.when(blobClient.getBlobName()).thenReturn(someName);
 
         // When
-        UUID blobName = blobClientUploadResponse.getBlobName();
+        String blobName = blobClientUploadResponse.getBlobName();
 
         // Then
         assertEquals(someName, blobName);

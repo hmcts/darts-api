@@ -10,16 +10,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.io.File;
@@ -56,7 +58,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private ArmApiService armApiService;
 
-    @MockBean
+    @MockitoBean
     private ArmTokenClient armTokenClient;
 
     @Value("${darts.storage.arm-api.api-url.download-data-path}")
@@ -71,7 +73,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @TempDir
@@ -87,9 +89,10 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
         when(armTokenClient.getToken(armTokenRequest))
             .thenReturn(armTokenResponse);
-        when(armTokenClient.availableEntitlementProfiles(bearerToken))
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armTokenClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest))
             .thenReturn(getAvailableEntitlementProfile());
-        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id"))
+        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id", emptyRpoRequest))
             .thenReturn(armTokenResponse);
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -105,12 +108,12 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
         var bearerAuth = "Bearer some-token";
         var reasonConf = "reason";
-        var scoreConfId = 23;
+        var scoreConfId = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(eventTimestamp)
-                          .retConfScore(scoreConfId)
+                          .retConfScore(scoreConfId.getId())
                           .retConfReason(reasonConf)
                           .build())
             .useGuidsForFields(false)
@@ -154,12 +157,12 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         // Given
         var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
         var reasonConf = "reason";
-        var scoreConfId = 23;
+        var scoreConfId = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(eventTimestamp)
-                          .retConfScore(scoreConfId)
+                          .retConfScore(scoreConfId.getId())
                           .retConfReason(reasonConf)
                           .build())
             .useGuidsForFields(false)

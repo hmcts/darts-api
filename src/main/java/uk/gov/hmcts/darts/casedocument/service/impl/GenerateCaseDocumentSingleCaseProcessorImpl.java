@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.UUID;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
@@ -73,7 +72,7 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
             IOUtils.toInputStream(caseDocumentJson, UTF_8),
             DatastoreContainerType.UNSTRUCTURED
         );
-        UUID externalLocation = blobClientUploadResponse.getBlobName();
+        String externalLocation = blobClientUploadResponse.getBlobName();
 
         var systemUser = userIdentity.getUserAccount();
         CaseDocumentEntity caseDocumentEntity = createAndSaveCaseDocumentEntity(caseId, caseDocumentJson, externalLocation, systemUser);
@@ -94,10 +93,10 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
         log.debug("Updated retention for case id {} due to case document generation", caseId);
     }
 
-    private CaseDocumentEntity createAndSaveCaseDocumentEntity(Integer caseId, String caseDocument, UUID externalLocation, UserAccountEntity user) {
+    private CaseDocumentEntity createAndSaveCaseDocumentEntity(Integer caseId, String caseDocument, String externalLocation, UserAccountEntity user) {
         var fileName = String.format(FILE_NAME_FORMAT,
                                      caseDocumentFilenamePrefix,
-                                     externalLocation.toString(),
+                                     externalLocation,
                                      caseDocumentFileExtension
         );
         int fileSize = caseDocument.getBytes().length;

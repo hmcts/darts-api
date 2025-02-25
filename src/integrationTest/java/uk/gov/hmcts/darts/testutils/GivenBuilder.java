@@ -5,9 +5,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.List;
@@ -26,39 +28,46 @@ public class GivenBuilder {
 
     public UserAccountEntity anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum role) {
         var userEmail = role.name() + "@global.com";
-        anAuthenticatedUserFor(userEmail);
 
         var securityGroup = createGroupForRole(role);
         securityGroup.setGlobalAccess(true);
 
         var user = minimalUserAccount();
         user.setEmailAddress(userEmail);
+        user = dartsDatabase.save(user);
 
         dartsDatabase.addUserToGroup(user, securityGroup);
+        anAuthenticatedUserFor(user);
 
-        return user;
+        return dartsDatabase.getDartsPersistence().refresh(user);
     }
 
     public UserAccountEntity anAuthenticatedUserAuthorizedForCourthouse(SecurityRoleEnum role, CourthouseEntity courthouse) {
         var userEmail = role.name() + "@" + courthouse.getCourthouseName() + ".com";
-        anAuthenticatedUserFor(userEmail);
 
         var securityGroup = buildGroupForRoleAndCourthouse(JUDICIARY, courthouse);
 
         var judge = minimalUserAccount();
         judge.setEmailAddress(userEmail);
-
+        judge = dartsDatabase.save(judge);
         dartsDatabase.addUserToGroup(judge, securityGroup);
 
-        return judge;
+        anAuthenticatedUserFor(judge);
+        return dartsDatabase.getDartsPersistence().refresh(judge);
     }
 
-    public static void anAuthenticatedUserFor(String userEmail) {
-        Jwt jwt = Jwt.withTokenValue("some-token")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of(userEmail))
-            .build();
+    public static void anAuthenticatedUserFor(String email, UserAccountRepository userAccountRepository) {
+        anAuthenticatedUserFor(userAccountRepository.findFirstByEmailAddressIgnoreCase(email).orElseThrow());
+    }
+
+    public static void anAuthenticatedUserFor(UserAccountEntity userAccountEntity) {
+        DartsJwt jwt = new DartsJwt(
+            Jwt.withTokenValue("some-token")
+                .header("alg", "RS256")
+                .claim("sub", UUID.randomUUID().toString())
+                .claim("emails", List.of(userAccountEntity.getEmailAddress()))
+                .build(),
+            userAccountEntity.getId());
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 }

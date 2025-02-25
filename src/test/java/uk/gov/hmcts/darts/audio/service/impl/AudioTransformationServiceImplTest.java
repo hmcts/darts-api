@@ -50,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -178,12 +179,15 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void saveProcessedDataShouldSaveBlobAndSetStatus() {
+    void saveProcessedData_shouldSaveBlobAndSetStatus() {
         final MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setRequestType(DOWNLOAD);
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(1);
+        mediaRequestEntity.setCreatedBy(userAccount);
 
         BlobClientUploadResponse blobClientUploadResponse = mock(BlobClientUploadResponseImpl.class);
-        UUID blobName = UUID.randomUUID();
+        String blobName = UUID.randomUUID().toString();
         when(blobClientUploadResponse.getBlobName())
             .thenReturn(blobName);
         when(blobClientUploadResponse.getBlobSize())
@@ -199,9 +203,10 @@ class AudioTransformationServiceImplTest {
 
         TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
         transformedMediaEntity.setId(1);
-        when(transformedMediaRepository.save(
-            any()
-        )).thenReturn(transformedMediaEntity);
+        doAnswer(invocation -> invocation.getArgument(0)).when(transformedMediaRepository).save(any());
+
+        when(mockTransientObjectDirectoryEntity.getTransformedMedia())
+            .thenReturn(transformedMediaEntity);
 
         when(mockTransientObjectDirectoryEntity.getTransformedMedia(
         )).thenReturn(transformedMediaEntity);
@@ -213,7 +218,7 @@ class AudioTransformationServiceImplTest {
             .path(Path.of("test/b6b51cb7-9ff8-44de-bf53-62c2bd2e13f3.zip"))
             .build();
 
-        UUID returnedBlobName = transformedMediaHelper.saveToStorage(
+        String returnedBlobName = transformedMediaHelper.saveToStorage(
             mediaRequestEntity,
             new ByteArrayInputStream(TEST_BINARY_STRING.getBytes()), "filename",
             audioFileInfo
@@ -738,7 +743,10 @@ class AudioTransformationServiceImplTest {
 
         MediaRequestEntity mediaRequest = new MediaRequestEntity();
         mediaRequest.setRequestType(AudioRequestType.PLAYBACK);
-
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(1);
+        mediaRequest.setCreatedBy(userAccount);
+        doAnswer(invocation -> invocation.getArgument(0)).when(transformedMediaRepository).save(any());
         TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(
             mediaRequest,
             "case1_23_Nov_2023.mp3",
@@ -747,6 +755,8 @@ class AudioTransformationServiceImplTest {
             BINARY_DATA.getLength()
         );
 
+        assertEquals(userAccount, transformedMediaEntity.getCreatedBy());
+        assertEquals(userAccount, transformedMediaEntity.getLastModifiedBy());
         assertEquals(TEST_FILE_NAME, transformedMediaEntity.getOutputFilename());
         assertEquals(TEST_EXTENSION, transformedMediaEntity.getOutputFormat().getExtension());
         assertEquals(TEST_BINARY_STRING.length(), transformedMediaEntity.getOutputFilesize());

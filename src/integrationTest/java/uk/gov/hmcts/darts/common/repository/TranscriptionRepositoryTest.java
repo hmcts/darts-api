@@ -3,10 +3,12 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -20,6 +22,8 @@ import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 class TranscriptionRepositoryTest extends IntegrationBase {
 
@@ -91,6 +95,56 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         var transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(courtCase.getId(), false);
 
         assertEquals(2, transcriptionEntities.size());
+    }
+
+    @Test
+    void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_ShouldSucceed() {
+        // given
+        TranscriptionStatusEntity completeTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(COMPLETE);
+        TranscriptionEntity transcriptionCompleteOld =
+            PersistableFactory.getTranscriptionTestData().minimalRawTranscription(completeTranscriptionStatus);
+        transcriptionCompleteOld = dartsDatabase.save(transcriptionCompleteOld);
+        transcriptionCompleteOld.setCreatedDateTime(OffsetDateTime.now().minusHours(2));
+        dartsDatabase.save(transcriptionCompleteOld);
+
+        TranscriptionEntity transcriptionCompleteNew =
+            PersistableFactory.getTranscriptionTestData().minimalRawTranscription(completeTranscriptionStatus);
+        dartsDatabase.save(transcriptionCompleteNew);
+
+        TranscriptionStatusEntity approvedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED);
+        TranscriptionEntity transcriptionApproved = PersistableFactory.getTranscriptionTestData().minimalRawTranscription(approvedTranscriptionStatus);
+        transcriptionApproved = dartsDatabase.save(transcriptionApproved);
+        transcriptionApproved.setCreatedDateTime(OffsetDateTime.now().minusHours(2));
+        dartsDatabase.save(transcriptionApproved);
+
+        OffsetDateTime createdDateTime = OffsetDateTime.now().minusHours(1);
+
+        List<TranscriptionStatusEntity> excludedStatuses = List.of(transcriptionApproved.getTranscriptionStatus());
+
+        // when
+        List<Integer> result = transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+            excludedStatuses, createdDateTime, Limit.of(10)
+        );
+
+        // then
+        assertEquals(1, result.size());
+        assertEquals(transcriptionCompleteOld.getId(), result.get(0));
+    }
+
+    @Test
+    void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_NoResultsFound() {
+        // given
+        TranscriptionEntity transcriptionApproved = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+        OffsetDateTime createdDateTime = OffsetDateTime.now().minusDays(1);
+        List<TranscriptionStatusEntity> excludedStatuses = List.of(transcriptionApproved.getTranscriptionStatus());
+
+        // when
+        List<Integer> result = transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+            excludedStatuses, createdDateTime, Limit.of(10)
+        );
+
+        // then
+        assertEquals(0, result.size());
     }
 
     private void persistTwoHiddenTwoNotHiddenTranscriptionsFor(CourtCaseEntity courtCaseEntity) {

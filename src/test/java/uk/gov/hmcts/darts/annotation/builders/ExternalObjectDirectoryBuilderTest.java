@@ -26,7 +26,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @ExtendWith(MockitoExtension.class)
 class ExternalObjectDirectoryBuilderTest {
 
-    private static final UUID SOME_EXTERNAL_LOCATION = UUID.randomUUID();
+    private static final String SOME_EXTERNAL_LOCATION = UUID.randomUUID().toString();
     private static final ObjectRecordStatusEntity OBJECT_RECORD_STATUS = new ObjectRecordStatusEntity();
     private static final ExternalLocationTypeEntity EXTERNAL_LOCATION_TYPE = new ExternalLocationTypeEntity();
 

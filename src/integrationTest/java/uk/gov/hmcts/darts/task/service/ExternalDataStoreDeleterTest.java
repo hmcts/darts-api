@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsExternalObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
@@ -72,7 +72,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private BlobServiceClient blobServiceClient;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
-    @MockBean
+    @MockitoBean
     private DataManagementAzureClientFactory dataManagementFactory;
 
     @Autowired
@@ -97,7 +97,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Autowired
     private DetsDataStoreDeleter detsDataStoreDeleter;
 
-    @MockBean
+    @MockitoBean
     private DetsApiService detsApiService;
 
     private UserAccountEntity requestor;
@@ -192,7 +192,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         externalDetsDataStoreDeleter.delete(1000);
 
         verifyEntitiesDeleted(List.of(inboundEntity, unstructuredEntity, detsEntity), List.of(outboundEntity));
-        verify(detsApiService).deleteBlobDataFromContainer(any(UUID.class));
+        verify(detsApiService).deleteBlobDataFromContainer(any(String.class));
     }
 
     @SneakyThrows
@@ -236,7 +236,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         externalDetsDataStoreDeleter.delete(1000);
 
         verifyEntitiesNotChanged(List.of(unstructuredEntity, inboundEntity, detsEntity), List.of(outboundEntity));
-        verify(detsApiService, never()).deleteBlobDataFromContainer(any(UUID.class));
+        verify(detsApiService, never()).deleteBlobDataFromContainer(any(String.class));
     }
 
     private void verifyEntitiesNotChanged(List<ExternalObjectDirectoryEntity> inboundUnstructuredList, List<TransientObjectDirectoryEntity> outboundList) {
@@ -301,14 +301,14 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             mediaEntity,
             dartsDatabase.getObjectRecordStatusEntity(status),
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(dataStoreId),
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
 
         return dartsDatabase.save(externalObjectDirectoryEntity);
     }
 
     private TransientObjectDirectoryEntity createTransientDirectoryAndObjectStatus(MediaRequestEntity currentMediaRequest, ObjectRecordStatusEnum status) {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
 
         return dartsDatabase.getTransientObjectDirectoryRepository()

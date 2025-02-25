@@ -72,17 +72,21 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         var caseAMedias = mediaRepository.findAllByCaseId(caseA.getId());
         var caseBMedias = mediaRepository.findAllByCaseId(caseB.getId());
 
-        // then
-        var caseAMediasId = caseAMedias.stream().map(MediaEntity::getId);
-        assertThat(caseAMediasId).containsExactlyInAnyOrder(media0.getId(), media1.getId(), media2.getId());
-        var caseBMediasId = caseBMedias.stream().map(MediaEntity::getId);
-        assertThat(caseBMediasId).containsExactlyInAnyOrder(media0.getId());
+        dartsPersistence.getTransactionalUtil().executeInTransaction(() -> {
+            var foundMedia0 = mediaRepository.findById(media0.getId()).orElseThrow();
+            var foundMedia1 = mediaRepository.findById(media1.getId()).orElseThrow();
 
-        List<CourtCaseEntity> media0cases = media0.associatedCourtCases();
-        assertThat(media0cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId(), caseB.getId());
-        List<CourtCaseEntity> media1cases = media1.associatedCourtCases();
-        assertThat(media1cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId());
+            // then
+            var caseAMediasId = caseAMedias.stream().map(MediaEntity::getId);
+            assertThat(caseAMediasId).containsExactlyInAnyOrder(foundMedia0.getId(), foundMedia1.getId(), media2.getId());
+            var caseBMediasId = caseBMedias.stream().map(MediaEntity::getId);
+            assertThat(caseBMediasId).containsExactlyInAnyOrder(foundMedia0.getId());
 
+            List<CourtCaseEntity> media0cases = foundMedia0.associatedCourtCases();
+            assertThat(media0cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId(), caseB.getId());
+            List<CourtCaseEntity> media1cases = foundMedia1.associatedCourtCases();
+            assertThat(media1cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId());
+        });
     }
 
     @Test

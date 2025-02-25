@@ -36,7 +36,6 @@ import java.util.UUID;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 
@@ -58,13 +57,13 @@ public class DataStoreToArmHelper {
 
     public List<Integer> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                    ExternalLocationTypeEntity armLocation, int maxResultSize) {
-        ObjectRecordStatusEntity armRawStatusFailed = objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId());
-        ObjectRecordStatusEntity armManifestFailed = objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId());
 
-        List<ObjectRecordStatusEntity> failedArmStatuses = List.of(armRawStatusFailed, armManifestFailed);
+        List<ObjectRecordStatusEntity> statusEntityList = List.of(
+            EodHelper.failedArmRawDataStatus(), EodHelper.failedArmManifestFileStatus(),
+            EodHelper.armIngestionStatus(), EodHelper.armRawDataPushedStatus());
 
         var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
-            failedArmStatuses,
+            statusEntityList,
             armLocation,
             armDataManagementConfiguration.getMaxRetryAttempts(),
             Pageable.ofSize(maxResultSize)
@@ -190,7 +189,7 @@ public class DataStoreToArmHelper {
                 log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
 
                 log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-                armDataManagementApi.copyBlobDataToArm(unstructuredExternalObjectDirectory.getExternalLocation().toString(), filename);
+                armDataManagementApi.copyBlobDataToArm(unstructuredExternalObjectDirectory.getExternalLocation(), filename);
                 log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
 
                 Instant finish = Instant.now();
@@ -199,8 +198,9 @@ public class DataStoreToArmHelper {
                 log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
 
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
-                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());
                 armExternalObjectDirectory.setLastModifiedBy(userAccount);
+                armExternalObjectDirectory.setStatus(EodHelper.armRawDataPushedStatus());
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
             }
         } catch (Exception e) {
@@ -223,7 +223,7 @@ public class DataStoreToArmHelper {
         String fileNameFormat = "%s_%s.%s";
         return String.format(fileNameFormat,
                              manifestFilePrefix,
-                             UUID.randomUUID(),
+                             UUID.randomUUID().toString(),
                              armDataManagementConfiguration.getFileExtension()
         );
     }
@@ -240,7 +240,7 @@ public class DataStoreToArmHelper {
             incrementTransferAttempts(armEod);
             updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus(), userAccount);
         } else {
-            log.error("Unable to find matching external object directory for {}", armEod.getId());
+            log.error("Unable to find matching external object directory for {} - manifest {}", armEod.getId(), archiveRecordsFileName);
             updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
             throw new DartsException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }
@@ -285,10 +285,6 @@ public class DataStoreToArmHelper {
                 updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmManifestFileStatus(), userAccount);
             }
         }
-    }
-
-    public Long getFileSize(int externalObjectDirectoryId) {
-        return externalObjectDirectoryRepository.findFileSize(externalObjectDirectoryId);
     }
 
 

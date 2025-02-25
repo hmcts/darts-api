@@ -19,6 +19,7 @@ public class UserAccountTestData {
         userAccount.setActive(true);
         userAccount.setIsSystemUser(false);
         userAccount.setUserFullName("some-user-full-name");
+        userAccount.setLastModifiedById(0);
         return userAccount;
     }
 

@@ -118,7 +118,6 @@ public class CaseController implements CasesApi {
         RequestValidator.validate(request);
         List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
         return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
-
     }
 
     @Override

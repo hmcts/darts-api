@@ -36,9 +36,9 @@ public class TranscriptionTestData
         minimalTranscription.setTranscriptionStatus(transcriptionStatusEntity);
         minimalTranscription.setHideRequestFromRequestor(false);
         minimalTranscription.setIsManualTranscription(false);
-        var userAccount = minimalUserAccount();
-        minimalTranscription.setLastModifiedBy(userAccount);
-        minimalTranscription.setCreatedBy(userAccount);
+        minimalTranscription.setLastModifiedById(0);
+        minimalTranscription.setCreatedById(0);
+        minimalTranscription.setIsCurrent(true);
         return minimalTranscription;
     }
 
@@ -90,7 +90,8 @@ public class TranscriptionTestData
             .hideRequestFromRequestor(false)
             .isManualTranscription(false)
             .lastModifiedBy(userAccount)
-            .createdBy(userAccount);
+            .createdBy(userAccount)
+            .isCurrent(true);
 
         return builder;
     }

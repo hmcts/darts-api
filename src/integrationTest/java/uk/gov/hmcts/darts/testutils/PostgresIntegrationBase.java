@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -46,7 +47,8 @@ public class PostgresIntegrationBase {
 
     static {
         POSTGRES = new PostgreSQLContainer<>(
-            "postgres:16-alpine"
+            DockerImageName.parse("hmctspublic.azurecr.io/imported/postgres")
+                .asCompatibleSubstituteFor("postgres")
         ).withDatabaseName("darts")
             .withUsername("darts")
             .withPassword("darts");
@@ -68,9 +70,7 @@ public class PostgresIntegrationBase {
 
     @BeforeEach
     void clearDb() {
-        dartsDatabase.resetSequences();
-        dartsDatabase.clearDatabaseInThisOrder();
-        dartsDatabase.resetTablesWithPredefinedTestData();
+        dartsDatabase.clearDb();
     }
 
     @AfterEach
@@ -80,6 +80,6 @@ public class PostgresIntegrationBase {
 
 
     protected void anAuthenticatedUserFor(String userEmail) {
-        GivenBuilder.anAuthenticatedUserFor(userEmail);
+        GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }
 }

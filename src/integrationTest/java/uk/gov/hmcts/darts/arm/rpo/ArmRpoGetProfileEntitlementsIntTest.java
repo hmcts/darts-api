@@ -2,9 +2,10 @@ package uk.gov.hmcts.darts.arm.rpo;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 })
 class ArmRpoGetProfileEntitlementsIntTest extends PostgresIntegrationBase {
 
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
 
     @Autowired
@@ -37,7 +38,6 @@ class ArmRpoGetProfileEntitlementsIntTest extends PostgresIntegrationBase {
     private static final String TOKEN = "some token";
     private static final String ENTITLEMENT_ID = "some entitlement id";
     private static final String ENTITLEMENT_NAME = "SRV-DARTS-RW-E";
-
 
     @Test
     void getProfileEntitlements_shouldSucceed_whenASuccessResponseIsObtainedFromArmThatContainsAMatchingEntitlement() {
@@ -85,7 +85,7 @@ class ArmRpoGetProfileEntitlementsIntTest extends PostgresIntegrationBase {
             .getMessage();
 
         // Then
-        assertThat(exceptionMessage, containsString("No matching entitlements were returned"));
+        assertThat(exceptionMessage, containsString("ARM getProfileEntitlements: No matching entitlements 'SRV-DARTS-RW-E' were returned"));
 
         executionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(executionId)
             .orElseThrow();
@@ -106,7 +106,8 @@ class ArmRpoGetProfileEntitlementsIntTest extends PostgresIntegrationBase {
         response.setStatus(200);
         response.setIsError(false);
         response.setEntitlements(profileEntitlements);
-        when(armRpoClient.getProfileEntitlementResponse(TOKEN))
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armRpoClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
             .thenReturn(response);
     }
 

@@ -1,6 +1,10 @@
 # Don't modify this file, it is only needed for the pipeline to set the image and ingressHost
 java:
   image: ${IMAGE_NAME}
+  devmemoryRequests: "1Gi"
+  devcpuRequests: "250m"
+  devmemoryLimits: "2Gi"
+  devcpuLimits: "2500m"
   ingressHost: ${SERVICE_FQDN}
   environment:
     MANUAL_DELETION_ENABLED: true

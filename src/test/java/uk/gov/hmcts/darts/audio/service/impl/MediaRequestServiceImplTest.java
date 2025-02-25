@@ -347,10 +347,10 @@ class MediaRequestServiceImplTest {
 
         when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
             .thenReturn(List.of(
-                new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(184, 2547, 2750)
+                new AudioRequestBeingProcessedFromArchiveQueryResult(181),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(182),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(183),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(184)
             ));
 
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
@@ -367,7 +367,7 @@ class MediaRequestServiceImplTest {
     @Test
     void whenAudioRequestHasBeenProcessedDeleteBlobDataAndAudioRequest() throws AzureDeleteBlobException {
         var mediaRequestId = 1;
-        UUID blobId = UUID.randomUUID();
+        String blobId = UUID.randomUUID().toString();
 
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(blobId);
@@ -385,7 +385,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
         verify(mockMediaRequestRepository).deleteById(mediaRequestId);
-        verify(dataManagementApi).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(dataManagementApi).deleteBlobDataFromOutboundContainer(any(String.class));
         verify(mockTransientObjectDirectoryRepository).deleteById(any());
     }
 
@@ -428,7 +428,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
         verify(mockMediaRequestRepository).deleteById(mediaRequestId);
-        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(String.class));
         verify(mockTransientObjectDirectoryRepository, times(0)).deleteById(any());
     }
 
@@ -449,7 +449,7 @@ class MediaRequestServiceImplTest {
         var objectRecordStatusEntity = new ObjectRecordStatusEntity();
         objectRecordStatusEntity.setId(STORED.getId());
 
-        var blobUuid = UUID.randomUUID();
+        var blobUuid = UUID.randomUUID().toString();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);
@@ -580,7 +580,7 @@ class MediaRequestServiceImplTest {
         var objectRecordStatusEntity = new ObjectRecordStatusEntity();
         objectRecordStatusEntity.setId(STORED.getId());
 
-        var blobUuid = UUID.randomUUID();
+        var blobUuid = UUID.randomUUID().toString();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);

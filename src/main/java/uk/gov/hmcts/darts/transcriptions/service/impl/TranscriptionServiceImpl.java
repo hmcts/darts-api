@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -82,7 +84,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
@@ -150,6 +151,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
     private final TranscriptionResponseMapper transcriptionResponseMapper;
     private final TranscriptionDownloader transcriptionDownloader;
+    private final TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
 
     @Value("${darts.manual-deletion.enabled:false}")
     @Getter(AccessLevel.PACKAGE)
@@ -175,6 +177,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             getTranscriptionUrgencyById(transcriptionRequestDetails.getTranscriptionUrgencyId()),
             isManual
         );
+
+        transcriptionLinkedCaseRepository.save(
+            TranscriptionLinkedCaseEntity.builder()
+                .transcription(transcription)
+                .courtCase(transcription.getCourtCase())
+                .build());
 
         transcription.getTranscriptionWorkflowEntities().add(
             saveTranscriptionWorkflow(
@@ -328,6 +336,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
+    @Override
     public TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
                                                                  TranscriptionEntity transcription,
                                                                  TranscriptionStatusEntity transcriptionStatus,
@@ -440,9 +449,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
-            UUID.fromString(inboundBlobCLient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);
+            inboundBlobCLient.getBlobName(), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);
         final var externalObjectDirectoryUnstructuredEntity = saveExternalObjectDirectory(
-            UUID.fromString(unstructuredBlobClient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, UNSTRUCTURED);
+            unstructuredBlobClient.getBlobName(), checksum, userAccountEntity, transcriptionDocumentEntity, UNSTRUCTURED);
 
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryInboundEntity);
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryUnstructuredEntity);
@@ -524,7 +533,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(transcriptionWorkflows, migratedTranscriptionComments);
     }
 
-    private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
+    private ExternalObjectDirectoryEntity saveExternalObjectDirectory(String externalLocation,
                                                                       String checksum,
                                                                       UserAccountEntity userAccountEntity,
                                                                       TranscriptionDocumentEntity transcriptionDocumentEntity,
@@ -642,7 +651,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         for (TranscriptionDocumentEntity entity : transcriptionDocumentEntities) {
             transcriptionResponsesLst.add(transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(entity));
         }
-
+        transcriptionResponsesLst.sort((o1, o2) ->
+                                           o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()));
         return transcriptionResponsesLst;
     }
 

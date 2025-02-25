@@ -10,8 +10,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
@@ -51,7 +51,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired
@@ -195,46 +195,55 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         List<MediaEntity> expectedEntities = List.of(mediaEntity1b, mediaEntity1a, mediaEntity1c);
         assertResponseItems(expectedEntities, mvcResult);
 
-        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        String actualResponse =  mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             [
-              {
-                "courthouse": {
-                  "display_name": "COURTHOUSE1"
-                },
-                "courtroom": {
-                  "name": "COURTROOM1"
-                },
-                "start_at": "2020-10-10T10:00:01Z",
-                "end_at": "2020-10-10T11:00:01Z",
-                "channel": 1,
-                "is_hidden": false
-              },
-              {
-                "courthouse": {
-                  "display_name": "COURTHOUSE1"
-                },
-                "courtroom": {
-                  "name": "COURTROOM1"
-                },
-                "start_at": "2020-10-10T10:00:02Z",
-                "end_at": "2020-10-10T11:00:02Z",
-                "channel": 1,
-                "is_hidden": false
-              },
-              {
-                "courthouse": {
-                  "display_name": "COURTHOUSE1"
-                },
-                "courtroom": {
-                  "name": "COURTROOM1"
-                },
-                "start_at": "2020-10-10T10:00:03Z",
-                "end_at": "2020-10-10T11:00:03Z",
-                "channel": 1,
-                "is_hidden": false
-              }
-            ]""";
+               {
+                 "id": 3,
+                 "courthouse": {
+                   "id": 1,
+                   "display_name": "COURTHOUSE1"
+                 },
+                 "courtroom": {
+                   "id": 1,
+                   "name": "COURTROOM1"
+                 },
+                 "start_at": "2020-10-10T10:00:03Z",
+                 "end_at": "2020-10-10T11:00:03Z",
+                 "channel": 1,
+                 "is_hidden": false
+               },
+               {
+                 "id": 2,
+                 "courthouse": {
+                   "id": 1,
+                   "display_name": "COURTHOUSE1"
+                 },
+                 "courtroom": {
+                   "id": 1,
+                   "name": "COURTROOM1"
+                 },
+                 "start_at": "2020-10-10T10:00:02Z",
+                 "end_at": "2020-10-10T11:00:02Z",
+                 "channel": 1,
+                 "is_hidden": false
+               },
+               {
+                 "id": 1,
+                 "courthouse": {
+                   "id": 1,
+                   "display_name": "COURTHOUSE1"
+                 },
+                 "courtroom": {
+                   "id": 1,
+                   "name": "COURTROOM1"
+                 },
+                 "start_at": "2020-10-10T10:00:01Z",
+                 "end_at": "2020-10-10T11:00:01Z",
+                 "channel": 1,
+                 "is_hidden": false
+               }
+             ]""";
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

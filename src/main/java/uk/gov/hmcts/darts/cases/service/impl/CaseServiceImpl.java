@@ -175,11 +175,7 @@ public class CaseServiceImpl implements CaseService {
         if (caseIds.isEmpty()) {
             return new ArrayList<>();
         }
-        List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds).stream()
-            .filter(HearingEntity::getHearingIsActual)
-            .sorted((o1, o2) -> o2.getCourtCase().getCaseNumber().compareTo(o1.getCourtCase().getCaseNumber()))
-            .toList();
-
+        List<HearingEntity> hearings = hearingRepository.findByIsActualCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
 
@@ -244,8 +240,8 @@ public class CaseServiceImpl implements CaseService {
         if (matchingCaseIds.size() > adminSearchMaxResults) {
             throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }
-        List<CourtCaseEntity> matchingCases = caseRepository.findAllById(matchingCaseIds);
-        hearingRepository.findByCaseIds(matchingCaseIds);
+        List<CourtCaseEntity> matchingCases = caseRepository.findAllWithIdMatchingOneOf(matchingCaseIds);
+
         return AdminCasesSearchResponseMapper.mapResponse(matchingCases);
     }
 

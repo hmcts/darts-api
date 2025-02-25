@@ -19,8 +19,8 @@ import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 
-import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -69,7 +69,7 @@ class AnnotationDataManagementTest {
     @Test
     void throwsAndAttemptsToDeleteFromInboundContainerWhenSavingToUnstructuredContainerFails() throws AzureDeleteBlobException {
         var binaryData = BinaryData.fromBytes("some-binary-data".getBytes());
-        var inboundLocationUuid = randomUUID();
+        var inboundLocationUuid = UUID.randomUUID().toString();
         when(dataManagementApi.saveBlobDataToInboundContainer(binaryData)).thenReturn(inboundLocationUuid);
         when(dataManagementApi.saveBlobDataToUnstructuredContainer(binaryData)).thenThrow(new RuntimeException());
 
@@ -84,8 +84,8 @@ class AnnotationDataManagementTest {
     @Test
     void returnsContainerLocationsWhenUploadSucceeds() {
         var binaryData = BinaryData.fromBytes("some-binary-data".getBytes());
-        var inboundLocationUuid = randomUUID();
-        var unstructuredLocationUuid = randomUUID();
+        var inboundLocationUuid = UUID.randomUUID().toString();
+        var unstructuredLocationUuid = UUID.randomUUID().toString();
         when(dataManagementApi.saveBlobDataToInboundContainer(binaryData)).thenReturn(inboundLocationUuid);
         when(dataManagementApi.saveBlobDataToUnstructuredContainer(binaryData)).thenReturn(unstructuredLocationUuid);
 
@@ -97,8 +97,8 @@ class AnnotationDataManagementTest {
 
     @Test
     void deletesFromCorrectContainer() throws AzureDeleteBlobException {
-        var inboundLocation = randomUUID();
-        var unstructuredLocation = randomUUID();
+        var inboundLocation = UUID.randomUUID().toString();
+        var unstructuredLocation = UUID.randomUUID().toString();
         annotationDataManagement.attemptToDeleteDocuments(Map.of(
             INBOUND, inboundLocation,
             UNSTRUCTURED, unstructuredLocation));
@@ -110,7 +110,7 @@ class AnnotationDataManagementTest {
 
     @Test
     void throwsWhenDeleteFails() throws AzureDeleteBlobException {
-        var externalLocationUuid = randomUUID();
+        var externalLocationUuid = UUID.randomUUID().toString();
         doThrow(new AzureDeleteBlobException("some-message")).when(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocationUuid);
 
         assertThatThrownBy(() -> annotationDataManagement.attemptToDeleteDocuments(Map.of(INBOUND, externalLocationUuid)))

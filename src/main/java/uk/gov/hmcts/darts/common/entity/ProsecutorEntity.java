@@ -41,7 +41,7 @@ public class ProsecutorEntity extends CreatedModifiedBaseEntity implements IsNam
     @Column(name = PROSECUTOR_NAME)
     private String name;
 
-
+    @Override
     public void setName(String name) {
         this.name = DataUtil.trim(name);
     }

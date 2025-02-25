@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,12 +11,14 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -63,9 +66,12 @@ class ArmRpoApiGetProfileEntitlementsTest {
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
         armApiConfigurationProperties.setArmServiceEntitlement(ENTITLEMENT_NAME);
+        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+        ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties,
-                                      armAutomatedTaskRepository, currentTimeHelper, armRpoDownloadProduction);
+                                      armAutomatedTaskRepository, currentTimeHelper, armRpoDownloadProduction,
+                                      objectMapper);
     }
 
     @AfterEach
@@ -77,11 +83,11 @@ class ArmRpoApiGetProfileEntitlementsTest {
     void getProfileEntitlements_shouldSucceed_whenAResponseIsObtainedFromArmThatContainsAMatchingEntitlement() {
         //  Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
-
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         var profileEntitlement = new ProfileEntitlementResponse.ProfileEntitlement();
         profileEntitlement.setName(ENTITLEMENT_NAME);
         profileEntitlement.setEntitlementId("some entitlement id");
-        createEntitlementResponseAndSetMock(Collections.singletonList(profileEntitlement));
+        createEntitlementResponseAndSetMock(Collections.singletonList(profileEntitlement), emptyRpoRequest);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
 
@@ -108,8 +114,8 @@ class ArmRpoApiGetProfileEntitlementsTest {
     void getProfileEntitlements_shouldThrowException_whenArmCallFails() {
         //  Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
-
-        when(armRpoClient.getProfileEntitlementResponse(TOKEN))
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armRpoClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
             .thenThrow(mock(FeignException.class));
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -118,7 +124,6 @@ class ArmRpoApiGetProfileEntitlementsTest {
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.getProfileEntitlements(TOKEN, EXECUTION_ID, someUserAccount));
         assertThat(armRpoException.getMessage(), containsString("API call failed"));
-
 
         // Then verify execution detail state moves to in progress
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
@@ -138,8 +143,8 @@ class ArmRpoApiGetProfileEntitlementsTest {
     void getProfileEntitlements_shouldThrowException_whenEntitlementsAreNullOrEmpty(List<ProfileEntitlementResponse.ProfileEntitlement> entitlements) {
         //  Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
-
-        createEntitlementResponseAndSetMock(entitlements);
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        createEntitlementResponseAndSetMock(entitlements, emptyRpoRequest);
 
         var someUserAccount = new UserAccountEntity();
 
@@ -165,17 +170,17 @@ class ArmRpoApiGetProfileEntitlementsTest {
     void getProfileEntitlements_shouldThrowException_whenNoMatchingEntitlementIsReturned() {
         //  Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
-
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         var profileEntitlement = new ProfileEntitlementResponse.ProfileEntitlement();
         profileEntitlement.setName("some lone name that does not match the configured entitlement name");
-        createEntitlementResponseAndSetMock(Collections.singletonList(profileEntitlement));
+        createEntitlementResponseAndSetMock(Collections.singletonList(profileEntitlement), emptyRpoRequest);
 
         var someUserAccount = new UserAccountEntity();
 
         // When
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.getProfileEntitlements(TOKEN, EXECUTION_ID, someUserAccount));
-        assertThat(armRpoException.getMessage(), containsString("No matching entitlements were returned"));
+        assertThat(armRpoException.getMessage(), containsString("ARM getProfileEntitlements: No matching entitlements 'some entitlement name' were returned"));
 
         // Then verify execution detail state moves to in progress
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
@@ -195,11 +200,11 @@ class ArmRpoApiGetProfileEntitlementsTest {
     void getProfileEntitlements_shouldThrowException_whenEntitlementIsReturnedButContainsANullOrEmptyEntitlementId(String entitlementId) {
         //  Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
-
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         var profileEntitlement = new ProfileEntitlementResponse.ProfileEntitlement();
         profileEntitlement.setName(ENTITLEMENT_NAME);
         profileEntitlement.setEntitlementId(entitlementId);
-        createEntitlementResponseAndSetMock(Collections.singletonList(profileEntitlement));
+        createEntitlementResponseAndSetMock(Collections.singletonList(profileEntitlement), emptyRpoRequest);
 
         var someUserAccount = new UserAccountEntity();
 
@@ -232,12 +237,12 @@ class ArmRpoApiGetProfileEntitlementsTest {
         return armRpoExecutionDetailEntity;
     }
 
-    private void createEntitlementResponseAndSetMock(List<ProfileEntitlementResponse.ProfileEntitlement> profileEntitlements) {
+    private void createEntitlementResponseAndSetMock(List<ProfileEntitlementResponse.ProfileEntitlement> profileEntitlements, EmptyRpoRequest emptyRpoRequest) {
         var response = new ProfileEntitlementResponse();
         response.setStatus(200);
         response.setIsError(false);
         response.setEntitlements(profileEntitlements);
-        when(armRpoClient.getProfileEntitlementResponse(TOKEN))
+        when(armRpoClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
             .thenReturn(response);
     }
 

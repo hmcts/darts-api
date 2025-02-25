@@ -110,9 +110,11 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
         return transcriptionSearchQuery.searchTranscriptions(request, transcriptionIds).stream()
             .map(this::toTranscriptionSearchResponse)
+            .sorted((o1, o2) -> o2.getTranscriptionId().compareTo(o1.getTranscriptionId()))
             .toList();
     }
 
+    @Override
     public List<SearchTranscriptionDocumentResponse> searchTranscriptionDocument(SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
         OffsetDateTime requestedAtFrom = searchTranscriptionDocumentRequest.getRequestedAtFrom()
             != null ? OffsetDateTime.of(searchTranscriptionDocumentRequest.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC) : null;
@@ -137,7 +139,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     public List<GetTranscriptionDetailAdminResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom) {
         List<GetTranscriptionDetailAdminResponse> detailResponseList = new ArrayList<>();
 
-        // throw an en exception if the user does not exist
+        // throw an exception if the user does not exist
         userAccountExistsValidator.validate(userId);
 
         List<TranscriptionEntity> entityList = transcriptionRepository.findTranscriptionForUserOnOrAfterDate(userId, requestedAtFrom);
@@ -173,6 +175,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     }
 
     @Transactional
+    @Override
     public TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
                                                                                  TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
         TranscriptionDocumentHideResponse response;
@@ -236,6 +239,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     }
 
     @Transactional
+    @Override
     public AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Integer transcriptionDocumentId) {
         if (!this.isManualDeletionEnabled()) {
             throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");

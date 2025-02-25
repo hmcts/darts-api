@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface ExternalObjectDirectoryService {
 
@@ -20,7 +19,7 @@ public interface ExternalObjectDirectoryService {
 
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
 
-    ExternalObjectDirectoryEntity createAndSaveCaseDocumentEod(UUID externalLocation,
+    ExternalObjectDirectoryEntity createAndSaveCaseDocumentEod(String externalLocation,
                                                                UserAccountEntity userAccountEntity,
                                                                CaseDocumentEntity caseDocumentEntity,
                                                                ExternalLocationTypeEntity externalLocationType);

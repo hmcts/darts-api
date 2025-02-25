@@ -4,7 +4,7 @@ package uk.gov.hmcts.darts.arm.rpo;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class ArmRpoApiGetIndexesByMatterIdIntTest extends IntegrationBase {
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
 
     @Autowired
@@ -90,7 +90,7 @@ class ArmRpoApiGetIndexesByMatterIdIntTest extends IntegrationBase {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM RPO get indexes by matter ID: Unable to find indexes by matter ID in response"));
+            "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.GET_INDEXES_BY_MATTERID.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());

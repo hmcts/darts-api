@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
@@ -31,7 +31,7 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired

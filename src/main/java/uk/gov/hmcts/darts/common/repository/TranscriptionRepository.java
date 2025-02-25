@@ -17,6 +17,7 @@ import java.util.List;
 @Repository
 public interface TranscriptionRepository extends RevisionRepository<TranscriptionEntity, Integer, Long>, JpaRepository<TranscriptionEntity, Integer> {
 
+    // transcriptions with is_current=false are filtered out downstream
     @Query(value = """
         SELECT *
         FROM darts.transcription tr
@@ -54,16 +55,18 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     )
     List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId, Boolean includeHidden);
 
+    // transcriptions with is_current=false are included as this query targets old transcriptions to be closed
     @Query("""
-           SELECT te
+           SELECT te.id
            FROM TranscriptionEntity te
            WHERE te.transcriptionStatus NOT IN (:transcriptionStatuses)
            and te.createdDateTime <= :createdDateTime
         """)
-    List<TranscriptionEntity> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+    List<Integer> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
         List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime, Limit limit);
 
-    // native query to bypass @SQLRestriction on TranscriptionDocumentEntity
+    // native query to bypass @SQLRestriction on TranscriptionDocumentEntity in NOT EXISTS sub-query
+    // transcriptions with is_current=false are filtered out downstream
     @Query(value = """
         SELECT t.*
         FROM darts.transcription t
@@ -96,6 +99,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         AND (t.endTime IS NULL OR t.endTime = :endTime)
         AND t.isManualTranscription = :isManual
         AND t.transcriptionStatus NOT IN (:ignoreStatuses)
+        AND t.isCurrent = true
         """)
     List<TranscriptionEntity> findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
         Integer hearingId,
@@ -134,6 +138,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
              AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
              AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+             AND t.isCurrent = true
         """)
     List<TranscriptionSearchResult> searchModernisedTranscriptionsFilteringOn(
         List<Integer> ids,
@@ -161,9 +166,8 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
          FROM TranscriptionEntity t
          JOIN t.transcriptionStatus ts
          JOIN t.createdBy ua
-         LEFT JOIN t.courtroom cr
          LEFT JOIN t.courtCases cc
-         LEFT JOIN cr.courthouse cth
+         LEFT JOIN cc.courthouse cth
          WHERE (:ids IS NULL OR t.id IN :ids)
              AND (:caseNumber IS NULL OR cc.caseNumber = :caseNumber)
              AND (cth.displayName ILIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
@@ -172,6 +176,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
              AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
              AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+             AND t.isCurrent = true
         """)
     List<TranscriptionSearchResult> searchMigratedTranscriptionsFilteringOn(
         List<Integer> ids,
@@ -188,13 +193,15 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         SELECT distinct t
         FROM TranscriptionEntity t
         WHERE t.requestedBy.id = :userId
+        AND t.isCurrent = true
         AND ((cast(:onOrAfterCreatedDate as TIMESTAMP)) IS NULL OR t.createdDateTime >= :onOrAfterCreatedDate)
         UNION
-        SELECT distinct trans 
+        SELECT distinct trans
         FROM TranscriptionWorkflowEntity twfe
         JOIN twfe.transcription trans
         JOIN twfe.workflowActor user
         WHERE user.id = :userId
+        AND trans.isCurrent = true
         AND ((cast(:onOrAfterCreatedDate as TIMESTAMP)) IS NULL OR trans.createdDateTime >= :onOrAfterCreatedDate)
         """)
     List<TranscriptionEntity> findTranscriptionForUserOnOrAfterDate(Integer userId, OffsetDateTime onOrAfterCreatedDate);

@@ -9,10 +9,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -28,7 +28,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetails;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
@@ -66,13 +66,13 @@ class EventsControllerTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private EventDispatcher eventDispatcher;
 
-    @MockBean
+    @MockitoBean
     private AudioApi audioApi;
 
-    @MockBean
+    @MockitoBean
     private DartsEventMapper dartsEventMapper;
 
     @Autowired
@@ -118,10 +118,11 @@ class EventsControllerTest extends IntegrationBase {
 
         // Given
         // setup an event id
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         LocalDateTime hearingDate = LocalDateTime.of(2020, 6, 6, 20, 0, 0);
         HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", hearingDate);
         EventEntity eventEntity = dartsDatabaseStub.createEvent(hearing);
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
         MockHttpServletRequestBuilder requestBuilder = get("/admin/events/" + eventEntity.getId())
@@ -129,8 +130,8 @@ class EventsControllerTest extends IntegrationBase {
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
-        AdminGetEventForIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                                                 AdminGetEventForIdResponseResult.class);
+        AdminGetEventResponseDetails responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
+                                                                                 AdminGetEventResponseDetails.class);
 
         // Then
         Assertions.assertEquals(eventEntity.getId(), responseResult.getId());

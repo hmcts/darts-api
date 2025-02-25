@@ -78,11 +78,15 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     @Getter(AccessLevel.PACKAGE)
     private boolean manualDeletionEnabled;
 
+    @Override
     public AdminMediaResponse getMediasById(Integer id) {
         var mediaEntity = mediaRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
 
-        return adminMediaMapper.toApiModel(mediaEntity);
+        AdminMediaResponse adminMediaResponse = adminMediaMapper.toApiModel(mediaEntity);
+        adminMediaResponse.getCases().sort((o1, o2) -> o2.getCaseNumber().compareTo(o1.getCaseNumber()));
+        adminMediaResponse.getHearings().sort((o1, o2) -> o2.getCaseNumber().compareTo(o1.getCaseNumber()));
+        return adminMediaResponse;
     }
 
     @Override
@@ -129,6 +133,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         Set<Integer> uniqueIds = new HashSet<>();
         return responseMediaItemList.stream()
             .filter(item -> uniqueIds.add(item.getId()))
+            .sorted((o1, o2) -> o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()))
             .collect(Collectors.toList());
     }
 
@@ -148,14 +153,19 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .values()
             .stream()
             .filter(objectAdminActionEntities -> !objectAdminActionEntities.isEmpty())
-            .map(actions -> toGetAdminMediasMarkedForDeletionItem(actions))
-            .toList();
+            .map(this::toGetAdminMediasMarkedForDeletionItem)
+            .peek(getAdminMediasMarkedForDeletionItem -> {
+                //We need to add the Media Entities to a List that supports sorting as the default one from Hibernate does not
+                List<GetAdminMediasMarkedForDeletionMediaItem> mediaEntities = new ArrayList<>(getAdminMediasMarkedForDeletionItem.getMedia());
+                mediaEntities.sort((o1, o2) -> o1.getChannel().compareTo(o2.getChannel()));
+                getAdminMediasMarkedForDeletionItem.setMedia(mediaEntities);
+            }).toList();
     }
 
     GetAdminMediasMarkedForDeletionItem toGetAdminMediasMarkedForDeletionItem(List<ObjectAdminActionEntity> actions) {
         ObjectAdminActionEntity base = actions.get(0);
         List<GetAdminMediasMarkedForDeletionMediaItem> media = actions.stream()
-            .map(action -> action.getMedia())
+            .map(ObjectAdminActionEntity::getMedia)
             .map(mediaEntity -> {
                 GetAdminMediasMarkedForDeletionMediaItem item = adminMarkedForDeletionMapper.toGetAdminMediasMarkedForDeletionMediaItem(mediaEntity);
                 item.setVersionCount(mediaRepository.getVersionCount(mediaEntity.getChronicleId()));

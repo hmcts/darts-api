@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -73,19 +72,19 @@ public class UserAccountStubComposable {
         newUser.setActive(true);
         newUser.setIsSystemUser(true);
         newUser.setUserFullName(username);
-        newUser.setCreatedBy(newUser);
-        newUser.setLastModifiedBy(newUser);
+        newUser.setCreatedById(0);
+        newUser.setLastModifiedById(0);
         newUser.setCreatedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         newUser.setLastModifiedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         return userAccountRepository.saveAndFlush(newUser);
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
+        Optional<UserAccountEntity> userAccounts = userAccountRepository.findFirstByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
         if (userAccounts.isEmpty()) {
             return createIntegrationUser(UUID.randomUUID().toString());
         }
-        return userAccounts.get(0);
+        return userAccounts.get();
     }
 
     /**
@@ -96,28 +95,28 @@ public class UserAccountStubComposable {
      */
     public UserAccountEntity getIntegrationTestUserAccountEntity(String identifier) {
         String emailAddress = identifier + "@example.com";
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
+        Optional<UserAccountEntity> userAccounts = userAccountRepository.findFirstByEmailAddressIgnoreCase(emailAddress);
         if (userAccounts.isEmpty()) {
             return createIntegrationUser(UUID.randomUUID().toString(), identifier, emailAddress, true);
         }
-        return userAccounts.get(0);
+        return userAccounts.get();
     }
 
     public UserAccountEntity getSeparateIntegrationTestUserAccountEntity() {
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(SEPARATE_TEST_USER_EMAIL);
+        Optional<UserAccountEntity> userAccounts = userAccountRepository.findFirstByEmailAddressIgnoreCase(SEPARATE_TEST_USER_EMAIL);
         if (userAccounts.isEmpty()) {
             return createSeparateUser(UUID.randomUUID().toString());
         }
-        return userAccounts.get(0);
+        return userAccounts.get();
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntityInactive(String identifier) {
         String emailAddress = identifier + "@example.com";
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
+        Optional<UserAccountEntity> userAccounts = userAccountRepository.findFirstByEmailAddressIgnoreCase(emailAddress);
         if (userAccounts.isEmpty()) {
             return createIntegrationUser(UUID.randomUUID().toString(), identifier, emailAddress, false);
         }
-        return userAccounts.get(0);
+        return userAccounts.get();
     }
 
     public UserAccountEntity createIntegrationUser(String guid) {
