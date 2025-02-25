@@ -139,7 +139,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     public List<GetTranscriptionDetailAdminResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom) {
         List<GetTranscriptionDetailAdminResponse> detailResponseList = new ArrayList<>();
 
-        // throw an en exception if the user does not exist
+        // throw an exception if the user does not exist
         userAccountExistsValidator.validate(userId);
 
         List<TranscriptionEntity> entityList = transcriptionRepository.findTranscriptionForUserOnOrAfterDate(userId, requestedAtFrom);
