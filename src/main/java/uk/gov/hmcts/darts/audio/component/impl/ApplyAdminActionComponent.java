@@ -63,20 +63,17 @@ public class ApplyAdminActionComponent {
     @Transactional
     public List<MediaEntity> applyAdminActionTo(@NonNull List<MediaEntity> mediaVersions,
                                                 @NonNull AdminActionProperties adminActionProperties) {
-        // We need to first remove any existing admin actions so that we can link new actions reflecting the details in the incoming adminActionRequest
+        // We need to first remove any existing admin actions so that we can link new actions reflecting the details in the incoming adminActionProperties
         removeAdminActionComponent.removeAdminActionFrom(mediaVersions);
-
-        final UserAccountEntity userAccount = userIdentity.getUserAccount();
 
         final String ticketReference = adminActionProperties.ticketReference();
         for (MediaEntity media : mediaVersions) {
-
             auditApi.record(HIDE_AUDIO, AUDIT_TEMPLATE.formatted(media.getId(), ticketReference));
 
             ObjectAdminActionEntity adminAction = createAdminAction(ticketReference,
                                                                     adminActionProperties.comments(),
                                                                     adminActionProperties.hiddenReason(),
-                                                                    userAccount);
+                                                                    userIdentity.getUserAccount());
             adminAction.setMedia(media);
             adminActionRepository.saveAndFlush(adminAction);
 

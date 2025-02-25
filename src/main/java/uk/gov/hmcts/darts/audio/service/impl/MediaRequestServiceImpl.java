@@ -10,7 +10,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
@@ -23,8 +22,6 @@ import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
-import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
-import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
@@ -507,12 +504,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         if (!Objects.equals(mediaRequestEntity.getCurrentOwner().getId(), request.getOwnerId())) {
             auditApi.record(CHANGE_AUDIO_OWNERSHIP);
         }
-    }
-
-    @Override
-    @Transactional
-    public MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest) {
-        throw new NotImplementedException("moved"); // TODO remove
     }
 
 }
