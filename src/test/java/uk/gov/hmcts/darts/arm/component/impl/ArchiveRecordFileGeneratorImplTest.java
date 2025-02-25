@@ -53,10 +53,11 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 @Slf4j
 class ArchiveRecordFileGeneratorImplTest {
 
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
-    public static final String READING_FILE = "Reading file {}";
-    public static final String ACTUAL_RESPONSE = "actual Response {}";
-    public static final String EXPECT_RESPONSE = "expect Response {}";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
+    private static final String READING_FILE = "Reading file {}";
+    private static final String ACTUAL_RESPONSE = "actual Response {}";
+    private static final String EXPECT_RESPONSE = "expect Response {}";
+
     @TempDir
     private File tempDirectory;
 

@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AnnotationArchiveRecordMapperImplTest {
+class AnnotationArchiveRecordMapperImplPropertyTest {
 
     private AnnotationArchiveRecordMapperImpl annotationArchiveRecordMapper;
 
@@ -34,7 +34,7 @@ class AnnotationArchiveRecordMapperImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    MockedStatic<PropertyFileLoader> propertyFileLoader;
+    private MockedStatic<PropertyFileLoader> propertyFileLoader;
 
     @BeforeEach
     void setUp() {
@@ -47,7 +47,6 @@ class AnnotationArchiveRecordMapperImplTest {
         @BeforeEach
         void setUp() {
             when(configuration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ssX");
-            when(configuration.getDateFormat()).thenReturn("yyyy-MM-dd");
 
             propertyFileLoader = mockStatic(PropertyFileLoader.class);
             propertyFileLoader.when(() -> PropertyFileLoader.loadPropertiesFromFile(any()))

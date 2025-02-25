@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -25,29 +25,28 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MediaArchiveRecordMapperImplTest {
+class CaseArchiveRecordMapperImplPropertyTest {
 
-    private MediaArchiveRecordMapperImpl mediaArchiveRecordMapper;
+    private CaseArchiveRecordMapperImpl caseArchiveRecordMapper;
 
     @Mock
     private ArmDataManagementConfiguration configuration;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    MockedStatic<PropertyFileLoader> propertyFileLoader;
+    private MockedStatic<PropertyFileLoader> propertyFileLoader;
 
     @BeforeEach
     void setUp() {
-        mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(configuration, currentTimeHelper);
+        caseArchiveRecordMapper = new CaseArchiveRecordMapperImpl(configuration, currentTimeHelper);
     }
 
     @Nested
-    class MapToMediaArchiveRecordTest {
+    class MapToCaseArchiveRecordTest {
 
         @BeforeEach
         void setUp() {
             when(configuration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ssX");
-            when(configuration.getDateFormat()).thenReturn("yyyy-MM-dd");
 
             propertyFileLoader = mockStatic(PropertyFileLoader.class);
             propertyFileLoader.when(() -> PropertyFileLoader.loadPropertiesFromFile(any()))
@@ -64,18 +63,18 @@ class MediaArchiveRecordMapperImplTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .media(PersistableFactory.getMediaTestData()
+                .caseDocument(PersistableFactory.getCaseDocumentTestData()
                                   .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
                                   .build())
                 .build();
 
             // When
-            MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                    "someFilename");
+            CaseArchiveRecord caseArchiveRecord = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectoryEntity,
+                                                                                                 "someFilename");
 
             // Then
             assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
-                         mediaArchiveRecord.getMediaCreateArchiveRecord().getRecordMetadata().getRetentionConfidenceScore());
+                         caseArchiveRecord.getCaseCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
         }
 
         @Test
@@ -83,17 +82,17 @@ class MediaArchiveRecordMapperImplTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .media(PersistableFactory.getMediaTestData()
+                .caseDocument(PersistableFactory.getCaseDocumentTestData()
                                   .someMinimalBuilder().retConfScore(null)
                                   .build())
                 .build();
 
             // When
-            MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                  "someFilename");
+            CaseArchiveRecord caseArchiveRecord = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectoryEntity,
+                                                                                                 "someFilename");
 
             // Then
-            assertNull(mediaArchiveRecord.getMediaCreateArchiveRecord().getRecordMetadata().getRetentionConfidenceScore());
+            assertNull(caseArchiveRecord.getCaseCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
         }
 
     }
