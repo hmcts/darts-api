@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.audio.mapper;
 
-import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.model.AdminActionResponse;
+import uk.gov.hmcts.darts.audio.model.AdminMediaVersionResponse;
+import uk.gov.hmcts.darts.audio.model.AdminVersionedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseCase;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseCourthouse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseCourtroom;
@@ -19,13 +21,17 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
-@UtilityClass
+@Component
 public class GetAdminMediaResponseMapper {
 
-    public List<GetAdminMediaResponseItem> createResponseItemList(List<MediaEntity> mediaEntities, HearingEntity hearing) {
+    private CourtroomMapper courtroomMapper;
+    private CourthouseMapper courthouseMapper;
+
+    public static List<GetAdminMediaResponseItem> createResponseItemList(List<MediaEntity> mediaEntities, HearingEntity hearing) {
         List<GetAdminMediaResponseItem> responseList = new ArrayList<>();
         for (MediaEntity mediaEntity : mediaEntities) {
             responseList.add(createResponseItem(mediaEntity, hearing));
@@ -33,7 +39,7 @@ public class GetAdminMediaResponseMapper {
         return responseList;
     }
 
-    public GetAdminMediaResponseItem createResponseItem(MediaEntity mediaEntity, HearingEntity hearing) {
+    public static GetAdminMediaResponseItem createResponseItem(MediaEntity mediaEntity, HearingEntity hearing) {
         GetAdminMediaResponseItem responseItem = new GetAdminMediaResponseItem();
         responseItem.setId(mediaEntity.getId());
         responseItem.setChannel(mediaEntity.getChannel());
@@ -48,21 +54,21 @@ public class GetAdminMediaResponseMapper {
         return responseItem;
     }
 
-    private GetAdminMediaResponseCase createResponseCase(CourtCaseEntity courtCaseEntity) {
+    private static GetAdminMediaResponseCase createResponseCase(CourtCaseEntity courtCaseEntity) {
         GetAdminMediaResponseCase responseCase = new GetAdminMediaResponseCase();
         responseCase.setId(courtCaseEntity.getId());
         responseCase.setCaseNumber(courtCaseEntity.getCaseNumber());
         return responseCase;
     }
 
-    private GetAdminMediaResponseHearing createResponseHearing(HearingEntity hearingEntity) {
+    private static GetAdminMediaResponseHearing createResponseHearing(HearingEntity hearingEntity) {
         GetAdminMediaResponseHearing responseHearing = new GetAdminMediaResponseHearing();
         responseHearing.setId(hearingEntity.getId());
         responseHearing.setHearingDate(hearingEntity.getHearingDate());
         return responseHearing;
     }
 
-    private GetAdminMediaResponseCourthouse createResponseCourthouse(HearingEntity hearingEntity) {
+    private static GetAdminMediaResponseCourthouse createResponseCourthouse(HearingEntity hearingEntity) {
         CourthouseEntity courthouse = hearingEntity.getCourtroom().getCourthouse();
         GetAdminMediaResponseCourthouse responseCourthouse = new GetAdminMediaResponseCourthouse();
         responseCourthouse.setId(courthouse.getId());
@@ -70,7 +76,7 @@ public class GetAdminMediaResponseMapper {
         return responseCourthouse;
     }
 
-    private GetAdminMediaResponseCourtroom createResponseCourtroom(HearingEntity hearingEntity) {
+    private static GetAdminMediaResponseCourtroom createResponseCourtroom(HearingEntity hearingEntity) {
         CourtroomEntity courtroom = hearingEntity.getCourtroom();
         GetAdminMediaResponseCourtroom responseCourthouse = new GetAdminMediaResponseCourtroom();
         responseCourthouse.setId(courtroom.getId());
@@ -78,7 +84,7 @@ public class GetAdminMediaResponseMapper {
         return responseCourthouse;
     }
 
-    public MediaHideResponse mapHideOrShowResponse(MediaEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
+    public static MediaHideResponse mapHideOrShowResponse(MediaEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
         MediaHideResponse response = new MediaHideResponse();
         response.setId(entity.getId());
         response.setIsHidden(entity.isHidden());
@@ -107,7 +113,8 @@ public class GetAdminMediaResponseMapper {
         return aaResponse;
     }
 
-    public MediaApproveMarkedForDeletionResponse mapMediaApproveMarkedForDeletionResponse(MediaEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
+    public static MediaApproveMarkedForDeletionResponse mapMediaApproveMarkedForDeletionResponse(MediaEntity entity,
+                                                                                                 ObjectAdminActionEntity objectAdminActionEntity) {
         MediaApproveMarkedForDeletionResponse response = new MediaApproveMarkedForDeletionResponse();
         response.setId(entity.getId());
         response.setIsHidden(entity.isHidden());
@@ -117,6 +124,40 @@ public class GetAdminMediaResponseMapper {
             response.setAdminAction(buildAdminActionResponse(objectAdminActionEntity));
         }
 
+        return response;
+    }
+
+    public AdminVersionedMediaResponse mapAdminVersionedMediaResponse(MediaEntity mediaEntity, List<MediaEntity> mediaVersions) {
+        AdminVersionedMediaResponse response = new AdminVersionedMediaResponse();
+        response.setMediaObjectId(mediaEntity.getLegacyObjectId());
+        response.setCurrentVersion(mapAdminMediaVersionResponse(mediaEntity));
+        response.setPreviousVersions(
+            mediaVersions.stream()
+                .map(this::mapAdminMediaVersionResponse)
+                .filter(adminMediaVersionResponse -> adminMediaVersionResponse != null)
+                .toList()
+        );
+        return response;
+    }
+
+    AdminMediaVersionResponse mapAdminMediaVersionResponse(MediaEntity mediaEntity) {
+        if (mediaEntity == null) {
+            return null;
+        }
+        AdminMediaVersionResponse response = new AdminMediaVersionResponse();
+        response.setId(mediaEntity.getId());
+        response.setCourtroom(courtroomMapper.toApiModel(mediaEntity.getCourtroom()));
+        response.setCourthouse(courthouseMapper.toApiModel(
+            Optional.ofNullable(mediaEntity.getCourtroom())
+                .map(courtroomEntity -> courtroomEntity.getCourthouse())
+                .orElse(null)));
+        response.setStartAt(mediaEntity.getStart());
+        response.setEndAt(mediaEntity.getEnd());
+        response.setChannel(mediaEntity.getChannel());
+        response.setChronicleId(mediaEntity.getChronicleId());
+        response.setAntecedentId(mediaEntity.getAntecedentId());
+        response.setIsCurrent(mediaEntity.getIsCurrent());
+        response.setCreatedAt(mediaEntity.getCreatedDateTime());
         return response;
     }
 }

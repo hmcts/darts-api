@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequestWithStorageGUID;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
+import uk.gov.hmcts.darts.audio.model.AdminVersionedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
@@ -162,6 +163,13 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<AdminMediaResponse> getAdminMediasById(Integer id) {
         return new ResponseEntity<>(adminMediaService.getMediasById(id), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    public ResponseEntity<AdminVersionedMediaResponse> getAdminMediaVersionsById(Integer id) {
+        return new ResponseEntity<>(adminMediaService.getMediaVersionsById(id), HttpStatus.OK);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
 import uk.gov.hmcts.darts.audio.component.impl.RemoveAdminActionComponent;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapperImpl;
 import uk.gov.hmcts.darts.audio.mapper.CourthouseMapper;
@@ -33,6 +35,7 @@ import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapperImpl;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.AdminMediaCourthouseResponse;
 import uk.gov.hmcts.darts.audio.model.AdminMediaCourtroomResponse;
+import uk.gov.hmcts.darts.audio.model.AdminVersionedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
@@ -102,6 +105,8 @@ class AdminMediaServiceImplTest {
     private RemoveAdminActionComponent removeAdminActionComponent;
     @Mock
     private ObjectHiddenReasonRepository hiddenReasonRepository;
+    @Mock
+    private GetAdminMediaResponseMapper getAdminMediaResponseMapper;
 
     private ObjectMapper objectMapper;
 
@@ -567,6 +572,72 @@ class AdminMediaServiceImplTest {
         String expectedString = "[" + MEDIA_ID_5 + "]";
         JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
     }
+
+    @Test
+    void getMediaEntityById_shouldReutrnMediaEntity_ifOneExists() {
+        MediaEntity mediaEntity = mock(MediaEntity.class);
+        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
+
+        assertThat(mediaRequestService.getMediaEntityById(1))
+            .isEqualTo(mediaEntity);
+        verify(mediaRepository).findById(1);
+    }
+
+    @Test
+    void getMediaEntityById_shouldThrowException_ifNoMediaEntityExists() {
+        when(mediaRepository.findById(1)).thenReturn(Optional.empty());
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaEntityById(1));
+
+        assertThat(exception.getError()).isEqualTo(AudioApiError.MEDIA_NOT_FOUND);
+    }
+
+
+    @Nested
+    @DisplayName("AdminVersionedMediaResponse getMediaVersionsById(Integer id)")
+    class GetMediaVersionsById {
+        @Test
+        void getMediaVersionsById_shouldFetchMediaVersions_whenChronicleIdIsNotNull() {
+            MediaEntity mediaEntity = mock(MediaEntity.class);
+            doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123);
+            when(mediaEntity.getChronicleId()).thenReturn("chronicleId1");
+            List<MediaEntity> versionedMedias = List.of(mock(MediaEntity.class), mock(MediaEntity.class));
+
+            when(mediaRepository.findAllByChronicleId("chronicleId1")).thenReturn(versionedMedias);
+
+            AdminVersionedMediaResponse response = mock(AdminVersionedMediaResponse.class);
+            when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(mediaEntity, versionedMedias))
+                .thenReturn(response);
+
+            assertThat(mediaRequestService.getMediaVersionsById(123))
+                .isEqualTo(response);
+            verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(mediaEntity, versionedMedias);
+
+            verify(mediaRequestService).getMediaEntityById(123);
+            verify(mediaRepository).findAllByChronicleId("chronicleId1");
+        }
+
+        @Test
+        void getMediaVersionsById_shouldNotFetchMediaVersions_whenChronicleIdIsNull() {
+            MediaEntity mediaEntity = mock(MediaEntity.class);
+            doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123);
+            when(mediaEntity.getChronicleId()).thenReturn(null);
+
+            AdminVersionedMediaResponse response = mock(AdminVersionedMediaResponse.class);
+            when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(mediaEntity, new ArrayList<>()))
+                .thenReturn(response);
+
+            assertThat(mediaRequestService.getMediaVersionsById(123))
+                .isEqualTo(response);
+            verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(mediaEntity, new ArrayList<>());
+
+
+            verify(mediaRequestService).getMediaEntityById(123);
+            verifyNoInteractions(mediaRepository);
+        }
+
+    }
+
 
     @NotNull
     private static HearingEntity createHearing() {
