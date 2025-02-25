@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -27,6 +26,7 @@ import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +42,6 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
-@Slf4j
 @AutoConfigureMockMvc
 class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
 
@@ -52,10 +51,10 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
-    public static final OffsetDateTime DATE_TIME = OffsetDateTime.parse("2023-06-26T13:00:00Z");
+    private static final OffsetDateTime DATE_TIME = OffsetDateTime.parse("2023-06-26T13:00:00Z");
 
     @Autowired
-    private transient MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
@@ -136,8 +135,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/testCaseOpen/expectedResponse.json");
-        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().toString());
-        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().toString());
+        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -178,9 +177,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/testCaseClosed/expectedResponse.json");
-        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().toString());
-        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().toString());
-        log.info("actualResponse: {}", actualResponse);
+        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -213,10 +211,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/testIsAnonymised/expectedResponse.json");
-        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().toString());
-        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().toString());
-        log.info("actualResponse: {}", actualResponse);
-        log.info("expectResponse: {}", expectedResponse);
+        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
