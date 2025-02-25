@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
+import uk.gov.hmcts.darts.audio.model.AdminVersionedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
@@ -70,6 +71,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private final CourthouseMapper courthouseMapper;
     private final CourtroomMapper courtroomMapper;
     private final ObjectActionMapper objectActionMapper;
+    private final GetAdminMediaResponseMapper getAdminMediaResponseMapper;
 
 
     @Value("${darts.audio.admin-search.max-results}")
@@ -80,13 +82,17 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     @Override
     public AdminMediaResponse getMediasById(Integer id) {
-        var mediaEntity = mediaRepository.findById(id)
-            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
+        var mediaEntity = getMediaEntityById(id);
 
         AdminMediaResponse adminMediaResponse = adminMediaMapper.toApiModel(mediaEntity);
         adminMediaResponse.getCases().sort((o1, o2) -> o2.getCaseNumber().compareTo(o1.getCaseNumber()));
         adminMediaResponse.getHearings().sort((o1, o2) -> o2.getCaseNumber().compareTo(o1.getCaseNumber()));
         return adminMediaResponse;
+    }
+
+    MediaEntity getMediaEntityById(Integer id) {
+        return mediaRepository.findById(id)
+            .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
     }
 
     @Override
@@ -224,6 +230,17 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
         auditApi.record(AuditActivity.MANUAL_DELETION, currentUser, objectAdminActionEntity.getId().toString());
 
-        return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
+        return getAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
+    }
+
+    @Override
+    public AdminVersionedMediaResponse getMediaVersionsById(Integer id) {
+        MediaEntity mediaEntity = getMediaEntityById(id);
+        List<MediaEntity> mediaVersions = new ArrayList<>();
+        //Only fetch versions if the media is part of a chronicle
+        if (mediaEntity.getChronicleId() != null) {
+            mediaVersions.addAll(mediaRepository.findAllByChronicleId(mediaEntity.getChronicleId()));
+        }
+        return getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(mediaEntity, mediaVersions);
     }
 }
