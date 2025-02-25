@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminMediaServiceImpl implements AdminMediaService {
 
     private final SearchMediaValidator searchMediaValidator;
@@ -273,13 +275,43 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     @Override
     public AdminVersionedMediaResponse getMediaVersionsById(Integer id) {
-        MediaEntity mediaEntity = getMediaEntityById(id);
-        List<MediaEntity> mediaVersions = new ArrayList<>();
-        //Only fetch versions if the media is part of a chronicle
-        if (mediaEntity.getChronicleId() != null) {
-            mediaVersions.addAll(mediaRepository.findAllByChronicleId(mediaEntity.getChronicleId()));
+        MediaEntity mediaEntityFromRequest = getMediaEntityById(id);
+
+        if (mediaEntityFromRequest.getChronicleId() == null) {
+            throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
+                                        "Media " + id + " has a Chronicle Id that is null. As such we can not ensure accurate results are returned");
         }
-        return getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(mediaEntity, mediaVersions);
+        List<MediaEntity> mediaVersions = mediaRepository.findAllByChronicleId(mediaEntityFromRequest.getChronicleId());
+
+
+        List<MediaEntity> currentMediaVersions = mediaVersions.stream()
+            .filter(mediaEntity -> mediaEntity.getIsCurrent() != null)
+            .filter(media -> media.getIsCurrent())
+            .sorted((o1, o2) -> o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime()))
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        List<MediaEntity> versionedMedia = mediaVersions.stream()
+            .filter(media -> media.getIsCurrent() == null || !media.getIsCurrent())
+            .sorted((o1, o2) -> o2.getCreatedDateTime().compareTo(o1.getCreatedDateTime()))
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        MediaEntity currentVersion;
+        if (currentMediaVersions.size() == 1) {
+            currentVersion = currentMediaVersions.getLast();
+        } else if (currentMediaVersions.size() == 0) {
+            currentVersion = null;
+            log.info("Media with id {} has {} current versions", id, currentMediaVersions.size());
+        } else {
+            log.warn("Media with id {} has {} current versions we only expect one", id, currentMediaVersions.size());
+            currentVersion = currentMediaVersions.getLast();
+            //Add any extra current events to top of versionedMedia so they still get displayed
+            currentMediaVersions.removeLast();
+            currentMediaVersions
+                .forEach(mediaEntity -> {
+                    versionedMedia.addFirst(mediaEntity);
+                });
+        }
+        return getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(currentVersion, versionedMedia);
     }
 
     private ApplyAdminActionComponent.AdminActionProperties mapToAdminActionProperties(AdminActionRequest adminActionRequest) {
