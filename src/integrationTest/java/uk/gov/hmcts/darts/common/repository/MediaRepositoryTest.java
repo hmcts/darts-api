@@ -42,6 +42,7 @@ public class MediaRepositoryTest extends PostgresIntegrationBase {
 
         @Test
         void shouldReturnEmptyList_whenThereAreNoOtherVersions() {
+            // Given
             final String chronicleIdForWhichNoRecordsExist = "0";
 
             // When

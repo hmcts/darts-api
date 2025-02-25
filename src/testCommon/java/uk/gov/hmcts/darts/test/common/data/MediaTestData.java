@@ -23,6 +23,42 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
 
     public static final byte[] MEDIA_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
 
+    @Override
+    public MediaEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestMediaEntity.TestMediaBuilderRetrieve someMinimalBuilderHolder() {
+        var builderRetrieve = new TestMediaEntity.TestMediaBuilderRetrieve();
+
+        UserAccountEntity someUser = PersistableFactory.getUserAccountTestData().someMinimal();
+
+        builderRetrieve.getBuilder()
+            .courtroom(PersistableFactory.getCourtroomTestData().someMinimal())
+            .channel(1)
+            .totalChannels(1)
+            .start(NOW)
+            .end(NOW.plusMinutes(1))
+            .createdDateTime(NOW)
+            .createdBy(someUser)
+            .lastModifiedDateTime(NOW)
+            .lastModifiedBy(someUser)
+            .mediaFile("a-media-file")
+            .mediaFormat("mp2")
+            .fileSize(1000L)
+            .mediaType(MEDIA_TYPE_DEFAULT)
+            .isHidden(false)
+            .isDeleted(false);
+
+        return builderRetrieve;
+    }
+
+    @Override
+    public TestMediaEntity.TestMediaEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
+    }
+
     /**
      * Deprecated.
      *
@@ -87,42 +123,6 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
     @Deprecated
     private String getChecksum() {
         return TestUtils.encodeToString(md5(MEDIA_TEST_DATA_BINARY_DATA));
-    }
-
-    @Override
-    public MediaEntity someMinimal() {
-        return someMinimalBuilder().build().getEntity();
-    }
-
-    @Override
-    public TestMediaEntity.TestMediaBuilderRetrieve someMinimalBuilderHolder() {
-        var builderRetrieve = new TestMediaEntity.TestMediaBuilderRetrieve();
-
-        UserAccountEntity someUser = PersistableFactory.getUserAccountTestData().someMinimal();
-
-        builderRetrieve.getBuilder()
-            .courtroom(PersistableFactory.getCourtroomTestData().someMinimal())
-            .channel(1)
-            .totalChannels(1)
-            .start(NOW)
-            .end(NOW.plusMinutes(1))
-            .createdDateTime(NOW)
-            .createdBy(someUser)
-            .lastModifiedDateTime(NOW)
-            .lastModifiedBy(someUser)
-            .mediaFile("a-media-file")
-            .mediaFormat("mp2")
-            .fileSize(1000L)
-            .mediaType(MEDIA_TYPE_DEFAULT)
-            .isHidden(false)
-            .isDeleted(false);
-
-        return builderRetrieve;
-    }
-
-    @Override
-    public TestMediaEntity.TestMediaEntityBuilder someMinimalBuilder() {
-        return someMinimalBuilderHolder().getBuilder();
     }
 
 }
