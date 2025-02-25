@@ -172,7 +172,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails) {
 
         var duplicateUserMediaRequests = mediaRequestRepository.findDuplicateUserMediaRequests(
-            hearingsService.getHearingById(audioRequestDetails.getHearingId()),
+            hearingsService.getHearingByIdWithValidation(audioRequestDetails.getHearingId()),
             userAccountRepository.getReferenceById(audioRequestDetails.getRequestor()),
             audioRequestDetails.getStartTime(),
             audioRequestDetails.getEndTime(),
@@ -187,7 +187,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public MediaRequestEntity saveAudioRequest(AudioRequestDetails request) {
         MediaRequestEntity mediaRequest = saveAudioRequestToDb(
-            hearingsService.getHearingById(request.getHearingId()),
+            hearingsService.getHearingByIdWithValidation(request.getHearingId()),
             userAccountRepository.getReferenceById(request.getRequestor()),
             request.getStartTime(),
             request.getEndTime(),
