@@ -45,7 +45,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseRetention;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefenceList;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefendantList;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createEventWith;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createProsecutorList;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createRetentionPolicyType;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
@@ -234,7 +233,7 @@ class CasesMapperTest {
     }
 
     @Test
-    void mapToAdminSingleCaseResponseItem_ReturnsMappedData() throws IOException {
+    void mapToAdminSingleCaseResponseItem_WithCaseOpen() throws IOException {
         // Given
         CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
@@ -242,26 +241,13 @@ class CasesMapperTest {
         CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 1);
         courtCase.setClosed(true);
 
-        HearingEntity hearingEntity = CommonTestDataUtil.createHearing(
+        CommonTestDataUtil.createHearing(
             courtCase, courtroomEntity, LocalDate.of(2023, Month.JULY, 7), true
         );
 
-        OffsetDateTime createdDateTime = courtCase.getCreatedDateTime();
         EventHandlerEntity reportingRestriction = new EventHandlerEntity();
         reportingRestriction.setEventName("test reporting restriction name");
-        createEventWith(
-            1, 1, "Event1", hearingEntity, reportingRestriction, createdDateTime, createdDateTime, false);
-        createEventWith(
-            2, 1, "Event2", hearingEntity, reportingRestriction, createdDateTime, createdDateTime.plusHours(1), true);
-
         courtCase.setReportingRestrictions(reportingRestriction);
-
-        var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
-        UserAccountEntity testUser = CommonTestDataUtil.createUserAccount();
-        CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
-        caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
-        when(caseRetentionRepository.findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(courtCase, String.valueOf(COMPLETE)))
-            .thenReturn(Optional.of(caseRetention));
 
         // When
         AdminSingleCaseResponseItem responseItem = caseMapper.mapToAdminSingleCaseResponseItem(courtCase);
@@ -271,12 +257,12 @@ class CasesMapperTest {
         log.info("actualResponse: {}", actualResponse);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponse.json");
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpen.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void mapToAdminSingleCaseResponseItem_ReturnsMappedDataWithReportingRestrictions() throws IOException {
+    void mapToAdminSingleCaseResponseItem_WithCaseClosed() throws IOException {
         // Given
         CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
@@ -284,18 +270,12 @@ class CasesMapperTest {
         CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 1);
         courtCase.setClosed(true);
 
-        HearingEntity hearingEntity = CommonTestDataUtil.createHearing(
+        CommonTestDataUtil.createHearing(
             courtCase, courtroomEntity, LocalDate.of(2023, Month.JULY, 7), true
         );
 
-        OffsetDateTime createdDateTime = courtCase.getCreatedDateTime();
         EventHandlerEntity reportingRestriction = new EventHandlerEntity();
         reportingRestriction.setEventName("test reporting restriction name");
-        createEventWith(
-            1, 1, "Event1", hearingEntity, reportingRestriction, createdDateTime, createdDateTime, false);
-        createEventWith(
-            2, 1, "Event2", hearingEntity, reportingRestriction, createdDateTime, createdDateTime.plusHours(1), true);
-
         courtCase.setReportingRestrictions(reportingRestriction);
 
         var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
@@ -313,7 +293,7 @@ class CasesMapperTest {
         log.info("actualResponse: {}", actualResponse);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponse.json");
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseClosed.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 }

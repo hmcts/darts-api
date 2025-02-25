@@ -75,15 +75,11 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
 
         JudgeEntity judge = createJudgeWithName("aJudge");
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
-
         HearingEntity hearing1a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 20), judge);
-
         HearingEntity hearing1b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 21), judge);
-
         HearingEntity hearing1c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 22), judge);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c);
-
         EventEntity event1 = createEventWith("eventName", "event1", hearing1a, OffsetDateTime.now());
         dartsDatabase.save(event1);
     }

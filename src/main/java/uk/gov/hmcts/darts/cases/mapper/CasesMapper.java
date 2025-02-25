@@ -165,7 +165,6 @@ public class CasesMapper {
         return singleCase;
     }
 
-    @Transactional
     public AdminSingleCaseResponseItem mapToAdminSingleCaseResponseItem(CourtCaseEntity courtCase) {
         AdminSingleCaseResponseItem adminCase = new AdminSingleCaseResponseItem();
 
