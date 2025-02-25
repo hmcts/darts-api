@@ -166,8 +166,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
         assertFalse(persistedEod.isUpdateRetention());
         assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
 
@@ -222,8 +220,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
         assertFalse(persistedEod.isUpdateRetention());
         assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
 
@@ -285,8 +281,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", armEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
         assertFalse(persistedEod.isUpdateRetention());
         assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
 
@@ -358,8 +352,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
         assertFalse(persistedEod.isUpdateRetention());
         assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
 
@@ -413,8 +405,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", persistedEod.getEventDateTs());
-        log.info("Retention date time {}", RETENTION_DATE_TIME);
         assertFalse(persistedEod.isUpdateRetention());
         assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
 
@@ -470,8 +460,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
         assertTrue(persistedEod.isUpdateRetention());
 
         verify(armApiClient, times(0)).updateMetadata(notNull(), notNull());
@@ -513,8 +501,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
         assertTrue(persistedEod.isUpdateRetention());
 
         verify(armApiClient, times(0)).updateMetadata(notNull(), notNull());
