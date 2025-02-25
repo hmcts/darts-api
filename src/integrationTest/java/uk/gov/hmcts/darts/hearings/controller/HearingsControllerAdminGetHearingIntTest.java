@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,10 +72,12 @@ class HearingsControllerAdminGetHearingIntTest extends IntegrationBase {
         hearingEntity = dartsPersistence.save(hearing);
     }
 
-    @Test
-    void adminGetHearing_usingAValidHearingId_shouldReturnCorrectData() throws Exception {
+    @ParameterizedTest(name = "Hearing is actual: {0}")
+    @ValueSource(booleans = {true, false})
+    void adminGetHearing_usingAValidHearingId_shouldReturnCorrectData(boolean hearingIsActual) throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
-
+        hearingEntity.setHearingIsActual(hearingIsActual);
+        dartsPersistence.save(hearingEntity);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
@@ -82,7 +86,7 @@ class HearingsControllerAdminGetHearingIntTest extends IntegrationBase {
             {
                 "id": 1,
                 "hearing_date": "2023-01-01",
-                "hearing_is_actual": true,
+                "hearing_is_actual": <hearing_is_actual>,
                 "courtroom": {
                     "id": 1,
                     "name": "ROOM"
@@ -118,7 +122,8 @@ class HearingsControllerAdminGetHearingIntTest extends IntegrationBase {
             """
             .replace("<courthouse>", hearingEntity.getCourtroom().getCourthouse().getDisplayName())
             .replace("<created_at>", hearingEntity.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
-            .replace("<last_modified_at>", hearingEntity.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+            .replace("<last_modified_at>", hearingEntity.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replaceAll("<hearing_is_actual>", String.valueOf(hearingIsActual));
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 

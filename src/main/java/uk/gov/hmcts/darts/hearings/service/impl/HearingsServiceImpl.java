@@ -107,24 +107,24 @@ public class HearingsServiceImpl implements HearingsService {
     @Override
     public void removeMediaLinkToHearing(Integer courtCaseId) {
         hearingRepository.findByCaseIdWithMediaList(courtCaseId)
-            .ifPresent(hearing ->
-                           hearing.getMediaList().forEach(media -> {
-                               // Check all cases linked to a hearing have been expired/anonymised
-                               if (!mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(media)) {
-                                   log.info(
-                                       "Media {} link not removed for case id {} as not all associated cases are expired",
-                                       media.getId(), courtCaseId);
-                               } else {
-                                   hearingRepository.findHearingIdsByMediaId(media.getId()).forEach(
-                                       hearingForMedia -> {
-                                           hearingForMedia.setMediaList(null);
-                                           hearingRepository.save(hearingForMedia);
-                                           log.info(
-                                               "Media id {} link removed for hearing id {} on the expiry of case id {}",
-                                               media.getId(), hearingForMedia.getId(), courtCaseId);
-                                       });
-                               }
-                           })
+            .ifPresent(hearing -> hearing.getMediaList()
+                .forEach(media -> {
+                    // Check all cases linked to a hearing have been expired/anonymised
+                    if (!mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(media)) {
+                        log.info(
+                            "Media {} link not removed for case id {} as not all associated cases are expired",
+                            media.getId(), courtCaseId);
+                    } else {
+                        hearingRepository.findHearingIdsByMediaId(media.getId()).forEach(
+                            hearingForMedia -> {
+                                hearingForMedia.setMediaList(null);
+                                hearingRepository.save(hearingForMedia);
+                                log.info(
+                                    "Media id {} link removed for hearing id {} on the expiry of case id {}",
+                                    media.getId(), hearingForMedia.getId(), courtCaseId);
+                            });
+                    }
+                })
             );
     }
 
