@@ -330,34 +330,29 @@ public class TranscriptionResponseMapper {
         transformedMediaDetails.isHidden(transcriptionDocumentResponse.isHidden());
 
         // prioritise the case from the hearing
-        if (transcriptionDocumentResponse.hearingCaseId() != null) {
+        if (transcriptionDocumentResponse.hearingCaseNumber() != null) {
             SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
-            caseResponse.setId(transcriptionDocumentResponse.hearingCaseId());
             caseResponse.setCaseNumber(transcriptionDocumentResponse.hearingCaseNumber());
             transformedMediaDetails.setCase(caseResponse);
         } else {
             SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
-            caseResponse.setId(transcriptionDocumentResponse.caseId());
             caseResponse.setCaseNumber(transcriptionDocumentResponse.caseNumber());
             transformedMediaDetails.setCase(caseResponse);
         }
 
         // prioritise the courthouse that is connected to the hearing
-        if (transcriptionDocumentResponse.hearingCourthouseId() != null) {
+        if (transcriptionDocumentResponse.hearingCourthouseDisplayName() != null) {
             SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
-            courthouseResponse.setId(transcriptionDocumentResponse.hearingCourthouseId());
             courthouseResponse.setDisplayName(transcriptionDocumentResponse.hearingCourthouseDisplayName());
             transformedMediaDetails.setCourthouse(courthouseResponse);
         } else {
             SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
-            courthouseResponse.setId(transcriptionDocumentResponse.courthouseId());
             courthouseResponse.setDisplayName(transcriptionDocumentResponse.courthouseDisplayName());
             transformedMediaDetails.setCourthouse(courthouseResponse);
         }
 
-        if (transcriptionDocumentResponse.hearingId() != null) {
+        if (transcriptionDocumentResponse.hearingDate() != null) {
             SearchTranscriptionDocumentResponseHearing hearingResponse = new SearchTranscriptionDocumentResponseHearing();
-            hearingResponse.setId(transcriptionDocumentResponse.hearingId());
             hearingResponse.setHearingDate(transcriptionDocumentResponse.hearingDate());
             transformedMediaDetails.setHearing(hearingResponse);
         }
