@@ -1,12 +1,23 @@
 package uk.gov.hmcts.darts.arm.util;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ArmRpoUtilTest {
 
-    private final ArmRpoUtil armRpoUtil = new ArmRpoUtil();
+    @Mock
+    private ArmRpoService armRpoService;
+
+    private ArmRpoUtil armRpoUtil;
+
+    @BeforeEach
+    void setUp() {
+        armRpoUtil = new ArmRpoUtil(armRpoService);
+    }
 
     @Test
     void generateUniqueProductionName_shouldAppendCsvExtension() {
