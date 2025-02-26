@@ -104,12 +104,10 @@ public class TranscriptionResponseMapper {
         List<TranscriptionCommentEntity> migratedTranscriptionComments
     ) {
 
-        List<GetTranscriptionWorkflowsResponse> result = new ArrayList<>();
-
         List<GetTranscriptionWorkflowsResponse> responseFromTranscriptionWorkflows = transcriptionWorkflowEntities.stream()
             .map(this::mapToTranscriptionWorkflows)
             .toList();
-        result.addAll(responseFromTranscriptionWorkflows);
+        List<GetTranscriptionWorkflowsResponse> result = new ArrayList<>(responseFromTranscriptionWorkflows);
 
         var responseFromMigratedComments = migratedTranscriptionComments.stream().map(this::mapMigratedCommentToTranscriptionWorkflows).toList();
         result.addAll(responseFromMigratedComments);
@@ -203,7 +201,7 @@ public class TranscriptionResponseMapper {
             transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
         if (CollectionUtils.isNotEmpty(transcriptionEntity.getHearings())) {
-            HearingEntity hearing = transcriptionEntity.getHearings().get(0);
+            HearingEntity hearing = transcriptionEntity.getHearings().getFirst();
             transcriptionResponse.setHearingId(hearing.getId());
             transcriptionResponse.setHearingDate(hearing.getHearingDate());
         } else {
@@ -330,26 +328,22 @@ public class TranscriptionResponseMapper {
         transformedMediaDetails.isHidden(transcriptionDocumentResponse.isHidden());
 
         // prioritise the case from the hearing
+        SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
         if (transcriptionDocumentResponse.hearingCaseNumber() != null) {
-            SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
             caseResponse.setCaseNumber(transcriptionDocumentResponse.hearingCaseNumber());
-            transformedMediaDetails.setCase(caseResponse);
         } else {
-            SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
             caseResponse.setCaseNumber(transcriptionDocumentResponse.caseNumber());
-            transformedMediaDetails.setCase(caseResponse);
         }
+        transformedMediaDetails.setCase(caseResponse);
 
         // prioritise the courthouse that is connected to the hearing
+        SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
         if (transcriptionDocumentResponse.hearingCourthouseDisplayName() != null) {
-            SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
             courthouseResponse.setDisplayName(transcriptionDocumentResponse.hearingCourthouseDisplayName());
-            transformedMediaDetails.setCourthouse(courthouseResponse);
         } else {
-            SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
             courthouseResponse.setDisplayName(transcriptionDocumentResponse.courthouseDisplayName());
-            transformedMediaDetails.setCourthouse(courthouseResponse);
         }
+        transformedMediaDetails.setCourthouse(courthouseResponse);
 
         if (transcriptionDocumentResponse.hearingDate() != null) {
             SearchTranscriptionDocumentResponseHearing hearingResponse = new SearchTranscriptionDocumentResponseHearing();
@@ -401,7 +395,7 @@ public class TranscriptionResponseMapper {
             return null;
         }
 
-        var action = entity.getAdminActions().get(0); // assume only 1 exists
+        var action = entity.getAdminActions().getFirst(); // assume only 1 exists
         return new AdminAction()
             .comments(action.getComments())
             .id(action.getId())
@@ -463,7 +457,7 @@ public class TranscriptionResponseMapper {
 
         AdminAction adminAction = buildAdminAction(transcriptionDocumentEntity);
 
-        // if the hearing is null then dont read any associated information
+        // if the hearing is null then don't read any associated information
         if (transcriptionDocumentEntity.getTranscription().getHearing() != null) {
             CaseResponseDetails caseResponseDetails = new CaseResponseDetails();
             caseResponseDetails.setId(transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getId());

@@ -24,13 +24,13 @@ public class AzureCopyUtil {
             var startTime = Instant.now();
             log.info("Copy of blob started at {}", startTime);
             builder.redirectErrorStream(true);
-            Process p = builder.start();
-            int exitValue = p.waitFor();
+            Process process = builder.start();
+            int exitValue = process.waitFor();
             var endTime = Instant.now();
             log.info("Copy of blob completed at {}. Total duration in seconds: {}. Exit value: {}",
                      endTime, Duration.between(startTime, endTime).getSeconds(), exitValue);
             if (exitValue != 0) {
-                String result = new String(p.getInputStream().readAllBytes());
+                String result = new String(process.getInputStream().readAllBytes());
                 String errorMessage = String.format(
                     "Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Command: '%s'. Result: %s",
                     source,
