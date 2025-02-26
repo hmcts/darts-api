@@ -12,8 +12,7 @@ import java.time.ZoneOffset;
 
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
-
-public class DailyListTestData {
+public final class DailyListTestData {
 
     private DailyListTestData() {
     }

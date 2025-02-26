@@ -323,7 +323,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                 .getTranscription()
                 .getTranscriptionCommentEntities()
                 .stream()
-                .filter(transcriptionComment -> isTranscriptionCommentRequested(transcriptionComment))
+                .filter(this::isTranscriptionCommentRequested)
                 .findFirst();
             if (transcriptionCommentEntity.isPresent()) {
                 comments = transcriptionCommentEntity.get().getComment();

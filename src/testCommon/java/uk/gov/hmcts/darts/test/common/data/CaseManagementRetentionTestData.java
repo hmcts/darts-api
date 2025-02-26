@@ -6,7 +6,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.someMinimalEvent
 import static uk.gov.hmcts.darts.test.common.data.RetentionPolicyTypeTestData.someMinimalRetentionPolicyType;
 
 
-public class CaseManagementRetentionTestData {
+public final class CaseManagementRetentionTestData {
 
     private CaseManagementRetentionTestData() {
     }

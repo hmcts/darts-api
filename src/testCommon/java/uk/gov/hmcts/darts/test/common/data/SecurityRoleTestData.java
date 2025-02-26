@@ -5,7 +5,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 
-public class SecurityRoleTestData {
+public final class SecurityRoleTestData {
     private SecurityRoleTestData() {
 
     }

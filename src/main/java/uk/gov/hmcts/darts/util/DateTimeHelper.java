@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.util;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class DateTimeHelper {
+public final class DateTimeHelper {
 
     private DateTimeHelper() {
         // Default

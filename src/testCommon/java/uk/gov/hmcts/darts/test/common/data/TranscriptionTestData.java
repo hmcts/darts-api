@@ -13,7 +13,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-public class TranscriptionTestData
+public final class TranscriptionTestData
     implements Persistable<TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve, TranscriptionEntity,
     TestTranscriptionEntity.TestTranscriptionEntityBuilder> {
 
