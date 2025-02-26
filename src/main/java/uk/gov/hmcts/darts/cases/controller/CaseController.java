@@ -107,7 +107,7 @@ public class CaseController implements CasesApi {
     ) {
         validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom());
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber()))
+            .caseNumber(advancedSearchRequest.getCaseNumber())
             .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
             .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
             .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
