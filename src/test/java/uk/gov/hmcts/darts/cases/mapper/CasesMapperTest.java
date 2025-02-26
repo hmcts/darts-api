@@ -233,7 +233,32 @@ class CasesMapperTest {
     }
 
     @Test
-    void mapToAdminSingleCaseResponseItem_WithCaseOpen() throws IOException {
+    void mapToAdminSingleCaseResponseItem_WithCaseOpenNullReportingRestrictions() throws IOException {
+        // Given
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
+
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+        courtCase.setClosed(true);
+
+        CommonTestDataUtil.createHearing(
+            courtCase, courtroomEntity, LocalDate.of(2023, Month.JULY, 7), true
+        );
+
+        // When
+        AdminSingleCaseResponseItem responseItem = caseMapper.mapToAdminSingleCaseResponseItem(courtCase);
+
+        // Then
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(responseItem);
+        log.info("actualResponse: {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpenNullRestrictions.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void mapToAdminSingleCaseResponseItem_WithCaseOpenDefaultReporting() throws IOException {
         // Given
         CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
@@ -257,7 +282,7 @@ class CasesMapperTest {
         log.info("actualResponse: {}", actualResponse);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpen.json");
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpenDefaultRestrictions.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
