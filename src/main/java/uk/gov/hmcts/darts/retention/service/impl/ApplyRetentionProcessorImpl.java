@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -32,18 +33,24 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
     @Override
     public void processApplyRetention(Integer batchSize) {
-        List<CaseRetentionEntity> caseRetentionEntities =
+        List<Integer> caseRetentionEntitiesIds =
             caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minus(pendingRetentionDuration),
                                                          Limit.of(batchSize));
-        processList(caseRetentionEntities);
+        processList(caseRetentionEntitiesIds);
 
     }
 
-    protected void processList(List<CaseRetentionEntity> caseRetentionEntities) {
+    protected void processList(List<Integer> caseRetentionEntitiesIds) {
         Set<Integer> processedCases = new HashSet<>();
 
         //List is ordered in createdDateTime desc order
-        for (CaseRetentionEntity caseRetentionEntity : caseRetentionEntities) {
+        for (Integer caseRetentionEntitiesId : caseRetentionEntitiesIds) {
+            Optional<CaseRetentionEntity> caseRetentionEntityOpt = caseRetentionRepository.findById(caseRetentionEntitiesId);
+            if (caseRetentionEntityOpt.isEmpty()) {
+                log.error("CaseRetentionEntity with id {} not found", caseRetentionEntitiesId);
+                continue;
+            }
+            CaseRetentionEntity caseRetentionEntity = caseRetentionEntityOpt.get();
             CourtCaseEntity courtCaseEntity = caseRetentionEntity.getCourtCase();
             if (processedCases.contains(courtCaseEntity.getId())) {
                 caseRetentionEntity.setCurrentState(CaseRetentionStatus.IGNORED.name());
