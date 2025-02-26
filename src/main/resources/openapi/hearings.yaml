@@ -215,6 +215,32 @@ paths:
           description: Unauthorised Error
         '403':
           description: Forbidden Error
+  /admin/hearings/{id}:
+    get:
+      tags:
+        - Hearings
+      summary: |-
+        Return details of a hearing
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HearingsResponse'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
 
 components:
   schemas:
@@ -304,6 +330,89 @@ components:
           type: string
           format: date
           example: '2023-07-31'
+
+    HearingsResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        hearing_date:
+          type: string
+          format: date
+          example: '2023-07-31'
+        scheduled_start_time:
+          type: string
+          format: time
+          example: '10:00:00'
+        hearing_is_actual:
+          type: boolean
+          example: true
+        case:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: 'The case id'
+            case_number:
+              type: string
+              description: 'The case number'
+            courthouse:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: 'The court house id'
+                display_name:
+                  type: string
+                  description: 'The court house display name'
+            defendants:
+              type: array
+              items:
+                type: string
+                example: Joe Bloggs
+            prosecutors:
+              type: array
+              items:
+                type: string
+                example: Joe Bloggs
+            defenders:
+              type: array
+              items:
+                type: string
+                example: Joe Bloggs
+            judges:
+              type: array
+              items:
+                type: string
+                example: Joe Bloggs
+        courtroom:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: 'The court house id'
+            name:
+              type: string
+              description: 'The court house display name'
+        judges:
+          type: array
+          items:
+            type: string
+            example: Joe Bloggs
+        created_at:
+          type: string
+          format: date-time
+          example: '2023-07-31T14:32:24.620Z'
+        created_by:
+          type: integer
+          example: 0
+        last_modified_at:
+          type: string
+          format: date-time
+          example: '2023-07-31T14:32:24.620Z'
+        last_modified_by:
+          type: integer
+          example: 0
     HearingsSearchResponse:
       type: object
       properties:
