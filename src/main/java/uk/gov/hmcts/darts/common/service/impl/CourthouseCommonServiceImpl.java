@@ -20,7 +20,7 @@ public class CourthouseCommonServiceImpl implements CourthouseCommonService {
 
     @Override
     public CourthouseEntity retrieveCourthouse(String courthouseName) {
-        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trim(courthouseName));
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToNull(courthouseName));
         Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(courthouseNameUpperTrimmed);
         if (foundCourthouse.isEmpty()) {
             String message = MessageFormat.format("Courthouse ''{0}'' not found.", courthouseNameUpperTrimmed);
