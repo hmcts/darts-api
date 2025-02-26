@@ -156,9 +156,9 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     )
                 )
                 AND tra.is_current = true
-                                
+                
                 UNION
-
+                
                 -- Your work > Completed today (transcriber-view?assigned=true)
                 SELECT
                     tra.tra_id as transcription_id,
@@ -279,8 +279,8 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
             JOIN darts.court_case court_case ON case_transcription.cas_id = court_case.cas_id
             JOIN darts.courthouse courthouse ON courthouse.cth_id=court_case.cth_id
             JOIN (""";
-            sql += workflowSubQuery;
-            sql += """
+        sql += workflowSubQuery;
+        sql += """
             ) trw ON trw.tra_id = transcription.tra_id
             WHERE court_case.cth_id IN (:cth_ids)
             AND transcription.trs_id=:trs_id

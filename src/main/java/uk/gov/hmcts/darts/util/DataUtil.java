@@ -7,6 +7,8 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 public final class DataUtil {
     private DataUtil() {
 
@@ -17,7 +19,7 @@ public final class DataUtil {
     }
 
     public static List<String> trim(List<String> list) {
-        if (list == null) {
+        if (isNull(list)) {
             return null;
         }
         return list.stream()

@@ -6,7 +6,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-public class CommonTestData {
+public final class CommonTestData {
 
     private CommonTestData() {
 

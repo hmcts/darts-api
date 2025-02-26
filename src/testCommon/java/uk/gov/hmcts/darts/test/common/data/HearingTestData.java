@@ -18,7 +18,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class HearingTestData
+public final class HearingTestData
     implements Persistable<TestHearingEntity.TestHearingEntityBuilderRetrieve, HearingEntity, TestHearingEntity.TestHearingEntityBuilder> {
 
     HearingTestData() {
@@ -87,7 +87,7 @@ public class HearingTestData
 
 
     public HearingEntity createHearingWithDefaults(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate, JudgeEntity judge,
-                                                          boolean isHearingActual) {
+                                                   boolean isHearingActual) {
         HearingEntity hearing = someMinimalHearing();
         hearing.setCourtCase(Objects.requireNonNullElseGet(courtCase, () -> PersistableFactory.getCourtCaseTestData().someMinimal()));
 

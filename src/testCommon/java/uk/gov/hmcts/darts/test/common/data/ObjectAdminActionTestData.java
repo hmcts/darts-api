@@ -6,7 +6,7 @@ import static java.time.OffsetDateTime.now;
 import static uk.gov.hmcts.darts.test.common.data.ObjectHiddenReasonTestData.publicInterestImmunity;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class ObjectAdminActionTestData {
+public final class ObjectAdminActionTestData {
 
     private ObjectAdminActionTestData() {
 

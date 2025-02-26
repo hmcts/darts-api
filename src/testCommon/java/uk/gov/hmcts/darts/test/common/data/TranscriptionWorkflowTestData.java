@@ -12,12 +12,12 @@ import java.util.ArrayList;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class TranscriptionWorkflowTestData implements Persistable<
+public final class TranscriptionWorkflowTestData implements Persistable<
     TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilderRetrieve,
     TranscriptionWorkflowEntity, TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder> {
 
     public static final OffsetDateTime WORKFLOW_TIMESTAMP = OffsetDateTime.of(2025, 1, 10, 10,
-                                                                      0, 0, 0, ZoneOffset.UTC);
+                                                                              0, 0, 0, ZoneOffset.UTC);
 
     TranscriptionWorkflowTestData() {
 
