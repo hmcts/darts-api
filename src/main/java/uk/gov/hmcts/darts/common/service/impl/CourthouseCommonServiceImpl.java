@@ -20,10 +20,10 @@ public class CourthouseCommonServiceImpl implements CourthouseCommonService {
 
     @Override
     public CourthouseEntity retrieveCourthouse(String courthouseName) {
-        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(courthouseNameUC);
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trim(courthouseName));
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(courthouseNameUpperTrimmed);
         if (foundCourthouse.isEmpty()) {
-            String message = MessageFormat.format("Courthouse ''{0}'' not found.", courthouseNameUC);
+            String message = MessageFormat.format("Courthouse ''{0}'' not found.", courthouseNameUpperTrimmed);
             throw new DartsApiException(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST, message);
         }
         return foundCourthouse.get();
