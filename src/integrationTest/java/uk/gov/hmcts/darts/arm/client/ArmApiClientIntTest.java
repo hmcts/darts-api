@@ -35,7 +35,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @TestPropertySource(properties = {
     "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
-@SuppressWarnings("PMD.CloseResource")
 class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
@@ -162,11 +161,12 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
                         .withStatus(200)));
 
         // When
-        feign.Response response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+        try (feign.Response response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
-        //Then
-        InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integrationTest/resources/wiremock/__files/testAudio.mp3"));
-        assertTrue(IOUtils.contentEquals(response.body().asInputStream(), expectedInputStream));
+            //Then
+            InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integrationTest/resources/wiremock/__files/testAudio.mp3"));
+            assertTrue(IOUtils.contentEquals(response.body().asInputStream(), expectedInputStream));
+        }
     }
 
     private String formatDateTime(OffsetDateTime offsetDateTime) {
