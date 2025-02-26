@@ -252,7 +252,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public AdminSingleCaseResponseItem adminGetCaseById(Integer caseId) {
         CourtCaseEntity caseEntity = getCourtCaseById(caseId);
         return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity);
