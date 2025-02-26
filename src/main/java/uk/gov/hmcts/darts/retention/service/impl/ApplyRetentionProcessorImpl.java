@@ -40,6 +40,8 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
     }
 
+
+    @SuppressWarnings("java:S135")//Required to ensure we continue processing the list even if one of the elements fails
     protected void processList(List<Integer> caseRetentionEntitiesIds) {
         Set<Integer> processedCases = new HashSet<>();
 
