@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +28,15 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
     @Override
     public void processApplyRetentionToCaseAssociatedObjects(Integer batchSize) {
 
-        var cases = findCasesNeedingRetentionAppliedToAssociatedObjects(batchSize);
+        var casesIds = findCasesNeedingRetentionAppliedToAssociatedObjects(batchSize);
 
-        for (var courtCase : cases) {
+        for (var courtCaseId : casesIds) {
+            Optional<CourtCaseEntity> courtCaseOpt = caseRepository.findById(courtCaseId);
+            if(courtCaseOpt.isEmpty()){
+                log.error("Case with id '{}' not found", courtCaseId);
+                continue;
+            }
+            CourtCaseEntity courtCase = courtCaseOpt.get();
             courtCase.setRetentionUpdated(false);
             courtCase.setLastModifiedBy(userIdentity.getUserAccount());
             caseRepository.save(courtCase);
@@ -45,8 +52,8 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
         }
     }
 
-    private List<CourtCaseEntity> findCasesNeedingRetentionAppliedToAssociatedObjects(Integer batchSize) {
-        return caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(maxRetentionRetries, Limit.of(batchSize));
+    private List<Integer> findCasesNeedingRetentionAppliedToAssociatedObjects(Integer batchSize) {
+        return caseRepository.findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(maxRetentionRetries, Limit.of(batchSize));
     }
 
 }
