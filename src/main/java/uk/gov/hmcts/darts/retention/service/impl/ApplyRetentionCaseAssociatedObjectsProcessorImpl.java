@@ -32,7 +32,7 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
 
         for (var courtCaseId : casesIds) {
             Optional<CourtCaseEntity> courtCaseOpt = caseRepository.findById(courtCaseId);
-            if(courtCaseOpt.isEmpty()){
+            if (courtCaseOpt.isEmpty()) {
                 log.error("Case with id '{}' not found", courtCaseId);
                 continue;
             }
