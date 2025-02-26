@@ -82,9 +82,6 @@ class CaseServiceImplTest {
 
     private CaseServiceImpl caseService;
 
-    private CasesMapper casesMapper;
-    private CasesAnnotationMapper annotationMapper;
-
     @Mock
     private CaseRepository caseRepository;
 
@@ -122,15 +119,15 @@ class CaseServiceImplTest {
     private LogApi logApi;
     private ObjectMapper objectMapper;
 
-    @Mock
-    private CaseTranscriptionMapper caseTranscriptionMapper;
 
     @BeforeEach
     void setUp() {
         Pattern unallocatedCaseRegex = Pattern.compile(".*\\d{8}-\\d{6}.*");
-        casesMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi, logApi,
-                                      unallocatedCaseRegex);
+        CasesMapper casesMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi,
+                                                  logApi,
+                                                  unallocatedCaseRegex);
 
+        CasesAnnotationMapper annotationMapper = new CasesAnnotationMapper();
         caseService = new CaseServiceImpl(
             casesMapper,
             annotationMapper,
@@ -563,7 +560,7 @@ class CaseServiceImplTest {
         assertEquals(2, result.getDefenders().size());
         assertEquals(0, result.getReportingRestrictions().size());
         assertEquals(Boolean.FALSE, result.getIsDataAnonymised());
-        
+
         verify(caseRepository, times(1)).findById(1);
     }
 
