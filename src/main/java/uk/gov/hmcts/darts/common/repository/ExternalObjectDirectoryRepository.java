@@ -516,133 +516,99 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         AND eod.updateRetention = :updateRetention
         """)
     List<Integer> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                                     boolean updateRetention, Limit limit);
-
+                                                               boolean updateRetention, Limit limit);
 
     List<ExternalObjectDirectoryEntity> findByManifestFile(String manifestName);
 
     @Query("""
-        SELECT eod
-        FROM ExternalObjectDirectoryEntity
-        eod
-        JOIN TranscriptionDocumentEntity
-        t ON
-        eod.transcriptionDocumentEntity =t
-        WHERE t.retainUntilTs< :maxRetentionDate
-        AND t.isDeleted =false
-        AND eod.
-        
-        externalLocationType.id in(1,2,3)
-        
-        AND EXISTS(
-            SELECT 1 FROM ExternalObjectDirectoryEntity eod2
-                WHERE eod2.externalLocationType.id=3
-                AND eod2.status.id=2
-                AND eod2.transcriptionDocumentEntity=eod.transcriptionDocumentEntity
-        )
+               SELECT eod
+               FROM ExternalObjectDirectoryEntity eod
+               JOIN TranscriptionDocumentEntity t ON eod.transcriptionDocumentEntity = t
+               WHERE t.retainUntilTs < :maxRetentionDate
+               AND t.isDeleted = false
+               AND eod.externalLocationType.id in (1,2,3)
+               AND EXISTS (
+                SELECT 1 FROM ExternalObjectDirectoryEntity eod2
+                WHERE eod2.externalLocationType.id = 3
+                AND eod2.status.id = 2
+                AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
+               )
         """)
     List<ExternalObjectDirectoryEntity> findExpiredTranscriptionDocuments(OffsetDateTime maxRetentionDate,
                                                                           Limit batchSize);
 
     @Query("""
-        SELECT eod
-        FROM ExternalObjectDirectoryEntity
-        eod
-        JOIN AnnotationDocumentEntity
-        a ON
-        eod.annotationDocumentEntity =a
-        WHERE a.retainUntilTs< :maxRetentionDate
-        AND a.isDeleted =false
-        AND eod.
-        
-        externalLocationType.id in(1,2,3)
-        
-        AND EXISTS(
-            SELECT 1 FROM ExternalObjectDirectoryEntity eod2
-                WHERE eod2.externalLocationType.id=3
-                AND eod2.status.id=2
-                AND eod2.annotationDocumentEntity=eod.annotationDocumentEntity
-        )
+               SELECT eod
+               FROM ExternalObjectDirectoryEntity eod
+               JOIN AnnotationDocumentEntity a ON eod.annotationDocumentEntity = a
+               WHERE a.retainUntilTs < :maxRetentionDate
+               AND a.isDeleted = false
+               AND eod.externalLocationType.id in (1,2,3)
+               AND EXISTS (
+                SELECT 1 FROM ExternalObjectDirectoryEntity eod2
+                WHERE eod2.externalLocationType.id = 3
+                AND eod2.status.id = 2
+                AND eod2.annotationDocumentEntity = eod.annotationDocumentEntity
+               )
         """)
     List<ExternalObjectDirectoryEntity> findExpiredAnnotationDocuments(OffsetDateTime maxRetentionDate, Limit batchSize);
 
     @Query("""
-        SELECT eod
-        FROM ExternalObjectDirectoryEntity
-        eod
-        JOIN CaseDocumentEntity
-        c ON
-        eod.caseDocument =c
-        WHERE c.retainUntilTs< :maxRetentionDate
-        AND c.isDeleted =false
-        AND eod.
-        
-        externalLocationType.id in(1,2,3)
-        
-        AND EXISTS(
-            SELECT 1 FROM ExternalObjectDirectoryEntity eod2
-                WHERE eod2.externalLocationType.id=3
-                AND eod2.status.id=2
-                AND eod2.caseDocument=eod.caseDocument
-        )
+               SELECT eod
+               FROM ExternalObjectDirectoryEntity eod
+               JOIN CaseDocumentEntity c ON eod.caseDocument = c
+               WHERE c.retainUntilTs < :maxRetentionDate
+               AND c.isDeleted = false
+               AND eod.externalLocationType.id in (1,2,3)
+               AND EXISTS (
+                SELECT 1 FROM ExternalObjectDirectoryEntity eod2
+                WHERE eod2.externalLocationType.id = 3
+                AND eod2.status.id = 2
+                AND eod2.caseDocument = eod.caseDocument
+               )
         """)
     List<ExternalObjectDirectoryEntity> findExpiredCaseDocuments(OffsetDateTime maxRetentionDate, Limit batchSize);
 
     @Query("""
-        SELECT eod
-        FROM ExternalObjectDirectoryEntity
-        eod
-        JOIN MediaEntity
-        m ON
-        eod.media =m
-        WHERE m.retainUntilTs< :maxRetentionDate
-        AND m.isDeleted =false
-        AND eod.
-        
-        externalLocationType.id in(1,2,3)
-        
-        AND EXISTS(
-            SELECT 1 FROM ExternalObjectDirectoryEntity eod2
-                WHERE eod2.externalLocationType.id=3
-                AND eod2.status.id=2
-                AND eod2.media=eod.media
-        )
+               SELECT eod
+               FROM ExternalObjectDirectoryEntity eod
+               JOIN MediaEntity m ON eod.media = m
+               WHERE m.retainUntilTs < :maxRetentionDate
+               AND m.isDeleted = false
+               AND eod.externalLocationType.id in (1,2,3)
+               AND EXISTS (
+                SELECT 1 FROM ExternalObjectDirectoryEntity eod2
+                WHERE eod2.externalLocationType.id = 3
+                AND eod2.status.id = 2
+                AND eod2.media = eod.media
+               )
         """)
     List<ExternalObjectDirectoryEntity> findExpiredMediaEntries(OffsetDateTime maxRetentionDate, Limit batchSize);
 
     @Query("""
-        SELECT eod
-        FROM ExternalObjectDirectoryEntity
-        eod
-        WHERE eod.media.id =:mediaId
-        AND eod.status.id =2
-        AND eod.
-        
-        externalLocationType.id IN(1,2)
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
+                WHERE eod.media.id = :mediaId
+                AND eod.status.id = 2
+                AND eod.externalLocationType.id IN (1, 2)
         """)
     List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByMediaId(@Param("mediaId") Integer mediaId);
 
     @Query("""
-        SELECT eod
-        FROM ExternalObjectDirectoryEntity
-        eod
-        WHERE eod.transcriptionDocumentEntity.id =:transcriptionDocumentId
-        AND eod.status.id =2
-        AND eod.
-        
-        externalLocationType.id IN(1,2)
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
+                WHERE eod.transcriptionDocumentEntity.id = :transcriptionDocumentId
+                AND eod.status.id = 2
+                AND eod.externalLocationType.id IN (1, 2)
         """)
     List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByTranscriptionId(@Param("transcriptionDocumentId") Integer id);
 
     @Modifying
     @Query("""
-        update ExternalObjectDirectoryEntity
-        eod
-        set eod.status =:newStatus,
-        eod.lastModifiedBy =:currentUser,
-        eod.lastModifiedDateTime =current_timestamp
-        where eod.status =:currentStatus
-        and eod.dataIngestionTs <=:maxDataIngestionTs
+        update ExternalObjectDirectoryEntity eod
+        set eod.status = :newStatus,
+            eod.lastModifiedBy = :currentUser,
+            eod.lastModifiedDateTime = current_timestamp
+        where eod.status = :currentStatus
+        and eod.dataIngestionTs <= :maxDataIngestionTs
         """)
     @Transactional
     void updateByStatusEqualsAndDataIngestionTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxDataIngestionTs,
@@ -651,16 +617,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                       Limit limit);
 
     @Query("""
-        update ExternalObjectDirectoryEntity
-        eod
-        set eod.status =:newStatus,
-        eod.transferAttempts =:transferAttempts,
-        eod.lastModifiedBy =:currentUser,
-        eod.lastModifiedDateTime =current_timestamp
-        where eod.status =:oldStatus
-        and eod.
-        lastModifiedDateTime between :
-        startTime and :endTime
+            update ExternalObjectDirectoryEntity eod
+            set eod.status = :newStatus,
+                eod.transferAttempts = :transferAttempts,
+                eod.lastModifiedBy = :currentUser,
+                eod.lastModifiedDateTime = current_timestamp
+            where eod.status = :oldStatus
+            and eod.lastModifiedDateTime between :startTime and :endTime
         """)
     @Modifying
     void updateEodStatusAndTransferAttemptsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
@@ -672,14 +635,12 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Modifying(clearAutomatically = true)
     @Query(
         """
-            update ExternalObjectDirectoryEntity
-            eod
-            set eod.status =:newStatus,
-            eod.transferAttempts =:transferAttempts,
-            eod.lastModifiedBy =:currentUser,
-            eod.lastModifiedDateTime =current_timestamp
-            where eod.
-            id in :idsToUpdate
+            update ExternalObjectDirectoryEntity eod
+            set eod.status = :newStatus,
+                eod.transferAttempts = :transferAttempts,
+                eod.lastModifiedBy = :currentUser,
+                eod.lastModifiedDateTime = current_timestamp
+            where eod.id in :idsToUpdate
             """
     )
     void updateEodStatusAndTransferAttemptsWhereIdIn(ObjectRecordStatusEntity newStatus, Integer transferAttempts, UserAccountEntity currentUser,
@@ -688,13 +649,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eod
-            FROM ExternalObjectDirectoryEntity
-            eod
-            WHERE eod.status =:status
-            AND eod.
-            dataIngestionTs between :
-            rpoCsvStartTime AND :rpoCsvEndTime
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status 
+            AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
     Page<ExternalObjectDirectoryEntity> findByStatusAndIngestionDateTsWithPaging(ObjectRecordStatusEntity status,
@@ -703,13 +660,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                  Pageable pageable);
 
     @Query("""
-        SELECT eod
-        FROM ExternalObjectDirectoryEntity
-        eod
-        WHERE eod.status =:status
-        AND eod.
-        dataIngestionTs BETWEEN :
-        ingestionStartDateTime AND :ingestionEndDateTime
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
+        WHERE eod.status = :status
+        AND eod.dataIngestionTs BETWEEN :ingestionStartDateTime AND :ingestionEndDateTime
         """)
     List<ExternalObjectDirectoryEntity> findAllByStatusAndDataIngestionTsBetweenAndLimit(@Param("status") ObjectRecordStatusEntity status,
                                                                                          @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
@@ -717,14 +670,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                          Limit limit);
 
     @Query("""
-        SELECT eod.
-        id FROM
-        ExternalObjectDirectoryEntity eod
-        WHERE eod.status =:status
-        AND eod.
-        lastModifiedDateTime BETWEEN :
-        startDateTime AND :endDateTime
-        AND eod.externalLocationType =:locationType
+        SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+        WHERE eod.status = :status
+        AND eod.lastModifiedDateTime BETWEEN :startDateTime AND :endDateTime
+        AND eod.externalLocationType = :locationType
         """)
     List<Integer> findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(@Param("status") ObjectRecordStatusEntity status,
                                                                            @Param("startDateTime") OffsetDateTime startDateTime,
