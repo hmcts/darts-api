@@ -45,9 +45,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -375,8 +373,8 @@ class AdminTranscriptionServiceTest {
 
     }
 
-    private static Set<TranscriptionSearchResult> someSetOfTranscriptionSearchResult(int quantity) {
-        return rangeClosed(1, quantity).mapToObj(i -> createTranscription(i)).collect(toSet());
+    private static List<TranscriptionSearchResult> someSetOfTranscriptionSearchResult(int quantity) {
+        return rangeClosed(1, quantity).mapToObj(i -> createTranscription(i)).toList();
     }
 
     private static TranscriptionSearchResult createTranscription(int seed) {
