@@ -164,8 +164,9 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
         try (feign.Response response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
             //Then
-            InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integrationTest/resources/wiremock/__files/testAudio.mp3"));
-            assertTrue(IOUtils.contentEquals(response.body().asInputStream(), expectedInputStream));
+            try (InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integrationTest/resources/wiremock/__files/testAudio.mp3"))) {
+                assertTrue(IOUtils.contentEquals(response.body().asInputStream(), expectedInputStream));
+            }
         }
     }
 
