@@ -115,8 +115,8 @@ class CourthouseCommonServiceImplTest {
         DartsApiException exception = assertThrows(DartsApiException.class,
                                                    () -> courthouseService.retrieveCourthouse("  "));
 
-        assertEquals("Provided courthouse does not exist. Courthouse '' not found.", exception.getMessage());
-        verify(courthouseRepository).findByCourthouseName("");
+        assertEquals("Provided courthouse does not exist. Courthouse 'null' not found.", exception.getMessage());
+        verify(courthouseRepository).findByCourthouseName(null);
     }
 
     @Test

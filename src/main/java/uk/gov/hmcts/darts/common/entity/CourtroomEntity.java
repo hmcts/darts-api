@@ -18,6 +18,8 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 import java.util.Locale;
 
+import static java.util.Objects.nonNull;
+
 @Entity
 @Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.CTH_ID, CourtroomEntity.COURTROOM_NAME})})
 @AllArgsConstructor
@@ -45,6 +47,8 @@ public class CourtroomEntity extends CreatedBaseEntity {
     private CourthouseEntity courthouse;
 
     public void setName(String name) {
-        this.name = name.toUpperCase(Locale.ROOT);
+        if (nonNull(name)) {
+            this.name = name.toUpperCase(Locale.ROOT);
+        }
     }
 }
