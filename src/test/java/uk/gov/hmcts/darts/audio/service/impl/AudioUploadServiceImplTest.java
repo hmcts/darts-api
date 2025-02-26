@@ -23,6 +23,8 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -46,6 +48,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -258,6 +261,133 @@ class AudioUploadServiceImplTest {
         verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
     }
 
+    @Test
+    void versionUpload_shouldNotInvokeHideAllFunctionalityIfExistingMediaIsNotHidden() {
+        MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(100)
+            .chronicleId("100")
+            .antecedentId(null)
+            .build()
+            .getEntity();
+
+        MediaEntity newMedia = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(101)
+            .chronicleId("100")
+            .antecedentId("100")
+            .build()
+            .getEntity();
+        doReturn(newMedia).when(mapper).mapToMedia(any(), any());
+
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.setStartedAt(STARTED_AT);
+        addAudioMetadataRequest.setEndedAt(ENDED_AT);
+        addAudioMetadataRequest.setFileSize(100L);
+        addAudioMetadataRequest.setCases(Collections.emptyList());
+
+        audioService.versionUpload(List.of(exisingMediaVersion),
+                                   addAudioMetadataRequest,
+                                   UUID.randomUUID().toString(),
+                                   "checksum",
+                                   PersistableFactory.getUserAccountTestData().someMinimal());
+
+        verifyNoInteractions(applyAdminActionComponent);
+    }
+
+    @Test
+    void versionUpload_shouldInvokeHideAllFunctionalityWithLimitedAdminActionDetailsIfExistingMediaIsHiddenWithNoExistingAdminAction() {
+        MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(100)
+            .isHidden(true)
+            .chronicleId("100")
+            .antecedentId(null)
+            .build()
+            .getEntity();
+
+        MediaEntity newMedia = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(101)
+            .chronicleId("100")
+            .antecedentId("100")
+            .build()
+            .getEntity();
+        doReturn(newMedia).when(mapper).mapToMedia(any(), any());
+
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.setStartedAt(STARTED_AT);
+        addAudioMetadataRequest.setEndedAt(ENDED_AT);
+        addAudioMetadataRequest.setFileSize(100L);
+        addAudioMetadataRequest.setCases(Collections.emptyList());
+
+        audioService.versionUpload(List.of(exisingMediaVersion),
+                                   addAudioMetadataRequest,
+                                   UUID.randomUUID().toString(),
+                                   "checksum",
+                                   PersistableFactory.getUserAccountTestData().someMinimal());
+
+        var adminActionPropertiesCaptor = ArgumentCaptor.forClass(ApplyAdminActionComponent.AdminActionProperties.class);
+        verify(applyAdminActionComponent).applyAdminActionTo(any(), adminActionPropertiesCaptor.capture());
+        verifyNoMoreInteractions(applyAdminActionComponent);
+
+        ApplyAdminActionComponent.AdminActionProperties adminActionProperties = adminActionPropertiesCaptor.getValue();
+        assertNull(adminActionProperties.ticketReference());
+        assertEquals("Prior version had no admin action, so no details are available", adminActionProperties.comments());
+        assertNull(adminActionProperties.hiddenReason());
+    }
+
+    @Test
+    void versionUpload_shouldInvokeHideAllFunctionalityWithCopiedAdminActionDetailsIfExistingMediaIsHiddenWithExistingAdminAction() {
+        MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(100)
+            .isHidden(true)
+            .chronicleId("100")
+            .antecedentId(null)
+            .build()
+            .getEntity();
+
+        ObjectHiddenReasonEntity objectHiddenReason = new ObjectHiddenReasonEntity();
+        ObjectAdminActionEntity adminAction = PersistableFactory.getObjectAdminActionTestData().someMinimalBuilder()
+            .media(exisingMediaVersion)
+            .comments("Some comments")
+            .ticketReference("Some ticket reference")
+            .objectHiddenReason(objectHiddenReason)
+            .build()
+            .getEntity();
+        exisingMediaVersion.setObjectAdminAction(adminAction);
+
+        MediaEntity newMedia = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(101)
+            .chronicleId("100")
+            .antecedentId("100")
+            .build()
+            .getEntity();
+        doReturn(newMedia).when(mapper).mapToMedia(any(), any());
+
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.setStartedAt(STARTED_AT);
+        addAudioMetadataRequest.setEndedAt(ENDED_AT);
+        addAudioMetadataRequest.setFileSize(100L);
+        addAudioMetadataRequest.setCases(Collections.emptyList());
+
+        audioService.versionUpload(List.of(exisingMediaVersion),
+                                   addAudioMetadataRequest,
+                                   UUID.randomUUID().toString(),
+                                   "checksum",
+                                   PersistableFactory.getUserAccountTestData().someMinimal());
+
+        var adminActionPropertiesCaptor = ArgumentCaptor.forClass(ApplyAdminActionComponent.AdminActionProperties.class);
+        verify(applyAdminActionComponent).applyAdminActionTo(any(), adminActionPropertiesCaptor.capture());
+        verifyNoMoreInteractions(applyAdminActionComponent);
+
+        ApplyAdminActionComponent.AdminActionProperties adminActionProperties = adminActionPropertiesCaptor.getValue();
+        assertEquals("Some ticket reference", adminActionProperties.ticketReference());
+        assertEquals("Some comments", adminActionProperties.comments());
+        assertEquals(objectHiddenReason, adminActionProperties.hiddenReason());
+    }
 
     private AddAudioMetadataRequest setupVersionUploadTest(int endTimeOffset, long fileSize) {
         MediaEntity mediaEntity = mock(MediaEntity.class);

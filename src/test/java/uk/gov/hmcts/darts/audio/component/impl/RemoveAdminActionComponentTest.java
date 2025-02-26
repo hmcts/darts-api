@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -148,6 +149,47 @@ class RemoveAdminActionComponentTest {
             verifyNoMoreInteractions(mediaRepository);
         }
 
+    }
+
+    @Nested
+    class RemoveAdminActionFromTests {
+
+        @Test
+        void shouldUnHideTargetedMediaAndRemoveAdminAction_whenTargetedMediaIsHiddenAndHasExistingAdminActionAndHasNoChronicleId() {
+            // Given
+            MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
+                .id(1)
+                .chronicleId(null)
+                .isHidden(true)
+                .build()
+                .getEntity();
+
+            ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+            objectAdminActionEntity.setId(100);
+            objectAdminActionEntity.setTicketReference("Some ticket reference");
+            objectAdminActionEntity.setComments("Some comments");
+            targetedMedia.setObjectAdminAction(objectAdminActionEntity);
+
+            // When
+            List<MediaEntity> mediaEntities = removeAdminActionComponent.removeAdminActionFrom(Collections.singletonList(targetedMedia));
+
+            // Then
+            assertEquals(1, mediaEntities.size());
+            MediaEntity mediaEntity = mediaEntities.getFirst();
+            assertEquals(1, mediaEntity.getId());
+            assertFalse(mediaEntity.isHidden());
+            assertFalse(mediaEntity.getObjectAdminAction().isPresent());
+
+            verify(adminActionRepository).deleteById(eq(100));
+            verifyNoMoreInteractions(adminActionRepository);
+
+            verify(auditApi).record(AuditActivity.UNHIDE_AUDIO, "Media id: 1, Ticket ref: Some ticket reference, Comments: Some comments");
+            verifyNoMoreInteractions(auditApi);
+
+            verify(mediaRepository).saveAndFlush(any(MediaEntity.class));
+            verifyNoMoreInteractions(mediaRepository);
+        }
+
         @Test
         void shouldUnHideTargetedMedia_whenTargetedMediaIsHiddenAndHasNoExistingAdminAction() {
             // Given
@@ -158,10 +200,8 @@ class RemoveAdminActionComponentTest {
                 .build()
                 .getEntity();
 
-            when(mediaRepository.findAllByChronicleId("1000")).thenReturn(List.of(targetedMedia));
-
             // When
-            List<MediaEntity> mediaEntities = removeAdminActionComponent.removeAdminActionFromAllVersions(targetedMedia);
+            List<MediaEntity> mediaEntities = removeAdminActionComponent.removeAdminActionFrom(Collections.singletonList(targetedMedia));
 
             // Then
             assertEquals(1, mediaEntities.size());
@@ -179,10 +219,66 @@ class RemoveAdminActionComponentTest {
             verifyNoMoreInteractions(mediaRepository);
         }
 
-    }
+        @Test
+        void shouldUnHideTargetedMedia_whenTargetedMediaIsNotHiddenAndHasExistingAdminAction() {
+            // Given
+            MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
+                .id(1)
+                .chronicleId("1000")
+                .isHidden(false)
+                .build()
+                .getEntity();
 
-    @Nested
-    class RemoveAdminActionFromTests {
+            ObjectAdminActionEntity adminActionForTargetedMedia = new ObjectAdminActionEntity();
+            adminActionForTargetedMedia.setId(100);
+            adminActionForTargetedMedia.setTicketReference("Some ticket reference");
+            adminActionForTargetedMedia.setComments("Some comments");
+            targetedMedia.setObjectAdminAction(adminActionForTargetedMedia);
+
+            // When
+            List<MediaEntity> mediaEntities = removeAdminActionComponent.removeAdminActionFrom(Collections.singletonList(targetedMedia));
+
+            // Then
+            assertEquals(1, mediaEntities.size());
+            MediaEntity mediaEntity = mediaEntities.getFirst();
+            assertEquals(1, mediaEntity.getId());
+            assertFalse(mediaEntity.isHidden());
+            assertFalse(mediaEntity.getObjectAdminAction().isPresent());
+
+            verify(adminActionRepository).deleteById(eq(100));
+            verifyNoMoreInteractions(adminActionRepository);
+
+            verify(auditApi).record(AuditActivity.UNHIDE_AUDIO, "Media id: 1, Ticket ref: Some ticket reference, Comments: Some comments");
+            verifyNoMoreInteractions(auditApi);
+
+            verify(mediaRepository).saveAndFlush(any(MediaEntity.class));
+            verifyNoMoreInteractions(mediaRepository);
+        }
+
+        @Test
+        void shouldNotUnHideTargetedMedia_whenTargetedMediaIsNotHiddenAndHasNoExistingAdminAction() {
+            // Given
+            MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
+                .id(1)
+                .chronicleId("1000")
+                .isHidden(false)
+                .build()
+                .getEntity();
+
+            // When
+            List<MediaEntity> mediaEntities = removeAdminActionComponent.removeAdminActionFrom(Collections.singletonList(targetedMedia));
+
+            // Then
+            assertEquals(1, mediaEntities.size());
+            MediaEntity mediaEntity = mediaEntities.getFirst();
+            assertEquals(1, mediaEntity.getId());
+            assertFalse(mediaEntity.isHidden());
+            assertFalse(mediaEntity.getObjectAdminAction().isPresent());
+
+            verifyNoInteractions(adminActionRepository);
+            verifyNoInteractions(auditApi);
+            verifyNoInteractions(mediaRepository);
+        }
 
         @Test
         void shouldThrowException_whenMediasHaveDifferingChronicleIds() {

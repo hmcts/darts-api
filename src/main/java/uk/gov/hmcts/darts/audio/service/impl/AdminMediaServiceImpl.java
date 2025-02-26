@@ -161,7 +161,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         final MediaEntity targetedMedia = mediaRepository.findByIdIncludeDeleted(mediaId)
             .orElseThrow(() -> new IllegalStateException("Media not found, expected this to be pre-validated"));
 
-        Boolean isToBeHidden = mediaHideRequest.getIsHidden();
+        boolean isToBeHidden = mediaHideRequest.getIsHidden();
         if (isToBeHidden) {
             AdminActionRequest adminActionRequest = mediaHideRequest.getAdminAction();
             applyAdminActionComponent.applyAdminActionToAllVersions(targetedMedia,

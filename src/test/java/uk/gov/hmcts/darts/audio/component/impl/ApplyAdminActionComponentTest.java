@@ -51,6 +51,10 @@ class ApplyAdminActionComponentTest {
 
     private ApplyAdminActionComponent applyAdminActionComponent;
 
+    private ObjectHiddenReasonEntity objectHiddenReasonEntity;
+    private UserAccountEntity userAccountEntity;
+    private OffsetDateTime someDateTime;
+
     @BeforeEach
     void setUp() {
         applyAdminActionComponent = new ApplyAdminActionComponent(userIdentity,
@@ -64,9 +68,7 @@ class ApplyAdminActionComponentTest {
     @Nested
     class ApplyAdminActionToAllVersionsTests {
 
-        private ObjectHiddenReasonEntity objectHiddenReasonEntity;
-        private UserAccountEntity userAccountEntity;
-        private OffsetDateTime someDateTime;
+
 
         @BeforeEach
         void setUp() {
@@ -152,6 +154,87 @@ class ApplyAdminActionComponentTest {
             // When
             List<MediaEntity> mediaEntities = applyAdminActionComponent.applyAdminActionToAllVersions(targetedMedia, adminActionProperty);
 
+            // Then
+            assertEquals(2, mediaEntities.size());
+
+            // Assert what we expect to be common across all versions
+            for (MediaEntity updatedMedia : mediaEntities) {
+                assertTrue(updatedMedia.isHidden());
+
+                Optional<ObjectAdminActionEntity> adminActionOptional = updatedMedia.getObjectAdminAction();
+                assertTrue(adminActionOptional.isPresent());
+                ObjectAdminActionEntity adminAction = adminActionOptional.get();
+
+                assertEquals("Some ticket reference", adminAction.getTicketReference());
+                assertEquals("Some comments", adminAction.getComments());
+                assertEquals(objectHiddenReasonEntity, adminAction.getObjectHiddenReason());
+                assertEquals(userAccountEntity, adminAction.getHiddenBy());
+                assertEquals(someDateTime, adminAction.getHiddenDateTime());
+                assertFalse(adminAction.isMarkedForManualDeletion());
+
+                verify(adminActionRepository).saveAndFlush(adminAction);
+                verify(mediaRepository).saveAndFlush(updatedMedia);
+            }
+            verifyNoMoreInteractions(adminActionRepository);
+            verifyNoMoreInteractions(mediaRepository);
+
+            verify(removeAdminActionComponent).removeAdminActionFrom(List.of(targetedMedia, otherVersion));
+            verifyNoMoreInteractions(removeAdminActionComponent);
+
+            verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 1, Ticket ref: Some ticket reference");
+            verify(auditApi).record(AuditActivity.HIDE_AUDIO, "Media id: 2, Ticket ref: Some ticket reference");
+            verifyNoMoreInteractions(auditApi);
+
+            // And verify the back-links
+            List<Integer> backLinkedMediaIds = mediaEntities.stream()
+                .map(MediaEntity::getObjectAdminActions)
+                .flatMap(List::stream)
+                .map(ObjectAdminActionEntity::getMedia)
+                .map(MediaEntity::getId)
+                .toList();
+            assertThat(backLinkedMediaIds, containsInAnyOrder(targetedMedia.getId(), otherVersion.getId()));
+        }
+    }
+
+    @Nested
+    class ApplyAdminActionToTests {
+
+        @BeforeEach
+        void setUp() {
+            objectHiddenReasonEntity = new ObjectHiddenReasonEntity();
+
+            userAccountEntity = PersistableFactory.getUserAccountTestData().someMinimal();
+            when(userIdentity.getUserAccount())
+                .thenReturn(userAccountEntity);
+
+            someDateTime = OffsetDateTime.parse("2025-01-01T00:00:00Z");
+            when(currentTimeHelper.currentOffsetDateTime())
+                .thenReturn(someDateTime);
+        }
+
+        @Test
+        void shouldHideAndSetAdminActionForAllProvidedMedias() {
+            // Given
+            final String commonChronicleId = "1000";
+
+            MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
+                .id(1)
+                .chronicleId(commonChronicleId)
+                .build()
+                .getEntity();
+            MediaEntity otherVersion = PersistableFactory.getMediaTestData().someMinimalBuilder()
+                .id(2)
+                .chronicleId(commonChronicleId)
+                .build()
+                .getEntity();
+
+            var adminActionProperty = new ApplyAdminActionComponent.AdminActionProperties("Some ticket reference",
+                                                                                          "Some comments",
+                                                                                          objectHiddenReasonEntity);
+
+            // When
+            List<MediaEntity> mediaEntities = applyAdminActionComponent.applyAdminActionTo(List.of(targetedMedia, otherVersion),
+                                                                                           adminActionProperty);
             // Then
             assertEquals(2, mediaEntities.size());
 

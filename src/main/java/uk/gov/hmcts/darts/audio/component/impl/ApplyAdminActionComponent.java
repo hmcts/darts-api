@@ -67,13 +67,14 @@ public class ApplyAdminActionComponent {
         removeAdminActionComponent.removeAdminActionFrom(mediaVersions);
 
         final String ticketReference = adminActionProperties.ticketReference();
+        UserAccountEntity currentUser = userIdentity.getUserAccount();
         for (MediaEntity media : mediaVersions) {
             auditApi.record(HIDE_AUDIO, AUDIT_TEMPLATE.formatted(media.getId(), ticketReference));
 
             ObjectAdminActionEntity adminAction = createAdminAction(ticketReference,
                                                                     adminActionProperties.comments(),
                                                                     adminActionProperties.hiddenReason(),
-                                                                    userIdentity.getUserAccount());
+                                                                    currentUser);
             adminAction.setMedia(media);
             adminActionRepository.saveAndFlush(adminAction);
 

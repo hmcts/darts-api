@@ -43,6 +43,7 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
         return someMinimalBuilderHolder().getBuilder();
     }
 
+    // Deprecated in favour of the methods provided by the Persistable interface
     @Deprecated
     public static CourthouseEntity someMinimalCourthouse() {
         var postfix = random(10, false, true);
@@ -56,6 +57,7 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
         return courtHouse;
     }
 
+    // Deprecated, please use the methods provided by the Persistable interface
     @Deprecated
     public static CourthouseEntity createCourthouseWithName(String name) {
         var courthouse = someMinimalCourthouse();
@@ -64,6 +66,7 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
         return courthouse;
     }
 
+    // Deprecated, please use the methods provided by the Persistable interface
     @Deprecated
     public static CourthouseEntity createCourthouseWithDifferentNameAndDisplayName(String name, String displayName) {
         var courthouse = someMinimalCourthouse();

@@ -10,6 +10,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
+// TestClassWithoutTestCases suppression: This is not a test class.
+// ConstructorCallsOverridableMethod suppression: If this proves to be a demonstrable problem, we can change the object creation approach. For now, it is fine.
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestCourtroomEntity extends CourtroomEntity implements DbInsertable<CourtroomEntity> {

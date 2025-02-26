@@ -183,6 +183,7 @@ public class IntegrationBase {
         GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }
 
+    // UselessOperationOnImmutable suppression: We don't care about the return value of parse(), we just want to know whether it throws an exception
     @SuppressWarnings("PMD.UselessOperationOnImmutable")
     protected boolean isIsoDateTimeString(String string) {
         try {

@@ -131,7 +131,8 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     void versionUpload(List<MediaEntity> mediaToSupersede,
                        AddAudioMetadataRequest addAudioMetadataRequest,
-                       String externalLocation, String checksum,
+                       String externalLocation,
+                       String checksum,
                        UserAccountEntity userAccount) {
 
         MediaEntity newMediaEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);

@@ -40,6 +40,7 @@ public final class UserAccountTestData
         return someMinimalBuilderHolder().getBuilder();
     }
 
+    // Deprecated, please use the methods provided by the Persistable interface
     @Deprecated
     public static UserAccountEntity minimalUserAccount() {
         var userAccount = new UserAccountEntity();
@@ -50,6 +51,7 @@ public final class UserAccountTestData
         return userAccount;
     }
 
+    // Deprecated, please use the methods provided by the Persistable interface
     @Deprecated
     public static UserAccountEntity buildUserWithRoleFor(SecurityRoleEnum role, CourthouseEntity courthouse) {
         var securityGroupEntity = buildGroupForRoleAndCourthouse(role, courthouse);

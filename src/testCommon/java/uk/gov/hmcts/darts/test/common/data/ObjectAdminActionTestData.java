@@ -32,6 +32,7 @@ public final class ObjectAdminActionTestData
         return someMinimalBuilderHolder().getBuilder();
     }
 
+    // Deprecated, please use the methods provided by the Persistable interface
     @Deprecated
     public static ObjectAdminActionEntity minimalObjectAdminAction() {
         var action = new ObjectAdminActionEntity();
@@ -39,6 +40,7 @@ public final class ObjectAdminActionTestData
         return action;
     }
 
+    // Deprecated, please use the methods provided by the Persistable interface
     @Deprecated
     public static ObjectAdminActionEntity objectAdminActionWithDefaults() {
         var action = minimalObjectAdminAction();

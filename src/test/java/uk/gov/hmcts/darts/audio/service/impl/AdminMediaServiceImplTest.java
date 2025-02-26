@@ -76,6 +76,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("PMD.CouplingBetweenObjects")
@@ -776,6 +777,30 @@ class AdminMediaServiceImplTest {
                                                                                                "Some comments",
                                                                                                objectHiddenReasonEntity);
             verify(applyAdminActionComponent).applyAdminActionToAllVersions(eq(mediaEntity), eq(expectedActionProperties));
+        }
+
+        @Test
+        void shouldThrowException_whenProvidedHiddenReasonDoesNotExist() {
+            // Given
+            when(hiddenReasonRepository.findById(0))
+                .thenReturn(Optional.empty());
+
+            MediaHideRequest mediaHideRequest = new MediaHideRequest();
+            mediaHideRequest.setIsHidden(true);
+
+            AdminActionRequest adminActionRequest = new AdminActionRequest();
+            adminActionRequest.setReasonId(0);
+            adminActionRequest.setTicketReference("Some reference");
+            adminActionRequest.setComments("Some comments");
+
+            mediaHideRequest.setAdminAction(adminActionRequest);
+
+            // When
+            assertThrows(DartsApiException.class, () ->
+                mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
+
+            verifyNoInteractions(objectAdminActionRepository);
+            verifyNoInteractions(applyAdminActionComponent);
         }
 
         @Test

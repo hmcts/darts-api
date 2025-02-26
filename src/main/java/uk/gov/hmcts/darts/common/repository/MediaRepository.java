@@ -114,11 +114,6 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
         """)
     Integer getVersionCount(String chronicleId);
 
-    @Query("""
-              SELECT me
-              FROM MediaEntity me
-              WHERE me.chronicleId = :chronicleId
-          """)
     List<MediaEntity> findAllByChronicleId(String chronicleId);
 
 }
