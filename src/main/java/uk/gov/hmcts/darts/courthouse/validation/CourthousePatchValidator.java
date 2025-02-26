@@ -35,7 +35,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
     @Transactional(propagation = Propagation.REQUIRED)
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.UnnecessaryAnnotationValueElement"})
     public void validate(CourthousePatch patch, Integer id) {
-        patch.setCourthouseName(StringUtils.toRootUpperCase(StringUtils.trim(patch.getCourthouseName())));
+        patch.setCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToNull(patch.getCourthouseName())));
         var courthouseEntity = repository.findById(id)
             .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
 
