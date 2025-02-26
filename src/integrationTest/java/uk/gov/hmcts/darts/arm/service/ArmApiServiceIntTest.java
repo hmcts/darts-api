@@ -198,15 +198,16 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
                         .withStatus(200)));
 
         // When
-        DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+        try (DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
-        // Then
-        verify(armTokenClient).getToken(armTokenRequest);
+            // Then
+            verify(armTokenClient).getToken(armTokenRequest);
 
-        WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
-                            .withHeader("Authorization", new RegexPattern("Bearer some-token")));
+            WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
+                                .withHeader("Authorization", new RegexPattern("Bearer some-token")));
 
-        assertThat(downloadResponseMetaData.getResource().getInputStream().readAllBytes()).isEqualTo(binaryData);
+            assertThat(downloadResponseMetaData.getResource().getInputStream().readAllBytes()).isEqualTo(binaryData);
+        }
     }
 
     @Test
