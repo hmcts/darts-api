@@ -24,6 +24,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CourtroomCommonServiceImplTest {
 
+    public static final String TEST_COURTHOUSE_UPPER = "TEST COURTHOUSE";
+    public static final String COURTROOM_1 = "COURTROOM 1";
     @Mock
     private CourtroomRepository courtroomRepository;
 
@@ -40,12 +42,12 @@ class CourtroomCommonServiceImplTest {
     void setUp() {
         courthouse = new CourthouseEntity();
         courthouse.setId(1);
-        courthouse.setCourthouseName("Test Courthouse");
+        courthouse.setCourthouseName(TEST_COURTHOUSE_UPPER);
 
         userAccount = new UserAccountEntity();
 
         existingCourtroom = new CourtroomEntity();
-        existingCourtroom.setName("COURTROOM 1");
+        existingCourtroom.setName(COURTROOM_1);
         existingCourtroom.setCourthouse(courthouse);
 
         courtroomService = new CourtroomCommonServiceImpl(courtroomRepository, courthouseCommonService);
@@ -53,13 +55,13 @@ class CourtroomCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCourtroomWithCourthouseExistingCourtroom() {
-        when(courtroomRepository.findByNameAndId(1, "COURTROOM 1"))
+        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
             .thenReturn(Optional.of(existingCourtroom));
 
         CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, "Courtroom 1", userAccount);
 
         assertNotNull(result);
-        assertEquals("COURTROOM 1", result.getName());
+        assertEquals(COURTROOM_1, result.getName());
         assertEquals(courthouse, result.getCourthouse());
         verify(courtroomRepository, never()).saveAndFlush(any(CourtroomEntity.class));
     }
@@ -82,13 +84,13 @@ class CourtroomCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCourtroomWithCourthouseNameExistingCourtroom() {
-        when(courtroomRepository.findByCourthouseNameAndCourtroomName("Test Courthouse", "COURTROOM 1"))
+        when(courtroomRepository.findByCourthouseNameAndCourtroomName(TEST_COURTHOUSE_UPPER, COURTROOM_1))
             .thenReturn(Optional.of(existingCourtroom));
 
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom("Test Courthouse", "Courtroom 1", userAccount);
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(TEST_COURTHOUSE_UPPER, "Courtroom 1", userAccount);
 
         assertNotNull(result);
-        assertEquals("COURTROOM 1", result.getName());
+        assertEquals(COURTROOM_1, result.getName());
         assertEquals(courthouse, result.getCourthouse());
         verify(courthouseCommonService, never()).retrieveCourthouse(anyString());
         verify(courtroomRepository, never()).saveAndFlush(any(CourtroomEntity.class));
@@ -96,32 +98,68 @@ class CourtroomCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCourtroomWithCourthouseNameNewCourtroom() {
-        when(courtroomRepository.findByCourthouseNameAndCourtroomName("Test Courthouse", "COURTROOM 2"))
+        when(courtroomRepository.findByCourthouseNameAndCourtroomName(TEST_COURTHOUSE_UPPER, "COURTROOM 2"))
             .thenReturn(Optional.empty());
-        when(courthouseCommonService.retrieveCourthouse("Test Courthouse"))
+        when(courthouseCommonService.retrieveCourthouse(TEST_COURTHOUSE_UPPER))
             .thenReturn(courthouse);
         when(courtroomRepository.saveAndFlush(any(CourtroomEntity.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom("Test Courthouse", "Courtroom 2", userAccount);
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(TEST_COURTHOUSE_UPPER, "Courtroom 2", userAccount);
 
         assertNotNull(result);
         assertEquals("COURTROOM 2", result.getName());
         assertEquals(courthouse, result.getCourthouse());
         assertEquals(userAccount, result.getCreatedBy());
-        verify(courthouseCommonService).retrieveCourthouse("Test Courthouse");
+        verify(courthouseCommonService).retrieveCourthouse(TEST_COURTHOUSE_UPPER);
         verify(courtroomRepository).saveAndFlush(any(CourtroomEntity.class));
     }
 
     @Test
     void retrieveOrCreateCourtroomCaseInsensitivity() {
-        when(courtroomRepository.findByNameAndId(1, "COURTROOM 1"))
+        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
             .thenReturn(Optional.of(existingCourtroom));
 
         CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, "courtroom 1", userAccount);
 
         assertNotNull(result);
-        assertEquals("COURTROOM 1", result.getName());
+        assertEquals(COURTROOM_1, result.getName());
+        assertEquals(courthouse, result.getCourthouse());
+    }
+
+    @Test
+    void retrieveOrCreateCourtroom_WithBeginningWhitespace() {
+        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
+            .thenReturn(Optional.of(existingCourtroom));
+
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, " courtroom 1", userAccount);
+
+        assertNotNull(result);
+        assertEquals(COURTROOM_1, result.getName());
+        assertEquals(courthouse, result.getCourthouse());
+    }
+
+    @Test
+    void retrieveOrCreateCourtroom_WithEndWhitespace() {
+        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
+            .thenReturn(Optional.of(existingCourtroom));
+
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, "courtroom 1 ", userAccount);
+
+        assertNotNull(result);
+        assertEquals(COURTROOM_1, result.getName());
+        assertEquals(courthouse, result.getCourthouse());
+    }
+
+    @Test
+    void retrieveOrCreateCourtroom_WithBeggingAndEndWhitespace() {
+        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
+            .thenReturn(Optional.of(existingCourtroom));
+
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, " courtroom 1 ", userAccount);
+
+        assertNotNull(result);
+        assertEquals(COURTROOM_1, result.getName());
         assertEquals(courthouse, result.getCourthouse());
     }
 }
