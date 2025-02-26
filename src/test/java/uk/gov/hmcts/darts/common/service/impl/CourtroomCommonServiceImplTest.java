@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
@@ -152,7 +154,7 @@ class CourtroomCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCourtroom_WithBeggingAndEndWhitespace() {
+    void retrieveOrCreateCourtroom_WithBeginingAndEndWhitespace() {
         when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
             .thenReturn(Optional.of(existingCourtroom));
 
@@ -161,5 +163,14 @@ class CourtroomCommonServiceImplTest {
         assertNotNull(result);
         assertEquals(COURTROOM_1, result.getName());
         assertEquals(courthouse, result.getCourthouse());
+    }
+
+    @Test
+    void retrieveOrCreateCourtroom_WithWhitespaceString() {
+        DartsApiException exception = assertThrows(DartsApiException.class,
+                                                   () -> courtroomService.retrieveOrCreateCourtroom(courthouse, "  ", userAccount));
+
+        assertEquals("Provided courtroom does not exist. Courtroom 'null' not found.", exception.getMessage());
+        verify(courtroomRepository).findByCourthouseNameAndCourtroomName(courthouse.getCourthouseName(), "  ");
     }
 }
