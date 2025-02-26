@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
@@ -53,6 +54,9 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @ManyToOne
     @JoinColumn(name = "ctr_id", nullable = false)
     private CourtroomEntity courtroom;
+
+    @OneToMany(mappedBy = EventLinkedCaseEntity_.EVENT)
+    private List<EventLinkedCaseEntity> eventLinkedCaseEntities = new ArrayList<>();
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;

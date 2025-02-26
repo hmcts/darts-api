@@ -156,6 +156,16 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         """)
     List<EventEntity> findAllByEventIdExcludingEventIdZero(Integer eventId);
 
+    @Query("""
+        SELECT ee
+        FROM EventEntity ee
+        JOIN ee.eventLinkedCaseEntities elc   
+        WHERE ee.eventId = :eventId
+        AND elc.caseNumber in :caseNumbers       
+        AND (ee.eventId <> 0 or ee.id = :eveId)
+        """)
+    List<EventEntity> findAllByRelatedEvents(Integer eveId, Integer eventId, List<String> caseNumbers);
+
     @Query("select e.id from EventEntity e where e.eventStatus = :statusNumber")
     List<Integer> findAllByEventStatus(Integer statusNumber, Limit limit);
 
