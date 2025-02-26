@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class AnnotationDocumentTestData implements Persistable<TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve,
+public final class AnnotationDocumentTestData implements Persistable<TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve,
     AnnotationDocumentEntity, TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder> {
     @Override
     public AnnotationDocumentEntity someMinimal() {
@@ -20,7 +20,7 @@ public class AnnotationDocumentTestData implements Persistable<TestAnnotationDoc
     }
 
     public AnnotationDocumentEntity minimalAnnotationDocument() {
-       return someMinimal();
+        return someMinimal();
     }
 
     public AnnotationDocumentEntity createAnnotationDocumentForHearings(List<HearingEntity> hearingEntities) {
