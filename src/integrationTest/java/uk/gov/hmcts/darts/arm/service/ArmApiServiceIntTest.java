@@ -11,6 +11,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
@@ -75,7 +76,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @MockitoSpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @TempDir
