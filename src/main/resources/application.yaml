@@ -128,12 +128,12 @@ darts:
     merge-workspace: ${user.home}/audiotransform/merge
     outbounddeleter:
       last-accessed-deletion-day: 2
-    pre-amble-duration: 30
+    pre-amble-duration: 30m
     preview:
       redis-ttl-mins: ${AUDIO_PREVIEW_REDIS_TTL:10}
       redis-failed-ttl-mins: ${AUDIO_PREVIEW_REDIS_FAILED_TTL:2}
       redis-folder: audio-previews
-    post-amble-duration: 30
+    post-amble-duration: 30m
     re-encode-workspace: ${user.home}/audiotransform/encode
     temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
     audio-transformation-service:
@@ -357,7 +357,8 @@ darts:
           at-most-for: PT90M
       audio-linking:
         system-user-email: system_AudioLinking@hmcts.net
-        audio-buffer: 0s
+        pre-amble-duration: ${darts.audio.pre-amble-duration}
+        post-amble-duration: ${darts.audio.post-amble-duration}
         lock:
           at-least-for: PT1M
           at-most-for: PT90M

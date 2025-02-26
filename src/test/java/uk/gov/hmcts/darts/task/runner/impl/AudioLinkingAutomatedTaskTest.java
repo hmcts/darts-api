@@ -111,7 +111,8 @@ class AudioLinkingAutomatedTaskTest {
                 new AudioLinkingAutomatedTask.EventProcessor(
                     mediaRepository,
                     eventService, mediaLinkedCaseHelper,
-                    Duration.ofSeconds(0),
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(2),
                     userIdentity)
             );
             lenient().when(userIdentity.getUserAccount()).thenReturn(userAccount);
@@ -144,7 +145,9 @@ class AudioLinkingAutomatedTaskTest {
             verify(mediaLinkedCaseHelper, times(1))
                 .linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaRepository, times(1))
-                .findAllByMediaTimeContains(123, timestamp, timestamp);
+                .findAllByMediaTimeContains(123,
+                                            timestamp.minus(Duration.ofSeconds(1)),
+                                            timestamp.plus(Duration.ofSeconds(2)));
             verify(event, times(1))
                 .setEventStatus(3);
 
@@ -158,7 +161,8 @@ class AudioLinkingAutomatedTaskTest {
         void processEvent_shouldLinkAudio_accountingForBufferTime() {
             doNothing().when(mediaLinkedCaseHelper)
                 .linkMediaByEvent(any(), any(), any(), any());
-            doReturn(Duration.ofSeconds(10)).when(eventProcessor).getAudioBuffer();
+            doReturn(Duration.ofSeconds(10)).when(eventProcessor).getPreAmbleDuration();
+            doReturn(Duration.ofSeconds(20)).when(eventProcessor).getPostAmbleDuration();
             EventEntity event = mock(EventEntity.class);
             when(eventService.getEventByEveId(2)).thenReturn(event);
             OffsetDateTime timestamp = OffsetDateTime.now();
@@ -181,7 +185,7 @@ class AudioLinkingAutomatedTaskTest {
             verify(mediaLinkedCaseHelper, times(1))
                 .linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaRepository, times(1))
-                .findAllByMediaTimeContains(123, timestamp.plusSeconds(10), timestamp.minusSeconds(10));
+                .findAllByMediaTimeContains(123, timestamp.minus(Duration.ofSeconds(10)), timestamp.plus(Duration.ofSeconds(20)));
             verify(event, times(1))
                 .setEventStatus(3);
             verify(eventService, times(1))

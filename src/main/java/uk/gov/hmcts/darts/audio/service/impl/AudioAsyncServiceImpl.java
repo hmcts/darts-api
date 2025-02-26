@@ -41,8 +41,8 @@ public class AudioAsyncServiceImpl implements AudioAsyncService {
 
         String courthouse = addAudioMetadataRequest.getCourthouse();
         String courtroom = addAudioMetadataRequest.getCourtroom();
-        OffsetDateTime start = addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration());
-        OffsetDateTime end = addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration());
+        OffsetDateTime start = addAudioMetadataRequest.getStartedAt().minus(audioConfigurationProperties.getPreAmbleDuration());
+        OffsetDateTime end = addAudioMetadataRequest.getEndedAt().plus(audioConfigurationProperties.getPostAmbleDuration());
         List<EventEntity> courtLogs = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             courthouse,
             courtroom,
