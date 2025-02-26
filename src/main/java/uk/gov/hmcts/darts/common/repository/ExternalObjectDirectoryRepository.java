@@ -512,7 +512,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query("""
         SELECT eod.id FROM ExternalObjectDirectoryEntity eod
-        WHERE eod.externalLocationType = :location
+        WHERE eod.externalLocationType = :externalLocationTypeEntity
         AND eod.updateRetention = :updateRetention
         """)
     List<Integer> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
