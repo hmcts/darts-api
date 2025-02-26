@@ -186,7 +186,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         var hearD1 = case4NotPerfectlyClosed.getHearings().getFirst();
         hearD1.setScheduledStartTime(LocalTime.NOON);
 
-        var hearE1 = case5PerfectlyClosed.getHearings().get(0);
+        var hearE1 = case5PerfectlyClosed.getHearings().getFirst();
         hearE1.setScheduledStartTime(LocalTime.NOON);
 
         var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
