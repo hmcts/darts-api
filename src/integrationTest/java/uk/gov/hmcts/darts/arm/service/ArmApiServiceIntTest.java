@@ -104,10 +104,61 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    void updateMetadata() throws Exception {
+    void updateMetadata_WithNanoSeconds() throws Exception {
 
         // Given
         var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
+
+        var bearerAuth = "Bearer some-token";
+        var reasonConf = "reason";
+        var scoreConfId = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
+        var updateMetadataRequest = UpdateMetadataRequest.builder()
+            .itemId(EXTERNAL_RECORD_ID)
+            .manifest(UpdateMetadataRequest.Manifest.builder()
+                          .eventDate(formatDateTime(eventTimestamp))
+                          .retConfScore(scoreConfId.getId())
+                          .retConfReason(reasonConf)
+                          .build())
+            .useGuidsForFields(false)
+            .build();
+        var updateMetadataResponse = UpdateMetadataResponse.builder()
+            .itemId(UUID.fromString(EXTERNAL_RECORD_ID))
+            .cabinetId(101)
+            .objectId(UUID.fromString("4bfe4fc7-4e2f-4086-8a0e-146cc4556260"))
+            .objectType(1)
+            .fileName("UpdateMetadata-20241801-122819.json")
+            .isError(false)
+            .responseStatus(0)
+            .responseStatusMessages(null)
+            .build();
+
+        String dummyResponse = objectMapper.writeValueAsString(updateMetadataResponse);
+        String dummyRequest = objectMapper.writeValueAsString(updateMetadataRequest);
+
+        stubFor(
+            WireMock.post(urlPathMatching(uploadPath)).withRequestBody(equalToJson(dummyRequest))
+                .willReturn(
+                    aResponse().withHeader("Content-Type", "application/json").withBody(dummyResponse)
+                        .withStatus(200)));
+
+        // When
+        var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
+
+        // Then
+        verify(armTokenClient).getToken(armTokenRequest);
+
+        WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
+                            .withHeader("Authorization", new RegexPattern(bearerAuth))
+                            .withRequestBody(equalToJson(dummyRequest)));
+
+        assertEquals(updateMetadataResponse, responseToTest);
+    }
+
+    @Test
+    void updateMetadata_WithZeroTimes() throws Exception {
+
+        // Given
+        var eventTimestamp = OffsetDateTime.parse("2024-01-31T00:00:00.00Z").plusYears(7);
 
         var bearerAuth = "Bearer some-token";
         var reasonConf = "reason";
