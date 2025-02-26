@@ -92,9 +92,8 @@ class DailyListUpdater {
             DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
             for (CourtList courtList : dailyList.getCourtLists()) {
 
-                String courtHouseName = courtList.getCourtHouse().getCourtHouseName().toUpperCase(Locale.ROOT);
-                Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(
-                    courtHouseName);
+                String courtHouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trim(courtList.getCourtHouse().getCourtHouseName()));
+                Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(courtHouseNameUpperTrimmed);
 
                 if (foundCourthouse.isPresent()) {
                     List<Sitting> sittings = courtList.getSittings();
@@ -112,7 +111,7 @@ class DailyListUpdater {
                             LocalDateTime hearingDateTime = dailyListHearing.getHearingDetails().getHearingDate().atTime(scheduledStartTime);
 
                             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                                courtHouseName, sitting.getCourtRoomNumber(),
+                                courtHouseNameUpperTrimmed, sitting.getCourtRoomNumber(),
                                 caseNumber, hearingDateTime,
                                 dailyListSystemUser
                             );
@@ -131,7 +130,7 @@ class DailyListUpdater {
                 } else {
                     statusType = JobStatusType.PARTIALLY_PROCESSED;
                     log.error("Unregistered courthouse {} daily list entry with id {} has not been processed",
-                              courtHouseName, dailyListEntity.getId());
+                              courtHouseNameUpperTrimmed, dailyListEntity.getId());
                 }
             }
         }

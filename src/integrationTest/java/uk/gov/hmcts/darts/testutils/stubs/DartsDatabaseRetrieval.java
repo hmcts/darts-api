@@ -5,35 +5,15 @@ import jakarta.persistence.EntityManagerFactory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.AuditEntity;
-import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
-import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -79,14 +59,10 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-
-import static java.util.Comparator.comparing;
 
 @Service
 @AllArgsConstructor
@@ -165,19 +141,6 @@ public class DartsDatabaseRetrieval {
     private final TransactionalUtil transactionalUtil;
     private final DartsPersistence dartsPersistence;
 
-
-    public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
-        return eventHandlerRepository.findByHandlerAndActiveTrue(handlerName);
-    }
-
-    public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
-                                                                             String someCourthouse) {
-        return caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
-            someCaseNumber,
-            someCourthouse
-        );
-    }
-
     public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom,
                                                                 LocalDate toLocalDate) {
         return hearingRepository.findByCourthouseCourtroomAndDate(someCourthouse, someRoom, toLocalDate);
@@ -187,30 +150,8 @@ public class DartsDatabaseRetrieval {
         return eventRepository.findAll();
     }
 
-    public List<NotificationEntity> getNotificationsForCase(Integer caseId) {
-        return notificationRepository.findByCourtCase_Id(caseId);
-    }
-
-    public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
-        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).orElse(null);
-    }
-
-    public CourthouseEntity findCourthouseWithName(String name) {
-        return courthouseRepository.findByCourthouseName(name).get();
-    }
-
-    public ExternalLocationTypeEntity getExternalLocationTypeEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {
-        return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
-    }
-
     public ObjectRecordStatusEntity getObjectRecordStatusEntity(ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
-    }
-
-    public List<NotificationEntity> getNotificationFor(String someCaseNumber) {
-        return notificationRepository.findAll().stream()
-            .filter(notification -> notification.getCourtCase().getCaseNumber().equals(someCaseNumber))
-            .toList();
     }
 
     @Transactional
@@ -240,88 +181,5 @@ public class DartsDatabaseRetrieval {
         return hearingEntity.getAnnotations().stream().toList();
     }
 
-    @Transactional
-    public Integer getLastModifiedByUserId(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
-        return createdModifiedBaseEntity.getLastModifiedBy().getId();
-    }
 
-    @Transactional
-    public EventHandlerEntity findEventHandlerMappingFor(Integer eventHandlerMappingId) {
-        return eventHandlerRepository.findById(eventHandlerMappingId).orElseThrow();
-    }
-
-    public SecurityGroupEntity getSecurityGroupRef(int id) {
-        return securityGroupRepository.getReferenceById(id);
-    }
-
-
-    public CourthouseEntity findCourthouseById(int id) {
-        return courthouseRepository.findById(id).orElseThrow();
-    }
-
-    public Optional<NodeRegisterEntity> findByNodeId(int id) {
-        return nodeRegisterRepository.findById(id);
-    }
-
-    public AutomatedTaskEntity getAutomatedTask(int id) {
-        return automatedTaskRepository.findById(id).orElseThrow();
-    }
-
-    public List<AutomatedTaskEntity> getAllAutomatedTasks() {
-        return automatedTaskRepository.findAll();
-    }
-
-    public List<AuditEntity> findAudits() {
-        return auditRepository.findAll();
-    }
-
-    public Revisions<Long, MediaRequestEntity> findMediaRequestRevisionsFor(Integer id) {
-        return mediaRequestRepository.findRevisions(id);
-    }
-
-    public Revisions<Long, CourthouseEntity> findCourthouseRevisionsFor(Integer id) {
-        return courthouseRepository.findRevisions(id);
-    }
-
-    public Revisions<Long, UserAccountEntity> findUserAccountRevisionsFor(Integer id) {
-        return userAccountRepository.findRevisions(id);
-    }
-
-    public Revisions<Long, SecurityGroupEntity> findSecurityGroupRevisionsFor(Integer id) {
-        return securityGroupRepository.findRevisions(id);
-    }
-
-    public Revisions<Long, TranscriptionEntity> findTranscriptionRevisionsFor(Integer id) {
-        return transcriptionRepository.findRevisions(id);
-    }
-
-    @Transactional
-    public Revisions<Long, TranscriptionWorkflowEntity> findTranscriptionWorkflowRevisionsFor(Integer transcriptionId) {
-        var transcription = transcriptionRepository.findById(transcriptionId).orElseThrow();
-        var latestWorkflow = transcription.getTranscriptionWorkflowEntities().stream()
-            .min(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp))
-            .orElseThrow();
-
-        return transcriptionWorkflowRepository.findRevisions(latestWorkflow.getId());
-    }
-
-    @Transactional
-    public Revisions<Long, TranscriptionCommentEntity> findTranscriptionCommentRevisionsFor(Integer transcriptionId) {
-        var transcription = transcriptionRepository.findById(transcriptionId).orElseThrow();
-        var latestComment = transcription.getTranscriptionCommentEntities().stream()
-            .min(comparing(TranscriptionCommentEntity::getCreatedDateTime))
-            .orElseThrow();
-
-        return transcriptionCommentRepository.findRevisions(latestComment.getId());
-    }
-
-    public Revisions<Long, RetentionPolicyTypeEntity> findRetentionPolicyRevisionsFor(Integer id) {
-        return retentionPolicyTypeRepository.findRevisions(id);
-    }
-
-    @Transactional
-    public SecurityRoleEntity findSecurityRole(SecurityRoleEnum role) {
-        return securityRoleRepository.findById(role.getId()).orElseThrow();
-
-    }
 }
