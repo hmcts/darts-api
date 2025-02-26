@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,10 +14,12 @@ import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,17 +29,25 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArmApiServiceImplTest {
+
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+
     @Mock
     private ArmApiConfigurationProperties armApiConfigurationProperties;
-
     @Mock
     private ArmTokenClient armTokenClient;
-
     @Mock
     private ArmApiClient armApiClient;
+    @Mock
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    @InjectMocks
+
     private ArmApiServiceImpl armApiService;
+
+    @BeforeEach
+    void setUp() {
+        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armTokenClient, armApiClient, armDataManagementConfiguration);
+    }
 
     @Test
     void updateMetadata_Success() {
@@ -54,6 +64,7 @@ class ArmApiServiceImplTest {
         when(armApiConfigurationProperties.getArmUsername()).thenReturn(username);
         when(armApiConfigurationProperties.getArmPassword()).thenReturn(password);
         when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(armProfile);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
 
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder().username(username).password(password).build();
         ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
@@ -70,7 +81,7 @@ class ArmApiServiceImplTest {
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(offsetDateTime)
+                          .eventDate(formatDateTime(offsetDateTime))
                           .retConfReason(refConfReason)
                           .retConfScore(refConfScore.getId())
                           .build())
@@ -96,6 +107,7 @@ class ArmApiServiceImplTest {
         when(armApiConfigurationProperties.getArmUsername()).thenReturn(username);
         when(armApiConfigurationProperties.getArmPassword()).thenReturn(password);
         when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(armProfile);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
 
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder().username(username).password(password).build();
         ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
@@ -112,7 +124,7 @@ class ArmApiServiceImplTest {
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(offsetDateTime)
+                          .eventDate(formatDateTime(offsetDateTime))
                           .retConfReason(null)
                           .retConfScore(null)
                           .build())
@@ -124,5 +136,11 @@ class ArmApiServiceImplTest {
 
         // then
         verify(armApiClient, times(1)).updateMetadata(eq("Bearer " + bearerToken), eq(expectedMetadataRequest));
+    }
+
+    private String formatDateTime(OffsetDateTime offsetDateTime) {
+        //"event_date": "1925-02-24T13:52:40.338Z
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        return offsetDateTime.format(dateTimeFormatter);
     }
 }

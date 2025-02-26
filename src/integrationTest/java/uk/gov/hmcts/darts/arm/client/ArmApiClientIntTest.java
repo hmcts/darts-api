@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -76,7 +77,7 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
+                          .eventDate(formatDateTime(eventTimestamp))
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -86,13 +87,13 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
 
         // Then
         verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
-                                  .withHeader(AUTHORIZATION, equalTo(bearerAuth))
-                                  .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                                  .withRequestBody(
-                                      matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
-                                          .and(matchingJsonPath("$.manifest.event_date", equalTo(eventTimestamp.toString())))
-                                          .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
-                                  ));
+                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                   .withRequestBody(
+                       matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
+                           .and(matchingJsonPath("$.manifest.event_date", equalTo(formatDateTime(eventTimestamp))))
+                           .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
+                   ));
 
         assertEquals(UUID.fromString(externalRecordId), updateMetadataResponse.getItemId());
     }
@@ -115,5 +116,10 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
         //Then
         InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integrationTest/resources/wiremock/__files/testAudio.mp3"));
         assertTrue(IOUtils.contentEquals(response.body().asInputStream(), expectedInputStream));
+    }
+
+    private String formatDateTime(OffsetDateTime offsetDateTime) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        return offsetDateTime.format(dateTimeFormatter);
     }
 }

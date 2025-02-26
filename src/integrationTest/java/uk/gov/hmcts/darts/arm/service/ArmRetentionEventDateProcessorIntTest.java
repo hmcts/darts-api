@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRetentionEventDateProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -37,9 +36,9 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionDocumentEnti
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,8 +62,6 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTes
 @Slf4j
 class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
-    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
-
     private static final OffsetDateTime DOCUMENT_RETENTION_DATE_TIME =
         OffsetDateTime.of(2023, 6, 10, 10, 50, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime RETENTION_DATE_TIME =
@@ -73,16 +70,13 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         OffsetDateTime.of(2023, 6, 10, 10, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime END_TIME =
         OffsetDateTime.of(2023, 6, 10, 10, 45, 0, 0, ZoneOffset.UTC);
-    public static final int EVENT_DATE_ADJUSTMENT_YEARS = 100;
+    private static final int EVENT_DATE_ADJUSTMENT_YEARS = 100;
 
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     @Autowired
     private ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
-
-    @MockitoBean
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @MockitoBean
     private UserIdentity userIdentity;
@@ -98,7 +92,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
     @MockitoBean
     private ArmApiClient armApiClient;
-
 
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
@@ -136,8 +129,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         final String externalRecordId = "recordId";
 
         // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
         MediaEntity savedMedia = dartsPersistence.save(
@@ -183,7 +174,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(savedMedia.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
+                          .eventDate(formatDateTime(savedMedia.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS)))
                           .retConfReason(confidenceReason)
                           .retConfScore(confidenceScore.getId())
                           .build())
@@ -196,8 +187,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_NoEodsToProcess() {
 
         // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
         String confReason = "reason";
@@ -214,16 +203,16 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
         dartsPersistence.save(savedMedia);
 
-        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve externalObjectDirectoryuilderRetrieve
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve externalObjectDirectoryBuilderRetrieve
             = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilderHolder();
 
-        externalObjectDirectoryuilderRetrieve.getBuilder().media(savedMedia)
+        externalObjectDirectoryBuilderRetrieve.getBuilder().media(savedMedia)
             .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM))
             .externalLocation(UUID.randomUUID().toString());
 
-        externalObjectDirectoryuilderRetrieve.getBuilder().eventDateTs(RETENTION_DATE_TIME).updateRetention(true);
-        ExternalObjectDirectoryEntity armEod = dartsPersistence.save(externalObjectDirectoryuilderRetrieve.build().getEntity());
+        externalObjectDirectoryBuilderRetrieve.getBuilder().eventDateTs(RETENTION_DATE_TIME).updateRetention(true);
+        ExternalObjectDirectoryEntity armEod = dartsPersistence.save(externalObjectDirectoryBuilderRetrieve.build().getEntity());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -244,8 +233,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @Test
     void calculateEventDates_WithTranscriptionSuccessfulUpdate() {
         // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
         authorisationStub.givenTestSchema();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
@@ -275,7 +262,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         dartsPersistence.save(transcriptionDocumentEntity);
 
-        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve externalObjectDirectoryuilderRetrieve
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve externalObjectDirectoryuilderRetrieve
             = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilderHolder();
 
         externalObjectDirectoryuilderRetrieve.getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity)
@@ -293,21 +280,14 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
         when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
 
-
         // when
         armRetentionEventDateProcessor.calculateEventDates(1000);
 
         // then
-        var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", armEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
-        assertFalse(persistedEod.isUpdateRetention());
-        assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
-
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(transcriptionDocumentEntity.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
+                          .eventDate(formatDateTime(transcriptionDocumentEntity.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS)))
                           .retConfReason(confidenceReason)
                           .retConfScore(confidenceScore.getId())
                           .build())
@@ -315,14 +295,15 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .build();
         verify(armApiClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
 
+        var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
+        assertTrue(persistedEod.isUpdateRetention());
+        assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
     }
 
     @Test
     void calculateEventDates_WithAnnotationSuccessfulUpdate() {
 
         // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
 
@@ -383,7 +364,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(annotationDocument.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
+                          .eventDate(formatDateTime(annotationDocument.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS)))
                           .retConfReason(confidenceReason)
                           .retConfScore(confidenceScore.getId())
                           .build())
@@ -395,8 +376,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @Test
     void calculateEventDates_WithCaseDocumentSuccessfulUpdate() {
         // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -431,15 +410,15 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
+        log.info("EOD event date time {}", persistedEod.getEventDateTs());
+        log.info("Retention date time {}", RETENTION_DATE_TIME);
         assertFalse(persistedEod.isUpdateRetention());
         assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
 
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(caseDocument.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS))
+                          .eventDate(formatDateTime(caseDocument.getRetainUntilTs().minusYears(EVENT_DATE_ADJUSTMENT_YEARS)))
                           .retConfReason(confidenceReason)
                           .retConfScore(confidenceScore.getId())
                           .build())
@@ -452,8 +431,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @Test
     void calculateEventDates_NoConfidenceScore() {
         // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -500,8 +477,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @Test
     void calculateEventDates_ConfidenceScoreOfZero() {
         // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -546,8 +521,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_NoArmRecord_NoRetentionDateSet() {
 
         // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
         String confReason = "reason";
@@ -585,5 +558,10 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         assertNull(persistedEod.getEventDateTs());
         assertTrue(persistedEod.isUpdateRetention());
         verify(armApiClient, times(0)).updateMetadata(any(), any());
+    }
+
+    private String formatDateTime(OffsetDateTime offsetDateTime) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        return offsetDateTime.format(dateTimeFormatter);
     }
 }

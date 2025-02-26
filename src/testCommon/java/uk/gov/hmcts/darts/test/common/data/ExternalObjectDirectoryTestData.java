@@ -17,8 +17,8 @@ import static uk.gov.hmcts.darts.test.common.data.ExternalLocationTypeTestData.l
 import static uk.gov.hmcts.darts.test.common.data.ObjectRecordStatusTestData.statusOf;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public final class ExternalObjectDirectoryTestData implements
-    Persistable<TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve, ExternalObjectDirectoryEntity,
+public class ExternalObjectDirectoryTestData implements
+    Persistable<TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve, ExternalObjectDirectoryEntity,
         TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder> {
 
     ExternalObjectDirectoryTestData() {
@@ -51,7 +51,7 @@ public final class ExternalObjectDirectoryTestData implements
 
 
     public ExternalObjectDirectoryEntity eodStoredInUnstructuredLocationForMedia(MediaEntity media) {
-        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve eod = someMinimalBuilderHolder();
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve eod = someMinimalBuilderHolder();
         TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder builder = eod.getBuilder();
 
         builder.media(media).status(statusOf(STORED))
@@ -102,9 +102,9 @@ public final class ExternalObjectDirectoryTestData implements
     }
 
     @Override
-    public TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve someMinimalBuilderHolder() {
-        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve builder
-            = new TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve();
+    public TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve someMinimalBuilderHolder() {
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve builder
+            = new TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve();
         var userAccount = minimalUserAccount();
 
         builder.getBuilder()

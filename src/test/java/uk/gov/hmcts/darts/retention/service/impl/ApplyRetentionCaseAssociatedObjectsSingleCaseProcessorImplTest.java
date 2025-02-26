@@ -64,7 +64,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     private static final String POLICY_A_NAME = "Policy A";
     private static final String SOME_PAST_DATE_TIME = "2000-01-01T00:00:00Z";
     private static final String SOME_FUTURE_DATE_TIME = "2100-01-01T00:00:00Z";
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
@@ -336,14 +336,14 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         // then
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaA1.getRetConfScore());
-        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, mediaA1.getRetConfReason());
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaA2.getRetConfScore());
         assertEquals(expectedResult, mediaA2.getRetConfReason());
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaB1.getRetConfScore());
-        String expectedResult2 = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"},{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        String expectedResult2 = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"},{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult2, mediaB1.getRetConfReason());
 
     }
@@ -384,7 +384,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         assertEquals(CASE_PERFECTLY_CLOSED, mediaA2.getRetConfScore());
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaB1.getRetConfScore());
-        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, mediaB1.getRetConfReason());
 
     }
@@ -427,7 +427,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         assertEquals(CASE_PERFECTLY_CLOSED, annotationDocumentA1.getRetConfScore());
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, annotationDocumentB1.getRetConfScore());
-        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, annotationDocumentB1.getRetConfReason());
 
     }
@@ -456,10 +456,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         when(transcriptionService.getAllCaseTranscriptionDocuments(case1PerfectlyClosed.getId())).thenReturn(
             List.of(transcriptionDocumentA1, transcriptionDocumentB1));
-
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionD1));
-
         when(eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(transcriptionDocumentA1, EodHelper.armLocation())).thenReturn(
             List.of(eodA1));
         when(eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(transcriptionDocumentB1, EodHelper.armLocation())).thenReturn(
@@ -474,7 +472,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         assertEquals(CASE_PERFECTLY_CLOSED, transcriptionDocumentA1.getRetConfScore());
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, transcriptionDocumentB1.getRetConfScore());
-        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, transcriptionDocumentB1.getRetConfReason());
 
     }
@@ -487,11 +485,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         var eod = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
-
         when(caseDocumentRepository.findByCourtCase(case1PerfectlyClosed)).thenReturn(List.of(caseDocument));
-
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
-
         when(eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation())).thenReturn(List.of(eod));
 
         // when
@@ -511,22 +506,17 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         var eod = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
 
         when(caseService.getCourtCaseById(case4NotPerfectlyClosed.getId())).thenReturn(case4NotPerfectlyClosed);
-
         when(caseDocumentRepository.findByCourtCase(case4NotPerfectlyClosed)).thenReturn(List.of(caseDocument));
-
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
-
         when(eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation())).thenReturn(List.of(eod));
-
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(RETENTION_UPDATED_DATE);
-
 
         // when
         caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case4NotPerfectlyClosed.getId());
 
         // then
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, caseDocument.getRetConfScore());
-        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00.000Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, caseDocument.getRetConfReason());
 
     }

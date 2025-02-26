@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.io.File;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,6 +53,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     private static final String ARM_ERROR_BODY = """
         { "itemId": "00000000-0000-0000-0000-000000000000", "cabinetId": 0, ...}
         """;
+    public static final String BINARY_CONTENT = "some binary content";
 
     private ArmTokenRequest armTokenRequest;
 
@@ -112,7 +114,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
+                          .eventDate(formatDateTime(eventTimestamp))
                           .retConfScore(scoreConfId.getId())
                           .retConfReason(reasonConf)
                           .build())
@@ -161,7 +163,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
+                          .eventDate(formatDateTime(eventTimestamp))
                           .retConfScore(scoreConfId.getId())
                           .retConfReason(reasonConf)
                           .build())
@@ -186,7 +188,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     @SneakyThrows
     void downloadArmData() {
         // Given
-        byte[] binaryData = "some binary content".getBytes();
+        byte[] binaryData = BINARY_CONTENT.getBytes();
 
         stubFor(
             WireMock.get(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
@@ -247,5 +249,10 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     private String getDownloadPath(String downloadPath, String cabinetId, String recordId, String fileId) {
         return downloadPath.replace("{cabinet_id}", cabinetId).replace("{record_id}", recordId).replace("{file_id}", fileId);
+    }
+
+    private String formatDateTime(OffsetDateTime offsetDateTime) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        return offsetDateTime.format(dateTimeFormatter);
     }
 }
