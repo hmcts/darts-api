@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,7 +64,9 @@ class OutboundAudioDeleterProcessorImplTest {
         var transformedMedia2 = someTransformedMediaNotOwnedByUserInGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
 
         when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), eq(Limit.of(1000))))
-            .thenReturn(List.of(transformedMedia1, transformedMedia2));
+            .thenReturn(List.of(1, 2));
+        when(transformedMediaRepository.findById(1)).thenReturn(Optional.of(transformedMedia1));
+        when(transformedMediaRepository.findById(2)).thenReturn(Optional.of(transformedMedia2));
 
         var deletedValues = List.of(new TransientObjectDirectoryEntity());
         when(singleElementProcessor.markForDeletion(any(), any()))
@@ -86,8 +89,10 @@ class OutboundAudioDeleterProcessorImplTest {
             List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
         when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), eq(Limit.of(1000))))
             .thenReturn(List.of(
-                transformedMediaOwnedByUserInMediaInPerpetuityGroup,
-                transformedMediaNotOwnedByUserInMediaInPerpetuityGroup));
+                1,
+                2));
+        when(transformedMediaRepository.findById(1)).thenReturn(Optional.of(transformedMediaOwnedByUserInMediaInPerpetuityGroup));
+        when(transformedMediaRepository.findById(2)).thenReturn(Optional.of(transformedMediaNotOwnedByUserInMediaInPerpetuityGroup));
 
         // when
         outboundAudioDeleterProcessorImpl.markForDeletion(1000);
