@@ -50,8 +50,18 @@ public class HearingsServiceImpl implements HearingsService {
 
     @Override
     public GetHearingResponse getHearings(Integer hearingId) {
-        HearingEntity foundHearing = getHearingById(hearingId);
+        HearingEntity foundHearing = getHearingByIdWithValidation(hearingId);
         return getHearingResponseMapper.map(foundHearing);
+    }
+
+    @Override
+    public HearingEntity getHearingByIdWithValidation(Integer hearingId) {
+        HearingEntity hearingEntity = getHearingById(hearingId);
+        if (!hearingEntity.getHearingIsActual()) {
+            throw new DartsApiException(HearingApiError.HEARING_NOT_ACTUAL);
+        }
+        hearingEntity.getCourtCase().validateIsExpired();
+        return hearingEntity;
     }
 
     @Override
@@ -60,12 +70,7 @@ public class HearingsServiceImpl implements HearingsService {
         if (foundHearingOpt.isEmpty()) {
             throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
         }
-        HearingEntity hearingEntity = foundHearingOpt.get();
-        if (!hearingEntity.getHearingIsActual()) {
-            throw new DartsApiException(HearingApiError.HEARING_NOT_ACTUAL);
-        }
-        hearingEntity.getCourtCase().validateIsExpired();
-        return hearingEntity;
+        return foundHearingOpt.get();
     }
 
     @Override
@@ -101,21 +106,26 @@ public class HearingsServiceImpl implements HearingsService {
 
     @Override
     public void removeMediaLinkToHearing(Integer courtCaseId) {
-        hearingRepository.findByCaseIdWithMediaList(courtCaseId).ifPresent(hearing ->
-            hearing.getMediaList().forEach(media -> {
-                // Check all cases linked to a hearing have been expired/anonymised
-                if (!mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(media)) {
-                    log.info("Media {} link not removed for case id {} as not all associated cases are expired", media.getId(), courtCaseId);
-                } else {
-                    hearingRepository.findHearingIdsByMediaId(media.getId()).forEach(hearingForMedia -> {
-                        hearingForMedia.setMediaList(null);
-                        hearingRepository.save(hearingForMedia);
-                        log.info("Media id {} link removed for hearing id {} on the expiry of case id {}",
-                                 media.getId(), hearingForMedia.getId(), courtCaseId);
-                    });
-                }
-            })
-        );
+        hearingRepository.findByCaseIdWithMediaList(courtCaseId)
+            .ifPresent(hearing -> hearing.getMediaList()
+                .forEach(media -> {
+                    // Check all cases linked to a hearing have been expired/anonymised
+                    if (!mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(media)) {
+                        log.info(
+                            "Media {} link not removed for case id {} as not all associated cases are expired",
+                            media.getId(), courtCaseId);
+                    } else {
+                        hearingRepository.findHearingIdsByMediaId(media.getId()).forEach(
+                            hearingForMedia -> {
+                                hearingForMedia.setMediaList(null);
+                                hearingRepository.save(hearingForMedia);
+                                log.info(
+                                    "Media id {} link removed for hearing id {} on the expiry of case id {}",
+                                    media.getId(), hearingForMedia.getId(), courtCaseId);
+                            });
+                    }
+                })
+            );
     }
 
     private void validateCaseIsNotExpiredFromHearingId(Integer hearingId) {
