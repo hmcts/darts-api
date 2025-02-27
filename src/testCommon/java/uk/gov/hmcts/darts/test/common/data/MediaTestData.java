@@ -60,9 +60,8 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
     }
 
     /**
-     * Deprecated.
-     *
-     * @deprecated do not use. Instead, use Persistable to create an object with the desired state.
+     * Create a "minimal" media entity.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
     public MediaEntity someMinimalMedia() {
@@ -85,12 +84,22 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
         return media;
     }
 
+    /**
+     * Create a media with specified properties.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         return createMediaWith(courtroomEntity, startTime, endTime, channel, "mp2", null, "reason");
     }
 
+    /**
+     * Create a media with specified properties.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                        String mediaType, RetentionConfidenceScoreEnum retConfScore, String retConfReason) {
         var mediaEntity = someMinimalMedia();
@@ -106,6 +115,12 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
         return mediaEntity;
     }
 
+    /**
+     * Create a media with specified properties.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
+    @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                        String mediaType) {
         var mediaEntity = someMinimalMedia();
@@ -120,7 +135,12 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
         return mediaEntity;
     }
 
+    /**
+     * Get the checksum of the test data.
+     * @deprecated As all usages are limited to other deprecated methods.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     private String getChecksum() {
         return TestUtils.encodeToString(md5(MEDIA_TEST_DATA_BINARY_DATA));
     }

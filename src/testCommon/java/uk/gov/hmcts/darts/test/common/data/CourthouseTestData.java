@@ -43,8 +43,12 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
         return someMinimalBuilderHolder().getBuilder();
     }
 
-    // Deprecated in favour of the methods provided by the Persistable interface
+    /**
+     * Create a "minimal" courthouse entity.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public static CourthouseEntity someMinimalCourthouse() {
         var postfix = random(10, false, true);
         var courtHouse = new CourthouseEntity();
@@ -57,8 +61,12 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
         return courtHouse;
     }
 
-    // Deprecated, please use the methods provided by the Persistable interface
+    /**
+     * Create a courthouse with the given name.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public static CourthouseEntity createCourthouseWithName(String name) {
         var courthouse = someMinimalCourthouse();
         courthouse.setCourthouseName(name);
@@ -66,8 +74,12 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
         return courthouse;
     }
 
-    // Deprecated, please use the methods provided by the Persistable interface
+    /**
+     * Create a courthouse with the given name and display name.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public static CourthouseEntity createCourthouseWithDifferentNameAndDisplayName(String name, String displayName) {
         var courthouse = someMinimalCourthouse();
         courthouse.setCourthouseName(name);

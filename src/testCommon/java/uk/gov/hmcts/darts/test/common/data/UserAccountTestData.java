@@ -40,8 +40,12 @@ public final class UserAccountTestData
         return someMinimalBuilderHolder().getBuilder();
     }
 
-    // Deprecated, please use the methods provided by the Persistable interface
+    /**
+     * Create a "minimal" user account entity.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public static UserAccountEntity minimalUserAccount() {
         var userAccount = new UserAccountEntity();
         userAccount.setActive(true);
@@ -51,8 +55,12 @@ public final class UserAccountTestData
         return userAccount;
     }
 
-    // Deprecated, please use the methods provided by the Persistable interface
+    /**
+     * Create a user account entity with specified properties.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public static UserAccountEntity buildUserWithRoleFor(SecurityRoleEnum role, CourthouseEntity courthouse) {
         var securityGroupEntity = buildGroupForRoleAndCourthouse(role, courthouse);
         var userAccount = minimalUserAccount();

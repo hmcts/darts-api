@@ -32,16 +32,24 @@ public final class ObjectAdminActionTestData
         return someMinimalBuilderHolder().getBuilder();
     }
 
-    // Deprecated, please use the methods provided by the Persistable interface
+    /**
+     * Create a "minimal" object admin action entity.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public static ObjectAdminActionEntity minimalObjectAdminAction() {
         var action = new ObjectAdminActionEntity();
         action.setObjectHiddenReason(publicInterestImmunity());
         return action;
     }
 
-    // Deprecated, please use the methods provided by the Persistable interface
+    /**
+     * Create an object admin action entity with some (arbitrary) default values.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
     @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public static ObjectAdminActionEntity objectAdminActionWithDefaults() {
         var action = minimalObjectAdminAction();
         action.setComments("some comment");

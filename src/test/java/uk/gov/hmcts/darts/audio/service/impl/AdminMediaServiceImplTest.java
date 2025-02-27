@@ -796,9 +796,11 @@ class AdminMediaServiceImplTest {
             mediaHideRequest.setAdminAction(adminActionRequest);
 
             // When
-            assertThrows(DartsApiException.class, () ->
+            DartsApiException exception = assertThrows(DartsApiException.class, () ->
                 mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
 
+            // Then
+            assertEquals("Hide reason is incorrect", exception.getMessage());
             verifyNoInteractions(objectAdminActionRepository);
             verifyNoInteractions(applyAdminActionComponent);
         }
