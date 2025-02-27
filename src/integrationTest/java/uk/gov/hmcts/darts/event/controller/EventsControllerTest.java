@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity_;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DataAnonymisationEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -29,6 +30,10 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetailsCasesCasesInner;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetailsHearingsHearingsInner;
+import uk.gov.hmcts.darts.event.model.CourthouseResponseDetails;
+import uk.gov.hmcts.darts.event.model.CourtroomResponseDetails;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
@@ -37,6 +42,7 @@ import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.EventLinkedCaseStub;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -81,6 +87,9 @@ class EventsControllerTest extends IntegrationBase {
     @Autowired
     private DartsDatabaseStub dartsDatabaseStub;
 
+    @Autowired
+    private EventLinkedCaseStub eventLinkedCaseStub;
+
     @Test
     void eventsApiPostEndpoint() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(CPP);
@@ -122,6 +131,8 @@ class EventsControllerTest extends IntegrationBase {
         HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", hearingDate);
         EventEntity eventEntity = dartsDatabaseStub.createEvent(hearing);
 
+        eventLinkedCaseStub.createCaseLinkedEvent(eventEntity, hearing.getCourtCase());
+
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
@@ -152,7 +163,32 @@ class EventsControllerTest extends IntegrationBase {
         Assertions.assertEquals(eventEntity.getCreatedBy().getId(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getLastModifiedAt());
         Assertions.assertEquals(eventEntity.getLastModifiedBy().getId(), responseResult.getLastModifiedBy());
-        //TODO add case / hearing validation
+
+        assertThat(responseResult.getHearings()).hasSize(1);
+        AdminGetEventResponseDetailsHearingsHearingsInner hearingsInner = responseResult.getHearings().getFirst();
+
+        assertThat(hearingsInner.getId()).isEqualTo(hearing.getId());
+        assertThat(hearingsInner.getCaseId()).isEqualTo(hearing.getCourtCase().getId());
+        assertThat(hearingsInner.getCaseNumber()).isEqualTo(hearing.getCourtCase().getCaseNumber());
+        assertThat(hearingsInner.getHearingDate()).isEqualTo(hearing.getHearingDate());
+
+        CourthouseResponseDetails courthouseResponseDetails = hearingsInner.getCourthouse();
+        CourtroomResponseDetails courtroomResponseDetails = hearingsInner.getCourtroom();
+
+        assertThat(courthouseResponseDetails.getId()).isEqualTo(hearing.getCourtroom().getCourthouse().getId());
+        assertThat(courthouseResponseDetails.getDisplayName()).isEqualTo(hearing.getCourtroom().getCourthouse().getDisplayName());
+
+        assertThat(courtroomResponseDetails.getId()).isEqualTo(hearing.getCourtroom().getId());
+        assertThat(courtroomResponseDetails.getName()).isEqualTo(hearing.getCourtroom().getName());
+
+        assertThat(responseResult.getCases()).hasSize(1);
+        AdminGetEventResponseDetailsCasesCasesInner casesCasesInner = responseResult.getCases().getFirst();
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+
+        assertThat(casesCasesInner.getId()).isEqualTo(courtCaseEntity.getId());
+        assertThat(casesCasesInner.getCaseNumber()).isEqualTo(courtCaseEntity.getCaseNumber());
+        assertThat(casesCasesInner.getCourthouse().getId()).isEqualTo(courtCaseEntity.getCourthouse().getId());
+        assertThat(casesCasesInner.getCourthouse().getDisplayName()).isEqualTo(courtCaseEntity.getCourthouse().getDisplayName());
     }
 
     @Test
