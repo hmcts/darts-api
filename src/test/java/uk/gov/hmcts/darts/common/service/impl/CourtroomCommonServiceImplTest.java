@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
@@ -165,13 +166,10 @@ class CourtroomCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCourtroom_WithWhitespaceString() {
-        when(courtroomRepository.findByNameAndId(1, ""))
-            .thenReturn(Optional.of(existingCourtroom));
-
+        // when
         CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, "  ", userAccount);
 
-        assertNotNull(result);
-        assertEquals("", result.getName());
-        assertEquals(courthouse, result.getCourthouse());
+        // then
+        assertNull(result);
     }
 }
