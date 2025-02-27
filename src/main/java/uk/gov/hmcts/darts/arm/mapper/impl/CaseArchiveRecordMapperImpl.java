@@ -63,8 +63,6 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
-    private static final String CASE_LIST_DELIMITER = "|";
-
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     private final CurrentTimeHelper currentTimeHelper;
