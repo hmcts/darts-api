@@ -186,7 +186,7 @@ public class TestSupportController {
         if (!courthouseName.startsWith("FUNC-")) {
             return new ResponseEntity<>("Courthouse name must start with FUNC-", BAD_REQUEST);
         }
-        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToNull(courthouseName));
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName));
 
         if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUpperTrimmed, courtroomName).isEmpty()) {
             var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUpperTrimmed)
@@ -227,7 +227,7 @@ public class TestSupportController {
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
         Optional<CourthouseEntity> foundCourthouse =
-            courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToNull(courthouseName)));
+            courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName)));
         if (foundCourthouse.isPresent()) {
             courtCase.setCourthouse(foundCourthouse.get());
         } else {

@@ -154,7 +154,7 @@ class CourtroomCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCourtroom_WithBeginingAndEndWhitespace() {
+    void retrieveOrCreateCourtroom_WithCaseInsensitiveSearchAndBeginAndEndWhitespace() {
         when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
             .thenReturn(Optional.of(existingCourtroom));
 

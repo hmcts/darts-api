@@ -23,7 +23,7 @@ public class CourtroomCommonServiceImpl implements CourtroomCommonService {
     @Override
     @Transactional
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
-        final String courtroomNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToNull(courtroomName));
+        final String courtroomNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courtroomName));
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(courthouse.getId(), courtroomNameUpperTrimmed);
         return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomNameUpperTrimmed, userAccount));
     }
@@ -31,7 +31,7 @@ public class CourtroomCommonServiceImpl implements CourtroomCommonService {
     @Override
     @Transactional
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName, UserAccountEntity userAccount) {
-        String courtroomNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToNull(courtroomName));
+        String courtroomNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courtroomName));
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomNameUpperTrimmed);
         if (foundCourtroom.isPresent()) {
             return foundCourtroom.get();
