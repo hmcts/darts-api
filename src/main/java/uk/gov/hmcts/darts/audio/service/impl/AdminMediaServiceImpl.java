@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
+import uk.gov.hmcts.darts.audio.model.PatchAdminMediasByIdRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
@@ -314,6 +315,21 @@ public class AdminMediaServiceImpl implements AdminMediaService {
                 });
         }
         return getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(currentVersion, versionedMedia);
+    }
+
+    @Override
+    @Transactional
+    public void patchMediasById(Integer id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest) {
+        if (!Boolean.TRUE.equals(patchAdminMediasByIdRequest.getIsCurrent())) {
+            throw new DartsApiException(CommonApiError.INVALID_REQUEST, "is_current must be set to true");
+        }
+        MediaEntity mediaEntity = getMediaEntityById(id);
+        if (Boolean.TRUE.equals(mediaEntity.getIsCurrent())) {
+            throw new DartsApiException(AudioApiError.MEDIA_ALREADY_CURRENT);
+        }
+        mediaRepository.setAllAssocaitedMediaToIsCurrentFalseExcludingMediaId(mediaEntity.getChronicleId(), mediaEntity.getId());
+        mediaEntity.setIsCurrent(true);
+        mediaRepository.save(mediaEntity);
     }
 
     private ApplyAdminActionComponent.AdminActionProperties mapToAdminActionProperties(AdminActionRequest adminActionRequest) {

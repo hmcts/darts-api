@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
+import uk.gov.hmcts.darts.audio.model.PatchAdminMediasByIdRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
@@ -170,6 +171,14 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<AdminVersionedMediaResponse> getAdminMediaVersionsById(Integer id) {
         return new ResponseEntity<>(adminMediaService.getMediaVersionsById(id), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    public ResponseEntity<Void> patchAdminMediasById(Integer id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest) {
+        adminMediaService.patchMediasById(id, patchAdminMediasByIdRequest);
+        return ResponseEntity.accepted().build();
     }
 
     @Override
