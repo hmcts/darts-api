@@ -15,18 +15,15 @@ import java.util.List;
 public interface TranscriptionDocumentRepository extends JpaRepository<TranscriptionDocumentEntity, Integer>,
     SoftDeleteRepository<TranscriptionDocumentEntity, Integer> {
 
+
     @Query("""
          SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
          courtCase.id,
          courtCase.caseNumber,
-         hearingCase.id,
          hearingCase.caseNumber,
-         courthouse.id,
          courthouse.displayName,
-         hearingcourthouse.id,
          hearingcourthouse.displayName,
-         hearings.id,
-         hearings.hearingDate,
+         coalesce(hearings.hearingDate, t.hearingDate),
          t.isManualTranscription,
          tmd.isHidden)
               FROM TranscriptionDocumentEntity tmd
@@ -42,7 +39,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              (:caseNumber IS NULL OR ((courtCase.caseNumber=cast(:caseNumber as text) OR hearingCase.caseNumber=cast(:caseNumber as text)))) AND
              (:courtHouseDisplayName IS NULL OR ((courthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%')
              OR (hearingcourthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%'))))) AND
-             ((cast(:hearingDate AS LocalDate)) IS NULL OR (hearings.hearingDate=:hearingDate ))AND
+             ((cast(:hearingDate AS LocalDate)) IS NULL OR (coalesce(hearings.hearingDate, t.hearingDate)=:hearingDate ))AND
              (:isManualTranscription IS NULL OR t.isManualTranscription=:isManualTranscription) AND
              (:requestedBy IS NULL OR (t.requestedBy.userFullName ILIKE CONCAT('%', cast(:requestedBy as text), '%')))AND
              ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (t.createdDateTime >= :requestedAtFrom)) AND
@@ -50,6 +47,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR t.createdDateTime <= :requestedAtTo)
           ORDER BY tmd.id DESC
         """)
+    @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
     List<TranscriptionDocumentResult> findTranscriptionMedia(String caseNumber,
                                                              String courtHouseDisplayName,
                                                              LocalDate hearingDate,

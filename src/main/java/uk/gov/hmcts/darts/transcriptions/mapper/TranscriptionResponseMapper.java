@@ -104,12 +104,10 @@ public class TranscriptionResponseMapper {
         List<TranscriptionCommentEntity> migratedTranscriptionComments
     ) {
 
-        List<GetTranscriptionWorkflowsResponse> result = new ArrayList<>();
-
         List<GetTranscriptionWorkflowsResponse> responseFromTranscriptionWorkflows = transcriptionWorkflowEntities.stream()
             .map(this::mapToTranscriptionWorkflows)
             .toList();
-        result.addAll(responseFromTranscriptionWorkflows);
+        List<GetTranscriptionWorkflowsResponse> result = new ArrayList<>(responseFromTranscriptionWorkflows);
 
         var responseFromMigratedComments = migratedTranscriptionComments.stream().map(this::mapMigratedCommentToTranscriptionWorkflows).toList();
         result.addAll(responseFromMigratedComments);
@@ -203,7 +201,7 @@ public class TranscriptionResponseMapper {
             transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
         if (CollectionUtils.isNotEmpty(transcriptionEntity.getHearings())) {
-            HearingEntity hearing = transcriptionEntity.getHearings().get(0);
+            HearingEntity hearing = transcriptionEntity.getHearings().getFirst();
             transcriptionResponse.setHearingId(hearing.getId());
             transcriptionResponse.setHearingDate(hearing.getHearingDate());
         } else {
@@ -330,34 +328,25 @@ public class TranscriptionResponseMapper {
         transformedMediaDetails.isHidden(transcriptionDocumentResponse.isHidden());
 
         // prioritise the case from the hearing
-        if (transcriptionDocumentResponse.hearingCaseId() != null) {
-            SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
-            caseResponse.setId(transcriptionDocumentResponse.hearingCaseId());
+        SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
+        if (transcriptionDocumentResponse.hearingCaseNumber() != null) {
             caseResponse.setCaseNumber(transcriptionDocumentResponse.hearingCaseNumber());
-            transformedMediaDetails.setCase(caseResponse);
         } else {
-            SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
-            caseResponse.setId(transcriptionDocumentResponse.caseId());
             caseResponse.setCaseNumber(transcriptionDocumentResponse.caseNumber());
-            transformedMediaDetails.setCase(caseResponse);
         }
+        transformedMediaDetails.setCase(caseResponse);
 
         // prioritise the courthouse that is connected to the hearing
-        if (transcriptionDocumentResponse.hearingCourthouseId() != null) {
-            SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
-            courthouseResponse.setId(transcriptionDocumentResponse.hearingCourthouseId());
+        SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
+        if (transcriptionDocumentResponse.hearingCourthouseDisplayName() != null) {
             courthouseResponse.setDisplayName(transcriptionDocumentResponse.hearingCourthouseDisplayName());
-            transformedMediaDetails.setCourthouse(courthouseResponse);
         } else {
-            SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
-            courthouseResponse.setId(transcriptionDocumentResponse.courthouseId());
             courthouseResponse.setDisplayName(transcriptionDocumentResponse.courthouseDisplayName());
-            transformedMediaDetails.setCourthouse(courthouseResponse);
         }
+        transformedMediaDetails.setCourthouse(courthouseResponse);
 
-        if (transcriptionDocumentResponse.hearingId() != null) {
+        if (transcriptionDocumentResponse.hearingDate() != null) {
             SearchTranscriptionDocumentResponseHearing hearingResponse = new SearchTranscriptionDocumentResponseHearing();
-            hearingResponse.setId(transcriptionDocumentResponse.hearingId());
             hearingResponse.setHearingDate(transcriptionDocumentResponse.hearingDate());
             transformedMediaDetails.setHearing(hearingResponse);
         }
@@ -406,7 +395,7 @@ public class TranscriptionResponseMapper {
             return null;
         }
 
-        var action = entity.getAdminActions().get(0); // assume only 1 exists
+        var action = entity.getAdminActions().getFirst(); // assume only 1 exists
         return new AdminAction()
             .comments(action.getComments())
             .id(action.getId())
@@ -468,7 +457,7 @@ public class TranscriptionResponseMapper {
 
         AdminAction adminAction = buildAdminAction(transcriptionDocumentEntity);
 
-        // if the hearing is null then dont read any associated information
+        // if the hearing is null then don't read any associated information
         if (transcriptionDocumentEntity.getTranscription().getHearing() != null) {
             CaseResponseDetails caseResponseDetails = new CaseResponseDetails();
             caseResponseDetails.setId(transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getId());

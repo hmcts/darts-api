@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 import static uk.gov.hmcts.darts.test.common.data.RetentionPolicyTypeTestData.someMinimalRetentionPolicyType;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class CaseRetentionTestData {
+public final class CaseRetentionTestData {
 
     private CaseRetentionTestData() {
 

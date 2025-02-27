@@ -19,7 +19,7 @@ import java.util.List;
 import static uk.gov.hmcts.darts.test.common.data.ObjectAdminActionTestData.objectAdminActionWithDefaults;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class TranscriptionDocumentTestData
+public final class TranscriptionDocumentTestData
     implements Persistable<TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve,
     TranscriptionDocumentEntity, TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder> {
 

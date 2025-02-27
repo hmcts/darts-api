@@ -13,8 +13,7 @@ import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 
-
-public class EventTestData {
+public final class EventTestData {
 
     public static final int REPORTING_RESTRICTIONS_LIFTED_DB_ID = 192;
 

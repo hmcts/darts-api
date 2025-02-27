@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestRetentionConfidenceCatego
 
 import java.time.OffsetDateTime;
 
-public class RetentionConfidenceCategoryMapperTestData
+public final class RetentionConfidenceCategoryMapperTestData
     implements Persistable<TestRetentionConfidenceCategoryMapperEntity.TestRetentionConfidenceCategoryMapperRetrieve,
     RetentionConfidenceCategoryMapperEntity,
     TestRetentionConfidenceCategoryMapperEntity.TestRetentionConfidenceCategoryMapperEntityBuilder> {
