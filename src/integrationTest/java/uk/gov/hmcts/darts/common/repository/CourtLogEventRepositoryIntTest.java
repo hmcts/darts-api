@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
+class CourtLogEventRepositoryIntTest extends IntegrationBase {
 
     @Autowired
     private CourtLogEventRepository courtLogEventRepository;
@@ -38,8 +38,7 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
             SOME_COURTROOM,
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
-
-
+        
         eventEntity1 = dartsDatabase.createEvent(hearingEntity, 54);
         eventEntity2 = dartsDatabase.createEvent(hearingEntity, 54);
         eventEntity3 = dartsDatabase.createEvent(hearingEntity, 32);
