@@ -178,6 +178,7 @@ components:
       x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST,
                          FEATURE_FLAG_NOT_ENABLED,
                          NOT_FOUND, INTERNAL_SERVER_ERROR ]
+                         INVALID_REQUEST ]
 
     CommonTitleErrors:
       type: string
@@ -186,7 +187,9 @@ components:
         - "Feature flag not enabled"
         - "Resource not found"
         - "Internal server error"
+        - "Invalid request"
       x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST ,
                          FEATURE_FLAG_NOT_ENABLED,
                          NOT_FOUND, INTERNAL_SERVER_ERROR
+                         INVALID_REQUEST
       ]
