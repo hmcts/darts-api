@@ -45,6 +45,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -56,6 +57,7 @@ import uk.gov.hmcts.darts.common.validation.IdRequest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -287,25 +289,25 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         List<MediaEntity> currentMediaVersions = mediaVersions.stream()
             .filter(mediaEntity -> mediaEntity.getIsCurrent() != null)
             .filter(media -> media.getIsCurrent())
-            .sorted((o1, o2) -> o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime()))
+            .sorted(Comparator.comparing(CreatedBaseEntity::getCreatedDateTime).reversed())
             .collect(Collectors.toCollection(ArrayList::new));
 
         List<MediaEntity> versionedMedia = mediaVersions.stream()
             .filter(media -> media.getIsCurrent() == null || !media.getIsCurrent())
-            .sorted((o1, o2) -> o2.getCreatedDateTime().compareTo(o1.getCreatedDateTime()))
+            .sorted(Comparator.comparing(CreatedBaseEntity::getCreatedDateTime).reversed())
             .collect(Collectors.toCollection(ArrayList::new));
 
         MediaEntity currentVersion;
         if (currentMediaVersions.size() == 1) {
             currentVersion = currentMediaVersions.getLast();
-        } else if (currentMediaVersions.size() == 0) {
+        } else if (currentMediaVersions.isEmpty()) {
             currentVersion = null;
-            log.info("Media with id {} has {} current versions", id, currentMediaVersions.size());
+            log.info("Media with id {} has no current versions", id);
         } else {
             log.warn("Media with id {} has {} current versions we only expect one", id, currentMediaVersions.size());
             currentVersion = currentMediaVersions.getLast();
             //Add any extra current events to top of versionedMedia so they still get displayed
-            currentMediaVersions.removeLast();
+            currentMediaVersions.removeFirst();
             currentMediaVersions
                 .forEach(mediaEntity -> {
                     versionedMedia.addFirst(mediaEntity);

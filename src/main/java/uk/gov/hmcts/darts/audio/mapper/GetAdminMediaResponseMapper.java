@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -137,7 +138,7 @@ public class GetAdminMediaResponseMapper {
         response.setPreviousVersions(
             mediaVersions.stream()
                 .map(this::mapAdminMediaVersionResponse)
-                .filter(adminMediaVersionResponse -> adminMediaVersionResponse != null)
+                .filter(Objects::nonNull)
                 .toList()
         );
         return response;
