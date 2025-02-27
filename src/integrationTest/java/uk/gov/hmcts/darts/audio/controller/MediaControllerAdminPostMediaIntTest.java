@@ -36,7 +36,6 @@ import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -426,9 +425,8 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
                 new Customization("admin_action.id", (actual, expected) -> adminActionEntity.getId().equals(actual)),
                 new Customization("admin_action.reason_id", (actual, expected) -> HiddenReason.OTHER_HIDE.getId().equals(actual)),
                 new Customization("admin_action.hidden_by_id", (actual, expected) -> clientUser.getId().equals(actual)),
-                new Customization("admin_action.hidden_at", (actual, expected) ->
-                    adminActionEntity.getHiddenDateTime().format(DateTimeFormatter.ISO_DATE_TIME).equals(actual))
-                )
+                new Customization("admin_action.hidden_at", (actual, expected) -> isIsoDateTimeString((String) actual))
+            )
         );
 
         // And assert further DB state
