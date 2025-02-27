@@ -23,8 +23,8 @@ public class CaseCommonServiceImpl implements CaseCommonService {
     @Override
     @Transactional
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
-        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
-        Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(caseNumber, courthouseNameUC);
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToNull(courthouseName));
+        Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(caseNumber, courthouseNameUpperTrimmed);
         return foundCase
             .map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
             .orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
