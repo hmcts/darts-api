@@ -289,7 +289,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         List<MediaEntity> currentMediaVersions = mediaVersions.stream()
             .filter(mediaEntity -> mediaEntity.getIsCurrent() != null)
             .filter(media -> media.getIsCurrent())
-            .sorted(Comparator.comparing(CreatedBaseEntity::getCreatedDateTime).reversed())
+            .sorted(Comparator.comparing(CreatedBaseEntity::getCreatedDateTime))
             .collect(Collectors.toCollection(ArrayList::new));
 
         List<MediaEntity> versionedMedia = mediaVersions.stream()
@@ -307,7 +307,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             log.warn("Media with id {} has {} current versions we only expect one", id, currentMediaVersions.size());
             currentVersion = currentMediaVersions.getLast();
             //Add any extra current events to top of versionedMedia so they still get displayed
-            currentMediaVersions.removeFirst();
+            currentMediaVersions.removeLast();
             currentMediaVersions
                 .forEach(mediaEntity -> {
                     versionedMedia.addFirst(mediaEntity);
