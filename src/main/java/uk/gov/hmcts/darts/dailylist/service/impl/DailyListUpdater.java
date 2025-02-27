@@ -92,7 +92,7 @@ class DailyListUpdater {
             DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
             for (CourtList courtList : dailyList.getCourtLists()) {
 
-                String courtHouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToNull(courtList.getCourtHouse().getCourtHouseName()));
+                String courtHouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courtList.getCourtHouse().getCourtHouseName()));
                 Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(courtHouseNameUpperTrimmed);
 
                 if (foundCourthouse.isPresent()) {
