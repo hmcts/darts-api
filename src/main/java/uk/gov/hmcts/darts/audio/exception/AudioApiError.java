@@ -95,6 +95,11 @@ public enum AudioApiError implements DartsApiError {
         AddAudioErrorCode.START_TIME_END_TIME_NOT_VALID.getValue(),
         HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.START_TIME_END_TIME_NOT_VALID.getValue()
+    ),
+    MEDIA_ALREADY_CURRENT(
+        AddAudioErrorCode.MEDIA_ALREADY_CURRENT.getValue(),
+        HttpStatus.CONFLICT,
+        AddAudioTitleErrors.MEDIA_ALREADY_CURRENT.getValue()
     );
 
 
