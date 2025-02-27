@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,6 +36,7 @@ import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -396,6 +396,12 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
             .andReturn();
 
         // Then
+        List<ObjectAdminActionEntity> adminActionsForTargetedMedia = objectAdminActionRepository.findAll().stream()
+            .filter(adminAction -> adminAction.getMedia().getId().equals(originalTargetedMedia.getId()))
+            .toList();
+        assertEquals(1, adminActionsForTargetedMedia.size());
+        ObjectAdminActionEntity adminActionEntity = adminActionsForTargetedMedia.getFirst();
+
         JSONAssert.assertEquals(
             """
                         {
@@ -417,14 +423,15 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
             new CustomComparator(
                 JSONCompareMode.NON_EXTENSIBLE,
                 new Customization("id", (actual, expected) -> originalTargetedMedia.getId().equals(actual)),
-                new Customization("admin_action.id", new RegularExpressionValueMatcher<>("\\d+")),
+                new Customization("admin_action.id", (actual, expected) -> adminActionEntity.getId().equals(actual)),
                 new Customization("admin_action.reason_id", (actual, expected) -> HiddenReason.OTHER_HIDE.getId().equals(actual)),
                 new Customization("admin_action.hidden_by_id", (actual, expected) -> clientUser.getId().equals(actual)),
-                new Customization("admin_action.hidden_at", (actual, expected) -> isIsoDateTimeString((String) actual))
+                new Customization("admin_action.hidden_at", (actual, expected) ->
+                    adminActionEntity.getHiddenDateTime().format(DateTimeFormatter.ISO_DATE_TIME).equals(actual))
                 )
         );
 
-        // And assert DB state
+        // And assert further DB state
         getTransactionalUtil().executeInTransaction(() -> {
             MediaEntity finalTargetedMedia = mediaRepository.findById(originalTargetedMedia.getId())
                 .orElseThrow();
