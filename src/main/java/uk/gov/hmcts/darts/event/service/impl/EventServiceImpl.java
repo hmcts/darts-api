@@ -29,7 +29,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public AdminGetEventById200Response adminGetEventById(Integer eventId) {
-        return eventMapper.mapToAdminGetEventsResponseForId(getEventByEveId(eventId));
+        return eventMapper.mapToAdminGetEventById200Response(getEventByEveId(eventId));
     }
 
     @Override

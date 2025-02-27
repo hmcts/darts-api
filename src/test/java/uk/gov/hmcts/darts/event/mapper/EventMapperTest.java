@@ -82,7 +82,7 @@ class EventMapperTest {
 
 
         // Given
-        AdminGetEventById200Response responseResult = eventMapper.mapToAdminGetEventsResponseForId(eventEntity);
+        AdminGetEventById200Response responseResult = eventMapper.mapToAdminGetEventById200Response(eventEntity);
 
         // Then
         assertAdminEventResponseDetails(eventEntity, responseResult);

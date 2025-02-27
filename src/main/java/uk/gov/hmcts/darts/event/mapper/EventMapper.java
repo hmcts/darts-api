@@ -26,9 +26,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EventMapper {
 
-    public AdminGetEventById200Response mapToAdminGetEventsResponseForId(EventEntity eventEntity) {
-        AdminGetEventById200Response adminGetEventResponseDetail = new AdminGetEventById200Response();
+    public AdminGetEventResponseDetails mapToAdminGetEventResponseDetails(EventEntity eventEntity) {
+        return mapToAdminGetEventsResponseForId(eventEntity, new AdminGetEventResponseDetails());
+    }
 
+    public AdminGetEventById200Response mapToAdminGetEventById200Response(EventEntity eventEntity) {
+        AdminGetEventById200Response response = new AdminGetEventById200Response();
+        mapToAdminGetEventsResponseForId(eventEntity, response);
+
+        response.setCases(mapAdminGetEventResponseDetailsCasesCases(eventEntity.getLinkedCases()));
+        response.setHearings(mapAdminGetEventResponseDetailsHearingsHearings(eventEntity.getHearingEntities()));
+        return response;
+    }
+
+    private <T extends AdminGetEventResponseDetails> T mapToAdminGetEventsResponseForId(EventEntity eventEntity, T adminGetEventResponseDetail) {
         adminGetEventResponseDetail.setId(eventEntity.getId());
         adminGetEventResponseDetail.setDocumentumId(eventEntity.getLegacyObjectId());
         adminGetEventResponseDetail.setSourceId(eventEntity.getEventId());
@@ -61,12 +72,9 @@ public class EventMapper {
         adminGetEventResponseDetail.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
         adminGetEventResponseDetail.setLastModifiedBy(eventEntity.getLastModifiedBy().getId());
         adminGetEventResponseDetail.setIsDataAnonymised(eventEntity.isDataAnonymised());
-
-        adminGetEventResponseDetail.setCases(mapAdminGetEventResponseDetailsCasesCases(eventEntity.getLinkedCases()));
-        adminGetEventResponseDetail.setHearings(mapAdminGetEventResponseDetailsHearingsHearings(eventEntity.getHearingEntities()));
-
         return adminGetEventResponseDetail;
     }
+
 
     List<AdminGetEventResponseDetailsHearingsHearingsInner> mapAdminGetEventResponseDetailsHearingsHearings(
         List<HearingEntity> hearingEntities) {
@@ -146,10 +154,10 @@ public class EventMapper {
 
         for (EventEntity eventEntity : eventEntities.stream().sorted(Comparator.comparing(EventEntity::getCreatedDateTime).reversed()).toList()) {
             if (currentEventEntity.isPresent() && eventEntity.equals(currentEventEntity.get())) {
-                adminGetEventsForIdResponse.setCurrentVersion(mapToAdminGetEventsResponseForId(eventEntity));
+                adminGetEventsForIdResponse.setCurrentVersion(mapToAdminGetEventResponseDetails(eventEntity));
                 continue;
             }
-            previousVersions.add(mapToAdminGetEventsResponseForId(eventEntity));
+            previousVersions.add(mapToAdminGetEventResponseDetails(eventEntity));
         }
 
         adminGetEventsForIdResponse.setPreviousVersions(previousVersions);

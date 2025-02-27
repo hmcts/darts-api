@@ -28,7 +28,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
-import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetails;
+import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
@@ -130,8 +130,8 @@ class EventsControllerTest extends IntegrationBase {
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
-        AdminGetEventResponseDetails responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                                                 AdminGetEventResponseDetails.class);
+        AdminGetEventById200Response responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
+                                                                             AdminGetEventById200Response.class);
 
         // Then
         Assertions.assertEquals(eventEntity.getId(), responseResult.getId());
@@ -152,6 +152,7 @@ class EventsControllerTest extends IntegrationBase {
         Assertions.assertEquals(eventEntity.getCreatedBy().getId(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getLastModifiedAt());
         Assertions.assertEquals(eventEntity.getLastModifiedBy().getId(), responseResult.getLastModifiedBy());
+        //TODO add case / hearing validation
     }
 
     @Test
