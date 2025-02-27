@@ -80,6 +80,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("PMD.CouplingBetweenObjects")
@@ -983,7 +984,7 @@ class AdminMediaServiceImplTest {
 
             // When
             IllegalStateException exception = assertThrows(IllegalStateException.class,
-                                                               () -> mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
+                                                           () -> mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
 
             // Then
             assertEquals(exception.getMessage(), "Media not found, expected this to be pre-validated");
