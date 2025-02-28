@@ -53,7 +53,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     @Autowired
     UserAccountRepository userAccountRepository;
     @Autowired
-    private transient MockMvc mockMvc;
+    private MockMvc mockMvc;
     private CourthouseEntity swanseaCourthouse;
     private UserAccountEntity user;
 
