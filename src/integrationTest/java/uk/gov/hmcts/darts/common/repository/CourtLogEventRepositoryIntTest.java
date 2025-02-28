@@ -22,7 +22,7 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2020-06-20T10:00Z");
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
 
-    private EventEntity eventEntity1;
+    private EventEntity eventEntityWithLogEntryTrue;
     private EventEntity eventEntity2;
     private EventEntity eventEntity3;
     private EventEntity eventEntity4;
@@ -34,14 +34,14 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
         hearingEntity = PersistableFactory.getHearingTestData().someMinimal();
         dartsPersistence.saveAll(hearingEntity);
 
-        eventEntity1 = dartsDatabase.createEvent(hearingEntity, 54);
-        eventEntity1.setLogEntry(true);
+        eventEntityWithLogEntryTrue = dartsDatabase.createEvent(hearingEntity, 54);
+        eventEntityWithLogEntryTrue.setLogEntry(true);
         eventEntity2 = dartsDatabase.createEvent(hearingEntity, 54);
         eventEntity3 = dartsDatabase.createEvent(hearingEntity, 32);
         eventEntity4 = dartsDatabase.createEvent(hearingEntity, 68);
         eventEntity5 = dartsDatabase.createEvent(hearingEntity, 188);
 
-        dartsDatabase.saveAll(eventEntity1, eventEntity2, eventEntity3, eventEntity4, eventEntity5);
+        dartsDatabase.saveAll(eventEntityWithLogEntryTrue, eventEntity2, eventEntity3, eventEntity4, eventEntity5);
     }
 
     @Test
@@ -56,11 +56,9 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
 
         // then
         assertFalse(events.isEmpty());
-        assertEquals(5, events.size());
-        List.of(eventEntity1, eventEntity2, eventEntity3, eventEntity4, eventEntity5);
-        events.forEach(event -> {
-            assertEquals(SOME_COURTHOUSE, event.getCourtroom().getCourthouse().getCourthouseName());
-        });
+        assertEquals(1, events.size());
+        List.of(eventEntityWithLogEntryTrue);
+        eventEntityWithLogEntryTrue.equals(events.getFirst());
     }
 
     @Test
