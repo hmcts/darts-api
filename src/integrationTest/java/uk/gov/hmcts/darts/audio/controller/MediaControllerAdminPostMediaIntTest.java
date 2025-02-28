@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.skyscreamer.jsonassert.Customization;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -14,15 +18,19 @@ import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.model.Problem;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.HiddenReason;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -33,6 +41,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -348,4 +357,196 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
         assertEquals(AudioApiError.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getType(), problemResponse.getType());
     }
+
+    @Test
+    void shouldHideTargetedMediaAndAllOtherVersions_whenTargetedMediaHasChronicleId() throws Exception {
+        // Given
+        MediaEntity originalTargetedMedia = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .chronicleId("1000")
+            .isHidden(false)
+            .build()
+            .getEntity();
+        MediaEntity originalOtherVersion = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .chronicleId("1000")
+            .isHidden(false)
+            .build()
+            .getEntity();
+        dartsPersistence.saveAll(originalTargetedMedia, originalOtherVersion);
+
+        AdminActionRequest adminActionRequest = new AdminActionRequest();
+        adminActionRequest.setReasonId(HiddenReason.OTHER_HIDE.getId());
+        adminActionRequest.setComments("some comment");
+        adminActionRequest.setTicketReference("some ticket ref");
+
+        MediaHideRequest mediaHideRequest = new MediaHideRequest();
+        mediaHideRequest.setAdminAction(adminActionRequest);
+        mediaHideRequest.setIsHidden(true);
+
+        UserAccountEntity clientUser = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        // When
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
+                MEDIA_ID_SUBSTITUTION_KEY, originalTargetedMedia.getId().toString()))
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(mediaHideRequest)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        // Then
+        List<ObjectAdminActionEntity> adminActionsForTargetedMedia = objectAdminActionRepository.findAll().stream()
+            .filter(adminAction -> adminAction.getMedia().getId().equals(originalTargetedMedia.getId()))
+            .toList();
+        assertEquals(1, adminActionsForTargetedMedia.size());
+        ObjectAdminActionEntity adminActionEntity = adminActionsForTargetedMedia.getFirst();
+
+        JSONAssert.assertEquals(
+            """
+                        {
+                          "id": 0,
+                          "is_hidden": true,
+                          "is_deleted": false,
+                          "admin_action": {
+                            "id": 0,
+                            "reason_id": 0,
+                            "hidden_by_id": 15000,
+                            "hidden_at": "",
+                            "is_marked_for_manual_deletion": false,
+                            "ticket_reference": "some ticket ref",
+                            "comments": "some comment"
+                          }
+                        }
+                """,
+            mvcResult.getResponse().getContentAsString(),
+            new CustomComparator(
+                JSONCompareMode.NON_EXTENSIBLE,
+                new Customization("id", (actual, expected) -> originalTargetedMedia.getId().equals(actual)),
+                new Customization("admin_action.id", (actual, expected) -> adminActionEntity.getId().equals(actual)),
+                new Customization("admin_action.reason_id", (actual, expected) -> HiddenReason.OTHER_HIDE.getId().equals(actual)),
+                new Customization("admin_action.hidden_by_id", (actual, expected) -> clientUser.getId().equals(actual)),
+                new Customization("admin_action.hidden_at", (actual, expected) -> isIsoDateTimeString((String) actual))
+            )
+        );
+
+        // And assert further DB state
+        getTransactionalUtil().executeInTransaction(() -> {
+            MediaEntity finalTargetedMedia = mediaRepository.findById(originalTargetedMedia.getId())
+                .orElseThrow();
+            assertTrue(finalTargetedMedia.isHidden());
+            assertTrue(finalTargetedMedia.getObjectAdminAction().isPresent());
+
+            ObjectAdminActionEntity adminAction = finalTargetedMedia.getObjectAdminAction().get();
+            assertEquals(HiddenReason.OTHER_HIDE.getId(), adminAction.getObjectHiddenReason().getId());
+            assertEquals(originalTargetedMedia.getId(), adminAction.getMedia().getId());
+            assertEquals(clientUser.getId(), adminAction.getHiddenBy().getId());
+            assertNotNull(adminAction.getHiddenDateTime());
+            assertFalse(adminAction.isMarkedForManualDeletion());
+            assertNull(adminAction.getMarkedForManualDelBy());
+            assertEquals("some ticket ref", adminAction.getTicketReference());
+            assertEquals("some comment", adminAction.getComments());
+        });
+
+        getTransactionalUtil().executeInTransaction(() -> {
+            MediaEntity finalOtherVersion = mediaRepository.findById(originalOtherVersion.getId())
+                .orElseThrow();
+            assertTrue(finalOtherVersion.isHidden());
+            assertTrue(finalOtherVersion.getObjectAdminAction().isPresent());
+
+            ObjectAdminActionEntity adminAction = finalOtherVersion.getObjectAdminAction().get();
+            assertEquals(HiddenReason.OTHER_HIDE.getId(), adminAction.getObjectHiddenReason().getId());
+            assertEquals(originalOtherVersion.getId(), adminAction.getMedia().getId());
+            assertEquals(clientUser.getId(), adminAction.getHiddenBy().getId());
+            assertNotNull(adminAction.getHiddenDateTime());
+            assertFalse(adminAction.isMarkedForManualDeletion());
+            assertNull(adminAction.getMarkedForManualDelBy());
+            assertEquals("some ticket ref", adminAction.getTicketReference());
+            assertEquals("some comment", adminAction.getComments());
+        });
+
+        List<AuditEntity> hideAudio = dartsDatabase.getAuditRepository().findAll().stream()
+            .filter(audit -> AuditActivity.HIDE_AUDIO.getId().equals(audit.getAuditActivity().getId()))
+            .toList();
+        assertEquals(2, hideAudio.size());
+    }
+
+    @Test
+    void shouldUnHideTargetedMediaAndAllOtherVersions_whenTargetedMediaHasChronicleId() throws Exception {
+        // Given
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MediaEntity originalTargetedMedia = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .chronicleId("1000")
+            .isHidden(true)
+            .build()
+            .getEntity();
+        MediaEntity originalOtherVersion = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .chronicleId("1000")
+            .isHidden(true)
+            .build()
+            .getEntity();
+        dartsPersistence.saveAll(originalTargetedMedia, originalOtherVersion);
+
+        ObjectAdminActionEntity targetedMediaAction = PersistableFactory.getObjectAdminActionTestData()
+            .someMinimalBuilder()
+            .media(originalTargetedMedia)
+            .build()
+            .getEntity();
+        ObjectAdminActionEntity otherVersionAction = PersistableFactory.getObjectAdminActionTestData()
+            .someMinimalBuilder()
+            .media(originalOtherVersion)
+            .build()
+            .getEntity();
+        dartsPersistence.saveAll(targetedMediaAction, otherVersionAction);
+
+        MediaHideRequest mediaHideRequest = new MediaHideRequest();
+        mediaHideRequest.setIsHidden(false);
+
+        // When
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
+                MEDIA_ID_SUBSTITUTION_KEY, originalTargetedMedia.getId().toString()))
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(mediaHideRequest)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        // Then
+        JSONAssert.assertEquals(
+            """
+                {
+                  "id": 0,
+                  "is_hidden": false,
+                  "is_deleted": false
+                }
+                """,
+            mvcResult.getResponse().getContentAsString(),
+            new CustomComparator(
+                JSONCompareMode.NON_EXTENSIBLE,
+                new Customization("id", (actual, expected) -> actual.equals(originalTargetedMedia.getId()))
+            )
+        );
+
+        // And assert DB state
+        getTransactionalUtil().executeInTransaction(() -> {
+            MediaEntity finalTargetedMedia = mediaRepository.findById(originalTargetedMedia.getId())
+                .orElseThrow();
+            assertFalse(finalTargetedMedia.isHidden());
+            assertFalse(finalTargetedMedia.getObjectAdminAction().isPresent());
+        });
+
+        getTransactionalUtil().executeInTransaction(() -> {
+            MediaEntity finalOtherVersion = mediaRepository.findById(originalOtherVersion.getId())
+                .orElseThrow();
+            assertFalse(finalOtherVersion.isHidden());
+            assertFalse(finalOtherVersion.getObjectAdminAction().isPresent());
+        });
+
+        List<AuditEntity> hideAudio = dartsDatabase.getAuditRepository().findAll().stream()
+            .filter(audit -> AuditActivity.UNHIDE_AUDIO.getId().equals(audit.getAuditActivity().getId()))
+            .toList();
+        assertEquals(2, hideAudio.size());
+    }
+
 }
