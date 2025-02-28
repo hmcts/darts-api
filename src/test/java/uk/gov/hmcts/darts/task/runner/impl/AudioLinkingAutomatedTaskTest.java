@@ -122,7 +122,8 @@ class AudioLinkingAutomatedTaskTest {
         void processEvent_shouldLinkAudio_whenUsingNoBufferTime() {
             doNothing().when(mediaLinkedCaseHelper)
                 .linkMediaByEvent(any(), any(), any(), any());
-
+            doReturn(Duration.ofSeconds(0)).when(eventProcessor).getPreAmbleDuration();
+            doReturn(Duration.ofSeconds(0)).when(eventProcessor).getPostAmbleDuration();
             EventEntity event = mock(EventEntity.class);
             when(eventService.getEventByEveId(1)).thenReturn(event);
             OffsetDateTime timestamp = OffsetDateTime.now();
@@ -145,9 +146,7 @@ class AudioLinkingAutomatedTaskTest {
             verify(mediaLinkedCaseHelper, times(1))
                 .linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaRepository, times(1))
-                .findAllByMediaTimeContains(123,
-                                            timestamp.minus(Duration.ofSeconds(1)),
-                                            timestamp.plus(Duration.ofSeconds(2)));
+                .findAllByMediaTimeContains(123, timestamp, timestamp);
             verify(event, times(1))
                 .setEventStatus(3);
 
@@ -185,7 +184,7 @@ class AudioLinkingAutomatedTaskTest {
             verify(mediaLinkedCaseHelper, times(1))
                 .linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaRepository, times(1))
-                .findAllByMediaTimeContains(123, timestamp.minus(Duration.ofSeconds(10)), timestamp.plus(Duration.ofSeconds(20)));
+                .findAllByMediaTimeContains(123, timestamp.plus(Duration.ofSeconds(10)), timestamp.minus(Duration.ofSeconds(20)));
             verify(event, times(1))
                 .setEventStatus(3);
             verify(eventService, times(1))

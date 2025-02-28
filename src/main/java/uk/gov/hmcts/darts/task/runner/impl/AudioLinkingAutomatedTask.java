@@ -88,8 +88,8 @@ public class AudioLinkingAutomatedTask
                 EventEntity event = eventService.getEventByEveId(eveId);
                 List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
                     event.getCourtroom().getId(),
-                    event.getTimestamp().minus(getPreAmbleDuration()),
-                    event.getTimestamp().plus(getPostAmbleDuration()));
+                    event.getTimestamp().plus(getPreAmbleDuration()),
+                    event.getTimestamp().minus(getPostAmbleDuration()));
                 mediaEntities.forEach(mediaEntity -> {
                     mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
                 });
