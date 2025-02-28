@@ -76,7 +76,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -612,7 +611,7 @@ class AdminMediaServiceImplTest {
         @Test
         void getMediaVersionsById_shouldReturnEmptyVersionList_whenNoMediaVersionsExist() {
             final String chronicleId = "someChronicleId";
-            MediaEntity mediaEntity = mockMediaEntity(true, chronicleId, OffsetDateTime.now());
+            MediaEntity mediaEntity = createMediaEntity(true, chronicleId, OffsetDateTime.now());
             doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123);
             when(mediaRepository.findAllByChronicleId(chronicleId)).thenReturn(List.of(mediaEntity));
 
@@ -631,9 +630,9 @@ class AdminMediaServiceImplTest {
         void getMediaVersionsById_shouldReturnVersionsAndCurrentMedia_whenVersionsExist() {
             final String chronicleId = "someChronicleId";
             OffsetDateTime now = OffsetDateTime.now();
-            MediaEntity currentMediaEntity = mockMediaEntity(true, chronicleId, now);
-            MediaEntity versionedMediaEntity1 = mockMediaEntity(null, chronicleId, now.plusMinutes(2));
-            MediaEntity versionedMediaEntity2 = mockMediaEntity(false, chronicleId, now.plusMinutes(1));
+            MediaEntity currentMediaEntity = createMediaEntity(true, chronicleId, now);
+            MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
+            MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
 
             doReturn(currentMediaEntity).when(mediaRequestService).getMediaEntityById(123);
             when(mediaRepository.findAllByChronicleId(chronicleId))
@@ -658,8 +657,8 @@ class AdminMediaServiceImplTest {
         void getMediaVersionsById_shouldReturnNullCurrentVersion_ifAllMediaIsCurrentFlase() {
             final String chronicleId = "someChronicleId";
             OffsetDateTime now = OffsetDateTime.now();
-            MediaEntity versionedMediaEntity1 = mockMediaEntity(null, chronicleId, now.plusMinutes(2));
-            MediaEntity versionedMediaEntity2 = mockMediaEntity(false, chronicleId, now.plusMinutes(1));
+            MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
+            MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
 
             doReturn(versionedMediaEntity1).when(mediaRequestService).getMediaEntityById(123);
 
@@ -686,12 +685,12 @@ class AdminMediaServiceImplTest {
         void getMediaVersionsById_shouldReturnLastCreatedMedia_ifMultipleIsCurrentTrueExist() {
             final String chronicleId = "someChronicleId";
             OffsetDateTime now = OffsetDateTime.now();
-            MediaEntity currentMediaEntity1 = mockMediaEntity(true, chronicleId, now.plusMinutes(2));
-            MediaEntity currentMediaEntity2 = mockMediaEntity(true, chronicleId, now);
-            MediaEntity currentMediaEntity3 = mockMediaEntity(true, chronicleId, now.plusMinutes(1));
+            MediaEntity currentMediaEntity1 = createMediaEntity(true, chronicleId, now.plusMinutes(2));
+            MediaEntity currentMediaEntity2 = createMediaEntity(true, chronicleId, now);
+            MediaEntity currentMediaEntity3 = createMediaEntity(true, chronicleId, now.plusMinutes(1));
 
-            MediaEntity versionedMediaEntity1 = mockMediaEntity(null, chronicleId, now.plusMinutes(2));
-            MediaEntity versionedMediaEntity2 = mockMediaEntity(false, chronicleId, now.plusMinutes(1));
+            MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
+            MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
 
             doReturn(currentMediaEntity1).when(mediaRequestService).getMediaEntityById(123);
             when(mediaRepository.findAllByChronicleId(chronicleId))
@@ -712,15 +711,14 @@ class AdminMediaServiceImplTest {
 
         }
 
-        private MediaEntity mockMediaEntity(Boolean isCurrent, String chronicleId, OffsetDateTime offsetDateTime) {
-            MediaEntity mediaEntity = mock(MediaEntity.class);
-            lenient().when(mediaEntity.getChronicleId()).thenReturn(chronicleId);
-            lenient().when(mediaEntity.getIsCurrent()).thenReturn(isCurrent);
-            lenient().when(mediaEntity.getCreatedDateTime()).thenReturn(offsetDateTime);
-            return mediaEntity;
+        private MediaEntity createMediaEntity(Boolean isCurrent, String chronicleId, OffsetDateTime offsetDateTime) {
+            return PersistableFactory.getMediaTestData().someMinimalBuilder()
+                .chronicleId(chronicleId)
+                .isCurrent(isCurrent)
+                .createdDateTime(offsetDateTime)
+                .build()
+                .getEntity();
         }
-
-
     }
 
 
