@@ -11,10 +11,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.TestMediaEntity;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
-
-import java.time.OffsetDateTime;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -41,8 +38,6 @@ public class AudioTransformationServiceGivenBuilder {
     private MediaEntity mediaEntity2;
     private MediaEntity mediaEntity3;
     private MediaEntity mediaEntity4;
-    private static final OffsetDateTime MEDIA_START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
-    private static final OffsetDateTime MEDIA_END_TIME = MEDIA_START_TIME.plusHours(1);
 
     public void setupTest() {
         hearingEntityWithMedia1 = PersistableFactory.getHearingTestData().someMinimalHearing();
@@ -50,19 +45,23 @@ public class AudioTransformationServiceGivenBuilder {
         hearingEntityWithMedia3 = PersistableFactory.getHearingTestData().someMinimalHearing();
         hearingEntityWithMedia4 = PersistableFactory.getHearingTestData().someMinimalHearing();
         hearingEntityWithoutMedia = PersistableFactory.getHearingTestData().someMinimalHearing();
-        TestMediaEntity.TestMediaBuilderRetrieve mediaTestData1 = getMediaTestData().someMinimalBuilderHolder();
-        TestMediaEntity.TestMediaBuilderRetrieve mediaTestData2 = getMediaTestData().someMinimalBuilderHolder();
-        TestMediaEntity.TestMediaBuilderRetrieve mediaTestData3 = getMediaTestData().someMinimalBuilderHolder();
-        TestMediaEntity.TestMediaBuilderRetrieve mediaTestData4 = getMediaTestData().someMinimalBuilderHolder();
-
-        int channel = 1;
-        mediaTestData1.getBuilder().channel(1);
-        mediaTestData4.getBuilder().isHidden(true).channel(channel);
-
-        mediaEntity1 = mediaTestData1.build().getEntity();
-        mediaEntity2 = mediaTestData2.build().getEntity();
-        mediaEntity3 = mediaTestData3.build().getEntity();
-        mediaEntity4 = mediaTestData4.build().getEntity();
+        mediaEntity1 = getMediaTestData().someMinimalBuilder()
+            .isCurrent(true)
+            .build()
+            .getEntity();
+        mediaEntity2 = getMediaTestData().someMinimalBuilder()
+            .isCurrent(true)
+            .build()
+            .getEntity();
+        mediaEntity3 = getMediaTestData().someMinimalBuilder()
+            .isCurrent(true)
+            .build()
+            .getEntity();
+        mediaEntity4 = getMediaTestData().someMinimalBuilder()
+            .isCurrent(true)
+            .isHidden(true)
+            .build()
+            .getEntity();
 
         hearingEntityWithMedia1.addMedia(mediaEntity1);
         hearingEntityWithMedia1.addMedia(mediaEntity2);
@@ -71,9 +70,9 @@ public class AudioTransformationServiceGivenBuilder {
 
         dartsPersistence.save(hearingEntityWithMedia1);
         dartsPersistence.save(hearingEntityWithMedia2);
+        dartsPersistence.save(hearingEntityWithMedia3);
         dartsPersistence.save(hearingEntityWithMedia4);
         dartsPersistence.save(hearingEntityWithoutMedia);
-        dartsPersistence.save(mediaEntity3);
     }
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {
@@ -83,8 +82,8 @@ public class AudioTransformationServiceGivenBuilder {
         retrieve.getBuilder().media(mediaEntity).status(dartsDatabase
                                                             .getObjectRecordStatusRepository()
                                                             .getReferenceById(STORED.getId()))
-                                                            .externalLocationType(dartsDatabase
-                                                            .getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()));
+            .externalLocationType(dartsDatabase
+                                      .getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()));
         return dartsDatabase.save(retrieve.build().getEntity());
     }
 }

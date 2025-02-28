@@ -2,17 +2,46 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestCourtroomEntity;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public final class CourtroomTestData {
+public final class CourtroomTestData implements Persistable<TestCourtroomEntity.TestCourtroomEntityBuilderRetrieve,
+    CourtroomEntity,
+    TestCourtroomEntity.TestCourtroomEntityBuilder> {
 
-    private CourtroomTestData() {
+    private static final OffsetDateTime NOW = OffsetDateTime.now();
 
+    @Override
+    public CourtroomEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestCourtroomEntity.TestCourtroomEntityBuilderRetrieve someMinimalBuilderHolder() {
+        var builderRetrieve = new TestCourtroomEntity.TestCourtroomEntityBuilderRetrieve();
+
+        UserAccountEntity someUser = PersistableFactory.getUserAccountTestData().someMinimal();
+
+        builderRetrieve.getBuilder()
+            .courthouse(PersistableFactory.getCourthouseTestData().someMinimal())
+            .name("SOME COURTROOM (%s)".formatted(UUID.randomUUID().toString()))
+            .createdDateTime(NOW)
+            .createdBy(someUser);
+
+        return builderRetrieve;
+    }
+
+    @Override
+    public TestCourtroomEntity.TestCourtroomEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 
     public static CourtroomEntity someMinimalCourtRoom() {
@@ -34,4 +63,5 @@ public final class CourtroomTestData {
         courtroom.setName(name);
         return courtroom;
     }
+
 }

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.testutils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.TokenStub;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,6 +92,7 @@ public class IntegrationBase {
     @Autowired
     protected ObjectMapper objectMapper;
     @Autowired
+    @Getter
     protected TransactionalUtil transactionalUtil;
     @Autowired
     private List<AutomatedOnDemandTask> automatedOnDemandTask;
@@ -177,4 +182,16 @@ public class IntegrationBase {
     protected void anAuthenticatedUserFor(String userEmail) {
         GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }
+
+    // UselessOperationOnImmutable suppression: We don't care about the return value of parse(), we just want to know whether it throws an exception
+    @SuppressWarnings("PMD.UselessOperationOnImmutable")
+    protected boolean isIsoDateTimeString(String string) {
+        try {
+            LocalDateTime.parse(string, DateTimeFormatter.ISO_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+        return true;
+    }
+
 }
