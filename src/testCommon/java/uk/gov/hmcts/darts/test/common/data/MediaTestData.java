@@ -2,12 +2,12 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.builder.TestMediaEntity;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 
 import static java.time.OffsetDateTime.now;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
@@ -21,23 +21,47 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
 
     private static final OffsetDateTime NOW = OffsetDateTime.now();
 
-    private static final String TEST_BINARY_DATA = "test binary data";
-    private static final byte[] MEDIA_TEST_DATA_BINARY_DATA = TEST_BINARY_DATA.getBytes();
+    public static final byte[] MEDIA_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
 
-    private final OffsetDateTime createdAt = NOW;
+    @Override
+    public MediaEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
 
-    private final OffsetDateTime lastModifiedAt = NOW;
+    @Override
+    public TestMediaEntity.TestMediaBuilderRetrieve someMinimalBuilderHolder() {
+        var builderRetrieve = new TestMediaEntity.TestMediaBuilderRetrieve();
 
-    private final CourtroomEntity courtroomTestData = CourtroomTestData.someMinimalCourtRoom();
+        UserAccountEntity someUser = PersistableFactory.getUserAccountTestData().someMinimal();
 
-    MediaTestData() {
+        builderRetrieve.getBuilder()
+            .courtroom(PersistableFactory.getCourtroomTestData().someMinimal())
+            .channel(1)
+            .totalChannels(1)
+            .start(NOW)
+            .end(NOW.plusMinutes(1))
+            .createdDateTime(NOW)
+            .createdBy(someUser)
+            .lastModifiedDateTime(NOW)
+            .lastModifiedBy(someUser)
+            .mediaFile("a-media-file")
+            .mediaFormat("mp2")
+            .fileSize(1000L)
+            .mediaType(MEDIA_TYPE_DEFAULT)
+            .isHidden(false)
+            .isDeleted(false);
 
+        return builderRetrieve;
+    }
+
+    @Override
+    public TestMediaEntity.TestMediaEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 
     /**
-     * Deprecated.
-     *
-     * @deprecated do not use. Instead, use Persistable to create an object with the desired state.
+     * Create a "minimal" media entity.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
     public MediaEntity someMinimalMedia() {
@@ -60,10 +84,22 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
         return media;
     }
 
+    /**
+     * Create a media with specified properties.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
+    @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         return createMediaWith(courtroomEntity, startTime, endTime, channel, "mp2", null, "reason");
     }
 
+    /**
+     * Create a media with specified properties.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
+    @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                        String mediaType, RetentionConfidenceScoreEnum retConfScore, String retConfReason) {
         var mediaEntity = someMinimalMedia();
@@ -79,6 +115,12 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
         return mediaEntity;
     }
 
+    /**
+     * Create a media with specified properties.
+     * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
+     */
+    @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                        String mediaType) {
         var mediaEntity = someMinimalMedia();
@@ -93,33 +135,14 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
         return mediaEntity;
     }
 
+    /**
+     * Get the checksum of the test data.
+     * @deprecated As all usages are limited to other deprecated methods.
+     */
+    @Deprecated
+    @SuppressWarnings("java:S1133") // suppress sonar warning about deprecated methods
     private String getChecksum() {
         return TestUtils.encodeToString(md5(MEDIA_TEST_DATA_BINARY_DATA));
     }
 
-    public MediaEntity someMinimal() {
-        return someMinimalBuilder().build().getEntity();
-    }
-
-    @Override
-    public TestMediaEntity.TestMediaBuilderRetrieve someMinimalBuilderHolder() {
-        var userAccount = minimalUserAccount();
-        TestMediaEntity.TestMediaBuilderRetrieve builder = new TestMediaEntity.TestMediaBuilderRetrieve();
-        builder.getBuilder().channel(1).totalChannels(1).start(now())
-            .end(now()).mediaFile("a-media-file")
-            .fileSize(1000L).mediaFormat("mp2").fileSize(1000L)
-            .mediaType(MEDIA_TYPE_DEFAULT).courtroom(someMinimalCourtRoom())
-            .isCurrent(true).lastModifiedBy(userAccount).deletedBy(userAccount)
-            .createdBy(userAccount).lastModifiedDateTime(NOW)
-            .createdDateTime(NOW).courtroom(courtroomTestData)
-            .createdDateTime(createdAt)
-            .lastModifiedDateTime(lastModifiedAt)
-            .hearingList(new ArrayList<>());
-        return builder;
-    }
-
-    @Override
-    public TestMediaEntity.TestMediaEntityBuilder someMinimalBuilder() {
-        return someMinimalBuilderHolder().getBuilder();
-    }
 }

@@ -30,7 +30,7 @@ public interface AdminMediaMapper {
         @Mapping(target = "mediaStatus", source = "mediaStatus"),
         @Mapping(target = "isHidden", source = "hidden"),
         @Mapping(target = "isDeleted", source = "deleted"),
-        @Mapping(target = "adminAction", source = "adminActionReasons"),
+        @Mapping(target = "adminAction", source = "objectAdminActions"),
         @Mapping(target = "version", source = "legacyVersionLabel"),
         @Mapping(target = "chronicleId", source = "chronicleId"),
         @Mapping(target = "antecedentId", source = "antecedentId"),
