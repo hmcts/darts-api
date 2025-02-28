@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.darts.util.DurationUtil;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -56,6 +58,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final UserIdentity userIdentity;
     private final LogApi logApi;
     private final AudioAsyncService audioAsyncService;
+    private final ApplyAdminActionComponent applyAdminActionComponent;
 
     @Value("${darts.audio.small-file-max-length}")
     private Duration smallFileSizeMaxLength;
@@ -128,7 +131,8 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     void versionUpload(List<MediaEntity> mediaToSupersede,
                        AddAudioMetadataRequest addAudioMetadataRequest,
-                       String externalLocation, String checksum,
+                       String externalLocation,
+                       String checksum,
                        UserAccountEntity userAccount) {
 
         MediaEntity newMediaEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);
@@ -144,6 +148,9 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             newMediaEntity.setAntecedentId(String.valueOf(oldMediaEntity.getId()));
             log.info("Revised version of media added with filename {} and antecedent media id {}", newMediaEntity.getMediaFile(),
                      newMediaEntity.getId().toString());
+            if (oldMediaEntity.isHidden()) {
+                copyAdminActionToNewMedia(oldMediaEntity, newMediaEntity);
+            }
         }
         newMediaEntity = mediaRepository.saveAndFlush(newMediaEntity);
         log.info("Saved media id {}", newMediaEntity.getId());
@@ -248,6 +255,20 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         externalObjectDirectoryEntity.setCreatedBy(userAccountEntity);
         externalObjectDirectoryEntity.setLastModifiedBy(userAccountEntity);
         externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+    }
+
+    private void copyAdminActionToNewMedia(MediaEntity oldMediaEntity, MediaEntity newMediaEntity) {
+        ApplyAdminActionComponent.AdminActionProperties adminActionProperties = oldMediaEntity.getObjectAdminAction()
+            .map(adminActionEntity ->
+                     new ApplyAdminActionComponent.AdminActionProperties(adminActionEntity.getTicketReference(),
+                                                                         adminActionEntity.getComments(),
+                                                                         adminActionEntity.getObjectHiddenReason()))
+            .orElseGet(() ->
+                           new ApplyAdminActionComponent.AdminActionProperties(null,
+                                                                               "Prior version had no admin action, so no details are available",
+                                                                               null));
+
+        applyAdminActionComponent.applyAdminActionTo(Collections.singletonList(newMediaEntity), adminActionProperties);
     }
 
 }
