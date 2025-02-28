@@ -348,6 +348,19 @@ public class DartsPersistence {
     @Transactional
     @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ObjectAdminActionEntity save(ObjectAdminActionEntity adminAction) {
+        if (adminAction.getAnnotationDocument() != null) {
+            save(adminAction.getAnnotationDocument());
+        }
+        if (adminAction.getCaseDocument() != null) {
+            save(adminAction.getCaseDocument());
+        }
+        if (adminAction.getMedia() != null) {
+            save(adminAction.getMedia());
+        }
+        if (adminAction.getTranscriptionDocument() != null) {
+            save(adminAction.getTranscriptionDocument());
+        }
+
         return objectAdminActionRepository.save(adminAction);
     }
 
@@ -721,10 +734,19 @@ public class DartsPersistence {
     }
 
     @Transactional
+    public void saveAll(MediaEntity... mediaEntities) {
+        stream(mediaEntities).forEach(this::save);
+    }
+
+    @Transactional
+    public void saveAll(ObjectAdminActionEntity... adminActionEntities) {
+        stream(adminActionEntities).forEach(this::save);
+    }
+
+    @Transactional
     public void saveAll(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
         externalObjectDirectoryEntities.forEach(this::save);
     }
-
 
     private void saveMediaList(List<MediaEntity> mediaList) {
         mediaList.forEach(media -> {
