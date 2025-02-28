@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,11 +11,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
+import uk.gov.hmcts.darts.audio.component.impl.RemoveAdminActionComponent;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapperImpl;
@@ -22,15 +27,19 @@ import uk.gov.hmcts.darts.audio.mapper.CourthouseMapper;
 import uk.gov.hmcts.darts.audio.mapper.CourthouseMapperImpl;
 import uk.gov.hmcts.darts.audio.mapper.CourtroomMapper;
 import uk.gov.hmcts.darts.audio.mapper.CourtroomMapperImpl;
+import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapper;
 import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapperImpl;
+import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.AdminMediaCourthouseResponse;
 import uk.gov.hmcts.darts.audio.model.AdminMediaCourtroomResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionMediaItem;
+import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
+import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -45,13 +54,16 @@ import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,12 +71,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 @ExtendWith(MockitoExtension.class)
 class AdminMediaServiceImplTest {
     @InjectMocks
@@ -79,6 +94,14 @@ class AdminMediaServiceImplTest {
     private TransformedMediaRepository mockTransformedMediaRepository;
     @Mock
     private SearchMediaValidator searchMediaValidator;
+    @Mock
+    private MediaHideOrShowValidator mediaHideOrShowValidator;
+    @Mock
+    private ApplyAdminActionComponent applyAdminActionComponent;
+    @Mock
+    private RemoveAdminActionComponent removeAdminActionComponent;
+    @Mock
+    private ObjectHiddenReasonRepository hiddenReasonRepository;
 
     private ObjectMapper objectMapper;
 
@@ -697,6 +720,120 @@ class AdminMediaServiceImplTest {
             assertThat(actual.getId()).isEqualTo(expectedId);
             assertThat(actual.getDisplayName()).isEqualTo(expectedCourtHouseName);
         }
+    }
+
+    @Nested
+    class AdminHideOrShowMediaByIdTests {
+
+        private MediaEntity mediaEntity;
+
+        private MockedStatic<GetAdminMediaResponseMapper> mediaResponseMapperMockedStatic;
+
+        @BeforeEach
+        void setUp() {
+            mediaResponseMapperMockedStatic = Mockito.mockStatic(GetAdminMediaResponseMapper.class);
+
+            mediaEntity = PersistableFactory.getMediaTestData().someMinimalBuilder()
+                .id(1)
+                .build()
+                .getEntity();
+            when(mediaRepository.findByIdIncludeDeleted(1))
+                .thenReturn(Optional.of(mediaEntity));
+        }
+
+        @AfterEach
+        void tearDown() {
+            if (mediaResponseMapperMockedStatic != null) {
+                mediaResponseMapperMockedStatic.close();
+            }
+        }
+
+        @Test
+        void shouldInvokeHideFunctionality_whenMediaHideRequestHasIsHiddenTrue() {
+            // Given
+            ObjectHiddenReasonEntity objectHiddenReasonEntity = new ObjectHiddenReasonEntity();
+            when(hiddenReasonRepository.findById(0))
+                .thenReturn(Optional.of(objectHiddenReasonEntity));
+
+            ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+            when(objectAdminActionRepository.findByMedia_Id(1))
+                .thenReturn(Collections.singletonList(objectAdminActionEntity));
+
+            MediaHideRequest mediaHideRequest = new MediaHideRequest();
+            mediaHideRequest.setIsHidden(true);
+
+            AdminActionRequest adminActionRequest = new AdminActionRequest();
+            adminActionRequest.setReasonId(0);
+            adminActionRequest.setTicketReference("Some reference");
+            adminActionRequest.setComments("Some comments");
+
+            mediaHideRequest.setAdminAction(adminActionRequest);
+
+            // When
+            mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest);
+
+            // Then
+            var expectedActionProperties = new ApplyAdminActionComponent.AdminActionProperties("Some reference",
+                                                                                               "Some comments",
+                                                                                               objectHiddenReasonEntity);
+            verify(applyAdminActionComponent).applyAdminActionToAllVersions(eq(mediaEntity), eq(expectedActionProperties));
+        }
+
+        @Test
+        void shouldThrowException_whenProvidedHiddenReasonDoesNotExist() {
+            // Given
+            when(hiddenReasonRepository.findById(0))
+                .thenReturn(Optional.empty());
+
+            MediaHideRequest mediaHideRequest = new MediaHideRequest();
+            mediaHideRequest.setIsHidden(true);
+
+            AdminActionRequest adminActionRequest = new AdminActionRequest();
+            adminActionRequest.setReasonId(0);
+            adminActionRequest.setTicketReference("Some reference");
+            adminActionRequest.setComments("Some comments");
+
+            mediaHideRequest.setAdminAction(adminActionRequest);
+
+            // When
+            DartsApiException exception = assertThrows(DartsApiException.class, () ->
+                mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
+
+            // Then
+            assertEquals("Hide reason is incorrect", exception.getMessage());
+            verifyNoInteractions(objectAdminActionRepository);
+            verifyNoInteractions(applyAdminActionComponent);
+        }
+
+        @Test
+        void shouldInvokeUnhideFunctionality_whenMediaHideRequestHasIsHiddenFalse() {
+            // Given
+            MediaHideRequest mediaHideRequest = new MediaHideRequest();
+            mediaHideRequest.setIsHidden(false);
+
+            // When
+            mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest);
+
+            // Then
+            verify(removeAdminActionComponent).removeAdminActionFromAllVersions(eq(mediaEntity));
+        }
+
+        @Test
+        void shouldThrowException_whenNoMediaIsFound() {
+            // Given
+            when(mediaRepository.findByIdIncludeDeleted(1))
+                .thenReturn(Optional.empty());
+
+            MediaHideRequest mediaHideRequest = new MediaHideRequest();
+
+            // When
+            IllegalStateException exception = assertThrows(IllegalStateException.class,
+                                                               () -> mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
+
+            // Then
+            assertEquals(exception.getMessage(), "Media not found, expected this to be pre-validated");
+        }
+
     }
 
 }

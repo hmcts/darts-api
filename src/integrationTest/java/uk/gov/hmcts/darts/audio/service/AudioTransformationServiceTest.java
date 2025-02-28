@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
@@ -41,6 +42,9 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @Autowired
     DartsPersistence dartsPersistence;
+
+    @Autowired
+    private MediaRepository mediaRepository;
 
     @Test
     void getMediaByHearingIdShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
