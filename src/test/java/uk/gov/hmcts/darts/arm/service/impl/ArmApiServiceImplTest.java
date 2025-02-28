@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.service;
+package uk.gov.hmcts.darts.arm.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,13 +15,13 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -138,8 +138,34 @@ class ArmApiServiceImplTest {
         verify(armApiClient, times(1)).updateMetadata(eq("Bearer " + bearerToken), eq(expectedMetadataRequest));
     }
 
+    @Test
+    void formatDateTime_ShouldReturnFormattedDateTime_WhenOffsetDateTimeIsNotNull() {
+        // given
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse("2023-01-01T12:00:00Z");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
+
+        String expectedFormattedDateTime = "2023-01-01T12:00:00.000Z";
+
+        // when
+        String formattedDateTime = armApiService.formatDateTime(offsetDateTime);
+
+        // then
+        assertEquals(expectedFormattedDateTime, formattedDateTime);
+    }
+
+    @Test
+    void formatDateTime_ShouldReturnNull_WhenOffsetDateTimeIsNull() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
+        
+        // when
+        String formattedDateTime = armApiService.formatDateTime(null);
+
+        // then
+        assertEquals(null, formattedDateTime);
+    }
+
     private String formatDateTime(OffsetDateTime offsetDateTime) {
-        //"event_date": "1925-02-24T13:52:40.338Z
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         return offsetDateTime.format(dateTimeFormatter);
     }

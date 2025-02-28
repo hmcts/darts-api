@@ -139,7 +139,7 @@ public class ArmApiServiceImpl implements ArmApiService {
         return String.format("Bearer %s", accessToken);
     }
 
-    private String formatDateTime(OffsetDateTime offsetDateTime) {
+    String formatDateTime(OffsetDateTime offsetDateTime) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         String dateTime = null;
         if (nonNull(offsetDateTime)) {
