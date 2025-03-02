@@ -24,6 +24,11 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createListO
 
 class CourtroomRepositoryIntTest extends PostgresIntegrationBase {
 
+    private static final String TEST_COURTHOUSE = "Test Courthouse";
+    private static final String COURTHOUSE_NAME = "TEST COURTHOUSE";
+    private static final String TEST_COURTROOM = "Test Courtroom";
+    private static final String COURTROOM_NAME = "TEST COURTROOM";
+
     @Autowired
     private CourtroomRepository courtroomRepository;
 
@@ -34,23 +39,21 @@ class CourtroomRepositoryIntTest extends PostgresIntegrationBase {
     void setUp() {
 
         courthouse = someMinimalCourthouse();
-        courthouse.setCourthouseName("Test Courthouse");
-        courthouse.setDisplayName("TEST COURTHOUSE");
+        courthouse.setCourthouseName(TEST_COURTHOUSE);
+        courthouse.setDisplayName(COURTHOUSE_NAME);
 
         courtroom = someMinimalCourtRoom();
-        courtroom.setName("Test Courtroom");
+        courtroom.setName(TEST_COURTROOM);
         courtroom.setCourthouse(courthouse);
 
         HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
-
         dartsPersistence.saveAll(hearingForCase);
-
     }
 
     @Test
     void findByCourthouseNameAndCourtroomName_ShouldReturnCourtroom() {
         // when
-        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName("Test Courthouse", "Test Courtroom");
+        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(TEST_COURTHOUSE, TEST_COURTROOM);
 
         // then
         assertTrue(foundCourtroom.isPresent());
@@ -59,9 +62,20 @@ class CourtroomRepositoryIntTest extends PostgresIntegrationBase {
     }
 
     @Test
+    void findByCourthouseNameAndCourtroomName_ShouldReturnCourtroomWithWhitespace() {
+        // when
+        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(" Test Courthouse ", " Test Courtroom ");
+
+        // then
+        assertTrue(foundCourtroom.isPresent());
+        assertEquals(TEST_COURTROOM, foundCourtroom.get().getName());
+        assertEquals(COURTHOUSE_NAME, foundCourtroom.get().getCourthouse().getCourthouseName());
+    }
+
+    @Test
     void findByCourthouseNameAndCourtroomName_ShouldNotReturnCourtroom_WithInvalidCourthouseName() {
         // when
-        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName("Test Courthouse2", "Test Courtroom");
+        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName("Test Courthouse2", TEST_COURTROOM);
 
         // then
         assertTrue(foundCourtroom.isEmpty());
@@ -70,7 +84,7 @@ class CourtroomRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void findByCourthouseNameAndCourtroomName_ShouldNotReturnCourtroom_WithInvalidCourtroom() {
         // when
-        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName("Test Courthouse", "Test Courtroom2");
+        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(TEST_COURTHOUSE, "Test Courtroom2");
 
         // then
         assertTrue(foundCourtroom.isEmpty());
@@ -79,12 +93,12 @@ class CourtroomRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void findByNameAndId_ShouldReturnCourtroom() {
         // when
-        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(courthouse.getId(), "Test Courtroom");
+        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(courthouse.getId(), TEST_COURTROOM);
 
         // then
         assertTrue(foundCourtroom.isPresent());
-        assertEquals(courtroom.getName(), foundCourtroom.get().getName());
-        assertEquals(courthouse.getCourthouseName(), foundCourtroom.get().getCourthouse().getCourthouseName());
+        assertEquals(COURTROOM_NAME, foundCourtroom.get().getName());
+        assertEquals(COURTHOUSE_NAME, foundCourtroom.get().getCourthouse().getCourthouseName());
         assertEquals(courtroom.getId(), foundCourtroom.get().getId());
     }
 
