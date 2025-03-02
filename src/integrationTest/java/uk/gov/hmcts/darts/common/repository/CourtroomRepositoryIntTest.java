@@ -72,8 +72,9 @@ class CourtroomRepositoryIntTest extends PostgresIntegrationBase {
         assertTrue(foundCourtroomOptional.isPresent());
 
         CourtroomEntity courtroomEntity = foundCourtroomOptional.get();
-        assertEquals(TEST_COURTROOM, courtroomEntity.getName());
+        assertEquals(COURTROOM_NAME, courtroomEntity.getName());
         assertEquals(COURTHOUSE_NAME, courtroomEntity.getCourthouse().getCourthouseName());
+        
     }
 
     @Test
