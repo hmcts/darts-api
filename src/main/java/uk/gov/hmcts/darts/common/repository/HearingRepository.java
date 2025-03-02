@@ -94,9 +94,9 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
                                            LocalDate startDate, LocalDate endDate, Integer numberOfRecords);
 
     @Query("""
-        SELECT hearing 
+        SELECT hearing
         FROM HearingEntity hearing, CourtCaseEntity case
-        LEFT JOIN FETCH hearing.mediaList 
+        LEFT JOIN FETCH hearing.mediaList
         WHERE case.id = :caseId
         AND hearing.courtCase = case
         """)
