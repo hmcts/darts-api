@@ -41,10 +41,12 @@ class CourtroomRepositoryIntTest extends PostgresIntegrationBase {
         courthouse = someMinimalCourthouse();
         courthouse.setCourthouseName(TEST_COURTHOUSE);
         courthouse.setDisplayName(COURTHOUSE_NAME);
+        courthouse = dartsPersistence.save(courthouse);
 
         courtroom = someMinimalCourtRoom();
         courtroom.setName(TEST_COURTROOM);
         courtroom.setCourthouse(courthouse);
+        courtroom = dartsPersistence.save(courtroom);
 
         HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
         dartsPersistence.saveAll(hearingForCase);
@@ -62,14 +64,16 @@ class CourtroomRepositoryIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findByCourthouseNameAndCourtroomName_ShouldReturnCourtroomWithWhitespace() {
+    void findByCourthouseNameAndCourtroomName_ShouldReturnCourtroomWithoutWhitespace() {
         // when
-        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(" Test Courthouse ", " Test Courtroom ");
+        Optional<CourtroomEntity> foundCourtroomOptional = courtroomRepository.findByCourthouseNameAndCourtroomName(" Test Courthouse ", " Test Courtroom ");
 
         // then
-        assertTrue(foundCourtroom.isPresent());
-        assertEquals(TEST_COURTROOM, foundCourtroom.get().getName());
-        assertEquals(COURTHOUSE_NAME, foundCourtroom.get().getCourthouse().getCourthouseName());
+        assertTrue(foundCourtroomOptional.isPresent());
+
+        CourtroomEntity courtroomEntity = foundCourtroomOptional.get();
+        assertEquals(TEST_COURTROOM, courtroomEntity.getName());
+        assertEquals(COURTHOUSE_NAME, courtroomEntity.getCourthouse().getCourthouseName());
     }
 
     @Test
