@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 public final class RetentionPolicyTestData {
 
     private RetentionPolicyTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static RetentionPolicyTypeEntity minimalRetentionPolicy() {

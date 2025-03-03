@@ -13,7 +13,7 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 public final class JudgeTestData {
 
     private JudgeTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static JudgeEntity someMinimalJudge() {

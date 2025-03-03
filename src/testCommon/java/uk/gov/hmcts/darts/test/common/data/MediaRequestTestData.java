@@ -43,7 +43,7 @@ public final class MediaRequestTestData implements Persistable<TestMediaRequestE
     private final OffsetDateTime lastModifiedAt = NOW;
 
     MediaRequestTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public MediaRequestEntity someMinimal() {
