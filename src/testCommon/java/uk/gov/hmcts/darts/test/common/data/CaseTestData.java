@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestCourtCaseEntity;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static java.time.OffsetDateTime.now;
@@ -15,7 +16,7 @@ import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefend
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class CaseTestData implements Persistable<TestCourtCaseEntity.TestCourtCaseBuilderRetrieve,
+public final class CaseTestData implements Persistable<TestCourtCaseEntity.TestCourtCaseBuilderRetrieve,
     CourtCaseEntity, TestCourtCaseEntity.TestCourtCaseEntityBuilder> {
 
     public CourtCaseEntity createSomeMinimalCase() {
@@ -40,11 +41,7 @@ public class CaseTestData implements Persistable<TestCourtCaseEntity.TestCourtCa
     public CourtCaseEntity createCaseWith(String caseNumber, CourthouseEntity courthouseEntity) {
         var courtCaseEntity = createSomeMinimalCase();
 
-        if (courthouseEntity == null) {
-            courtCaseEntity.setCourthouse(someMinimalCourthouse());
-        } else {
-            courtCaseEntity.setCourthouse(courthouseEntity);
-        }
+        courtCaseEntity.setCourthouse(Objects.requireNonNullElseGet(courthouseEntity, CourthouseTestData::someMinimalCourthouse));
 
         courtCaseEntity.setCaseNumber(caseNumber);
         courtCaseEntity.setClosed(false);

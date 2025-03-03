@@ -20,7 +20,6 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
     private CourtLogEventRepository courtLogEventRepository;
 
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2020-06-20T10:00Z");
-    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
 
     private EventEntity eventEntityWithLogEntryTrue;
     private EventEntity eventEntity2;
@@ -64,7 +63,7 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void findByCourthouseAndCourtroomBetweenStartAndEnd_shouldFindEventEntities() {
         // when
-        List<EventEntity> events = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+        List<EventEntity> resultEvents = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             hearingEntity.getCourtroom().getCourthouse().getCourthouseName(),
             hearingEntity.getCourtroom().getName(),
             SOME_DATE_TIME.minusHours(1),
@@ -72,8 +71,12 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
         );
 
         // then
-        assertFalse(events.isEmpty());
-        assertEquals(events.size(), 5);
-
+        assertFalse(resultEvents.isEmpty());
+        assertEquals(resultEvents.size(), 5);
+        List.of(eventEntityWithLogEntryTrue, eventEntity2, eventEntity3, eventEntity4, eventEntity5).forEach(event -> {
+            event.equals(resultEvents.stream().filter(
+                resultEvent -> resultEvent.getId().equals(event.getId())).findFirst().get()
+            );
+        });
     }
 }

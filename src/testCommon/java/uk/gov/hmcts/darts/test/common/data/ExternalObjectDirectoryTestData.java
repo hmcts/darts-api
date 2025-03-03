@@ -17,7 +17,7 @@ import static uk.gov.hmcts.darts.test.common.data.ExternalLocationTypeTestData.l
 import static uk.gov.hmcts.darts.test.common.data.ObjectRecordStatusTestData.statusOf;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class ExternalObjectDirectoryTestData implements
+public final class ExternalObjectDirectoryTestData implements
     Persistable<TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve, ExternalObjectDirectoryEntity,
         TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder> {
 
