@@ -11,6 +11,7 @@ import java.util.Random;
 
 import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class EventTestData
     implements Persistable<TestEventEntity.TestEventEntityBuilderRetrieve, EventEntity, TestEventEntity.TestEventEntityBuilder> {
@@ -83,15 +84,18 @@ public final class EventTestData
     @Override
     public TestEventEntity.TestEventEntityBuilderRetrieve someMinimalBuilderHolder() {
         TestEventEntity.TestEventEntityBuilderRetrieve builder = new TestEventEntity.TestEventEntityBuilderRetrieve();
+        var userAccount = minimalUserAccount();
         builder.getBuilder()
             .courtroom(someMinimalCourtRoom())
+            .createdBy(userAccount)
+            .lastModifiedBy(userAccount)
+            .createdDateTime(OffsetDateTime.now())
+            .lastModifiedDateTime(OffsetDateTime.now())
             .eventType(createTestEventHandlerEntity("some-event-name"))
             .timestamp(OffsetDateTime.now())
             .isLogEntry(false)
-            .isCurrent(true)
-            .hearingEntities(List.of(
-                new HearingTestData().someMinimalBuilder().build().getEntity()
-            ));
+            .isCurrent(true);
+
         return builder;
     }
 
