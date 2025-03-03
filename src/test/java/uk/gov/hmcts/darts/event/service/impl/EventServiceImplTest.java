@@ -69,26 +69,6 @@ class EventServiceImplTest {
     }
 
     @Test
-    void getEventVersionsForEveId() {
-        EventEntity event = mock(EventEntity.class);
-        when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-        when(eventRepository.findAllByEventIdExcludingEventIdZero(event.getEventId())).thenReturn(List.of(event));
-        assertThat(eventService.getEventVersionsForEveIdExcludingEventIdZero(1)).isEqualTo(List.of(event));
-        verify(eventRepository, times(1)).findById(1);
-        verify(eventRepository, times(1)).findAllByEventIdExcludingEventIdZero(event.getEventId());
-    }
-
-    @Test
-    void getEventVersionsForEveIdNotFound() {
-        when(eventRepository.findById(1)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> eventService.getEventVersionsForEveIdExcludingEventIdZero(1))
-            .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
-        verify(eventRepository, times(1)).findById(1);
-    }
-
-    @Test
     void positiveSaveEvent() {
         EventEntity event = mock(EventEntity.class);
         when(eventRepository.save(event)).thenReturn(event);
@@ -141,7 +121,7 @@ class EventServiceImplTest {
     @Test
     void adminGetVersionsByEventId_shouldReturnEvent() {
         List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
-       doReturn(eventEntities).when(eventService).getRelatedEvents(123);
+        doReturn(eventEntities).when(eventService).getRelatedEvents(123);
 
         AdminGetVersionsByEventIdResponseResult responseDetails = mock(AdminGetVersionsByEventIdResponseResult.class);
         when(eventMapper.mapToAdminGetEventVersionsResponseForId(any())).thenReturn(responseDetails);
