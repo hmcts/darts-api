@@ -40,11 +40,8 @@ class CourtLogsServiceIntTest extends PostgresIntegrationBase {
     private CourtLogsService courtLogsService;
 
     private EventEntity eventEntityWithLogEntryTrue;
-    private EventEntity eventEntityWithLogEntryFalse;
 
-    private HearingEntity hearingEntity;
     private CourthouseEntity courthouse;
-    private CourtroomEntity courtroom;
 
     @BeforeEach
     void beforeEach() {
@@ -53,17 +50,17 @@ class CourtLogsServiceIntTest extends PostgresIntegrationBase {
         courthouse.setDisplayName(COURTHOUSE_NAME);
         courthouse = dartsPersistence.save(courthouse);
 
-        courtroom = someMinimalCourtRoom();
+        CourtroomEntity courtroom = someMinimalCourtRoom();
         courtroom.setName(TEST_COURTROOM);
         courtroom.setCourthouse(courthouse);
         courtroom = dartsPersistence.save(courtroom);
 
-        hearingEntity = setupHearingForCase(courthouse, courtroom);
+        HearingEntity hearingEntity = setupHearingForCase(courthouse, courtroom);
         dartsPersistence.saveAll(hearingEntity);
 
         eventEntityWithLogEntryTrue = dartsDatabase.createEvent(hearingEntity, 10);
         eventEntityWithLogEntryTrue.setLogEntry(true);
-        eventEntityWithLogEntryFalse = dartsDatabase.createEvent(hearingEntity, 10);
+        EventEntity eventEntityWithLogEntryFalse = dartsDatabase.createEvent(hearingEntity, 10);
         eventEntityWithLogEntryFalse.setLogEntry(false);
 
         dartsDatabase.saveAll(eventEntityWithLogEntryTrue, eventEntityWithLogEntryFalse);
@@ -77,6 +74,9 @@ class CourtLogsServiceIntTest extends PostgresIntegrationBase {
 
         // then
         assertEquals(1, courtLogs.size());
+        assertEquals(eventEntityWithLogEntryTrue.getEventText(), courtLogs.getFirst().getEventText());
+        assertEquals(courthouse.getCourthouseName(), courtLogs.getFirst().getCourthouse());
+        assertEquals(CASE_NUMBER, courtLogs.getFirst().getCaseNumber());
     }
 
     @Transactional
