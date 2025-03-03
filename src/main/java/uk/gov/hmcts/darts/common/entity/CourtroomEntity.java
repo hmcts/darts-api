@@ -14,11 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
-
-import java.util.Locale;
-
-import static java.util.Objects.nonNull;
 
 @Entity
 @Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.CTH_ID, CourtroomEntity.COURTROOM_NAME})})
@@ -47,8 +44,6 @@ public class CourtroomEntity extends CreatedBaseEntity {
     private CourthouseEntity courthouse;
 
     public void setName(String name) {
-        if (nonNull(name)) {
-            this.name = name.toUpperCase(Locale.ROOT);
-        }
+        this.name = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(name));
     }
 }

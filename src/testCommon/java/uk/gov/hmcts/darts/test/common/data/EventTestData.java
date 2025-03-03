@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.test.common.data;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestEventEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -12,8 +13,10 @@ import java.util.Random;
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public final class EventTestData {
+public final class EventTestData
+    implements Persistable<TestEventEntity.TestEventEntityBuilderRetrieve, EventEntity, TestEventEntity.TestEventEntityBuilder> {
 
     public static final int REPORTING_RESTRICTIONS_LIFTED_DB_ID = 192;
 
@@ -24,8 +27,8 @@ public final class EventTestData {
 
     private static final String LOG_ENTRY_EVENT_NAME = "LOG";
 
-    private EventTestData() {
-
+    EventTestData() {
+        //Empty constructor
     }
 
     public static EventEntity someMinimalEvent() {
@@ -73,5 +76,31 @@ public final class EventTestData {
         eventEntity.setCourtroom(hearingEntity.getCourtroom());
         return eventEntity;
 
+    }
+
+    @Override
+    public EventEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestEventEntity.TestEventEntityBuilderRetrieve someMinimalBuilderHolder() {
+        var userAccount = minimalUserAccount();
+        TestEventEntity.TestEventEntityBuilderRetrieve builder = new TestEventEntity.TestEventEntityBuilderRetrieve();
+        builder.getBuilder()
+            .courtroom(CourtroomTestData.someMinimalCourtRoom())
+            .eventType(EventTestData.createTestEventHandlerEntity("some-event-name"))
+            .timestamp(OffsetDateTime.now())
+            .isLogEntry(false)
+            .isCurrent(true)
+            .hearingEntities(List.of(
+                new HearingTestData().someMinimalBuilder().build().getEntity()
+            ));
+        return builder;
+    }
+
+    @Override
+    public TestEventEntity.TestEventEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }
