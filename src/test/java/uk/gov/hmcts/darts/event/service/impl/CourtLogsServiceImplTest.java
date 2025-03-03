@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -20,7 +19,7 @@ import static org.mockito.Mockito.when;
 class CourtLogsServiceImplTest {
 
     private static final String CASE_0000001 = "Case0000001";
-    @InjectMocks
+    
     private CourtLogsServiceImpl courtLogsService;
 
     @Mock
@@ -46,12 +45,11 @@ class CourtLogsServiceImplTest {
             CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00")
         );
 
-        assertEquals("SWANSEA", entities.get(0).getCourthouse());
-        assertEquals(CASE_0000001, entities.get(0).getCaseNumber());
-        assertEquals("2023-07-01T10:00Z", entities.get(0).getTimestamp().toString());
-        assertEquals("Test", entities.get(0).getEventText());
+        assertEquals("SWANSEA", entities.getFirst().getCourthouse());
+        assertEquals(CASE_0000001, entities.getFirst().getCaseNumber());
+        assertEquals("2023-07-01T10:00Z", entities.getFirst().getTimestamp().toString());
+        assertEquals("Test", entities.getFirst().getEventText());
 
     }
-
 
 }

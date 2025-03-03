@@ -86,4 +86,7 @@ public class PersistableFactory {
         return new ObjectAdminActionTestData();
     }
 
+    public static EventTestData getEventTestData() {
+        return new EventTestData();
+    }
 }
