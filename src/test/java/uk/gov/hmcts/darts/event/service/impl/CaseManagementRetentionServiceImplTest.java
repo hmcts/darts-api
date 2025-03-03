@@ -29,27 +29,27 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.event.service.impl.CourtLogsServiceImplTest.CASE_0000001;
 
 
 @ExtendWith(MockitoExtension.class)
 class CaseManagementRetentionServiceImplTest {
 
-    static final String SWANSEA = "SWANSEA";
+    private static final String SWANSEA = "SWANSEA";
+    private static final String CASE_0000001 = "Case0000001";
 
-    static final String ERROR_MESSAGE = """
-    Data on the event could not be reconciled with Darts records. Could not find a retention policy for fixedPolicyKey '1000'""";
+    private static final String ERROR_MESSAGE = """
+        Data on the event could not be reconciled with Darts records. Could not find a retention policy for fixedPolicyKey '1000'""";
 
-    CaseManagementRetentionServiceImpl caseManagementRetentionService;
-
-    @Mock
-    CaseManagementRetentionRepository caseManagementRetentionRepository;
+    private CaseManagementRetentionServiceImpl caseManagementRetentionService;
 
     @Mock
-    RetentionPolicyTypeRepository retentionPolicyTypeRepository;
+    private CaseManagementRetentionRepository caseManagementRetentionRepository;
 
     @Mock
-    CurrentTimeHelper currentTimeHelper;
+    private RetentionPolicyTypeRepository retentionPolicyTypeRepository;
+
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
 
     @BeforeEach
     void setUp() {
