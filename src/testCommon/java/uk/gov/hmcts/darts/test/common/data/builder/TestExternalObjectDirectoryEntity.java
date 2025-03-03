@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.test.common.data.builder;
 
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity> {
     @lombok.Builder
@@ -65,11 +67,10 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
         }
     }
 
+    @NoArgsConstructor
     public static class TestExternalObjectDirectoryBuilderRetrieve
         implements BuilderHolder<TestExternalObjectDirectoryEntity,
         TestExternalObjectDirectoryEntityBuilder> {
-        public TestExternalObjectDirectoryBuilderRetrieve() {
-        }
 
         private TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder builder = TestExternalObjectDirectoryEntity.builder();
 
