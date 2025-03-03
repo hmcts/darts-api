@@ -71,7 +71,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
             .body("""
                       {
                         "log_entry_date_time": "2023-05-23T09:15:25Z",
-                        "courthouse": "",
+                        "courthouse": "UNKNOWN_COURTHOUSE",
                         "courtroom": "1",
                         "case_numbers": [
                           "FUNC-CASE1001"
