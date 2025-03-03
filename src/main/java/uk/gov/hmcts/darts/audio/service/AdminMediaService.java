@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
+import uk.gov.hmcts.darts.audio.model.PatchAdminMediasByIdRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 
@@ -30,4 +31,6 @@ public interface AdminMediaService {
     List<GetAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion();
 
     MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId);
+
+    void patchMediasById(Integer id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest);
 }
