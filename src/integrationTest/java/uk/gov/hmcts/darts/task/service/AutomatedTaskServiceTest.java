@@ -178,7 +178,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
-        log.info("Number of scheduled tasks " + scheduledTasks.size());
+        log.info("Number of scheduled tasks {}", scheduledTasks.size());
         scheduledTasks.forEach(
             scheduledTask -> {
                 Task task = scheduledTask.getTask();
@@ -205,7 +205,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                              fixedDelayTask.getInitialDelayDuration(), fixedDelayTask.getIntervalDuration()
                     );
                 } else {
-                    log.info("Unknown task type: " + task);
+                    log.info("Unknown task type: {}", task);
                 }
             }
         );

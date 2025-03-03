@@ -65,10 +65,10 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
         }
     }
 
-    public static class TestExternalObjectDirectoryuilderRetrieve
+    public static class TestExternalObjectDirectoryBuilderRetrieve
         implements BuilderHolder<TestExternalObjectDirectoryEntity,
         TestExternalObjectDirectoryEntityBuilder> {
-        public TestExternalObjectDirectoryuilderRetrieve() {
+        public TestExternalObjectDirectoryBuilderRetrieve() {
         }
 
         private TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder builder = TestExternalObjectDirectoryEntity.builder();

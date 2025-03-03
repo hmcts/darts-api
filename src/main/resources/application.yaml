@@ -218,7 +218,7 @@ darts:
       annotation-record-class: DARTS
       case-record-class: DARTS
       temp-blob-workspace: ${user.home}/arm/tempworkspace
-      date-time-format: yyyy-MM-dd'T'HH:mm:ssX
+      date-time-format: yyyy-MM-dd'T'HH:mm:ss.SSSX
       date-format: yyyy-MM-dd
       file-extension: a360
       list-blobs-timeout-duration: 60s
