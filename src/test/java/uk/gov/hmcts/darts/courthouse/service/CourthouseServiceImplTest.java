@@ -176,7 +176,8 @@ class CourthouseServiceImplTest {
     }
 
     @Test
-    void retrieveCourthouse_RetrievesCourthouse_UsingWhitespaceCourthouseNameAndNullCode() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+    void retrieveCourthouse_RetrievesCourthouse_UsingWhitespaceCourthouseNameAndNullCode()
+        throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
         // Given
         when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(createSwanseaCourthouseEntity()));
 

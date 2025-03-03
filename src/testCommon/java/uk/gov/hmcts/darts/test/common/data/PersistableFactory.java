@@ -2,6 +2,10 @@ package uk.gov.hmcts.darts.test.common.data;
 
 public final class PersistableFactory {
 
+    private PersistableFactory() {
+        // This constructor is intentionally empty. Nothing special is needed here.
+    }
+
     public static ExternalObjectDirectoryTestData getExternalObjectDirectoryTestData() {
         return new ExternalObjectDirectoryTestData();
     }

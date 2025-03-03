@@ -12,6 +12,7 @@ public final class ArmRpoExecutionDetailTestData implements Persistable<TestArmR
     ArmRpoExecutionDetailEntity, TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilder> {
 
     ArmRpoExecutionDetailTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public ArmRpoExecutionDetailEntity minimalArmRpoExecutionDetailEntity() {
