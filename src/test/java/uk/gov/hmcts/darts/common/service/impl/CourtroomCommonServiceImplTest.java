@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.common.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -55,20 +57,7 @@ class CourtroomCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCourtroomWithCourthouseExistingCourtroom() {
-        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
-            .thenReturn(Optional.of(existingCourtroom));
-
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, "Courtroom 1", userAccount);
-
-        assertNotNull(result);
-        assertEquals(COURTROOM_1, result.getName());
-        assertEquals(courthouse, result.getCourthouse());
-        verify(courtroomRepository, never()).saveAndFlush(any(CourtroomEntity.class));
-    }
-
-    @Test
-    void retrieveOrCreateCourtroomWithCourthouseNewCourtroom() {
+    void retrieveOrCreateCourtroom_WithCourthouseNewCourtroom() {
         when(courtroomRepository.findByNameAndId(1, "COURTROOM 2"))
             .thenReturn(Optional.empty());
         when(courtroomRepository.saveAndFlush(any(CourtroomEntity.class)))
@@ -83,12 +72,20 @@ class CourtroomCommonServiceImplTest {
         verify(courtroomRepository).saveAndFlush(any(CourtroomEntity.class));
     }
 
-    @Test
-    void retrieveOrCreateCourtroomWithCourthouseNameExistingCourtroom() {
+    @ParameterizedTest
+    @CsvSource({
+        "Courtroom 1",
+        "courtroom 1",
+        " courtroom 1",
+        "courtroom 1 ",
+        " courtroom 1 ",
+        " COURTROOM 1 "
+    })
+    void retrieveOrCreateCourtroom_WithCourthouseNameExistingCourtroom(String inputName) {
         when(courtroomRepository.findByCourthouseNameAndCourtroomName(COURTHOUSE_UPPER, COURTROOM_1))
             .thenReturn(Optional.of(existingCourtroom));
 
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(COURTHOUSE_UPPER, "Courtroom 1", userAccount);
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(COURTHOUSE_UPPER, inputName, userAccount);
 
         assertNotNull(result);
         assertEquals(COURTROOM_1, result.getName());
@@ -98,7 +95,7 @@ class CourtroomCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCourtroomWithCourthouseNameNewCourtroom() {
+    void retrieveOrCreateCourtroom_WithCourthouseNameNewCourtroom() {
         when(courtroomRepository.findByCourthouseNameAndCourtroomName(COURTHOUSE_UPPER, "COURTROOM 2"))
             .thenReturn(Optional.empty());
         when(courthouseCommonService.retrieveCourthouse(COURTHOUSE_UPPER))
@@ -116,48 +113,19 @@ class CourtroomCommonServiceImplTest {
         verify(courtroomRepository).saveAndFlush(any(CourtroomEntity.class));
     }
 
-    @Test
-    void retrieveOrCreateCourtroomCaseInsensitivity() {
+    @ParameterizedTest
+    @CsvSource({
+        "Courtroom 1",
+        "courtroom 1",
+        " courtroom 1",
+        "courtroom 1 ",
+        " courtroom 1 "
+    })
+    void retrieveOrCreateCourtroomCase_Insensitivity(String inputName) {
         when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
             .thenReturn(Optional.of(existingCourtroom));
 
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, "courtroom 1", userAccount);
-
-        assertNotNull(result);
-        assertEquals(COURTROOM_1, result.getName());
-        assertEquals(courthouse, result.getCourthouse());
-    }
-
-    @Test
-    void retrieveOrCreateCourtroom_WithBeginningWhitespace() {
-        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
-            .thenReturn(Optional.of(existingCourtroom));
-
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, " courtroom 1", userAccount);
-
-        assertNotNull(result);
-        assertEquals(COURTROOM_1, result.getName());
-        assertEquals(courthouse, result.getCourthouse());
-    }
-
-    @Test
-    void retrieveOrCreateCourtroom_WithEndWhitespace() {
-        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
-            .thenReturn(Optional.of(existingCourtroom));
-
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, "courtroom 1 ", userAccount);
-
-        assertNotNull(result);
-        assertEquals(COURTROOM_1, result.getName());
-        assertEquals(courthouse, result.getCourthouse());
-    }
-
-    @Test
-    void retrieveOrCreateCourtroom_WithCaseInsensitiveSearchAndBeginAndEndWhitespace() {
-        when(courtroomRepository.findByNameAndId(1, COURTROOM_1))
-            .thenReturn(Optional.of(existingCourtroom));
-
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, " courtroom 1 ", userAccount);
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, inputName, userAccount);
 
         assertNotNull(result);
         assertEquals(COURTROOM_1, result.getName());
