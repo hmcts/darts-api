@@ -27,8 +27,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CourtroomCommonServiceImplTest {
 
-    public static final String COURTHOUSE_UPPER = "TEST COURTHOUSE";
-    public static final String COURTROOM_1 = "COURTROOM 1";
+    private static final String COURTHOUSE_UPPER = "TEST COURTHOUSE";
+    private static final String COURTROOM_1 = "COURTROOM 1";
+    
     @Mock
     private CourtroomRepository courtroomRepository;
 
