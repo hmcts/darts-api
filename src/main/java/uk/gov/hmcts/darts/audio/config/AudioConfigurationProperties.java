@@ -31,7 +31,7 @@ public class AudioConfigurationProperties {
     private String tempBlobWorkspace;
 
     private Duration allowableAudioGapDuration;
-    private Integer preAmbleDuration;
-    private Integer postAmbleDuration;
+    private Duration preAmbleDuration;
+    private Duration postAmbleDuration;
     private List<String> handheldAudioCourtroomNumbers;
 }
