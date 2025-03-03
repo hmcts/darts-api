@@ -9,7 +9,7 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 public final class RetentionPolicyTypeTestData {
 
     private RetentionPolicyTypeTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static RetentionPolicyTypeEntity someMinimalRetentionPolicyType() {

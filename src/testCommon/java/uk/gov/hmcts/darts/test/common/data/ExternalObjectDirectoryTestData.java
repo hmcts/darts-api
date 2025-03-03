@@ -22,7 +22,7 @@ public final class ExternalObjectDirectoryTestData implements
         TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder> {
 
     ExternalObjectDirectoryTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     /**
