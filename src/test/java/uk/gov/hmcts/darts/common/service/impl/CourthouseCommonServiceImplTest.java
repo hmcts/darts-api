@@ -45,7 +45,7 @@ class CourthouseCommonServiceImplTest {
         CourthouseEntity result = courthouseService.retrieveCourthouse("Test Courthouse");
 
         assertNotNull(result);
-        assertEquals("Test Courthouse" .toUpperCase(Locale.ROOT), result.getCourthouseName());
+        assertEquals("Test Courthouse".toUpperCase(Locale.ROOT), result.getCourthouseName());
         verify(courthouseRepository).findByCourthouseName(TEST_COURTHOUSE_UPPER);
     }
 
@@ -70,7 +70,7 @@ class CourthouseCommonServiceImplTest {
         CourthouseEntity result = courthouseService.retrieveCourthouse("test courthouse");
 
         assertNotNull(result);
-        assertEquals("Test Courthouse" .toUpperCase(Locale.ROOT), result.getCourthouseName());
+        assertEquals("Test Courthouse".toUpperCase(Locale.ROOT), result.getCourthouseName());
         verify(courthouseRepository).findByCourthouseName(TEST_COURTHOUSE_UPPER);
     }
 
@@ -115,16 +115,16 @@ class CourthouseCommonServiceImplTest {
         DartsApiException exception = assertThrows(DartsApiException.class,
                                                    () -> courthouseService.retrieveCourthouse("  "));
 
-        assertEquals("Provided courthouse does not exist. Courthouse 'null' not found.", exception.getMessage());
-        verify(courthouseRepository).findByCourthouseName(null);
+        assertEquals("Provided courthouse does not exist. Courthouse '' not found.", exception.getMessage());
+        verify(courthouseRepository).findByCourthouseName("");
     }
 
     @Test
-    void retrieveCourthouseNullInputThrowsException() {
+    void retrieveCourthouse_WithNullInputThrowsException() {
         DartsApiException exception = assertThrows(DartsApiException.class,
                                                    () -> courthouseService.retrieveCourthouse(null));
 
-        assertEquals("Provided courthouse does not exist. Courthouse 'null' not found.", exception.getMessage());
-        verify(courthouseRepository).findByCourthouseName(null);
+        assertEquals("Provided courthouse does not exist. Courthouse '' not found.", exception.getMessage());
+        verify(courthouseRepository).findByCourthouseName("");
     }
 }

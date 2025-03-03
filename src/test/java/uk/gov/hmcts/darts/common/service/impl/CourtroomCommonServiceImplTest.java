@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
 
@@ -16,7 +15,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
@@ -26,7 +24,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CourtroomCommonServiceImplTest {
 
-    public static final String TEST_COURTHOUSE_UPPER = "TEST COURTHOUSE";
+    public static final String COURTHOUSE_UPPER = "TEST COURTHOUSE";
     public static final String COURTROOM_1 = "COURTROOM 1";
     @Mock
     private CourtroomRepository courtroomRepository;
@@ -44,7 +42,7 @@ class CourtroomCommonServiceImplTest {
     void setUp() {
         courthouse = new CourthouseEntity();
         courthouse.setId(1);
-        courthouse.setCourthouseName(TEST_COURTHOUSE_UPPER);
+        courthouse.setCourthouseName(COURTHOUSE_UPPER);
 
         userAccount = new UserAccountEntity();
 
@@ -86,10 +84,10 @@ class CourtroomCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCourtroomWithCourthouseNameExistingCourtroom() {
-        when(courtroomRepository.findByCourthouseNameAndCourtroomName(TEST_COURTHOUSE_UPPER, COURTROOM_1))
+        when(courtroomRepository.findByCourthouseNameAndCourtroomName(COURTHOUSE_UPPER, COURTROOM_1))
             .thenReturn(Optional.of(existingCourtroom));
 
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(TEST_COURTHOUSE_UPPER, "Courtroom 1", userAccount);
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(COURTHOUSE_UPPER, "Courtroom 1", userAccount);
 
         assertNotNull(result);
         assertEquals(COURTROOM_1, result.getName());
@@ -100,20 +98,20 @@ class CourtroomCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCourtroomWithCourthouseNameNewCourtroom() {
-        when(courtroomRepository.findByCourthouseNameAndCourtroomName(TEST_COURTHOUSE_UPPER, "COURTROOM 2"))
+        when(courtroomRepository.findByCourthouseNameAndCourtroomName(COURTHOUSE_UPPER, "COURTROOM 2"))
             .thenReturn(Optional.empty());
-        when(courthouseCommonService.retrieveCourthouse(TEST_COURTHOUSE_UPPER))
+        when(courthouseCommonService.retrieveCourthouse(COURTHOUSE_UPPER))
             .thenReturn(courthouse);
         when(courtroomRepository.saveAndFlush(any(CourtroomEntity.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
-        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(TEST_COURTHOUSE_UPPER, "Courtroom 2", userAccount);
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(COURTHOUSE_UPPER, "Courtroom 2", userAccount);
 
         assertNotNull(result);
         assertEquals("COURTROOM 2", result.getName());
         assertEquals(courthouse, result.getCourthouse());
         assertEquals(userAccount, result.getCreatedBy());
-        verify(courthouseCommonService).retrieveCourthouse(TEST_COURTHOUSE_UPPER);
+        verify(courthouseCommonService).retrieveCourthouse(COURTHOUSE_UPPER);
         verify(courtroomRepository).saveAndFlush(any(CourtroomEntity.class));
     }
 
@@ -167,10 +165,13 @@ class CourtroomCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCourtroom_WithWhitespaceString() {
-        DartsApiException exception = assertThrows(DartsApiException.class,
-                                                   () -> courtroomService.retrieveOrCreateCourtroom(courthouse, "  ", userAccount));
+        when(courtroomRepository.findByNameAndId(1, ""))
+            .thenReturn(Optional.of(existingCourtroom));
 
-        assertEquals("Provided courtroom does not exist. Courtroom 'null' not found.", exception.getMessage());
-        verify(courtroomRepository).findByCourthouseNameAndCourtroomName(courthouse.getCourthouseName(), "  ");
+        CourtroomEntity result = courtroomService.retrieveOrCreateCourtroom(courthouse, "  ", userAccount);
+
+        assertNotNull(result);
+        assertEquals("", result.getName());
+        assertEquals(courthouse, result.getCourthouse());
     }
 }
