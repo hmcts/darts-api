@@ -77,7 +77,7 @@ public class AudioTransformationServiceGivenBuilder {
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {
         ExternalObjectDirectoryTestData externalObjectDirectoryTestData = PersistableFactory.getExternalObjectDirectoryTestData();
-        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve retrieve = externalObjectDirectoryTestData.someMinimalBuilderHolder();
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve retrieve = externalObjectDirectoryTestData.someMinimalBuilderHolder();
 
         retrieve.getBuilder().media(mediaEntity).status(dartsDatabase
                                                             .getObjectRecordStatusRepository()

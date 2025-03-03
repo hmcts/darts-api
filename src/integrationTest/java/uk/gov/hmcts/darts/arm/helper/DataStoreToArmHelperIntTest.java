@@ -58,7 +58,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTes
 
 class DataStoreToArmHelperIntTest extends IntegrationBase {
 
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
     private MediaEntity savedMedia;
 

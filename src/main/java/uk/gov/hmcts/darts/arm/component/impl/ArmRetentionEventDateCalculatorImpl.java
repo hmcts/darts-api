@@ -91,6 +91,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                 log.info("ARM event date calculation is skipped for EOD {} as no Retention Score is available", externalObjectDirectoryId);
             }
         }
+
         return false;
     }
 
