@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
@@ -15,16 +14,17 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CourtLogsServiceImplTest {
 
-    public static final String CASE_0000001 = "Case0000001";
+    private static final String CASE_0000001 = "Case0000001";
     @InjectMocks
-    CourtLogsServiceImpl courtLogsService;
+    private CourtLogsServiceImpl courtLogsService;
 
     @Mock
-    CourtLogEventRepository repository;
+    private CourtLogEventRepository repository;
 
     @Test
     void testGetCourtLogs() {
@@ -32,7 +32,7 @@ class CourtLogsServiceImplTest {
         var hearingEntity = CommonTestDataUtil.createHearing(CASE_0000001, LocalTime.of(10, 0));
         List<EventEntity> event = List.of(CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity));
 
-        Mockito.when(repository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
+        when(repository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
             "SWANSEA",
             CASE_0000001,
             CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00"),
