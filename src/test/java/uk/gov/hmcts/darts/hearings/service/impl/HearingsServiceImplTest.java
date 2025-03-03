@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.hearings.mapper.HearingTranscriptionMapper;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -161,7 +162,7 @@ class HearingsServiceImplTest {
     void removeMediaLinkToHearing_shouldRemoveLinkToHearing_whenAllAssociatedCasesAreAnonymised() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
-        hearingEntity.setMediaList(List.of(mediaEntity));
+        hearingEntity.setMediaList(new ArrayList<>(List.of(mediaEntity)));
 
         when(mediaRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(List.of(mediaEntity));
         when(mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(any())).thenReturn(true);
