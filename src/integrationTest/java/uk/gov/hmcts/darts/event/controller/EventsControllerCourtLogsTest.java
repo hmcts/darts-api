@@ -56,7 +56,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
     private static final String SOME_TEXT = "some-text";
-    public static final String LOG = "LOG";
+    private static final String LOG = "LOG";
 
     @Autowired
     private EventRepository eventRepository;
