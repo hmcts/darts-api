@@ -8,48 +8,38 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
-import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class CaseRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
-    private UserAccountStub userAccountStub;
-
-    @Autowired
-    private CourtCaseStub caseStub;
-
-    @Autowired
     private CaseRepository caseRepository;
 
     private CourtCaseEntity courtCaseOpen;
-    private HearingEntity hearingEntity1;
-    private HearingEntity hearingEntity2;
-    private HearingEntity hearingEntity3;
     private CourtCaseEntity courtCaseClosed;
-    private HearingEntity hearingEntity4;
-
 
     @BeforeEach
     void setUp() {
         courtCaseOpen = PersistableFactory.getCourtCaseTestData().someMinimalBuilder()
             .closed(false)
             .build().getEntity();
-        hearingEntity1 = PersistableFactory.getHearingTestData().createHearingFor(courtCaseOpen);
-        hearingEntity2 = PersistableFactory.getHearingTestData().createHearingFor(courtCaseOpen);
-        hearingEntity3 = PersistableFactory.getHearingTestData().createHearingFor(courtCaseOpen);
+        courtCaseOpen = dartsPersistence.save(courtCaseOpen);
+        HearingEntity hearingEntity1 = PersistableFactory.getHearingTestData().createHearingFor(courtCaseOpen);
+        HearingEntity hearingEntity2 = PersistableFactory.getHearingTestData().createHearingFor(courtCaseOpen);
+        HearingEntity hearingEntity3 = PersistableFactory.getHearingTestData().createHearingFor(courtCaseOpen);
 
         courtCaseClosed = PersistableFactory.getCourtCaseTestData().someMinimalBuilder()
             .closed(true)
             .build().getEntity();
         courtCaseClosed.setClosed(true);
-        hearingEntity4 = PersistableFactory.getHearingTestData().createHearingFor(courtCaseClosed);
+        courtCaseClosed = dartsPersistence.save(courtCaseClosed);
+        HearingEntity hearingEntity4 = PersistableFactory.getHearingTestData().createHearingFor(courtCaseClosed);
 
         dartsPersistence.saveAll(hearingEntity1, hearingEntity2, hearingEntity3, hearingEntity4);
     }
@@ -88,5 +78,30 @@ class CaseRepositoryIntTest extends PostgresIntegrationBase {
         // then
         assertThat(result).isNotEmpty();
         assertTrue(result.contains(courtCaseOpen.getCaseNumber()));
+    }
+
+    @Test
+    void findOpenCaseNumbers_shouldSaveAndReturnOpenCaseNumbers_WithOutsideWhitespaceTrimmedButNotInnerWhitespace() {
+        // given
+        CourtCaseEntity courtCaseOpenEntity = PersistableFactory.getCourtCaseTestData().someMinimalBuilder()
+            .closed(false)
+            .build().getEntity();
+        courtCaseOpenEntity.getCourthouse().setCourthouseName(" Test Courthouse Name With Whitespace ");
+        courtCaseOpenEntity = dartsPersistence.save(courtCaseOpenEntity);
+        HearingEntity hearing = PersistableFactory.getHearingTestData().createHearingFor(courtCaseOpenEntity);
+        dartsPersistence.saveAll(hearing);
+
+        var courthouseNameWithWhitespace = courtCaseOpenEntity.getCourthouse().getCourthouseName();
+        log.info("courthouseNameWithWhitespace: '{}'", courthouseNameWithWhitespace);
+        // verify the courthouse name has whitespace trimmed and converted to uppercase when saved
+        assertEquals("TEST COURTHOUSE NAME WITH WHITESPACE", courthouseNameWithWhitespace);
+
+        // when
+        var result = caseRepository.findOpenCaseNumbers(
+            courthouseNameWithWhitespace, List.of(courtCaseOpenEntity.getCaseNumber()));
+
+        // then
+        assertThat(result).isNotEmpty();
+        assertTrue(result.contains(courtCaseOpenEntity.getCaseNumber()));
     }
 }

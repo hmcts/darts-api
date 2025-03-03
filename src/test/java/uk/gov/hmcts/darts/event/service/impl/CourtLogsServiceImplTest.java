@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -19,11 +20,17 @@ import static org.mockito.Mockito.when;
 class CourtLogsServiceImplTest {
 
     private static final String CASE_0000001 = "Case0000001";
-    
+
     private CourtLogsServiceImpl courtLogsService;
 
     @Mock
     private CourtLogEventRepository repository;
+
+    @BeforeEach
+    void setUp() {
+        courtLogsService = new CourtLogsServiceImpl(repository);
+    }
+
 
     @Test
     void testGetCourtLogs() {
