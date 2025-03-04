@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 @Slf4j
 class ArchiveRecordServiceImplTest {
 
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
     private static final String DARTS = "DARTS";
     private static final String REGION = "GBR";
     private static final int EODID = 1234;

@@ -225,9 +225,9 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
         assertEquals("some text", annotation.getAnnotationText());
         assertEquals(hearingEntity.getId(), annotation.getHearingId());
         assertEquals(1, annotation.getAnnotationDocuments().size());
-        assertEquals("a filename", annotation.getAnnotationDocuments().get(0).getFileName());
-        assertEquals("DOC", annotation.getAnnotationDocuments().get(0).getFileType());
-        assertEquals(user.getUserFullName(), annotation.getAnnotationDocuments().get(0).getUploadedBy());
+        assertEquals("a filename", annotation.getAnnotationDocuments().getFirst().getFileName());
+        assertEquals("DOC", annotation.getAnnotationDocuments().getFirst().getFileType());
+        assertEquals(user.getUserFullName(), annotation.getAnnotationDocuments().getFirst().getUploadedBy());
     }
 
     private AnnotationEntity createAnnotation(UserAccountEntity user, HearingEntity hearingEntity, boolean deleted) {
