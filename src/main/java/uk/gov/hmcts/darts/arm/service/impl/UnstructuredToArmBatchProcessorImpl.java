@@ -108,7 +108,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             executor.invokeAll(tasks);
         } catch (Exception e) {
             log.error("Error during batch processing", e);
-            batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
+            //batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
             return;
         }
         try {
