@@ -11,6 +11,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 @Slf4j
 class DataUtilTest {
 
@@ -72,8 +73,8 @@ class DataUtilTest {
         dartsEvent.setCourthouse(null);
         dartsEvent.setCourtroom(null);
         DataUtil.preProcess(dartsEvent);
-        assertThat(dartsEvent.getCourthouse()).isNull();
-        assertThat(dartsEvent.getCourtroom()).isNull();
+        assertThat(dartsEvent.getCourthouse()).isEmpty();
+        assertThat(dartsEvent.getCourtroom()).isEmpty();
     }
 
     @Test
@@ -95,7 +96,7 @@ class DataUtilTest {
         AddCaseRequest addCaseRequest = new AddCaseRequest();
         addCaseRequest.setCourthouse(null);
         DataUtil.preProcess(addCaseRequest);
-        assertThat(addCaseRequest.getCourthouse()).isNull();
+        assertThat(addCaseRequest.getCourthouse()).isEmpty();
     }
 
     @Test
@@ -114,7 +115,7 @@ class DataUtilTest {
         addAudioMetadataRequest.setCourthouse(null);
         addAudioMetadataRequest.setCourtroom(null);
         DataUtil.preProcess(addAudioMetadataRequest);
-        assertThat(addAudioMetadataRequest.getCourthouse()).isNull();
-        assertThat(addAudioMetadataRequest.getCourtroom()).isNull();
+        assertThat(addAudioMetadataRequest.getCourthouse()).isEmpty();
+        assertThat(addAudioMetadataRequest.getCourtroom()).isEmpty();
     }
 }

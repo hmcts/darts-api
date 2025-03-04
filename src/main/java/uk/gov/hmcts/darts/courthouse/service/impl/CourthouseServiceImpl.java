@@ -1,17 +1,5 @@
 package uk.gov.hmcts.darts.courthouse.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.CREATE_COURTHOUSE;
-import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
-import static uk.gov.hmcts.darts.courthouse.service.CourthouseUpdateAuditActivityProvider.auditActivitiesFor;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +36,18 @@ import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseUpdateMapper;
 import uk.gov.hmcts.darts.usermanagement.api.UserManagementApi;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CREATE_COURTHOUSE;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
+import static uk.gov.hmcts.darts.courthouse.service.CourthouseUpdateAuditActivityProvider.auditActivitiesFor;
 
 @RequiredArgsConstructor
 @Service
