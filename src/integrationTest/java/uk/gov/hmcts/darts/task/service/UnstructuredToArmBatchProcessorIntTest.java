@@ -265,7 +265,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
             eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.getFirst().getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())
         ).hasSize(1);
 
-
         List<Integer> failedMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
             List.of(medias.getFirst().getId(),
                     medias.get(1).getId(),
