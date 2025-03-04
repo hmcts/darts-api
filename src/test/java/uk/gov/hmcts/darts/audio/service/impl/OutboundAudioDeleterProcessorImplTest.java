@@ -1,5 +1,19 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,20 +28,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
 
 @ExtendWith(MockitoExtension.class)
 class OutboundAudioDeleterProcessorImplTest {
@@ -52,7 +52,8 @@ class OutboundAudioDeleterProcessorImplTest {
         this.outboundAudioDeleterProcessorImpl = new OutboundAudioDeleterProcessorImpl(
             userAccountRepository, lastAccessedDeletionDayCalculator,
             userIdentity, transformedMediaRepository,
-            singleElementProcessor
+            singleElementProcessor,
+            new OutboundAudioDeleterProcessorImpl.TransformedMediaEntityProcessor(singleElementProcessor, transformedMediaRepository)
         );
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
     }
@@ -88,9 +89,7 @@ class OutboundAudioDeleterProcessorImplTest {
         var transformedMediaNotOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaNotOwnedByUserInGroup(
             List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
         when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), eq(Limit.of(1000))))
-            .thenReturn(List.of(
-                1,
-                2));
+            .thenReturn(List.of(1, 2));
         when(transformedMediaRepository.findById(1)).thenReturn(Optional.of(transformedMediaOwnedByUserInMediaInPerpetuityGroup));
         when(transformedMediaRepository.findById(2)).thenReturn(Optional.of(transformedMediaNotOwnedByUserInMediaInPerpetuityGroup));
 
