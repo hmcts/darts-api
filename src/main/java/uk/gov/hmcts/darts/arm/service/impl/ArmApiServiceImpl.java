@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static java.util.Objects.nonNull;
@@ -46,10 +47,11 @@ public class ArmApiServiceImpl implements ArmApiService {
                                                  String retConfReason) {
 
         Integer retConfScoreId = nonNull(retConfScore) ? retConfScore.getId() : null;
+
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
+                          .eventDate(formatDateTime(eventTimestamp))
                           .retConfReason(retConfReason)
                           .retConfScore(retConfScoreId)
                           .build())
@@ -137,4 +139,12 @@ public class ArmApiServiceImpl implements ArmApiService {
         return String.format("Bearer %s", accessToken);
     }
 
+    String formatDateTime(OffsetDateTime offsetDateTime) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
+        String dateTime = null;
+        if (nonNull(offsetDateTime)) {
+            dateTime = offsetDateTime.format(dateTimeFormatter);
+        }
+        return dateTime;
+    }
 }

@@ -17,10 +17,11 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
 import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
 import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
@@ -48,22 +49,29 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(deletionDays);
 
-        List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findAllDeletableTransformedMedia(
+        List<Integer> transformedMediaListIds = transformedMediaRepository.findAllDeletableTransformedMedia(
             deletionStartDateTime, Limit.of(batchSize));
-        if (transformedMediaList.isEmpty()) {
+        if (transformedMediaListIds.isEmpty()) {
             log.debug("No transformed media to be marked for deletion");
         } else {
-            for (TransformedMediaEntity transformedMedia : transformedMediaList) {
+            Set<MediaRequestEntity> mediaRequests = new HashSet<>();
+            for (Integer transformedMediaId : transformedMediaListIds) {
                 try {
+                    Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
+                    if (transformedMediaOpt.isEmpty()) {
+                        log.error("TransformedMediaEntity with id {} not found", transformedMediaId);
+                        continue;
+                    }
+                    TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
                     if (isTransformedMediaEligibleForDelete(transformedMedia)) {
                         List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
                         deletedValues.addAll(deleted);
                     }
+                    mediaRequests.add(transformedMedia.getMediaRequest());
                 } catch (Exception exception) {
-                    log.error("Unable to mark for deletion transformed media {}", transformedMedia.getId(), exception);
+                    log.error("Unable to mark for deletion transformed media {}", transformedMediaId, exception);
                 }
             }
-            Set<MediaRequestEntity> mediaRequests = transformedMediaList.stream().map(TransformedMediaEntity::getMediaRequest).collect(toSet());
             mediaRequests.forEach(mr -> singleElementProcessor.markMediaRequestAsExpired(mr, systemUser));
         }
 

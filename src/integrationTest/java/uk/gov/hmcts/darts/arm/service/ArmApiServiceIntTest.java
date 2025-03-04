@@ -11,6 +11,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.io.File;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,6 +54,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     private static final String ARM_ERROR_BODY = """
         { "itemId": "00000000-0000-0000-0000-000000000000", "cabinetId": 0, ...}
         """;
+    public static final String BINARY_CONTENT = "some binary content";
 
     private ArmTokenRequest armTokenRequest;
 
@@ -73,7 +76,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @MockitoSpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @TempDir
@@ -101,7 +104,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    void updateMetadata() throws Exception {
+    void updateMetadata_WithNanoSeconds() throws Exception {
 
         // Given
         var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
@@ -112,7 +115,58 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
+                          .eventDate(formatDateTime(eventTimestamp))
+                          .retConfScore(scoreConfId.getId())
+                          .retConfReason(reasonConf)
+                          .build())
+            .useGuidsForFields(false)
+            .build();
+        var updateMetadataResponse = UpdateMetadataResponse.builder()
+            .itemId(UUID.fromString(EXTERNAL_RECORD_ID))
+            .cabinetId(101)
+            .objectId(UUID.fromString("4bfe4fc7-4e2f-4086-8a0e-146cc4556260"))
+            .objectType(1)
+            .fileName("UpdateMetadata-20241801-122819.json")
+            .isError(false)
+            .responseStatus(0)
+            .responseStatusMessages(null)
+            .build();
+
+        String dummyResponse = objectMapper.writeValueAsString(updateMetadataResponse);
+        String dummyRequest = objectMapper.writeValueAsString(updateMetadataRequest);
+
+        stubFor(
+            WireMock.post(urlPathMatching(uploadPath)).withRequestBody(equalToJson(dummyRequest))
+                .willReturn(
+                    aResponse().withHeader("Content-Type", "application/json").withBody(dummyResponse)
+                        .withStatus(200)));
+
+        // When
+        var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
+
+        // Then
+        verify(armTokenClient).getToken(armTokenRequest);
+
+        WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
+                            .withHeader("Authorization", new RegexPattern(bearerAuth))
+                            .withRequestBody(equalToJson(dummyRequest)));
+
+        assertEquals(updateMetadataResponse, responseToTest);
+    }
+
+    @Test
+    void updateMetadata_WithZeroTimes() throws Exception {
+
+        // Given
+        var eventTimestamp = OffsetDateTime.parse("2024-01-31T00:00:00.00Z").plusYears(7);
+
+        var bearerAuth = "Bearer some-token";
+        var reasonConf = "reason";
+        var scoreConfId = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
+        var updateMetadataRequest = UpdateMetadataRequest.builder()
+            .itemId(EXTERNAL_RECORD_ID)
+            .manifest(UpdateMetadataRequest.Manifest.builder()
+                          .eventDate(formatDateTime(eventTimestamp))
                           .retConfScore(scoreConfId.getId())
                           .retConfReason(reasonConf)
                           .build())
@@ -161,7 +215,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
+                          .eventDate(formatDateTime(eventTimestamp))
                           .retConfScore(scoreConfId.getId())
                           .retConfReason(reasonConf)
                           .build())
@@ -186,7 +240,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     @SneakyThrows
     void downloadArmData() {
         // Given
-        byte[] binaryData = "some binary content".getBytes();
+        byte[] binaryData = BINARY_CONTENT.getBytes();
 
         stubFor(
             WireMock.get(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
@@ -195,15 +249,16 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
                         .withStatus(200)));
 
         // When
-        DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+        try (DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
-        // Then
-        verify(armTokenClient).getToken(armTokenRequest);
+            // Then
+            verify(armTokenClient).getToken(armTokenRequest);
 
-        WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
-                            .withHeader("Authorization", new RegexPattern("Bearer some-token")));
+            WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
+                                .withHeader("Authorization", new RegexPattern("Bearer some-token")));
 
-        assertThat(downloadResponseMetaData.getResource().getInputStream().readAllBytes()).isEqualTo(binaryData);
+            assertThat(downloadResponseMetaData.getResource().getInputStream().readAllBytes()).isEqualTo(binaryData);
+        }
     }
 
     @Test
@@ -247,5 +302,10 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     private String getDownloadPath(String downloadPath, String cabinetId, String recordId, String fileId) {
         return downloadPath.replace("{cabinet_id}", cabinetId).replace("{record_id}", recordId).replace("{file_id}", fileId);
+    }
+
+    private String formatDateTime(OffsetDateTime offsetDateTime) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        return offsetDateTime.format(dateTimeFormatter);
     }
 }
