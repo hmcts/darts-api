@@ -1,5 +1,15 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import java.text.MessageFormat;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
@@ -19,16 +29,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.AsyncUtil;
-
-import java.text.MessageFormat;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 
 
 @Slf4j
@@ -99,6 +99,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
         List<Callable<Void>> tasks = eodsForBatch.stream()
             .map(currentEod -> (Callable<Void>) () -> {
+                log.info("Processing EOD {} for batch on thread {}", currentEod.getId(), Thread.currentThread().toString());
                 pushToArmProcess(userAccount, currentEod, batchItems, archiveRecordsFileName);
                 return null;
             })
