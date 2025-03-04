@@ -23,11 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
-
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
