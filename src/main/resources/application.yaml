@@ -66,6 +66,9 @@ spring:
             jwk-set-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/discovery/v2.0/keys
             logout-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/logout
             reset-password-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
+  threads:
+    virtual:
+      enabled=true:
 
   datasource:
     driver-class-name: org.postgresql.Driver
