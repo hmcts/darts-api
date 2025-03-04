@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
 import uk.gov.hmcts.darts.audio.component.impl.RemoveAdminActionComponent;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapperImpl;
 import uk.gov.hmcts.darts.audio.mapper.CourthouseMapper;
@@ -33,6 +35,7 @@ import uk.gov.hmcts.darts.audio.mapper.ObjectActionMapperImpl;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.AdminMediaCourthouseResponse;
 import uk.gov.hmcts.darts.audio.model.AdminMediaCourtroomResponse;
+import uk.gov.hmcts.darts.audio.model.AdminVersionedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionAdminAction;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionItem;
@@ -102,6 +105,8 @@ class AdminMediaServiceImplTest {
     private RemoveAdminActionComponent removeAdminActionComponent;
     @Mock
     private ObjectHiddenReasonRepository hiddenReasonRepository;
+    @Mock
+    private GetAdminMediaResponseMapper getAdminMediaResponseMapper;
 
     private ObjectMapper objectMapper;
 
@@ -568,6 +573,155 @@ class AdminMediaServiceImplTest {
         JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void getMediaEntityById_shouldReutrnMediaEntity_ifOneExists() {
+        MediaEntity mediaEntity = mock(MediaEntity.class);
+        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
+
+        assertThat(mediaRequestService.getMediaEntityById(1))
+            .isEqualTo(mediaEntity);
+        verify(mediaRepository).findById(1);
+    }
+
+    @Test
+    void getMediaEntityById_shouldThrowException_ifNoMediaEntityExists() {
+        when(mediaRepository.findById(1)).thenReturn(Optional.empty());
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaEntityById(1));
+
+        assertThat(exception.getError()).isEqualTo(AudioApiError.MEDIA_NOT_FOUND);
+    }
+
+
+    @Nested
+    @DisplayName("AdminVersionedMediaResponse getMediaVersionsById(Integer id)")
+    class GetMediaVersionsById {
+        @Test
+        void getMediaVersionsById_shouldThrowException_whenChronicleIdIsNull() {
+            MediaEntity mediaEntity = mock(MediaEntity.class);
+            mediaEntity.setChronicleId(null);
+            doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123);
+
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaVersionsById(123));
+            assertThat(exception.getError()).isEqualTo(CommonApiError.INTERNAL_SERVER_ERROR);
+            assertThat(exception.getMessage())
+                .isEqualTo("Internal server error. Media 123 has a Chronicle Id that is null. As such we can not ensure accurate results are returned");
+        }
+
+        @Test
+        void getMediaVersionsById_shouldReturnEmptyVersionList_whenNoMediaVersionsExist() {
+            final String chronicleId = "someChronicleId";
+            MediaEntity mediaEntity = createMediaEntity(true, chronicleId, OffsetDateTime.now());
+            doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123);
+            when(mediaRepository.findAllByChronicleId(chronicleId)).thenReturn(List.of(mediaEntity));
+
+            AdminVersionedMediaResponse response = mock(AdminVersionedMediaResponse.class);
+            when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(mediaEntity, List.of())).thenReturn(response);
+
+            assertThat(mediaRequestService.getMediaVersionsById(123))
+                .isEqualTo(response);
+
+            verify(mediaRepository).findAllByChronicleId(chronicleId);
+            verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(mediaEntity, List.of());
+            verify(mediaRequestService).getMediaEntityById(123);
+        }
+
+        @Test
+        void getMediaVersionsById_shouldReturnVersionsAndCurrentMedia_whenVersionsExist() {
+            final String chronicleId = "someChronicleId";
+            OffsetDateTime now = OffsetDateTime.now();
+            MediaEntity currentMediaEntity = createMediaEntity(true, chronicleId, now);
+            MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
+            MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
+
+            doReturn(currentMediaEntity).when(mediaRequestService).getMediaEntityById(123);
+            when(mediaRepository.findAllByChronicleId(chronicleId))
+                .thenReturn(List.of(currentMediaEntity, versionedMediaEntity2, versionedMediaEntity1));
+
+            AdminVersionedMediaResponse response = mock(AdminVersionedMediaResponse.class);
+
+            List<MediaEntity> expectedVersioendMedia = List.of(versionedMediaEntity1, versionedMediaEntity2);
+            when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(currentMediaEntity, expectedVersioendMedia))
+                .thenReturn(response);
+
+            assertThat(mediaRequestService.getMediaVersionsById(123))
+                .isEqualTo(response);
+
+            verify(mediaRepository).findAllByChronicleId(chronicleId);
+            verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(currentMediaEntity, expectedVersioendMedia);
+            verify(mediaRequestService).getMediaEntityById(123);
+        }
+
+
+        @Test
+        void getMediaVersionsById_shouldReturnNullCurrentVersion_ifAllMediaIsCurrentFlase() {
+            final String chronicleId = "someChronicleId";
+            OffsetDateTime now = OffsetDateTime.now();
+            MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
+            MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
+
+            doReturn(versionedMediaEntity1).when(mediaRequestService).getMediaEntityById(123);
+
+
+            when(mediaRepository.findAllByChronicleId(chronicleId))
+                .thenReturn(List.of(versionedMediaEntity2, versionedMediaEntity1));
+
+            AdminVersionedMediaResponse response = mock(AdminVersionedMediaResponse.class);
+
+            List<MediaEntity> expectedVersioendMedia = List.of(versionedMediaEntity1, versionedMediaEntity2);
+            when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(null, expectedVersioendMedia))
+                .thenReturn(response);
+
+            assertThat(mediaRequestService.getMediaVersionsById(123))
+                .isEqualTo(response);
+
+            verify(mediaRepository).findAllByChronicleId(chronicleId);
+            verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(null, expectedVersioendMedia);
+            verify(mediaRequestService).getMediaEntityById(123);
+
+        }
+
+        @Test
+        void getMediaVersionsById_shouldReturnLastCreatedMedia_ifMultipleIsCurrentTrueExist() {
+            final String chronicleId = "someChronicleId";
+            OffsetDateTime now = OffsetDateTime.now();
+            MediaEntity currentMediaEntity1 = createMediaEntity(true, chronicleId, now.plusMinutes(2));
+            MediaEntity currentMediaEntity2 = createMediaEntity(true, chronicleId, now);
+            MediaEntity currentMediaEntity3 = createMediaEntity(true, chronicleId, now.plusMinutes(1));
+
+            MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
+            MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
+
+            doReturn(currentMediaEntity1).when(mediaRequestService).getMediaEntityById(123);
+            when(mediaRepository.findAllByChronicleId(chronicleId))
+                .thenReturn(List.of(currentMediaEntity1, currentMediaEntity2, currentMediaEntity3, versionedMediaEntity2, versionedMediaEntity1));
+            AdminVersionedMediaResponse response = mock(AdminVersionedMediaResponse.class);
+
+
+            List<MediaEntity> expectedVersioendMedia = List.of(currentMediaEntity3, currentMediaEntity2, versionedMediaEntity1, versionedMediaEntity2);
+            when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(currentMediaEntity1, expectedVersioendMedia))
+                .thenReturn(response);
+
+            assertThat(mediaRequestService.getMediaVersionsById(123))
+                .isEqualTo(response);
+
+            verify(mediaRepository).findAllByChronicleId(chronicleId);
+            verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(currentMediaEntity1, expectedVersioendMedia);
+            verify(mediaRequestService).getMediaEntityById(123);
+
+        }
+
+        private MediaEntity createMediaEntity(Boolean isCurrent, String chronicleId, OffsetDateTime offsetDateTime) {
+            return PersistableFactory.getMediaTestData().someMinimalBuilder()
+                .chronicleId(chronicleId)
+                .isCurrent(isCurrent)
+                .createdDateTime(offsetDateTime)
+                .build()
+                .getEntity();
+        }
+    }
+
+
     @NotNull
     private static HearingEntity createHearing() {
         CourthouseEntity courthouse = new CourthouseEntity();
@@ -828,7 +982,7 @@ class AdminMediaServiceImplTest {
 
             // When
             IllegalStateException exception = assertThrows(IllegalStateException.class,
-                                                               () -> mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
+                                                           () -> mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
 
             // Then
             assertEquals(exception.getMessage(), "Media not found, expected this to be pre-validated");
