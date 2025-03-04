@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -22,12 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
 
 @ExtendWith(MockitoExtension.class)
 class OutboundAudioDeleterProcessorImplTest {
@@ -79,12 +73,6 @@ class OutboundAudioDeleterProcessorImplTest {
 
         // then
         assertThat(result).isEqualTo(deletedValues);
-    }
-
-    private TransformedMediaEntity someTransformedMediaOwnedByUserInGroup(List<SecurityGroupEnum> securityGroupEnum) {
-        var transformedMediaEntity = mock(TransformedMediaEntity.class);
-        when(transformedMediaEntity.isOwnerInSecurityGroup(securityGroupEnum)).thenReturn(true);
-        return transformedMediaEntity;
     }
 }
 
