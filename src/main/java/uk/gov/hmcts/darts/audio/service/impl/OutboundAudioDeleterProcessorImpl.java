@@ -1,16 +1,5 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +15,17 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
 
 
 @Service
