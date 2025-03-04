@@ -22,7 +22,7 @@ import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
-import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetails;
+import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
 import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import uk.gov.hmcts.darts.event.model.AdminObfuscateEveByIdsRequest;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
@@ -181,7 +181,7 @@ public class EventsController implements EventApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<AdminGetEventResponseDetails> adminGetEventById(Integer eventId) {
+    public ResponseEntity<AdminGetEventById200Response> adminGetEventById(Integer eventId) {
         return new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
     }
 
