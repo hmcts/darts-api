@@ -34,7 +34,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Integer eventId) {
-        return eventMapper.mapToAdminGetEventVersionsResponseForId(getEventVersionsForEveIdExcludingEventIdZero(eventId));
+        return eventMapper.mapToAdminGetEventVersionsResponseForId(getRelatedEvents(eventId));
     }
 
     @Override
@@ -44,16 +44,15 @@ public class EventServiceImpl implements EventService {
                                                      String.format("Event with id %s not found", eveId)));
     }
 
-    @Override
-    public List<EventEntity> getEventVersionsForEveIdExcludingEventIdZero(Integer eveId) {
+    List<EventEntity> getRelatedEvents(Integer eveId) {
         EventEntity event = getEventByEveId(eveId);
-        List<EventEntity> events =  eventRepository.findAllByEventIdExcludingEventIdZero(event.getEventId());
 
-        if (events.isEmpty()) {
-            // must be event id zero (XHIBIT issue) so return the event itself so it is added as the current event
-            events.add(event);
-        }
-        return events;
+        List<String> caseNumbers = event.getEventLinkedCaseEntities().stream()
+            .map(EventLinkedCaseEntity::getCaseNumber)
+            .distinct()
+            .toList();
+        return eventRepository.findAllByRelatedEvents(
+            event.getId(), event.getEventId(), caseNumbers);
     }
 
     @Override
