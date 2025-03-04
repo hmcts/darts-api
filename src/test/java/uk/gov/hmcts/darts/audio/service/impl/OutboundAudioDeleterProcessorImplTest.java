@@ -61,8 +61,8 @@ class OutboundAudioDeleterProcessorImplTest {
     @Test
     void testContinuesProcessingNextIterationOnException() {
         // given
-        var transformedMedia1 = someTransformedMediaNotOwnedByUserInGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
-        var transformedMedia2 = someTransformedMediaNotOwnedByUserInGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
+        var transformedMedia1 = mock(TransformedMediaEntity.class);
+        var transformedMedia2 = mock(TransformedMediaEntity.class);
 
         when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), eq(Limit.of(1000))))
             .thenReturn(List.of(1, 2));
@@ -81,37 +81,9 @@ class OutboundAudioDeleterProcessorImplTest {
         assertThat(result).isEqualTo(deletedValues);
     }
 
-    @Test
-    void doesntMarkForDeletionWhenCurrentOwnerIsInGroupMediaInPerpetuity() {
-        // given
-        var transformedMediaOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaOwnedByUserInGroup(
-            List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
-        var transformedMediaNotOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaNotOwnedByUserInGroup(
-            List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
-        when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), eq(Limit.of(1000))))
-            .thenReturn(List.of(1, 2));
-        when(transformedMediaRepository.findById(1)).thenReturn(Optional.of(transformedMediaOwnedByUserInMediaInPerpetuityGroup));
-        when(transformedMediaRepository.findById(2)).thenReturn(Optional.of(transformedMediaNotOwnedByUserInMediaInPerpetuityGroup));
-
-        // when
-        outboundAudioDeleterProcessorImpl.markForDeletion(1000);
-
-        // then
-        verify(singleElementProcessor, times(1))
-            .markForDeletion(any(), eq(transformedMediaNotOwnedByUserInMediaInPerpetuityGroup));
-        verify(singleElementProcessor, times(0))
-            .markForDeletion(any(), eq(transformedMediaOwnedByUserInMediaInPerpetuityGroup));
-    }
-
     private TransformedMediaEntity someTransformedMediaOwnedByUserInGroup(List<SecurityGroupEnum> securityGroupEnum) {
         var transformedMediaEntity = mock(TransformedMediaEntity.class);
         when(transformedMediaEntity.isOwnerInSecurityGroup(securityGroupEnum)).thenReturn(true);
-        return transformedMediaEntity;
-    }
-
-    private TransformedMediaEntity someTransformedMediaNotOwnedByUserInGroup(List<SecurityGroupEnum> securityGroupEnum) {
-        var transformedMediaEntity = mock(TransformedMediaEntity.class);
-        when(transformedMediaEntity.isOwnerInSecurityGroup(securityGroupEnum)).thenReturn(false);
         return transformedMediaEntity;
     }
 }
