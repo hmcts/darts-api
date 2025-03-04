@@ -1,14 +1,16 @@
 package uk.gov.hmcts.darts.util;
 
-import java.util.List;
-import java.util.Optional;
-
-import static java.util.Objects.isNull;
 
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.Objects.isNull;
+
 
 public final class DataUtil {
     private DataUtil() {
