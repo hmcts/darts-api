@@ -271,7 +271,7 @@ public class CourthouseServiceImpl implements CourthouseService {
             foundCourthouse.setLastModifiedBy(currentUser);
             courthouseRepository.saveAndFlush(foundCourthouse);
         } else {
-            if (!StringUtils.equalsIgnoreCase(foundCourthouse.getCourthouseName(), StringUtils.trimToEmpty(courthouseName))
+            if (!StringUtils.equalsIgnoreCase(StringUtils.trimToEmpty(foundCourthouse.getCourthouseName()), StringUtils.trimToEmpty(courthouseName))
                 || (courthouseCode != null && !Objects.equals(courthouseCode, foundCourthouse.getCode()))) {
                 throw new CourthouseCodeNotMatchException(foundCourthouse, courthouseCode, courthouseName);
             }
