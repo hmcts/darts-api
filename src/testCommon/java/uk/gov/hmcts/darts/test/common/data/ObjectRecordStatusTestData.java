@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 public final class ObjectRecordStatusTestData {
 
     private ObjectRecordStatusTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static ObjectRecordStatusEntity statusOf(ObjectRecordStatusEnum status) {

@@ -28,7 +28,7 @@ public interface CaseRepository
         FROM CourtCaseEntity c
         WHERE c.closed = false
         and c.caseNumber in :caseNumbers
-        and c.courthouse.courthouseName = upper(:courthouseName)
+        and c.courthouse.courthouseName = upper(trim(:courthouseName))
         """)
     List<String> findOpenCaseNumbers(String courthouseName, List<String> caseNumbers);
 

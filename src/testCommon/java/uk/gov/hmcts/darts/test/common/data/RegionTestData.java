@@ -8,7 +8,7 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 public final class RegionTestData {
 
     private RegionTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static RegionEntity minimalRegion() {

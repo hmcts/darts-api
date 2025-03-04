@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 public final class ParameterisedTestDataGenerator {
 
     private ParameterisedTestDataGenerator() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     private static void generateCombinations(List<List<String>> params, int index, String[] current, List<Arguments> argumentList) {
