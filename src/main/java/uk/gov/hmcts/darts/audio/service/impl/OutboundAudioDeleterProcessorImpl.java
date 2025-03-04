@@ -85,18 +85,12 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
                     return null;
                 }
                 TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
-                if (isTransformedMediaEligibleForDelete(transformedMedia)) {
-                    deletedValues.addAll(singleElementProcessor.markForDeletion(systemUser, transformedMedia));
-                }
+                deletedValues.addAll(singleElementProcessor.markForDeletion(systemUser, transformedMedia));
                 return transformedMedia.getMediaRequest();
             } catch (Exception exception) {
                 log.error("Unable to mark for deletion transformed media {}", transformedMediaId, exception);
             }
             return null;
-        }
-
-        private boolean isTransformedMediaEligibleForDelete(TransformedMediaEntity transformedMedia) {
-            return !transformedMedia.isOwnerInSecurityGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
         }
     }
 
