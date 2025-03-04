@@ -44,9 +44,13 @@
 --     add pk to retention_policy_type_heritage_mapping
 --     amend manual_retention_override and actual_case_closed_flag to int from bool
 --v18  add default to created_ts on case_overflow
---     drop cas_id
---     add case_object_id and audio_folder_object_id
---     add new pk to case_overflow, relegate old pk to fk, and add field case_object_id
+--v19  remove cas_id from rps_retainer and corresponding foreign key
+--     add case_object_id, audio_folder_object_id to rps_retainer
+--     add cof_id to case_overflow
+--     change PK on case_overflow from cas_id to cof_id
+--     add sequence cof_seq 
+--     add case_object_id to case_overflow
+--v20  remove not null from cas_id on case_overflow
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -70,13 +74,13 @@ CREATE TABLE case_management_retention
 ) TABLESPACE pg_default;
 
 CREATE TABLE rps_retainer
-(rpr_id                         INTEGER                       NOT NULL
+(rpr_id                         INTEGER                       NOT NULL                  
 ,rpt_id                         INTEGER                       NOT NULL
 ,rps_retainer_object_id         CHARACTER VARYING             NOT NULL -- all data will be from legacy
-,is_current                     BOOLEAN
 ,case_object_id                 CHARACTER VARYING
 ,audio_folder_object_id         CHARACTER VARYING
-,dm_retainer_root_id            CHARACTER VARYING
+,is_current                     BOOLEAN 
+,dm_retainer_root_id            CHARACTER VARYING      
 ,dm_retention_rule_type         INTEGER
 ,dm_retention_date              TIMESTAMP WITH TIME ZONE               -- retaining _date to indictate source
 ,dmc_current_phase_id           CHARACTER VARYING
@@ -114,6 +118,7 @@ COMMENT ON TABLE  rps_retainer
 IS 'is essentially a legacy table, based on the component tables necessary to derive the dmc_rps_retainer object';
 COMMENT ON COLUMN rps_retainer.rpr_id
 IS 'primary key of case_rps_retainer';
+
 
 CREATE TABLE case_retention
 (car_id                      INTEGER                       NOT NULL
@@ -188,9 +193,10 @@ CREATE TABLE retention_policy_type
 ) TABLESPACE pg_default;
 
 CREATE TABLE case_overflow
-(cof_id                      INTEGER NOT NULL
-,cas_id                      INTEGER
+(cof_id                      INTEGER                       NOT NULL
+,cas_id                      INTEGER                       
 ,rpt_id                      INTEGER
+,case_object_id              CHARACTER VARYING
 ,case_total_sentence         CHARACTER VARYING
 ,retention_event_ts          TIMESTAMP WITH TIME ZONE     
 ,case_retention_fixed        CHARACTER VARYING
@@ -201,7 +207,6 @@ CREATE TABLE case_overflow
 ,c_closed_pre_live           INTEGER
 ,c_case_closed_date_pre_live TIMESTAMP WITH TIME ZONE
 ,case_created_ts             TIMESTAMP WITH TIME ZONE
-,case_object_id              CHARACTER VARYING
 ,audio_folder_object_id      CHARACTER VARYING(16)
 ,case_last_modified_ts       TIMESTAMP WITH TIME ZONE                -- to support delta, when case changed
 ,audio_last_modified_ts      TIMESTAMP WITH TIME ZONE                -- to suppor delta, when moj_audio_folder changes
@@ -276,7 +281,7 @@ ALTER TABLE retention_policy_type ADD PRIMARY KEY USING INDEX retention_policy_t
 CREATE UNIQUE INDEX rps_retainer_pk ON rps_retainer(rpr_id) TABLESPACE pg_default; 
 ALTER TABLE rps_retainer ADD PRIMARY KEY USING INDEX rps_retainer_pk;
 
-CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cof_id) TABLESPACE pg_default;
+CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cof_id) TABLESPACE pg_default; 
 ALTER TABLE case_overflow ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
 CREATE UNIQUE INDEX case_retention_extra_pk ON case_retention_extra(cas_id) TABLESPACE pg_default; 
@@ -298,7 +303,8 @@ CREATE SEQUENCE rah_seq CACHE 20;
 CREATE SEQUENCE rhm_seq CACHE 20;
 CREATE SEQUENCE cof_seq CACHE 20;
 
-ALTER TABLE rps_retainer
+
+ALTER TABLE rps_retainer      
 ADD CONSTRAINT rps_retainer_retention_policy_type_fk
 FOREIGN KEY (rpt_id) REFERENCES retention_policy_type(rpt_id);
 
@@ -415,4 +421,4 @@ GRANT SELECT,UPDATE ON  rcc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rpt_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rah_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rhm_seq TO darts_user;
-GRANT SELECT,UPDATE ON cof_seq TO darts_user;
+GRANT SELECT,UPDATE ON  cof_seq TO darts_user;
