@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -34,7 +35,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @TestPropertySource(properties = {
     "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
-@SuppressWarnings("PMD.CloseResource")
 class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
@@ -47,7 +47,7 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
     private ArmApiClient armApiClient;
 
     @Test
-    void updateMetadataShouldSucceedIfServerReturns200Success() {
+    void updateMetadata_ShouldSucceed_WhenServerReturns200Success() {
         // Given
         var bearerAuth = "Bearer some-token";
         var externalRecordId = "7683ee65-c7a7-7343-be80-018b8ac13602";
@@ -76,7 +76,7 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
+                          .eventDate(formatDateTime(eventTimestamp))
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -86,20 +86,71 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
 
         // Then
         verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
-                                  .withHeader(AUTHORIZATION, equalTo(bearerAuth))
-                                  .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                                  .withRequestBody(
-                                      matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
-                                          .and(matchingJsonPath("$.manifest.event_date", equalTo(eventTimestamp.toString())))
-                                          .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
-                                  ));
+                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                   .withRequestBody(
+                       matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
+                           .and(matchingJsonPath("$.manifest.event_date", equalTo(formatDateTime(eventTimestamp))))
+                           .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
+                   ));
+
+        assertEquals(UUID.fromString(externalRecordId), updateMetadataResponse.getItemId());
+    }
+
+    @Test
+    void updateMetadata_ShouldSucceed_WithZeroTimes() {
+        // Given
+        var bearerAuth = "Bearer some-token";
+        var externalRecordId = "7683ee65-c7a7-7343-be80-018b8ac13602";
+        var eventTimestamp = OffsetDateTime.parse("2024-01-31T00:00:00.00000Z").plusYears(7);
+
+        stubFor(
+            WireMock.post(urlEqualTo(UPDATE_METADATA_PATH))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-type", "application/json")
+                        .withBody("""
+                                      {
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null
+                                      }
+                                      """
+                        )
+                        .withStatus(200)));
+
+        var updateMetadataRequest = UpdateMetadataRequest.builder()
+            .itemId(externalRecordId)
+            .manifest(UpdateMetadataRequest.Manifest.builder()
+                          .eventDate(formatDateTime(eventTimestamp))
+                          .build())
+            .useGuidsForFields(false)
+            .build();
+
+        // When
+        UpdateMetadataResponse updateMetadataResponse = armApiClient.updateMetadata(bearerAuth, updateMetadataRequest);
+
+        // Then
+        verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
+                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                   .withRequestBody(
+                       matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
+                           .and(matchingJsonPath("$.manifest.event_date", equalTo(formatDateTime(eventTimestamp))))
+                           .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
+                   ));
 
         assertEquals(UUID.fromString(externalRecordId), updateMetadataResponse.getItemId());
     }
 
     @Test
     @SneakyThrows
-    void downloadArmDataShouldSucceedIfServerReturns200Success() {
+    void downloadArmData_ShouldSucceed_WhenServerReturns200Success() {
         // Given
         stubFor(
             WireMock.get(urlPathMatching(DOWNLOAD_ARM_DATA_PATH))
@@ -110,10 +161,17 @@ class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
                         .withStatus(200)));
 
         // When
-        feign.Response response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+        try (feign.Response response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
-        //Then
-        InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integrationTest/resources/wiremock/__files/testAudio.mp3"));
-        assertTrue(IOUtils.contentEquals(response.body().asInputStream(), expectedInputStream));
+            //Then
+            try (InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integrationTest/resources/wiremock/__files/testAudio.mp3"))) {
+                assertTrue(IOUtils.contentEquals(response.body().asInputStream(), expectedInputStream));
+            }
+        }
+    }
+
+    private String formatDateTime(OffsetDateTime offsetDateTime) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        return offsetDateTime.format(dateTimeFormatter);
     }
 }
