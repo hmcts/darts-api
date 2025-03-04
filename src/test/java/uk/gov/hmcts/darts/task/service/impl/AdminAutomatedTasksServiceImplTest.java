@@ -6,10 +6,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
@@ -103,6 +105,7 @@ class AdminAutomatedTasksServiceImplTest {
         assertEquals(100, automatedTaskEntity.getBatchSize());
         assertEquals(expectedReturnTask, task);
         verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB, "some-task-name disabled");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Batch size updated");
         verifyNoMoreInteractions(auditApi);
     }
 
@@ -163,6 +166,11 @@ class AdminAutomatedTasksServiceImplTest {
 
 
         verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB, "some-task-name disabled");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Batch size updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - ARM replay start ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - ARM replay end ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv start hour updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv end hour updated");
         verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
         verify(automatedTaskRepository).save(automatedTaskEntity);
         verifyNoMoreInteractions(auditApi);
@@ -200,7 +208,9 @@ class AdminAutomatedTasksServiceImplTest {
 
         verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
         verify(automatedTaskRepository).save(automatedTaskEntity);
-        verifyNoInteractions(auditApi);
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - ARM replay start ts updated");
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Rpo Csv start hour updated");
+        verifyNoMoreInteractions(auditApi);
     }
 
     @Test
@@ -234,12 +244,13 @@ class AdminAutomatedTasksServiceImplTest {
         AutomatedTaskEntity automatedTaskEntity3 =
             createAutomatedTaskEntity("CaseExpiryDeletion", true);
 
-        when(automatedTaskRepository.findAll()).thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
+        when(automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending()))
+            .thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
         adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         verify(automatedTaskRepository, times(1))
-            .findAll();
+            .findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending());
         verify(mapper, times(1))
             .mapEntitiesToModel(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
     }
@@ -254,12 +265,13 @@ class AdminAutomatedTasksServiceImplTest {
         AutomatedTaskEntity automatedTaskEntity3 =
             createAutomatedTaskEntity("CaseExpiryDeletion", false);
 
-        when(automatedTaskRepository.findAll()).thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
+        when(automatedTaskRepository.findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending()))
+            .thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
         adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         verify(automatedTaskRepository, times(1))
-            .findAll();
+            .findAll(Sort.by(AutomatedTaskEntity_.TASK_NAME).ascending());
         verify(mapper, times(1))
             .mapEntitiesToModel(List.of(automatedTaskEntity1, automatedTaskEntity2));
     }
@@ -282,7 +294,7 @@ class AdminAutomatedTasksServiceImplTest {
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> adminAutomatedTaskService.getAutomatedTaskById(1234));
-        assertEquals(exception.getError(), AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND);
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND, exception.getError());
     }
 
     @Test
@@ -291,7 +303,7 @@ class AdminAutomatedTasksServiceImplTest {
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> adminAutomatedTaskService.runAutomatedTask(1234));
-        assertEquals(exception.getError(), AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND);
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND, exception.getError());
     }
 
     @Test
@@ -301,7 +313,18 @@ class AdminAutomatedTasksServiceImplTest {
 
         DartsApiException exception = assertThrows(
             DartsApiException.class, () -> adminAutomatedTaskService.updateAutomatedTask(1234, new AutomatedTaskPatch()));
-        assertEquals(exception.getError(), AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND);
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND, exception.getError());
+    }
+
+
+    @Test
+    void registerAudit_usingStandardData_shouldSaveAudit() {
+        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion", false);
+
+        adminAutomatedTaskService
+            .registerConfiguredAutomatedTaskAudit(automatedTaskEntity, "Some additional info");
+
+        verify(auditApi).record(AuditActivity.CONFIGURED_AUTOMATED_TASK, "Task: 1234 - Some additional info");
     }
 
 

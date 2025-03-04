@@ -38,6 +38,7 @@ public class HearingEntityToCaseHearing {
         hearing.setCourtroom(entity.getCourtroom().getName());
         var transcripts = entity.getTranscriptions()
             .stream()
+            .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsCurrent()))
             .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
                 || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId())
             )

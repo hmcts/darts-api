@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Limit;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -53,16 +52,15 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
     List<TransformedMediaDetailsDto> findTransformedMediaDetails(Integer userId, boolean expired);
 
 
-    @EntityGraph(attributePaths = {"mediaRequest.currentOwner.securityGroupEntities"})
     @Query("""
-        SELECT tm FROM MediaRequestEntity mr, TransformedMediaEntity tm
+        SELECT tm.id FROM MediaRequestEntity mr, TransformedMediaEntity tm
                JOIN tm.transientObjectDirectoryEntities tod
                WHERE tm.mediaRequest = mr
                AND ((tm.lastAccessed < :createdAtOrLastAccessedDateTime AND mr.status = 'COMPLETED')
                     OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND  mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
                AND upper(tod.status.description) <> 'MARKED FOR DELETION'
         """)
-    List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime, Limit limit);
+    List<Integer> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime, Limit limit);
 
     @Query(value = """
         SELECT tm
@@ -82,6 +80,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            (:requestedBy IS NULL OR (tm.createdBy.userFullName ILIKE CONCAT('%', cast (:requestedBy as text), '%'))) AND
            ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR media.createdDateTime >= :requestedAtFrom) AND
            ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
+           ORDER BY tm.id DESC
         """)
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,
@@ -91,6 +90,4 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
                                                       String requestedBy,
                                                       OffsetDateTime requestedAtFrom,
                                                       OffsetDateTime requestedAtTo);
-
-
 }

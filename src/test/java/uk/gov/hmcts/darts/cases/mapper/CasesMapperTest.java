@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.cases.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,14 +12,17 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -29,22 +33,35 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseRetention;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefenceList;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefendantList;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createProsecutorList;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createRetentionPolicyType;
+import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
+@Slf4j
 class CasesMapperTest {
     public static final String SWANSEA = "SWANSEA";
     public static final String CASE_NUMBER = "casenumber1";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapperConfig().objectMapper();
+
+    private static final OffsetDateTime DATETIME_2025 = OffsetDateTime.of(2025, 1, 1, 10, 10, 0, 0, UTC);
+    private static final String POLICY_A_NAME = "Policy A";
+    private static final String SOME_PAST_DATE_TIME = "2000-01-01T00:00:00Z";
+    private static final String SOME_FUTURE_DATE_TIME = "2100-01-01T00:00:00Z";
 
     @Mock
     private RetrieveCoreObjectService retrieveCoreObjectService;
@@ -109,7 +126,6 @@ class CasesMapperTest {
         caseEntity.setProsecutorList(createProsecutorList(caseEntity));
         caseEntity.setDefenceList(createDefenceList(caseEntity));
         caseEntity.setDefendantList(createDefendantList(caseEntity));
-
 
         AddCaseRequest request = new AddCaseRequest(SWANSEA, "1");
         request.setProsecutors(new ArrayList<>(List.of("New Prosecutor")));
@@ -216,5 +232,93 @@ class CasesMapperTest {
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void mapToAdminSingleCaseResponseItem_WithCaseOpenNullReportingRestrictions() throws IOException {
+        // Given
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
 
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+        courtCase.setClosed(true);
+
+        CommonTestDataUtil.createHearing(
+            courtCase, courtroomEntity, LocalDate.of(2023, Month.JULY, 7), true
+        );
+
+        // When
+        AdminSingleCaseResponseItem responseItem = caseMapper.mapToAdminSingleCaseResponseItem(courtCase);
+
+        // Then
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(responseItem);
+        log.info("actualResponse: {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpenNullRestrictions.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void mapToAdminSingleCaseResponseItem_WithCaseOpenDefaultReporting() throws IOException {
+        // Given
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
+
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+        courtCase.setClosed(true);
+
+        CommonTestDataUtil.createHearing(
+            courtCase, courtroomEntity, LocalDate.of(2023, Month.JULY, 7), true
+        );
+
+        EventHandlerEntity reportingRestriction = new EventHandlerEntity();
+        reportingRestriction.setEventName("test reporting restriction name");
+        courtCase.setReportingRestrictions(reportingRestriction);
+
+        // When
+        AdminSingleCaseResponseItem responseItem = caseMapper.mapToAdminSingleCaseResponseItem(courtCase);
+
+        // Then
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(responseItem);
+        log.info("actualResponse: {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpenDefaultRestrictions.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void mapToAdminSingleCaseResponseItem_WithCaseClosed() throws IOException {
+        // Given
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
+
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+        courtCase.setClosed(true);
+
+        CommonTestDataUtil.createHearing(
+            courtCase, courtroomEntity, LocalDate.of(2023, Month.JULY, 7), true
+        );
+
+        EventHandlerEntity reportingRestriction = new EventHandlerEntity();
+        reportingRestriction.setEventName("test reporting restriction name");
+        courtCase.setReportingRestrictions(reportingRestriction);
+
+        var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
+        UserAccountEntity testUser = CommonTestDataUtil.createUserAccount();
+        CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
+        caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
+        when(caseRetentionRepository.findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(courtCase, String.valueOf(COMPLETE)))
+            .thenReturn(Optional.of(caseRetention));
+
+        // When
+        AdminSingleCaseResponseItem responseItem = caseMapper.mapToAdminSingleCaseResponseItem(courtCase);
+
+        // Then
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(responseItem);
+        log.info("actualResponse: {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseClosed.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
 }

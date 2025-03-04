@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -42,7 +43,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Autowired
@@ -175,6 +176,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
 
         verify(mockUserIdentity).getUserAccount();
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDICIARY, SUPER_ADMIN, DARTS));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -201,6 +203,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
 
         verify(mockUserIdentity).getUserAccount();
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDICIARY, SUPER_ADMIN, DARTS));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -222,9 +225,9 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
         assertEquals("some text", annotation.getAnnotationText());
         assertEquals(hearingEntity.getId(), annotation.getHearingId());
         assertEquals(1, annotation.getAnnotationDocuments().size());
-        assertEquals("a filename", annotation.getAnnotationDocuments().get(0).getFileName());
-        assertEquals("DOC", annotation.getAnnotationDocuments().get(0).getFileType());
-        assertEquals(user.getUserFullName(), annotation.getAnnotationDocuments().get(0).getUploadedBy());
+        assertEquals("a filename", annotation.getAnnotationDocuments().getFirst().getFileName());
+        assertEquals("DOC", annotation.getAnnotationDocuments().getFirst().getFileType());
+        assertEquals(user.getUserFullName(), annotation.getAnnotationDocuments().getFirst().getUploadedBy());
     }
 
     private AnnotationEntity createAnnotation(UserAccountEntity user, HearingEntity hearingEntity, boolean deleted) {

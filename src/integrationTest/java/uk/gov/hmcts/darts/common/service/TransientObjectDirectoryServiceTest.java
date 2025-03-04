@@ -8,11 +8,12 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -36,8 +37,9 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
         var mediaRequestEntity1 = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(mediaRequestEntity1.getId());
-        UUID blobId = UUID.fromString("f744a74f-83c0-47e4-8bb2-2fd4d2b68647");
-
+        String blobId = "f744a74f-83c0-47e4-8bb2-2fd4d2b68647";
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUser(false, "NEWCASTLE");
+        givenBearerTokenExists(userAccount.getEmailAddress());
         TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(
             mediaRequestEntity,
             "aFilename",
@@ -45,6 +47,8 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
             mediaRequestEntity.getEndTime(),
             1000L
         );
+        assertThat(transformedMediaEntity.getCreatedBy()).isEqualTo(mediaRequestEntity.getCreatedBy());
+        assertThat(transformedMediaEntity.getLastModifiedBy()).isEqualTo(mediaRequestEntity.getCreatedBy());
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobId
@@ -62,5 +66,4 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:05:00.000Z")));
         assertNotNull(transientObjectDirectoryEntity.getLastModifiedBy());
     }
-
 }

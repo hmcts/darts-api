@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.OffsetDateTime;
 
@@ -12,6 +13,7 @@ import java.time.OffsetDateTime;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class RecordManagementMatterResponse extends BaseRpoResponse {
 
     private RecordManagementMatter recordManagementMatter;

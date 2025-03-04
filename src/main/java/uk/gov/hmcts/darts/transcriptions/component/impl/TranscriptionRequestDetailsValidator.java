@@ -48,7 +48,7 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
     }
 
     private void checkHearingHasValidMedia(TranscriptionRequestDetails transcriptionRequestDetails) {
-        final HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+        final HearingEntity hearing = hearingsService.getHearingByIdWithValidation(transcriptionRequestDetails.getHearingId());
         checkAudioFileExistsAndTimesValid(transcriptionRequestDetails, hearing);
     }
 

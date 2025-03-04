@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItem;
@@ -58,13 +58,13 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTes
 
 class DataStoreToArmHelperIntTest extends IntegrationBase {
 
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
     private MediaEntity savedMedia;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
-    @SpyBean
+    @MockitoSpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Autowired
@@ -111,7 +111,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             DETS,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
@@ -177,7 +177,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
             savedMedia,
             STORED,
             ARM,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         armExternalObjectDirectory.setOsrUuid(objectStateRecordEntity.getUuid());
         dartsDatabase.save(armExternalObjectDirectory);

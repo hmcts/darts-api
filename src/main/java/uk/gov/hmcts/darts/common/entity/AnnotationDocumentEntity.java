@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
@@ -86,7 +87,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity
     private OffsetDateTime retainUntilTs;
 
     @Column(name = "ret_conf_score")
-    private Integer retConfScore;
+    private RetentionConfidenceScoreEnum retConfScore;
 
     @Column(name = "ret_conf_reason")
     private String retConfReason;
@@ -96,6 +97,12 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity
 
     @Column(name = "subcontent_position")
     private Integer subcontentPosition;
+
+    @Column(name = "data_ticket")
+    private Integer dataTicket;
+
+    @Column(name = "storage_id", length = 16)
+    private String storageId;
 
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.ANNOTATION_DOCUMENT_ENTITY)
     private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();

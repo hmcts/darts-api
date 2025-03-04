@@ -37,7 +37,7 @@ class CaseRetentionConfidenceReasonMapperTest {
         courtCase2.setRetConfUpdatedTs(retentionDate);
         courtCase2.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
 
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ssX");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         var caseRetentionConfidenceReasonMapper = new CaseRetentionConfidenceReasonMapper(armDataManagementConfiguration);
 
         List<CourtCaseEntity> courtCases = List.of(courtCase1, courtCase2);
@@ -47,20 +47,20 @@ class CaseRetentionConfidenceReasonMapperTest {
 
         //then
         assertNotNull(result);
-        assertEquals("2023-05-31T10:00:00+01", result.getRetentionConfidenceAppliedTimestamp());
+        assertEquals("2023-05-31T10:00:00.000+01", result.getRetentionConfidenceAppliedTimestamp());
         assertEquals(2, result.getRetentionCases().size());
 
         CaseRetentionConfidenceReason.RetentionCase retentionCase1 = result.getRetentionCases().get(0);
         assertEquals(courtCase1.getCaseNumber(), retentionCase1.getCaseNumber());
         assertEquals(courtCase1.getCourthouse().getCourthouseName(), retentionCase1.getCourthouse());
         assertEquals("CASE_CLOSED", retentionCase1.getRetentionConfidenceReason());
-        assertEquals("2030-05-31T10:00:00+01", retentionCase1.getRetentionConfidenceUpdatedTimestamp());
+        assertEquals("2030-05-31T10:00:00.000+01", retentionCase1.getRetentionConfidenceUpdatedTimestamp());
 
         CaseRetentionConfidenceReason.RetentionCase retentionCase2 = result.getRetentionCases().get(1);
         assertEquals(courtCase2.getCaseNumber(), retentionCase2.getCaseNumber());
         assertEquals(courtCase2.getCourthouse().getCourthouseName(), retentionCase2.getCourthouse());
         assertEquals("AGED_CASE", retentionCase2.getRetentionConfidenceReason());
-        assertEquals("2030-05-31T10:00:00+01", retentionCase2.getRetentionConfidenceUpdatedTimestamp());
+        assertEquals("2030-05-31T10:00:00.000+01", retentionCase2.getRetentionConfidenceUpdatedTimestamp());
 
     }
 }

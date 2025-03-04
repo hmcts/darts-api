@@ -5,16 +5,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
+import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
-import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -22,6 +23,8 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -29,46 +32,47 @@ import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.util.LogUtil;
 
-import java.io.InputStream;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioUploadServiceImplTest {
 
     public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
     public static final OffsetDateTime ENDED_AT = OffsetDateTime.now();
     private static final String DUMMY_FILE_CONTENT = "DUMMY FILE CONTENT";
-    @Captor
-    ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
-    @Captor
-    ArgumentCaptor<InputStream> inboundBlobStorageArgumentCaptor;
-    @Captor
-    ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityArgumentCaptor;
     @Mock
     private MediaRepository mediaRepository;
     @Mock
@@ -82,26 +86,23 @@ class AudioUploadServiceImplTest {
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Mock
     private DataManagementApi dataManagementApi;
     @Mock
     private LogApi logApi;
-    private AudioUploadService audioService;
+    private AudioUploadServiceImpl audioService;
     @Mock
     private AudioAsyncService audioAsyncService;
     @Mock
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
-    private MediaLinkedCaseRepository mediaLinkedCaseRepository;
+    private ApplyAdminActionComponent applyAdminActionComponent;
+    private AddAudioRequestMapper mapper;
 
     @BeforeEach
     void setUp() {
-        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity, mediaLinkedCaseHelper, mediaRepository);
-        FileContentChecksum fileContentChecksum = new FileContentChecksum();
-        audioService = new AudioUploadServiceImpl(
+        mapper = spy(new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity, mediaLinkedCaseHelper, mediaRepository));
+        audioService = spy(new AudioUploadServiceImpl(
             externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
             externalLocationTypeRepository,
             mediaRepository,
             retrieveCoreObjectService,
@@ -109,197 +110,14 @@ class AudioUploadServiceImplTest {
             mapper,
             dataManagementApi,
             userIdentity,
-            fileContentChecksum,
             logApi,
-            mediaLinkedCaseRepository,
-            audioAsyncService);
-    }
+            audioAsyncService,
+            applyAdminActionComponent
+            ));
+        ReflectionTestUtils.setField(audioService, "smallFileSizeMaxLength", Duration.ofSeconds(2));
+        ReflectionTestUtils.setField(audioService, "smallFileSize", 1024);
 
-    @Test
-    void addAudio_shouldUploadToInboundAndSave_whenFileAndMetadataUsed() {
-        UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setId(10);
-        when(userIdentity.getUserAccount()).thenReturn(userAccount);
-
-        // Given
-        HearingEntity hearingEntity = new HearingEntity();
-        when(retrieveCoreObjectService.retrieveOrCreateHearing(
-            anyString(),
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(hearingEntity);
-        when(mediaRepository.findMediaByDetails(any(), any(), any(), any(), any()))
-            .thenReturn(Collections.emptyList());
-
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("SWANSEA");
-        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
-            .thenReturn(courtroomEntity);
-
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
-        mediaEntity.setId(10);
-        when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "addAudio",
-            "audio_sample.mp2",
-            "audio/mpeg",
-            DUMMY_FILE_CONTENT.getBytes()
-        );
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
-
-        // When
-        UUID externalLocation = UUID.randomUUID();
-        when(dataManagementApi.saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture())).thenReturn(externalLocation);
-        audioService.addAudio(audioFile, addAudioMetadataRequest);
-
-        // Then
-        verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
-        verify(mediaRepository, times(2)).save(mediaEntityArgumentCaptor.capture());
-        verify(hearingRepository, times(3)).saveAndFlush(any());
-        verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
-        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
-
-        MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
-        assertEquals(startedAt, savedMedia.getStart());
-        assertEquals(endedAt, savedMedia.getEnd());
-        assertEquals(1, savedMedia.getChannel());
-        assertEquals(2, savedMedia.getTotalChannels());
-        assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
-        assertEquals("1", savedMedia.getCourtroom().getName());
-
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntityArgumentCaptor.getValue();
-        assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
-        assertNotNull(externalObjectDirectoryEntity.getChecksum());
-        assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
-    }
-
-    @Test
-    void addAudio_shouldSaveMediaAndEod_whenMetadataOnly() {
-        UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setId(10);
-        when(userIdentity.getUserAccount()).thenReturn(userAccount);
-
-        // Given
-        HearingEntity hearingEntity = new HearingEntity();
-        when(retrieveCoreObjectService.retrieveOrCreateHearing(
-            anyString(),
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(hearingEntity);
-
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("SWANSEA");
-        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
-            .thenReturn(courtroomEntity);
-
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
-        mediaEntity.setId(10);
-        when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
-        when(dataManagementApi.getChecksum(any(), any()))
-            .thenReturn(addAudioMetadataRequest.getChecksum());
-
-        // When
-        UUID externalLocation = UUID.randomUUID();
-        audioService.addAudio(externalLocation, addAudioMetadataRequest);
-
-        // Then
-        verify(mediaRepository, times(2)).save(mediaEntityArgumentCaptor.capture());
-        verify(hearingRepository, times(3)).saveAndFlush(any());
-        verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
-        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
-        verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
-        MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
-        assertEquals(startedAt, savedMedia.getStart());
-        assertEquals(endedAt, savedMedia.getEnd());
-        assertEquals(1, savedMedia.getChannel());
-        assertEquals(2, savedMedia.getTotalChannels());
-        assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
-        assertEquals("1", savedMedia.getCourtroom().getName());
-
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntityArgumentCaptor.getValue();
-        assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
-        assertNotNull(externalObjectDirectoryEntity.getChecksum());
-        assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
-    }
-
-    @Test
-    void addAudio_shouldDeleteInboundBlob_whenMetadataOnlyAndAudioIsADuplicate() throws AzureDeleteBlobException {
-        UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setId(10);
-        when(userIdentity.getUserAccount()).thenReturn(userAccount);
-
-        // Given
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("SWANSEA");
-        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
-            .thenReturn(courtroomEntity);
-
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
-
-        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
-        mediaEntity.setChecksum(addAudioMetadataRequest.getChecksum());
-        mediaEntity.setId(10);
-
-        when(mediaRepository.findMediaByDetails(any(), any(), any(), any(), any()))
-            .thenReturn(List.of(mediaEntity));
-
-        when(dataManagementApi.getChecksum(any(), any())).thenReturn(addAudioMetadataRequest.getChecksum());
-
-        // When
-        UUID externalLocation = UUID.randomUUID();
-        audioService.addAudio(externalLocation, addAudioMetadataRequest);
-
-        // Then
-        verify(mediaRepository, times(1))
-            .findMediaByDetails(courtroomEntity, mediaEntity.getChannel(),mediaEntity.getMediaFile(), startedAt, endedAt);
-        verifyNoMoreInteractions(mediaRepository);
-        verifyNoInteractions(hearingRepository);
-        verifyNoInteractions(logApi);
-        verifyNoInteractions(externalObjectDirectoryRepository);
-        verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
-        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
-        verifyNoMoreInteractions(dataManagementApi);
-    }
-
-    @Test
-    void addAudioNoUploadChecksumDoNotMatch() {
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
-        when(dataManagementApi.getChecksum(any(), any()))
-            .thenReturn("123");
-
-        // When
-        UUID externalLocation = UUID.randomUUID();
-
-        Assertions.assertThatThrownBy(() -> audioService.addAudio(externalLocation, addAudioMetadataRequest))
-            .isInstanceOf(DartsApiException.class)
-            .hasMessage("Failed to add audio meta data. Checksum for blob '123' does not match the one passed in the API request '123456'.")
-            .hasFieldOrPropertyWithValue("error", AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA);
-
-        verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
-
-        // Then
-        verifyNoInteractions(mediaRepository, hearingRepository, logApi, externalObjectDirectoryRepository);
+        lenient().doAnswer(invocation -> invocation.getArgument(0)).when(mediaRepository).saveAndFlush(any());
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {
@@ -410,6 +228,188 @@ class AudioUploadServiceImplTest {
     }
 
     @Test
+    void versionUpload_shouldLogSmallFileWithLongDurationWarning_whenFileIs1024BytesAndDurationIsMoreThan2Seconds() {
+        AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(3, 1024L);
+
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
+
+        verify(logApi).addAudioSmallFileWithLongDuration(
+            "COURTHOUSE_123",
+            "COURTROOM_123",
+            addAudioMetadataRequest.getStartedAt(),
+            addAudioMetadataRequest.getEndedAt(),
+            123,
+            1024L
+        );
+    }
+
+    @Test
+    void versionUpload_shouldNotLogSmallFileWithLongDurationWarning_whenFileIs1024BytesAndDurationIsEqualTo2Seconds() {
+        AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(2, 1024L);
+
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
+
+        verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void versionUpload_shouldLogSmallFileWithLongDurationWarning_whenFileIs1025BytesAndDurationIsMoreThan2Seconds() {
+        AddAudioMetadataRequest addAudioMetadataRequest = setupVersionUploadTest(3, 1025L);
+
+        audioService.versionUpload(List.of(), addAudioMetadataRequest, UUID.randomUUID().toString(), "123", mock(UserAccountEntity.class));
+
+        verify(logApi, never()).addAudioSmallFileWithLongDuration(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void versionUpload_shouldNotInvokeHideAllFunctionalityIfExistingMediaIsNotHidden() {
+        MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(100)
+            .chronicleId("100")
+            .antecedentId(null)
+            .build()
+            .getEntity();
+
+        MediaEntity newMedia = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(101)
+            .chronicleId("100")
+            .antecedentId("100")
+            .build()
+            .getEntity();
+        doReturn(newMedia).when(mapper).mapToMedia(any(), any());
+
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.setStartedAt(STARTED_AT);
+        addAudioMetadataRequest.setEndedAt(ENDED_AT);
+        addAudioMetadataRequest.setFileSize(100L);
+        addAudioMetadataRequest.setCases(Collections.emptyList());
+
+        audioService.versionUpload(List.of(exisingMediaVersion),
+                                   addAudioMetadataRequest,
+                                   UUID.randomUUID().toString(),
+                                   "checksum",
+                                   PersistableFactory.getUserAccountTestData().someMinimal());
+
+        verifyNoInteractions(applyAdminActionComponent);
+    }
+
+    @Test
+    void versionUpload_shouldInvokeHideAllFunctionalityWithLimitedAdminActionDetailsIfExistingMediaIsHiddenWithNoExistingAdminAction() {
+        MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(100)
+            .isHidden(true)
+            .chronicleId("100")
+            .antecedentId(null)
+            .build()
+            .getEntity();
+
+        MediaEntity newMedia = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(101)
+            .chronicleId("100")
+            .antecedentId("100")
+            .build()
+            .getEntity();
+        doReturn(newMedia).when(mapper).mapToMedia(any(), any());
+
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.setStartedAt(STARTED_AT);
+        addAudioMetadataRequest.setEndedAt(ENDED_AT);
+        addAudioMetadataRequest.setFileSize(100L);
+        addAudioMetadataRequest.setCases(Collections.emptyList());
+
+        audioService.versionUpload(List.of(exisingMediaVersion),
+                                   addAudioMetadataRequest,
+                                   UUID.randomUUID().toString(),
+                                   "checksum",
+                                   PersistableFactory.getUserAccountTestData().someMinimal());
+
+        var adminActionPropertiesCaptor = ArgumentCaptor.forClass(ApplyAdminActionComponent.AdminActionProperties.class);
+        verify(applyAdminActionComponent).applyAdminActionTo(any(), adminActionPropertiesCaptor.capture());
+        verifyNoMoreInteractions(applyAdminActionComponent);
+
+        ApplyAdminActionComponent.AdminActionProperties adminActionProperties = adminActionPropertiesCaptor.getValue();
+        assertNull(adminActionProperties.ticketReference());
+        assertEquals("Prior version had no admin action, so no details are available", adminActionProperties.comments());
+        assertNull(adminActionProperties.hiddenReason());
+    }
+
+    @Test
+    void versionUpload_shouldInvokeHideAllFunctionalityWithCopiedAdminActionDetailsIfExistingMediaIsHiddenWithExistingAdminAction() {
+        MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(100)
+            .isHidden(true)
+            .chronicleId("100")
+            .antecedentId(null)
+            .build()
+            .getEntity();
+
+        ObjectHiddenReasonEntity objectHiddenReason = new ObjectHiddenReasonEntity();
+        ObjectAdminActionEntity adminAction = PersistableFactory.getObjectAdminActionTestData().someMinimalBuilder()
+            .media(exisingMediaVersion)
+            .comments("Some comments")
+            .ticketReference("Some ticket reference")
+            .objectHiddenReason(objectHiddenReason)
+            .build()
+            .getEntity();
+        exisingMediaVersion.setObjectAdminAction(adminAction);
+
+        MediaEntity newMedia = PersistableFactory.getMediaTestData()
+            .someMinimalBuilder()
+            .id(101)
+            .chronicleId("100")
+            .antecedentId("100")
+            .build()
+            .getEntity();
+        doReturn(newMedia).when(mapper).mapToMedia(any(), any());
+
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.setStartedAt(STARTED_AT);
+        addAudioMetadataRequest.setEndedAt(ENDED_AT);
+        addAudioMetadataRequest.setFileSize(100L);
+        addAudioMetadataRequest.setCases(Collections.emptyList());
+
+        audioService.versionUpload(List.of(exisingMediaVersion),
+                                   addAudioMetadataRequest,
+                                   UUID.randomUUID().toString(),
+                                   "checksum",
+                                   PersistableFactory.getUserAccountTestData().someMinimal());
+
+        var adminActionPropertiesCaptor = ArgumentCaptor.forClass(ApplyAdminActionComponent.AdminActionProperties.class);
+        verify(applyAdminActionComponent).applyAdminActionTo(any(), adminActionPropertiesCaptor.capture());
+        verifyNoMoreInteractions(applyAdminActionComponent);
+
+        ApplyAdminActionComponent.AdminActionProperties adminActionProperties = adminActionPropertiesCaptor.getValue();
+        assertEquals("Some ticket reference", adminActionProperties.ticketReference());
+        assertEquals("Some comments", adminActionProperties.comments());
+        assertEquals(objectHiddenReason, adminActionProperties.hiddenReason());
+    }
+
+    private AddAudioMetadataRequest setupVersionUploadTest(int endTimeOffset, long fileSize) {
+        MediaEntity mediaEntity = mock(MediaEntity.class);
+        when(mediaEntity.getId()).thenReturn(123);
+        doReturn(mediaEntity).when(mapper).mapToMedia(any(), any());
+
+        AddAudioMetadataRequest addAudioMetadataRequest = mock(AddAudioMetadataRequest.class);
+        OffsetDateTime startTime = OffsetDateTime.now();
+        OffsetDateTime endTime = startTime.plusSeconds(endTimeOffset);
+        when(addAudioMetadataRequest.getStartedAt()).thenReturn(startTime);
+        when(addAudioMetadataRequest.getEndedAt()).thenReturn(endTime);
+        when(addAudioMetadataRequest.getFileSize()).thenReturn(fileSize);
+        lenient().when(addAudioMetadataRequest.getCourthouse()).thenReturn("COURTHOUSE_123");
+        lenient().when(addAudioMetadataRequest.getCourtroom()).thenReturn("COURTROOM_123");
+
+        doNothing().when(audioService).linkAudioToHearingInMetadata(any(), any());
+        doNothing().when(audioService).saveExternalObjectDirectory(any(), any(), any(), any());
+
+        return addAudioMetadataRequest;
+    }
+
+    @Test
     void linkAudioAndHearingDuplicateCases() {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         addAudioMetadataRequest.setCases(List.of("1", "2", "1"));
@@ -443,16 +443,225 @@ class AudioUploadServiceImplTest {
         userAccount.setId(10);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "addAudio",
-            "audio_sample.mp2",
-            "audio/mpeg",
-            DUMMY_FILE_CONTENT.getBytes()
-        );
+        String blobId = UUID.randomUUID().toString();
+        when(dataManagementApi.getChecksum(any(), any()))
+            .thenReturn("123456");
 
-        audioService.addAudio(audioFile, addAudioMetadataRequest);
+        audioService.addAudio(blobId, addAudioMetadataRequest);
         verify(hearingRepository, times(2)).saveAndFlush(any());
         assertEquals(1, hearing1.getMediaList().size());
         assertEquals(1, hearing2.getMediaList().size());
+    }
+
+    @Test
+    void addAudio_shouldSaveAudio_whenMetaDataIsUsed() {
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
+        // Given
+        HearingEntity hearingEntity = new HearingEntity();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            anyString(),
+            any(),
+            any()
+        )).thenReturn(hearingEntity);
+        when(mediaRepository.findMediaByDetails(any(), any(), any(), any(), any()))
+            .thenReturn(Collections.emptyList());
+
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
+            .thenReturn(courtroomEntity);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+        mediaEntity.setId(10);
+        when(mediaRepository.saveAndFlush(any(MediaEntity.class))).thenReturn(mediaEntity);
+
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
+        when(dataManagementApi.getChecksum(any(), any()))
+            .thenReturn("123456");
+
+        // When
+        String externalLocation = UUID.randomUUID().toString();
+        audioService.addAudio(externalLocation, addAudioMetadataRequest);
+
+        // Then
+
+        ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor = ArgumentCaptor.forClass(MediaEntity.class);
+        ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityArgumentCaptor =
+            ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
+
+        verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
+        verify(hearingRepository, times(3)).saveAndFlush(any());
+        verify(logApi).audioUploaded(addAudioMetadataRequest);
+        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
+
+        MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
+        assertEquals(startedAt, savedMedia.getStart());
+        assertEquals(endedAt, savedMedia.getEnd());
+        assertEquals(1, savedMedia.getChannel());
+        assertEquals(2, savedMedia.getTotalChannels());
+        assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
+        assertEquals("1", savedMedia.getCourtroom().getName());
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntityArgumentCaptor.getValue();
+        assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
+        assertNotNull(externalObjectDirectoryEntity.getChecksum());
+        assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
+    }
+
+    @Test
+    void addAudio_shouldSaveMediaAndEod_whenMetadataOnly() {
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
+        // Given
+        HearingEntity hearingEntity = new HearingEntity();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            anyString(),
+            any(),
+            any()
+        )).thenReturn(hearingEntity);
+
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
+            .thenReturn(courtroomEntity);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+        mediaEntity.setId(10);
+        when(mediaRepository.saveAndFlush(any(MediaEntity.class))).thenReturn(mediaEntity);
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
+        when(dataManagementApi.getChecksum(any(), any()))
+            .thenReturn(addAudioMetadataRequest.getChecksum());
+
+        // When
+        String externalLocation = UUID.randomUUID().toString();
+        audioService.addAudio(externalLocation, addAudioMetadataRequest);
+
+        // Then
+        ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor = ArgumentCaptor.forClass(MediaEntity.class);
+        ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityArgumentCaptor =
+            ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
+
+        verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
+        verify(hearingRepository, times(3)).saveAndFlush(any());
+        verify(logApi).audioUploaded(addAudioMetadataRequest);
+        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
+        verify(dataManagementApi).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
+        MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
+        assertEquals(startedAt, savedMedia.getStart());
+        assertEquals(endedAt, savedMedia.getEnd());
+        assertEquals(1, savedMedia.getChannel());
+        assertEquals(2, savedMedia.getTotalChannels());
+        assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
+        assertEquals("1", savedMedia.getCourtroom().getName());
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntityArgumentCaptor.getValue();
+        assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
+        assertNotNull(externalObjectDirectoryEntity.getChecksum());
+        assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
+    }
+
+    @Test
+    void addAudio_shouldDeleteInboundBlob_whenMetadataOnlyAndAudioIsADuplicate() throws AzureDeleteBlobException {
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
+        // Given
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
+            .thenReturn(courtroomEntity);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
+
+        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+        mediaEntity.setChecksum(addAudioMetadataRequest.getChecksum());
+        mediaEntity.setId(10);
+
+        when(mediaRepository.findMediaByDetails(any(), any(), any(), any(), any()))
+            .thenReturn(List.of(mediaEntity));
+
+        when(dataManagementApi.getChecksum(any(), any())).thenReturn(addAudioMetadataRequest.getChecksum());
+
+        // When
+        String externalLocation = UUID.randomUUID().toString();
+        audioService.addAudio(externalLocation, addAudioMetadataRequest);
+
+        // Then
+        verify(mediaRepository)
+            .findMediaByDetails(courtroomEntity, mediaEntity.getChannel(), mediaEntity.getMediaFile(), startedAt, endedAt);
+        verifyNoMoreInteractions(mediaRepository);
+        verifyNoInteractions(hearingRepository);
+        verifyNoInteractions(logApi);
+        verifyNoInteractions(externalObjectDirectoryRepository);
+        verify(dataManagementApi).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
+        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
+        verifyNoMoreInteractions(dataManagementApi);
+    }
+
+    @Test
+    void addAudioNoUploadChecksumDoNotMatch() throws AzureDeleteBlobException {
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
+        when(dataManagementApi.getChecksum(any(), any()))
+            .thenReturn("123");
+
+        // When
+        String externalLocation = UUID.randomUUID().toString();
+
+        Assertions.assertThatThrownBy(() -> audioService.addAudio(externalLocation, addAudioMetadataRequest))
+            .isInstanceOf(DartsApiException.class)
+            .hasMessage("Failed to add audio meta data. Checksum for blob '123' does not match the one passed in the API request '123456'.")
+            .hasFieldOrPropertyWithValue("error", AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA);
+
+        verify(dataManagementApi).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
+        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
+        // Then
+        verifyNoInteractions(mediaRepository, hearingRepository, logApi, externalObjectDirectoryRepository);
+    }
+
+    @Test
+    void deleteUploadedAudio_whenValidDataIsProvided_shouldDeleteUploadedAudio(CapturedOutput output) throws AzureDeleteBlobException {
+        String externalLocation = UUID.randomUUID().toString();
+        audioService.deleteUploadedAudio(externalLocation);
+        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
+        assertThat(output)
+            .doesNotContain("Failed to delete blob");
+    }
+
+    @Test
+    void deleteUploadedAudio_whenAnExceptionOccures_shouldLogAndConsume(CapturedOutput output) throws AzureDeleteBlobException {
+        AzureDeleteBlobException exception = new AzureDeleteBlobException("Failed to delete blob");
+        doThrow(exception).when(dataManagementApi).deleteBlobDataFromInboundContainer(any());
+
+        String externalLocation = UUID.randomUUID().toString();
+        audioService.deleteUploadedAudio(externalLocation);
+        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
+        LogUtil.waitUntilMessage(output, "Failed to delete blob", 5);
+        LogUtil.waitUntilMessage(output, "Failed to delete blob data from inbound container", 5);
     }
 }

@@ -4,11 +4,16 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AbstractAutomatedTaskConfig;
@@ -23,6 +28,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.validation.constraints.NotNull;
 
 import static java.lang.Boolean.TRUE;
@@ -55,6 +66,8 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     private ThreadLocal<UUID> executionId;
     @Getter
     private boolean isManualRun;
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                             T abstractAutomatedTaskConfig,
@@ -70,12 +83,19 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     }
 
     private void setupUserAuthentication() {
-        Jwt jwt = Jwt.withTokenValue("automated-task")
-            .header("alg", "RS256")
-            .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
-            .build();
+        String email = automatedTaskConfigurationProperties.getSystemUserEmail();
+        Integer userId = userAccountRepository.findFirstByEmailAddressIgnoreCase(email)
+            .orElseThrow(() -> new DartsException(
+                "System user not found with email " + email))
+            .getId();
+
+        DartsJwt jwt = new DartsJwt(Jwt.withTokenValue("automated-task")
+                                        .header("alg", "RS256")
+                                        .claim("emails", List.of(email))
+                                        .build(),
+                                    userId);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-        log.debug("Task: {} using email: {}", getTaskName(), automatedTaskConfigurationProperties.getSystemUserEmail());
+        log.debug("Task: {} using email: {}", getTaskName(), email);
     }
 
     @Override
@@ -95,7 +115,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                             log.info("Task: {} is inactive but has been run manually", getTaskName());
                         }
                         logApi.taskStarted(executionId.get(), this.getTaskName());
-                        lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
+                        lockService.getLockingTaskExecutor().executeWithLock(createLockableTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(SKIPPED);
                         log.warn("Task: {} not running now as it has been disabled", getTaskName());
@@ -114,6 +134,10 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
         } finally {
             postRunTask();
         }
+    }
+
+    LockedTask createLockableTask() {
+        return new LockedTask();
     }
 
     @Override
@@ -238,16 +262,44 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     class LockedTask implements Runnable {
         @Override
         public void run() {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
             try {
-                LockAssert.assertLocked();
-                runTask();
+                assertLocked();
             } catch (IllegalStateException exception) {
                 setAutomatedTaskStatus(LOCK_FAILED);
                 log.error("Unable to lock task", exception);
-            } catch (Exception exception) {
-                setAutomatedTaskStatus(FAILED);
-                handleException(exception);
             }
+
+            final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Future<?> future = executor.submit(() -> {
+                try {
+                    //Spring security context default strategy is ThreadLocal meaning we need to set it up on each thread we want the user on
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    runTask();
+                } catch (Exception exception) {
+                    setAutomatedTaskStatus(FAILED);
+                    handleException(exception);
+                    throw exception;
+                }
+            });
+
+            try {
+                Object result = future.get(getLockAtMostFor().toMillis(), TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                log.error("Task: {} timed out after {}ms", getTaskName(), getLockAtMostFor().toMillis());
+                future.cancel(true);
+            } catch (ExecutionException e) {
+                log.error("Task: {} execution exception", getTaskName(), e);
+            } catch (InterruptedException e) {
+                log.error("Task: {} interrupted", getTaskName(), e);
+                Thread.currentThread().interrupt();
+            }
+            executor.shutdown();
+        }
+
+        //Separate method to allow mocking
+        void assertLocked() {
+            LockAssert.assertLocked();
         }
     }
 }

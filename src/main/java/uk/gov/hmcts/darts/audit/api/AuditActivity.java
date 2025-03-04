@@ -50,7 +50,8 @@ public enum AuditActivity {
     MANUAL_OBFUSCATION(41),
     UNHIDE_AUDIO(42),
     HIDE_TRANSCRIPTION(43),
-    UNHIDE_TRANSCRIPTION(44);
+    UNHIDE_TRANSCRIPTION(44),
+    CONFIGURED_AUTOMATED_TASK(45);
 
     private final Integer id;
 }

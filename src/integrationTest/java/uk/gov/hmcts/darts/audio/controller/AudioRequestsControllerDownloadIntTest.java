@@ -4,14 +4,15 @@ import com.azure.storage.blob.BlobAsyncClient;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -60,10 +61,10 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     private static final URI ENDPOINT = URI.create("/audio-requests/download");
 
     private static final Integer DOWNLOAD_AUDIT_ACTIVITY_ID = AuditActivity.EXPORT_AUDIO.getId();
-    @MockBean
+    @MockitoBean
     private Authorisation mockAuthorisation;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Autowired
@@ -78,7 +79,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     @Autowired
     private AuditRepository auditRepository;
 
-    @MockBean
+    @MockitoBean
     private DataManagementAzureClientFactory factory;
 
     @Value("${darts.storage.blob.temp-blob-workspace}")
@@ -91,7 +92,9 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         BlobServiceClient client = Mockito.mock(BlobServiceClient.class);
         BlobContainerClient containerClient = Mockito.mock(BlobContainerClient.class);
-        BlobClient blobClient = new DownloadableBlobClient(Mockito.mock(BlobAsyncClient.class));
+        BlobAsyncClient blobAsyncClient = Mockito.mock(BlobAsyncClient.class);
+        when(blobAsyncClient.getServiceVersion()).thenReturn(Mockito.mock(BlobServiceVersion.class));
+        BlobClient blobClient = new DownloadableBlobClient(blobAsyncClient);
 
         when(factory.getBlobServiceClient(notNull())).thenReturn(client);
         when(factory.getBlobContainerClient(notNull(), eq(client))).thenReturn(containerClient);
@@ -100,7 +103,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     void audioRequestDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
@@ -148,7 +151,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     void audioRequestDownloadShouldReturnInternalServerErrorWhenExceptionDuringDownloadBlobData() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);

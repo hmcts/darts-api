@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -13,7 +14,8 @@ import java.util.Optional;
 
 @SuppressWarnings("PMD.MethodNamingConventions")
 @Repository
-public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
+public interface CaseRepository
+    extends JpaRepository<CourtCaseEntity, Integer>, JpaSpecificationExecutor<CourtCaseEntity> {
 
     Optional<CourtCaseEntity> findByCaseNumberAndCourthouse_CourthouseName(String caseNumber,
                                                                            String courthouseName);
@@ -49,16 +51,33 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         """)
     List<Integer> findOpenCasesToClose(OffsetDateTime cutoffDate, Limit limit);
 
-    List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries, Limit limit);
+    @Query("""
+        SELECT cc.id
+        FROM CourtCaseEntity cc
+        WHERE cc.isRetentionUpdated = true
+        AND cc.retentionRetries < :maxRetentionRetries
+        ORDER BY cc.id ASC
+        """)
+    List<Integer> findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries, Limit limit);
 
     @Query("""
-        SELECT courtCase FROM CourtCaseEntity courtCase
-        WHERE courtCase.closed = true
-        AND courtCase.caseClosedTimestamp <= :caseClosedBeforeTimestamp
-        AND NOT EXISTS (select cde from CaseDocumentEntity cde
-            where (cde.courtCase.id = courtCase.id))
+        SELECT courtCase.id 
+        FROM CourtCaseEntity cc,
+        CaseRetentionEntity cr,
+        (select cr2.courtCase.id as caseId, max(cr2.createdDateTime) latest_ts
+                FROM CaseRetentionEntity cr2
+                WHERE cr2.currentState = 'COMPLETE'
+                GROUP by cr2.courtCase.id) latest_case_retention
+        WHERE cr.courtCase.id = cc.id
+        AND cc.closed = true
+        AND cc.caseClosedTimestamp <= :caseClosedBeforeTimestamp
+        AND latest_case_retention.latest_ts = cr.createdDateTime
+        AND latest_case_retention.caseId = cr.courtCase.id
+        AND cr.retainUntil is not null
+        AND NOT EXISTS 
+            (select cde FROM CaseDocumentEntity cde WHERE (cde.courtCase.id = cc.id))
         """)
-    List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
+    List<Integer> findCasesIdsNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
 
     @Query("""
             SELECT cc.id
@@ -90,4 +109,12 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         and cr.retainUntil < :maxRetentionDate
         """)
     List<Integer> findCaseIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
+
+    @Query("""
+        SELECT cc
+        FROM CourtCaseEntity cc
+        WHERE cc.id in :ids
+        ORDER BY cc.caseNumber DESC
+        """)
+    List<CourtCaseEntity> findAllWithIdMatchingOneOf(List<Integer> ids);
 }

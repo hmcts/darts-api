@@ -9,8 +9,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -72,11 +73,11 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
-    @MockBean
+    @MockitoBean
     private AuditApi mockAuditApi;
-    @MockBean
+    @MockitoBean
     private DataManagementFacade mockDataManagementFacade;
 
     @TempDir
@@ -193,10 +194,10 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             STORED);
         final ExternalLocationTypeEntity unstructuredLocation = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
-        final UUID externalLocation = UUID.randomUUID();
+        final String externalLocation = UUID.randomUUID().toString();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
         final String confidenceReason = "reason";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
         // setup a real file so we can assert against its processing
         StorageConfiguration configuration = new StorageConfiguration();
@@ -267,9 +268,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             STORED);
         final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
-        final UUID externalLocation = UUID.randomUUID();
+        final String externalLocation = UUID.randomUUID().toString();
         final String checksum = "KQ9vVogyRdsnEvxyNQz77g==";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         final String confidenceReason = "reason";
 
         transcriptionEntity = transcriptionStub.updateTranscriptionWithDocument(

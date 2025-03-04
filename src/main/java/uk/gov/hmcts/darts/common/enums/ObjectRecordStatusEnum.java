@@ -20,6 +20,7 @@ public enum ObjectRecordStatusEnum {
     FAILURE_ARM_INGESTION_FAILED(8),
     AWAITING_VERIFICATION(9),
     MARKED_FOR_DELETION(10),
+    @Deprecated
     DELETED(11),
     ARM_INGESTION(12),
     ARM_DROP_ZONE(13),
@@ -32,7 +33,8 @@ public enum ObjectRecordStatusEnum {
     FAILURE_EMPTY_FILE(20),
     ARM_RPO_PENDING(21),
     ARM_REPLAY(22),
-    ARM_MISSING_RESPONSE(23);
+    ARM_MISSING_RESPONSE(23),
+    ARM_RAW_DATA_PUSHED(24);
 
     private static final Map<Integer, ObjectRecordStatusEnum> BY_ID = new ConcurrentHashMap<>();
 
