@@ -4,12 +4,13 @@ import lombok.Getter;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
 public class ArmBatchItems {
     @Getter
-    private final List<ArmBatchItem> items = new ArrayList<>();
+    private final List<ArmBatchItem> items = Collections.synchronizedList(new ArrayList<>());
 
     public void add(ArmBatchItem batchItem) {
         items.add(batchItem);
