@@ -25,7 +25,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
 
 @ExtendWith(MockitoExtension.class)
-class AnnotationArchiveRecordMapperImplTest {
+class AnnotationArchiveRecordMapperImplPropertyTest {
 
     private AnnotationArchiveRecordMapperImpl annotationArchiveRecordMapper;
 
