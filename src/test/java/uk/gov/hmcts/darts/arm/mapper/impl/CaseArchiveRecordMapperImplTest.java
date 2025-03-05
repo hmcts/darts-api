@@ -34,7 +34,7 @@ class CaseArchiveRecordMapperImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    MockedStatic<PropertyFileLoader> propertyFileLoader;
+    private MockedStatic<PropertyFileLoader> propertyFileLoader;
 
     @BeforeEach
     void setUp() {
