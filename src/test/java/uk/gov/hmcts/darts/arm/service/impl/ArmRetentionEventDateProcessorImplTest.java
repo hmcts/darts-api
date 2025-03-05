@@ -66,7 +66,7 @@ class ArmRetentionEventDateProcessorImplTest {
     @Test
     void calculateEventDates() {
         // given
-        List<ExternalObjectDirectoryEntity> eods = List.of(externalObjectDirectoryEntity);
+        List<Integer> eods = List.of(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
         when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000))).thenReturn(eods);
 
         externalObjectDirectoryEntity.setEventDateTs(MEDIA_RETENTION_DATE_TIME);
@@ -87,7 +87,7 @@ class ArmRetentionEventDateProcessorImplTest {
     @Test
     void calculateEventDates_NoRowsToProcess() {
         // given
-        List<ExternalObjectDirectoryEntity> eods = new ArrayList<>();
+        List<Integer> eods = new ArrayList<>();
         when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000))).thenReturn(eods);
 
         // when

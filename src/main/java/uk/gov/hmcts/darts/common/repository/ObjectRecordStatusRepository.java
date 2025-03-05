@@ -18,5 +18,4 @@ public interface ObjectRecordStatusRepository extends JpaRepository<ObjectRecord
         }
         return responseList;
     }
-
 }

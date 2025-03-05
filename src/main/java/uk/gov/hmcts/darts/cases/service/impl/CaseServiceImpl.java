@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
+import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.CaseTranscriptModel;
@@ -248,5 +249,12 @@ public class CaseServiceImpl implements CaseService {
     @Override
     public CourtCaseEntity saveCase(CourtCaseEntity courtCase) {
         return caseRepository.saveAndFlush(courtCase);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AdminSingleCaseResponseItem adminGetCaseById(Integer caseId) {
+        CourtCaseEntity caseEntity = getCourtCaseById(caseId);
+        return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity);
     }
 }

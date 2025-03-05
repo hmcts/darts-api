@@ -61,11 +61,11 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
 
         // when
-        var result = caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(1000));
+        var result = caseRepository.findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(1000));
 
         // then
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().getId()).isEqualTo(matchingCase.getId());
+        assertThat(result.getFirst()).isEqualTo(matchingCase.getId());
     }
 
 

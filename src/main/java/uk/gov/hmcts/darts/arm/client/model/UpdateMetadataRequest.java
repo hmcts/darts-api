@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
 
-import java.time.OffsetDateTime;
-
 @Data
 @Builder
 @Jacksonized
@@ -32,7 +30,7 @@ public class UpdateMetadataRequest {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Manifest {
         @JsonProperty("event_date")
-        private OffsetDateTime eventDate;
+        private String eventDate;
 
         @JsonProperty("ret_conf_score")
         private Integer retConfScore;
