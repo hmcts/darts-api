@@ -1,5 +1,13 @@
 package uk.gov.hmcts.darts.courthouse.validation;
 
+import java.util.HashSet;
+
+import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -14,14 +22,6 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 
-import java.util.HashSet;
-
-import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS;
-import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING;
-import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS;
-import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
-
 @Component
 @RequiredArgsConstructor
 public class CourthousePatchValidator implements BiValidator<CourthousePatch, Integer> {
@@ -35,7 +35,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
     @Transactional(propagation = Propagation.REQUIRED)
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.UnnecessaryAnnotationValueElement"})
     public void validate(CourthousePatch patch, Integer id) {
-        patch.setCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToEmpty(patch.getCourthouseName())));
+        patch.setCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToNull(patch.getCourthouseName())));
         var courthouseEntity = repository.findById(id)
             .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
 
