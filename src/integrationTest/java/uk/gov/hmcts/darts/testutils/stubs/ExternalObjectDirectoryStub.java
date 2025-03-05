@@ -127,7 +127,7 @@ public class ExternalObjectDirectoryStub {
      * Creates an ExternalObjectDirectoryEntity.
      *
      * @deprecated Use
-     *     {@link ExternalObjectDirectoryStub#createExternalObjectDirectory(MediaEntity, ObjectRecordStatusEnum, ExternalLocationTypeEnum, UUID)} instead.
+     *     {@link ExternalObjectDirectoryStub#createExternalObjectDirectory(MediaEntity, ObjectRecordStatusEnum, ExternalLocationTypeEnum, String)} instead.
      */
     @Deprecated
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,

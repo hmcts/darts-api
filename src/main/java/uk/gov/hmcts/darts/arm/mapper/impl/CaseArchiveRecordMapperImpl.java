@@ -180,16 +180,23 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
                     case BF_009_KEY -> metadata.setBf009(value);
                     case BF_010_KEY -> metadata.setBf010(value);
                     case BF_011_KEY -> metadata.setBf011(value);
-                    case BF_012_KEY -> metadata.setBf012(mapToInt(value, caseDocument));
-                    case BF_013_KEY -> metadata.setBf013(mapToInt(value, caseDocument));
-                    case BF_014_KEY -> metadata.setBf014(mapToInt(value, caseDocument));
-                    case BF_015_KEY -> metadata.setBf015(mapToInt(value, caseDocument));
                     case BF_016_KEY -> metadata.setBf016(value);
                     case BF_017_KEY -> metadata.setBf017(value);
                     case BF_018_KEY -> metadata.setBf018(value);
                     case BF_019_KEY -> metadata.setBf019(value);
                     case BF_020_KEY -> metadata.setBf020(value);
-                    default -> log.warn("Annotation archive record unknown property key: {}", key);
+                    default -> log.warn("Case archive record unknown property key: {}", key);
+                }
+            } else {
+                Integer intValue = mapToInt(caseRecordProperties.getProperty(key), caseDocument);
+                if (intValue != null) {
+                    switch (key) {
+                        case BF_012_KEY -> metadata.setBf012(intValue);
+                        case BF_013_KEY -> metadata.setBf013(intValue);
+                        case BF_014_KEY -> metadata.setBf014(intValue);
+                        case BF_015_KEY -> metadata.setBf015(intValue);
+                        default -> log.warn("Case archive record unknown integer property key: {}", key);
+                    }
                 }
             }
         }
