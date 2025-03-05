@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
+import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,26 +63,6 @@ class EventServiceImplTest {
         when(eventRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> eventService.getEventByEveId(1))
-            .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
-        verify(eventRepository, times(1)).findById(1);
-    }
-
-    @Test
-    void getEventVersionsForEveId() {
-        EventEntity event = mock(EventEntity.class);
-        when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-        when(eventRepository.findAllByEventIdExcludingEventIdZero(event.getEventId())).thenReturn(List.of(event));
-        assertThat(eventService.getEventVersionsForEveIdExcludingEventIdZero(1)).isEqualTo(List.of(event));
-        verify(eventRepository, times(1)).findById(1);
-        verify(eventRepository, times(1)).findAllByEventIdExcludingEventIdZero(event.getEventId());
-    }
-
-    @Test
-    void getEventVersionsForEveIdNotFound() {
-        when(eventRepository.findById(1)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> eventService.getEventVersionsForEveIdExcludingEventIdZero(1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
         verify(eventRepository, times(1)).findById(1);
@@ -134,5 +116,30 @@ class EventServiceImplTest {
         when(eventLinkedCaseRepository.areAllAssociatedCasesAnonymised(event)).thenReturn(false);
         assertThat(eventService.allAssociatedCasesAnonymised(event)).isFalse();
         verify(eventLinkedCaseRepository).areAllAssociatedCasesAnonymised(event);
+    }
+
+    @Test
+    void adminGetVersionsByEventId_shouldReturnEvent() {
+        List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
+        doReturn(eventEntities).when(eventService).getRelatedEvents(123);
+
+        AdminGetVersionsByEventIdResponseResult responseDetails = mock(AdminGetVersionsByEventIdResponseResult.class);
+        when(eventMapper.mapToAdminGetEventVersionsResponseForId(any())).thenReturn(responseDetails);
+
+
+        assertThat(eventService.adminGetVersionsByEventId(123)).isEqualTo(responseDetails);
+
+        verify(eventService).getRelatedEvents(123);
+        verify(eventMapper)
+            .mapToAdminGetEventVersionsResponseForId(eventEntities);
+    }
+
+    @Test
+    void getRelatedEvents_hasSingleEventLinkedCase() {
+        List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
+        when(eventRepository.findAllByRelatedEvents(123)).thenReturn(eventEntities);
+
+        assertThat(eventService.getRelatedEvents(123)).isEqualTo(eventEntities);
+        verify(eventRepository).findAllByRelatedEvents(123);
     }
 }
