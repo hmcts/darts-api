@@ -99,7 +99,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
         List<Callable<Void>> tasks = eodsForBatch.stream()
             .map(currentEod -> (Callable<Void>) () -> {
-                log.info("Processing EOD {} for batch on thread {}", currentEod.getId(), Thread.currentThread().toString());
+                log.info("Processing EOD {} for batch on thread {}", currentEod.getId(), Thread.currentThread());
                 pushToArmProcess(userAccount, currentEod, batchItems, archiveRecordsFileName);
                 return null;
             })
