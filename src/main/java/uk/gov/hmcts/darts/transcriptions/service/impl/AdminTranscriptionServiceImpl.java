@@ -110,7 +110,6 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
         return transcriptionSearchQuery.searchTranscriptions(request, transcriptionIds).stream()
             .map(this::toTranscriptionSearchResponse)
-            .sorted((o1, o2) -> o2.getTranscriptionId().compareTo(o1.getTranscriptionId()))
             .toList();
     }
 

@@ -107,7 +107,7 @@ public class CaseController implements CasesApi {
     ) {
         validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom());
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber()))
+            .caseNumber(advancedSearchRequest.getCaseNumber())
             .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
             .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
             .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
@@ -187,7 +187,7 @@ public class CaseController implements CasesApi {
         return new ResponseEntity<>(caseService.adminGetCaseById(id), HttpStatus.OK);
     }
 
-    private void validateUppercase(String courthouse, String courtroom) {
+    void validateUppercase(String courthouse, String courtroom) {
         if (!CourtValidationUtils.isUppercase(courthouse, courtroom)) {
             throw new DartsApiException(CaseApiError.INVALID_REQUEST, "Courthouse and courtroom must be uppercase.");
         }
