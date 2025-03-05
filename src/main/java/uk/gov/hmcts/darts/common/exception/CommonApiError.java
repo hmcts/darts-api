@@ -25,6 +25,11 @@ public enum CommonApiError implements DartsApiError {
         HttpStatus.NOT_FOUND,
         CommonTitleErrors.NOT_FOUND.getValue()
     ),
+    INVALID_REQUEST(
+        CommonErrorCode.INVALID_REQUEST.getValue(),
+        HttpStatus.BAD_REQUEST,
+        CommonTitleErrors.INVALID_REQUEST.getValue()
+    ),
     INTERNAL_SERVER_ERROR(
         CommonErrorCode.INTERNAL_SERVER_ERROR.getValue(),
         HttpStatus.INTERNAL_SERVER_ERROR,
