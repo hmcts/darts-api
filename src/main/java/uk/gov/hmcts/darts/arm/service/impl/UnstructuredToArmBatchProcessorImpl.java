@@ -4,7 +4,9 @@ import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
@@ -104,14 +106,22 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 return null;
             })
             .toList();
-
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        ThreadFactory factory = Thread.ofVirtual().factory();
+        try (ExecutorService executor = Executors.newThreadPerTaskExecutor(factory)) {
             executor.invokeAll(tasks);
         } catch (Exception e) {
             log.error("Error during batch processing", e);
             //batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
             return;
         }
+
+//        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+//            executor.invokeAll(tasks);
+//        } catch (Exception e) {
+//            log.error("Error during batch processing", e);
+//            //batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
+//            return;
+//        }
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
                 String manifestFileContents = unstructuredToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
