@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.internal.SessionFactoryImpl;
+import org.hibernate.service.spi.ServiceRegistryImplementor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,12 +24,15 @@ public class HibernateEventListenerRegistryConfiguration {
 
     @PostConstruct
     public void eventListenerRegistry() {
-        var serviceRegistry = entityManagerFactory
+        EnversService enversService;
+        EventListenerRegistry listenerRegistry;
+        try (ServiceRegistryImplementor serviceRegistry = entityManagerFactory
             .unwrap(SessionFactoryImpl.class)
-            .getServiceRegistry();
+            .getServiceRegistry()) {
 
-        var enversService = serviceRegistry.getService(EnversService.class);
-        var listenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
+            enversService = serviceRegistry.getService(EnversService.class);
+            listenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
+        }
 
         assert listenerRegistry != null;
 
