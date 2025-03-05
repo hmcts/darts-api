@@ -1,28 +1,5 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import javax.validation.constraints.NotNull;
-
-import static java.lang.Boolean.TRUE;
-import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.IN_PROGRESS;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.LOCK_FAILED;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
@@ -45,6 +22,28 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import javax.validation.constraints.NotNull;
+
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.IN_PROGRESS;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.LOCK_FAILED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
 @Slf4j
 public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedTaskConfig> implements AutomatedTask, AutoloadingAutomatedTask {
