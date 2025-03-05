@@ -47,7 +47,6 @@ class MediaArchiveRecordMapperImplTest {
         @BeforeEach
         void setUp() {
             when(configuration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-            when(configuration.getDateFormat()).thenReturn("yyyy-MM-dd");
 
             propertyFileLoader = mockStatic(PropertyFileLoader.class);
             propertyFileLoader.when(() -> PropertyFileLoader.loadPropertiesFromFile(any()))
