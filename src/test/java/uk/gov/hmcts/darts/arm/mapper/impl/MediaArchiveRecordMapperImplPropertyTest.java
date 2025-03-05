@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -25,9 +25,9 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TranscriptionArchiveRecordMapperImplTest {
+class MediaArchiveRecordMapperImplPropertyTest {
 
-    private TranscriptionArchiveRecordMapperImpl transcriptionArchiveRecordMapper;
+    private MediaArchiveRecordMapperImpl mediaArchiveRecordMapper;
 
     @Mock
     private ArmDataManagementConfiguration configuration;
@@ -38,11 +38,11 @@ class TranscriptionArchiveRecordMapperImplTest {
 
     @BeforeEach
     void setUp() {
-        transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(configuration, currentTimeHelper);
+        mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(configuration, currentTimeHelper);
     }
 
     @Nested
-    class MapToTranscriptionArchiveRecordTest {
+    class MapToMediaArchiveRecordTest {
 
         @BeforeEach
         void setUp() {
@@ -63,19 +63,18 @@ class TranscriptionArchiveRecordMapperImplTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .id(0)
-                .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
-                                                 .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
-                                                 .build())
+                .media(PersistableFactory.getMediaTestData()
+                           .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+                           .build())
                 .build();
 
             // When
-            TranscriptionArchiveRecord transcriptionRecord = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                                              "someFilename");
+            MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectoryEntity,
+                                                                                                     "someFilename");
 
             // Then
             assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
-                         transcriptionRecord.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
+                         mediaArchiveRecord.getMediaCreateArchiveRecord().getRecordMetadata().getRetentionConfidenceScore());
         }
 
         @Test
@@ -83,18 +82,17 @@ class TranscriptionArchiveRecordMapperImplTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .id(0)
-                .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
-                                                 .someMinimalBuilder().retConfScore(null)
-                                                 .build())
+                .media(PersistableFactory.getMediaTestData()
+                           .someMinimalBuilder().retConfScore(null)
+                           .build())
                 .build();
 
             // When
-            TranscriptionArchiveRecord transcriptionRecord = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                                              "someFilename");
+            MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectoryEntity,
+                                                                                                     "someFilename");
 
             // Then
-            assertNull(transcriptionRecord.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
+            assertNull(mediaArchiveRecord.getMediaCreateArchiveRecord().getRecordMetadata().getRetentionConfidenceScore());
         }
 
     }

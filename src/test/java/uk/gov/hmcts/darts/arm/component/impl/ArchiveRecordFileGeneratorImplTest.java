@@ -1,5 +1,26 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -27,36 +48,16 @@ import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.test.common.FileStore;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
-import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
-
 @SuppressWarnings("PMD.AssignmentInOperand")
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordFileGeneratorImplTest {
 
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
-    public static final String READING_FILE = "Reading file {}";
-    public static final String ACTUAL_RESPONSE = "actual Response {}";
-    public static final String EXPECT_RESPONSE = "expect Response {}";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+    private static final String READING_FILE = "Reading file {}";
+    private static final String ACTUAL_RESPONSE = "actual Response {}";
+    private static final String EXPECT_RESPONSE = "expect Response {}";
+
     @TempDir
     private File tempDirectory;
 
@@ -135,6 +136,7 @@ class ArchiveRecordFileGeneratorImplTest {
         String fileLocation = tempDirectory.getAbsolutePath();
         String relationId = "1234";
         File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("1234-1-1.a360"));
+
 
         archiveRecordFileGenerator.generateArchiveRecord(createCaseArchiveRecord(relationId), archiveFile, ArchiveRecordType.CASE_ARCHIVE_TYPE);
 
@@ -224,22 +226,22 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00.000Z")
+            .eventDate("2024-01-23T11:40:00Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Media")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("mp2")
-            .bf004("2024-01-23T00:00:00.000Z")
+            .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30.000Z")
+            .bf011("2024-01-23T11:39:30Z")
             .bf012(1)
             .bf013(1)
             .bf014(3)
             .bf015(4)
-            .bf017("2024-01-23T11:40:00.000Z")
-            .bf018("2024-01-23T13:40:00.000Z")
+            .bf017("2024-01-23T11:40:00Z")
+            .bf018("2024-01-23T13:40:00Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -301,20 +303,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00.000Z")
+            .eventDate("2024-01-23T11:40:00Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Transcription")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("mp2")
-            .bf004("2024-01-23T00:00:00.000Z")
+            .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30.000Z")
+            .bf011("2024-01-23T11:39:30Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00.000Z")
-            .bf018("2024-01-23T13:40:00.000Z")
+            .bf017("2024-01-23T11:40:00Z")
+            .bf018("2024-01-23T13:40:00Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -359,20 +361,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00.000Z")
+            .eventDate("2024-01-23T11:40:00Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Annotation")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("txt")
-            .bf004("2024-01-23T00:00:00.000Z")
+            .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30.000Z")
+            .bf011("2024-01-23T11:39:30Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00.000Z")
-            .bf018("2024-01-23T13:40:00.000Z")
+            .bf017("2024-01-23T11:40:00Z")
+            .bf018("2024-01-23T13:40:00Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -416,20 +418,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00.000Z")
+            .eventDate("2024-01-23T11:40:00Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea")
             .bf001("Case")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("txt")
-            .bf004("2024-01-23T00:00:00.000Z")
+            .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30.000Z")
+            .bf011("2024-01-23T11:39:30Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00.000Z")
-            .bf018("2024-01-23T13:40:00.000Z")
+            .bf017("2024-01-23T11:40:00Z")
+            .bf018("2024-01-23T13:40:00Z")
             .bf019("Swansea")
             .build();
     }
