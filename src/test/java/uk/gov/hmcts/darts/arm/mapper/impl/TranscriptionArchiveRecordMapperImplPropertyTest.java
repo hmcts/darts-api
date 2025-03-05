@@ -1,13 +1,5 @@
 package uk.gov.hmcts.darts.arm.mapper.impl;
 
-import java.util.Properties;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -17,17 +9,25 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
 
-@ExtendWith(MockitoExtension.class)
-class CaseArchiveRecordMapperImplTest {
+import java.util.Properties;
 
-    private CaseArchiveRecordMapperImpl caseArchiveRecordMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class TranscriptionArchiveRecordMapperImplPropertyTest {
+
+    private TranscriptionArchiveRecordMapperImpl transcriptionArchiveRecordMapper;
 
     @Mock
     private ArmDataManagementConfiguration configuration;
@@ -38,11 +38,11 @@ class CaseArchiveRecordMapperImplTest {
 
     @BeforeEach
     void setUp() {
-        caseArchiveRecordMapper = new CaseArchiveRecordMapperImpl(configuration, currentTimeHelper);
+        transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(configuration, currentTimeHelper);
     }
 
     @Nested
-    class MapToCaseArchiveRecordTest {
+    class MapToTranscriptionArchiveRecordTest {
 
         @BeforeEach
         void setUp() {
@@ -63,18 +63,19 @@ class CaseArchiveRecordMapperImplTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .caseDocument(PersistableFactory.getCaseDocumentTestData()
-                                  .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
-                                  .build())
+                .id(0)
+                .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
+                                                 .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+                                                 .build())
                 .build();
 
             // When
-            CaseArchiveRecord caseArchiveRecord = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                 "someFilename");
+            TranscriptionArchiveRecord transcriptionRecord = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity,
+                                                                                                                              "someFilename");
 
             // Then
             assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
-                         caseArchiveRecord.getCaseCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
+                         transcriptionRecord.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
         }
 
         @Test
@@ -82,17 +83,18 @@ class CaseArchiveRecordMapperImplTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .caseDocument(PersistableFactory.getCaseDocumentTestData()
-                                  .someMinimalBuilder().retConfScore(null)
-                                  .build())
+                .id(0)
+                .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
+                                                 .someMinimalBuilder().retConfScore(null)
+                                                 .build())
                 .build();
 
             // When
-            CaseArchiveRecord caseArchiveRecord = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                 "someFilename");
+            TranscriptionArchiveRecord transcriptionRecord = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity,
+                                                                                                                              "someFilename");
 
             // Then
-            assertNull(caseArchiveRecord.getCaseCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
+            assertNull(transcriptionRecord.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
         }
 
     }
