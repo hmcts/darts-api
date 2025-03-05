@@ -20,7 +20,6 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
-import static org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
