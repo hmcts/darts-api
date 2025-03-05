@@ -55,8 +55,6 @@ class ArchiveRecordFileGeneratorImplTest {
 
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
     private static final String READING_FILE = "Reading file {}";
-    private static final String ACTUAL_RESPONSE = "actual Response {}";
-    private static final String EXPECT_RESPONSE = "expect Response {}";
 
     @TempDir
     private File tempDirectory;
@@ -91,8 +89,6 @@ class ArchiveRecordFileGeneratorImplTest {
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveMediaMetadata/expectedResponse.a360");
-        log.info(ACTUAL_RESPONSE, actualResponse);
-        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -109,8 +105,6 @@ class ArchiveRecordFileGeneratorImplTest {
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveTranscriptionMetadata/expectedResponse.a360");
-        log.info(ACTUAL_RESPONSE, actualResponse);
-        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -126,8 +120,6 @@ class ArchiveRecordFileGeneratorImplTest {
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveAnnotationMetadata/expectedResponse.a360");
-        log.info(ACTUAL_RESPONSE, actualResponse);
-        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -137,15 +129,12 @@ class ArchiveRecordFileGeneratorImplTest {
         String relationId = "1234";
         File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("1234-1-1.a360"));
 
-
         archiveRecordFileGenerator.generateArchiveRecord(createCaseArchiveRecord(relationId), archiveFile, ArchiveRecordType.CASE_ARCHIVE_TYPE);
 
         log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveCaseMetadata/expectedResponse.a360");
-        log.info(ACTUAL_RESPONSE, actualResponse);
-        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -226,22 +215,22 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00Z")
+            .eventDate("2024-01-23T11:40:00.000Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Media")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("mp2")
-            .bf004("2024-01-23T00:00:00Z")
+            .bf004("2024-01-23T00:00:00.000Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30Z")
+            .bf011("2024-01-23T11:39:30.000Z")
             .bf012(1)
             .bf013(1)
             .bf014(3)
             .bf015(4)
-            .bf017("2024-01-23T11:40:00Z")
-            .bf018("2024-01-23T13:40:00Z")
+            .bf017("2024-01-23T11:40:00.000Z")
+            .bf018("2024-01-23T13:40:00.000Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -303,20 +292,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00Z")
+            .eventDate("2024-01-23T11:40:00.000Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Transcription")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("mp2")
-            .bf004("2024-01-23T00:00:00Z")
+            .bf004("2024-01-23T00:00:00.000Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30Z")
+            .bf011("2024-01-23T11:39:30.000Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00Z")
-            .bf018("2024-01-23T13:40:00Z")
+            .bf017("2024-01-23T11:40:00.000Z")
+            .bf018("2024-01-23T13:40:00.000Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -361,20 +350,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00Z")
+            .eventDate("2024-01-23T11:40:00.000Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Annotation")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("txt")
-            .bf004("2024-01-23T00:00:00Z")
+            .bf004("2024-01-23T00:00:00.000Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30Z")
+            .bf011("2024-01-23T11:39:30.000Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00Z")
-            .bf018("2024-01-23T13:40:00Z")
+            .bf017("2024-01-23T11:40:00.000Z")
+            .bf018("2024-01-23T13:40:00.000Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -418,20 +407,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00Z")
+            .eventDate("2024-01-23T11:40:00.000Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea")
             .bf001("Case")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("txt")
-            .bf004("2024-01-23T00:00:00Z")
+            .bf004("2024-01-23T00:00:00.000Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30Z")
+            .bf011("2024-01-23T11:39:30.000Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00Z")
-            .bf018("2024-01-23T13:40:00Z")
+            .bf017("2024-01-23T11:40:00.000Z")
+            .bf018("2024-01-23T13:40:00.000Z")
             .bf019("Swansea")
             .build();
     }
