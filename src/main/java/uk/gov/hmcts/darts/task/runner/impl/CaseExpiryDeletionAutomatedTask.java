@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
-import uk.gov.hmcts.darts.hearings.api.HearingApi;
+import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.CaseExpiryDeletionAutomatedTaskConfig;
@@ -32,7 +32,7 @@ public class CaseExpiryDeletionAutomatedTask
 
     private final CurrentTimeHelper currentTimeHelper;
     private final DataAnonymisationService dataAnonymisationService;
-    private final HearingApi hearingApi;
+    private final HearingsService hearingsService;
     private final CaseRepository caseRepository;
     private final UserIdentity userAccountService;
 
@@ -42,13 +42,13 @@ public class CaseExpiryDeletionAutomatedTask
                                            CaseRepository caseRepository,
                                            LogApi logApi, LockService lockService,
                                            DataAnonymisationService dataAnonymisationService,
-                                           HearingApi hearingApi,
+                                           HearingsService hearingsService,
                                            UserIdentity userAccountService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.currentTimeHelper = currentTimeHelper;
         this.caseRepository = caseRepository;
         this.dataAnonymisationService = dataAnonymisationService;
-        this.hearingApi = hearingApi;
+        this.hearingsService = hearingsService;
         this.userAccountService = userAccountService;
     }
 
@@ -69,7 +69,7 @@ public class CaseExpiryDeletionAutomatedTask
                 try {
                     log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
                     dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId, false);
-                    hearingApi.removeMediaLinkToHearing(courtCaseId);
+                    hearingsService.removeMediaLinkToHearing(courtCaseId);
                 } catch (Exception e) {
                     log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
                 }
