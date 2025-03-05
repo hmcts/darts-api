@@ -1,9 +1,9 @@
 package uk.gov.hmcts.darts.util;
 
 import lombok.SneakyThrows;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.springframework.boot.test.system.CapturedOutput;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public final class LogUtil {
