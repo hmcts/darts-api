@@ -178,7 +178,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
-        log.info("Number of scheduled tasks " + scheduledTasks.size());
+        log.info("Number of scheduled tasks {}", scheduledTasks.size());
         scheduledTasks.forEach(
             scheduledTask -> {
                 Task task = scheduledTask.getTask();
@@ -205,7 +205,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                              fixedDelayTask.getInitialDelayDuration(), fixedDelayTask.getIntervalDuration()
                     );
                 } else {
-                    log.info("Unknown task type: " + task);
+                    log.info("Unknown task type: {}", task);
                 }
             }
         );
@@ -985,7 +985,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskInboundTranscriptionAndAnnotationDeleterAutomatedTask() throws Exception {
+    void givenConfiguredTaskInboundTranscriptionAndAnnotationDeleterAutomatedTask() {
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 
@@ -1000,7 +1000,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() throws Exception {
+    void givenConfiguredTaskUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() {
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 

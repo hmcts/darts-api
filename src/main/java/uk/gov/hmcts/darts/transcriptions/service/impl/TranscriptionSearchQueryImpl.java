@@ -15,10 +15,8 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -29,10 +27,10 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
     private final TranscriptionStatusRepository transcriptionStatusRepository;
 
     @Override
-    public Set<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Integer> transcriptionIds) {
+    public List<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Integer> transcriptionIds) {
 
         Optional<TranscriptionStatusEntity> transcriptionStatusEntity = transcriptionStatusRepository.findById(TranscriptionStatusEnum.APPROVED.getId());
-        var nonLegacyTranscriptions = transcriptionRepository.searchModernisedTranscriptionsFilteringOn(
+        return transcriptionRepository.searchTranscriptionsFilteringOn(
             transcriptionIds,
             request.getCaseNumber(),
             request.getCourthouseDisplayName(),
@@ -43,24 +41,6 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
             request.getRequestedBy(),
             transcriptionStatusEntity.orElse(null)
         );
-
-        var legacyTranscriptions = transcriptionRepository.searchMigratedTranscriptionsFilteringOn(
-            transcriptionIds,
-            request.getCaseNumber(),
-            request.getCourthouseDisplayName(),
-            request.getHearingDate(),
-            getCreatedFromTs(request),
-            getCreatedTo(request),
-            request.getIsManualTranscription(),
-            request.getRequestedBy(),
-            transcriptionStatusEntity.orElse(null)
-        );
-
-        var combinedSearchResults = new HashSet<TranscriptionSearchResult>();
-        combinedSearchResults.addAll(nonLegacyTranscriptions);
-        combinedSearchResults.addAll(legacyTranscriptions);
-
-        return combinedSearchResults;
     }
 
     @Override
