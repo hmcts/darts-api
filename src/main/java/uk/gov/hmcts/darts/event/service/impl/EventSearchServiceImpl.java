@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,7 @@ public class EventSearchServiceImpl implements EventSearchService {
     }
 
     private static List<Integer> getNonEmptyOrNull(List<Integer> integerList) {
-        if (integerList != null && integerList.isEmpty()) {
+        if (CollectionUtils.isEmpty(integerList)) {
             return null;
         }
         return integerList;
