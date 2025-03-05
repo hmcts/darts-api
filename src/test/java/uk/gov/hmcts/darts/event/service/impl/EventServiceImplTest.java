@@ -136,44 +136,10 @@ class EventServiceImplTest {
 
     @Test
     void getRelatedEvents_hasSingleEventLinkedCase() {
-        EventLinkedCaseEntity eventLinkedCaseEntity = mock(EventLinkedCaseEntity.class);
-        when(eventLinkedCaseEntity.getCaseNumber()).thenReturn("some-case-number");
-
-        EventEntity event = mock(EventEntity.class);
-        when(event.getEventLinkedCaseEntities()).thenReturn(List.of(eventLinkedCaseEntity));
-        when(event.getId()).thenReturn(123);
-        when(event.getEventId()).thenReturn(321);
-        doReturn(event).when(eventService).getEventByEveId(123);
-
         List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
-        when(eventRepository.findAllByRelatedEvents(123, 321, List.of("some-case-number"))).thenReturn(eventEntities);
+        when(eventRepository.findAllByRelatedEvents(123)).thenReturn(eventEntities);
 
         assertThat(eventService.getRelatedEvents(123)).isEqualTo(eventEntities);
-        verify(eventRepository).findAllByRelatedEvents(123, 321, List.of("some-case-number"));
-        verify(eventService).getEventByEveId(123);
-    }
-
-    @Test
-    void getRelatedEvents_hasMultipleSingleEventLinkedCase() {
-        EventLinkedCaseEntity eventLinkedCaseEntity1 = mock(EventLinkedCaseEntity.class);
-        when(eventLinkedCaseEntity1.getCaseNumber()).thenReturn("some-case-number-1");
-        EventLinkedCaseEntity eventLinkedCaseEntity2 = mock(EventLinkedCaseEntity.class);
-        when(eventLinkedCaseEntity2.getCaseNumber()).thenReturn("some-case-number-2");
-        EventLinkedCaseEntity eventLinkedCaseEntity3 = mock(EventLinkedCaseEntity.class);
-        when(eventLinkedCaseEntity3.getCaseNumber()).thenReturn("some-case-number-3");
-
-        EventEntity event = mock(EventEntity.class);
-        when(event.getEventLinkedCaseEntities()).thenReturn(List.of(eventLinkedCaseEntity1, eventLinkedCaseEntity2, eventLinkedCaseEntity3));
-        when(event.getId()).thenReturn(123);
-        when(event.getEventId()).thenReturn(321);
-        doReturn(event).when(eventService).getEventByEveId(123);
-
-        List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
-        when(eventRepository.findAllByRelatedEvents(123, 321, List.of("some-case-number-1", "some-case-number-2", "some-case-number-3"))).thenReturn(
-            eventEntities);
-
-        assertThat(eventService.getRelatedEvents(123)).isEqualTo(eventEntities);
-        verify(eventRepository).findAllByRelatedEvents(123, 321, List.of("some-case-number-1", "some-case-number-2", "some-case-number-3"));
-        verify(eventService).getEventByEveId(123);
+        verify(eventRepository).findAllByRelatedEvents(123);
     }
 }
