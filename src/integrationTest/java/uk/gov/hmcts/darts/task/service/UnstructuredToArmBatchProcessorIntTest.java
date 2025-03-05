@@ -233,11 +233,14 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
 
         var eod1 = externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+        var eod2 = externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         var eod3 = externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
+        var eod4 = externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
+        var eod5 = externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
+        var eod6 = externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
+        log.info("eod1:med1 {}:{}, eod2:med2 {}:{}, eod3:med3 {}:{}, eod4:med4 {}:{}, eod5:med5 {}:{}, eod6:med6 {}:{}",
+                 eod1.getId(), eod1.getMedia().getId(), eod2.getId(), eod2.getMedia().getId(), eod3.getId(), eod3.getMedia().getId(),
+                 eod4.getId(), eod4.getMedia().getId(), eod5.getId(), eod5.getMedia().getId(), eod6.getId(), eod6.getMedia().getId());
 
         DartsException dartsException = new DartsException("Exception copying file");
         String failedFilename1 = format("^%s_%s_%s.*", 7, eod1.getMedia().getId(), eod1.getTransferAttempts());
@@ -260,7 +263,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
             EodHelper.armDropZoneStatus(),
             EodHelper.armLocation()
         );
-        assertThat(foundMediaList.size()).isEqualTo(3);
+        log.info("foundMediaList: {}", foundMediaList);
+        assertThat(foundMediaList.size()).isEqualTo(4);
         assertThat(
             eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.getFirst().getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())
         ).hasSize(1);
@@ -275,6 +279,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
             EodHelper.failedArmRawDataStatus(),
             EodHelper.armLocation()
         );
+        log.info("failedMediaList: {}", failedMediaList);
         assertThat(failedMediaList.size()).isEqualTo(2);
 
         ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
