@@ -215,8 +215,7 @@ class DetsToArmBatchPushProcessorImplTest {
         // given
         detsToArmBatchPushProcessor.processDetsToArm(5);
         // when
-        LogUtil.waitUntilMessage(output, "No DETS EODs to process", 5);
-        assertThat(output).contains("No DETS EODs to process");
+        LogUtil.assertOutputHasMessage(output, "No DETS EODs to process", 5);
     }
 
     @Test
@@ -249,7 +248,7 @@ class DetsToArmBatchPushProcessorImplTest {
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
         // then
-        assertThat(output).contains("No DETS EODs to process");
+        LogUtil.assertOutputHasMessage(output, "No DETS EODs to process", 10);
     }
 
     private ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
