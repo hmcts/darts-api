@@ -218,6 +218,23 @@ class CourthouseServiceImplTest {
 
     }
 
+    @Test
+    void retrieveCourthouse_WithExistingNullCode() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+        // given
+        when(courthouseRepository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
+        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        courthouseEntity.setCourthouseName(SWANSEA_NAME_UC);
+        courthouseEntity.setCode(null);
+        when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(courthouseEntity));
+
+        // when
+        CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(458, SWANSEA_NAME);
+
+        // then
+        assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
+        assertEquals(458, courthouse.getCode());
+    }
+
     private CourthouseEntity createSwanseaCourthouseEntity() {
         CourthouseEntity courthouseEntity = new CourthouseEntity();
         courthouseEntity.setCourthouseName(SWANSEA_NAME_UC);
