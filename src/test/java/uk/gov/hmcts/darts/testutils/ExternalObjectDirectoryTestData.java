@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.UUID;
 
 @SuppressWarnings({"HideUtilityClassConstructor", "OverloadMethodsDeclarationOrder"})
 public class ExternalObjectDirectoryTestData {
@@ -24,9 +23,9 @@ public class ExternalObjectDirectoryTestData {
 
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
-                                                                              ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              UUID externalLocation) {
+                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                       String externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
@@ -42,7 +41,7 @@ public class ExternalObjectDirectoryTestData {
     public static ExternalObjectDirectoryEntity createExternalObjectDirectory(TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              UUID externalLocation) {
+                                                                              String externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = new ExternalObjectDirectoryTestData().createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
@@ -55,9 +54,9 @@ public class ExternalObjectDirectoryTestData {
     }
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
-                                                                              ExternalLocationTypeEnum externalLocationTypeEnum,
-                                                                              ObjectRecordStatusEnum objectRecordStatusEnum,
-                                                                              UUID externalLocation) {
+                                                                       ExternalLocationTypeEnum externalLocationTypeEnum,
+                                                                       ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                                       String externalLocation) {
 
         return createExternalObjectDirectory(media,
                                              ObjectRecordStatusTestData.getObjectRecordStatus(objectRecordStatusEnum),
@@ -66,8 +65,8 @@ public class ExternalObjectDirectoryTestData {
     }
 
     public ExternalObjectDirectoryEntity createMinimalExternalObjectDirectory(ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                                     ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                                     UUID externalLocation) {
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              String externalLocation) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setId(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
         externalObjectDirectory.setStatus(objectRecordStatusEntity);
@@ -88,7 +87,7 @@ public class ExternalObjectDirectoryTestData {
     private ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
                                                                         ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                         ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                        UUID externalLocation) {
+                                                                        String externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,

@@ -9,8 +9,8 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +40,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.util.unit.DataSize.ofMegabytes;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -64,11 +63,11 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
-    @MockBean
+    @MockitoBean
     private MultipartProperties mockMultipartProperties;
-    @MockBean
+    @MockitoBean
     private AuditApi mockAuditApi;
 
     private Integer transcriptionId;
@@ -117,9 +116,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         UserAccountEntity testUser = authorisationStub.getSeparateIntegrationUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
-
-        when(mockMultipartProperties.getMaxFileSize()).thenReturn(ofMegabytes(10));
-        when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofMegabytes(10));
 
         doNothing().when(mockAuditApi)
             .record(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());

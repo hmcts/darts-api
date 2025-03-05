@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.audio.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -38,7 +38,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private Authorisation mockAuthorisation;
 
     @Autowired
@@ -46,7 +46,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
 
     @Test
     void transformedMediaDeleteShouldReturnSuccess() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
@@ -89,7 +89,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
     void transformedMediaDeleteShouldReturnSuccessOthersExist() throws Exception {
         //only deletes the one requested.
 
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);

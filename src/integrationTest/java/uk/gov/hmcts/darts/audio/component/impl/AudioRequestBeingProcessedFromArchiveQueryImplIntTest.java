@@ -92,11 +92,6 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
                 (2544, 183, NULL, NULL, 2, 1, 'c15137df-1a2b-4c0d-b309-bc9238330efb', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:58:18.120536+00', '2024-01-04 15:58:18.120547+00', -45, -45, NULL, NULL, NULL, NULL, NULL, false),
                 (2546, 184, NULL, NULL, 2, 1, '8f37e682-633c-465b-b1e3-75cdf4a04d85', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:59:16.538801+00', '2024-01-04 15:59:16.538821+00', -45, -45, NULL, NULL, NULL, NULL, NULL, false),
 
-                (2547, 184, NULL, NULL, 11, 2, 'e9dce141-5f58-4bfd-8660-bce8e0759acb', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:59:30.057281+00', '2024-01-04 15:59:30.291683+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
-                (2561, 181, NULL, NULL, 11, 2, 'e4a003a0-2184-4f2b-a4e2-4ed85a36f734', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:53:30.132639+00', '2024-01-04 15:53:30.486242+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
-                (2562, 182, NULL, NULL, 11, 2, 'a3c10ea0-01c2-43f1-bfe7-3b25b7902dfb', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:55:30.075869+00', '2024-01-04 15:55:30.334252+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
-                (2545, 183, NULL, NULL, 11, 2, '0e5d566a-00d9-4d02-bcaf-f01f7c582f99', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:58:30.071231+00', '2024-01-04 15:58:30.345809+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
-
                 (2750, 184, NULL, NULL, 2, 3, '8b7dff0f-a2e7-4210-8a5e-f216d8c874eb', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:17.427415+00', '2024-01-22 16:10:17.681265+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
                 (2759, 181, NULL, NULL, 2, 3, '71c3e02b-b7d2-4603-be74-e8c39faaf285', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:19.834748+00', '2024-01-22 16:10:20.093688+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
                 (2763, 182, NULL, NULL, 2, 3, '0dde5ec4-d16d-4940-a923-a73bacd969bb', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:20.882012+00', '2024-01-22 16:10:21.144768+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
@@ -115,11 +110,69 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
             mediaRequestId);
 
         List expected = List.of(
-            new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(184, 2547, 2750)
+            new AudioRequestBeingProcessedFromArchiveQueryResult(181),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(182),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(183),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(184)
         );
+        assertEquals(expected.size(), results.size());
+        assertEquals(expected, results);
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:linelength")
+    void givenAudioRequestBeingProcessedFromUnstructured_thenReturnNoResults() {
+        jdbcTemplate.update("""
+                INSERT INTO darts.external_object_directory (eod_id, med_id, trd_id, ado_id, ors_id, elt_id, external_location, checksum, transfer_attempts, created_ts, last_modified_ts, last_modified_by, created_by, cad_id, manifest_file, event_date_ts, external_file_id, external_record_id, update_retention)
+                VALUES
+                (2547, 184, NULL, NULL, 2, 2, 'e9dce141-5f58-4bfd-8660-bce8e0759acb', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:59:30.057281+00', '2024-01-04 15:59:30.291683+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
+                (2561, 181, NULL, NULL, 2, 2, 'e4a003a0-2184-4f2b-a4e2-4ed85a36f734', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:53:30.132639+00', '2024-01-04 15:53:30.486242+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
+                (2562, 182, NULL, NULL, 2, 2, 'a3c10ea0-01c2-43f1-bfe7-3b25b7902dfb', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:55:30.075869+00', '2024-01-04 15:55:30.334252+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
+                (2545, 183, NULL, NULL, 2, 2, '0e5d566a-00d9-4d02-bcaf-f01f7c582f99', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:58:30.071231+00', '2024-01-04 15:58:30.345809+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false)
+                """);
+        Integer mediaRequestId = 421;
+        final List<AudioRequestBeingProcessedFromArchiveQueryResult> results = audioRequestBeingProcessedFromArchiveQuery.getResults(
+            mediaRequestId);
+
+        assertEquals(0, results.size());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:linelength")
+    void givenAudioRequestBeingProcessedFromDets_thenReturnNoResults() {
+        jdbcTemplate.update("""
+                INSERT INTO darts.external_object_directory (eod_id, med_id, trd_id, ado_id, ors_id, elt_id, external_location, checksum, transfer_attempts, created_ts, last_modified_ts, last_modified_by, created_by, cad_id, manifest_file, event_date_ts, external_file_id, external_record_id, update_retention)
+                VALUES
+                (2547, 184, NULL, NULL, 4, 2, 'e9dce141-5f58-4bfd-8660-bce8e0759acb', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:59:30.057281+00', '2024-01-04 15:59:30.291683+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
+                (2561, 181, NULL, NULL, 4, 2, 'e4a003a0-2184-4f2b-a4e2-4ed85a36f734', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:53:30.132639+00', '2024-01-04 15:53:30.486242+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
+                (2562, 182, NULL, NULL, 4, 2, 'a3c10ea0-01c2-43f1-bfe7-3b25b7902dfb', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:55:30.075869+00', '2024-01-04 15:55:30.334252+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
+                (2545, 183, NULL, NULL, 4, 2, '0e5d566a-00d9-4d02-bcaf-f01f7c582f99', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:58:30.071231+00', '2024-01-04 15:58:30.345809+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false)
+                """);
+        Integer mediaRequestId = 421;
+        final List<AudioRequestBeingProcessedFromArchiveQueryResult> results = audioRequestBeingProcessedFromArchiveQuery.getResults(
+            mediaRequestId);
+
+        assertEquals(0, results.size());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:linelength")
+    void givenAudioRequestBeingProcessedPartlyFromArchive_thenReturnResultsWhereInArchiveOnly() {
+        jdbcTemplate.update("""
+                INSERT INTO darts.external_object_directory (eod_id, med_id, trd_id, ado_id, ors_id, elt_id, external_location, checksum, transfer_attempts, created_ts, last_modified_ts, last_modified_by, created_by, cad_id, manifest_file, event_date_ts, external_file_id, external_record_id, update_retention)
+                VALUES
+                (2547, 184, NULL, NULL, 2, 2, 'e9dce141-5f58-4bfd-8660-bce8e0759acb', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:59:30.057281+00', '2024-01-04 15:59:30.291683+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false),
+                (2561, 181, NULL, NULL, 4, 2, 'e4a003a0-2184-4f2b-a4e2-4ed85a36f734', 'wysXTgRikGN6nMB8AJ0JrQ==', NULL, '2024-01-04 15:53:30.132639+00', '2024-01-04 15:53:30.486242+00', 0, 0, NULL, NULL, NULL, NULL, NULL, false)
+                """);
+        Integer mediaRequestId = 421;
+        final List<AudioRequestBeingProcessedFromArchiveQueryResult> results = audioRequestBeingProcessedFromArchiveQuery.getResults(
+            mediaRequestId);
+
+        List expected = List.of(
+            new AudioRequestBeingProcessedFromArchiveQueryResult(182),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(183)
+        );
+
         assertEquals(expected.size(), results.size());
         assertEquals(expected, results);
     }

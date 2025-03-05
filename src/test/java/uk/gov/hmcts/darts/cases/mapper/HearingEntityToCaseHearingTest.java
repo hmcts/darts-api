@@ -158,6 +158,16 @@ class HearingEntityToCaseHearingTest {
     }
 
     @Test
+    void mapToHearingList_shouldNotIncludeNonCurrentTranscriptions() {
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
+        hearings.get(0).getTranscriptions().get(0).setIsCurrent(false);
+
+        List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
+        assertEquals(1, hearingList.size());
+        assertEquals(0, hearingList.getFirst().getTranscriptCount());
+    }
+
+    @Test
     void testWithNoHearings() throws Exception {
 
         List<HearingEntity> hearings = new ArrayList<>();

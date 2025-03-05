@@ -13,7 +13,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-public class TranscriptionTestData
+public final class TranscriptionTestData
     implements Persistable<TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve, TranscriptionEntity,
     TestTranscriptionEntity.TestTranscriptionEntityBuilder> {
 
@@ -36,9 +36,9 @@ public class TranscriptionTestData
         minimalTranscription.setTranscriptionStatus(transcriptionStatusEntity);
         minimalTranscription.setHideRequestFromRequestor(false);
         minimalTranscription.setIsManualTranscription(false);
-        var userAccount = minimalUserAccount();
-        minimalTranscription.setLastModifiedBy(userAccount);
-        minimalTranscription.setCreatedBy(userAccount);
+        minimalTranscription.setLastModifiedById(0);
+        minimalTranscription.setCreatedById(0);
+        minimalTranscription.setIsCurrent(true);
         return minimalTranscription;
     }
 
@@ -90,7 +90,8 @@ public class TranscriptionTestData
             .hideRequestFromRequestor(false)
             .isManualTranscription(false)
             .lastModifiedBy(userAccount)
-            .createdBy(userAccount);
+            .createdBy(userAccount)
+            .isCurrent(true);
 
         return builder;
     }

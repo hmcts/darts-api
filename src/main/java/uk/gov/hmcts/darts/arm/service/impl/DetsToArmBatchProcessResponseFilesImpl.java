@@ -26,6 +26,8 @@ import uk.gov.hmcts.darts.util.DurationUtil;
 
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 
 @Slf4j
 @Component
@@ -85,8 +87,10 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                     userAccount);
 
         getObjectStateRecord(armEod.getId())
-            .ifPresent(osr ->
-                           updateOsrFileIngestStatusToSuccess(batchUploadFileFilenameProcessor, armResponseBatchData, objectChecksum, osr)
+            .ifPresent(
+                osr -> updateOsrFileIngestStatusToSuccess(
+                    batchUploadFileFilenameProcessor, armResponseBatchData, objectChecksum, osr, armResponseUploadFileRecord
+                )
             );
     }
 
@@ -143,10 +147,14 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     private void updateOsrFileIngestStatusToSuccess(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
                                                     ArmResponseBatchData armResponseBatchData,
                                                     String objectChecksum,
-                                                    ObjectStateRecordEntity osr) {
+                                                    ObjectStateRecordEntity osr,
+                                                    ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         osr.setFlagFileIngestStatus(true);
         osr.setDateFileIngestToArm(timeHelper.currentOffsetDateTime());
         osr.setMd5FileIngestToArm(objectChecksum);
+        if (nonNull(armResponseUploadFileRecord.getFileSize())) {
+            osr.setFileSizeIngestToArm(Long.valueOf(armResponseUploadFileRecord.getFileSize()));
+        }
         osr.setIdResponseFile(batchUploadFileFilenameProcessor.getBatchMetadataFilename());
         osr.setIdResponseCrFile(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilename());
         osr.setIdResponseUfFile(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilename());
@@ -168,11 +176,19 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
         super.markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
 
         ObjectStateRecordEntity objectStateRecordEntity = externalObjectDirectory.getObjectStateRecordEntity();
+
         if (objectStateRecordEntity != null) {
-            objectStateRecordEntity.setObjectStatus(String.format("No response files produced by ARM within %s",
-                                                                  DurationUtil.formatDurationHumanReadable(
-                                                                      armDataManagementConfiguration.getArmMissingResponseDuration())));
-            objectStateRecordRepository.save(objectStateRecordEntity);
+            Optional<ObjectStateRecordEntity> osrEntity = objectStateRecordRepository.findById(objectStateRecordEntity.getUuid());
+            if (osrEntity.isPresent()) {
+                osrEntity.get().setObjectStatus(String.format("No response files produced by ARM within %s",
+                                                              DurationUtil.formatDurationHumanReadable(
+                                                                  armDataManagementConfiguration.getArmMissingResponseDuration())));
+                objectStateRecordRepository.save(osrEntity.get());
+            } else {
+                log.warn("No OSR Object exists with OsrId : {} for EodId : {}", objectStateRecordEntity.getUuid(), externalObjectDirectory.getId());
+            }
+        } else {
+            log.warn("Unable to fetch associated OSR for EodId : {}", externalObjectDirectory.getId());
         }
     }
 }

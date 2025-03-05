@@ -6,15 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ParameterisedTestDataGenerator {
+public final class ParameterisedTestDataGenerator {
 
     private ParameterisedTestDataGenerator() {
-    }
-
-    public static Stream<Arguments> generateCombinations(List<List<String>> params) {
-        List<Arguments> argumentList = new ArrayList<>();
-        generateCombinations(params, 0, new String[params.size()], argumentList);
-        return argumentList.stream();
     }
 
     private static void generateCombinations(List<List<String>> params, int index, String[] current, List<Arguments> argumentList) {

@@ -151,9 +151,15 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "transcription_object_name")
     private String transcriptionObjectName;
 
+    @SuppressWarnings("checkstyle:MemberName")
     @NotAudited
-    @Column(name = "folder_path")
-    private String folderPath;
+    @Column(name = "c_current_state")
+    private String cCurrentState;
+
+    @SuppressWarnings("checkstyle:MemberName")
+    @NotAudited
+    @Column(name = "r_current_state")
+    private Integer rCurrentState;
 
     public void addCase(CourtCaseEntity courtCase) {
         if (courtCase != null) {

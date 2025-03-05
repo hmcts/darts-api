@@ -2,9 +2,10 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.component.impl.ApplyAdminActionComponent;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
@@ -15,37 +16,32 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.common.util.FileContentChecksum;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.common.util.MediaEntityTreeNodeImpl;
 import uk.gov.hmcts.darts.common.util.Tree;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.DurationUtil;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +49,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 public class AudioUploadServiceImpl implements AudioUploadService {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final MediaRepository mediaRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
@@ -61,39 +56,34 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final AddAudioRequestMapper mapper;
     private final DataManagementApi dataManagementApi;
     private final UserIdentity userIdentity;
-    private final FileContentChecksum fileContentChecksum;
     private final LogApi logApi;
-    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final AudioAsyncService audioAsyncService;
+    private final ApplyAdminActionComponent applyAdminActionComponent;
+
+    @Value("${darts.audio.small-file-max-length}")
+    private Duration smallFileSizeMaxLength;
+    @Value("${darts.audio.small-file-size}")
+    private long smallFileSize;
 
 
     @Override
-    public void addAudio(MultipartFile audioMultipartFile, AddAudioMetadataRequest addAudioMetadataRequest) {
-        String incomingChecksum;
+    public void deleteUploadedAudio(String guid) {
         try {
-            incomingChecksum = fileContentChecksum.calculate(audioMultipartFile.getInputStream());
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, "Failed to compute incoming checksum", e);
+            dataManagementApi.deleteBlobDataFromInboundContainer(guid);
+        } catch (AzureDeleteBlobException azureDeleteBlobException) {
+            log.error("Failed to delete blob data from inbound container", azureDeleteBlobException);
         }
-        //No need to delete guid on duplicate as the file is never uploaded to the blob store unless the duplicate check has passed in this flow
-        addAudio(incomingChecksum, () -> saveAudioToInbound(audioMultipartFile), addAudioMetadataRequest, false);
     }
 
     @Override
-    public void addAudio(UUID guid, AddAudioMetadataRequest addAudioMetadataRequest) {
-        String checksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, guid);
-        if (!checksum.equals(addAudioMetadataRequest.getChecksum())) {
+    public void addAudio(String blodId, AddAudioMetadataRequest addAudioMetadataRequest) {
+        String incomingChecksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, blodId);
+        if (!incomingChecksum.equals(addAudioMetadataRequest.getChecksum())) {
+            deleteUploadedAudio(blodId);
             throw new DartsApiException(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA,
                                         String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
-                                                      checksum, addAudioMetadataRequest.getChecksum()));
+                                                      incomingChecksum, addAudioMetadataRequest.getChecksum()));
         }
-        addAudio(checksum, () -> guid, addAudioMetadataRequest, true);
-    }
-
-    private void addAudio(String incomingChecksum,
-                          Supplier<UUID> externalLocationSupplier,
-                          AddAudioMetadataRequest addAudioMetadataRequest,
-                          boolean deleteGuidOnDuplicate) {
         log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
         //remove duplicate cases as they can appear more than once, e.g. if they broke for lunch.
@@ -105,23 +95,18 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         List<MediaEntity> duplicatesWithDifferentChecksum = filterForMediaWithMismatchingChecksum(duplicatesToBeSuperseded, incomingChecksum);
 
         if (isNotEmpty(duplicatesToBeSuperseded) && isEmpty(duplicatesWithDifferentChecksum)) {
-            if (deleteGuidOnDuplicate) {
-                UUID uuid = externalLocationSupplier.get();
-                try {
-                    dataManagementApi.deleteBlobDataFromInboundContainer(uuid);
-                } catch (AzureDeleteBlobException e) {
-                    log.error("Failed to delete blob from inbound container with guid: ", uuid, e);
-                }
+            try {
+                dataManagementApi.deleteBlobDataFromInboundContainer(blodId);
+            } catch (AzureDeleteBlobException e) {
+                log.error("Failed to delete blob from inbound container with guid: ", blodId, e);
             }
+
             if (log.isInfoEnabled()) {
                 log.info("Exact duplicate detected based upon media metadata and checksum for media entity ids {}. Returning 200 with no changes.",
                          duplicatesToBeSuperseded.stream().map(MediaEntity::getId).toList());
             }
             return;
         }
-
-        ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        UUID externalLocation = externalLocationSupplier.get();
 
         UserAccountEntity currentUser = userIdentity.getUserAccount();
 
@@ -132,7 +117,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             mediaToSupersede.addAll(duplicatesWithDifferentChecksum);
             if (log.isInfoEnabled()) {
                 log.info("Duplicate audio file has been found with difference in checksum for guid {} latest checksum {}. But found {}",
-                         externalLocation, incomingChecksum,
+                         blodId, incomingChecksum,
                          duplicatesWithDifferentChecksum
                              .stream()
                              .map(mediaEntity -> "Media Id " + mediaEntity.getId().toString() + " with checksum " + mediaEntity.getChecksum())
@@ -141,23 +126,14 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
 
         // version the file upload to the database
-        versionUpload(mediaToSupersede, addAudioMetadataRequest,
-                      externalLocation, incomingChecksum, objectRecordStatusEntity, currentUser);
+        versionUpload(mediaToSupersede, addAudioMetadataRequest, blodId, incomingChecksum, currentUser);
     }
 
-    private UUID saveAudioToInbound(MultipartFile audioFileStream) {
-        try (var bufferedInputStream = new BufferedInputStream(audioFileStream.getInputStream())) {
-            return dataManagementApi.saveBlobDataToInboundContainer(bufferedInputStream);
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
-        }
-    }
-
-    private void versionUpload(List<MediaEntity> mediaToSupersede,
-                               AddAudioMetadataRequest addAudioMetadataRequest,
-                               UUID externalLocation, String checksum,
-                               ObjectRecordStatusEntity objectRecordStatusEntity,
-                               UserAccountEntity userAccount) {
+    void versionUpload(List<MediaEntity> mediaToSupersede,
+                       AddAudioMetadataRequest addAudioMetadataRequest,
+                       String externalLocation,
+                       String checksum,
+                       UserAccountEntity userAccount) {
 
         MediaEntity newMediaEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);
         newMediaEntity.setChecksum(checksum);
@@ -172,10 +148,28 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             newMediaEntity.setAntecedentId(String.valueOf(oldMediaEntity.getId()));
             log.info("Revised version of media added with filename {} and antecedent media id {}", newMediaEntity.getMediaFile(),
                      newMediaEntity.getId().toString());
+            if (oldMediaEntity.isHidden()) {
+                copyAdminActionToNewMedia(oldMediaEntity, newMediaEntity);
+            }
         }
-        mediaRepository.save(newMediaEntity);
+        newMediaEntity = mediaRepository.saveAndFlush(newMediaEntity);
         log.info("Saved media id {}", newMediaEntity.getId());
 
+        OffsetDateTime startDate = addAudioMetadataRequest.getStartedAt();
+        OffsetDateTime finishDate = addAudioMetadataRequest.getEndedAt();
+        Duration difference = Duration.between(startDate, finishDate);
+
+        if (addAudioMetadataRequest.getFileSize() <= smallFileSize
+            && DurationUtil.greaterThan(difference, smallFileSizeMaxLength)) {
+            logApi.addAudioSmallFileWithLongDuration(
+                addAudioMetadataRequest.getCourthouse(),
+                addAudioMetadataRequest.getCourtroom(),
+                startDate,
+                finishDate,
+                newMediaEntity.getId(),
+                addAudioMetadataRequest.getFileSize()
+            );
+        }
         linkAudioToHearingInMetadata(addAudioMetadataRequest, newMediaEntity);
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity, userAccount);
 
@@ -183,8 +177,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             externalLocation,
             checksum,
             userIdentity.getUserAccount(),
-            newMediaEntity,
-            objectRecordStatusEntity
+            newMediaEntity
         );
         for (MediaEntity mediaEntity : mediaToSupersede) {
             deleteMediaLinkingAndSetCurrentFalse(mediaEntity);
@@ -239,7 +232,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
     }
 
-    private void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
+    void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
         List<HearingEntity> hearingList = mediaEntity.getHearingList();
         for (HearingEntity hearing : hearingList) {
             mediaEntity.removeHearing(hearing);
@@ -248,14 +241,13 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         mediaRepository.save(mediaEntity);
     }
 
-    private void saveExternalObjectDirectory(UUID externalLocation,
-                                             String checksum,
-                                             UserAccountEntity userAccountEntity,
-                                             MediaEntity mediaEntity,
-                                             ObjectRecordStatusEntity objectRecordStatusEntity) {
+    void saveExternalObjectDirectory(String externalLocation,
+                                     String checksum,
+                                     UserAccountEntity userAccountEntity,
+                                     MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
-        externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
+        externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
@@ -263,6 +255,20 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         externalObjectDirectoryEntity.setCreatedBy(userAccountEntity);
         externalObjectDirectoryEntity.setLastModifiedBy(userAccountEntity);
         externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+    }
+
+    private void copyAdminActionToNewMedia(MediaEntity oldMediaEntity, MediaEntity newMediaEntity) {
+        ApplyAdminActionComponent.AdminActionProperties adminActionProperties = oldMediaEntity.getObjectAdminAction()
+            .map(adminActionEntity ->
+                     new ApplyAdminActionComponent.AdminActionProperties(adminActionEntity.getTicketReference(),
+                                                                         adminActionEntity.getComments(),
+                                                                         adminActionEntity.getObjectHiddenReason()))
+            .orElseGet(() ->
+                           new ApplyAdminActionComponent.AdminActionProperties(null,
+                                                                               "Prior version had no admin action, so no details are available",
+                                                                               null));
+
+        applyAdminActionComponent.applyAdminActionTo(Collections.singletonList(newMediaEntity), adminActionProperties);
     }
 
 }

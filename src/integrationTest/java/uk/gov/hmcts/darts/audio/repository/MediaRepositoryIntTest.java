@@ -2,8 +2,12 @@ package uk.gov.hmcts.darts.audio.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -14,8 +18,10 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,17 +78,21 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         var caseAMedias = mediaRepository.findAllByCaseId(caseA.getId());
         var caseBMedias = mediaRepository.findAllByCaseId(caseB.getId());
 
-        // then
-        var caseAMediasId = caseAMedias.stream().map(MediaEntity::getId);
-        assertThat(caseAMediasId).containsExactlyInAnyOrder(media0.getId(), media1.getId(), media2.getId());
-        var caseBMediasId = caseBMedias.stream().map(MediaEntity::getId);
-        assertThat(caseBMediasId).containsExactlyInAnyOrder(media0.getId());
+        dartsPersistence.getTransactionalUtil().executeInTransaction(() -> {
+            var foundMedia0 = mediaRepository.findById(media0.getId()).orElseThrow();
+            var foundMedia1 = mediaRepository.findById(media1.getId()).orElseThrow();
 
-        List<CourtCaseEntity> media0cases = media0.associatedCourtCases();
-        assertThat(media0cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId(), caseB.getId());
-        List<CourtCaseEntity> media1cases = media1.associatedCourtCases();
-        assertThat(media1cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId());
+            // then
+            var caseAMediasId = caseAMedias.stream().map(MediaEntity::getId);
+            assertThat(caseAMediasId).containsExactlyInAnyOrder(foundMedia0.getId(), foundMedia1.getId(), media2.getId());
+            var caseBMediasId = caseBMedias.stream().map(MediaEntity::getId);
+            assertThat(caseBMediasId).containsExactlyInAnyOrder(foundMedia0.getId());
 
+            List<CourtCaseEntity> media0cases = foundMedia0.associatedCourtCases();
+            assertThat(media0cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId(), caseB.getId());
+            List<CourtCaseEntity> media1cases = foundMedia1.associatedCourtCases();
+            assertThat(media1cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId());
+        });
     }
 
     @Test
@@ -249,6 +259,54 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
         assertThat(mediaRepository.getVersionCount("someIdSingle")).isEqualTo(1);
         assertThat(mediaRepository.getVersionCount("someIdMultiple")).isEqualTo(2);
+    }
+
+    static Stream<Arguments> findAllByMediaTimeContainsTestSource() {
+        OffsetDateTime startTime = OffsetDateTime.now();
+        OffsetDateTime endTime = startTime.plusHours(2);
+
+        return Stream.of(
+            Arguments.of("Event time 30 mins before media start time should be returned when buffer is 30 min",
+                         startTime, endTime, startTime.minusMinutes(30), true),
+            Arguments.of("Event time 30 mins after media end time should be returned when buffer is 30 min",
+                         startTime, endTime, endTime.plusMinutes(30), true),
+            Arguments.of("Event time is within media time should be returned",
+                         startTime, endTime, startTime.plusMinutes(30), true),
+            Arguments.of("Event time 31 mins before media start time should not be returned when buffer is 30 min",
+                         startTime, endTime, startTime.minusMinutes(31), false),
+            Arguments.of("Event time 31 mins after media end time should not be returned when buffer is 30 min",
+                         startTime, endTime, endTime.plusMinutes(31), false)
+        );
+    }
+
+    @ParameterizedTest(name = "{0} (StartTime: {1}. EndTime: {2}. EventTime: {3}. ExpectDataToReturn: {4})")
+    @MethodSource("findAllByMediaTimeContainsTestSource")
+    void findAllByMediaTimeContains_tests(String testName, OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime eventTime,
+                                          boolean expectDataToReturn) {
+        CourtroomEntity courtroomEntity = PersistableFactory.getCourtroomTestData()
+            .someMinimal();
+        dartsPersistence.save(courtroomEntity);
+
+        MediaEntity media = PersistableFactory.getMediaTestData().someMinimalBuilder()
+            .start(startTime)
+            .end(endTime)
+            .courtroom(courtroomEntity)
+            .build()
+            .getEntity();
+        dartsPersistence.save(media);
+
+        Duration buffer = Duration.ofMinutes(30);
+        List<MediaEntity> medias = dartsDatabase.getMediaRepository().findAllByMediaTimeContains(
+            courtroomEntity.getId(),
+            eventTime.plus(buffer),
+            eventTime.minus(buffer));
+
+        if (expectDataToReturn) {
+            assertEquals(1, medias.size());
+            assertThat(medias.getFirst().getId()).isEqualTo(media.getId());
+        } else {
+            assertEquals(0, medias.size());
+        }
     }
 
     private MediaLinkedCaseEntity createMediaLinkedCase(MediaEntity media, CourtCaseEntity courtCase) {

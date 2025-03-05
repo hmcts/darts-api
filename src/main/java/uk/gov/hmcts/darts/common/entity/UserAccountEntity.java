@@ -19,6 +19,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
@@ -33,7 +34,8 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @AuditTable("user_account_aud")
-public class UserAccountEntity extends CreatedModifiedBaseEntity {
+public class UserAccountEntity extends CreatedModifiedBaseEntity
+    implements HasIntegerId {
 
     @Id
     @Column(name = "usr_id")
@@ -44,6 +46,10 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @NotAudited
     @Column(name = "dm_user_s_object_id", length = 16)
     private String dmObjectId;
+
+    @NotAudited
+    @Column(name = "user_name")
+    private String userName;
 
     @Column(name = "user_full_name", nullable = false)
     private String userFullName;
@@ -101,6 +107,8 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @NotAudited
     @Column(name = "user_state")
     private Short userState;
+
+
 
     public Boolean isActive() {
         return active;

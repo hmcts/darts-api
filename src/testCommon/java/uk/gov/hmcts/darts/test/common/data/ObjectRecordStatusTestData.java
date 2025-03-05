@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.test.common.data;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 
-public class ObjectRecordStatusTestData {
+public final class ObjectRecordStatusTestData {
 
     private ObjectRecordStatusTestData() {
 

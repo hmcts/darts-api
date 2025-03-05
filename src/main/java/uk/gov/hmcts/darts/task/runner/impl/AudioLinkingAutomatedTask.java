@@ -69,9 +69,13 @@ public class AudioLinkingAutomatedTask
         private final EventService eventService;
         private final MediaLinkedCaseHelper mediaLinkedCaseHelper;
 
+
         @Getter
-        @Value("${darts.automated-tasks.audio-linking.audio-buffer:0s}")
-        private final Duration audioBuffer;
+        @Value("${darts.automated-tasks.pre-amble-duration:0s}")
+        private final Duration preAmbleDuration;
+        @Getter
+        @Value("${darts.automated-tasks.post-amble-duration:0s}")
+        private final Duration postAmbleDuration;
         private final UserIdentity userIdentity;
 
 
@@ -84,8 +88,8 @@ public class AudioLinkingAutomatedTask
                 EventEntity event = eventService.getEventByEveId(eveId);
                 List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
                     event.getCourtroom().getId(),
-                    event.getTimestamp().plus(getAudioBuffer()),
-                    event.getTimestamp().minus(getAudioBuffer()));
+                    event.getTimestamp().plus(getPreAmbleDuration()),
+                    event.getTimestamp().minus(getPostAmbleDuration()));
                 mediaEntities.forEach(mediaEntity -> {
                     mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
                 });

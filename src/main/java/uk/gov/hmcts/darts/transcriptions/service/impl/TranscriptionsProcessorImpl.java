@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
@@ -35,7 +34,7 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
             List<TranscriptionStatusEntity> finishedTranscriptionStatuses = transcriptionService.getFinishedTranscriptionStatuses();
             OffsetDateTime lastCreatedDateTime = currentTimeHelper.currentOffsetDateTime()
                 .minus(transcriptionConfigurationProperties.getMaxCreatedByDuration());
-            List<TranscriptionEntity> transcriptionsToBeClosed =
+            List<Integer> transcriptionsToBeClosed =
                 transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
                     finishedTranscriptionStatuses,
                     lastCreatedDateTime,
@@ -45,8 +44,8 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
                 log.debug("No transcriptions to be closed off");
             } else {
                 log.info("Number of transcriptions to be closed off: {}", transcriptionsToBeClosed.size());
-                for (TranscriptionEntity transcriptionToBeClosed : transcriptionsToBeClosed) {
-                    transcriptionService.closeTranscription(transcriptionToBeClosed.getId(), AUTOMATICALLY_CLOSED_TRANSCRIPTION);
+                for (Integer transcriptionToBeClosed : transcriptionsToBeClosed) {
+                    transcriptionService.closeTranscription(transcriptionToBeClosed, AUTOMATICALLY_CLOSED_TRANSCRIPTION);
                 }
             }
         } catch (Exception e) {

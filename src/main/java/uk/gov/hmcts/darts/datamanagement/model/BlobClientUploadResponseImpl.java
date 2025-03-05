@@ -4,7 +4,6 @@ import com.azure.storage.blob.BlobClient;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * A wrapper/facade around BlobClient to expose properties useful to upload callers.
@@ -20,8 +19,8 @@ public class BlobClientUploadResponseImpl implements BlobClientUploadResponse {
     }
 
     @Override
-    public UUID getBlobName() {
-        return UUID.fromString(blobClient.getBlobName());
+    public String getBlobName() {
+        return blobClient.getBlobName();
     }
 
     @Override
@@ -39,6 +38,7 @@ public class BlobClientUploadResponseImpl implements BlobClientUploadResponse {
      * @param additionalMetadata Metadata to add to the blob
      * @return A map containing all metadata applied to the blob.
      */
+    @Override
     public Map<String, String> addMetadata(Map<String, String> additionalMetadata) {
         var metadata = new HashMap<>(blobClient.getProperties().getMetadata());
         metadata.putAll(additionalMetadata);

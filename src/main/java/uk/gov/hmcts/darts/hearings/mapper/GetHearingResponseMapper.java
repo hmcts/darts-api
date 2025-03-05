@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.hearings.mapper;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -31,7 +32,7 @@ public class GetHearingResponseMapper {
         getHearingResponse.setCaseNumber(hearing.getCourtCase().getCaseNumber());
         getHearingResponse.setHearingDate(hearing.getHearingDate());
         getHearingResponse.setJudges(hearing.getJudgesStringList());
-        getHearingResponse.setTranscriptionCount(hearing.getTranscriptions().size());
+        getHearingResponse.setTranscriptionCount(hearing.getTranscriptions().stream().filter(t -> BooleanUtils.isTrue(t.getIsCurrent())).toList().size());
         List<HearingReportingRestrictionsEntity> restrictions
             = hearingReportingRestrictionsRepository.findAllByCaseId(hearing.getCourtCase().getId());
 

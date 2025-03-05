@@ -14,9 +14,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
-import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
-import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
@@ -54,7 +52,6 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,15 +79,11 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUDIO_PLAYBACK;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.CHANGE_AUDIO_OWNERSHIP;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.EXPORT_AUDIO;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_AUDIO;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.UNHIDE_AUDIO;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
-import static uk.gov.hmcts.darts.test.common.data.ObjectAdminActionTestData.objectAdminActionWithDefaults;
-import static uk.gov.hmcts.darts.test.common.data.ObjectHiddenReasonTestData.classified;
 import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
 
 @ExtendWith(MockitoExtension.class)
@@ -213,14 +206,14 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(mockHearingService.getHearingById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockMediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         doNothing().when(auditApi).record(any(), any(), any(CourtCaseEntity.class));
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
         assertEquals(request.getId(), mockMediaRequestEntity.getId());
-        verify(mockHearingService).getHearingById(hearingId);
+        verify(mockHearingService).getHearingByIdWithValidation(hearingId);
         verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
         verify(auditApi).record(REQUEST_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
@@ -239,7 +232,7 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(mockHearingService.getHearingById(hearingId))
+        when(mockHearingService.getHearingByIdWithValidation(hearingId))
             .thenThrow(new DartsApiException(HearingApiError.HEARING_NOT_FOUND));
 
         DartsApiException exception = assertThrows(DartsApiException.class,
@@ -264,7 +257,7 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(mockHearingService.getHearingById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         when(mockMediaRequestRepository.findDuplicateUserMediaRequests(
             mockHearingEntity,
@@ -293,7 +286,7 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(mockHearingService.getHearingById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         when(mockMediaRequestRepository.findDuplicateUserMediaRequests(
             mockHearingEntity,
@@ -347,10 +340,10 @@ class MediaRequestServiceImplTest {
 
         when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
             .thenReturn(List.of(
-                new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(184, 2547, 2750)
+                new AudioRequestBeingProcessedFromArchiveQueryResult(181),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(182),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(183),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(184)
             ));
 
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
@@ -367,7 +360,7 @@ class MediaRequestServiceImplTest {
     @Test
     void whenAudioRequestHasBeenProcessedDeleteBlobDataAndAudioRequest() throws AzureDeleteBlobException {
         var mediaRequestId = 1;
-        UUID blobId = UUID.randomUUID();
+        String blobId = UUID.randomUUID().toString();
 
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(blobId);
@@ -385,7 +378,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
         verify(mockMediaRequestRepository).deleteById(mediaRequestId);
-        verify(dataManagementApi).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(dataManagementApi).deleteBlobDataFromOutboundContainer(any(String.class));
         verify(mockTransientObjectDirectoryRepository).deleteById(any());
     }
 
@@ -428,7 +421,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
         verify(mockMediaRequestRepository).deleteById(mediaRequestId);
-        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(String.class));
         verify(mockTransientObjectDirectoryRepository, times(0)).deleteById(any());
     }
 
@@ -449,7 +442,7 @@ class MediaRequestServiceImplTest {
         var objectRecordStatusEntity = new ObjectRecordStatusEntity();
         objectRecordStatusEntity.setId(STORED.getId());
 
-        var blobUuid = UUID.randomUUID();
+        var blobUuid = UUID.randomUUID().toString();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);
@@ -580,7 +573,7 @@ class MediaRequestServiceImplTest {
         var objectRecordStatusEntity = new ObjectRecordStatusEntity();
         objectRecordStatusEntity.setId(STORED.getId());
 
-        var blobUuid = UUID.randomUUID();
+        var blobUuid = UUID.randomUUID().toString();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);
@@ -798,33 +791,4 @@ class MediaRequestServiceImplTest {
         verifyNoInteractions(auditApi);
     }
 
-    @Test
-    @SuppressWarnings("java:S1874")
-    void auditsWhenAudioHidden() {
-        var media = withIdsPopulated(mediaTestData.someMinimalMedia());
-        media.setHidden(false);
-        when(mediaRepository.findByIdIncludeDeleted(any())).thenReturn(Optional.of(media));
-        when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.of(classified()));
-
-        var mediaHideRequest = new MediaHideRequest()
-            .isHidden(true)
-            .adminAction(new AdminActionRequest().reasonId(1));
-
-        mediaRequestService.adminHideOrShowMediaById(media.getId(), mediaHideRequest);
-
-        verify(auditApi).record(HIDE_AUDIO);
-    }
-
-    @Test
-    @SuppressWarnings("java:S1874")
-    void auditsWhenAudioMadeVisible() {
-        var media = withIdsPopulated(mediaTestData.someMinimalMedia());
-        media.setHidden(true);
-        when(mediaRepository.findByIdIncludeDeleted(any())).thenReturn(Optional.of(media));
-        when(objectAdminActionRepository.findByMedia_Id(any())).thenReturn(Arrays.asList(objectAdminActionWithDefaults()));
-
-        mediaRequestService.adminHideOrShowMediaById(media.getId(), new MediaHideRequest().isHidden(false));
-
-        verify(auditApi).record(UNHIDE_AUDIO, "Ticket reference: Ticket-123, Comments: some comment");
-    }
 }

@@ -8,7 +8,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -51,7 +51,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     private transient MockMvc mockMvc;
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Test

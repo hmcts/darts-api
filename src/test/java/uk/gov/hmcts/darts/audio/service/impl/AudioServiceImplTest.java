@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -30,6 +32,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -70,6 +73,8 @@ class AudioServiceImplTest {
 
     private AudioService audioService;
 
+    private EodHelperMocks eodHelperMocks;
+
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
@@ -82,6 +87,13 @@ class AudioServiceImplTest {
             fileOperationService,
             audioBeingProcessedFromArchiveQuery
         );
+    }
+
+    @AfterEach
+    void afterEach() {
+        if (eodHelperMocks != null) {
+            eodHelperMocks.close();
+        }
     }
 
     @Test
@@ -138,13 +150,18 @@ class AudioServiceImplTest {
         audioMetadata3.setId(3);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata1, audioMetadata2, audioMetadata3);
 
-        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any())).thenReturn(List.of(1, 3));
-
+        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any(), any())).thenReturn(List.of(1, 3));
+        eodHelperMocks = new EodHelperMocks();
+        eodHelperMocks.simulateInitWithMockedData();
         audioService.setIsAvailable(audioMetadataList);
 
         assertEquals(true, audioMetadataList.get(0).getIsAvailable());
         assertEquals(false, audioMetadataList.get(1).getIsAvailable());
         assertEquals(true, audioMetadataList.get(2).getIsAvailable());
+        verify(externalObjectDirectoryRepository).findMediaIdsByInMediaIdStatusAndType(
+            List.of(1, 2, 3),
+            eodHelperMocks.getStoredStatus(),
+            eodHelperMocks.getUnstructuredLocation(), eodHelperMocks.getDetsLocation());
     }
 
     @Test
