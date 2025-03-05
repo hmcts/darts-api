@@ -1,27 +1,5 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockAssert;
-import net.javacrumbs.shedlock.core.LockConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import uk.gov.hmcts.darts.authentication.component.DartsJwt;
-import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
-import uk.gov.hmcts.darts.common.exception.DartsException;
-import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AbstractAutomatedTaskConfig;
-import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.AutomatedTask;
-import uk.gov.hmcts.darts.task.service.LockService;
-import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -44,6 +22,28 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.IN_PROGRESS;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.LOCK_FAILED;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.core.LockAssert;
+import net.javacrumbs.shedlock.core.LockConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
+import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
+import uk.gov.hmcts.darts.task.config.AbstractAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.AutomatedTask;
+import uk.gov.hmcts.darts.task.service.LockService;
+import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
 
 @Slf4j
@@ -164,9 +164,9 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
 
     public Duration getLockAtMostFor() {
         return Optional.ofNullable(automatedTaskConfigurationProperties.getLock())
-            .map(lock -> lock.getAtMostFor())
-            .filter(duration -> duration.isPositive())
-            .orElseGet(() -> lockService.getLockAtMostFor());
+            .map(AbstractAutomatedTaskConfig.Lock::getAtMostFor)
+            .filter(Duration::isPositive)
+            .orElseGet(lockService::getLockAtMostFor);
     }
 
     public Duration getLockAtLeastFor() {
@@ -262,39 +262,40 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     class LockedTask implements Runnable {
         @Override
         public void run() {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            try {
-                assertLocked();
-            } catch (IllegalStateException exception) {
-                setAutomatedTaskStatus(LOCK_FAILED);
-                log.error("Unable to lock task", exception);
-            }
-
-            final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Future<?> future = executor.submit(() -> {
+            try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
                 try {
-                    //Spring security context default strategy is ThreadLocal meaning we need to set it up on each thread we want the user on
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    runTask();
-                } catch (Exception exception) {
-                    setAutomatedTaskStatus(FAILED);
-                    handleException(exception);
-                    throw exception;
+                    assertLocked();
+                } catch (IllegalStateException exception) {
+                    setAutomatedTaskStatus(LOCK_FAILED);
+                    log.error("Unable to lock task", exception);
                 }
-            });
 
-            try {
-                Object result = future.get(getLockAtMostFor().toMillis(), TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                log.error("Task: {} timed out after {}ms", getTaskName(), getLockAtMostFor().toMillis());
-                future.cancel(true);
-            } catch (ExecutionException e) {
-                log.error("Task: {} execution exception", getTaskName(), e);
-            } catch (InterruptedException e) {
-                log.error("Task: {} interrupted", getTaskName(), e);
-                Thread.currentThread().interrupt();
+                final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                Future<?> future = executor.submit(() -> {
+                    try {
+                        //Spring security context default strategy is ThreadLocal meaning we need to set it up on each thread we want the user on
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        runTask();
+                    } catch (Exception exception) {
+                        setAutomatedTaskStatus(FAILED);
+                        handleException(exception);
+                        throw exception;
+                    }
+                });
+
+                try {
+                    future.get(getLockAtMostFor().toMillis(), TimeUnit.MILLISECONDS);
+                } catch (TimeoutException e) {
+                    log.error("Task: {} timed out after {}ms", getTaskName(), getLockAtMostFor().toMillis());
+                    future.cancel(true);
+                } catch (ExecutionException e) {
+                    log.error("Task: {} execution exception", getTaskName(), e);
+                } catch (InterruptedException e) {
+                    log.error("Task: {} interrupted", getTaskName(), e);
+                    Thread.currentThread().interrupt();
+                }
+                executor.shutdown();
             }
-            executor.shutdown();
         }
 
         //Separate method to allow mocking
