@@ -175,9 +175,10 @@ components:
         - "COMMON_101"
         - "COMMON_102"
         - "COMMON_103"
+        - "COMMON_104"
       x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST,
                          FEATURE_FLAG_NOT_ENABLED,
-                         NOT_FOUND, INTERNAL_SERVER_ERROR ]
+                         NOT_FOUND, INTERNAL_SERVER_ERROR,
                          INVALID_REQUEST ]
 
     CommonTitleErrors:
@@ -190,6 +191,6 @@ components:
         - "Invalid request"
       x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST ,
                          FEATURE_FLAG_NOT_ENABLED,
-                         NOT_FOUND, INTERNAL_SERVER_ERROR
+                         NOT_FOUND, INTERNAL_SERVER_ERROR,
                          INVALID_REQUEST
       ]
