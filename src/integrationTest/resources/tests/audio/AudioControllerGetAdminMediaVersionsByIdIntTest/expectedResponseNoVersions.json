@@ -1,0 +1,22 @@
+{
+  "media_object_id": "object-id-value",
+  "current_version": {
+    "id": 1,
+    "courthouse": {
+      "id": 1,
+      "display_name": "TESTCOURTHOUSE"
+    },
+    "courtroom": {
+      "id": 1,
+      "name": "TESTCOURTROOM"
+    },
+    "start_at": "2024-01-04T12:10:10Z",
+    "end_at": "2024-01-04T13:10:10Z",
+    "channel": 2,
+    "chronicle_id": "chronicleId",
+    "antecedent_id": "antecedent-value",
+    "is_current": true,
+    "created_at": "<created_at_current>"
+  },
+  "previous_versions": []
+}
