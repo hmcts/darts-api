@@ -181,67 +181,41 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             metadata.setRetentionConfidenceScore(transcriptionDocument.getRetConfScore().getId());
         }
 
-        if (transcriptionRecordProperties.containsKey(BF_001_KEY)) {
-            metadata.setBf001(mapToString(transcriptionRecordProperties.getProperty(BF_001_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_002_KEY)) {
-            metadata.setBf002(mapToString(transcriptionRecordProperties.getProperty(BF_002_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_003_KEY)) {
-            metadata.setBf003(mapToString(transcriptionRecordProperties.getProperty(BF_003_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_004_KEY)) {
-            metadata.setBf004(mapToString(transcriptionRecordProperties.getProperty(BF_004_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_005_KEY)) {
-            metadata.setBf005(mapToString(transcriptionRecordProperties.getProperty(BF_005_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_006_KEY)) {
-            metadata.setBf006(mapToString(transcriptionRecordProperties.getProperty(BF_006_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_007_KEY)) {
-            metadata.setBf007(mapToString(transcriptionRecordProperties.getProperty(BF_007_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_008_KEY)) {
-            metadata.setBf008(mapToString(transcriptionRecordProperties.getProperty(BF_008_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_009_KEY)) {
-            metadata.setBf009(mapToString(transcriptionRecordProperties.getProperty(BF_009_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_010_KEY)) {
-            metadata.setBf010(mapToString(transcriptionRecordProperties.getProperty(BF_010_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_011_KEY)) {
-            metadata.setBf011(mapToString(transcriptionRecordProperties.getProperty(BF_011_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_012_KEY)) {
-            metadata.setBf012(mapToInt(transcriptionRecordProperties.getProperty(BF_012_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_013_KEY)) {
-            metadata.setBf013(mapToInt(transcriptionRecordProperties.getProperty(BF_013_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_014_KEY)) {
-            metadata.setBf014(mapToInt(transcriptionRecordProperties.getProperty(BF_014_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_015_KEY)) {
-            metadata.setBf015(mapToInt(transcriptionRecordProperties.getProperty(BF_015_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_016_KEY)) {
-            metadata.setBf016(mapToString(transcriptionRecordProperties.getProperty(BF_016_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_017_KEY)) {
-            metadata.setBf017(mapToString(transcriptionRecordProperties.getProperty(BF_017_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_018_KEY)) {
-            metadata.setBf018(mapToString(transcriptionRecordProperties.getProperty(BF_018_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_019_KEY)) {
-            metadata.setBf019(mapToString(transcriptionRecordProperties.getProperty(BF_019_KEY), transcriptionDocument));
-        }
-        if (transcriptionRecordProperties.containsKey(BF_020_KEY)) {
-            metadata.setBf020(mapToString(transcriptionRecordProperties.getProperty(BF_020_KEY), transcriptionDocument));
-        }
+        setMetadataProperties(metadata, transcriptionDocument);
         return metadata;
+    }
+
+    private void setMetadataProperties(RecordMetadata metadata, TranscriptionDocumentEntity transcriptionDocument) {
+        for (String key : transcriptionRecordProperties.stringPropertyNames()) {
+            String value = mapToString(transcriptionRecordProperties.getProperty(key), transcriptionDocument);
+            if (value != null) {
+                switch (key) {
+                    case BF_001_KEY -> metadata.setBf001(value);
+                    case BF_002_KEY -> metadata.setBf002(value);
+                    case BF_003_KEY -> metadata.setBf003(value);
+                    case BF_004_KEY -> metadata.setBf004(value);
+                    case BF_005_KEY -> metadata.setBf005(value);
+                    case BF_006_KEY -> metadata.setBf006(value);
+                    case BF_007_KEY -> metadata.setBf007(value);
+                    case BF_008_KEY -> metadata.setBf008(value);
+                    case BF_009_KEY -> metadata.setBf009(value);
+                    case BF_010_KEY -> metadata.setBf010(value);
+                    case BF_011_KEY -> metadata.setBf011(value);
+                    case BF_012_KEY -> metadata.setBf012(mapToInt(value, transcriptionDocument));
+                    case BF_013_KEY -> metadata.setBf013(mapToInt(value, transcriptionDocument));
+                    case BF_014_KEY -> metadata.setBf014(mapToInt(value, transcriptionDocument));
+                    case BF_015_KEY -> metadata.setBf015(mapToInt(value, transcriptionDocument));
+                    case BF_016_KEY -> metadata.setBf016(value);
+                    case BF_017_KEY -> metadata.setBf017(value);
+                    case BF_018_KEY -> metadata.setBf018(value);
+                    case BF_019_KEY -> metadata.setBf019(value);
+                    case BF_020_KEY -> metadata.setBf020(value);
+                    default -> {
+                        // ignore unknown properties - comment to fix PMD warning
+                    }
+                }
+            }
+        }
     }
 
     private String mapToString(String key, TranscriptionDocumentEntity transcriptionDocument) {
