@@ -9,8 +9,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
-import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
@@ -19,13 +17,11 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.AsyncUtil;
 
@@ -60,29 +56,16 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @Mock
-    private DataManagementApi dataManagementApi;
-    @Mock
-    private ArmDataManagementApi armDataManagementApi;
-    @Mock
     private UserIdentity userIdentity;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @Mock
-    private ExternalObjectDirectoryEntity eod1;
-    @Mock
-    private ExternalObjectDirectoryEntity eod2;
     @Mock
     private FileOperationService fileOperationService;
     @Mock
     private ArchiveRecordService archiveRecordService;
 
     private UnstructuredToArmBatchProcessor unstructuredToArmBatchProcessor;
-    @Mock
-    private ExternalObjectDirectoryService eodService;
-    @Mock
-    private ArchiveRecordFileGenerator archiveRecordFileGenerator;
+
     @InjectMocks
     private DataStoreToArmHelper unstructuredToArmHelper;
 

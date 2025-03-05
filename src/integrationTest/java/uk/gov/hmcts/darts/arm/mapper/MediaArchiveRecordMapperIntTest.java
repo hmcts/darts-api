@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -44,11 +42,8 @@ class MediaArchiveRecordMapperIntTest extends IntegrationBase {
     @MockitoSpyBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    @TempDir
-    private File tempDirectory;
-
     @Autowired
-    MediaArchiveRecordMapper mediaArchiveRecordMapper;
+    private MediaArchiveRecordMapper mediaArchiveRecordMapper;
 
     @BeforeEach
     void setupData() {
