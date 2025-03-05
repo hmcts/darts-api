@@ -167,7 +167,7 @@ public class AudioController implements AudioApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<AdminVersionedMediaResponse> getAdminMediaVersionsById(Integer id) {
         return new ResponseEntity<>(adminMediaService.getMediaVersionsById(id), HttpStatus.OK);
     }

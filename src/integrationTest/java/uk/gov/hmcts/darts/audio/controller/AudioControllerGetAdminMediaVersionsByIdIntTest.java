@@ -45,9 +45,8 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
     private static final String RETAIN_UNTIL = "2200-02-01T00:00:00Z";
 
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturn200_whenChronicleIdHasBothCurrentAndNonCurrentVersions(SecurityRoleEnum role) throws Exception {
+    @Test
+    void shouldReturn200_whenChronicleIdHasBothCurrentAndNonCurrentVersions() throws Exception {
         final String chronicleId = "chronicleId";
         MediaEntity currentMediaEntity = createAndSaveMediaEntity(true, chronicleId, Duration.ofDays(3));
         MediaEntity versionedMediaEntity1 = createAndSaveMediaEntity(false, chronicleId, Duration.ofDays(2));
@@ -55,7 +54,7 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
         //Craeted unrelated media to ensure not returned
         createAndSaveMediaEntity(true, "unrealted");
 
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         // When
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL, currentMediaEntity.getId()))
@@ -114,11 +113,10 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturn404_WhenMediaRecordDoesNotExist(SecurityRoleEnum role) throws Exception {
+    @Test
+    void shouldReturn404_WhenMediaRecordDoesNotExist() throws Exception {
         // Given
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         // When
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL, "123456789"))
@@ -136,11 +134,10 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
                                     """, jsonString, JSONCompareMode.STRICT);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturn404_WhenMediaRecordIsDeleted(SecurityRoleEnum role) throws Exception {
+    @Test
+    void shouldReturn404_WhenMediaRecordIsDeleted() throws Exception {
         // Given
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
 
         var mediaEntity = createAndSaveMediaEntity(true, true, "chronicleId", Duration.ofMillis(0));
@@ -162,7 +159,7 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = EXCLUDE)
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EXCLUDE)
     void shouldDenyAccess_whenNotAuthorised(SecurityRoleEnum role) throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
