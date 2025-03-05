@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.data.EventTestData;
@@ -196,7 +197,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllByRelatedEvents_shouldReturnAllRelatedEvents() {
+    void findAllByRelatedEvents_shouldReturnAllRelatedEvents_usingCaseNumberAndCourtHouse() {
         final EventEntity event1 = EventTestData.someMinimalEvent();
         final EventEntity event2 = EventTestData.someMinimalEvent();
         final EventEntity event3 = EventTestData.someMinimalEvent();
@@ -225,15 +226,58 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         eventLinkedCaseStub
             .createCaseLinkedEvent(event3, "caseNumber2", "courthouseName");
         eventLinkedCaseStub
-            .createCaseLinkedEvent(event4, "caseNumber2", "courthouseName");
+            .createCaseLinkedEvent(event4, "caseNumber2", "courthouseName2");
         eventLinkedCaseStub
             .createCaseLinkedEvent(event5, "caseNumber", "courthouseName");
 
-        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(), event1.getEventId(),
-                                                                                 List.of("caseNumber", "caseNumber3"));
-        assertThat(relatedEvents).hasSize(2);
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId());
+        //Event 2 not returned as it has a different case number to ones linked to event1
+        //Event 4 not returned as it has a different courthouse name to ones linked to event1
+        //Event 5 not returned as it has a different event id to ones linked to event1
         assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
-            .containsExactlyInAnyOrder(event1.getId(), event2.getId());
+            .hasSize(2)
+            .containsExactlyInAnyOrder(event1.getId(), event3.getId());
+    }
+
+    @Test
+    void findAllByRelatedEvents_shouldReturnAllRelatedEvents_usingCaseId() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        final EventEntity event3 = EventTestData.someMinimalEvent();
+        final EventEntity event4 = EventTestData.someMinimalEvent();
+        final EventEntity event5 = EventTestData.someMinimalEvent();
+
+
+        event1.setEventId(123);
+        event2.setEventId(123);
+        event3.setEventId(123);
+        event4.setEventId(123);
+        event5.setEventId(1234);
+
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+        dartsDatabase.save(event3);
+        dartsDatabase.save(event4);
+        dartsDatabase.save(event5);
+
+        CourtCaseEntity caseEntity1 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event3, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event5, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event4, caseEntity1.getCaseNumber(), caseEntity1.getCourthouse().getCourthouseName());
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event4, "caseNumber2", "courthouseName");
+
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId());
+        assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
+            .containsExactlyInAnyOrder(event1.getId(), event3.getId(), event4.getId());
     }
 
     @Test
@@ -253,8 +297,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         eventLinkedCaseStub
             .createCaseLinkedEvent(event1, "caseNumber", "courthouseName");
 
-        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(), event1.getEventId(),
-                                                                                 List.of("caseNumber"));
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId());
         //Only one event should be returned as the event id is 0
         assertThat(relatedEvents).hasSize(1);
         assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
