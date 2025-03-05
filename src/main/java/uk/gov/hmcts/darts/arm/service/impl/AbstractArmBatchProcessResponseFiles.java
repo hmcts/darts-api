@@ -135,11 +135,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     void runTasksAsync(List<Callable<Void>> tasks, AsyncTaskConfig asyncTaskConfig) {
         try {
             AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
+        } catch (InterruptedException e) {
+            log.error(getClass().getName() + " failed with unexpected exception", e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error(getClass().getName() + " failed with unexpected exception", e);
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
         }
     }
 
