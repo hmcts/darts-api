@@ -13,6 +13,7 @@ public final class AnnotationTestData implements Persistable<TestAnnotationEntit
     AnnotationEntity, TestAnnotationEntity.TestAnnotationEntityBuilder> {
 
     AnnotationTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public AnnotationEntity minimalAnnotationEntity() {

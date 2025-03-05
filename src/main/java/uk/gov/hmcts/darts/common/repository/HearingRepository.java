@@ -14,14 +14,14 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
 
     @Query("""
         SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr
-        WHERE ch.courthouseName = upper(:courthouse)
-        AND cr.name = upper(:courtroom)
+        WHERE ch.courthouseName = upper(trim(:courthouseName))
+        AND cr.name = upper(trim(:courtroom))
         AND h.hearingDate = :date
         AND h.courtroom = cr
         AND cr.courthouse = ch
         """
     )
-    List<HearingEntity> findByCourthouseCourtroomAndDate(String courthouse, String courtroom, LocalDate date);
+    List<HearingEntity> findByCourthouseCourtroomAndDate(String courthouseName, String courtroom, LocalDate date);
 
     @Query("""
         SELECT h FROM HearingEntity h
@@ -57,8 +57,8 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
 
     @Query("""
         SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr, CourtCaseEntity case
-        WHERE ch.courthouseName = upper(:courthouse)
-        AND cr.name = upper(:courtroom)
+        WHERE ch.courthouseName = upper(trim(:courthouseName))
+        AND cr.name = upper(trim(:courtroom))
         AND h.hearingDate = :date
         AND h.courtroom = cr
         AND cr.courthouse = ch
@@ -66,7 +66,7 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         and h.courtCase = case
         """
     )
-    Optional<HearingEntity> findHearing(String courthouse, String courtroom, String caseNumber, LocalDate date);
+    Optional<HearingEntity> findHearing(String courthouseName, String courtroom, String caseNumber, LocalDate date);
 
     @Query("""
             select exists
@@ -94,9 +94,9 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
                                            LocalDate startDate, LocalDate endDate, Integer numberOfRecords);
 
     @Query("""
-        SELECT hearing 
+        SELECT hearing
         FROM HearingEntity hearing, CourtCaseEntity case
-        LEFT JOIN FETCH hearing.mediaList 
+        LEFT JOIN FETCH hearing.mediaList
         WHERE case.id = :caseId
         AND hearing.courtCase = case
         """)

@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity implements DbInsertable<TranscriptionDocumentEntity> {
     @lombok.Builder
@@ -75,7 +76,7 @@ public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity
 
         @Override
         public TestTranscriptionDocumentEntity build() {
-           return builder.build();
+            return builder.build();
         }
 
         @Override

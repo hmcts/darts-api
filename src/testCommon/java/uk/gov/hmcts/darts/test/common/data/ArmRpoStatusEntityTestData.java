@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 public final class ArmRpoStatusEntityTestData {
 
     private ArmRpoStatusEntityTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static ArmRpoStatusEntity statusOf(ArmRpoStatusEnum status) {

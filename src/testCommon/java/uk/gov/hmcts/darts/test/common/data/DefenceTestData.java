@@ -12,7 +12,7 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 public final class DefenceTestData {
 
     private DefenceTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static DefenceEntity someMinimalDefence() {

@@ -5,7 +5,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 public final class ObjectHiddenReasonTestData {
 
     private ObjectHiddenReasonTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static ObjectHiddenReasonEntity publicInterestImmunity() {

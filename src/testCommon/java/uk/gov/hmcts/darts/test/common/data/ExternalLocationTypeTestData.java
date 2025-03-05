@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 public final class ExternalLocationTypeTestData {
 
     private ExternalLocationTypeTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static ExternalLocationTypeEntity locationTypeOf(ExternalLocationTypeEnum locationType) {
