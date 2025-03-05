@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -47,11 +48,10 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
     private static final String HIDE_DELETE_AT = "2024-02-01T00:00:00Z";
     private static final String RETAIN_UNTIL = "2200-02-01T00:00:00Z";
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldUpdateMediaToIsCurrentTrue_whenPayloadHasThisSetToTrue_andResetAllOtherAssociatedMediaIsCurrentToFalse(SecurityRoleEnum role) throws Exception {
+    @Test
+    void shouldUpdateMediaToIsCurrentTrue_whenPayloadHasThisSetToTrue_andResetAllOtherAssociatedMediaIsCurrentToFalse() throws Exception {
         // Given
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         var userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
             .findFirst()
@@ -76,10 +76,9 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
         assertMediaIsCurrentStatus(mediaEntity4.getId(), true);//Should be true as different chronicleId
     }
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturn400_whenIsCurrentIsSetToFalse(SecurityRoleEnum role) throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+    @Test
+    void shouldReturn400_whenIsCurrentIsSetToFalse() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         mockMvc.perform(patch(ENDPOINT.resolve("123456789"))
                             .contentType(MediaType.APPLICATION_JSON)
@@ -87,10 +86,9 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
             .andExpect(status().isBadRequest());
     }
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturn400_whenIsCurrentIsSetToNull(SecurityRoleEnum role) throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+    @Test
+    void shouldReturn400_whenIsCurrentIsSetToNull() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         mockMvc.perform(patch(ENDPOINT.resolve("123456789"))
                             .contentType(MediaType.APPLICATION_JSON)
@@ -98,11 +96,10 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
             .andExpect(status().isBadRequest());
     }
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturn409_whenMediaIsAlreadyCurrent(SecurityRoleEnum role) throws Exception {
+    @Test
+    void shouldReturn409_whenMediaIsAlreadyCurrent() throws Exception {
         // Given
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         var userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
             .findFirst()
@@ -119,11 +116,10 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
     }
 
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturn404_whenMediaRecordDoesNotExist(SecurityRoleEnum role) throws Exception {
+    @Test
+    void shouldReturn404_whenMediaRecordDoesNotExist() throws Exception {
         // Given
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         // When
         MvcResult mvcResult = mockMvc.perform(patch(ENDPOINT.resolve("123456789"))
@@ -143,11 +139,10 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
                                     """, jsonString, JSONCompareMode.STRICT);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturn404_whenMediaRecordIsDeleted(SecurityRoleEnum role) throws Exception {
+    @Test
+    void shouldReturn404_whenMediaRecordIsDeleted() throws Exception {
         // Given
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         var userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
             .findFirst()
@@ -175,7 +170,7 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = EXCLUDE)
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EXCLUDE)
     void shouldThrowUnauthorisedError_whenUserIsNotAuthenticatedAtTheRightLevel(SecurityRoleEnum role) throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
