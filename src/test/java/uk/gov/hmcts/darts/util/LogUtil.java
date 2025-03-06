@@ -26,8 +26,8 @@ public final class LogUtil {
         }
     }
 
-    public static void assertOutputHasMessage(CapturedOutput output, String message, int timeout) {
-        waitUntilMessage(output, message, timeout);
+    public static void assertOutputHasMessage(CapturedOutput output, String message, int timeoutInSeconds) {
+        waitUntilMessage(output, message, timeoutInSeconds);
         assertThat(output).contains(message);
     }
 }
