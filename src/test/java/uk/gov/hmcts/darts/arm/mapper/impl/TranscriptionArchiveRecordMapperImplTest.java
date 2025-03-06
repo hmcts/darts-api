@@ -125,6 +125,29 @@ class TranscriptionArchiveRecordMapperImplTest {
         assertThat(exception.getMessage(), containsString("pattern"));
     }
 
+    @Test
+    void mapToTranscriptionArchiveRecord_ShouldReturnRecord_WithAllProperties() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/all_properties/transcription-record.properties");
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("Transcription");
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        // when
+        TranscriptionArchiveRecord result = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, "rawFilename");
+
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getTranscriptionCreateArchiveRecordOperation());
+        assertNotNull(result.getUploadNewFileRecord());
+
+        assertMetadataWithAllProperties(result.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata());
+    }
+
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Transcription", metadata.getBf001());
         assertNotNull(metadata.getBf002());
@@ -137,6 +160,29 @@ class TranscriptionArchiveRecordMapperImplTest {
         assertNull(metadata.getBf009());
         assertNotNull(metadata.getBf010());
         assertNull(metadata.getBf011());
+        assertEquals(transcriptionDocument.getId(), metadata.getBf012());
+        assertEquals(transcriptionEntity.getId(), metadata.getBf013());
+        assertNull(metadata.getBf014());
+        assertNull(metadata.getBf015());
+        assertEquals("1", metadata.getBf016());
+        assertNull(metadata.getBf017());
+        assertNull(metadata.getBf018());
+        assertNotNull(metadata.getBf019());
+        assertNull(metadata.getBf020());
+    }
+
+    private void assertMetadataWithAllProperties(RecordMetadata metadata) {
+        assertEquals("Transcription", metadata.getBf001());
+        assertNotNull(metadata.getBf002());
+        assertEquals("some-file-type", metadata.getBf003());
+        assertNull(metadata.getBf004());
+        assertEquals(transcriptionDocument.getChecksum(), metadata.getBf005());
+        assertEquals("Automatic", metadata.getBf006());
+        assertNull(metadata.getBf007());
+        assertNull(metadata.getBf008());
+        assertNull(metadata.getBf009());
+        assertNotNull(metadata.getBf010());
+        assertNotNull(metadata.getBf011());
         assertEquals(transcriptionDocument.getId(), metadata.getBf012());
         assertEquals(transcriptionEntity.getId(), metadata.getBf013());
         assertNull(metadata.getBf014());

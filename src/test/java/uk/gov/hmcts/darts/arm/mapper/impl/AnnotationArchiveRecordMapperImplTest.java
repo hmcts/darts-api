@@ -128,6 +128,30 @@ class AnnotationArchiveRecordMapperImplTest {
         assertThat(exception.getMessage(), containsString("pattern"));
     }
 
+    @Test
+    void mapToAnnotationArchiveRecord_ShouldReturnRecord_WhenUsingAllProperties() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/all_properties/annotation-record.properties");
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("Annotation");
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        RecordMetadata metadata = RecordMetadata.builder().build();
+
+        // when
+        AnnotationArchiveRecord result = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, "rawFilename");
+
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getAnnotationCreateArchiveRecordOperation());
+        assertNotNull(result.getUploadNewFileRecord());
+
+        assertMetadataAllFields(result.getAnnotationCreateArchiveRecordOperation().getRecordMetadata());
+    }
+
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Annotation", metadata.getBf001());
         assertEquals("1001", metadata.getBf002());
@@ -140,6 +164,29 @@ class AnnotationArchiveRecordMapperImplTest {
         assertEquals(annotationDocument.getAnnotation().getText(), metadata.getBf009());
         assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
         assertNull(metadata.getBf011());
+        assertEquals(annotationDocument.getId(), metadata.getBf012());
+        assertEquals(annotationEntity.getId(), metadata.getBf013());
+        assertNull(metadata.getBf014());
+        assertNull(metadata.getBf015());
+        assertEquals(String.valueOf(annotationDocument.getUploadedBy().getId()), metadata.getBf016());
+        assertNull(metadata.getBf017());
+        assertNull(metadata.getBf018());
+        assertEquals("case_courthouse", metadata.getBf019());
+        assertEquals("1", metadata.getBf020());
+    }
+
+    private void assertMetadataAllFields(RecordMetadata metadata) {
+        assertEquals("Annotation", metadata.getBf001());
+        assertEquals("1001", metadata.getBf002());
+        assertEquals(annotationDocument.getFileType(), metadata.getBf003());
+        assertEquals("2020-10-10T00:00:00.000Z", metadata.getBf004());
+        assertEquals(annotationDocument.getChecksum(), metadata.getBf005());
+        assertNull(metadata.getBf006());
+        assertNull(metadata.getBf007());
+        assertNull(metadata.getBf008());
+        assertEquals(annotationDocument.getAnnotation().getText(), metadata.getBf009());
+        assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
+        assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf011());
         assertEquals(annotationDocument.getId(), metadata.getBf012());
         assertEquals(annotationEntity.getId(), metadata.getBf013());
         assertNull(metadata.getBf014());
