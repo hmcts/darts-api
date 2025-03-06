@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
+import uk.gov.hmcts.darts.testutils.stubs.wiremock.TokenStub;
 
 /**
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
@@ -34,6 +35,8 @@ public class PostgresIntegrationBase {
 
     @Autowired
     protected TransactionalUtil transactionalUtil;
+
+    protected TokenStub tokenStub = new TokenStub();
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 

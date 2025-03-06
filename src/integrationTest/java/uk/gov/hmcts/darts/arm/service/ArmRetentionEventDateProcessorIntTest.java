@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
 import java.time.OffsetDateTime;
@@ -60,7 +61,7 @@ import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CA
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @Slf4j
-class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
+class ArmRetentionEventDateProcessorIntTest extends IntegrationBaseWithWiremock {
 
     private static final OffsetDateTime DOCUMENT_RETENTION_DATE_TIME =
         OffsetDateTime.of(2023, 6, 10, 10, 50, 0, 0, ZoneOffset.UTC);

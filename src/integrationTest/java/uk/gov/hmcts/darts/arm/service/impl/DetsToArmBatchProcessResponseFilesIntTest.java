@@ -225,12 +225,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -361,12 +355,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         OffsetDateTime currentDateTime = transcriptionEntity.getEndTime();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentDateTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -448,12 +436,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         OffsetDateTime currentDateTime = caseDocument.getCreatedDateTime();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentDateTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -513,12 +495,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(null);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -567,12 +543,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(null);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
