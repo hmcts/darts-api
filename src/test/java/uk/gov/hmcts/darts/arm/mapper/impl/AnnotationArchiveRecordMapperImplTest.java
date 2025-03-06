@@ -139,8 +139,7 @@ class AnnotationArchiveRecordMapperImplTest {
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("Annotation");
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        RecordMetadata metadata = RecordMetadata.builder().build();
-
+        
         // when
         AnnotationArchiveRecord result = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, "rawFilename");
 
