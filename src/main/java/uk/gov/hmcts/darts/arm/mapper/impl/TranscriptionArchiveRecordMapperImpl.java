@@ -129,7 +129,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
-        uploadNewFileRecord.setRelationId(relationId.toString());
+        uploadNewFileRecord.setRelationId(String.valueOf(relationId));
         uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(transcriptionDocument, rawFilename));
         return uploadNewFileRecord;
     }

@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.mapper.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -39,7 +38,6 @@ class AnnotationArchiveRecordMapperImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    @InjectMocks
     private AnnotationArchiveRecordMapperImpl annotationArchiveRecordMapper;
 
     private ExternalObjectDirectoryEntity externalObjectDirectory;
@@ -66,14 +64,15 @@ class AnnotationArchiveRecordMapperImplTest {
         externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setAnnotationDocumentEntity(annotationDocument);
         externalObjectDirectory.setId(1);
+
+        annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
     }
 
     @Test
     void mapToAnnotationArchiveRecord_ShouldReturnRecord_WhenValidInput() {
         // given
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
-        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("recordClass");
         when(armDataManagementConfiguration.getRegion()).thenReturn("region");
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/annotation-record.properties");
@@ -93,9 +92,9 @@ class AnnotationArchiveRecordMapperImplTest {
     }
 
     @Test
-    void mapToAnnotationArchiveRecord_ShouldReturnEmptyData_WhenEodEmptyAnnotation() {
+    void mapToAnnotationArchiveRecord_ShouldReturnEmptyData_WhenEodEmptyAnnotationDocument() {
         // given
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/annotation-record.properties");
 
@@ -133,13 +132,13 @@ class AnnotationArchiveRecordMapperImplTest {
         assertEquals("Annotation", metadata.getBf001());
         assertEquals("1001", metadata.getBf002());
         assertEquals(annotationDocument.getFileType(), metadata.getBf003());
-        assertEquals("2020-10-10T00:00:00Z", metadata.getBf004());
+        assertEquals("2020-10-10T00:00:00.000Z", metadata.getBf004());
         assertEquals(annotationDocument.getChecksum(), metadata.getBf005());
         assertNull(metadata.getBf006());
         assertNull(metadata.getBf007());
         assertNull(metadata.getBf008());
         assertEquals(annotationDocument.getAnnotation().getText(), metadata.getBf009());
-        assertEquals("2020-10-10T10:11:00Z", metadata.getBf010());
+        assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
         assertNull(metadata.getBf011());
         assertEquals(annotationDocument.getId(), metadata.getBf012());
         assertEquals(annotationEntity.getId(), metadata.getBf013());
