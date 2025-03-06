@@ -29,26 +29,6 @@ import java.util.Properties;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_001_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_002_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_003_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_004_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_005_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_006_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_007_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_008_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_009_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_010_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_011_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_012_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_013_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_014_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_015_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_016_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_017_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_018_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_019_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_020_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CASE_NUMBERS_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHANNEL_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHECKSUM_KEY;
@@ -68,7 +48,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @RequiredArgsConstructor
 @Slf4j
 @SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
-public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
+public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implements MediaArchiveRecordMapper {
 
     public static final String CASE_LIST_DELIMITER = "|";
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -156,36 +136,10 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         for (String key : mediaRecordProperties.stringPropertyNames()) {
             String value = mapToString(mediaRecordProperties.getProperty(key), mediaEntity);
             if (value != null) {
-                switch (key) {
-                    case BF_001_KEY -> metadata.setBf001(value);
-                    case BF_002_KEY -> metadata.setBf002(value);
-                    case BF_003_KEY -> metadata.setBf003(value);
-                    case BF_004_KEY -> metadata.setBf004(value);
-                    case BF_005_KEY -> metadata.setBf005(value);
-                    case BF_006_KEY -> metadata.setBf006(value);
-                    case BF_007_KEY -> metadata.setBf007(value);
-                    case BF_008_KEY -> metadata.setBf008(value);
-                    case BF_009_KEY -> metadata.setBf009(value);
-                    case BF_010_KEY -> metadata.setBf010(value);
-                    case BF_011_KEY -> metadata.setBf011(value);
-                    case BF_016_KEY -> metadata.setBf016(value);
-                    case BF_017_KEY -> metadata.setBf017(value);
-                    case BF_018_KEY -> metadata.setBf018(value);
-                    case BF_019_KEY -> metadata.setBf019(value);
-                    case BF_020_KEY -> metadata.setBf020(value);
-                    default -> log.warn("Media archive record unknown string property key: {}", key);
-                }
+                processStringMetadataProperties(metadata, key, value);
             } else {
                 Integer intValue = mapToInt(mediaRecordProperties.getProperty(key), mediaEntity);
-                if (intValue != null) {
-                    switch (key) {
-                        case BF_012_KEY -> metadata.setBf012(intValue);
-                        case BF_013_KEY -> metadata.setBf013(intValue);
-                        case BF_014_KEY -> metadata.setBf014(intValue);
-                        case BF_015_KEY -> metadata.setBf015(intValue);
-                        default -> log.warn("Media archive record unknown integer property key: {}", key);
-                    }
-                }
+                processIntMetadataProperties(metadata, key, intValue);
             }
         }
     }
