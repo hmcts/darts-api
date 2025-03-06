@@ -70,7 +70,6 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private DateTimeFormatter dateTimeFormatter;
 
-
     @Override
     public CaseArchiveRecord mapToCaseArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());

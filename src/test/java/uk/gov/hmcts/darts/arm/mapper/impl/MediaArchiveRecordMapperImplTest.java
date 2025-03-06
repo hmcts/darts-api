@@ -6,12 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
+import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
+import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
-import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
@@ -27,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CaseArchiveRecordMapperImplTest {
+class MediaArchiveRecordMapperImplTest {
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -35,119 +34,112 @@ class CaseArchiveRecordMapperImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    private CaseArchiveRecordMapperImpl caseArchiveRecordMapper;
+    private MediaArchiveRecordMapper mediaArchiveRecordMapper;
 
     private ExternalObjectDirectoryEntity externalObjectDirectory;
-    private CaseDocumentEntity caseDocument;
-    private CourtCaseEntity courtCase;
+    private MediaEntity mediaEntity;
 
     @BeforeEach
     void setUp() {
 
         TestExternalObjectDirectoryEntity testEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
-            .caseDocument(PersistableFactory.getCaseDocumentTestData()
-                              .someMinimalBuilder()
-                              .build())
+            .media(PersistableFactory.getMediaTestData()
+                       .someMinimalBuilder()
+                       .start(OffsetDateTime.parse("2025-01-23T10:30:00Z"))
+                       .end(OffsetDateTime.parse("2025-01-23T17:30:00Z"))
+                       .build())
+
             .build();
         externalObjectDirectory = testEod.getEntity();
-        caseDocument = testEod.getCaseDocument();
-        courtCase = testEod.getCaseDocument().getCourtCase();
-        caseDocument.setFileName("test-file.txt");
-        caseDocument.setFileType("text/plain");
-        caseDocument.setCreatedDateTime(OffsetDateTime.parse("2025-01-23T10:30:00Z"));
-        caseDocument.setChecksum("checksum123");
+        mediaEntity = testEod.getMedia();
 
-        caseArchiveRecordMapper = new CaseArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
+        mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
     }
 
     @Test
-    void mapToCaseArchiveRecord_ShouldReturnRecord_WhenValidInput() {
+    void mapToMediaArchiveRecord_ShouldReturnRecord_WhenValidInput() {
         // given
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
         when(armDataManagementConfiguration.getRegion()).thenReturn("region");
-        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
-            "Tests/arm/properties/case-record.properties");
-        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("Case");
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/media-record.properties");
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("Media");
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
         // when
-        CaseArchiveRecord result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, "rawFilename");
+        MediaArchiveRecord result = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, "rawFilename");
 
         // then
         assertNotNull(result);
-        assertNotNull(result.getCaseCreateArchiveRecordOperation());
+        assertNotNull(result.getMediaCreateArchiveRecord());
         assertNotNull(result.getUploadNewFileRecord());
 
-        assertMetadataSuccess(result.getCaseCreateArchiveRecordOperation().getRecordMetadata());
+        assertMetadataSuccess(result.getMediaCreateArchiveRecord().getRecordMetadata());
     }
 
     @Test
-    void mapToCaseArchiveRecord_ShouldReturnEmptyData_WhenEodEmptyCaseDocument() {
+    void mapToMediaArchiveRecord_ShouldReturnEmptyData_WhenEodEmptyMedia() {
         // given
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
-            "Tests/arm/properties/case-record.properties");
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/media-record.properties");
 
-        CourthouseEntity courthouse = new CourthouseEntity();
-        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
-        courtCaseEntity.setCourthouse(courthouse);
-        CaseDocumentEntity caseDocumentEntity2 = new CaseDocumentEntity();
-        caseDocumentEntity2.setCourtCase(courtCaseEntity);
+        MediaEntity mediaEntity2 = new MediaEntity();
         ExternalObjectDirectoryEntity externalObjectDirectory2 = new ExternalObjectDirectoryEntity();
-        externalObjectDirectory2.setCaseDocument(caseDocumentEntity2);
+        externalObjectDirectory2.setMedia(mediaEntity2);
 
         // when
-        CaseArchiveRecord result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory2, "rawFilename");
+        MediaArchiveRecord result = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory2, "rawFilename");
 
         // then
         assertNotNull(result);
-        assertNotNull(result.getCaseCreateArchiveRecordOperation());
+        assertNotNull(result.getMediaCreateArchiveRecord());
         assertNotNull(result.getUploadNewFileRecord());
-        assertMetadataEmpty(result.getCaseCreateArchiveRecordOperation().getRecordMetadata());
+        assertMetadataEmpty(result.getMediaCreateArchiveRecord().getRecordMetadata());
     }
 
     @Test
-    void mapToAnnotationArchiveRecord_ShouldThrowNullPointerException_WhenDateTimeNotSet() {
+    void mapToMediaArchiveRecord_ShouldThrowNullPointerException_WhenDateTimeNotSet() {
         // given
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(null);
 
         // when
         NullPointerException exception =
             assertThrows(NullPointerException.class, () ->
-                caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, "rawFilename"));
+                mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, "rawFilename"));
 
         // then
         assertThat(exception.getMessage(), containsString("pattern"));
     }
 
     private void assertMetadataSuccess(RecordMetadata metadata) {
-        assertEquals("Case", metadata.getBf001());
-        assertEquals("case-1", metadata.getBf002());
-        assertEquals(caseDocument.getFileType(), metadata.getBf003());
+        assertEquals("Media", metadata.getBf001());
+        assertNull(metadata.getBf002());
+        assertEquals(mediaEntity.getMediaFormat(), metadata.getBf003());
         assertNull(metadata.getBf004());
-        assertEquals(caseDocument.getChecksum(), metadata.getBf005());
+        assertEquals(mediaEntity.getChecksum(), metadata.getBf005());
         assertNull(metadata.getBf006());
         assertNull(metadata.getBf007());
         assertNull(metadata.getBf008());
         assertNull(metadata.getBf009());
-        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf010());
-        assertNull(metadata.getBf011());
-        assertEquals(caseDocument.getId(), metadata.getBf012());
-        assertEquals(courtCase.getId(), metadata.getBf013());
-        assertNull(metadata.getBf014());
-        assertNull(metadata.getBf015());
+        assertNotNull(metadata.getBf010());
+        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf011());
+        assertEquals(mediaEntity.getId(), metadata.getBf012());
+        assertEquals(mediaEntity.getId(), metadata.getBf013());
+        assertEquals(mediaEntity.getChannel(), metadata.getBf014());
+        assertEquals(mediaEntity.getTotalChannels(), metadata.getBf015());
         assertNull(metadata.getBf016());
-        assertNull(metadata.getBf017());
+        assertEquals("2025-01-23T17:30:00.000Z", metadata.getBf017());
         assertNull(metadata.getBf018());
-        assertEquals(courtCase.getCourthouse().getDisplayName(), metadata.getBf019());
-        assertNull(metadata.getBf020());
+        assertEquals("Some Courthouse", metadata.getBf019());
+        assertNotNull(metadata.getBf020());
     }
 
     private void assertMetadataEmpty(RecordMetadata metadata) {
-        assertEquals("Case", metadata.getBf001());
+        assertEquals("Media", metadata.getBf001());
         assertNull(metadata.getBf002());
         assertNull(metadata.getBf003());
         assertNull(metadata.getBf004());
