@@ -115,6 +115,29 @@ class MediaArchiveRecordMapperImplTest {
         assertThat(exception.getMessage(), containsString("pattern"));
     }
 
+    @Test
+    void mapToMediaArchiveRecord_ShouldReturnRecord_WithAllProperties() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/all_properties/media-record.properties");
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("Media");
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        // when
+        MediaArchiveRecord result = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, "rawFilename");
+
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getMediaCreateArchiveRecord());
+        assertNotNull(result.getUploadNewFileRecord());
+
+        assertMetadataAllProperties(result.getMediaCreateArchiveRecord().getRecordMetadata());
+    }
+
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Media", metadata.getBf001());
         assertNull(metadata.getBf002());
@@ -134,6 +157,29 @@ class MediaArchiveRecordMapperImplTest {
         assertNull(metadata.getBf016());
         assertEquals("2025-01-23T17:30:00.000Z", metadata.getBf017());
         assertNull(metadata.getBf018());
+        assertEquals("Some Courthouse", metadata.getBf019());
+        assertNotNull(metadata.getBf020());
+    }
+
+    private void assertMetadataAllProperties(RecordMetadata metadata) {
+        assertEquals("Media", metadata.getBf001());
+        assertNull(metadata.getBf002());
+        assertEquals(mediaEntity.getMediaFormat(), metadata.getBf003());
+        assertNull(metadata.getBf004());
+        assertEquals(mediaEntity.getChecksum(), metadata.getBf005());
+        assertNull(metadata.getBf006());
+        assertNull(metadata.getBf007());
+        assertNull(metadata.getBf008());
+        assertNull(metadata.getBf009());
+        assertNotNull(metadata.getBf010());
+        assertNotNull(metadata.getBf011());
+        assertEquals(mediaEntity.getId(), metadata.getBf012());
+        assertEquals(mediaEntity.getId(), metadata.getBf013());
+        assertEquals(mediaEntity.getChannel(), metadata.getBf014());
+        assertEquals(mediaEntity.getTotalChannels(), metadata.getBf015());
+        assertNull(metadata.getBf016());
+        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf017());
+        assertEquals("2025-01-23T17:30:00.000Z", metadata.getBf018());
         assertEquals("Some Courthouse", metadata.getBf019());
         assertNotNull(metadata.getBf020());
     }
