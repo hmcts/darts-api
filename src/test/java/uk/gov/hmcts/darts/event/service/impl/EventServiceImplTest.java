@@ -142,4 +142,14 @@ class EventServiceImplTest {
         assertThat(eventService.getRelatedEvents(123)).isEqualTo(eventEntities);
         verify(eventRepository).findAllByRelatedEvents(123);
     }
+
+    @Test
+    void getRelatedEvents_shouldThrowException_whenNoEventsAreFound() {
+        when(eventRepository.findAllByRelatedEvents(1)).thenReturn(List.of());
+
+        assertThatThrownBy(() -> eventService.getRelatedEvents(1))
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
+        verify(eventRepository, times(1)).findAllByRelatedEvents(1);
+    }
 }

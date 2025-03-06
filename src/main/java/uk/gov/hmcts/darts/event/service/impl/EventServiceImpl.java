@@ -45,7 +45,12 @@ public class EventServiceImpl implements EventService {
     }
 
     List<EventEntity> getRelatedEvents(Integer eveId) {
-        return eventRepository.findAllByRelatedEvents(eveId);
+        List<EventEntity> entities = eventRepository.findAllByRelatedEvents(eveId);
+        if (entities.isEmpty()) {
+            throw new DartsApiException(CommonApiError.NOT_FOUND,
+                                        String.format("Event with id %s not found", eveId));
+        }
+        return entities;
     }
 
     @Override
