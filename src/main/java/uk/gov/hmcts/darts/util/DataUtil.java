@@ -37,19 +37,19 @@ public final class DataUtil {
     }
 
     public static void preProcess(DartsEvent dartsEvent) {
-        dartsEvent.setCourthouse(DataUtil.toUpperCase(StringUtils.trimToEmpty(dartsEvent.getCourthouse())));
-        dartsEvent.setCourtroom(DataUtil.toUpperCase(StringUtils.trimToEmpty(dartsEvent.getCourtroom())));
+        dartsEvent.setCourthouse(toUpperCase(StringUtils.trimToEmpty(dartsEvent.getCourthouse())));
+        dartsEvent.setCourtroom(toUpperCase(StringUtils.trimToEmpty(dartsEvent.getCourtroom())));
     }
 
     public static void preProcess(AddCaseRequest addCaseRequest) {
-        addCaseRequest.setCourthouse(DataUtil.toUpperCase(StringUtils.trimToEmpty(addCaseRequest.getCourthouse())));
-        addCaseRequest.defenders(DataUtil.trim(addCaseRequest.getDefenders()));
-        addCaseRequest.prosecutors(DataUtil.trim(addCaseRequest.getProsecutors()));
-        addCaseRequest.defendants(DataUtil.trim(addCaseRequest.getDefendants()));
+        addCaseRequest.setCourthouse(toUpperCase(StringUtils.trimToEmpty(addCaseRequest.getCourthouse())));
+        addCaseRequest.defenders(trim(addCaseRequest.getDefenders()));
+        addCaseRequest.prosecutors(trim(addCaseRequest.getProsecutors()));
+        addCaseRequest.defendants(trim(addCaseRequest.getDefendants()));
     }
 
     public static void preProcess(AddAudioMetadataRequest metadata) {
-        metadata.setCourthouse(DataUtil.toUpperCase(StringUtils.trimToEmpty(metadata.getCourthouse())));
-        metadata.setCourtroom(DataUtil.toUpperCase(StringUtils.trimToEmpty(metadata.getCourtroom())));
+        metadata.setCourthouse(toUpperCase(StringUtils.trimToEmpty(metadata.getCourthouse())));
+        metadata.setCourtroom(toUpperCase(StringUtils.trimToEmpty(metadata.getCourtroom())));
     }
 }
