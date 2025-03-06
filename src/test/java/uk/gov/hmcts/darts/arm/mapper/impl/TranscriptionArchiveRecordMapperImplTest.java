@@ -6,17 +6,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
+import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
+import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
-import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -27,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CaseArchiveRecordMapperImplTest {
+class TranscriptionArchiveRecordMapperImplTest {
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -35,124 +38,123 @@ class CaseArchiveRecordMapperImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    private CaseArchiveRecordMapperImpl caseArchiveRecordMapper;
+    private TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper;
 
     private ExternalObjectDirectoryEntity externalObjectDirectory;
-    private CaseDocumentEntity caseDocument;
-    private CourtCaseEntity courtCase;
+    private TranscriptionDocumentEntity transcriptionDocument;
+    private TranscriptionEntity transcriptionEntity;
 
     @BeforeEach
     void setUp() {
 
         TestExternalObjectDirectoryEntity testEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
-            .caseDocument(PersistableFactory.getCaseDocumentTestData()
-                              .someMinimalBuilder()
-                              .build())
+            .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
+                                             .someMinimalBuilder()
+                                             .build())
+
             .build();
         externalObjectDirectory = testEod.getEntity();
-        caseDocument = testEod.getCaseDocument();
-        courtCase = testEod.getCaseDocument().getCourtCase();
-        caseDocument.setFileName("test-file.txt");
-        caseDocument.setFileType("text/plain");
-        caseDocument.setCreatedDateTime(OffsetDateTime.parse("2025-01-23T10:30:00Z"));
-        caseDocument.setChecksum("checksum123");
-
-        caseArchiveRecordMapper = new CaseArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
+        transcriptionDocument = testEod.getTranscriptionDocumentEntity();
+        transcriptionEntity = transcriptionDocument.getTranscription();
+        transcriptionDocument.getUploadedBy().setId(1);
+        transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
     }
 
     @Test
-    void mapToCaseArchiveRecord_ShouldReturnRecord_WhenValidInput() {
+    void mapToTranscriptionArchiveRecord_ShouldReturnRecord_WhenValidInput() {
         // given
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
         when(armDataManagementConfiguration.getRegion()).thenReturn("region");
-        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
-            "Tests/arm/properties/case-record.properties");
-        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("Case");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/transcription-record.properties");
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("Transcription");
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
         // when
-        CaseArchiveRecord result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, "rawFilename");
+        TranscriptionArchiveRecord result = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, "rawFilename");
 
         // then
         assertNotNull(result);
-        assertNotNull(result.getCaseCreateArchiveRecordOperation());
+        assertNotNull(result.getTranscriptionCreateArchiveRecordOperation());
         assertNotNull(result.getUploadNewFileRecord());
 
-        assertMetadataSuccess(result.getCaseCreateArchiveRecordOperation().getRecordMetadata());
+        assertMetadataSuccess(result.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata());
     }
 
     @Test
-    void mapToCaseArchiveRecord_ShouldReturnEmptyData_WhenEodEmptyCaseDocument() {
+    void mapToTranscriptionArchiveRecord_ShouldReturnEmptyData_WhenEodEmptyTranscription() {
         // given
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
-            "Tests/arm/properties/case-record.properties");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/transcription-record.properties");
 
         CourthouseEntity courthouse = new CourthouseEntity();
-        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
-        courtCaseEntity.setCourthouse(courthouse);
-        CaseDocumentEntity caseDocumentEntity2 = new CaseDocumentEntity();
-        caseDocumentEntity2.setCourtCase(courtCaseEntity);
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCourthouse(courthouse);
+        TranscriptionEntity transcriptionEntity2 = new TranscriptionEntity();
+        transcriptionEntity2.setCourtCases(List.of(courtCase));
+        TranscriptionDocumentEntity transcriptionDocumentEntity2 = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity2.setTranscription(transcriptionEntity2);
         ExternalObjectDirectoryEntity externalObjectDirectory2 = new ExternalObjectDirectoryEntity();
-        externalObjectDirectory2.setCaseDocument(caseDocumentEntity2);
+        externalObjectDirectory2.setTranscriptionDocumentEntity(transcriptionDocumentEntity2);
 
         // when
-        CaseArchiveRecord result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory2, "rawFilename");
+        TranscriptionArchiveRecord result = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory2, "rawFilename");
 
         // then
         assertNotNull(result);
-        assertNotNull(result.getCaseCreateArchiveRecordOperation());
+        assertNotNull(result.getTranscriptionCreateArchiveRecordOperation());
         assertNotNull(result.getUploadNewFileRecord());
-        assertMetadataEmpty(result.getCaseCreateArchiveRecordOperation().getRecordMetadata());
+        assertMetadataEmpty(result.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata());
     }
 
     @Test
-    void mapToAnnotationArchiveRecord_ShouldThrowNullPointerException_WhenDateTimeNotSet() {
+    void mapToTranscriptionArchiveRecord_ShouldThrowNullPointerException_WhenDateTimeNotSet() {
         // given
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(null);
 
         // when
         NullPointerException exception =
             assertThrows(NullPointerException.class, () ->
-                caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, "rawFilename"));
+                transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, "rawFilename"));
 
         // then
         assertThat(exception.getMessage(), containsString("pattern"));
     }
 
     private void assertMetadataSuccess(RecordMetadata metadata) {
-        assertEquals("Case", metadata.getBf001());
-        assertEquals("case-1", metadata.getBf002());
-        assertEquals(caseDocument.getFileType(), metadata.getBf003());
+        assertEquals("Transcription", metadata.getBf001());
+        assertNotNull(metadata.getBf002());
+        assertEquals("some-file-type", metadata.getBf003());
         assertNull(metadata.getBf004());
-        assertEquals(caseDocument.getChecksum(), metadata.getBf005());
-        assertNull(metadata.getBf006());
+        assertEquals(transcriptionDocument.getChecksum(), metadata.getBf005());
+        assertEquals("Automatic", metadata.getBf006());
         assertNull(metadata.getBf007());
         assertNull(metadata.getBf008());
         assertNull(metadata.getBf009());
-        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf010());
+        assertNotNull(metadata.getBf010());
         assertNull(metadata.getBf011());
-        assertEquals(caseDocument.getId(), metadata.getBf012());
-        assertEquals(courtCase.getId(), metadata.getBf013());
+        assertEquals(transcriptionDocument.getId(), metadata.getBf012());
+        assertEquals(transcriptionEntity.getId(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
-        assertNull(metadata.getBf016());
+        assertEquals("1", metadata.getBf016());
         assertNull(metadata.getBf017());
         assertNull(metadata.getBf018());
-        assertEquals(courtCase.getCourthouse().getDisplayName(), metadata.getBf019());
+        assertNotNull(metadata.getBf019());
         assertNull(metadata.getBf020());
     }
 
     private void assertMetadataEmpty(RecordMetadata metadata) {
-        assertEquals("Case", metadata.getBf001());
+        assertEquals("Transcription", metadata.getBf001());
         assertNull(metadata.getBf002());
         assertNull(metadata.getBf003());
         assertNull(metadata.getBf004());
         assertNull(metadata.getBf005());
-        assertNull(metadata.getBf006());
+        assertEquals("Automatic", metadata.getBf006());
         assertNull(metadata.getBf007());
         assertNull(metadata.getBf008());
         assertNull(metadata.getBf009());
@@ -168,4 +170,5 @@ class CaseArchiveRecordMapperImplTest {
         assertNull(metadata.getBf019());
         assertNull(metadata.getBf020());
     }
+
 }
