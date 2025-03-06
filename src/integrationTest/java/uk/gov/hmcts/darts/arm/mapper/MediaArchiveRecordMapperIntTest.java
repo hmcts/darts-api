@@ -30,10 +30,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DAT
 @Slf4j
 class MediaArchiveRecordMapperIntTest extends IntegrationBase {
 
-    private static final String T_10_30_00_Z = "2025-01-23T10:30:00Z";
-    private static final String T_11_30_00_Z = "2025-01-23T11:30:00Z";
-    private static final OffsetDateTime END = OffsetDateTime.parse(T_11_30_00_Z);
-    private static final OffsetDateTime START = OffsetDateTime.parse(T_10_30_00_Z);
+    private static final OffsetDateTime END = OffsetDateTime.parse("2025-01-23T11:30:00Z");
+    private static final OffsetDateTime START = OffsetDateTime.parse("2025-01-23T10:30:00Z");
 
     @MockitoBean
     private UserIdentity userIdentity;
@@ -70,6 +68,7 @@ class MediaArchiveRecordMapperIntTest extends IntegrationBase {
             eod.getMedia().setCreatedDateTime(START);
             eod.getMedia().setStart(START);
             eod.getMedia().setEnd(END);
+            eod.setLastModifiedBy(END);
             dartsPersistence.getExternalObjectDirectoryRepository().saveAndFlush(eod);
         });
 
@@ -115,14 +114,14 @@ class MediaArchiveRecordMapperIntTest extends IntegrationBase {
         assertNull(metadata.getBf007());
         assertNull(metadata.getBf008());
         assertNull(metadata.getBf009());
-        assertEquals(T_10_30_00_Z, metadata.getBf010());
-        assertEquals(T_10_30_00_Z, metadata.getBf011());
+        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf010());
+        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf011());
         assertEquals(eod.getId(), metadata.getBf012());
         assertEquals(media.getId(), metadata.getBf013());
         assertEquals(media.getChannel(), metadata.getBf014());
         assertEquals(media.getTotalChannels(), metadata.getBf015());
         assertNull(metadata.getBf016());
-        assertEquals(T_11_30_00_Z, metadata.getBf017());
+        assertEquals("2025-01-23T11:30:00.000Z", metadata.getBf017());
         assertNull(metadata.getBf018());
         assertEquals("TESTCOURTHOUSE", metadata.getBf019());
         assertEquals("TESTCOURTROOM", metadata.getBf020());
