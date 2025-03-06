@@ -29,6 +29,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CaseArchiveRecordMapperImplTest {
 
+    public static final String T_10_30_00_000_Z = "2025-01-23T10:30:00.000Z";
+    public static final String CASE_1 = "case-1";
+    public static final String CASE = "Case";
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
@@ -69,7 +72,7 @@ class CaseArchiveRecordMapperImplTest {
         when(armDataManagementConfiguration.getRegion()).thenReturn("region");
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/case-record.properties");
-        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("Case");
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn(CASE);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
@@ -131,7 +134,7 @@ class CaseArchiveRecordMapperImplTest {
         when(armDataManagementConfiguration.getRegion()).thenReturn("region");
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/all_properties/case-record.properties");
-        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("Case");
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn(CASE);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
@@ -147,8 +150,8 @@ class CaseArchiveRecordMapperImplTest {
     }
 
     private void assertMetadataSuccess(RecordMetadata metadata) {
-        assertEquals("Case", metadata.getBf001());
-        assertEquals("case-1", metadata.getBf002());
+        assertEquals(CASE, metadata.getBf001());
+        assertEquals(CASE_1, metadata.getBf002());
         assertEquals(caseDocument.getFileType(), metadata.getBf003());
         assertNull(metadata.getBf004());
         assertEquals(caseDocument.getChecksum(), metadata.getBf005());
@@ -156,7 +159,7 @@ class CaseArchiveRecordMapperImplTest {
         assertNull(metadata.getBf007());
         assertNull(metadata.getBf008());
         assertNull(metadata.getBf009());
-        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf010());
+        assertEquals(T_10_30_00_000_Z, metadata.getBf010());
         assertNull(metadata.getBf011());
         assertEquals(caseDocument.getId(), metadata.getBf012());
         assertEquals(courtCase.getId(), metadata.getBf013());
@@ -170,8 +173,8 @@ class CaseArchiveRecordMapperImplTest {
     }
 
     private void assertMetadataAllProperties(RecordMetadata metadata) {
-        assertEquals("Case", metadata.getBf001());
-        assertEquals("case-1", metadata.getBf002());
+        assertEquals(CASE, metadata.getBf001());
+        assertEquals(CASE_1, metadata.getBf002());
         assertEquals(caseDocument.getFileType(), metadata.getBf003());
         assertNull(metadata.getBf004());
         assertEquals(caseDocument.getChecksum(), metadata.getBf005());
@@ -179,8 +182,8 @@ class CaseArchiveRecordMapperImplTest {
         assertNull(metadata.getBf007());
         assertNull(metadata.getBf008());
         assertNull(metadata.getBf009());
-        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf010());
-        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf011());
+        assertEquals(T_10_30_00_000_Z, metadata.getBf010());
+        assertEquals(T_10_30_00_000_Z, metadata.getBf011());
         assertEquals(caseDocument.getId(), metadata.getBf012());
         assertEquals(courtCase.getId(), metadata.getBf013());
         assertNull(metadata.getBf014());
@@ -193,7 +196,7 @@ class CaseArchiveRecordMapperImplTest {
     }
 
     private void assertMetadataEmpty(RecordMetadata metadata) {
-        assertEquals("Case", metadata.getBf001());
+        assertEquals(CASE, metadata.getBf001());
         assertNull(metadata.getBf002());
         assertNull(metadata.getBf003());
         assertNull(metadata.getBf004());
