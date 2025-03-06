@@ -31,3 +31,4 @@ bin/arm_responses/
 
 applicationinsights-agent-*.jar
 *.log
+/.idea/
