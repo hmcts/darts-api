@@ -68,7 +68,7 @@ class MediaArchiveRecordMapperIntTest extends IntegrationBase {
             eod.getMedia().setCreatedDateTime(START);
             eod.getMedia().setStart(START);
             eod.getMedia().setEnd(END);
-            eod.setLastModifiedBy(END);
+            eod.setLastModifiedDateTime(END);
             dartsPersistence.getExternalObjectDirectoryRepository().saveAndFlush(eod);
         });
 
