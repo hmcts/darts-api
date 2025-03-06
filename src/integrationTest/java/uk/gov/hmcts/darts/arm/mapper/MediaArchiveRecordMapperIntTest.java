@@ -32,6 +32,10 @@ class MediaArchiveRecordMapperIntTest extends IntegrationBase {
 
     private static final OffsetDateTime END = OffsetDateTime.parse("2025-01-23T11:30:00Z");
     private static final OffsetDateTime START = OffsetDateTime.parse("2025-01-23T10:30:00Z");
+    private static final String T_10_30_00_000_Z = "2025-01-23T10:30:00.000Z";
+    private static final String T_11_30_00_000_Z = "2025-01-23T11:30:00.000Z";
+    private static final String TESTCOURTHOUSE = "TESTCOURTHOUSE";
+    private static final String TESTCOURTROOM = "TESTCOURTROOM";
 
     @MockitoBean
     private UserIdentity userIdentity;
@@ -114,17 +118,17 @@ class MediaArchiveRecordMapperIntTest extends IntegrationBase {
         assertNull(metadata.getBf007());
         assertNull(metadata.getBf008());
         assertNull(metadata.getBf009());
-        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf010());
-        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf011());
+        assertEquals(T_10_30_00_000_Z, metadata.getBf010());
+        assertEquals(T_10_30_00_000_Z, metadata.getBf011());
         assertEquals(eod.getId(), metadata.getBf012());
         assertEquals(media.getId(), metadata.getBf013());
         assertEquals(media.getChannel(), metadata.getBf014());
         assertEquals(media.getTotalChannels(), metadata.getBf015());
         assertNull(metadata.getBf016());
-        assertEquals("2025-01-23T11:30:00.000Z", metadata.getBf017());
+        assertEquals(T_11_30_00_000_Z, metadata.getBf017());
         assertNull(metadata.getBf018());
-        assertEquals("TESTCOURTHOUSE", metadata.getBf019());
-        assertEquals("TESTCOURTROOM", metadata.getBf020());
+        assertEquals(TESTCOURTHOUSE, metadata.getBf019());
+        assertEquals(TESTCOURTROOM, metadata.getBf020());
     }
 
     private ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {
