@@ -65,7 +65,7 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
         mockMvc.perform(patch(ENDPOINT.resolve(String.valueOf(mediaEntity1.getId())))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(createPayload(true)))
-            .andExpect(status().isAccepted())
+            .andExpect(status().isOk())
             .andReturn();
 
         // Then
