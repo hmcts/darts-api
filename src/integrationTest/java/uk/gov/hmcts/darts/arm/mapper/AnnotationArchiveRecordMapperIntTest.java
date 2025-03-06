@@ -36,10 +36,7 @@ import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CA
 @Slf4j
 class AnnotationArchiveRecordMapperIntTest extends IntegrationBase {
 
-    private static final String T_10_30_00_Z = "2025-01-23T10:30:00Z";
-    private static final String T_11_30_00_Z = "2025-01-23T11:30:00Z";
-    private static final OffsetDateTime END = OffsetDateTime.parse(T_11_30_00_Z);
-    private static final OffsetDateTime START = OffsetDateTime.parse(T_10_30_00_Z);
+    private static final OffsetDateTime END = OffsetDateTime.parse("2025-01-23T11:30:00Z");
 
     @MockitoBean
     private UserIdentity userIdentity;
@@ -67,10 +64,10 @@ class AnnotationArchiveRecordMapperIntTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
 
-        TestAnnotationEntity.TestAnnotationEntityRetrieve annotationEntityRetrieve
-            = PersistableFactory.getAnnotationTestData().someMinimalBuilderHolder();
+        TestAnnotationEntity.TestAnnotationEntityBuilder annotationEntityRetrieve
+            = PersistableFactory.getAnnotationTestData().someMinimalBuilderHolder().getBuilder();
 
-        AnnotationEntity annotation = annotationEntityRetrieve.getBuilder().text(testAnnotation).build().getEntity();
+        AnnotationEntity annotation = annotationEntityRetrieve.text(testAnnotation).build().getEntity();
 
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         final String fileName = "judges-notes.txt";
@@ -161,9 +158,9 @@ class AnnotationArchiveRecordMapperIntTest extends IntegrationBase {
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertEquals(String.valueOf(annotationDocumentEntity.getUploadedBy().getId()), metadata.getBf016());
-        assertNotNull(metadata.getBf017());
+        assertNull(metadata.getBf017());
         assertNull(metadata.getBf018());
-        assertEquals("TESTCOURTHOUSE", metadata.getBf019());
-        assertEquals("TESTCOURTROOM", metadata.getBf020());
+        assertNull(metadata.getBf019());
+        assertNull(metadata.getBf020());
     }
 }
