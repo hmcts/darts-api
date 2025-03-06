@@ -301,7 +301,7 @@ paths:
               required:
                 - is_current
       responses:
-        '202':
+        '200':
           description: Accepted
         '400':
           description: Bad Request Error
@@ -315,6 +315,13 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
         '404':
           description: Not Found Error
           content:

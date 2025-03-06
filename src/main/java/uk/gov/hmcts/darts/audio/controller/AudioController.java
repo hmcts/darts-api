@@ -178,7 +178,7 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> patchAdminMediasById(Integer id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest) {
         adminMediaService.patchMediasById(id, patchAdminMediasByIdRequest);
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok().build();
     }
 
     @Override
