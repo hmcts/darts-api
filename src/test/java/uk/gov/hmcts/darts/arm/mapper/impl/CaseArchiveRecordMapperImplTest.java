@@ -123,6 +123,29 @@ class CaseArchiveRecordMapperImplTest {
         assertThat(exception.getMessage(), containsString("pattern"));
     }
 
+    @Test
+    void mapToCaseArchiveRecord_ShouldReturnRecord_WithAllProperties() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/all_properties/case-record.properties");
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("Case");
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        // when
+        CaseArchiveRecord result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, "rawFilename");
+
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getCaseCreateArchiveRecordOperation());
+        assertNotNull(result.getUploadNewFileRecord());
+
+        assertMetadataAllProperties(result.getCaseCreateArchiveRecordOperation().getRecordMetadata());
+    }
+
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Case", metadata.getBf001());
         assertEquals("case-1", metadata.getBf002());
@@ -135,6 +158,29 @@ class CaseArchiveRecordMapperImplTest {
         assertNull(metadata.getBf009());
         assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf010());
         assertNull(metadata.getBf011());
+        assertEquals(caseDocument.getId(), metadata.getBf012());
+        assertEquals(courtCase.getId(), metadata.getBf013());
+        assertNull(metadata.getBf014());
+        assertNull(metadata.getBf015());
+        assertNull(metadata.getBf016());
+        assertNull(metadata.getBf017());
+        assertNull(metadata.getBf018());
+        assertEquals(courtCase.getCourthouse().getDisplayName(), metadata.getBf019());
+        assertNull(metadata.getBf020());
+    }
+
+    private void assertMetadataAllProperties(RecordMetadata metadata) {
+        assertEquals("Case", metadata.getBf001());
+        assertEquals("case-1", metadata.getBf002());
+        assertEquals(caseDocument.getFileType(), metadata.getBf003());
+        assertNull(metadata.getBf004());
+        assertEquals(caseDocument.getChecksum(), metadata.getBf005());
+        assertNull(metadata.getBf006());
+        assertNull(metadata.getBf007());
+        assertNull(metadata.getBf008());
+        assertNull(metadata.getBf009());
+        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf010());
+        assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf011());
         assertEquals(caseDocument.getId(), metadata.getBf012());
         assertEquals(courtCase.getId(), metadata.getBf013());
         assertNull(metadata.getBf014());
