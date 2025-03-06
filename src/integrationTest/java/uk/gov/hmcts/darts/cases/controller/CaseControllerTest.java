@@ -4,6 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,10 +23,13 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
@@ -34,6 +39,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,6 +54,7 @@ import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.TestUtils.substituteHearingDateWithToday;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
@@ -55,6 +63,7 @@ import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createListOfDe
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createListOfDefendantsForCase;
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createListOfJudges;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createListOfProsecutor;
+import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGroupForRole;
 
 @AutoConfigureMockMvc
 class CaseControllerTest extends IntegrationBase {
@@ -65,9 +74,6 @@ class CaseControllerTest extends IntegrationBase {
 
     @Autowired
     private transient MockMvc mockMvc;
-
-    @MockitoBean
-    private UserIdentity mockUserIdentity;
 
     @MockitoBean
     LogApi logApi;
@@ -184,9 +190,10 @@ class CaseControllerTest extends IntegrationBase {
         Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
-    @Test
-    void casesPostWithoutExistingCase() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"MID_TIER", "XHIBIT"}, mode = INCLUDE)
+    void casesPostWithoutExistingCase(SecurityRoleEnum securityRoleEnum) throws Exception {
+        setupExternalUserForCourhouse(null, securityRoleEnum);
 
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -198,6 +205,17 @@ class CaseControllerTest extends IntegrationBase {
         String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponse.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"MID_TIER", "XHIBIT"}, mode = EXCLUDE)
+    void casesPost_shouldThrowError_whenNotAuthenticatied(SecurityRoleEnum securityRoleEnum) throws Exception {
+        setupExternalUserForCourhouse(null, securityRoleEnum);
+
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
     }
 
     @Test
@@ -330,16 +348,19 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     private void setupExternalMidTierUserForCourthouse(CourthouseEntity courthouse) {
-        String guid = UUID.randomUUID().toString();
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createMidTierExternalUser(guid, courthouse);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(MID_TIER))).thenReturn(true);
+        setupExternalUserForCourhouse(courthouse, MID_TIER);
     }
 
     private void setupExternalDarPcUserForCourthouse(CourthouseEntity courthouse) {
+        setupExternalUserForCourhouse(courthouse, DAR_PC);
+    }
+
+    public void setupExternalUserForCourhouse(CourthouseEntity courthouse, SecurityRoleEnum roleEnum) {
         String guid = UUID.randomUUID().toString();
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createDarPcExternalUser(guid, courthouse);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(DAR_PC))).thenReturn(true);
+        var securityGroup = createGroupForRole(roleEnum);
+        securityGroup.setGlobalAccess(true);
+        securityGroup = dartsDatabase.save(securityGroup);
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createExternalUser(guid, securityGroup, courthouse);
+        GivenBuilder.anAuthenticatedUserFor(testUser);
     }
 }
