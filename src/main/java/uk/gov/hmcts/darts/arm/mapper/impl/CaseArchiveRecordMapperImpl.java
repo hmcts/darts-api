@@ -27,26 +27,6 @@ import java.util.Properties;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_001_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_002_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_003_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_004_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_005_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_006_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_007_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_008_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_009_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_010_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_011_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_012_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_013_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_014_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_015_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_016_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_017_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_018_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_019_KEY;
-import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_020_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CASE_NUMBERS_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHECKSUM_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTHOUSE_KEY;
@@ -60,10 +40,8 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings({"PMD.GodClass"})
-public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
-
-    private static final String CASE_LIST_DELIMITER = "|";
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
+public class CaseArchiveRecordMapperImpl extends BaseArchiveRecordMapper implements CaseArchiveRecordMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
@@ -71,13 +49,10 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
     private Properties caseRecordProperties;
 
     private DateTimeFormatter dateTimeFormatter;
-    private DateTimeFormatter dateFormatter;
-
 
     @Override
     public CaseArchiveRecord mapToCaseArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
-        dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
 
         try {
             loadCaseProperties();
@@ -134,7 +109,6 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             .build();
     }
 
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
         OffsetDateTime retainUntilTs = caseDocument.getRetainUntilTs();
@@ -163,67 +137,20 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             metadata.setRetentionConfidenceScore(caseDocument.getRetConfScore().getId());
         }
 
-        if (caseRecordProperties.containsKey(BF_001_KEY)) {
-            metadata.setBf001(mapToString(caseRecordProperties.getProperty(BF_001_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_002_KEY)) {
-            metadata.setBf002(mapToString(caseRecordProperties.getProperty(BF_002_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_003_KEY)) {
-            metadata.setBf003(mapToString(caseRecordProperties.getProperty(BF_003_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_004_KEY)) {
-            metadata.setBf004(mapToString(caseRecordProperties.getProperty(BF_004_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_005_KEY)) {
-            metadata.setBf005(mapToString(caseRecordProperties.getProperty(BF_005_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_006_KEY)) {
-            metadata.setBf006(mapToString(caseRecordProperties.getProperty(BF_006_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_007_KEY)) {
-            metadata.setBf007(mapToString(caseRecordProperties.getProperty(BF_007_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_008_KEY)) {
-            metadata.setBf008(mapToString(caseRecordProperties.getProperty(BF_008_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_009_KEY)) {
-            metadata.setBf009(mapToString(caseRecordProperties.getProperty(BF_009_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_010_KEY)) {
-            metadata.setBf010(mapToString(caseRecordProperties.getProperty(BF_010_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_011_KEY)) {
-            metadata.setBf011(mapToString(caseRecordProperties.getProperty(BF_011_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_012_KEY)) {
-            metadata.setBf012(mapToInt(caseRecordProperties.getProperty(BF_012_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_013_KEY)) {
-            metadata.setBf013(mapToInt(caseRecordProperties.getProperty(BF_013_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_014_KEY)) {
-            metadata.setBf014(mapToInt(caseRecordProperties.getProperty(BF_014_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_015_KEY)) {
-            metadata.setBf015(mapToInt(caseRecordProperties.getProperty(BF_015_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_016_KEY)) {
-            metadata.setBf016(mapToString(caseRecordProperties.getProperty(BF_016_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_017_KEY)) {
-            metadata.setBf017(mapToString(caseRecordProperties.getProperty(BF_017_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_018_KEY)) {
-            metadata.setBf018(mapToString(caseRecordProperties.getProperty(BF_018_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_019_KEY)) {
-            metadata.setBf019(mapToString(caseRecordProperties.getProperty(BF_019_KEY), caseDocument));
-        }
-        if (caseRecordProperties.containsKey(BF_020_KEY)) {
-            metadata.setBf020(mapToString(caseRecordProperties.getProperty(BF_020_KEY), caseDocument));
-        }
+        setMetadataProperties(metadata, caseDocument);
         return metadata;
+    }
+
+    private void setMetadataProperties(RecordMetadata metadata, CaseDocumentEntity caseDocument) {
+        for (String key : caseRecordProperties.stringPropertyNames()) {
+            String value = mapToString(caseRecordProperties.getProperty(key), caseDocument);
+            if (value != null) {
+                processStringMetadataProperties(metadata, key, value);
+            } else {
+                Integer intValue = mapToInt(caseRecordProperties.getProperty(key), caseDocument);
+                processIntMetadataProperties(metadata, key, intValue);
+            }
+        }
     }
 
     private String mapToString(String key, CaseDocumentEntity caseDocument) {

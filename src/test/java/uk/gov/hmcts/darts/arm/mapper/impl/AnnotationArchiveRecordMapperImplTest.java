@@ -1,101 +1,235 @@
 package uk.gov.hmcts.darts.arm.mapper.impl;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.AnnotationArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
-import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
-import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
-import java.util.Properties;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockStatic;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AnnotationArchiveRecordMapperImplTest {
 
-    private AnnotationArchiveRecordMapperImpl annotationArchiveRecordMapper;
-
     @Mock
-    private ArmDataManagementConfiguration configuration;
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
+
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    MockedStatic<PropertyFileLoader> propertyFileLoader;
+    private AnnotationArchiveRecordMapperImpl annotationArchiveRecordMapper;
+
+    private ExternalObjectDirectoryEntity externalObjectDirectory;
+    private AnnotationDocumentEntity annotationDocument;
+    private AnnotationEntity annotationEntity;
 
     @BeforeEach
     void setUp() {
-        annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(configuration, currentTimeHelper);
+
+        UserAccountEntity userAccount = CommonTestDataUtil.createUserAccount();
+        annotationEntity = new AnnotationEntity();
+        annotationEntity.setId(1001);
+        annotationEntity.setCurrentOwner(userAccount);
+
+        HearingEntity hearing = CommonTestDataUtil.createHearing("1001", LocalDate.of(2020, 10, 10));
+
+        annotationEntity.setHearingList(List.of(hearing));
+        annotationEntity.setTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        annotationEntity.setText("annotationText");
+        annotationDocument = createAnnotationDocumentEntity(11);
+        annotationDocument.setAnnotation(annotationEntity);
+        annotationEntity.setAnnotationDocuments(List.of(annotationDocument));
+
+        externalObjectDirectory = new ExternalObjectDirectoryEntity();
+        externalObjectDirectory.setAnnotationDocumentEntity(annotationDocument);
+        externalObjectDirectory.setId(1);
+
+        annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
     }
 
-    @Nested
-    class MapToAnnotationArchiveRecordTest {
+    @Test
+    void mapToAnnotationArchiveRecord_ShouldReturnRecord_WhenValidInput() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/annotation-record.properties");
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("Annotation");
 
-        @BeforeEach
-        void setUp() {
-            when(configuration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-            when(configuration.getDateFormat()).thenReturn("yyyy-MM-dd");
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
-            propertyFileLoader = mockStatic(PropertyFileLoader.class);
-            propertyFileLoader.when(() -> PropertyFileLoader.loadPropertiesFromFile(any()))
-                .thenReturn(new Properties());
-        }
+        // when
+        AnnotationArchiveRecord result = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, "rawFilename");
 
-        @AfterEach
-        void tearDown() {
-            propertyFileLoader.close();
-        }
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getAnnotationCreateArchiveRecordOperation());
+        assertNotNull(result.getUploadNewFileRecord());
 
-        @Test
-        void shouldProduceRecordMetadata_withRetConfScore_whenSuppliedWithRetConfScore() {
-            // Given
-            TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
-                .someMinimalBuilder()
-                .annotationDocumentEntity(PersistableFactory.getAnnotationDocumentTestData()
-                                              .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
-                                              .build())
-                .build();
+        assertMetadataSuccess(result.getAnnotationCreateArchiveRecordOperation().getRecordMetadata());
+    }
 
-            // When
-            AnnotationArchiveRecord annotationArchiveRecord = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                                         "someFilename");
+    @Test
+    void mapToAnnotationArchiveRecord_ShouldReturnEmptyData_WhenEodEmptyAnnotationDocument() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/annotation-record.properties");
 
-            // Then
-            assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED.getId(),
-                         annotationArchiveRecord.getAnnotationCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
-        }
+        AnnotationEntity annotation = new AnnotationEntity();
+        AnnotationDocumentEntity annotationDocument2 = new AnnotationDocumentEntity();
+        annotationDocument2.setAnnotation(annotation);
+        ExternalObjectDirectoryEntity externalObjectDirectory2 = new ExternalObjectDirectoryEntity();
+        externalObjectDirectory2.setAnnotationDocumentEntity(annotationDocument2);
 
-        @Test
-        void shouldProduceRecordMetadata_withNullRetConfScore_whenSuppliedWithNullRetConfScore() {
-            // Given
-            TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
-                .someMinimalBuilder()
-                .annotationDocumentEntity(PersistableFactory.getAnnotationDocumentTestData()
-                                              .someMinimalBuilder().retConfScore(null)
-                                              .build())
-                .build();
+        // when
+        AnnotationArchiveRecord result = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory2, "rawFilename");
 
-            // When
-            AnnotationArchiveRecord annotationArchiveRecord = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectoryEntity,
-                                                                                                                         "someFilename");
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getAnnotationCreateArchiveRecordOperation());
+        assertNotNull(result.getUploadNewFileRecord());
+        assertMetadataEmpty(result.getAnnotationCreateArchiveRecordOperation().getRecordMetadata());
+    }
 
-            // Then
-            assertNull(annotationArchiveRecord.getAnnotationCreateArchiveRecordOperation().getRecordMetadata().getRetentionConfidenceScore());
-        }
+    @Test
+    void mapToAnnotationArchiveRecord_ShouldThrowNullPointerException_WhenDateTimeNotSet() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(null);
 
+        // when
+        NullPointerException exception =
+            assertThrows(NullPointerException.class, () ->
+                annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, "rawFilename"));
+
+        // then
+        assertThat(exception.getMessage(), containsString("pattern"));
+    }
+
+    @Test
+    void mapToAnnotationArchiveRecord_ShouldReturnRecord_WhenUsingAllProperties() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/all_properties/annotation-record.properties");
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("Annotation");
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        
+        // when
+        AnnotationArchiveRecord result = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, "rawFilename");
+
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getAnnotationCreateArchiveRecordOperation());
+        assertNotNull(result.getUploadNewFileRecord());
+
+        assertMetadataAllFields(result.getAnnotationCreateArchiveRecordOperation().getRecordMetadata());
+    }
+
+    private void assertMetadataSuccess(RecordMetadata metadata) {
+        assertEquals("Annotation", metadata.getBf001());
+        assertEquals("1001", metadata.getBf002());
+        assertEquals(annotationDocument.getFileType(), metadata.getBf003());
+        assertEquals("2020-10-10T00:00:00.000Z", metadata.getBf004());
+        assertEquals(annotationDocument.getChecksum(), metadata.getBf005());
+        assertNull(metadata.getBf006());
+        assertNull(metadata.getBf007());
+        assertNull(metadata.getBf008());
+        assertEquals(annotationDocument.getAnnotation().getText(), metadata.getBf009());
+        assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
+        assertNull(metadata.getBf011());
+        assertEquals(annotationDocument.getId(), metadata.getBf012());
+        assertEquals(annotationEntity.getId(), metadata.getBf013());
+        assertNull(metadata.getBf014());
+        assertNull(metadata.getBf015());
+        assertEquals(String.valueOf(annotationDocument.getUploadedBy().getId()), metadata.getBf016());
+        assertNull(metadata.getBf017());
+        assertNull(metadata.getBf018());
+        assertEquals("case_courthouse", metadata.getBf019());
+        assertEquals("1", metadata.getBf020());
+    }
+
+    private void assertMetadataAllFields(RecordMetadata metadata) {
+        assertEquals("Annotation", metadata.getBf001());
+        assertEquals("1001", metadata.getBf002());
+        assertEquals(annotationDocument.getFileType(), metadata.getBf003());
+        assertEquals("2020-10-10T00:00:00.000Z", metadata.getBf004());
+        assertEquals(annotationDocument.getChecksum(), metadata.getBf005());
+        assertNull(metadata.getBf006());
+        assertNull(metadata.getBf007());
+        assertNull(metadata.getBf008());
+        assertEquals(annotationDocument.getAnnotation().getText(), metadata.getBf009());
+        assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
+        assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf011());
+        assertEquals(annotationDocument.getId(), metadata.getBf012());
+        assertEquals(annotationEntity.getId(), metadata.getBf013());
+        assertNull(metadata.getBf014());
+        assertNull(metadata.getBf015());
+        assertEquals(String.valueOf(annotationDocument.getUploadedBy().getId()), metadata.getBf016());
+        assertNull(metadata.getBf017());
+        assertNull(metadata.getBf018());
+        assertEquals("case_courthouse", metadata.getBf019());
+        assertEquals("1", metadata.getBf020());
+    }
+
+    private void assertMetadataEmpty(RecordMetadata metadata) {
+        assertEquals("Annotation", metadata.getBf001());
+        assertNull(metadata.getBf002());
+        assertNull(metadata.getBf003());
+        assertNull(metadata.getBf004());
+        assertNull(metadata.getBf005());
+        assertNull(metadata.getBf006());
+        assertNull(metadata.getBf007());
+        assertNull(metadata.getBf008());
+        assertNull(metadata.getBf009());
+        assertNull(metadata.getBf010());
+        assertNull(metadata.getBf011());
+        assertNull(metadata.getBf012());
+        assertNull(metadata.getBf013());
+        assertNull(metadata.getBf014());
+        assertNull(metadata.getBf015());
+        assertNull(metadata.getBf016());
+        assertNull(metadata.getBf017());
+        assertNull(metadata.getBf018());
+        assertNull(metadata.getBf019());
+        assertNull(metadata.getBf020());
+    }
+
+    private AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {
+        AnnotationDocumentEntity annotationDoc = new AnnotationDocumentEntity();
+        annotationDoc.setId(id);
+        annotationDoc.setFileName("filename" + id);
+        annotationDoc.setFileType("filetype" + id);
+        UserAccountEntity userAccount = CommonTestDataUtil.createUserAccount("user" + id);
+        userAccount.setUserFullName("userFullName" + id);
+        annotationDoc.setUploadedBy(userAccount);
+        annotationDoc.setUploadedDateTime(OffsetDateTime.of(2020, 10, 10, 10, id, 0, 0, ZoneOffset.UTC));
+        return annotationDoc;
     }
 
 }
