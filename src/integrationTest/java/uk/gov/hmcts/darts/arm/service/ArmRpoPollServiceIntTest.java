@@ -82,11 +82,6 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     @MockitoBean
     private ArmRpoUtil armRpoUtil;
 
-    @MockitoSpyBean
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @TempDir
-    protected File tempDirectory;
-
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private String uniqueProductionName;
     private final Duration pollDuration = Duration.ofHours(4);
@@ -103,9 +98,6 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armRpoExecutionDetailEntity = dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
 
         uniqueProductionName = PRODUCTION_NAME + "_UUID_CSV";
         lenient().when(armRpoUtil.generateUniqueProductionName(anyString())).thenReturn(uniqueProductionName);
