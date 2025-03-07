@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.event.service.EventService;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -45,12 +46,16 @@ public class EventServiceImpl implements EventService {
     }
 
     List<EventEntity> getRelatedEvents(Integer eveId) {
-        List<EventEntity> entities = eventRepository.findAllByRelatedEvents(eveId);
-        if (entities.isEmpty()) {
-            throw new DartsApiException(CommonApiError.NOT_FOUND,
-                                        String.format("Event with id %s not found", eveId));
-        }
-        return entities;
+        EventEntity event = getEventByEveId(eveId);
+        List<Integer> caseIds = event.getEventLinkedCaseEntities().stream()
+            .map(EventLinkedCaseEntity::getCourtCase)
+            .filter(Objects::nonNull)
+            .map(CourtCaseEntity::getId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+        return eventRepository.findAllByRelatedEvents(
+            event.getId(), event.getEventId(), caseIds);
     }
 
     @Override

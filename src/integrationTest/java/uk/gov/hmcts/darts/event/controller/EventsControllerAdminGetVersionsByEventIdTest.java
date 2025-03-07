@@ -204,10 +204,18 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(currentEventEntity.getLastModifiedBy().getId(), responseResult.getCurrentVersion().getLastModifiedBy());
     }
 
+    @Test
+    void adminEventsApiGetVersionsByEventIdEndpoint_shouldReturnError_whenEveIdCanNotBeFound() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+
+        mockMvc.perform(get("/admin/events/-1/versions")
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isNotFound());
+    }
+
     private void linkToCaseNumber(List<EventEntity> eventEntities, String number) {
         eventEntities.forEach(eventEntity -> {
             eventLinkedCaseStub.createCaseLinkedEvent(eventEntity, number, "courthouse");
         });
     }
-
 }
