@@ -51,6 +51,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
 @RestController
 @RequiredArgsConstructor
@@ -85,7 +86,7 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {MID_TIER})
+        globalAccessSecurityRoles = {MID_TIER, XHIBIT})
     public ResponseEntity<PostCaseResponse> casesPost(AddCaseRequest addCaseRequest) {
         DataUtil.preProcess(addCaseRequest);
         validateRequest(addCaseRequest);
