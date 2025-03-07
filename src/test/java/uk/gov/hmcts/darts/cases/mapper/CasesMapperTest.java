@@ -28,6 +28,8 @@ import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsReposito
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -319,6 +321,52 @@ class CasesMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseClosed.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void mapToAdminSingleCaseResponseItem_WithRetentionAndAdditionalCaseDetails() throws IOException {
+        // Given
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+        courtCase.setRetentionUpdated(true);
+        courtCase.setRetentionRetries(123);
+        courtCase.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
+        courtCase.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
+        courtCase.setRetConfUpdatedTs(OffsetDateTime.of(2024, 1, 2, 3, 4, 5, 6, UTC));
+
+        courtCase.setLegacyCaseObjectId("OBJ_ID");
+        courtCase.setCaseObjectName("CASE_OBJ_NAME");
+        courtCase.setCaseType("CASE_TYPE");
+        courtCase.setUploadPriority(123);
+
+
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
+
+        CommonTestDataUtil.createHearing(
+            courtCase, courtroomEntity, LocalDate.of(2023, Month.JULY, 7), true
+        );
+
+        EventHandlerEntity reportingRestriction = new EventHandlerEntity();
+        reportingRestriction.setEventName("test reporting restriction name");
+        courtCase.setReportingRestrictions(reportingRestriction);
+
+        var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
+        UserAccountEntity testUser = CommonTestDataUtil.createUserAccount();
+        CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
+        caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
+        when(caseRetentionRepository.findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(courtCase, String.valueOf(COMPLETE)))
+            .thenReturn(Optional.of(caseRetention));
+
+        // When
+        AdminSingleCaseResponseItem responseItem = caseMapper.mapToAdminSingleCaseResponseItem(courtCase);
+
+        // Then
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(responseItem);
+        log.info("actualResponse: {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseRetentionAndAdditionalCaseDetails.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 }

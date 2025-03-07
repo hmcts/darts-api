@@ -19,6 +19,8 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -30,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -191,6 +194,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.setDataAnonymised(true);
+        UserAccountEntity anonymisedBy = dartsDatabase.getUserAccountStub().createUser("aUser");
+        courtCase.setDataAnonymisedBy(anonymisedBy.getId());
         OffsetDateTime dataAnonymisedTs = OffsetDateTime.parse("2023-01-01T12:00:00Z");
         courtCase.setDataAnonymisedTs(dataAnonymisedTs);
         courtCase.addProsecutor(createProsecutorForCase(courtCase));
@@ -207,8 +212,95 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/testIsAnonymised/expectedResponse.json");
-        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
-        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+        expectedResponse = expectedResponse
+            .replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<DATA_ANONYMISED_BY>", String.valueOf(anonymisedBy.getId()));
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminGetCaseById_IsDeleted() throws Exception {
+        // given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "123",
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+        );
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.setDeleted(true);
+        UserAccountEntity deletedBy = dartsDatabase.getUserAccountStub().createUser("aUser");
+        courtCase.setDeletedBy(deletedBy);
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
+        courtCase.addDefendant(createDefendantForCase(courtCase));
+        courtCase.addDefence("aDefence");
+        courtCase = dartsDatabase.save(courtCase);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId("123", SOME_COURTHOUSE));
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        // then
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminGetCaseByIdTest/expectedResponse_isDeleted.json");
+        expectedResponse = expectedResponse
+            .replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<CASE_DELETED_BY>", String.valueOf(deletedBy.getId()));
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminGetCaseById_WithRetentionAndAdditionalCaseDetails() throws Exception {
+        // given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "123",
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+        );
+
+        List<OffsetDateTime> eventDateTimes = new ArrayList<>();
+        eventDateTimes.add(DATE_TIME);
+        var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
+            .map(eve -> dartsDatabase.addHandlerToEvent(eve, 54))
+            .toList();
+        hearingEntity = dartsDatabase.saveEventsForHearing(hearingEntity, reportingRestrictions);
+
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
+        courtCase.addDefendant(createDefendantForCase(courtCase));
+        courtCase.addDefence("aDefence");
+        courtCase.setRetentionUpdated(true);
+        courtCase.setRetentionRetries(123);
+        courtCase.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
+        courtCase.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
+        courtCase.setRetConfUpdatedTs(OffsetDateTime.of(2024, 1, 2, 3, 4, 5, 6, UTC));
+
+        courtCase.setLegacyCaseObjectId("OBJ_ID");
+        courtCase.setCaseObjectName("CASE_OBJ_NAME");
+        courtCase.setCaseType("CASE_TYPE");
+        courtCase.setUploadPriority(123);
+        courtCase = dartsDatabase.save(courtCase);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCase.getId());
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        // then
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminGetCaseByIdTest/expectedResponse_withRetentionAndAdditionalCaseDetails.json");
+        expectedResponse = expectedResponse
+            .replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
