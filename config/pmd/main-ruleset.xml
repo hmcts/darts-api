@@ -83,4 +83,5 @@
   <rule ref="category/java/performance.xml"/>
   <rule ref="category/java/security.xml"/>
   <exclude-pattern>.*/generated.*</exclude-pattern>
+  <exclude-pattern>.*/uk/gov/hmcts/darts/task/runner/dailylist/govtalk/.*</exclude-pattern>
 </ruleset>
