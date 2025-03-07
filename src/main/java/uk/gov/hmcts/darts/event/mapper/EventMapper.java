@@ -35,7 +35,7 @@ public class EventMapper {
         mapToAdminGetEventsResponseForId(eventEntity, response);
 
         response.setCases(mapAdminGetEventResponseDetailsCasesCases(eventEntity.getLinkedCases()));
-        response.setHearings(mapAdminGetEventResponseDetailsHearingsHearings(eventEntity.getHearingEntities()));
+        response.setHearings(mapAdminGetEventResponseDetailsHearings(eventEntity.getHearingEntities()));
         return response;
     }
 
@@ -76,17 +76,17 @@ public class EventMapper {
     }
 
 
-    List<AdminGetEventResponseDetailsHearingsHearingsInner> mapAdminGetEventResponseDetailsHearingsHearings(
+    List<AdminGetEventResponseDetailsHearingsHearingsInner> mapAdminGetEventResponseDetailsHearings(
         List<HearingEntity> hearingEntities) {
         if (CollectionUtils.isEmpty(hearingEntities)) {
             return new ArrayList<>();
         }
         return hearingEntities.stream()
-            .map(hearingEntity -> mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity))
+            .map(hearingEntity -> mapAdminGetEventResponseDetailsHearing(hearingEntity))
             .toList();
     }
 
-    AdminGetEventResponseDetailsHearingsHearingsInner mapAdminGetEventResponseDetailsHearingsHearing(HearingEntity hearingEntity) {
+    AdminGetEventResponseDetailsHearingsHearingsInner mapAdminGetEventResponseDetailsHearing(HearingEntity hearingEntity) {
         if (hearingEntity == null) {
             return null;
         }

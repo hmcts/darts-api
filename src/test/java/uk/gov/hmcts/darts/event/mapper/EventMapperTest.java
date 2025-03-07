@@ -76,9 +76,9 @@ class EventMapperTest {
         AdminGetEventResponseDetailsHearingsHearingsInner adminGetEventResponseDetailsHearingsHearingsInner3 = mock(
             AdminGetEventResponseDetailsHearingsHearingsInner.class);
 
-        doReturn(adminGetEventResponseDetailsHearingsHearingsInner1).when(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity1);
-        doReturn(adminGetEventResponseDetailsHearingsHearingsInner2).when(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity2);
-        doReturn(adminGetEventResponseDetailsHearingsHearingsInner3).when(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity3);
+        doReturn(adminGetEventResponseDetailsHearingsHearingsInner1).when(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity1);
+        doReturn(adminGetEventResponseDetailsHearingsHearingsInner2).when(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity2);
+        doReturn(adminGetEventResponseDetailsHearingsHearingsInner3).when(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity3);
 
 
         // Given
@@ -98,9 +98,9 @@ class EventMapperTest {
         verify(eventMapper).mapAdminGetEventResponseDetailsCasesCase(courtCaseEntity1);
         verify(eventMapper).mapAdminGetEventResponseDetailsCasesCase(courtCaseEntity2);
         verify(eventMapper).mapAdminGetEventResponseDetailsCasesCase(courtCaseEntity3);
-        verify(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity1);
-        verify(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity2);
-        verify(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity3);
+        verify(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity1);
+        verify(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity2);
+        verify(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity3);
     }
 
     @Test
@@ -251,13 +251,13 @@ class EventMapperTest {
 
 
     @Test
-    void mapAdminGetEventResponseDetailsHearingsHearings_whenHearingEntityIsNull_returnsEmptyList() {
-        assertThat(eventMapper.mapAdminGetEventResponseDetailsHearingsHearings(null)).isEmpty();
+    void mapAdminGetEventResponseDetailsHearings_whenHearingEntityIsNull_returnsEmptyList() {
+        assertThat(eventMapper.mapAdminGetEventResponseDetailsHearings(null)).isEmpty();
     }
 
     @Test
-    void mapAdminGetEventResponseDetailsHearingsHearings_whenHearingEntityIsEmpty_returnsEmptyList() {
-        assertThat(eventMapper.mapAdminGetEventResponseDetailsHearingsHearings(List.of())).isEmpty();
+    void mapAdminGetEventResponseDetailsHearings_whenHearingEntityIsEmpty_returnsEmptyList() {
+        assertThat(eventMapper.mapAdminGetEventResponseDetailsHearings(List.of())).isEmpty();
     }
 
     @Test
@@ -273,22 +273,22 @@ class EventMapperTest {
         AdminGetEventResponseDetailsHearingsHearingsInner adminGetEventResponseDetailsHearingsHearingsInner3 = mock(
             AdminGetEventResponseDetailsHearingsHearingsInner.class);
 
-        doReturn(adminGetEventResponseDetailsHearingsHearingsInner1).when(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity1);
-        doReturn(adminGetEventResponseDetailsHearingsHearingsInner2).when(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity2);
-        doReturn(adminGetEventResponseDetailsHearingsHearingsInner3).when(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity3);
+        doReturn(adminGetEventResponseDetailsHearingsHearingsInner1).when(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity1);
+        doReturn(adminGetEventResponseDetailsHearingsHearingsInner2).when(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity2);
+        doReturn(adminGetEventResponseDetailsHearingsHearingsInner3).when(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity3);
 
-        assertThat(eventMapper.mapAdminGetEventResponseDetailsHearingsHearings(List.of(hearingEntity1, hearingEntity2, hearingEntity3)))
+        assertThat(eventMapper.mapAdminGetEventResponseDetailsHearings(List.of(hearingEntity1, hearingEntity2, hearingEntity3)))
             .containsExactly(adminGetEventResponseDetailsHearingsHearingsInner1, adminGetEventResponseDetailsHearingsHearingsInner2,
                              adminGetEventResponseDetailsHearingsHearingsInner3);
 
-        verify(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity1);
-        verify(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity2);
-        verify(eventMapper).mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity3);
+        verify(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity1);
+        verify(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity2);
+        verify(eventMapper).mapAdminGetEventResponseDetailsHearing(hearingEntity3);
     }
 
     @Test
-    void mapAdminGetEventResponseDetailsHearingsHearing_whenNullValueIsGiven_returnNull() {
-        assertThat(eventMapper.mapAdminGetEventResponseDetailsHearingsHearing(null))
+    void mapAdminGetEventResponseDetailsHearing_whenNullValueIsGiven_returnNull() {
+        assertThat(eventMapper.mapAdminGetEventResponseDetailsHearing(null))
             .isNull();
     }
 
@@ -314,7 +314,7 @@ class EventMapperTest {
         hearingEntity.setHearingDate(hearingDate);
         hearingEntity.setCourtroom(courtroomEntity);
 
-        AdminGetEventResponseDetailsHearingsHearingsInner result = eventMapper.mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity);
+        AdminGetEventResponseDetailsHearingsHearingsInner result = eventMapper.mapAdminGetEventResponseDetailsHearing(hearingEntity);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1);
@@ -340,7 +340,7 @@ class EventMapperTest {
         LocalDate hearingDate = LocalDate.now();
         hearingEntity.setHearingDate(hearingDate);
 
-        AdminGetEventResponseDetailsHearingsHearingsInner result = eventMapper.mapAdminGetEventResponseDetailsHearingsHearing(hearingEntity);
+        AdminGetEventResponseDetailsHearingsHearingsInner result = eventMapper.mapAdminGetEventResponseDetailsHearing(hearingEntity);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1);
