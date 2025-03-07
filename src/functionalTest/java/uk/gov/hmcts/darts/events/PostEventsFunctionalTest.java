@@ -69,7 +69,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
                         "type": "1000",
                         "sub_type": "1002",
                         "event_id": "12345",
-                        "courthouse": "Unknown Courthouse",
+                        "courthouse": "",
                         "courtroom": "1",
                         "case_numbers": [
                           "FUNC-Swansea_case_1"
