@@ -113,6 +113,7 @@ public class HearingsServiceImpl implements HearingsService {
         mediaRepository.findByCaseIdWithMediaList(courtCaseId)
             .stream()
             .filter(media -> {
+                // Check all cases linked to a hearing have been expired/anonymised
                 if (mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(media)) {
                     return true;
                 }
@@ -120,9 +121,8 @@ public class HearingsServiceImpl implements HearingsService {
                 return false;
             })
             .forEach(media -> {
-                // Check all cases linked to a hearing have been expired/anonymised
                 List<HearingEntity> hearingEntities = media.getHearingList();
-                hearingEntities.forEach(hearing -> media.removeHearing(hearing));
+                hearingEntities.forEach(media::removeHearing);
                 mediaRepository.save(media);
                 hearingRepository.saveAll(hearingEntities);
 
