@@ -20,7 +20,7 @@ public final class TranscriptionWorkflowTestData implements Persistable<
                                                                               0, 0, 0, ZoneOffset.UTC);
 
     TranscriptionWorkflowTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public TranscriptionWorkflowEntity minimalTranscriptionWorkflow(TranscriptionStatusEnum transcriptionStatusEnum) {

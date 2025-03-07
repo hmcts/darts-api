@@ -13,7 +13,7 @@ import static uk.gov.hmcts.darts.test.common.data.SecurityRoleTestData.createSec
 public final class SecurityGroupTestData {
 
     private SecurityGroupTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static SecurityGroupEntity minimalSecurityGroup(UserAccountEntity userAccountEntity) {

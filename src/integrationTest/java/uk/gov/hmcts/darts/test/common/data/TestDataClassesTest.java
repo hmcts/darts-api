@@ -42,7 +42,6 @@ class TestDataClassesTest extends IntegrationBase {
 
     }
 
-
     static Stream<Arguments> persistableClassesProvider() throws ClassNotFoundException {
         return getPersistableClasses()
             .stream()

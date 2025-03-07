@@ -84,7 +84,7 @@ class AudioAsyncServiceImplTest {
     }
 
     @Test
-    void linkAudioToHearingByEvent() {
+    void linkAudioToHearingByEvent_ShouldLinkToEvent() {
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();
         hearing.setCourtCase(courtCase);
@@ -103,6 +103,62 @@ class AudioAsyncServiceImplTest {
         )).thenReturn(List.of(eventEntity));
 
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
+        verify(hearingRepository, times(1)).saveAndFlush(any());
+        assertEquals(1, hearing.getMediaList().size());
+        verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
+    }
+
+    @Test
+    void linkAudioToHearingByEvent_ShouldLinkToEvent_WithWhitespaceCourthouse() {
+        HearingEntity hearing = new HearingEntity();
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        hearing.setCourtCase(courtCase);
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
+        eventEntity.addHearing(hearing);
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        addAudioMetadataRequest.setCourthouse(" SWANSEA ");
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+            "SWANSEA",
+            addAudioMetadataRequest.getCourtroom(),
+            addAudioMetadataRequest.getStartedAt(),
+            addAudioMetadataRequest.getEndedAt()
+        )).thenReturn(List.of(eventEntity));
+
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
+        verify(hearingRepository, times(1)).saveAndFlush(any());
+        assertEquals(1, hearing.getMediaList().size());
+        verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
+    }
+
+    @Test
+    void linkAudioToHearingByEvent_ShouldLinkToEvent_WithWhitespaceCourtroom() {
+        // given
+        HearingEntity hearing = new HearingEntity();
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        hearing.setCourtCase(courtCase);
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
+        eventEntity.addHearing(hearing);
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        addAudioMetadataRequest.setCourtroom(" 1 ");
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+            addAudioMetadataRequest.getCourthouse(),
+            "1",
+            STARTED_AT,
+            ENDED_AT
+        )).thenReturn(List.of(eventEntity));
+
+        // when
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
+
+        // then
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
         verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);

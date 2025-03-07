@@ -7,7 +7,7 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 
 public final class SecurityRoleTestData {
     private SecurityRoleTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static SecurityRoleEntity createSecurityRoleFor(SecurityRoleEnum role) {
