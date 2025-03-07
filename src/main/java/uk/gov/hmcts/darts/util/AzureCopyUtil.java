@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.util;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,8 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -19,7 +22,18 @@ public class AzureCopyUtil {
     public void copy(String source, String destination) {
         try {
             ProcessBuilder builder = new ProcessBuilder();
-            builder.command(config.getAzCopyExecutable(), "copy", source, destination, config.getAzCopyPreserveAccessTier());
+            List<String> command = new ArrayList<>();
+            command.add(config.getAzCopyExecutable());
+            command.add("copy");
+            command.add(source);
+            command.add(destination);
+            if (StringUtils.isNotEmpty(config.getAzCopyPreserveAccessTier())) {
+                command.add(config.getAzCopyPreserveAccessTier());
+            }
+            if (StringUtils.isNotEmpty(config.getAzCopyLogLevel())) {
+                command.add(config.getAzCopyLogLevel());
+            }
+            builder.command(command);
 
             var startTime = Instant.now();
             log.info("Copy of blob started at {}", startTime);
