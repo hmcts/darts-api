@@ -154,55 +154,6 @@
 			"name": "Audio",
 			"item": [
 				{
-					"name": "/audios",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{global_access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "accept",
-								"value": "*/*"
-							}
-						],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "file",
-									"contentType": "audio/mpeg",
-									"type": "file",
-									"src": "/Users/chrismagowan/Documents/DARTS/audio/T20190024_04-02-2021/daudio/localaudio/T2019/0024/0001/0001.a00"
-								},
-								{
-									"key": "metadata",
-									"value": "{\n  \"started_at\": \"2023-11-23T10:36:05.362Z\",\n  \"ended_at\": \"2023-11-23T10:36:05.362Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"sample\",\n  \"courthouse\": \"Bristol\",\n  \"courtroom\": \"1\",\n  \"file_size\": 937.96,\n  \"checksum\": \"aQlozKNmM84agyCpJu26fw==\",\n  \"cases\": [\n    \"case1\"\n  ]\n}",
-									"contentType": "application/json",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{serverUrl}}/audios",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audios"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "/audio/hearings/{hearing_id}/audios",
 					"request": {
 						"method": "GET",

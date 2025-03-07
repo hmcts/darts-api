@@ -24,24 +24,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GenerateCaseDocumentBatchProcessorImplTest {
 
-    public static final int BATCH_SIZE = 2;
-    public static final int CASE_1_ID = 22;
-    public static final int CASE_2_ID = 23;
-    public static final int CASE_DOCUMENT_GENERATION_DAYS = 5;
+    private static final int BATCH_SIZE = 2;
+    private static final int CASE_1_ID = 22;
+    private static final int CASE_2_ID = 23;
 
     @Mock
-    CaseRepository caseRepository;
+    private CaseRepository caseRepository;
     @Mock
-    GenerateCaseDocumentSingleCaseProcessor singleCaseProcessor;
+    private GenerateCaseDocumentSingleCaseProcessor singleCaseProcessor;
     @Mock
-    CurrentTimeHelper currentTimeHelper;
+    private CurrentTimeHelper currentTimeHelper;
 
-    GenerateCaseDocumentBatchProcessorImpl batchProcessor;
+    private GenerateCaseDocumentBatchProcessorImpl batchProcessor;
 
     @Mock
-    CourtCaseEntity case1;
+    private CourtCaseEntity case1;
     @Mock
-    CourtCaseEntity case2;
+    private CourtCaseEntity case2;
 
     @BeforeEach
     void setup() {
@@ -51,19 +50,19 @@ class GenerateCaseDocumentBatchProcessorImplTest {
             singleCaseProcessor,
             currentTimeHelper
         );
-
-        when(case1.getId()).thenReturn(CASE_1_ID);
-        when(case2.getId()).thenReturn(CASE_2_ID);
     }
 
     @Test
     void testBatchGenerationOfCaseDocument() {
+        // given
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Limit.of(BATCH_SIZE))))
-            .thenReturn(List.of(case1, case2));
-        
+        when(caseRepository.findCasesIdsNeedingCaseDocumentGenerated(any(), eq(Limit.of(BATCH_SIZE))))
+            .thenReturn(List.of(CASE_1_ID, CASE_2_ID));
+
+        // when
         batchProcessor.processGenerateCaseDocument(BATCH_SIZE);
 
+        // then
         verify(singleCaseProcessor, times(2)).processGenerateCaseDocument(any());
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_2_ID);
@@ -71,13 +70,16 @@ class GenerateCaseDocumentBatchProcessorImplTest {
 
     @Test
     void testExceptionIsHandledAndProcessingContinues() {
+        // given
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Limit.of(BATCH_SIZE))))
-            .thenReturn(List.of(case1, case2));
+        when(caseRepository.findCasesIdsNeedingCaseDocumentGenerated(any(), eq(Limit.of(BATCH_SIZE))))
+            .thenReturn(List.of(CASE_1_ID, CASE_2_ID));
         doThrow(RuntimeException.class).when(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
 
+        // when
         batchProcessor.processGenerateCaseDocument(BATCH_SIZE);
 
+        // then
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_2_ID);
     }
 

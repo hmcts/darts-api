@@ -24,7 +24,6 @@ import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
@@ -35,7 +34,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Component
 @RequiredArgsConstructor
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
-    
+
     private final ArchiveRecordService archiveRecordService;
     private final DataStoreToArmHelper unstructuredToArmHelper;
     private final UserIdentity userIdentity;
@@ -80,7 +79,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 .toList();
 
             try {
-                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration.getThreads(), 90, TimeUnit.MINUTES);
+                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
             } catch (Exception e) {
                 log.error("Unstructured to arm batch unexpected exception", e);
                 if (e instanceof InterruptedException) {
@@ -133,9 +132,13 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             return;
         }
 
-        for (var batchItem : batchItems.getSuccessful()) {
-            unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
-            logApi.armPushSuccessful(batchItem.getArmEod().getId());
+        for (var batchItem : batchItems.getItems()) {
+            if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null) {
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
+                logApi.armPushSuccessful(batchItem.getArmEod().getId());
+            } else {
+                recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
+            }
         }
     }
 
@@ -149,7 +152,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             unstructuredToArmHelper.incrementTransferAttempts(armEod);
             unstructuredToArmHelper.updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus(), userAccount);
         } else {
-            log.error("Unable to find matching external object directory for {}", armEod.getId());
+            log.error("Unable to find matching external object directory {} for manifest {}", armEod.getId(), archiveRecordsFileName);
             unstructuredToArmHelper.updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
             throw new RuntimeException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }

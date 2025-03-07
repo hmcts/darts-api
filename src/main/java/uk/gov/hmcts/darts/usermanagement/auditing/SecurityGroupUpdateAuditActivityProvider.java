@@ -19,13 +19,15 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USERS_GROUP;
 
 public class SecurityGroupUpdateAuditActivityProvider implements AuditActivityProvider {
 
+    private final Set<AuditActivity> auditActivities = new HashSet<>();
+
     public static SecurityGroupUpdateAuditActivityProvider auditActivitiesFor(SecurityGroupEntity entity, SecurityGroupPatch patch) {
         return new SecurityGroupUpdateAuditActivityProvider(entity, patch);
     }
 
-    private final Set<AuditActivity> auditActivities = new HashSet<>();
-
-    private SecurityGroupUpdateAuditActivityProvider() {
+    @Override
+    public Set<AuditActivity> getAuditActivities() {
+        return auditActivities;
     }
 
     private SecurityGroupUpdateAuditActivityProvider(SecurityGroupEntity entity, SecurityGroupPatch patch) {
@@ -38,11 +40,6 @@ public class SecurityGroupUpdateAuditActivityProvider implements AuditActivityPr
         if (courthousesInGroupAreUpdated(entity, patch)) {
             auditActivities.add(UPDATE_COURTHOUSE_GROUP);
         }
-    }
-
-    @Override
-    public Set<AuditActivity> getAuditActivities() {
-        return auditActivities;
     }
 
     private boolean courthousesInGroupAreUpdated(SecurityGroupEntity entity, SecurityGroupPatch patch) {

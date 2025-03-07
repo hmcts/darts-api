@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.cases.mapper.CaseTranscriptionMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
 import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -75,42 +76,38 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals"})
 class CaseServiceImplTest {
 
-    public static final String SWANSEA = "SWANSEA";
-    public static final String TEST_COURT_CASE = "CASE_COURTHOUSE";
-    public static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 3, 25, 10, 0, 0, 0, ZoneOffset.UTC);
+    private static final String SWANSEA = "SWANSEA";
+    private static final String TEST_COURT_CASE = "CASE_COURTHOUSE";
+    private static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 3, 25, 10, 0, 0, 0, ZoneOffset.UTC);
 
-    CaseServiceImpl service;
-
-    @Mock
-    CaseRepository caseRepository;
+    private CaseServiceImpl caseService;
 
     @Mock
-    HearingRepository hearingRepository;
+    private CaseRepository caseRepository;
 
     @Mock
-    EventRepository eventRepository;
+    private HearingRepository hearingRepository;
 
     @Mock
-    HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
-
-    CasesMapper mapper;
-
-    CasesAnnotationMapper annotationMapper;
+    private EventRepository eventRepository;
 
     @Mock
-    RetrieveCoreObjectService retrieveCoreObjectService;
+    private HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
     @Mock
-    AdvancedSearchRequestHelper advancedSearchRequestHelper;
-    @Mock
-    AdminCasesSearchRequestHelper adminCasesSearchRequestHelper;
+    private RetrieveCoreObjectService retrieveCoreObjectService;
 
     @Mock
-    TranscriptionRepository transcriptionRepository;
+    private AdvancedSearchRequestHelper advancedSearchRequestHelper;
     @Mock
-    TranscriptionDocumentRepository transcriptionDocumentRepository;
+    private AdminCasesSearchRequestHelper adminCasesSearchRequestHelper;
+
+    @Mock
+    private TranscriptionRepository transcriptionRepository;
+    @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
     @Captor
-    ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
+    private ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
@@ -122,16 +119,17 @@ class CaseServiceImplTest {
     private LogApi logApi;
     private ObjectMapper objectMapper;
 
-    @Mock
-    private CaseTranscriptionMapper caseTranscriptionMapper;
 
     @BeforeEach
     void setUp() {
         Pattern unallocatedCaseRegex = Pattern.compile(".*\\d{8}-\\d{6}.*");
-        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi, logApi,
-                                 unallocatedCaseRegex);
-        service = new CaseServiceImpl(
-            mapper,
+        CasesMapper casesMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi,
+                                                  logApi,
+                                                  unallocatedCaseRegex);
+
+        CasesAnnotationMapper annotationMapper = new CasesAnnotationMapper();
+        caseService = new CaseServiceImpl(
+            casesMapper,
             annotationMapper,
             hearingRepository,
             eventRepository,
@@ -156,7 +154,7 @@ class CaseServiceImplTest {
         courtCaseEntity.setHearings(hearings);
         when(caseRepository.findById(any())).thenReturn(Optional.of(courtCaseEntity));
 
-        SingleCase result = service.getCasesById(101);
+        SingleCase result = caseService.getCasesById(101);
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
@@ -172,7 +170,7 @@ class CaseServiceImplTest {
 
         when(caseRepository.findById(any())).thenReturn(Optional.of(courtCaseEntity));
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getCasesById(101));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> caseService.getCasesById(101));
 
         assertEquals("CASE_107", exception.getError().getErrorTypeNumeric());
     }
@@ -192,7 +190,7 @@ class CaseServiceImplTest {
         request.setCourtroom("1");
         request.setDate(LocalDate.of(2023, 6, 20));
 
-        List<ScheduledCase> resultList = service.getHearings(request);
+        List<ScheduledCase> resultList = caseService.getHearings(request);
         String actualResponse = objectMapper.writeValueAsString(resultList);
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CaseServiceTest/testGetCasesWithMultipleHearing/expectedResponse.json");
@@ -215,7 +213,7 @@ class CaseServiceImplTest {
         request.setCourtroom("2");
         request.setDate(LocalDate.of(2023, 6, 20));
 
-        List<ScheduledCase> resultList = service.getHearings(request);
+        List<ScheduledCase> resultList = caseService.getHearings(request);
         String actualResponse = objectMapper.writeValueAsString(resultList);
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CaseServiceTest/testGetCasesWithSingleHearingAndDifferentCourtroom/expectedResponse.json");
@@ -243,7 +241,7 @@ class CaseServiceImplTest {
         userAccount.setId(10);
         when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
 
-        service.getHearings(request);
+        caseService.getHearings(request);
         verify(retrieveCoreObjectService).retrieveOrCreateCourtroom(eq(SWANSEA), eq("99"), any(UserAccountEntity.class));
         verify(logApi, times(1)).casesRequestedByDarPc(request);
     }
@@ -261,7 +259,7 @@ class CaseServiceImplTest {
 
         AddCaseRequest request = CommonTestDataUtil.createAddCaseRequest();
 
-        PostCaseResponse result = service.addCaseOrUpdate(request);
+        PostCaseResponse result = caseService.addCaseOrUpdate(request);
 
         String actualResponse = TestUtils.removeTags(List.of("case_id"), objectMapper.writeValueAsString(result));
         String expectedResponse = getContentsFromFile(
@@ -297,7 +295,7 @@ class CaseServiceImplTest {
 
         DartsApiException thrownException = assertThrows(
             DartsApiException.class,
-            () -> service.addCaseOrUpdate(request)
+            () -> caseService.addCaseOrUpdate(request)
         );
 
         assertEquals("Provided courthouse does not exist", thrownException.getMessage());
@@ -319,7 +317,7 @@ class CaseServiceImplTest {
 
         when(hearingRepository.findByCaseIds(List.of(existingCaseEntity.getId()))).thenReturn(existingHearings);
 
-        List<Hearing> caseHearings = service.getCaseHearings(existingCaseEntity.getId());
+        List<Hearing> caseHearings = caseService.getCaseHearings(existingCaseEntity.getId());
 
         assertEquals(existingHearings.get(0).getId(), caseHearings.get(0).getId());
         assertEquals(existingHearings.get(0).getCourtroom().getName(), caseHearings.get(0).getCourtroom());
@@ -343,7 +341,7 @@ class CaseServiceImplTest {
 
         when(hearingRepository.findByCaseIds(List.of(existingCaseEntity.getId()))).thenReturn(existingHearings);
 
-        List<Hearing> caseHearings = service.getCaseHearings(existingCaseEntity.getId());
+        List<Hearing> caseHearings = caseService.getCaseHearings(existingCaseEntity.getId());
 
         assertEquals(0, caseHearings.size());
     }
@@ -353,7 +351,7 @@ class CaseServiceImplTest {
         when(hearingRepository.findByCaseIds(any())).thenReturn(Collections.emptyList());
 
         var exception = assertThrows(DartsApiException.class, () ->
-            service.getCaseHearings(1));
+            caseService.getCaseHearings(1));
 
         assertEquals("The requested case cannot be found", exception.getMessage());
     }
@@ -367,7 +365,7 @@ class CaseServiceImplTest {
 
         when(caseRepository.findById(existingCaseEntity.getId())).thenReturn(Optional.of(existingCaseEntity));
         var exception = assertThrows(DartsApiException.class, () ->
-            service.getCaseHearings(1));
+            caseService.getCaseHearings(1));
 
         assertThat(exception.getMessage()).isEqualTo("Case has expired.");
         assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
@@ -393,7 +391,7 @@ class CaseServiceImplTest {
 
         when(eventRepository.findAllByCaseId(courtCaseEntity.getId())).thenReturn(events);
         when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
-        List<Event> result = service.getEventsByCaseId(courtCaseEntity.getId());
+        List<Event> result = caseService.getEventsByCaseId(courtCaseEntity.getId());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
@@ -408,13 +406,13 @@ class CaseServiceImplTest {
         courtCaseEntity.setDataAnonymised(true);
         when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getEventsByCaseId(courtCaseEntity.getId()));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> caseService.getEventsByCaseId(courtCaseEntity.getId()));
         assertThat(exception.getMessage()).isEqualTo("Case has expired.");
         assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
     }
 
     @Test
-    void testUpdateCaseWithNonExistingCourtroomAndMatchingHearingDate() {
+    void updateCase_WithNonExistingCourtroomAndMatchingHearingDate() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
@@ -429,7 +427,7 @@ class CaseServiceImplTest {
         });
 
         AddCaseRequest request = CommonTestDataUtil.createUpdateCaseRequest();
-        service.addCaseOrUpdate(request);
+        caseService.addCaseOrUpdate(request);
 
         verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
 
@@ -445,7 +443,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testUpdateCaseWithMultipleHearingsWithOldHearingDateWithCourtroomInRequest() {
+    void updateCase_WithMultipleHearingsWithOldHearingDateWithCourtroomInRequest() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
@@ -461,7 +459,7 @@ class CaseServiceImplTest {
         });
 
         AddCaseRequest request = CommonTestDataUtil.createUpdateCaseRequest();
-        service.addCaseOrUpdate(request);
+        caseService.addCaseOrUpdate(request);
 
         verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
 
@@ -475,7 +473,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testUpdateCaseWithMultipleHearingsWithCourtroomInRequest() {
+    void updateCase_WithMultipleHearingsWithCourtroomInRequest() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
@@ -491,7 +489,7 @@ class CaseServiceImplTest {
         });
 
         AddCaseRequest request = CommonTestDataUtil.createUpdateCaseRequest();
-        service.addCaseOrUpdate(request);
+        caseService.addCaseOrUpdate(request);
 
         verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
 
@@ -505,7 +503,8 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testUpdateCaseWithMultipleHearingsWithoutCourtroomInRequest() {
+    void updateCase_WithMultipleHearingsWithoutCourtroomInRequest() {
+        // given
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
 
@@ -519,8 +518,11 @@ class CaseServiceImplTest {
         });
 
         AddCaseRequest request = CommonTestDataUtil.createUpdateCaseRequest();
-        service.addCaseOrUpdate(request);
 
+        // when
+        caseService.addCaseOrUpdate(request);
+
+        // then
         verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
         verifyNoInteractions(hearingRepository);
 
@@ -532,6 +534,48 @@ class CaseServiceImplTest {
         assertEquals(3, updatedCaseEntity.getProsecutorList().size());
         assertEquals(3, updatedCaseEntity.getDefenceList().size());
 
+    }
+
+    @Test
+    void adminGetCaseById_ShouldReturnCase_WhenCaseExists() {
+        // given
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
+        CourtCaseEntity courtCaseEntity = hearings.getFirst().getCourtCase();
+        courtCaseEntity.setHearings(hearings);
+
+        when(caseRepository.findById(1)).thenReturn(Optional.of(courtCaseEntity));
+
+        // when
+        AdminSingleCaseResponseItem result = caseService.adminGetCaseById(1);
+
+        // then
+        assertNotNull(result);
+        assertEquals(courtCaseEntity.getId(), result.getId());
+        assertEquals(courtCaseEntity.getCourthouse().getId(), result.getCourthouse().getId());
+        assertEquals(courtCaseEntity.getCourthouse().getDisplayName(), result.getCourthouse().getDisplayName());
+        assertEquals(courtCaseEntity.getCaseNumber(), result.getCaseNumber());
+        assertEquals(2, result.getDefendants().size());
+        assertEquals(2, result.getJudges().size());
+        assertEquals(2, result.getProsecutors().size());
+        assertEquals(2, result.getDefenders().size());
+        assertEquals(0, result.getReportingRestrictions().size());
+        assertEquals(Boolean.FALSE, result.getIsDataAnonymised());
+
+        verify(caseRepository, times(1)).findById(1);
+    }
+
+    @Test
+    void adminGetCaseById_ShouldThrowException_WhenCaseDoesNotExist() {
+        // given
+        when(caseRepository.findById(1)).thenReturn(Optional.empty());
+
+        // when
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> caseService.adminGetCaseById(1));
+
+        // then
+        assertEquals("CASE_104", exception.getError().getErrorTypeNumeric());
+        assertEquals("The requested case cannot be found", exception.getMessage());
+        verify(caseRepository, times(1)).findById(1);
     }
 
     private HearingEntity createHearingEntity() {

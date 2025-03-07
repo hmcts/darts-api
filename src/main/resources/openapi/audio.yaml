@@ -146,38 +146,7 @@ paths:
                 type: "AUDIO_101"
                 title: "The requested data cannot be located"
                 status: 500
-  /audios:
-    post:
-      tags:
-        - Audio
-      summary: Upload audio file and metadata
-      operationId: addAudio
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-                metadata:
-                  $ref: '#/components/schemas/AddAudioMetadataRequest'
-      responses:
-        200:
-          description: Audio file and metadata accepted
-        400:
-          description: Bad request
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-        500:
-          description: Internal server error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
+
   /audios/metadata:
     post:
       tags:
@@ -307,7 +276,6 @@ paths:
                 type: "AUTHORISATION_100"
                 title: "User is not authorised for the associated courthouse"
                 status: 401
-
   /admin/medias/{id}:
     get:
       tags:
@@ -327,7 +295,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdminMediaResponse'
-
+  /admin/medias/{id}/versions:
+    get:
+      tags:
+        - Audio
+      operationId: getAdminMediaVersionsById
+      description: Returns a representation of a media record and associated versions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/MediaId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminVersionedMediaResponse'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
   /admin/medias/{media_id}/hide:
     post:
       tags:
@@ -468,7 +470,7 @@ components:
         media:
           type: array
           items:
-              $ref: '#/components/schemas/GetAdminMediasMarkedForDeletionMediaItem'
+            $ref: '#/components/schemas/GetAdminMediasMarkedForDeletionMediaItem'
         start_at:
           type: string
           format: date-time
@@ -598,6 +600,40 @@ components:
           $ref: '#/components/schemas/AdminMediaCourtroomResponse'
         admin_action:
           $ref: '#/components/schemas/AdminActionResponse'
+    AdminVersionedMediaResponse:
+      type: object
+      properties:
+        media_object_id:
+          type: string
+        current_version:
+          $ref: '#/components/schemas/AdminMediaVersionResponse'
+        previous_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminMediaVersionResponse'
+    AdminMediaVersionResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/MediaId'
+        courthouse:
+          $ref: '#/components/schemas/AdminMediaCourthouseResponse'
+        courtroom:
+          $ref: '#/components/schemas/AdminMediaCourtroomResponse'
+        start_at:
+          $ref: '#/components/schemas/StartAt'
+        end_at:
+          $ref: '#/components/schemas/EndAt'
+        channel:
+          $ref: '#/components/schemas/Channel'
+        chronicle_id:
+          $ref: '#/components/schemas/ChronicleId'
+        antecedent_id:
+          $ref: '#/components/schemas/AntecedentId'
+        is_current:
+          $ref: '#/components/schemas/IsCurrent'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
     AdminMediaResponse:
       type: object
       properties:
@@ -1131,11 +1167,6 @@ components:
         - "AUDIO_102"
         - "AUDIO_103"
         - "AUDIO_104"
-        - "AUDIO_105"
-        - "AUDIO_106"
-        - "AUDIO_107"
-        - "AUDIO_108"
-        - "AUDIO_109"
         - "AUDIO_110"
         - "AUDIO_111"
         - "AUDIO_112"
@@ -1153,11 +1184,6 @@ components:
                          MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER,
-                         AUDIO_NOT_PROVIDED,
-                         UNEXPECTED_FILE_TYPE,
-                         FILE_DURATION_OUT_OF_BOUNDS,
-                         FILE_SIZE_OUT_OF_BOUNDS,
-                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
                          MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
@@ -1180,11 +1206,6 @@ components:
         - "The requested media cannot be found"
         - "Failed to store uploaded audio file"
         - "Failed to mark audio(s) for deletion as system user was not found"
-        - "Audio not found"
-        - "The file type is not acceptable"
-        - "The duration of the audio exceeds maximum threshold"
-        - "The audio metadata size exceeds maximum threshold"
-        - "Required request parameter 'transformed_media_id' for method parameter type Integer is not present"
         - "Media is already hidden"
         - "Hide media action payload not correct"
         - "Showing media action payload not correct"
@@ -1202,11 +1223,6 @@ components:
                          MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER,
-                         AUDIO_NOT_PROVIDED,
-                         UNEXPECTED_FILE_TYPE,
-                         FILE_DURATION_OUT_OF_BOUNDS,
-                         FILE_SIZE_OUT_OF_BOUNDS,
-                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
                          MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,

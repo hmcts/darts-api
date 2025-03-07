@@ -5,15 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ArmResponseInputUploadFileRecord {
 
     @JsonProperty("operation")
     private String operation;
 
-    @JsonProperty("timestamp")
+    @JsonProperty(value = "timestamp", required = true)
     private String timestamp;
 
     @JsonProperty("status")

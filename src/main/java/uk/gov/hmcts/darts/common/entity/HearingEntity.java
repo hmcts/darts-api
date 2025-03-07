@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,7 +32,8 @@ import java.util.List;
 @Table(name = "hearing")
 @Getter
 @Setter
-public class HearingEntity extends CreatedModifiedBaseEntity {
+public class HearingEntity extends CreatedModifiedBaseEntity
+    implements HasIntegerId {
 
     public static final String HEA_ID = "hea_id";
     @Id
@@ -91,9 +93,12 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     private List<AnnotationEntity> annotations = new ArrayList<>();
 
     public void addMedia(MediaEntity mediaEntity) {
-        if (!mediaList.contains(mediaEntity)) {
+        if (!containsMedia(mediaEntity)) {
             mediaList.add(mediaEntity);
-            mediaEntity.getHearingList().add(this);
+            /*TODO review if this is required or not if not remove comments
+            if (this.id == null || mediaEntity.getHearingList().stream().noneMatch(hearing -> this.id.equals(hearing.getId()))) {
+                mediaEntity.getHearingList().add(this);
+            }*/
         }
     }
 
@@ -123,6 +128,6 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     }
 
     public boolean containsMedia(MediaEntity mediaEntity) {
-        return mediaList.stream().anyMatch(media -> media.getId().equals(mediaEntity.getId()));
+        return mediaEntity.getId() != null && mediaList.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
     }
 }

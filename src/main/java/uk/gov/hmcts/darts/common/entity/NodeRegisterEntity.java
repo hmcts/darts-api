@@ -12,12 +12,17 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 @Entity
 @Table(name = NodeRegisterEntity.TABLE_NAME)
 @Getter
 @Setter
+@Audited
+@AuditTable("node_register_aud")
 public class NodeRegisterEntity extends CreatedBaseEntity {
 
     public static final String TABLE_NAME = "node_register";
@@ -30,6 +35,7 @@ public class NodeRegisterEntity extends CreatedBaseEntity {
     public static final String MAC_ADDRESS = "mac_address";
     public static final String NODE_TYPE = "node_type";
 
+    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = COURTROOM_ID, nullable = false)
     private CourtroomEntity courtroom;

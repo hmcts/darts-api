@@ -9,7 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.envers.AuditJoinTable;
+import org.hibernate.envers.AuditTable;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.util.AnnotationUtils;
 import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -46,6 +50,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -92,6 +97,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -105,6 +111,7 @@ import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -119,6 +126,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -204,6 +212,7 @@ public class DartsDatabaseStub {
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
     private final RetentionConfidenceCategoryMapperRepository retentionConfidenceCategoryMapperRepository;
+    private final TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -247,7 +256,12 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void resetTablesWithPredefinedTestData() {
-
+        entityManager.getMetamodel().getEntities().stream()
+            .filter(entityType -> LastModifiedBy.class.isAssignableFrom(entityType.getJavaType()))
+            .forEach(entityType -> {
+                String table = entityType.getJavaType().getAnnotation(Table.class).name();
+                entityManager.createNativeQuery("update darts." + table + " set last_modified_by = 0").executeUpdate();
+            });
         retentionPolicyTypeRepository.deleteAll(
             retentionPolicyTypeRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
@@ -271,45 +285,85 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void clearDatabaseInThisOrder() {
-        removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
-        dataAnonymisationRepository.deleteAll();
-        armRpoExecutionDetailRepository.deleteAll();
-        objectAdminActionRepository.deleteAll();
-        auditRepository.deleteAll();
-        externalObjectDirectoryRepository.deleteAll();
-        annotationDocumentRepository.deleteAll();
-        caseDocumentRepository.deleteAll();
-        caseRetentionRepository.deleteAll();
-        caseManagementRetentionRepository.deleteAll();
-        transcriptionDocumentRepository.deleteAll();
-        transcriptionCommentRepository.deleteAll();
-        transcriptionWorkflowRepository.deleteAll();
-        transcriptionDocumentRepository.deleteAll();
-        transcriptionRepository.deleteAll();
-        transientObjectDirectoryRepository.deleteAll();
-        transformedMediaRepository.deleteAll();
-        mediaRequestRepository.deleteAll();
-        eventLinkedCaseRepository.deleteAll();
-        eventRepository.deleteAll();
-        hearingRepository.deleteAll();
-        annotationRepository.deleteAll();
-        mediaLinkedCaseRepository.deleteAll();
-        mediaRepository.deleteAll();
-        notificationRepository.deleteAll();
-        nodeRegisterRepository.deleteAll();
-        courtroomRepository.deleteAll();
-        defenceRepository.deleteAll();
-        defendantRepository.deleteAll();
-        prosecutorRepository.deleteAll();
-        caseRepository.deleteAll();
-        judgeRepository.deleteAll();
-        dailyListRepository.deleteAll();
-        courthouseRepository.deleteAll();
-        regionRepository.deleteAll();
-        annotationRepository.deleteAll();
-        transcriptionRepository.deleteAll();
-        transcriptionWorkflowRepository.deleteAll();
-        retentionConfidenceCategoryMapperRepository.deleteAll();
+        TestUtils.retryLoop(10, 500, () -> {
+            removeDeleteFlag(AnnotationDocumentEntity.class,
+                             CaseDocumentEntity.class,
+                             MediaEntity.class,
+                             TranscriptionDocumentEntity.class);
+            transcriptionLinkedCaseRepository.deleteAll();
+            dataAnonymisationRepository.deleteAll();
+            armRpoExecutionDetailRepository.deleteAll();
+            objectAdminActionRepository.deleteAll();
+            auditRepository.deleteAll();
+            externalObjectDirectoryRepository.deleteAll();
+            annotationDocumentRepository.deleteAll();
+            caseDocumentRepository.deleteAll();
+            caseRetentionRepository.deleteAll();
+            caseManagementRetentionRepository.deleteAll();
+            transcriptionDocumentRepository.deleteAll();
+            transcriptionCommentRepository.deleteAll();
+            transcriptionWorkflowRepository.deleteAll();
+            transcriptionDocumentRepository.deleteAll();
+            transcriptionRepository.deleteAll();
+            transientObjectDirectoryRepository.deleteAll();
+            transformedMediaRepository.deleteAll();
+            mediaRequestRepository.deleteAll();
+            eventLinkedCaseRepository.deleteAll();
+            eventRepository.deleteAll();
+            hearingRepository.deleteAll();
+            annotationRepository.deleteAll();
+            mediaLinkedCaseRepository.deleteAll();
+            mediaRepository.deleteAll();
+            notificationRepository.deleteAll();
+            nodeRegisterRepository.deleteAll();
+            courtroomRepository.deleteAll();
+            defenceRepository.deleteAll();
+            defendantRepository.deleteAll();
+            prosecutorRepository.deleteAll();
+            caseRepository.deleteAll();
+            judgeRepository.deleteAll();
+            dailyListRepository.deleteAll();
+            courthouseRepository.deleteAll();
+            regionRepository.deleteAll();
+            annotationRepository.deleteAll();
+            transcriptionRepository.deleteAll();
+            transcriptionWorkflowRepository.deleteAll();
+            retentionConfidenceCategoryMapperRepository.deleteAll();
+        });
+    }
+
+    public void removeAllAudits() {
+        removeAudits(UserAccountEntity.class,
+                     MediaRequestEntity.class,
+                     ArmAutomatedTaskEntity.class,
+                     AutomatedTaskEntity.class,
+                     CourthouseEntity.class,
+                     EventHandlerEntity.class,
+                     NodeRegisterEntity.class,
+                     RetentionPolicyTypeEntity.class,
+                     SecurityGroupEntity.class,
+                     TranscriptionCommentEntity.class,
+                     TranscriptionEntity.class,
+                     TranscriptionWorkflowEntity.class,
+                     UserAccountEntity.class);
+    }
+
+    private void removeAudits(Class<?>... classes) {
+        stream(classes).forEach(tClass -> {
+            AuditTable table = tClass.getAnnotation(AuditTable.class);
+            if (table != null) {
+                entityManager.createNativeQuery("delete from darts." + table.value())
+                    .executeUpdate();
+            }
+            AnnotationUtils.findAnnotatedFields(tClass, AuditJoinTable.class, field -> true)
+                .forEach(field -> {
+                    AuditJoinTable auditJoinTable = field.getAnnotation(AuditJoinTable.class);
+                    entityManager.createNativeQuery("delete from darts." + auditJoinTable.name())
+                        .executeUpdate();
+                });
+        });
+        entityManager.createNativeQuery("delete from darts.revinfo")
+            .executeUpdate();
     }
 
     @SafeVarargs
@@ -566,7 +620,7 @@ public class DartsDatabaseStub {
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
         save(hearingEntity.getCourtCase());
-        saveAllList(hearingEntity.getJudges());
+        saveAllCollection(hearingEntity.getJudges());
         return dartsDatabaseSaveStub.save(hearingEntity);
     }
 
@@ -575,14 +629,17 @@ public class DartsDatabaseStub {
         if (courthouse == null) {
             return null;
         }
-        dartsDatabaseSaveStub.save(courthouse.getCreatedBy());
+        UserAccountEntity createdBy = dartsDatabaseSaveStub.save(courthouse.getCreatedBy());
+        courthouse.setCreatedBy(createdBy);
+        courthouse.setLastModifiedBy(createdBy);
         return dartsDatabaseSaveStub.save(courthouse);
     }
 
     @Transactional
     public CourtroomEntity save(CourtroomEntity courtroom) {
         save(courtroom.getCourthouse());
-        dartsDatabaseSaveStub.save(courtroom.getCreatedBy());
+        UserAccountEntity createdBy = dartsDatabaseSaveStub.save(courtroom.getCreatedBy());
+        courtroom.setCreatedBy(createdBy);
         return dartsDatabaseSaveStub.save(courtroom);
     }
 
@@ -592,7 +649,7 @@ public class DartsDatabaseStub {
             return null;
         }
         save(courtCase.getCourthouse());
-        saveAllList(courtCase.getJudges());
+        saveAllCollection(courtCase.getJudges());
         courtCase.getDefenceList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
         courtCase.getDefendantList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
         courtCase.getProsecutorList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
@@ -702,7 +759,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public <T> void saveAllList(List<T> entities) {
+    public <T> void saveAllCollection(Collection<T> entities) {
         if (entities == null || entities.isEmpty()) {
             return;
         }
@@ -752,16 +809,22 @@ public class DartsDatabaseStub {
         return save(mediaRequestEntity);
     }
 
-    public void createTestUserAccount() {
-        if (userAccountRepository.findByEmailAddressIgnoreCase("test.user@example.com").isEmpty()) {
+    public UserAccountEntity createTestUserAccount() {
+        Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findFirstByEmailAddressIgnoreCase("test.user@example.com");
+        if (userAccountEntity.isEmpty()) {
             UserAccountEntity testUser = new UserAccountEntity();
             testUser.setEmailAddress("test.user@example.com");
             testUser.setUserFullName("testuser");
             testUser.setAccountGuid(UUID.randomUUID().toString());
             testUser.setIsSystemUser(false);
             testUser.setActive(true);
-            userAccountRepository.saveAndFlush(testUser);
+            testUser.setCreatedById(0);
+            testUser.setCreatedDateTime(OffsetDateTime.now());
+            testUser.setLastModifiedById(0);
+            testUser.setLastModifiedDateTime(OffsetDateTime.now());
+            return userAccountRepository.saveAndFlush(testUser);
         }
+        return userAccountEntity.get();
     }
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
@@ -812,33 +875,32 @@ public class DartsDatabaseStub {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity =
             getRetentionPolicyTypeEntity(RetentionPolicyEnum.MANUAL);
 
-        CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
+        CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(courtCase, retentionPolicyTypeEntity, "a_state");
         caseRetentionEntity1 = dartsDatabaseSaveStub.save(caseRetentionEntity1);
         Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
-        CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(2, courtCase, retentionPolicyTypeEntity, "b_state");
+        CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(courtCase, retentionPolicyTypeEntity, "b_state");
         caseRetentionEntity2 = dartsDatabaseSaveStub.save(caseRetentionEntity2);
         Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
-        CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity, "c_state");
+        CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(courtCase, retentionPolicyTypeEntity, "c_state");
         caseRetentionEntity3 = dartsDatabaseSaveStub.save(caseRetentionEntity3);
         Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
         return List.of(caseRetentionEntity1, caseRetentionEntity2, caseRetentionEntity3);
     }
 
-    public CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
+    public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
                                                          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
 
-        return createCaseRetentionObject(id, courtCase,
+        return createCaseRetentionObject(courtCase,
                                          OffsetDateTime.now().plusYears(7),
                                          retentionPolicyTypeEntity, state, false);
     }
 
-    public CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
+    public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
                                                          OffsetDateTime retainUntil,
                                                          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state,
                                                          boolean save) {
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
         caseRetentionEntity.setCourtCase(courtCase);
-        caseRetentionEntity.setId(id);
         caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
         caseRetentionEntity.setTotalSentence("10y0m0d");
         caseRetentionEntity.setRetainUntil(retainUntil);
@@ -901,9 +963,13 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
-        securityGroup.getUsers().add(userAccount);
-        userAccount.getSecurityGroupEntities().add(securityGroup);
         dartsDatabaseSaveStub.save(securityGroup);
+        if (userAccount.getSecurityGroupEntities().stream().anyMatch(securityGroupEntity -> {
+            return securityGroup.getId().equals(securityGroupEntity.getId());
+        })) {
+            return;
+        }
+        userAccount.getSecurityGroupEntities().add(securityGroup);
         dartsDatabaseSaveStub.save(userAccount);
     }
 
@@ -922,8 +988,7 @@ public class DartsDatabaseStub {
     @Transactional
     public EventHandlerEntity createEventHandlerData(String subtype) {
         var eventHandler = createEventHandlerWith("DarStartHandler", "99999", subtype);
-        saveWithTransientEntities(eventHandler);
-        return eventHandler;
+        return save(eventHandler);
     }
 
     @Transactional
@@ -1078,5 +1143,14 @@ public class DartsDatabaseStub {
             courthouseName,
             MediaLinkedCaseSourceType.LEGACY
         );
+    }
+
+    @Transactional
+    public void clearDb() {
+        removeAllAudits();
+        resetSequences();
+        clearDatabaseInThisOrder();
+        resetTablesWithPredefinedTestData();
+        removeAllAudits();//Ensures any newly added delete audits are removed
     }
 }

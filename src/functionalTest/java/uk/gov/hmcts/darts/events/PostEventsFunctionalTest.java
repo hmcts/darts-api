@@ -27,22 +27,22 @@ class PostEventsFunctionalTest extends FunctionalTest {
         String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
         String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
 
-        createCourtroomAndCourthouse(courthouseName,courtroomName);
+        createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String bodyText = """
-                      {
-                        "message_id": "100",
-                        "type": "1000",
-                        "sub_type": "1002",
-                        "event_id": "12345",
-                        "courthouse": "<<courtHouseName>>",
-                        "courtroom": "<<courtroomName>>",
-                        "case_numbers": [
-                          "FUNC-Swansea_case_1"
-                        ],
-                        "event_text": "A temporary event created by functional test",
-                        "date_time": "2023-08-08T14:01:06Z"
-                      }""";
+            {
+              "message_id": "100",
+              "type": "1000",
+              "sub_type": "1002",
+              "event_id": "12345",
+              "courthouse": "<<courtHouseName>>",
+              "courtroom": "<<courtroomName>>",
+              "case_numbers": [
+                "FUNC-Swansea_case_1"
+              ],
+              "event_text": "A temporary event created by functional test",
+              "date_time": "2023-08-08T14:01:06Z"
+            }""";
         bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
         bodyText = bodyText.replace("<<courtroomName>>", courtroomName);
 

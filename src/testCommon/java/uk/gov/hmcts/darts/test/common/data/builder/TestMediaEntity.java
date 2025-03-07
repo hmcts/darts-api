@@ -9,12 +9,14 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEntity> {
 
@@ -28,7 +30,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
                            boolean isDeleted, Boolean isCurrent, UserAccountEntity deletedBy,
                            OffsetDateTime deletedTimestamp, String mediaStatus,
                            List<HearingEntity> hearingList, OffsetDateTime retainUntilTs,
-                           List<ObjectAdminActionEntity> adminActionReasons, Integer retConfScore,
+                           List<ObjectAdminActionEntity> objectAdminActions, RetentionConfidenceScoreEnum retConfScore,
                            String retConfReason, OffsetDateTime createdDateTime,
                            UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
                            UserAccountEntity lastModifiedBy) {
@@ -58,7 +60,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
         setMediaStatus(mediaStatus);
         setHearingList(hearingList != null ? hearingList : new ArrayList<>());
         setRetainUntilTs(retainUntilTs);
-        setAdminActionReasons(adminActionReasons != null ? adminActionReasons : new ArrayList<>());
+        setObjectAdminActions(objectAdminActions != null ? objectAdminActions : new ArrayList<>());
         setRetConfScore(retConfScore);
         setRetConfReason(retConfReason);
         setCreatedDateTime(createdDateTime);

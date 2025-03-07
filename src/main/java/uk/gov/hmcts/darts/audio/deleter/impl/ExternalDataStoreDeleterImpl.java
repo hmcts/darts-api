@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,7 +34,7 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
 
     @Override
     public boolean delete(T entityToBeDeleted) {
-        UUID externalLocation = entityToBeDeleted.getLocation();
+        String externalLocation = entityToBeDeleted.getLocation();
         Integer entityId = entityToBeDeleted.getId();
         boolean deleted = false;
         int statusId = entityToBeDeleted.getStatusId();

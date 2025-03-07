@@ -76,7 +76,7 @@ public class TestSupportController {
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
 
-    @SuppressWarnings({"unchecked", "PMD.CloseResource"})
+    @SuppressWarnings({"PMD.CloseResource"})
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
         Session session = sessionFactory.openSession();
@@ -186,11 +186,11 @@ public class TestSupportController {
         if (!courthouseName.startsWith("FUNC-")) {
             return new ResponseEntity<>("Courthouse name must start with FUNC-", BAD_REQUEST);
         }
-        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName));
 
-        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUC, courtroomName).isEmpty()) {
-            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUC)
-                .orElseGet(() -> newCourthouse(courthouseNameUC));
+        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUpperTrimmed, courtroomName).isEmpty()) {
+            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUpperTrimmed)
+                .orElseGet(() -> newCourthouse(courthouseNameUpperTrimmed));
 
             newUserCourthousePermissions(courthouse);
             newCourtroom(courtroomName, courthouse);
@@ -226,7 +226,8 @@ public class TestSupportController {
         courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(courthouseName));
+        Optional<CourthouseEntity> foundCourthouse =
+            courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName)));
         if (foundCourthouse.isPresent()) {
             courtCase.setCourthouse(foundCourthouse.get());
         } else {
@@ -382,8 +383,8 @@ public class TestSupportController {
 
     private static List<Integer> eventIdsToBeDeleted(Session session, List<Integer> heaIds) {
         List<Integer> eventsByHearing = session.createNativeQuery("""
-                                                                 select eve_id from darts.hearing_event_ae where hea_id in (?)
-                                                                 """, Integer.class)
+                                                                      select eve_id from darts.hearing_event_ae where hea_id in (?)
+                                                                      """, Integer.class)
             .setParameter(1, heaIds)
             .getResultList();
 
@@ -468,10 +469,11 @@ public class TestSupportController {
         courtCase.setCaseNumber(caseNumber);
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
+        UserAccountEntity userAccount = userAccountRepository.getReferenceById(0);
 
-        courtCase.setCreatedBy(userAccountRepository.getReferenceById(0));
+        courtCase.setCreatedBy(userAccount);
         courtCase.setCreatedDateTime(OffsetDateTime.now());
-        courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        courtCase.setLastModifiedBy(userAccount);
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
         String courtroomName = "FUNC-" + randomAlphanumeric(7).toUpperCase(Locale.ENGLISH);
@@ -487,17 +489,16 @@ public class TestSupportController {
         if (retentionPolicyTypeEntity.isPresent()) {
             CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
             caseRetentionEntity.setCourtCase(courtCase);
-            caseRetentionEntity.setId(1);
             caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity.get());
             caseRetentionEntity.setTotalSentence("10y0m0d");
-            caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
+            caseRetentionEntity.setSubmittedBy(userAccount);
             caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
             caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
             caseRetentionEntity.setCurrentState("a_state");
             caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
-            caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+            caseRetentionEntity.setCreatedBy(userAccount);
             caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
-            caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+            caseRetentionEntity.setLastModifiedBy(userAccount);
 
             caseRetentionRepository.saveAndFlush(caseRetentionEntity);
         }

@@ -38,16 +38,17 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream"})
     @Override
     @Transactional
-    public void processSingleElement(ExternalObjectDirectoryEntity inboundEodEntity) {
+    public void processSingleElement(Integer inboundEodEntityId) {
+        ExternalObjectDirectoryEntity inboundEodEntity = externalObjectDirectoryRepository.findById(inboundEodEntityId).orElseThrow();
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundEodEntity);
 
         unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.awaitingVerificationStatus());
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
         try {
-            UUID inboundExternalLocation = inboundEodEntity.getExternalLocation();
-            UUID unstructuredExternalLocation = UUID.randomUUID();
+            String inboundExternalLocation = inboundEodEntity.getExternalLocation();
+            String unstructuredExternalLocation = UUID.randomUUID().toString();
             dataManagementService.copyBlobData(
-                getInboundContainerName(), getUnstructuredContainerName(), inboundExternalLocation.toString(), unstructuredExternalLocation.toString());
+                getInboundContainerName(), getUnstructuredContainerName(), inboundExternalLocation, unstructuredExternalLocation);
             unstructuredExternalObjectDirectoryEntity.setChecksum(inboundEodEntity.getChecksum());
             unstructuredExternalObjectDirectoryEntity.setExternalLocation(unstructuredExternalLocation);
             unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());

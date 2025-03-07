@@ -24,6 +24,10 @@ public class CreateExportBasedOnSearchResultsTableRequest {
     private String productionName;
     @NonNull
     private String storageAccountId;
+    @NonNull
+    private Boolean onlyForCurrentUser;
+    @NonNull
+    private Integer exportType;
 
     @Data
     @Builder

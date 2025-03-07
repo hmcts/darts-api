@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.cases.http.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
+import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
@@ -50,6 +51,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
 @RestController
 @RequiredArgsConstructor
@@ -84,7 +86,7 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {MID_TIER})
+        globalAccessSecurityRoles = {MID_TIER, XHIBIT})
     public ResponseEntity<PostCaseResponse> casesPost(AddCaseRequest addCaseRequest) {
         DataUtil.preProcess(addCaseRequest);
         validateRequest(addCaseRequest);
@@ -106,7 +108,7 @@ public class CaseController implements CasesApi {
     ) {
         validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom());
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber()))
+            .caseNumber(advancedSearchRequest.getCaseNumber())
             .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
             .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
             .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
@@ -118,7 +120,6 @@ public class CaseController implements CasesApi {
         RequestValidator.validate(request);
         List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
         return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
-
     }
 
     @Override
@@ -179,11 +180,18 @@ public class CaseController implements CasesApi {
         return new ResponseEntity<>(caseService.adminCaseSearch(adminCasesSearchRequest), HttpStatus.OK);
     }
 
-    private void validateUppercase(String courthouse, String courtroom) {
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    public ResponseEntity<AdminSingleCaseResponseItem> adminCasesIdGet(Integer id) {
+        return new ResponseEntity<>(caseService.adminGetCaseById(id), HttpStatus.OK);
+    }
+
+    void validateUppercase(String courthouse, String courtroom) {
         if (!CourtValidationUtils.isUppercase(courthouse, courtroom)) {
             throw new DartsApiException(CaseApiError.INVALID_REQUEST, "Courthouse and courtroom must be uppercase.");
         }
     }
-
 
 }

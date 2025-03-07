@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.retention.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -68,7 +68,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     MediaRepository mediaRepository;
     @Autowired
     ExternalObjectDirectoryStub eodStub;
-    @SpyBean
+    @MockitoSpyBean
     ExternalObjectDirectoryRepository eodRepository;
     @Autowired
     AnnotationStub annotationStub;
@@ -88,9 +88,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     CaseDocumentStub caseDocumentStub;
     @Autowired
     CaseDocumentRepository caseDocumentRepository;
-    @SpyBean
+    @MockitoSpyBean
     ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
-    @MockBean
+    @MockitoBean
     UserIdentity userIdentity;
 
     @Autowired
@@ -332,9 +332,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         tr2.addHearing(hear2);
         transcriptionRepository.save(tr2);
 
-        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID());
-        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID());
-        transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND, UUID.randomUUID());
+        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID().toString());
+        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID().toString());
+        transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND, UUID.randomUUID().toString());
 
         var trDoc1 = tr1.getTranscriptionDocumentEntities().getFirst();
         eodStub.createAndSaveExternalObjectDirectory(trDoc1.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
@@ -378,9 +378,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         var caseDoc2 = caseDocumentStub.createAndSaveCaseDocumentEntity(caseA, testUser);
         var caseDoc3 = caseDocumentStub.createAndSaveCaseDocumentEntity(caseB, testUser);
 
-        eodStub.createExternalObjectDirectory(caseDoc1, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID());
-        eodStub.createExternalObjectDirectory(caseDoc2, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID());
-        eodStub.createExternalObjectDirectory(caseDoc3, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID());
+        eodStub.createExternalObjectDirectory(caseDoc1, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID().toString());
+        eodStub.createExternalObjectDirectory(caseDoc2, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID().toString());
+        eodStub.createExternalObjectDirectory(caseDoc3, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID().toString());
 
         // when
         processor.processApplyRetentionToCaseAssociatedObjects(1000);

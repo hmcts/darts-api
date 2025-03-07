@@ -5,8 +5,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -46,7 +45,7 @@ class AnnotationGetTest extends IntegrationBase {
 
     @Mock
     private DownloadResponseMetaData downloadResponseMetaData;
-    @MockBean
+    @MockitoBean
     private DataManagementFacade dataManagementFacade;
     @Autowired
     private MockMvc mockMvc;
@@ -120,7 +119,7 @@ class AnnotationGetTest extends IntegrationBase {
             annotationDocumentEntity,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+            "665e00c8-5b82-4392-8766-e0c982f603d3"
         );
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
@@ -129,7 +128,7 @@ class AnnotationGetTest extends IntegrationBase {
             annotationDocumentEntity,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+            "665e00c8-5b82-4392-8766-e0c982f603d3"
         );
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod2);

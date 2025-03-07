@@ -22,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestCourtCaseEntity extends CourtCaseEntity implements DbInsertable<CourtCaseEntity> {
 
@@ -112,7 +113,7 @@ public class TestCourtCaseEntity extends CourtCaseEntity implements DbInsertable
 
         @Override
         public TestCourtCaseEntity build() {
-           return builder.build();
+            return builder.build();
         }
 
         @Override

@@ -5,7 +5,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -19,6 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -49,7 +50,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Test
@@ -70,6 +71,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         );
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -94,6 +96,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
 
         lenient().when(mockUserIdentity.getUserAccount()).thenReturn(user);
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
 
         verifyNoMoreInteractions(mockUserIdentity);
     }

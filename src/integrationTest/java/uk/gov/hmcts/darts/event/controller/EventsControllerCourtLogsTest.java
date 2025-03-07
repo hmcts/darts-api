@@ -8,8 +8,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -56,7 +56,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
     private static final String SOME_TEXT = "some-text";
-    public static final String LOG = "LOG";
+    private static final String LOG = "LOG";
 
     @Autowired
     private EventRepository eventRepository;
@@ -64,7 +64,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @BeforeEach

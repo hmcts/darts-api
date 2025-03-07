@@ -12,10 +12,10 @@ import java.time.ZoneOffset;
 
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
-
-public class DailyListTestData {
+public final class DailyListTestData {
 
     private DailyListTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static DailyListEntity createDailyList(LocalTime time, String source, String listingCourthouse, String fileLocation) throws IOException {

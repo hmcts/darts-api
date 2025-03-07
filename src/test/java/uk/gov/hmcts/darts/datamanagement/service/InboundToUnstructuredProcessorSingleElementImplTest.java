@@ -40,7 +40,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
     private static final Integer INBOUND_ID = 5555;
     public static final String UUID_REGEX = "([a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8})";
-    private static final UUID EXTERNAL_LOCATION_UUID = UUID.randomUUID();
+    private static final String EXTERNAL_LOCATION_UUID = UUID.randomUUID().toString();
     private static final String INBOUND_CONTAINER_NAME = "darts-inbound-container";
     private static final String UNSTRUCTURED_CONTAINER_NAME = "darts-unstructured";
     @Mock
@@ -87,7 +87,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryRepository.findById(INBOUND_ID).get());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -104,11 +104,11 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
         when(caseDocumentEntity.getId()).thenReturn(44);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryRepository.findById(INBOUND_ID).get());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         verify(dataManagementService).copyBlobData(
-            eq(INBOUND_CONTAINER_NAME), eq(UNSTRUCTURED_CONTAINER_NAME), eq(EXTERNAL_LOCATION_UUID.toString()), matches(UUID_REGEX));
+            eq(INBOUND_CONTAINER_NAME), eq(UNSTRUCTURED_CONTAINER_NAME), eq(EXTERNAL_LOCATION_UUID), matches(UUID_REGEX));
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
         ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
@@ -122,7 +122,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class,
-                     () -> inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryRepository.findById(INBOUND_ID).get()));
+                     () -> inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID));
     }
 
 }

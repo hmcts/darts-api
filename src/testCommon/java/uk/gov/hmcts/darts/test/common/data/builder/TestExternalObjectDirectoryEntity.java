@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.test.common.data.builder;
 
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
@@ -14,15 +15,15 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity> {
     @lombok.Builder
     public TestExternalObjectDirectoryEntity(Integer id, MediaEntity media, TranscriptionDocumentEntity transcriptionDocumentEntity,
                                              AnnotationDocumentEntity annotationDocumentEntity, CaseDocumentEntity caseDocument,
                                              ObjectRecordStatusEntity status,
-                                             ExternalLocationTypeEntity externalLocationType, UUID externalLocation,
+                                             ExternalLocationTypeEntity externalLocationType, String externalLocation,
                                              String externalFileId, String externalRecordId,
                                              String checksum, Integer transferAttempts, Integer verificationAttempts,
                                              OffsetDateTime dataIngestionTs, String manifestFile,
@@ -66,11 +67,10 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
         }
     }
 
-    public static class TestExternalObjectDirectoryuilderRetrieve
+    @NoArgsConstructor
+    public static class TestExternalObjectDirectoryBuilderRetrieve
         implements BuilderHolder<TestExternalObjectDirectoryEntity,
         TestExternalObjectDirectoryEntityBuilder> {
-        public TestExternalObjectDirectoryuilderRetrieve() {
-        }
 
         private TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder builder = TestExternalObjectDirectoryEntity.builder();
 

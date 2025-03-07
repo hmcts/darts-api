@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,7 +84,7 @@ class DataStoreToArmHelperTest {
             mediaEntity1,
             ARM,
             ARM_INGESTION,
-            UUID.randomUUID());
+            UUID.randomUUID().toString());
         externalObjectDirectoryEntity.setId(345);
         externalObjectDirectoryEntity.setStatus(EodHelper.armIngestionStatus());
         externalObjectDirectoryEntity.setOsrUuid(1234L);
@@ -98,13 +97,11 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void testGetEodEntitiesToSendToArm() {
+    void getEodEntitiesToSendToArm_success() {
         // given
-        ExternalLocationTypeEntity sourceLocation = mock(ExternalLocationTypeEntity.class);
-        ExternalLocationTypeEntity armLocation = mock(ExternalLocationTypeEntity.class);
-        ObjectRecordStatusEntity armRawStatusFailed = mock(ObjectRecordStatusEntity.class);
-        ObjectRecordStatusEntity armManifestFailed = mock(ObjectRecordStatusEntity.class);
-        when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(armRawStatusFailed).thenReturn(armManifestFailed);
+        ExternalLocationTypeEntity sourceLocation = EodHelper.unstructuredLocation();
+        ExternalLocationTypeEntity armLocation = EodHelper.armLocation();
+
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(anyList(), any(), anyInt(), any(Pageable.class)))
             .thenReturn(List.of(123));
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -214,20 +211,6 @@ class DataStoreToArmHelperTest {
         // then
         verify(archiveRecordFileGenerator).generateArchiveRecords(eq("fileName"), eq(archiveRecords));
     }
-
-    @Test
-    void getFileSize() {
-        // given
-        when(externalObjectDirectoryRepository.findFileSize(anyInt())).thenReturn(1000L);
-
-        // when
-        Long result = dataStoreToArmHelper.getFileSize(externalObjectDirectoryEntity.getId());
-
-        // then
-        assertEquals(1000L, result);
-    }
-
-
 
     @Test
     void getArchiveRecordsFileName_typical() throws IOException {
