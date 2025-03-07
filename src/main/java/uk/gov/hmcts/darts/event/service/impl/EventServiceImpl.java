@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
-import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetails;
+import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
 import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventService;
 
@@ -29,8 +29,8 @@ public class EventServiceImpl implements EventService {
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
 
     @Override
-    public AdminGetEventResponseDetails adminGetEventById(Integer eventId) {
-        return eventMapper.mapToAdminGetEventsResponseForId(getEventByEveId(eventId));
+    public AdminGetEventById200Response adminGetEventById(Integer eventId) {
+        return eventMapper.mapToAdminGetEventById200Response(getEventByEveId(eventId));
     }
 
     @Override

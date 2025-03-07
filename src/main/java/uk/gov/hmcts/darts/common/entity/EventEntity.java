@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
@@ -90,5 +91,12 @@ public class EventEntity extends CreatedModifiedBaseEntity {
 
     public void addHearing(HearingEntity hearingEntity) {
         hearingEntities.add(hearingEntity);
+    }
+
+    public List<CourtCaseEntity> getLinkedCases() {
+        if (CollectionUtils.isEmpty(eventLinkedCaseEntities)) {
+            return new ArrayList<>();
+        }
+        return eventLinkedCaseEntities.stream().map(EventLinkedCaseEntity::getCourtCase).toList();
     }
 }
