@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,8 +40,8 @@ public class AudioAsyncServiceImpl implements AudioAsyncService {
             return;
         }
 
-        String courthouse = addAudioMetadataRequest.getCourthouse();
-        String courtroom = addAudioMetadataRequest.getCourtroom();
+        String courthouse = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(addAudioMetadataRequest.getCourthouse()));
+        String courtroom = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(addAudioMetadataRequest.getCourtroom()));
         OffsetDateTime start = addAudioMetadataRequest.getStartedAt().minus(audioConfigurationProperties.getPreAmbleDuration());
         OffsetDateTime end = addAudioMetadataRequest.getEndedAt().plus(audioConfigurationProperties.getPostAmbleDuration());
         List<EventEntity> courtLogs = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(

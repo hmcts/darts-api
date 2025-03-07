@@ -3,15 +3,11 @@ package uk.gov.hmcts.darts.courthouse.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -46,58 +42,52 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CourthouseServiceImplTest {
 
-    public static final String TEST_COURTHOUSE_NAME = "Test courthouse";
-    public static final int CODE = 123;
-    public static final int COURTHOUSE_ID = 11;
-    public static final String SWANSEA_NAME = "swansea";
-    public static final int SWANSEA_CODE = 457;
-    public static final String SWANSEA_NAME_UC = "SWANSEA";
+    private static final String TEST_COURTHOUSE_NAME = "Test courthouse";
+    private static final int CODE = 123;
+    private static final int COURTHOUSE_ID = 11;
+    private static final String SWANSEA_NAME = "swansea";
+    private static final int SWANSEA_CODE = 457;
+    private static final String SWANSEA_NAME_UC = "SWANSEA";
 
-    CourthouseServiceImpl courthouseService;
-
-    @Mock
-    CourthouseRepository courthouseRepository;
+    private CourthouseServiceImpl courthouseService;
 
     @Mock
-    CourthouseToCourthouseEntityMapper courthouseMapper;
+    private CourthouseRepository courthouseRepository;
 
     @Mock
-    RegionRepository regionRepository;
+    private CourthouseToCourthouseEntityMapper courthouseMapper;
 
     @Mock
-    AdminRegionToRegionEntityMapper regionMapper;
+    private RegionRepository regionRepository;
 
     @Mock
-    CourthousePatchValidator courthousePatchValidator;
+    private AdminRegionToRegionEntityMapper regionMapper;
 
     @Mock
-    CourthouseUpdateMapper courthouseUpdateMapper;
+    private CourthousePatchValidator courthousePatchValidator;
 
     @Mock
-    AuthorisationApi authorisationApi;
+    private CourthouseUpdateMapper courthouseUpdateMapper;
 
     @Mock
-    AuditApi auditApi;
+    private AuthorisationApi authorisationApi;
 
-    @MockitoBean
-    private UserIdentity mockUserIdentity;
-
-    @Captor
-    ArgumentCaptor<Integer> captorInteger;
+    @Mock
+    private AuditApi auditApi;
 
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
 
     @Mock
-    HearingRepository hearingRepository;
+    private HearingRepository hearingRepository;
     @Mock
-    CaseRepository caseRepository;
+    private CaseRepository caseRepository;
     @Mock
-    SecurityRoleRepository securityRoleRepository;
+    private SecurityRoleRepository securityRoleRepository;
     @Mock
-    AdminCourthouseToCourthouseEntityMapper adminMapper;
+    private AdminCourthouseToCourthouseEntityMapper adminMapper;
     @Mock
-    UserManagementApi userManagementApi;
+    private UserManagementApi userManagementApi;
 
     @BeforeEach
     void setup() {
@@ -154,7 +144,7 @@ class CourthouseServiceImplTest {
 
 
     @Test
-    void retrieveCourthouseUsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+    void retrieveCourthouse_UsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
         when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
         CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(null, SWANSEA_NAME);
@@ -163,7 +153,7 @@ class CourthouseServiceImplTest {
     }
 
     @Test
-    void retrieveCourthouseUsingCodeAndName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+    void retrieveCourthouse_UsingCodeAndName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
         when(courthouseRepository.findByCode(SWANSEA_CODE)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
         CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(SWANSEA_CODE, SWANSEA_NAME);
@@ -172,7 +162,36 @@ class CourthouseServiceImplTest {
     }
 
     @Test
-    void retrieveCourthouseUsingNameAndDifferentCode() {
+    void retrieveCourthouse_RetrievesCourthouse_UsingWhitespaceCourthouseName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+        // Given
+        when(courthouseRepository.findByCode(SWANSEA_CODE)).thenReturn(Optional.empty());
+        when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(createSwanseaCourthouseEntity()));
+
+        // When
+        CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(SWANSEA_CODE, " Swansea ");
+
+        // Then
+        assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
+        assertEquals(SWANSEA_CODE, courthouse.getCode());
+    }
+
+    @Test
+    void retrieveCourthouse_RetrievesCourthouse_UsingWhitespaceCourthouseNameAndNullCode()
+        throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+        // Given
+        when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(createSwanseaCourthouseEntity()));
+
+        // When
+        CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(null, " Swansea ");
+
+        // Then
+        assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
+        assertEquals(SWANSEA_CODE, courthouse.getCode());
+    }
+
+
+    @Test
+    void retrieveCourthouse_UsingNameAndDifferentCode() {
         when(courthouseRepository.findByCode(458)).thenReturn(Optional.empty());
         when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
@@ -188,7 +207,7 @@ class CourthouseServiceImplTest {
     }
 
     @Test
-    void retrieveCourthouseUsingInvalidName() {
+    void retrieveCourthouse_UsingInvalidName() {
         when(courthouseRepository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
         when(courthouseRepository.findByCourthouseName("TEST")).thenReturn(Optional.empty());
 
@@ -197,6 +216,23 @@ class CourthouseServiceImplTest {
             () -> courthouseService.retrieveAndUpdateCourtHouse(458, "test")
         );
 
+    }
+
+    @Test
+    void retrieveCourthouse_WithExistingNullCode() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+        // given
+        when(courthouseRepository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
+        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        courthouseEntity.setCourthouseName(SWANSEA_NAME_UC);
+        courthouseEntity.setCode(null);
+        when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(courthouseEntity));
+
+        // when
+        CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(458, SWANSEA_NAME);
+
+        // then
+        assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
+        assertEquals(458, courthouse.getCode());
     }
 
     private CourthouseEntity createSwanseaCourthouseEntity() {
