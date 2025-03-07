@@ -47,6 +47,9 @@ public class EventServiceImpl implements EventService {
 
     List<EventEntity> getRelatedEvents(Integer eveId) {
         EventEntity event = getEventByEveId(eveId);
+        if (event.getEventId() == 0) {
+            return List.of(event);
+        }
         List<Integer> caseIds = event.getEventLinkedCaseEntities().stream()
             .map(EventLinkedCaseEntity::getCourtCase)
             .filter(Objects::nonNull)

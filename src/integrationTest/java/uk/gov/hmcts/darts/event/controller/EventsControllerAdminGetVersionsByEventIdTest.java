@@ -8,6 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
@@ -49,10 +50,10 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
 
     @Test
     void adminEventsApiGetVersionsByEventIdEndpoint_shouldReturnCurrentEventAndPreviousEvents_whenEventIdIsNotZero() throws Exception {
-
         // Given
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(2, 2, false, EVENT_TS);
-        linkToCaseNumber(eventEntityVersions.get(1), "1234567890");
+        CourtCaseEntity courtCase = dartsDatabase.createCase("courthouse", "1234567890");
+        linkToCaseNumber(eventEntityVersions.get(1), courtCase);
         EventEntity currentEventEntity = eventEntityVersions.get(1).get(0);
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
@@ -124,7 +125,8 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
 
         // Given
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(2, 2, false, EVENT_TS);
-        linkToCaseNumber(eventEntityVersions.get(1), "1234567890");
+        CourtCaseEntity courtCase = dartsDatabase.createCase("courthouse", "1234567890");
+        linkToCaseNumber(eventEntityVersions.get(1), courtCase);
 
         EventEntity currentEventEntity = eventEntityVersions.get(1).get(0);
 
@@ -134,7 +136,8 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
             eventEntity.setEventId(currentEventEntity.getEventId());
             eventStub.saveEvent(eventEntity);
         });
-        linkToCaseNumber(eventEntityVersions.get(1), "new-case");
+        CourtCaseEntity courtCase2 = dartsDatabase.createCase("courthouse", "new-case");
+        linkToCaseNumber(eventEntityVersions.get(1), courtCase2);
 
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
@@ -162,7 +165,8 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
 
         // Given
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(1, 2, false, EVENT_TS);
-        linkToCaseNumber(eventEntityVersions.get(0), "1234567890");
+        CourtCaseEntity courtCase = dartsDatabase.createCase("courthouse", "1234567890");
+        linkToCaseNumber(eventEntityVersions.get(0), courtCase);
         EventEntity currentEventEntity = eventEntityVersions.get(0).get(0);
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
@@ -213,9 +217,9 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
             .andExpect(status().isNotFound());
     }
 
-    private void linkToCaseNumber(List<EventEntity> eventEntities, String number) {
+    private void linkToCaseNumber(List<EventEntity> eventEntities, CourtCaseEntity caseEntity) {
         eventEntities.forEach(eventEntity -> {
-            eventLinkedCaseStub.createCaseLinkedEvent(eventEntity, number, "courthouse");
+            eventLinkedCaseStub.createCaseLinkedEvent(eventEntity, caseEntity);
         });
     }
 }

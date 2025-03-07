@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -132,6 +133,17 @@ class EventServiceImplTest {
         verify(eventService).getRelatedEvents(123);
         verify(eventMapper)
             .mapToAdminGetEventVersionsResponseForId(eventEntities);
+    }
+
+    @Test
+    void getRelatedEvents_eventIdIsZero() {
+        EventEntity event = mock(EventEntity.class);
+        when(event.getEventId()).thenReturn(0);
+        doReturn(event).when(eventService).getEventByEveId(123);
+
+        assertThat(eventService.getRelatedEvents(123)).isEqualTo(List.of(event));
+        verifyNoInteractions(eventRepository);
+        verify(eventService).getEventByEveId(123);
     }
 
     @Test
