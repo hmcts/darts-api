@@ -24,9 +24,8 @@
   "created_by": 0,
   "last_modified_at": "<LAST_MODIFIED_AT>",
   "last_modified_by": 0,
-  "is_deleted": false,
-  "is_data_anonymised": true,
-  "data_anonymised_by": <DATA_ANONYMISED_BY>,
-  "data_anonymised_at": "2023-01-01T12:00:00Z",
+  "is_deleted": true,
+  "case_deleted_by": <CASE_DELETED_BY>,
+  "is_data_anonymised": false,
   "is_interpreter_used": false
 }
