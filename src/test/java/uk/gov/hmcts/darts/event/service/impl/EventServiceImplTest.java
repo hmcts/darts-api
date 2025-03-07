@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
+import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +26,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,26 +64,6 @@ class EventServiceImplTest {
         when(eventRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> eventService.getEventByEveId(1))
-            .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
-        verify(eventRepository, times(1)).findById(1);
-    }
-
-    @Test
-    void getEventVersionsForEveId() {
-        EventEntity event = mock(EventEntity.class);
-        when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-        when(eventRepository.findAllByEventIdExcludingEventIdZero(event.getEventId())).thenReturn(List.of(event));
-        assertThat(eventService.getEventVersionsForEveIdExcludingEventIdZero(1)).isEqualTo(List.of(event));
-        verify(eventRepository, times(1)).findById(1);
-        verify(eventRepository, times(1)).findAllByEventIdExcludingEventIdZero(event.getEventId());
-    }
-
-    @Test
-    void getEventVersionsForEveIdNotFound() {
-        when(eventRepository.findById(1)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> eventService.getEventVersionsForEveIdExcludingEventIdZero(1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
         verify(eventRepository, times(1)).findById(1);
@@ -134,5 +117,84 @@ class EventServiceImplTest {
         when(eventLinkedCaseRepository.areAllAssociatedCasesAnonymised(event)).thenReturn(false);
         assertThat(eventService.allAssociatedCasesAnonymised(event)).isFalse();
         verify(eventLinkedCaseRepository).areAllAssociatedCasesAnonymised(event);
+    }
+
+    @Test
+    void adminGetVersionsByEventId_shouldReturnEvent() {
+        List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
+        doReturn(eventEntities).when(eventService).getRelatedEvents(123);
+
+        AdminGetVersionsByEventIdResponseResult responseDetails = mock(AdminGetVersionsByEventIdResponseResult.class);
+        when(eventMapper.mapToAdminGetEventVersionsResponseForId(any())).thenReturn(responseDetails);
+
+
+        assertThat(eventService.adminGetVersionsByEventId(123)).isEqualTo(responseDetails);
+
+        verify(eventService).getRelatedEvents(123);
+        verify(eventMapper)
+            .mapToAdminGetEventVersionsResponseForId(eventEntities);
+    }
+
+    @Test
+    void getRelatedEvents_eventIdIsZero() {
+        EventEntity event = mock(EventEntity.class);
+        when(event.getEventId()).thenReturn(0);
+        doReturn(event).when(eventService).getEventByEveId(123);
+
+        assertThat(eventService.getRelatedEvents(123)).isEqualTo(List.of(event));
+        verifyNoInteractions(eventRepository);
+        verify(eventService).getEventByEveId(123);
+    }
+
+    @Test
+    void getRelatedEvents_hasSingleEventLinkedCase() {
+        CourtCaseEntity caseEntity = mock(CourtCaseEntity.class);
+        when(caseEntity.getId()).thenReturn(1);
+        EventLinkedCaseEntity eventLinkedCaseEntity = mock(EventLinkedCaseEntity.class);
+        when(eventLinkedCaseEntity.getCourtCase()).thenReturn(caseEntity);
+
+        EventEntity event = mock(EventEntity.class);
+        when(event.getEventLinkedCaseEntities()).thenReturn(List.of(eventLinkedCaseEntity));
+        when(event.getId()).thenReturn(123);
+        when(event.getEventId()).thenReturn(321);
+        doReturn(event).when(eventService).getEventByEveId(123);
+
+        List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
+        when(eventRepository.findAllByRelatedEvents(123, 321, List.of(1))).thenReturn(eventEntities);
+
+        assertThat(eventService.getRelatedEvents(123)).isEqualTo(eventEntities);
+        verify(eventRepository).findAllByRelatedEvents(123, 321, List.of(1));
+        verify(eventService).getEventByEveId(123);
+    }
+
+    @Test
+    void getRelatedEvents_hasMultipleSingleEventLinkedCase() {
+        CourtCaseEntity caseEntity1 = mock(CourtCaseEntity.class);
+        when(caseEntity1.getId()).thenReturn(1);
+        CourtCaseEntity caseEntity2 = mock(CourtCaseEntity.class);
+        when(caseEntity2.getId()).thenReturn(2);
+        CourtCaseEntity caseEntity3 = mock(CourtCaseEntity.class);
+        when(caseEntity3.getId()).thenReturn(3);
+
+        EventLinkedCaseEntity eventLinkedCaseEntity1 = mock(EventLinkedCaseEntity.class);
+        when(eventLinkedCaseEntity1.getCourtCase()).thenReturn(caseEntity1);
+        EventLinkedCaseEntity eventLinkedCaseEntity2 = mock(EventLinkedCaseEntity.class);
+        when(eventLinkedCaseEntity2.getCourtCase()).thenReturn(caseEntity2);
+        EventLinkedCaseEntity eventLinkedCaseEntity3 = mock(EventLinkedCaseEntity.class);
+        when(eventLinkedCaseEntity3.getCourtCase()).thenReturn(caseEntity3);
+
+        EventEntity event = mock(EventEntity.class);
+        when(event.getEventLinkedCaseEntities()).thenReturn(List.of(eventLinkedCaseEntity1, eventLinkedCaseEntity2, eventLinkedCaseEntity3));
+        when(event.getId()).thenReturn(123);
+        when(event.getEventId()).thenReturn(321);
+        doReturn(event).when(eventService).getEventByEveId(123);
+
+        List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
+        when(eventRepository.findAllByRelatedEvents(123, 321, List.of(1, 2, 3))).thenReturn(
+            eventEntities);
+
+        assertThat(eventService.getRelatedEvents(123)).isEqualTo(eventEntities);
+        verify(eventRepository).findAllByRelatedEvents(123, 321, List.of(1, 2, 3));
+        verify(eventService).getEventByEveId(123);
     }
 }
