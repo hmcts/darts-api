@@ -36,7 +36,7 @@ public class GetEventsResponseMapper {
 
     public List<EventEntity> filterNonLatestEvents(List<EventEntity> events) {
 
-        var groupedEvents =  events.stream()
+        var groupedEvents = events.stream()
             .collect(Collectors.groupingBy(event -> Optional.ofNullable(event.getEventId())));
 
         return groupedEvents.values().stream()
@@ -47,7 +47,7 @@ public class GetEventsResponseMapper {
     }
 
     private Stream<EventEntity> getLatestEvent(List<EventEntity> group) {
-        if (group.get(0).getEventId() == null ||  group.get(0).getEventId() == 0) {
+        if (group.getFirst().getEventId() == null || group.getFirst().getEventId() == 0) {
             // Issue with XHIBIT whereby they always send the first event over with ID zero. This means we end up with multiple events for a
             // case/hearing with ID zero and therefore always need to return these as we don't know which ones are genuine versions and which ones
             // are just first versions of events.

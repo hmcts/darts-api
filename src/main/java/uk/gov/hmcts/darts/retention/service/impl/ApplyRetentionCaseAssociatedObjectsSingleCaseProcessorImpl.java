@@ -302,7 +302,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private void updateArmEodRetention(List<ExternalObjectDirectoryEntity> armEods, String errorMessage) {
         if (armEods.size() == 1) {
-            ExternalObjectDirectoryEntity eod = armEods.get(0);
+            ExternalObjectDirectoryEntity eod = armEods.getFirst();
             eod.setUpdateRetention(true);
             eodRepository.save(eod);
         } else {

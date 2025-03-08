@@ -50,7 +50,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
 
         // Given
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(2, 2, false, EVENT_TS);
-        EventEntity currentEventEntity = eventEntityVersions.get(1).get(0);
+        EventEntity currentEventEntity = eventEntityVersions.get(1).getFirst();
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
@@ -61,7 +61,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
         AdminGetVersionsByEventIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                                                 AdminGetVersionsByEventIdResponseResult.class);
+                                                                                        AdminGetVersionsByEventIdResponseResult.class);
 
         // Then
         assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
@@ -76,15 +76,15 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(currentEventEntity.getCourtroom().getName(), responseResult.getCurrentVersion().getCourtroom().getName());
         assertEquals(currentEventEntity.getCourtroom().getCourthouse().getId(), responseResult.getCurrentVersion().getCourthouse().getId());
         assertEquals(currentEventEntity.getCourtroom().getCourthouse().getDisplayName(),
-                                responseResult.getCurrentVersion().getCourthouse().getDisplayName());
+                     responseResult.getCurrentVersion().getCourthouse().getDisplayName());
         assertEquals(currentEventEntity.getLegacyVersionLabel(), responseResult.getCurrentVersion().getVersion());
         assertEquals(currentEventEntity.getTimestamp(), responseResult.getCurrentVersion().getEventTs());
         assertEquals(currentEventEntity.getIsCurrent(), responseResult.getCurrentVersion().getIsCurrent());
         assertEquals(currentEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
-                                responseResult.getCurrentVersion().getCreatedAt());
+                     responseResult.getCurrentVersion().getCreatedAt());
         assertEquals(currentEventEntity.getCreatedBy().getId(), responseResult.getCurrentVersion().getCreatedBy());
         assertEquals(currentEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
-                                responseResult.getCurrentVersion().getLastModifiedAt());
+                     responseResult.getCurrentVersion().getLastModifiedAt());
         assertEquals(currentEventEntity.getLastModifiedBy().getId(), responseResult.getCurrentVersion().getLastModifiedBy());
 
         // Previous version
@@ -97,22 +97,22 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(previousEventEntity.getEventText(), responseResult.getPreviousVersions().getFirst().getText());
         assertEquals(previousEventEntity.getEventType().getId(), responseResult.getPreviousVersions().getFirst().getEventMapping().getId());
         assertEquals(previousEventEntity.getEventType().getEventName(),
-                                responseResult.getPreviousVersions().getFirst().getEventMapping().getName());
+                     responseResult.getPreviousVersions().getFirst().getEventMapping().getName());
         assertEquals(previousEventEntity.isLogEntry(), responseResult.getPreviousVersions().getFirst().getIsLogEntry());
         assertEquals(previousEventEntity.getCourtroom().getId(), responseResult.getPreviousVersions().getFirst().getCourtroom().getId());
         assertEquals(previousEventEntity.getCourtroom().getName(), responseResult.getPreviousVersions().getFirst().getCourtroom().getName());
         assertEquals(previousEventEntity.getCourtroom().getCourthouse().getId(),
-                                responseResult.getPreviousVersions().getFirst().getCourthouse().getId());
+                     responseResult.getPreviousVersions().getFirst().getCourthouse().getId());
         assertEquals(previousEventEntity.getCourtroom().getCourthouse().getDisplayName(),
-                                responseResult.getPreviousVersions().getFirst().getCourthouse().getDisplayName());
+                     responseResult.getPreviousVersions().getFirst().getCourthouse().getDisplayName());
         assertEquals(previousEventEntity.getLegacyVersionLabel(), responseResult.getPreviousVersions().getFirst().getVersion());
         assertEquals(previousEventEntity.getTimestamp(), responseResult.getPreviousVersions().getFirst().getEventTs());
         assertEquals(previousEventEntity.getIsCurrent(), responseResult.getPreviousVersions().getFirst().getIsCurrent());
         assertEquals(previousEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
-                                responseResult.getPreviousVersions().getFirst().getCreatedAt());
+                     responseResult.getPreviousVersions().getFirst().getCreatedAt());
         assertEquals(previousEventEntity.getCreatedBy().getId(), responseResult.getPreviousVersions().getFirst().getCreatedBy());
         assertEquals(previousEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
-                                responseResult.getPreviousVersions().getFirst().getLastModifiedAt());
+                     responseResult.getPreviousVersions().getFirst().getLastModifiedAt());
         assertEquals(previousEventEntity.getLastModifiedBy().getId(), responseResult.getPreviousVersions().getFirst().getLastModifiedBy());
     }
 
@@ -121,7 +121,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
 
         // Given
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(1, 2, false, EVENT_TS);
-        EventEntity currentEventEntity = eventEntityVersions.get(0).get(0);
+        EventEntity currentEventEntity = eventEntityVersions.get(0).getFirst();
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
@@ -133,7 +133,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
         AdminGetVersionsByEventIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                                                         AdminGetVersionsByEventIdResponseResult.class);
+                                                                                        AdminGetVersionsByEventIdResponseResult.class);
 
         // Then
         assertThat(responseResult.getPreviousVersions()).hasSize(0);

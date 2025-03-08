@@ -115,18 +115,18 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         assertEquals(documentEntity.getId(), mediaResponse.getId());
         assertEquals(documentEntity.isHidden(), mediaResponse.getIsHidden());
         assertEquals(documentEntity.isDeleted(), mediaResponse.getIsDeleted());
-        assertEquals(objectAdminActionEntity.get(0).getId(), mediaResponse.getAdminAction().getId());
-        assertEquals(objectAdminActionEntity.get(0).getComments(), mediaResponse.getAdminAction().getComments());
-        assertEquals(objectAdminActionEntity.get(0).getTicketReference(), mediaResponse.getAdminAction().getTicketReference());
-        assertEquals(objectAdminActionEntity.get(0).getObjectHiddenReason().getId(), mediaResponse.getAdminAction().getReasonId());
-        assertFalse(objectAdminActionEntity.get(0).isMarkedForManualDeletion());
-        assertEquals(objectAdminActionEntity.get(0).getHiddenBy().getId(), mediaResponse.getAdminAction().getHiddenById());
-        assertEquals(objectAdminActionEntity.get(0)
+        assertEquals(objectAdminActionEntity.getFirst().getId(), mediaResponse.getAdminAction().getId());
+        assertEquals(objectAdminActionEntity.getFirst().getComments(), mediaResponse.getAdminAction().getComments());
+        assertEquals(objectAdminActionEntity.getFirst().getTicketReference(), mediaResponse.getAdminAction().getTicketReference());
+        assertEquals(objectAdminActionEntity.getFirst().getObjectHiddenReason().getId(), mediaResponse.getAdminAction().getReasonId());
+        assertFalse(objectAdminActionEntity.getFirst().isMarkedForManualDeletion());
+        assertEquals(objectAdminActionEntity.getFirst().getHiddenBy().getId(), mediaResponse.getAdminAction().getHiddenById());
+        assertEquals(objectAdminActionEntity.getFirst()
                          .getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS),
                      mediaResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
-        assertNull(objectAdminActionEntity.get(0).getMarkedForManualDelBy());
+        assertNull(objectAdminActionEntity.getFirst().getMarkedForManualDelBy());
         assertNull(mediaResponse.getAdminAction().getMarkedForManualDeletionById());
-        assertNull(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime());
+        assertNull(objectAdminActionEntity.getFirst().getMarkedForManualDelDateTime());
         assertNull(mediaResponse.getAdminAction().getMarkedForManualDeletionAt());
     }
 

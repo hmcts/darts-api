@@ -287,7 +287,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             }
         );
         assertEquals(1, partialFailureResponse.size());
-        assertEquals(idThatDoesNotExist, partialFailureResponse.get(0).getTranscriptionId());
+        assertEquals(idThatDoesNotExist, partialFailureResponse.getFirst().getTranscriptionId());
 
         // assert partial success i.e. that the hide flags in the database have been set
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
@@ -343,7 +343,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             }
         );
         assertEquals(1, partialFailureResponse.size());
-        assertEquals(transcriptionId1, partialFailureResponse.get(0).getTranscriptionId());
+        assertEquals(transcriptionId1, partialFailureResponse.getFirst().getTranscriptionId());
 
         // assert partial success in the database
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());

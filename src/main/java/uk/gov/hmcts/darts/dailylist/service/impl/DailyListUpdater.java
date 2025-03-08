@@ -256,7 +256,7 @@ class DailyListUpdater {
             if (hearing.getDefendants().isEmpty()) {
                 return hearing.getCaseNumber();
             } else {
-                String urn = hearing.getDefendants().get(0).getUrn();
+                String urn = hearing.getDefendants().getFirst().getUrn();
                 if (StringUtils.isBlank(urn)) {
                     log.warn("Case number not found for hearing: daily_list_id={}, hearing_date={}",
                              dailyListEntity.getId(), hearing.getHearingDetails().getHearingDate());

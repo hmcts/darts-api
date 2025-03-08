@@ -103,7 +103,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .toList();
 
         Assertions.assertEquals(1, results.size());
-        EventEntity persistedEvent = results.get(0);
+        EventEntity persistedEvent = results.getFirst();
 
         EventHandlerEntity eventType = persistedEvent.getEventType();
         Assertions.assertEquals("New Description", eventType.getEventName());
@@ -220,8 +220,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .toList();
 
         Assertions.assertEquals(1, results.size());
-        Assertions.assertEquals("40750", results.get(0).getEventType().getType());
-        Assertions.assertEquals("12309", results.get(0).getEventType().getSubType());
+        Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
+        Assertions.assertEquals("12309", results.getFirst().getEventType().getSubType());
     }
 
     @Test
@@ -259,8 +259,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .toList();
 
         Assertions.assertEquals(1, results.size());
-        Assertions.assertEquals("40750", results.get(0).getEventType().getType());
-        Assertions.assertNull(results.get(0).getEventType().getSubType());
+        Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
+        Assertions.assertNull(results.getFirst().getEventType().getSubType());
     }
 
     private static EventHandlerEntity getActiveHandler() {

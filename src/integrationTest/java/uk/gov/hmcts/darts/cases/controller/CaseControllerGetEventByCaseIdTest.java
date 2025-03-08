@@ -111,7 +111,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             }]
             """;
 
-        expectedJson = expectedJson.replace("<event-id>", eventEntityList.get(0).getId().toString());
+        expectedJson = expectedJson.replace("<event-id>", eventEntityList.getFirst().getId().toString());
         expectedJson = expectedJson.replace("<hearing-id>", hearingEntity.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -136,7 +136,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         eventEntityList = createEventsWithDefaults(1).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, SECTION_11_1981_DB_ID))
             .toList();
-        EventEntity eventEntity = eventEntityList.get(0);
+        EventEntity eventEntity = eventEntityList.getFirst();
         eventEntity.setEventId(3);
         eventEntity.setTimestamp(eventEntity.getTimestamp().plusDays(1));
 
@@ -148,27 +148,27 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-           
-            [
-             {
-               "id": 2,
-               "hearing_id": 1,
-               "hearing_date": "2023-01-01",
-               "timestamp": "2023-01-02T12:00:00Z",
-               "name": "Section 11 of the Contempt of Court Act 1981",
-               "is_data_anonymised": false,
-               "text": "some-event-text-1"
-             },
-             {
-               "id": 1,
-               "hearing_id": 1,
-               "hearing_date": "2023-01-01",
-               "timestamp": "2023-01-01T12:00:00Z",
-               "name": "Section 11 of the Contempt of Court Act 1981",
-               "is_data_anonymised": false,
-               "text": "some-event-text-1"
-             }
-           ]
+            
+             [
+              {
+                "id": 2,
+                "hearing_id": 1,
+                "hearing_date": "2023-01-01",
+                "timestamp": "2023-01-02T12:00:00Z",
+                "name": "Section 11 of the Contempt of Court Act 1981",
+                "is_data_anonymised": false,
+                "text": "some-event-text-1"
+              },
+              {
+                "id": 1,
+                "hearing_id": 1,
+                "hearing_date": "2023-01-01",
+                "timestamp": "2023-01-01T12:00:00Z",
+                "name": "Section 11 of the Contempt of Court Act 1981",
+                "is_data_anonymised": false,
+                "text": "some-event-text-1"
+              }
+            ]
             """;
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);

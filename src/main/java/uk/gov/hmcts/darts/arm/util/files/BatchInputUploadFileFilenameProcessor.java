@@ -36,7 +36,7 @@ public class BatchInputUploadFileFilenameProcessor {
             List<String> tokens = Arrays.asList(filename.split(ARM_FILENAME_SEPARATOR));
 
             if (tokens.size() == NUMBER_OF_TOKENS) {
-                prefix = tokens.get(0);
+                prefix = tokens.getFirst();
                 uuidString = tokens.get(1);
                 hashcode = tokens.get(2);
                 status = tokens.get(3);

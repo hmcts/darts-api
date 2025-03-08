@@ -734,7 +734,7 @@ class TranscriptionResponseMapperTest {
 
         AdminMarkedForDeletionResponseItem response = transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(documentEntity);
 
-        ObjectAdminActionEntity adminActionEntity = documentEntity.getAdminActions().get(0);
+        ObjectAdminActionEntity adminActionEntity = documentEntity.getAdminActions().getFirst();
         assertEquals(adminActionEntity.getId(), response.getAdminAction().getId());
         assertEquals(adminActionEntity.getComments(), response.getAdminAction().getComments());
         assertEquals(adminActionEntity.getTicketReference(), response.getAdminAction().getTicketReference());
@@ -872,7 +872,7 @@ class TranscriptionResponseMapperTest {
             response -> response.getComments().stream().map(TranscriptionWorkflowsComment::getComment)).toList();
 
         assertEquals(6, responseCommentList.size());
-        assertEquals("2a", responseCommentList.get(0));
+        assertEquals("2a", responseCommentList.getFirst());
         assertEquals("2b", responseCommentList.get(1));
         assertEquals("1a", responseCommentList.get(2));
         assertEquals("1b", responseCommentList.get(3));

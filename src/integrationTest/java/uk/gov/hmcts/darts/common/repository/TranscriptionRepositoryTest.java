@@ -128,7 +128,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
 
         // then
         assertEquals(1, result.size());
-        assertEquals(transcriptionCompleteOld.getId(), result.get(0));
+        assertEquals(transcriptionCompleteOld.getId(), result.getFirst());
     }
 
     @Test

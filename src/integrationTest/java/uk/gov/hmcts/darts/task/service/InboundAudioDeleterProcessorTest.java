@@ -81,7 +81,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
 
             assertEquals(1, foundMediaList.size());
 
-            ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+            ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
             assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
             assertEquals(USER_EMAIL_ADDRESS, foundMedia.getLastModifiedBy().getEmailAddress());
         });
@@ -134,7 +134,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(STORED.getId(), foundMedia.getStatus().getId());
     }
 }

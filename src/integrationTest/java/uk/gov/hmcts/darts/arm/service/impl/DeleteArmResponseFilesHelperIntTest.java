@@ -59,7 +59,7 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-        eodRpoPending = dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_RPO_PENDING, ARM);
+        eodRpoPending = dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.getFirst(), ARM_RPO_PENDING, ARM);
         eodFailed = dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(1), ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED, ARM);
         dartsDatabase.save(eodRpoPending);
         dartsDatabase.save(eodFailed);

@@ -24,7 +24,7 @@ public class PolicyHasNoPendingRevisionValidator implements Validator<String> {
         List<RetentionPolicyTypeEntity> entitiesByFixedPolicyKey = retentionPolicyTypeRepository.findByFixedPolicyKeyOrderByPolicyStartDesc(
             fixedPolicyKey);
         if (entitiesByFixedPolicyKey.size() > 1) {
-            RetentionPolicyTypeEntity currentPolicyForKey = entitiesByFixedPolicyKey.get(0);
+            RetentionPolicyTypeEntity currentPolicyForKey = entitiesByFixedPolicyKey.getFirst();
             if (currentPolicyForKey.getPolicyStart().isAfter(currentTimeHelper.currentOffsetDateTime())) {
                 throw new DartsApiException(RetentionApiError.TARGET_POLICY_HAS_PENDING_REVISION,
                                             Map.of("pending_revision_id", currentPolicyForKey.getId()));

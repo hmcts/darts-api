@@ -145,7 +145,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertThat(transcriptionEntity.getCourtroom().getId()).isEqualTo(hearing.getCourtroom().getId());
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         assertEquals(2, transcriptionWorkflowEntities.size());
-        assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
+        assertTranscriptionWorkflow(transcriptionWorkflowEntities.getFirst(),
                                     REQUESTED, testUser
         );
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(1),
@@ -171,7 +171,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private void assertTranscriptionLinkedCase(TranscriptionEntity transcriptionEntity, CourtCaseEntity courtCase) {
         List<TranscriptionLinkedCaseEntity> transcriptionLinkedCaseEntities = transcriptionLinkedCaseRepository.findAll();
         assertThat(transcriptionLinkedCaseEntities).hasSize(1);
-        TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity = transcriptionLinkedCaseEntities.get(0);
+        TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity = transcriptionLinkedCaseEntities.getFirst();
 
         assertThat(transcriptionLinkedCaseEntity.getTranscription()).isEqualTo(transcriptionEntity);
         assertThat(transcriptionLinkedCaseEntity.getCourtCase()).isEqualTo(courtCase);
@@ -199,7 +199,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         assertEquals(expected, auditEntities.size());
         if (expected == 1) {
-            assertEquals(testUser, auditEntities.get(0).getUser());
+            assertEquals(testUser, auditEntities.getFirst().getUser());
         }
     }
 
@@ -300,8 +300,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-        OffsetDateTime startTime = hearing.getMediaList().get(0).getStart().truncatedTo(ChronoUnit.SECONDS);
-        OffsetDateTime endTime = hearing.getMediaList().get(0).getEnd().truncatedTo(ChronoUnit.SECONDS);
+        OffsetDateTime startTime = hearing.getMediaList().getFirst().getStart().truncatedTo(ChronoUnit.SECONDS);
+        OffsetDateTime endTime = hearing.getMediaList().getFirst().getEnd().truncatedTo(ChronoUnit.SECONDS);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
@@ -330,8 +330,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-        OffsetDateTime startTime = hearing.getMediaList().get(0).getStart().plusMinutes(5);
-        OffsetDateTime endTime = hearing.getMediaList().get(0).getEnd().minusMinutes(15);
+        OffsetDateTime startTime = hearing.getMediaList().getFirst().getStart().plusMinutes(5);
+        OffsetDateTime endTime = hearing.getMediaList().getFirst().getEnd().minusMinutes(15);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),

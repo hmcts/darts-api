@@ -109,7 +109,7 @@ class AudioServiceImplTest {
 
         audioService.setIsArchived(audioMetadataList, 1);
 
-        assertEquals(true, audioMetadataList.get(0).getIsArchived());
+        assertEquals(true, audioMetadataList.getFirst().getIsArchived());
     }
 
     @Test
@@ -125,7 +125,7 @@ class AudioServiceImplTest {
 
         audioService.setIsArchived(audioMetadataList, 1);
 
-        assertEquals(true, audioMetadataList.get(0).getIsArchived());
+        assertEquals(true, audioMetadataList.getFirst().getIsArchived());
     }
 
     @Test
@@ -137,7 +137,7 @@ class AudioServiceImplTest {
 
         audioService.setIsArchived(audioMetadataList, HEARING_ID);
 
-        assertEquals(false, audioMetadataList.get(0).getIsArchived());
+        assertEquals(false, audioMetadataList.getFirst().getIsArchived());
     }
 
     @Test
@@ -155,7 +155,7 @@ class AudioServiceImplTest {
         eodHelperMocks.simulateInitWithMockedData();
         audioService.setIsAvailable(audioMetadataList);
 
-        assertEquals(true, audioMetadataList.get(0).getIsAvailable());
+        assertEquals(true, audioMetadataList.getFirst().getIsAvailable());
         assertEquals(false, audioMetadataList.get(1).getIsAvailable());
         assertEquals(true, audioMetadataList.get(2).getIsAvailable());
         verify(externalObjectDirectoryRepository).findMediaIdsByInMediaIdStatusAndType(

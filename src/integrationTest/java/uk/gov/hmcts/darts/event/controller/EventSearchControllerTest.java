@@ -102,7 +102,7 @@ class EventSearchControllerTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         List<EventEntity> entity = eventsGivensBuilder.persistedEventsWithHearings(eventsCount, eventHearingsCount);
-        CourtCaseEntity courtCaseEntity = entity.get(0).getHearingEntities().get(0).getCourtCase();
+        CourtCaseEntity courtCaseEntity = entity.getFirst().getHearingEntities().getFirst().getCourtCase();
         courtCaseEntity.setDataAnonymisedTs(now());
         dartsDatabase.save(courtCaseEntity);
 

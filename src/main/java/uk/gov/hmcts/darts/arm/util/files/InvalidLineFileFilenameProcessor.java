@@ -32,7 +32,7 @@ public class InvalidLineFileFilenameProcessor {
             // IL - Invalid Lines File - This is the Invalid Lines file which represents the File which is ingested by ARM.
             // DARTS/response/fbfec54925d62146aeced724ff9f3c8e_e5afb388-3830-79ca-a5d4-dcc6e51796a3_0_il.rsp
             if (tokens.size() == NUMBER_OF_TOKENS) {
-                hashcode = tokens.get(0);
+                hashcode = tokens.getFirst();
                 hashcode2 = tokens.get(1);
                 status = tokens.get(2);
             } else {

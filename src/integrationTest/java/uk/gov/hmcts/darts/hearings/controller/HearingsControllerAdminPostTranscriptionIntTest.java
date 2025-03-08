@@ -303,7 +303,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
 
         List<HearingEntity> expectedHearing = new ArrayList<>();
         expectedHearing.add(hearingEntityList.get(1));
-        expectedHearing.add(hearingEntityList.get(0));
+        expectedHearing.add(hearingEntityList.getFirst());
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -372,7 +372,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(10);
 
         HearingsSearchRequest searchRequest = new HearingsSearchRequest();
-        searchRequest.setCourthouseIds(List.of(hearingEntityList.get(0).getCourtroom().getCourthouse().getId(),
+        searchRequest.setCourthouseIds(List.of(hearingEntityList.getFirst().getCourtroom().getCourthouse().getId(),
                                                hearingEntityList.get(1).getCourtroom().getCourthouse().getId(),
                                                hearingEntityList.get(2).getCourtroom().getCourthouse().getId(),
                                                hearingEntityList.get(3).getCourtroom().getCourthouse().getId(),
