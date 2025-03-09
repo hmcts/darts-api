@@ -71,11 +71,11 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             }).toList();
         try {
             AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
+        } catch (InterruptedException e) {
+            log.error("Inbound to Unstructured interrupted exception", e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error("Inbound to Unstructured unexpected exception", e);
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
         }
     }
 

@@ -80,11 +80,12 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
             try {
                 AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
+            } catch (InterruptedException e) {
+                log.error("Unstructured to arm batch unexpected exception", e);
+                Thread.currentThread().interrupt();
+                return;
             } catch (Exception e) {
                 log.error("Unstructured to arm batch unexpected exception", e);
-                if (e instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
                 return;
             }
         }

@@ -60,6 +60,7 @@ import static org.springframework.http.HttpStatus.OK;
 @SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement", "PMD.TestClassWithoutTestCases"})
 public class TestSupportController {
 
+    public static final String IDS = "ids";
     private final SessionFactory sessionFactory;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
@@ -168,13 +169,13 @@ public class TestSupportController {
 
         session.createNativeQuery("""
                                       delete from darts.courtroom where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.security_group_courthouse_ae where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.courthouse where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
     }
 
     @PostMapping(value = "/courthouse/{courthouse_name}/courtroom/{courtroom_name}")
@@ -441,10 +442,10 @@ public class TestSupportController {
         }
         session.createNativeQuery("""
                                       delete from darts.security_group_courthouse_ae where grp_id in ( :ids )
-                                      """, Integer.class).setParameter("ids", securityGroupIds).executeUpdate();
+                                      """, Integer.class).setParameter(IDS, securityGroupIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.security_group where grp_id in ( :ids )
-                                      """, Integer.class).setParameter("ids", securityGroupIds).executeUpdate();
+                                      """, Integer.class).setParameter(IDS, securityGroupIds).executeUpdate();
     }
 
     private void removeRetentionPolicyTypes(Session session) {
