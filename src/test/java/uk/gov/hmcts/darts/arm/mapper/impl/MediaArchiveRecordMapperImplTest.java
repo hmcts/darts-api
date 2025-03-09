@@ -138,6 +138,29 @@ class MediaArchiveRecordMapperImplTest {
         assertMetadataAllProperties(result.getMediaCreateArchiveRecord().getRecordMetadata());
     }
 
+    @Test
+    void mapToMediaArchiveRecord_ShouldReturnRecord_UsingInvalidProperties() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
+            "Tests/arm/all_properties/invalid-record.properties");
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("Media");
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        // when
+        MediaArchiveRecord result = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, "rawFilename");
+
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getMediaCreateArchiveRecord());
+        assertNotNull(result.getUploadNewFileRecord());
+
+        assertNull(result.getMediaCreateArchiveRecord().getRecordMetadata().getBf001());
+    }
+
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Media", metadata.getBf001());
         assertNull(metadata.getBf002());
