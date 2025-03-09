@@ -1,15 +1,17 @@
 package uk.gov.hmcts.darts.arm.exception;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class UnableToReadArmFileException extends Exception {
-    private final String armFilename;
+    String armFilename;
 
     public UnableToReadArmFileException(String armFilename, Throwable cause) {
         super(cause);
         this.armFilename = armFilename;
     }
 
-    public UnableToReadArmFileException(String armFilename) {
-        super("Unable to read ARM file: " + armFilename);
-        this.armFilename = armFilename;
+    public UnableToReadArmFileException() {
+        super();
     }
 }

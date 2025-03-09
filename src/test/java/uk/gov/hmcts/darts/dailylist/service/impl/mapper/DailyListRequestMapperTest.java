@@ -25,6 +25,8 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class DailyListRequestMapperTest {
 
     final XmlParser xmlParser = new XmlParser();
@@ -48,11 +50,16 @@ class DailyListRequestMapperTest {
 
     @Test
     void mapToEntity_ReturnsDailyListForSnaresbrook() throws Exception {
+        // given
         String requestXml = TestUtils.getContentsFromFile(
             "Tests/dailylist/DailyListRequestMapperTest/test1/request.xml");
         DailyListStructure legacyDailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
+
+        // when
         DailyListJsonObject modernisedDailyList = dailyListRequestMapper.mapToEntity(legacyDailyList);
 
+        // then
+        assertNotNull(modernisedDailyList);
         String actualResponse = getObjMapper().writeValueAsString(modernisedDailyList);
         String expectedResponse = TestUtils.getContentsFromFile(
             "Tests/dailylist/DailyListRequestMapperTest/test1/expectedResponse.json");
@@ -62,11 +69,16 @@ class DailyListRequestMapperTest {
 
     @Test
     void mapToEntity_ReturnsDailyListForSwansea() throws Exception {
+        // given
         String requestXml = TestUtils.getContentsFromFile(
             "Tests/dailylist/DailyListRequestMapperTest/test2/request.xml");
         DailyListStructure legacyDailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
+
+        // when
         DailyListJsonObject modernisedDailyList = dailyListRequestMapper.mapToEntity(legacyDailyList);
 
+        // then
+        assertNotNull(modernisedDailyList);
         String actualResponse = getObjMapper().writeValueAsString(modernisedDailyList);
         String expectedResponse = TestUtils.getContentsFromFile(
             "Tests/dailylist/DailyListRequestMapperTest/test2/expectedResponse.json");
