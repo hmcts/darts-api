@@ -6,7 +6,6 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
@@ -24,15 +23,15 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
     @Override
     public void calculateEventDates(Integer batchSize) {
         boolean updateRetention = true;
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities =
+        List<Integer> externalObjectDirectoryEntitiesIds =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(EodHelper.armLocation(), updateRetention,
                                                                                            Limit.of(batchSize));
 
-        for (ExternalObjectDirectoryEntity externalObjectDirectory : externalObjectDirectoryEntities) {
+        for (Integer externalObjectDirectoryId : externalObjectDirectoryEntitiesIds) {
             try {
-                armRetentionEventDateCalculator.calculateRetentionEventDate(externalObjectDirectory.getId());
+                armRetentionEventDateCalculator.calculateRetentionEventDate(externalObjectDirectoryId);
             } catch (Exception e) {
-                log.error("Unable to calculate retention date for EOD {}", externalObjectDirectory.getId(), e);
+                log.error("Unable to calculate retention date for EOD {}", externalObjectDirectoryId, e);
             }
         }
     }

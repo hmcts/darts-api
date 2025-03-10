@@ -177,8 +177,8 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             metadata.setRetentionConfidenceReason(transcriptionDocument.getRetConfReason());
         }
 
-        if (nonNull(transcriptionDocument.getRetConfScore()) && transcriptionDocument.getRetConfScore() != 0) {
-            metadata.setRetentionConfidenceScore(transcriptionDocument.getRetConfScore());
+        if (nonNull(transcriptionDocument.getRetConfScore())) {
+            metadata.setRetentionConfidenceScore(transcriptionDocument.getRetConfScore().getId());
         }
 
         if (transcriptionRecordProperties.containsKey(BF_001_KEY)) {
@@ -323,7 +323,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                 .getTranscription()
                 .getTranscriptionCommentEntities()
                 .stream()
-                .filter(transcriptionComment -> isTranscriptionCommentRequested(transcriptionComment))
+                .filter(this::isTranscriptionCommentRequested)
                 .findFirst();
             if (transcriptionCommentEntity.isPresent()) {
                 comments = transcriptionCommentEntity.get().getComment();
@@ -395,9 +395,9 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom())
             && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom().getCourthouse())) {
             courthouse = transcriptionDocument.getTranscription().getHearing().getCourtroom().getCourthouse().getDisplayName();
-        } else if (nonNull(transcriptionDocument.getTranscription().getCourtroom())
-            && nonNull(transcriptionDocument.getTranscription().getCourtroom().getCourthouse())) {
-            courthouse = transcriptionDocument.getTranscription().getCourtroom().getCourthouse().getDisplayName();
+        } else if (nonNull(transcriptionDocument.getTranscription().getCourtCase().getCourthouse())
+            && nonNull(transcriptionDocument.getTranscription().getCourtCase().getCourthouse())) {
+            courthouse = transcriptionDocument.getTranscription().getCourtCase().getCourthouse().getDisplayName();
         }
         return courthouse;
     }

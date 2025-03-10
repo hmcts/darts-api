@@ -15,16 +15,16 @@ public class SearchMediaValidator implements Validator<MediaSearchData> {
     public void validate(MediaSearchData data) {
         if (noParams(data) || (data.getTransformedMediaId() != null
             && (data.getHearingIds() != null && !data.getHearingIds().isEmpty()
-                || data.getEndDateTime() != null
-                || data.getStartDateTime() != null))) {
+            || data.getEndDateTime() != null
+            || data.getStartDateTime() != null))) {
             throw new DartsApiException(ADMIN_SEARCH_CRITERIA_NOT_SUITABLE);
         }
     }
 
     private boolean noParams(MediaSearchData data) {
         return data.getTransformedMediaId() == null
-            && (CollectionUtils.isEmpty(data.getHearingIds())
+            && CollectionUtils.isEmpty(data.getHearingIds())
             && data.getEndDateTime() == null
-            && data.getStartDateTime() == null);
+            && data.getStartDateTime() == null;
     }
 }

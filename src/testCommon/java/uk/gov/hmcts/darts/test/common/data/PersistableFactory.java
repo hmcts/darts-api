@@ -1,17 +1,9 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-public class PersistableFactory {
-    private static PersistableFactory instance;
+public final class PersistableFactory {
 
     private PersistableFactory() {
-
-    }
-
-    public static synchronized PersistableFactory getInstance() {
-        if (instance == null) {
-            instance = new PersistableFactory();
-        }
-        return instance;
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static ExternalObjectDirectoryTestData getExternalObjectDirectoryTestData() {
@@ -70,4 +62,23 @@ public class PersistableFactory {
         return new RetentionConfidenceCategoryMapperTestData();
     }
 
+    public static UserAccountTestData getUserAccountTestData() {
+        return new UserAccountTestData();
+    }
+
+    public static CourthouseTestData getCourthouseTestData() {
+        return new CourthouseTestData();
+    }
+
+    public static CourtroomTestData getCourtroomTestData() {
+        return new CourtroomTestData();
+    }
+
+    public static ObjectAdminActionTestData getObjectAdminActionTestData() {
+        return new ObjectAdminActionTestData();
+    }
+
+    public static EventTestData getEventTestData() {
+        return new EventTestData();
+    }
 }

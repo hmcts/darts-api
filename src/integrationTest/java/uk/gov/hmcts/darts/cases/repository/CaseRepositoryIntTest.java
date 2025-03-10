@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.repository;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
@@ -22,21 +23,21 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CaseRepositoryIntTest extends IntegrationBase {
-    protected static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
-    protected static final String SOME_ROOM = "some-room";
-    protected static final String SOME_CASE_NUMBER_1 = "CASE1";
-    protected static final String SOME_CASE_NUMBER_2 = "CASE2";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
+    private static final String SOME_ROOM = "some-room";
+    private static final String SOME_CASE_NUMBER_1 = "CASE1";
+    private static final String SOME_CASE_NUMBER_2 = "CASE2";
 
     private final OffsetDateTime testTime = OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
 
     @Autowired
-    CourtCaseStub caseStub;
+    private CourtCaseStub caseStub;
 
     @Autowired
-    CaseRepository caseRepository;
+    private CaseRepository caseRepository;
 
     @Test
-    void testFindByIsRetentionUpdatedTrueAndRetentionRetriesLessThan() {
+    void findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_ReturnsResults() {
         // given
         caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setRetentionUpdated(true);
@@ -54,60 +55,22 @@ class CaseRepositoryIntTest extends IntegrationBase {
             courtCase.setRetentionUpdated(true);
             courtCase.setRetentionRetries(1);
         });
+        CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+            matchingCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject1);
+
 
         // when
-        var result = caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(1000));
+        var result = caseRepository.findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(1000));
 
         // then
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getId()).isEqualTo(matchingCase.getId());
+        assertThat(result.getFirst()).isEqualTo(matchingCase.getId());
     }
 
-    @Test
-    void testFindCasesNeedingCaseDocumentGeneratedPaged() {
-        // given
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
-
-        var matchingCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
-        });
-
-        var matchingCase2 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
-
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
-
-        var courtCaseWithCaseDocument = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
-        dartsDatabase.getCaseDocumentStub().createCaseDocumentEntity(courtCaseWithCaseDocument, courtCaseWithCaseDocument.getCreatedBy());
-
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-        });
-
-        // when
-        List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(
-            OffsetDateTime.now().minusDays(28), Limit.of(2));
-
-        // then
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(matchingCase1.getId());
-        assertThat(result.get(1).getId()).isEqualTo(matchingCase2.getId());
-    }
 
     @Test
-    void testFindCasesNeedingCaseDocumentGeneratedUnpaged() {
+    void findCasesIdsNeedingCaseDocumentGenerated_ReturnsMatchingCases() {
         // given
         caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
@@ -120,68 +83,75 @@ class CaseRepositoryIntTest extends IntegrationBase {
         });
         dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseWithCaseDocument);
 
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-        });
+        caseStub.createAndSaveCourtCase(courtCase -> courtCase.setClosed(false));
 
         var matchingCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
             courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(1);
         });
+        CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+            matchingCase1, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject1);
 
         var matchingCase2 = caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
             courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(1);
         });
+        CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
+            matchingCase2, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(29), false);
+        dartsDatabase.save(caseRetentionObject2);
 
         var matchingCase3 = caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(30));
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(1);
         });
+        CaseRetentionEntity caseRetentionObject3 = dartsDatabase.createCaseRetentionObject(
+            matchingCase3, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject3);
 
         assertThat(dartsDatabase.getCaseRepository().findAll()).hasSize(6);
 
         // when
-        List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(
+        List<Integer> result = caseRepository.findCasesIdsNeedingCaseDocumentGenerated(
             OffsetDateTime.now().minusDays(28), Limit.unlimited());
 
         // then
         assertThat(result).hasSize(3);
-        assertThat(result.get(0).getId()).isEqualTo(matchingCase1.getId());
-        assertThat(result.get(1).getId()).isEqualTo(matchingCase2.getId());
-        assertThat(result.get(2).getId()).isEqualTo(matchingCase3.getId());
+        assertThat(result.getFirst()).isEqualTo(matchingCase1.getId());
+        assertThat(result.get(1)).isEqualTo(matchingCase2.getId());
+        assertThat(result.get(2)).isEqualTo(matchingCase3.getId());
     }
 
-
     @Test
-    void testFindCasesNeedingCaseDocumentForRetentionDateGenerationPagedSuccess() {
+    void findCasesNeedingCaseDocumentForRetentionDateGeneration_AllSuccess() {
         // given
-
-        AtomicInteger suffix = new AtomicInteger(1);
-        Function<Boolean, CourtCaseEntity> createValidCourtCase = (isRetentionUpdated) -> {
-            String caseNumber = "CASE" + suffix.getAndIncrement();
-            CourtCaseEntity courtCase = dartsDatabase.createCase(SOME_COURTHOUSE, caseNumber);
-
-            dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, caseNumber,
-                                                         DateConverterUtil.toLocalDateTime(testTime));
-
-            CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
-                courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
-
-            dartsDatabase.save(caseRetentionObject1);
-
-            CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
-                courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(20), false);
-            dartsDatabase.save(caseRetentionObject2);
-            courtCase.setRetentionUpdated(isRetentionUpdated);
-            return dartsDatabase.save(courtCase);
-        };
+        Function<Boolean, CourtCaseEntity> createValidCourtCase = getCourtCaseEntityFunction();
 
         CourtCaseEntity courtCase1 = createValidCourtCase.apply(true);
-        CourtCaseEntity courtCase2 = createValidCourtCase.apply(false);
-        CourtCaseEntity courtCase3 = createValidCourtCase.apply(true);
-        CourtCaseEntity courtCase4 = createValidCourtCase.apply(false);
+        CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+            courtCase1, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject1);
 
+        CourtCaseEntity courtCase2 = createValidCourtCase.apply(false);
+        CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
+            courtCase2, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject2);
+
+        CourtCaseEntity courtCase3 = createValidCourtCase.apply(true);
+        CaseRetentionEntity caseRetentionObject3 = dartsDatabase.createCaseRetentionObject(
+            courtCase3, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject3);
+
+        CourtCaseEntity courtCase4 = createValidCourtCase.apply(false);
+        CaseRetentionEntity caseRetentionObject4 = dartsDatabase.createCaseRetentionObject(
+            courtCase4, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(28), false);
+        dartsDatabase.save(caseRetentionObject4);
 
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
         // when
@@ -190,15 +160,38 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // then
         assertThat(result).hasSize(4);
-        assertThat(result.get(0)).isEqualTo(courtCase2.getId());
+        assertThat(result.getFirst()).isEqualTo(courtCase2.getId());
         assertThat(result.get(1)).isEqualTo(courtCase4.getId());
         assertThat(result.get(2)).isEqualTo(courtCase1.getId());
         assertThat(result.get(3)).isEqualTo(courtCase3.getId());
 
     }
 
+    private @NotNull Function<Boolean, CourtCaseEntity> getCourtCaseEntityFunction() {
+        AtomicInteger suffix = new AtomicInteger(1);
+        return (isRetentionUpdated) -> {
+            String caseNumber = "CASE" + suffix.getAndIncrement();
+            CourtCaseEntity courtCase = dartsDatabase.createCase(SOME_COURTHOUSE, caseNumber);
+
+            dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, caseNumber,
+                                                         DateConverterUtil.toLocalDateTime(testTime));
+
+            CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+                courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+            dartsDatabase.save(caseRetentionObject1);
+
+            CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
+                courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(20), false);
+            dartsDatabase.save(caseRetentionObject2);
+
+            courtCase.setRetentionUpdated(isRetentionUpdated);
+            return dartsDatabase.save(courtCase);
+        };
+
+    }
+
     @Test
-    void returnIsRetentionUpdatedFirst() {
+    void findCasesNeedingCaseDocumentForRetentionDateGeneration_returnIsRetentionUpdatedFirst() {
         // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
@@ -236,13 +229,13 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
+        assertThat(result.getFirst()).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
         assertThat(result.get(1)).isEqualTo(courtCaseEntityWithCaseDocument.getId());
 
     }
 
     @Test
-    void testFindCasesNeedingCaseDocumentForRetentionDateGenerationPagedWhereRetentionDateToFarInTheFuture() {
+    void findCasesNeedingCaseDocumentForRetentionDateGeneration_WhereRetentionDateToFarInTheFuture() {
         // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
@@ -279,7 +272,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    void testFindCasesNeedingCaseDocumentForRetentionDateGenerationPagedWithRecentDocuments() {
+    void findCasesNeedingCaseDocumentForRetentionDateGeneration_WithRecentDocuments() {
         // given
         CourtCaseEntity courtCaseEntityWithCaseDocuments1 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
@@ -325,34 +318,22 @@ class CaseRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    void testFindOpenCasesToClosePaged() {
+    void findAllWithIdMatchingOneOf_ReturnsResults() {
         // given
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
-
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
-
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(30));
-        });
-
-        var foundCourtCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(30));
-        });
+        CourtCaseEntity case1 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
+        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
+        CourtCaseEntity case3 = dartsDatabase.createCase(SOME_COURTHOUSE, "SOME_CASE_NUMBER_3");
+        CourtCaseEntity case4 = dartsDatabase.createCase(SOME_COURTHOUSE, "SOME_CASE_NUMBER_0");
 
         // when
-        List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(
-            OffsetDateTime.now().minusDays(28), Limit.of(2));
+        List<CourtCaseEntity> returnedCourtCases = caseRepository.findAllWithIdMatchingOneOf(List.of(
+            case1.getId(), case3.getId(), case4.getId()
+        ));
 
         // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getId()).isEqualTo(foundCourtCase1.getId());
+        assertThat(returnedCourtCases).hasSize(3);
+        assertThat(returnedCourtCases.getFirst().getId()).isEqualTo(case3.getId());
+        assertThat(returnedCourtCases.get(1).getId()).isEqualTo(case4.getId());
+        assertThat(returnedCourtCases.get(2).getId()).isEqualTo(case1.getId());
     }
 }

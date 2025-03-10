@@ -3,8 +3,6 @@ package uk.gov.hmcts.darts.datamanagement.exception;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.UUID;
-
 
 @ToString
 @NoArgsConstructor
@@ -17,11 +15,11 @@ public class FileNotDownloadedException extends Exception {
         super(message, cause);
     }
 
-    public FileNotDownloadedException(UUID blobId, String containerName, String message) {
+    public FileNotDownloadedException(String blobId, String containerName, String message) {
         super("BlobId: " + blobId + ", container: " + containerName + ", message: " + message);
     }
 
-    public FileNotDownloadedException(UUID blobId, String containerName, String message, Throwable cause) {
+    public FileNotDownloadedException(String blobId, String containerName, String message, Throwable cause) {
         super("BlobId: " + blobId + ", container: " + containerName + ", message: " + message, cause);
     }
 }

@@ -50,4 +50,13 @@ class GetHearingResponseMapperTest {
         assertEquals(response.getTranscriptionCount(), 1);
         assertEquals(0, response.getCaseReportingRestrictions().size());
     }
+
+    @Test
+    void getHearingResponseMapper_shouldNotIncludeNonCurrentTranscriptions() {
+        HearingEntity hearing = CommonTestDataUtil.createHearing("TestCase", LocalTime.of(10, 0, 0));
+        hearing.getTranscriptions().getFirst().setIsCurrent(false);
+
+        GetHearingResponse response = getHearingResponseMapper.map(hearing);
+        assertEquals(response.getTranscriptionCount(), 0);
+    }
 }

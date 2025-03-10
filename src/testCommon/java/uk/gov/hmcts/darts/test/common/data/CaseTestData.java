@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestCourtCaseEntity;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static java.time.OffsetDateTime.now;
@@ -15,8 +16,12 @@ import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefend
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtCaseBuilderRetrieve,
-    CourtCaseEntity, TestCourtCaseEntity.TestCourtCaseEntityBuilder>  {
+public final class CaseTestData implements Persistable<TestCourtCaseEntity.TestCourtCaseBuilderRetrieve,
+    CourtCaseEntity, TestCourtCaseEntity.TestCourtCaseEntityBuilder> {
+    
+    CaseTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
+    }
 
     public CourtCaseEntity createSomeMinimalCase() {
         var postfix = random(10, false, true);
@@ -40,11 +45,7 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
     public CourtCaseEntity createCaseWith(String caseNumber, CourthouseEntity courthouseEntity) {
         var courtCaseEntity = createSomeMinimalCase();
 
-        if (courthouseEntity == null) {
-            courtCaseEntity.setCourthouse(someMinimalCourthouse());
-        } else {
-            courtCaseEntity.setCourthouse(courthouseEntity);
-        }
+        courtCaseEntity.setCourthouse(Objects.requireNonNullElseGet(courthouseEntity, CourthouseTestData::someMinimalCourthouse));
 
         courtCaseEntity.setCaseNumber(caseNumber);
         courtCaseEntity.setClosed(false);
@@ -63,8 +64,8 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
-        courtCaseEntity.setCreatedBy(UserAccountTestData.minimalUserAccount());
-        courtCaseEntity.setLastModifiedBy(UserAccountTestData.minimalUserAccount());
+        courtCaseEntity.setCreatedBy(minimalUserAccount());
+        courtCaseEntity.setLastModifiedBy(minimalUserAccount());
         return courtCaseEntity;
     }
 
@@ -122,7 +123,7 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
         var userAccount = minimalUserAccount();
         retrieve.getBuilder().courthouse(someMinimalCourthouse())
             .caseNumber("case-1-" + postfix)
-            .closed(false)  
+            .closed(false)
             .interpreterUsed(false)
             .createdBy(userAccount)
             .lastModifiedBy(userAccount)

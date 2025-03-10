@@ -12,7 +12,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonRootName(value = "ARMAsyncSearchResponse")
+@JsonRootName("ARMAsyncSearchResponse")
 public class ArmAsyncSearchResponse extends BaseRpoResponse {
 
     private String searchId;

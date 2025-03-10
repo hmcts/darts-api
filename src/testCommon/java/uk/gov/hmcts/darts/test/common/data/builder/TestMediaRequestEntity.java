@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestMediaRequestEntity extends MediaRequestEntity implements DbInsertable<MediaRequestEntity> {
 
@@ -46,7 +47,7 @@ public class TestMediaRequestEntity extends MediaRequestEntity implements DbInse
         }
     }
 
-    public static class TestMediaBuilderRetrieve implements BuilderHolder<TestMediaRequestEntity,TestMediaRequestEntityBuilder> {
+    public static class TestMediaBuilderRetrieve implements BuilderHolder<TestMediaRequestEntity, TestMediaRequestEntityBuilder> {
 
         private final TestMediaRequestEntity.TestMediaRequestEntityBuilder builder = TestMediaRequestEntity.builder();
 
@@ -57,7 +58,7 @@ public class TestMediaRequestEntity extends MediaRequestEntity implements DbInse
 
         @Override
         public TestMediaRequestEntity.TestMediaRequestEntityBuilder getBuilder() {
-             return builder;
+            return builder;
         }
     }
 }

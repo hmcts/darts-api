@@ -9,10 +9,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
+import uk.gov.hmcts.darts.hearings.mapper.AdminHearingMapper;
 import uk.gov.hmcts.darts.hearings.mapper.AdminHearingSearchResponseMapper;
+import uk.gov.hmcts.darts.hearings.model.HearingsResponse;
 import uk.gov.hmcts.darts.hearings.model.HearingsSearchRequest;
 import uk.gov.hmcts.darts.hearings.model.HearingsSearchResponse;
 import uk.gov.hmcts.darts.hearings.service.AdminHearingsService;
+import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
 import java.util.List;
 
@@ -21,6 +24,7 @@ import java.util.List;
 @Slf4j
 public class AdminHearingsServiceImpl implements AdminHearingsService {
     private final HearingRepository hearingRepository;
+    private final HearingsService hearingsService;
 
     @Value("${darts.hearings.admin-search.max-results}")
     private Integer adminSearchMaxResults;
@@ -44,11 +48,17 @@ public class AdminHearingsServiceImpl implements AdminHearingsService {
         return AdminHearingSearchResponseMapper.mapResponse(hearingEntityList);
     }
 
+
     Integer getAdminSearchMaxResults() {
         return adminSearchMaxResults;
     }
 
     void setAdminSearchMaxResults(Integer adminSearchMaxResults) {
         this.adminSearchMaxResults = adminSearchMaxResults;
+    }
+
+    @Override
+    public HearingsResponse getAdminHearings(Integer hearingId) {
+        return AdminHearingMapper.mapToHearingsResponse(hearingsService.getHearingById(hearingId));
     }
 }

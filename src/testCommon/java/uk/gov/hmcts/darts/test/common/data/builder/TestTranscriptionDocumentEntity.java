@@ -8,12 +8,14 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity implements DbInsertable<TranscriptionDocumentEntity> {
     @lombok.Builder
@@ -26,7 +28,7 @@ public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity
                                            String checksum, boolean isDeleted,
                                            UserAccountEntity deletedBy, OffsetDateTime deletedTs,
                                            String contentObjectId, boolean isHidden,
-                                           OffsetDateTime retainUntilTs, Integer retConfScore,
+                                           OffsetDateTime retainUntilTs, RetentionConfidenceScoreEnum retConfScore,
                                            String retConfReason,
                                            List<ObjectAdminActionEntity> adminActions,
                                            UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
@@ -74,7 +76,7 @@ public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity
 
         @Override
         public TestTranscriptionDocumentEntity build() {
-           return builder.build();
+            return builder.build();
         }
 
         @Override

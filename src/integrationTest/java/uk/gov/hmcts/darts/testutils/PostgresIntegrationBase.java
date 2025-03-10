@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -18,7 +19,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
  */
 @SpringBootTest
-@ActiveProfiles({"intTest"})
+@ActiveProfiles({"intTest", "in-memory-caching"})
 @Import(IntegrationTestConfiguration.class)
 public class PostgresIntegrationBase {
 
@@ -46,10 +47,15 @@ public class PostgresIntegrationBase {
 
     static {
         POSTGRES = new PostgreSQLContainer<>(
-            "postgres:16-alpine"
+            DockerImageName.parse("hmctspublic.azurecr.io/imported/postgres")
+                .asCompatibleSubstituteFor("postgres")
         ).withDatabaseName("darts")
             .withUsername("darts")
             .withPassword("darts");
+        POSTGRES.setCommand("postgres", "-c", String.format("max_connections=%d", SERVER_MAX_CONNECTIONS));
+
+        // container will be automatically stopped
+        POSTGRES.start();
     }
 
     @DynamicPropertySource
@@ -59,18 +65,10 @@ public class PostgresIntegrationBase {
         registry.add("spring.datasource.password", POSTGRES::getPassword);
     }
 
-    static {
-        POSTGRES.setCommand("postgres", "-c", String.format("max_connections=%d", SERVER_MAX_CONNECTIONS));
-
-        // container will be automatically stopped
-        POSTGRES.start();
-    }
 
     @BeforeEach
     void clearDb() {
-        dartsDatabase.resetSequences();
-        dartsDatabase.clearDatabaseInThisOrder();
-        dartsDatabase.resetTablesWithPredefinedTestData();
+        dartsDatabase.clearDb();
     }
 
     @AfterEach
@@ -80,6 +78,6 @@ public class PostgresIntegrationBase {
 
 
     protected void anAuthenticatedUserFor(String userEmail) {
-        GivenBuilder.anAuthenticatedUserFor(userEmail);
+        GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }
 }

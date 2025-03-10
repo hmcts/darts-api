@@ -130,7 +130,10 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
 
 
     private static List<Integer> idsOf(List<EventEntity> persistedEvents) {
-        return persistedEvents.stream().map(EventEntity::getId).toList();
+        return persistedEvents.stream()
+            .sorted((o1, o2) -> o2.getId().compareTo(o1.getId()))
+            .map(EventEntity::getId)
+            .toList();
     }
 
     private List<Integer> courthouseIdsAssociatedWithEvents(List<EventEntity> events) {

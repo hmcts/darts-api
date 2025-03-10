@@ -6,10 +6,12 @@ import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInsertable<CaseDocumentEntity> {
 
@@ -26,7 +28,7 @@ public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInse
         String checksum,
         boolean hidden,
         OffsetDateTime retainUntilTs,
-        Integer retConfScore,
+        RetentionConfidenceScoreEnum retConfScore,
         String retConfReason,
         OffsetDateTime createdDateTime,
         UserAccountEntity createdBy,
@@ -71,7 +73,7 @@ public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInse
 
         @Override
         public TestCaseDocumentEntity build() {
-           return builder.build();
+            return builder.build();
         }
 
         @Override

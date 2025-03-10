@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 
@@ -44,6 +45,8 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                 OffsetDateTime armRetentionDate = retentionDate.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears());
                 if (nonNull(externalObjectDirectory.getEventDateTs())
                     && armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) == 0) {
+                    log.info("Event date found and different when compared to ARM retention date, resetting update retention flag for {} ",
+                             externalObjectDirectoryId);
                     externalObjectDirectory.setUpdateRetention(false);
                     externalObjectDirectory.setLastModifiedBy(userAccount);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
@@ -66,10 +69,10 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
 
         if (confidenceAware != null) {
-            Integer confidenceScore = confidenceAware.getRetConfScore();
+            RetentionConfidenceScoreEnum confidenceScore = confidenceAware.getRetConfScore();
             String confidenceReason = confidenceAware.getRetConfReason();
 
-            if (confidenceScore != null && confidenceScore != 0) {
+            if (confidenceScore != null) {
                 UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
                     externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
 
@@ -88,6 +91,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                 log.info("ARM event date calculation is skipped for EOD {} as no Retention Score is available", externalObjectDirectoryId);
             }
         }
+
         return false;
     }
 

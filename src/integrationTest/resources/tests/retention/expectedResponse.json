@@ -1,68 +1,5 @@
 [
   {
-    "id": 1,
-    "name": "DARTS Permanent Retention v3",
-    "display_name": "Legacy Permanent",
-    "description": "DARTS Permanent retention policy",
-    "fixed_policy_key": "-1",
-    "duration": "30Y0M0D",
-    "policy_start_at": "2024-01-01T00:00:00Z"
-  },
-  {
-    "id": 2,
-    "name": "DARTS Standard Retention v3",
-    "display_name": "Legacy Standard",
-    "description": "DARTS Standard retention policy",
-    "fixed_policy_key": "-2",
-    "duration": "7Y0M0D",
-    "policy_start_at": "2024-01-01T00:00:00Z"
-  },
-  {
-    "id": 3,
-    "name": "DARTS Not Guilty Policy",
-    "display_name": "Not Guilty",
-    "description": "DARTS Not Guilty policy for Variable Retention release October 2023",
-    "fixed_policy_key": "1",
-    "duration": "1Y0M0D",
-    "policy_start_at": "2024-01-01T00:00:00Z"
-  },
-  {
-    "id": 4,
-    "name": "DARTS Non Custodial Policy",
-    "display_name": "Non Custodial",
-    "description": "DARTS Non Custodial policy for Variable Retention release October 2023",
-    "fixed_policy_key": "2",
-    "duration": "7Y0M0D",
-    "policy_start_at": "2024-01-01T00:00:00Z"
-  },
-  {
-    "id": 5,
-    "name": "DARTS Custodial Policy",
-    "display_name": "Custodial",
-    "description": "DARTS Custodial policy for Variable Retention release October 2023",
-    "fixed_policy_key": "3",
-    "duration": "7Y0M0D",
-    "policy_start_at": "2024-01-01T00:00:00Z"
-  },
-  {
-    "id": 6,
-    "name": "DARTS Life Policy",
-    "display_name": "Life",
-    "description": "DARTS Life policy for Variable Retention release October 2023",
-    "fixed_policy_key": "4",
-    "duration": "99Y0M0D",
-    "policy_start_at": "2024-01-01T00:00:00Z"
-  },
-  {
-    "id": 7,
-    "name": "DARTS Default Policy",
-    "display_name": "Default",
-    "description": "DARTS Default retention policy",
-    "fixed_policy_key": "0",
-    "duration": "7Y0M0D",
-    "policy_start_at": "2024-01-01T00:00:00Z"
-  },
-  {
     "id": 8,
     "name": "DARTS Permanent Policy",
     "display_name": "Permanent",
@@ -81,12 +18,48 @@
     "policy_start_at": "2024-01-01T00:00:00Z"
   },
   {
-    "id": 10,
-    "name": "DARTS Archive Permanent Retention",
-    "display_name": "Archive Permanent",
-    "description": "DARTS Archive Permanent Retention",
-    "fixed_policy_key": "-3",
-    "duration": "30Y0M0D",
+    "id": 6,
+    "name": "DARTS Life Policy",
+    "display_name": "Life",
+    "description": "DARTS Life policy for Variable Retention release October 2023",
+    "fixed_policy_key": "4",
+    "duration": "99Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 5,
+    "name": "DARTS Custodial Policy",
+    "display_name": "Custodial",
+    "description": "DARTS Custodial policy for Variable Retention release October 2023",
+    "fixed_policy_key": "3",
+    "duration": "7Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 4,
+    "name": "DARTS Non Custodial Policy",
+    "display_name": "Non Custodial",
+    "description": "DARTS Non Custodial policy for Variable Retention release October 2023",
+    "fixed_policy_key": "2",
+    "duration": "7Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "DARTS Not Guilty Policy",
+    "display_name": "Not Guilty",
+    "description": "DARTS Not Guilty policy for Variable Retention release October 2023",
+    "fixed_policy_key": "1",
+    "duration": "1Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 7,
+    "name": "DARTS Default Policy",
+    "display_name": "Default",
+    "description": "DARTS Default retention policy",
+    "fixed_policy_key": "0",
+    "duration": "7Y0M0D",
     "policy_start_at": "2024-01-01T00:00:00Z"
   },
   {
@@ -96,6 +69,33 @@
     "description": "DARTS Archive Standard Retention",
     "fixed_policy_key": "-4",
     "duration": "7Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 10,
+    "name": "DARTS Archive Permanent Retention",
+    "display_name": "Archive Permanent",
+    "description": "DARTS Archive Permanent Retention",
+    "fixed_policy_key": "-3",
+    "duration": "30Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "DARTS Standard Retention v3",
+    "display_name": "Legacy Standard",
+    "description": "DARTS Standard retention policy",
+    "fixed_policy_key": "-2",
+    "duration": "7Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 1,
+    "name": "DARTS Permanent Retention v3",
+    "display_name": "Legacy Permanent",
+    "description": "DARTS Permanent retention policy",
+    "fixed_policy_key": "-1",
+    "duration": "30Y0M0D",
     "policy_start_at": "2024-01-01T00:00:00Z"
   }
 ]

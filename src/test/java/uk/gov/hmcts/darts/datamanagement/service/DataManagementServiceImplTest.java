@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
 class DataManagementServiceImplTest {
 
     public static final String BLOB_CONTAINER_NAME = "dummy_container";
-    public static final UUID BLOB_ID = UUID.randomUUID();
+    public static final String BLOB_ID = UUID.randomUUID().toString();
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     @Mock
@@ -104,7 +104,7 @@ class DataManagementServiceImplTest {
     void testSaveBlobData() {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
-        UUID blobId = dataManagementService.saveBlobData(BLOB_CONTAINER_NAME, BINARY_DATA);
+        String blobId = dataManagementService.saveBlobData(BLOB_CONTAINER_NAME, BINARY_DATA);
         assertNotNull(blobId);
     }
 
@@ -122,7 +122,7 @@ class DataManagementServiceImplTest {
         when(dataManagementFactory.getBlobClient(any(), any()))
             .thenReturn(blobClient);
         when(blobClient.getBlobName())
-            .thenReturn(BLOB_ID.toString());
+            .thenReturn(BLOB_ID);
 
         // When
         BlobClientUploadResponseImpl blobClientUploadResponse = dataManagementService.saveBlobData(BLOB_CONTAINER_NAME,
@@ -206,13 +206,13 @@ class DataManagementServiceImplTest {
             .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
         when(dataManagementConfiguration.getContainerSasUrl("darts-unstructured"))
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
-        UUID sourceBlobId = UUID.randomUUID();
-        UUID destinationUuid = UUID.randomUUID();
+        String sourceBlobId = UUID.randomUUID().toString();
+        String destinationUuid = UUID.randomUUID().toString();
 
         dataManagementService.copyBlobData("darts-inbound-container",
                                            "darts-unstructured",
-                                           sourceBlobId.toString(),
-                                           destinationUuid.toString());
+                                           sourceBlobId,
+                                           destinationUuid);
 
         verify(azureCopyUtil).copy(
             "https://dartssastg.blob....net/darts-inbound-container/" + sourceBlobId + "?sp=r&st=2024-05-23T13...%3D",
@@ -227,12 +227,12 @@ class DataManagementServiceImplTest {
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
         when(dataManagementConfiguration.getContainerSasUrl("dropzone"))
             .thenReturn("https://dartsarmstg.blob....net/dropzone/DARTS?sp=rwdl&st=2024-03-28T08...sdd=1");
-        UUID sourceBlobId = UUID.randomUUID();
-        String destinationLocation = "DARTS/submission/" + UUID.randomUUID();
+        String sourceBlobId = UUID.randomUUID().toString();
+        String destinationLocation = "DARTS/submission/" + UUID.randomUUID().toString();
 
         dataManagementService.copyBlobData("darts-unstructured",
                                            "dropzone",
-                                           sourceBlobId.toString(),
+                                           sourceBlobId,
                                            destinationLocation);
 
         verify(azureCopyUtil).copy(
@@ -262,7 +262,7 @@ class DataManagementServiceImplTest {
     void positiveGetChecksumTypical() {
         final String checksum = "abc123";
         final byte[] checkSumBytes = checksum.getBytes();
-        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String blobId = "431318c8-97db-415c-b321-120c48f0ffe2";
         final String containerName = "container123";
         final String connectionString = "connectionString";
 
@@ -315,7 +315,7 @@ class DataManagementServiceImplTest {
     @ParameterizedTest
     @NullAndEmptySource
     void negativeGetChecksumChecksumNotFound(byte[] checksumBytes) {
-        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String blobId = "431318c8-97db-415c-b321-120c48f0ffe2";
         final String containerName = "container123";
         final String connectionString = "connectionString";
 
@@ -356,7 +356,7 @@ class DataManagementServiceImplTest {
 
     @Test
     void positiveGetChecksumAzureChecksumNotFoundMetaDataChecksumFound() {
-        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String blobId = "431318c8-97db-415c-b321-120c48f0ffe2";
         final String containerName = "container123";
         final String connectionString = "connectionString";
 
@@ -400,7 +400,7 @@ class DataManagementServiceImplTest {
     @NullAndEmptySource
     @ValueSource(strings = {" "})
     void negativeGetChecksumAzureChecksumNotFoundMetaDataChecksumInvalid(String checksum) {
-        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String blobId = "431318c8-97db-415c-b321-120c48f0ffe2";
         final String containerName = "container123";
         final String connectionString = "connectionString";
 
@@ -443,7 +443,7 @@ class DataManagementServiceImplTest {
     }
 
     private void assertGetChecksumNotFound(Boolean exists) {
-        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String blobId = "431318c8-97db-415c-b321-120c48f0ffe2";
         final String containerName = "container123";
         final String connectionString = "connectionString";
 

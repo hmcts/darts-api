@@ -148,7 +148,7 @@ class EventLoggerServiceImplTest {
         var event = createDartsEvent(123, "Some event text", false);
         event.setCourthouse("NOT_EXIST");
         eventLoggerService.missingCourthouse(event);
-        var logEntry = String.format("Courthouse not found: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, event_timestamp=%s",
+        var logEntry = String.format("Courthouse not found: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, timestamp=%s",
                                      event.getMessageId(), event.getEventId(), event.getCourthouse().toUpperCase(Locale.ROOT),
                                      event.getCourtroom().toUpperCase(Locale.ROOT), "2024-10-10T10:00:00Z");
         List<String> errorLogs = logCaptor.getErrorLogs();

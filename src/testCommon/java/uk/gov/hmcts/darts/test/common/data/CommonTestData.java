@@ -6,10 +6,10 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-public class CommonTestData {
+public final class CommonTestData {
 
     private CommonTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     // Can probably be simplified

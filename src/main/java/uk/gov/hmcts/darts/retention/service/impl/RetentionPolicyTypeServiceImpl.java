@@ -2,11 +2,13 @@ package uk.gov.hmcts.darts.retention.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
@@ -56,10 +58,9 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
 
     @Override
     public List<RetentionPolicyType> getRetentionPolicyTypes() {
-        List<RetentionPolicyTypeEntity> policyTypeRepositoryAll = retentionPolicyTypeRepository.findAll();
-
+        List<RetentionPolicyTypeEntity> policyTypeRepositoryAll = retentionPolicyTypeRepository.findAll(
+            Sort.by(RetentionPolicyTypeEntity_.FIXED_POLICY_KEY).descending());
         return retentionPolicyTypeMapper.mapToModelList(policyTypeRepositoryAll);
-
     }
 
     @Override
