@@ -45,6 +45,7 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
 
     /**
      * Create a "minimal" courthouse entity.
+     *
      * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
@@ -63,6 +64,7 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
 
     /**
      * Create a courthouse with the given name.
+     *
      * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
@@ -76,6 +78,7 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
 
     /**
      * Create a courthouse with the given name and display name.
+     *
      * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
@@ -86,5 +89,4 @@ public final class CourthouseTestData implements Persistable<TestCourthouseEntit
         courthouse.setDisplayName(displayName);
         return courthouse;
     }
-
 }

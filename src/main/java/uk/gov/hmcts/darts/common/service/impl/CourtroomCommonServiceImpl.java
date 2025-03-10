@@ -23,22 +23,22 @@ public class CourtroomCommonServiceImpl implements CourtroomCommonService {
     @Override
     @Transactional
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
-        final String courtroomNameUpper = StringUtils.toRootUpperCase(courtroomName);
-        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(courthouse.getId(), courtroomNameUpper);
-        return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomNameUpper, userAccount));
+        final String courtroomNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courtroomName));
+        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(courthouse.getId(), courtroomNameUpperTrimmed);
+        return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomNameUpperTrimmed, userAccount));
     }
 
     @Override
     @Transactional
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName, UserAccountEntity userAccount) {
-        String courtroomNameUpper = StringUtils.toRootUpperCase(courtroomName);
-        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomNameUpper);
+        String courtroomNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courtroomName));
+        Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomNameUpperTrimmed);
         if (foundCourtroom.isPresent()) {
             return foundCourtroom.get();
         }
 
         CourthouseEntity courthouse = courthouseCommonService.retrieveCourthouse(courthouseName);
-        return createCourtroom(courthouse, courtroomNameUpper, userAccount);
+        return createCourtroom(courthouse, courtroomNameUpperTrimmed, userAccount);
     }
 
     private CourtroomEntity createCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {

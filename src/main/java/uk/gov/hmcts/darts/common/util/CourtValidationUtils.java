@@ -4,6 +4,7 @@ package uk.gov.hmcts.darts.common.util;
 public final class CourtValidationUtils {
 
     private CourtValidationUtils() {
+        // empty constructor
     }
 
     public static boolean isUppercase(String value) {

@@ -162,14 +162,20 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
      */
     private DownloadResponseMetaData getDataFromStorage(List<ExternalObjectDirectoryEntity> storedEodEntities) throws FileNotDownloadedException {
         List<DatastoreContainerType> storageOrder = storageOrderHelper.getStorageOrder();
-        StringBuilder logBuilder = new StringBuilder("Starting to search for files with " + storedEodEntities.size() + " eodEntities\n");
+        StringBuilder logBuilder = new StringBuilder("Starting to search for files with ")
+            .append(storedEodEntities.size())
+            .append(" eodEntities\n");
 
         ExternalObjectDirectoryEntity eodEntityToDelete = null;
         for (DatastoreContainerType datastoreContainerType : storageOrder) {
-            logBuilder.append("checking container ").append(datastoreContainerType.name()).append("\n");
+            logBuilder.append("checking container ")
+                .append(datastoreContainerType.name())
+                .append('\n');
             ExternalObjectDirectoryEntity eodEntity = findCorrespondingEodEntityForStorageLocation(storedEodEntities, datastoreContainerType);
             if (eodEntity == null) {
-                logBuilder.append("matching eodEntity not found for ").append(datastoreContainerType.name()).append("\n");
+                logBuilder.append("matching eodEntity not found for ")
+                    .append(datastoreContainerType.name())
+                    .append('\n');
                 continue;
             }
             if (datastoreContainerType.equals(DatastoreContainerType.UNSTRUCTURED)) {
@@ -190,7 +196,8 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                 return downloadResponseMetaData;
             } catch (FileNotDownloadedException | IOException e) {
                 String logMessage = MessageFormat.format("Could not download file for eodEntity ''{0,number,#}''", eodEntity.getId());
-                logBuilder.append(logMessage + "\n");
+                logBuilder.append(logMessage)
+                    .append('\n');
                 log.error(logMessage, e);
             }
         }

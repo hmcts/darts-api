@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestArmRpoExecutionDetailEntity extends ArmRpoExecutionDetailEntity implements DbInsertable<ArmRpoExecutionDetailEntity> {
 

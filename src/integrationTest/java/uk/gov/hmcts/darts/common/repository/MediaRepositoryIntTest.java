@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.repository;
+package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +10,6 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;

@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 public class TestTranscriptionWorkflowEntity extends TranscriptionWorkflowEntity implements DbInsertable<TranscriptionWorkflowEntity> {
 
     @lombok.Builder

@@ -528,7 +528,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminGetEventResponseDetails'
+                allOf:
+                  - $ref: '#/components/schemas/AdminGetEventResponseDetails'
+                  - $ref: '#/components/schemas/AdminGetEventResponseDetailsCases'
+                  - $ref: '#/components/schemas/AdminGetEventResponseDetailsHearings'
+
         '404':
           description: Not Found - Event id
           content:
@@ -825,7 +829,47 @@ components:
           type: integer
         name:
           type: string
-
+    AdminGetEventResponseDetailsCases:
+      type: object
+      properties:
+        cases:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: 'The case id'
+              case_number:
+                type: string
+                description: 'The case number'
+              courthouse:
+                $ref: '#/components/schemas/CourthouseResponseDetails'
+    AdminGetEventResponseDetailsHearings:
+      type: object
+      properties:
+        hearings:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: 'The hearing id'
+              case_id:
+                type: integer
+                description: 'The case id'
+              case_number:
+                type: string
+                description: 'The case number'
+              hearing_date:
+                type: string
+                format: date
+                description: 'The hearing date'
+              courthouse:
+                $ref: '#/components/schemas/CourthouseResponseDetails'
+              courtroom:
+                $ref: '#/components/schemas/CourtroomResponseDetails'
     AdminGetEventResponseDetails:
       type: object
       properties:
@@ -942,4 +986,4 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND]
+        EVENT_ID_NOT_FOUND ]

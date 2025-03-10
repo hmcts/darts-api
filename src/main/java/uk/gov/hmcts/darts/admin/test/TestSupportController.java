@@ -60,6 +60,7 @@ import static org.springframework.http.HttpStatus.OK;
 @SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement", "PMD.TestClassWithoutTestCases"})
 public class TestSupportController {
 
+    public static final String IDS = "ids";
     private final SessionFactory sessionFactory;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
@@ -76,7 +77,7 @@ public class TestSupportController {
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
 
-    @SuppressWarnings({"unchecked", "PMD.CloseResource"})
+    @SuppressWarnings({"PMD.CloseResource"})
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
         Session session = sessionFactory.openSession();
@@ -168,13 +169,13 @@ public class TestSupportController {
 
         session.createNativeQuery("""
                                       delete from darts.courtroom where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.security_group_courthouse_ae where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.courthouse where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
     }
 
     @PostMapping(value = "/courthouse/{courthouse_name}/courtroom/{courtroom_name}")
@@ -186,11 +187,11 @@ public class TestSupportController {
         if (!courthouseName.startsWith("FUNC-")) {
             return new ResponseEntity<>("Courthouse name must start with FUNC-", BAD_REQUEST);
         }
-        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName));
 
-        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUC, courtroomName).isEmpty()) {
-            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUC)
-                .orElseGet(() -> newCourthouse(courthouseNameUC));
+        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUpperTrimmed, courtroomName).isEmpty()) {
+            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUpperTrimmed)
+                .orElseGet(() -> newCourthouse(courthouseNameUpperTrimmed));
 
             newUserCourthousePermissions(courthouse);
             newCourtroom(courtroomName, courthouse);
@@ -226,7 +227,8 @@ public class TestSupportController {
         courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(courthouseName));
+        Optional<CourthouseEntity> foundCourthouse =
+            courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName)));
         if (foundCourthouse.isPresent()) {
             courtCase.setCourthouse(foundCourthouse.get());
         } else {
@@ -382,8 +384,8 @@ public class TestSupportController {
 
     private static List<Integer> eventIdsToBeDeleted(Session session, List<Integer> heaIds) {
         List<Integer> eventsByHearing = session.createNativeQuery("""
-                                                                 select eve_id from darts.hearing_event_ae where hea_id in (?)
-                                                                 """, Integer.class)
+                                                                      select eve_id from darts.hearing_event_ae where hea_id in (?)
+                                                                      """, Integer.class)
             .setParameter(1, heaIds)
             .getResultList();
 
@@ -440,10 +442,10 @@ public class TestSupportController {
         }
         session.createNativeQuery("""
                                       delete from darts.security_group_courthouse_ae where grp_id in ( :ids )
-                                      """, Integer.class).setParameter("ids", securityGroupIds).executeUpdate();
+                                      """, Integer.class).setParameter(IDS, securityGroupIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.security_group where grp_id in ( :ids )
-                                      """, Integer.class).setParameter("ids", securityGroupIds).executeUpdate();
+                                      """, Integer.class).setParameter(IDS, securityGroupIds).executeUpdate();
     }
 
     private void removeRetentionPolicyTypes(Session session) {

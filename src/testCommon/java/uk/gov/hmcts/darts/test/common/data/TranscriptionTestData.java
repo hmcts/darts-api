@@ -18,6 +18,7 @@ public final class TranscriptionTestData
     TestTranscriptionEntity.TestTranscriptionEntityBuilder> {
 
     TranscriptionTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public TranscriptionEntity minimalTranscription() {

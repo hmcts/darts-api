@@ -1,7 +1,7 @@
-package uk.gov.hmcts.darts.audio.repository;
+package uk.gov.hmcts.darts.common.repository;
 
 public enum TransformedMediaSubStringQueryEnum {
-    COURT_HOUSE("Court Name:",  "post courthouse"),
+    COURT_HOUSE("Court Name:", "post courthouse"),
     OWNER("Owner", "post owner"),
     REQUESTED_BY("Requested By", "post requested by");
 
