@@ -122,7 +122,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
            WHERE me.chronicleId = :chronicleId
            AND me.id != :excludeMediaId
         """)
-    void setAllAssocaitedMediaToIsCurrentFalseExcludingMediaId(String chronicleId, Integer excludeMediaId);
+    void setAllAssociatedMediaToIsCurrentFalseExcludingMediaId(String chronicleId, Integer excludeMediaId);
 
     List<MediaEntity> findAllByChronicleId(String chronicleId);
 

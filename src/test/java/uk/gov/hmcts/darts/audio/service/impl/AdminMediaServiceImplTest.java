@@ -915,7 +915,7 @@ class AdminMediaServiceImplTest {
 
             verify(media).setIsCurrent(true);
             verify(mediaRepository).save(media);
-            verify(mediaRepository).setAllAssocaitedMediaToIsCurrentFalseExcludingMediaId("chronicleId123", 123);
+            verify(mediaRepository).setAllAssociatedMediaToIsCurrentFalseExcludingMediaId("chronicleId123", 123);
         }
     }
 

@@ -259,7 +259,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void setAllAssocaitedMediaToIsCurrentFalseExcludingMediaId_shouldUpdateAllRelatedMedias() {
+    void setAllAssociatedMediaToIsCurrentFalseExcludingMediaId_shouldUpdateAllRelatedMedias() {
         var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
         media1.setChronicleId("chronicleId");
         media1.setIsCurrent(true);
@@ -277,7 +277,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         media4.setIsCurrent(true);
         dartsPersistence.save(media4);
 
-        transactionalUtil.executeInTransaction(() -> mediaRepository.setAllAssocaitedMediaToIsCurrentFalseExcludingMediaId("chronicleId", media2.getId()));
+        transactionalUtil.executeInTransaction(() -> mediaRepository.setAllAssociatedMediaToIsCurrentFalseExcludingMediaId("chronicleId", media2.getId()));
 
         assertThat(mediaRepository.findById(media1.getId()).orElseThrow().getIsCurrent()).isFalse();
         assertThat(mediaRepository.findById(media2.getId()).orElseThrow().getIsCurrent()).isTrue();

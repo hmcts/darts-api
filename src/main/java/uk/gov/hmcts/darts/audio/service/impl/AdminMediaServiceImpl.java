@@ -327,7 +327,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         if (Boolean.TRUE.equals(mediaEntity.getIsCurrent())) {
             throw new DartsApiException(AudioApiError.MEDIA_ALREADY_CURRENT);
         }
-        mediaRepository.setAllAssocaitedMediaToIsCurrentFalseExcludingMediaId(mediaEntity.getChronicleId(), mediaEntity.getId());
+        mediaRepository.setAllAssociatedMediaToIsCurrentFalseExcludingMediaId(mediaEntity.getChronicleId(), mediaEntity.getId());
         mediaEntity.setIsCurrent(true);
         mediaRepository.save(mediaEntity);
     }
