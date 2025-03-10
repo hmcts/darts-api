@@ -241,6 +241,54 @@ paths:
           description: Unauthorised Error
         '403':
           description: Forbidden Error
+  /admin/hearings/{id}/audios:
+    get:
+      tags:
+        - Hearings
+      summary: |-
+        Returns the audios associated with a specific hearing via the "hearing_media_ae" table, including current audios only but all channels.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HearingsAudiosResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_104"
+                title: "The requested hearing cannot be found"
+                status: 404
 
 components:
   schemas:
@@ -330,7 +378,31 @@ components:
           type: string
           format: date
           example: '2023-07-31'
-
+    HearingsAudiosResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 1
+          start_at:
+            type: string
+            format: date-time
+            example: 2023-07-31T14:32:24.620Z
+          end_at:
+            type: string
+            format: date-time
+            example: 2023-07-31T14:32:24.620Z
+          filename:
+            type: string
+            example: "audio.mp3"
+          channel:
+            type: integer
+            example: 1
+          total_channels:
+            type: integer
+            example: 4
     HearingsResponse:
       type: object
       properties:

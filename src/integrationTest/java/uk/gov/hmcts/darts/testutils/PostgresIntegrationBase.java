@@ -1,8 +1,5 @@
 package uk.gov.hmcts.darts.testutils;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -10,10 +7,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
-import uk.gov.hmcts.darts.test.common.LogUtil;
-import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
 /**
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
@@ -21,21 +14,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 @SpringBootTest
 @ActiveProfiles({"intTest", "in-memory-caching"})
 @Import(IntegrationTestConfiguration.class)
-public class PostgresIntegrationBase {
-
-    @Autowired
-    protected DartsDatabaseStub dartsDatabase;
-
-    @Autowired
-    protected DartsPersistence dartsPersistence;
-
-    @Autowired
-    protected OpenInViewUtil openInViewUtil;
-
-    @Autowired
-    protected TransactionalUtil transactionalUtil;
-
-    protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
+public class PostgresIntegrationBase extends TestBase {
 
     /**
      * We shouldn't need to change this value. If we need to increase the limit as more tests use PostgresIntegrationBase, then it suggests we have a
@@ -63,21 +42,5 @@ public class PostgresIntegrationBase {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
-    }
-
-
-    @BeforeEach
-    void clearDb() {
-        dartsDatabase.clearDb();
-    }
-
-    @AfterEach
-    void clearTestData() {
-        logAppender.reset();
-    }
-
-
-    protected void anAuthenticatedUserFor(String userEmail) {
-        GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }
 }
