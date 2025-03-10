@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -227,7 +226,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         // join the 2 lists - distinct
         List<Integer> combinedUserIds = Stream.concat(systemUserIds.stream(), patchNonSystemUserIds.stream())
             .distinct()
-            .collect(Collectors.toList());
+            .toList();
 
         if (combinedUserIds != null) {
             securityGroupEntity.getUsers().forEach(userAccountEntity -> userAccountEntity.getSecurityGroupEntities().remove(securityGroupEntity));

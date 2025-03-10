@@ -33,7 +33,6 @@ import java.util.UUID;
 import static java.time.OffsetDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -232,7 +231,7 @@ class TranscriptionDownloaderTest {
                 var transcriptionDocument = someTranscriptionDocumentWithUploadDate(uploadedDateTime);
                 transcriptionDocument.setExternalObjectDirectoryEntities(someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(i));
                 return transcriptionDocument;
-            }).collect(toList());
+            }).toList();
     }
 
     private TranscriptionDocumentEntity someTranscriptionDocumentWithUploadDate(OffsetDateTime uploadedDateTime) {
@@ -247,7 +246,7 @@ class TranscriptionDownloaderTest {
     private List<ExternalObjectDirectoryEntity> someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(int quantity) {
         return rangeClosed(1, quantity).boxed()
             .map(i -> someExternalObjectDirectoryWithCreationDate(now().minusDays(2).minusDays(i)))
-            .collect(toList());
+            .toList();
     }
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryWithCreationDate(OffsetDateTime createdDateTime) {

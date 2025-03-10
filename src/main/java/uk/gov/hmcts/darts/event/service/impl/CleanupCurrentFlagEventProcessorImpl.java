@@ -15,7 +15,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
 
@@ -29,9 +28,9 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
 
     public CleanupCurrentFlagEventProcessorImpl(
         @Value("${darts.events.earliest-is-current-clear-up-date}") String earliestIsCurrentClearUpDate,
-            EventRepository eventRepository,
-            HearingRepository hearingRepository
-        ) {
+        EventRepository eventRepository,
+        HearingRepository hearingRepository
+    ) {
         this.earliestIsCurrentClearUpDate = LocalDate.parse(earliestIsCurrentClearUpDate)
             .atStartOfDay()
             .atOffset(UTC);
@@ -61,7 +60,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                                                                                                  eventIdAndHearingIds.getEventId());
         List<EventEntity> eventsToBeSuperseded = eventsWithSameEventIdAndHearings.stream()
             .sorted(Comparator.comparing(EventEntity::getCreatedDateTime).reversed())
-            .collect(Collectors.toList());
+            .toList();
         eventsToBeSuperseded.removeFirst();
         if (CollectionUtils.isNotEmpty(eventsToBeSuperseded)) {
             List<EventEntity> eventsThatHaveBeenSuperseded = new ArrayList<>();
@@ -69,8 +68,8 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                 if (eventToBeSuperseded.getCreatedDateTime().isBefore(earliestIsCurrentClearUpDate)) {
                     log.info("Event version with event id {} received into modernised DARTS is for a legacy event. Skipping event is_current cleanup " +
                                  "for eve_id {}",
-                         eventIdAndHearingIds.getEventId(),
-                         eventIdAndHearingIds.getEveId());
+                             eventIdAndHearingIds.getEventId(),
+                             eventIdAndHearingIds.getEveId());
                     continue;
                 }
                 eventToBeSuperseded.setIsCurrent(false);
