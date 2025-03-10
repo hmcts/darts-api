@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.testutils;
 
 import lombok.Getter;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class TestBase {
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 
+    @BeforeEach
     void clearDb() {
         dartsDatabase.clearDb();
     }
