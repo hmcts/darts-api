@@ -153,67 +153,39 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             metadata.setRetentionConfidenceScore(annotationDocument.getRetConfScore().getId());
         }
 
-        if (annotationRecordProperties.containsKey(BF_001_KEY)) {
-            metadata.setBf001(mapToString(annotationRecordProperties.getProperty(BF_001_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_002_KEY)) {
-            metadata.setBf002(mapToString(annotationRecordProperties.getProperty(BF_002_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_003_KEY)) {
-            metadata.setBf003(mapToString(annotationRecordProperties.getProperty(BF_003_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_004_KEY)) {
-            metadata.setBf004(mapToString(annotationRecordProperties.getProperty(BF_004_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_005_KEY)) {
-            metadata.setBf005(mapToString(annotationRecordProperties.getProperty(BF_005_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_006_KEY)) {
-            metadata.setBf006(mapToString(annotationRecordProperties.getProperty(BF_006_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_007_KEY)) {
-            metadata.setBf007(mapToString(annotationRecordProperties.getProperty(BF_007_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_008_KEY)) {
-            metadata.setBf008(mapToString(annotationRecordProperties.getProperty(BF_008_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_009_KEY)) {
-            metadata.setBf009(mapToString(annotationRecordProperties.getProperty(BF_009_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_010_KEY)) {
-            metadata.setBf010(mapToString(annotationRecordProperties.getProperty(BF_010_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_011_KEY)) {
-            metadata.setBf011(mapToString(annotationRecordProperties.getProperty(BF_011_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_012_KEY)) {
-            metadata.setBf012(mapToInt(annotationRecordProperties.getProperty(BF_012_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_013_KEY)) {
-            metadata.setBf013(mapToInt(annotationRecordProperties.getProperty(BF_013_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_014_KEY)) {
-            metadata.setBf014(mapToInt(annotationRecordProperties.getProperty(BF_014_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_015_KEY)) {
-            metadata.setBf015(mapToInt(annotationRecordProperties.getProperty(BF_015_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_016_KEY)) {
-            metadata.setBf016(mapToString(annotationRecordProperties.getProperty(BF_016_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_017_KEY)) {
-            metadata.setBf017(mapToString(annotationRecordProperties.getProperty(BF_017_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_018_KEY)) {
-            metadata.setBf018(mapToString(annotationRecordProperties.getProperty(BF_018_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_019_KEY)) {
-            metadata.setBf019(mapToString(annotationRecordProperties.getProperty(BF_019_KEY), annotationDocument));
-        }
-        if (annotationRecordProperties.containsKey(BF_020_KEY)) {
-            metadata.setBf020(mapToString(annotationRecordProperties.getProperty(BF_020_KEY), annotationDocument));
-        }
+        setMetadataProperties(metadata, annotationDocument);
+
         return metadata;
+    }
+
+    private void setMetadataProperties(RecordMetadata metadata, AnnotationDocumentEntity annotationDocument) {
+        for (String key : annotationRecordProperties.stringPropertyNames()) {
+            String value = mapToString(annotationRecordProperties.getProperty(key), annotationDocument);
+            if (value != null) {
+                switch (key) {
+                    case BF_001_KEY -> metadata.setBf001(value);
+                    case BF_002_KEY -> metadata.setBf002(value);
+                    case BF_003_KEY -> metadata.setBf003(value);
+                    case BF_004_KEY -> metadata.setBf004(value);
+                    case BF_005_KEY -> metadata.setBf005(value);
+                    case BF_006_KEY -> metadata.setBf006(value);
+                    case BF_007_KEY -> metadata.setBf007(value);
+                    case BF_008_KEY -> metadata.setBf008(value);
+                    case BF_009_KEY -> metadata.setBf009(value);
+                    case BF_010_KEY -> metadata.setBf010(value);
+                    case BF_011_KEY -> metadata.setBf011(value);
+                    case BF_012_KEY -> metadata.setBf012(mapToInt(value, annotationDocument));
+                    case BF_013_KEY -> metadata.setBf013(mapToInt(value, annotationDocument));
+                    case BF_014_KEY -> metadata.setBf014(mapToInt(value, annotationDocument));
+                    case BF_015_KEY -> metadata.setBf015(mapToInt(value, annotationDocument));
+                    case BF_016_KEY -> metadata.setBf016(value);
+                    case BF_017_KEY -> metadata.setBf017(value);
+                    case BF_018_KEY -> metadata.setBf018(value);
+                    case BF_019_KEY -> metadata.setBf019(value);
+                    case BF_020_KEY -> metadata.setBf020(value);
+                }
+            }
+        }
     }
 
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
