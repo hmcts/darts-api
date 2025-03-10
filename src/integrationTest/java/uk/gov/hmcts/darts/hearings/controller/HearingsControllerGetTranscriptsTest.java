@@ -154,6 +154,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         transcription4.setIsManualTranscription(false);
         transcription4.setLegacyObjectId("Something");
         dartsDatabase.save(transcription4);
+        dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(transcription4);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
