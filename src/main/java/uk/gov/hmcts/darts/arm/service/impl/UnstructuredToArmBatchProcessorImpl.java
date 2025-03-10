@@ -18,12 +18,14 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
@@ -62,31 +64,34 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer, unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
             AtomicInteger batchCounter = new AtomicInteger(1);
             UserAccountEntity userAccount = userIdentity.getUserAccount();
-            List<Callable<Void>> tasks = batchesForArm
-                .stream()
-                .map(eodsForBatch -> (Callable<Void>) () -> {
-                    int batchNumber = batchCounter.getAndIncrement();
-                    try {
-                        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
-                        log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
-                        createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
-                        log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
-                    } catch (Exception e) {
-                        log.error("Unexpected exception when processing batch {}", batchNumber, e);
-                    }
-                    return null;
-                })
-                .toList();
-
-            try {
-                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
-            } catch (Exception e) {
-                log.error("Unstructured to arm batch unexpected exception", e);
-                if (e instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
+            //List<Callable<Void>> tasks = batchesForArm
+            //    .stream()
+            //    .map(eodsForBatch -> (Callable<Void>) () -> {
+            batchesForArm.stream().forEach(eodsForBatch -> {
+                int batchNumber = batchCounter.getAndIncrement();
+                try {
+                    List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
+                    log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
+                    createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
+                    log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
+                } catch (Exception e) {
+                    log.error("Unexpected exception when processing batch {}", batchNumber, e);
                 }
-                return;
-            }
+                //return null;
+            });
+            //            return null;
+            //        })
+            //        .toList();
+
+//            try {
+//                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
+//            } catch (Exception e) {
+//                log.error("Unstructured to arm batch unexpected exception", e);
+//                if (e instanceof InterruptedException) {
+//                    Thread.currentThread().interrupt();
+//                }
+//                return;
+//            }
         }
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
@@ -95,32 +100,29 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         String archiveRecordsFileName = unstructuredToArmHelper.getArchiveRecordsFileName(armDataManagementConfiguration.getManifestFilePrefix());
         var batchItems = new ArmBatchItems();
 
-        for (var currentEod : eodsForBatch) {
-            var batchItem = new ArmBatchItem();
-            try {
-                ExternalObjectDirectoryEntity armEod;
-                if (isEqual(currentEod.getExternalLocationType(), EodHelper.armLocation())) {
-                    //retry existing attempt that has previously failed.
-                    armEod = currentEod;
-                    batchItem.setArmEod(armEod);
-                    updateArmEodToArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFileName, userAccount);
-                } else {
-                    armEod = unstructuredToArmHelper.createArmEodWithArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFileName, userAccount);
-                }
-
-                String rawFilename = unstructuredToArmHelper.generateRawFilename(armEod);
-
-                if (shouldPushRawDataToArm(batchItem)) {
-                    pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename, userAccount);
-                } else if (shouldAddEntryToManifestFile(batchItem)) {
-                    batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
-                }
-            } catch (Exception e) {
-                log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
-                recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
-            }
+        List<Callable<Void>> tasks = eodsForBatch.stream()
+            .map(currentEod -> (Callable<Void>) () -> {
+                log.info("Processing EOD {} for batch on thread {}", currentEod.getId(), Thread.currentThread());
+                pushToArmProcess(userAccount, currentEod, batchItems, archiveRecordsFileName);
+                return null;
+            })
+            .toList();
+        ThreadFactory factory = Thread.ofVirtual().factory();
+        try (ExecutorService executor = Executors.newThreadPerTaskExecutor(factory)) {
+            executor.invokeAll(tasks);
+        } catch (Exception e) {
+            log.error("Error during batch processing", e);
+            //batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
+            return;
         }
 
+//        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+//            executor.invokeAll(tasks);
+//        } catch (Exception e) {
+//            log.error("Error during batch processing", e);
+//            //batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
+//            return;
+//        }
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
                 String manifestFileContents = unstructuredToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
@@ -139,6 +141,33 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             } else {
                 recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
             }
+        }
+    }
+
+    private void pushToArmProcess(UserAccountEntity userAccount, ExternalObjectDirectoryEntity currentEod,
+                                  ArmBatchItems batchItems, String archiveRecordsFileName) {
+        var batchItem = new ArmBatchItem();
+        try {
+            ExternalObjectDirectoryEntity armEod;
+            if (isEqual(currentEod.getExternalLocationType(), EodHelper.armLocation())) {
+                //retry existing attempt that has previously failed.
+                armEod = currentEod;
+                batchItem.setArmEod(armEod);
+                updateArmEodToArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFileName, userAccount);
+            } else {
+                armEod = unstructuredToArmHelper.createArmEodWithArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFileName, userAccount);
+            }
+
+            String rawFilename = unstructuredToArmHelper.generateRawFilename(armEod);
+
+            if (shouldPushRawDataToArm(batchItem)) {
+                pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename, userAccount);
+            } else if (shouldAddEntryToManifestFile(batchItem)) {
+                batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
+            }
+        } catch (Exception e) {
+            log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
+            recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
         }
     }
 
