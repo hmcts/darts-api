@@ -1,15 +1,16 @@
 package uk.gov.hmcts.darts.cases.util;
 
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.time.LocalDate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("PMD.ShortMethodName")
 class RequestValidatorTest {
 
     @Test
@@ -114,4 +115,65 @@ class RequestValidatorTest {
         RequestValidator.validate(request);
     }
 
+    @Test
+    void courthouseExists_butIsTooShort_shouldThrowError() {
+        GetCasesSearchRequest request = buildValidRequest();
+        request.setCourthouse("a");
+
+        DartsApiException exception = assertThrows(
+            DartsApiException.class,
+            () -> RequestValidator.validate(request)
+        );
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CRITERIA_TOO_BROAD);
+        assertThat(exception.getMessage()).contains("Please include at least 3 characters.");
+    }
+
+    @Test
+    void judgeNameExists_butIsTooShort_shouldThrowError() {
+        GetCasesSearchRequest request = buildValidRequest();
+        request.setJudgeName("a");
+
+        DartsApiException exception = assertThrows(
+            DartsApiException.class,
+            () -> RequestValidator.validate(request)
+        );
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CRITERIA_TOO_BROAD);
+        assertThat(exception.getMessage()).contains("Please include at least 3 characters.");
+    }
+
+    @Test
+    void defendantNameExists_butIsTooShort_shouldThrowError() {
+        GetCasesSearchRequest request = buildValidRequest();
+        request.setDefendantName("a");
+
+        DartsApiException exception = assertThrows(
+            DartsApiException.class,
+            () -> RequestValidator.validate(request)
+        );
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CRITERIA_TOO_BROAD);
+        assertThat(exception.getMessage()).contains("Please include at least 3 characters.");
+    }
+
+    @Test
+    void eventTextExists_butIsTooShort_shouldThrowError() {
+        GetCasesSearchRequest request = buildValidRequest();
+        request.setEventTextContains("a");
+
+        DartsApiException exception = assertThrows(
+            DartsApiException.class,
+            () -> RequestValidator.validate(request)
+        );
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CRITERIA_TOO_BROAD);
+        assertThat(exception.getMessage()).contains("Please include at least 3 characters.");
+    }
+
+    private GetCasesSearchRequest buildValidRequest() {
+        return GetCasesSearchRequest.builder()
+            .courthouse("swansea")
+            .judgeName("judge")
+            .defendantName("defendant")
+            .eventTextContains("event")
+            .caseNumber("123456")
+            .build();
+    }
 }
