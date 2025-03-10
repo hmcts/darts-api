@@ -86,11 +86,19 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {MID_TIER, XHIBIT})
-    public ResponseEntity<PostCaseResponse> casesPost(AddCaseRequest addCaseRequest) {
+        globalAccessSecurityRoles = {MID_TIER})
+    public ResponseEntity<PostCaseResponse> casesAddCasePost(AddCaseRequest addCaseRequest) {
         DataUtil.preProcess(addCaseRequest);
         validateRequest(addCaseRequest);
         return new ResponseEntity<>(caseService.addCaseOrUpdate(addCaseRequest), HttpStatus.CREATED);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {XHIBIT})
+    public ResponseEntity<PostCaseResponse> casesAddDocumentPost(AddCaseRequest addCaseRequest) {
+        return casesAddCasePost(addCaseRequest);
     }
 
     private void validateRequest(AddCaseRequest addCaseRequest) {
