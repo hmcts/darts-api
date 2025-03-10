@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 class AzureCopyUtilTest {
 
     @Mock
-    DataManagementConfiguration configuration;
+    private DataManagementConfiguration configuration;
 
     @Test
     void testExceptionMessageDoesNotIncludeSourceOrDestinationInfoToAvoidSecretsLeak() {
@@ -48,4 +48,68 @@ class AzureCopyUtilTest {
             .hasMessageNotContaining(destinationSasUrl);
     }
 
+    @Test
+    void copy_withPreserveAccessTier() {
+        // given
+        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
+
+        when(configuration.getAzCopyExecutable()).thenReturn("/usr/bin/azcopy");
+        String preserveAccessTier = "--s2s-preserve-access-tier=false";
+        when(configuration.getAzCopyPreserveAccessTier()).thenReturn(preserveAccessTier);
+
+        String sourceSasUrl = "someSasUrl";
+        String destinationSasUrl = "someOtherSasUrl";
+
+        // when
+        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
+            .hasMessageContaining(preserveAccessTier);
+    }
+
+    @Test
+    void copy_withLogLevel() {
+        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
+
+        when(configuration.getAzCopyExecutable()).thenReturn("/usr/bin/azcopy");
+        String logLevel = "--log-level=ERROR";
+        when(configuration.getAzCopyLogLevel()).thenReturn(logLevel);
+
+        String sourceSasUrl = "someSasUrl";
+        String destinationSasUrl = "someOtherSasUrl";
+
+        // when
+        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
+            .hasMessageContaining(logLevel);
+    }
+
+    @Test
+    void copy_withCheckLength() {
+        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
+
+        when(configuration.getAzCopyExecutable()).thenReturn("/usr/bin/azcopy");
+        String checkLevel = "--check-length=false";
+        when(configuration.getAzCopyCheckLength()).thenReturn(checkLevel);
+
+        String sourceSasUrl = "someSasUrl";
+        String destinationSasUrl = "someOtherSasUrl";
+
+        // when
+        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
+            .hasMessageContaining(checkLevel);
+    }
+
+    @Test
+    void copy_withOutputLevelQuiet() {
+        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
+
+        when(configuration.getAzCopyExecutable()).thenReturn("/usr/bin/azcopy");
+        String outputLevel = "--output-level=quiet";
+        when(configuration.getAzCopyOutputLevel()).thenReturn(outputLevel);
+
+        String sourceSasUrl = "someSasUrl";
+        String destinationSasUrl = "someOtherSasUrl";
+
+        // when
+        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
+            .hasMessageContaining(outputLevel);
+    }
 }

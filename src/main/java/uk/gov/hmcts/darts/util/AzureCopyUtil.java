@@ -20,6 +20,7 @@ public class AzureCopyUtil {
     private final DataManagementConfiguration config;
 
     public void copy(String source, String destination) {
+        StringBuilder runCommand = new StringBuilder();
         try {
             ProcessBuilder builder = new ProcessBuilder();
             List<String> command = new ArrayList<>();
@@ -36,10 +37,14 @@ public class AzureCopyUtil {
             if (StringUtils.isNotEmpty(config.getAzCopyCheckLength())) {
                 command.add(config.getAzCopyCheckLength());
             }
+            if (StringUtils.isNotEmpty(config.getAzCopyOutputLevel())) {
+                command.add(config.getAzCopyOutputLevel());
+            }
             builder.command(command);
 
+            buildCensoredRunCommand(command, runCommand);
             var startTime = Instant.now();
-            log.info("Copy of blob started at {} - {}", startTime, builder.command());
+            log.info("Copy of blob started at {} - {}", startTime, runCommand);
             builder.redirectErrorStream(true);
             Process process = builder.start();
             int exitValue = process.waitFor();
@@ -52,16 +57,28 @@ public class AzureCopyUtil {
                     "Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Command: '%s'. Result: %s",
                     source,
                     destination,
-                    builder.command(),
+                    runCommand,
                     result);
                 log.error(errorMessage);
                 throw new DartsException(errorMessage);
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            throw new DartsException("Failed to execute azure copy - interrupted", ie);
+            throw new DartsException("Failed to execute azure copy - interrupted " + runCommand, ie);
         } catch (Exception e) {
-            throw new DartsException("Failed to execute azure copy", e);
+            throw new DartsException("Failed to execute azure copy " + runCommand, e);
+        }
+    }
+
+    private static void buildCensoredRunCommand(List<String> command, StringBuilder runCommand) {
+        for (int index = 0; index < command.size(); index++) {
+            if (index == 2) {
+                runCommand.append("source ").append(" ");
+            } else if (index == 3) {
+                runCommand.append("destination ").append(" ");
+            } else {
+                runCommand.append(command.get(index)).append(" ");
+            }
         }
     }
 }

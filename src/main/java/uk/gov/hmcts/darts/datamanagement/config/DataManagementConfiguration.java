@@ -60,6 +60,9 @@ public class DataManagementConfiguration extends StorageConfiguration {
     @Value("${darts.storage.az-copy-check-length}")
     private String azCopyCheckLength;
 
+    @Value("${darts.storage.az-copy-output-level}")
+    private String azCopyOutputLevel;
+
     @Override
     @Value("${darts.storage.blob.temp-blob-workspace}")
     public void setTempBlobWorkspace(String tempBlobWorkspace) {

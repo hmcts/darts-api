@@ -304,6 +304,7 @@ darts:
       az-copy-preserve-access-tier: "--s2s-preserve-access-tier=false"
       az-copy-log-level: "--log-level=ERROR"
       az-copy-check-length: "--check-length=false"
+      az-copy-output-level: "--output-level=quiet"
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   case-document:
