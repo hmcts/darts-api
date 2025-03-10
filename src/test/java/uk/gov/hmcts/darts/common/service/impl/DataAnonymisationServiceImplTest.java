@@ -98,7 +98,7 @@ class DataAnonymisationServiceImplTest {
 
 
     @Test
-    @DisplayName("Event should not be anonymised if one or more Associated cases are not anonymised")
+    @DisplayName("Event should not be anonymised if one or more associated cases are not anonymised")
     void eventEntityAnonymiseNotUpdatedAsNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsTrue() {
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
@@ -112,7 +112,7 @@ class DataAnonymisationServiceImplTest {
         verify(eventService, never()).saveEvent(eventEntity);
     }
 
-    @ParameterizedTest(name = "Event should be anonymised if all Associated cases are anonymised. (isManuallyRequested = {0})")
+    @ParameterizedTest(name = "Event should be anonymised if all associated cases are anonymised. (isManuallyRequested = {0})")
     @ValueSource(booleans = {true, false})
     void anonymiseEventEntity_eventEntityAnonymiseUpdated_asAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsTrue(boolean isManuallyRequested) {
         setupOffsetDateTime();
@@ -141,7 +141,7 @@ class DataAnonymisationServiceImplTest {
     }
 
     @Test
-    @DisplayName("Event should be anonymised if one or more Associated cases are not anonymised and the onlyAnonymiseIfAllCasesExpired flag is false")
+    @DisplayName("Event should be anonymised if one or more associated cases are not anonymised and the onlyAnonymiseIfAllCasesExpired flag is false")
     void anonymiseEventEntity_eventEntityAnonymiseUpdated_asNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsFalse() {
         setupOffsetDateTime();
         EventEntity eventEntity = new EventEntity();
