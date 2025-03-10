@@ -55,11 +55,6 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     private UserIdentity userIdentity;
     @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
-    @MockitoSpyBean
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
-
-    @TempDir
-    private File tempDirectory;
 
     @Autowired
     private DetsToArmBatchPushProcessor detsToArmBatchPushProcessor;
@@ -87,10 +82,6 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             ));
         savedMedia.setFileSize(1000L);
         savedMedia = dartsDatabase.save(savedMedia);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-
     }
 
     @Test

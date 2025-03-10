@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
-import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
@@ -26,12 +25,8 @@ class GetExtendedSearchesByMatterServiceIntTest extends IntegrationBase {
     @MockitoBean
     private ArmRpoClient armRpoClient;
 
-    @MockitoBean
-    private ArmApiConfigurationProperties armApiConfigurationProperties;
-
     @Autowired
     private GetExtendedSearchesByMatterService getExtendedSearchesByMatterService;
-
 
     @Test
     void getExtendedSearchesByMatterSuccess() {
