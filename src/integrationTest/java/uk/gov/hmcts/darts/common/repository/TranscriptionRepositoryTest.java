@@ -78,7 +78,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void findByCaseIdManualOrLegacy_shouldReturnLegacyTranscirptionHasDocuments() {
+    void findByCaseIdManualOrLegacy_shouldReturnLegacyTranscriptionHasDocuments() {
         TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity, false);
         legacyTranscription.setLegacyObjectId("legacy");
         legacyTranscription.setIsManualTranscription(false);
