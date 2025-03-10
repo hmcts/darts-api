@@ -285,11 +285,14 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                 try {
                     future.get(getLockAtMostFor().toMillis(), TimeUnit.MILLISECONDS);
                 } catch (TimeoutException e) {
+                    setAutomatedTaskStatus(FAILED);
                     log.error("Task: {} timed out after {}ms", getTaskName(), getLockAtMostFor().toMillis());
                     future.cancel(true);
                 } catch (ExecutionException e) {
+                    setAutomatedTaskStatus(FAILED);
                     log.error("Task: {} execution exception", getTaskName(), e);
                 } catch (InterruptedException e) {
+                    setAutomatedTaskStatus(FAILED);
                     log.error("Task: {} interrupted", getTaskName(), e);
                     Thread.currentThread().interrupt();
                 }

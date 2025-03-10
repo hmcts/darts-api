@@ -661,7 +661,7 @@ class AudioUploadServiceImplTest {
         String externalLocation = UUID.randomUUID().toString();
         audioService.deleteUploadedAudio(externalLocation);
         verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
-        LogUtil.waitUntilMessage(output, "Failed to delete blob", 5);
-        LogUtil.waitUntilMessage(output, "Failed to delete blob data from inbound container", 5);
+        LogUtil.assertOutputHasMessage(output, "Failed to delete blob", 5);
+        LogUtil.assertOutputHasMessage(output, "Failed to delete blob data from inbound container", 5);
     }
 }
