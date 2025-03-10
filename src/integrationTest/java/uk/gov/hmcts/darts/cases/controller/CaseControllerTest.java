@@ -39,7 +39,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
-import static org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -190,7 +189,7 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesPostWithoutExistingCase_addCase() throws Exception {
-        setupExternalUserForCourhouse(null, SecurityRoleEnum.MID_TIER);
+        setupExternalUserForCourhouse(null, MID_TIER);
 
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + "/addCase")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -244,6 +243,7 @@ class CaseControllerTest extends IntegrationBase {
 
     @Nested
     @DisplayName(BASE_PATH + "/addCase")
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")//False positive done via inheritance
     class PostCaseByAddCase extends PostCase {
         PostCaseByAddCase() {
             super(MID_TIER, "/addCase");
@@ -252,6 +252,7 @@ class CaseControllerTest extends IntegrationBase {
 
     @Nested
     @DisplayName(BASE_PATH + "/addDocument")
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")//False positive done via inheritance
     class PostCaseByAddDocument extends PostCase {
         PostCaseByAddDocument() {
             super(XHIBIT, "/addDocument");
@@ -259,7 +260,7 @@ class CaseControllerTest extends IntegrationBase {
     }
 
 
-    abstract class PostCase {
+    class PostCase {
         private final SecurityRoleEnum securityRoleEnum;
         private final String suffix;
 
@@ -396,10 +397,6 @@ class CaseControllerTest extends IntegrationBase {
             verify(logApi, times(2)).defendantNameOverflow(any(AddCaseRequest.class));
             verify(logApi, times(1)).defendantNotAdded("U20240603-103622, U20240603-03622", "CASE1001");
         }
-    }
-
-    private void setupExternalMidTierUserForCourthouse(CourthouseEntity courthouse) {
-        setupExternalUserForCourhouse(courthouse, MID_TIER);
     }
 
     private void setupExternalDarPcUserForCourthouse(CourthouseEntity courthouse) {
