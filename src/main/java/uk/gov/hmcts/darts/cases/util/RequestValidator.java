@@ -36,39 +36,44 @@ public class RequestValidator {
      */
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     private static void checkComplexity(GetCasesSearchRequest request) {
-        boolean courthouseProvided = StringUtils.length(request.getCourthouse()) >= SEARCH_TEXT_LENGTH_THRESHOLD
-            || CollectionUtils.isNotEmpty(request.getCourthouseIds());
+        int totalPoints = 0;
+        //give a point for every letter more than 3
+        totalPoints += Math.max(0, StringUtils.length(request.getCaseNumber()) - SEARCH_TEXT_LENGTH_THRESHOLD);
+        boolean courtroomProvided = request.getCourtroom() != null;
+        totalPoints += courtroomProvided ? 1 : 0;
+        totalPoints += getPoints(request.getJudgeName());
+        totalPoints += getPoints(request.getDefendantName());
+        totalPoints += getPoints(request.getEventTextContains());
+        boolean specificDateProvided = request.getDateFrom() != null && request.getDateFrom().equals(request.getDateTo());
+        totalPoints += specificDateProvided ? 1 : 0;
+
+        //Do this at the end to ensure getPoints CRITERIA_TOO_BROAD gets chucked first
+        boolean courthouseProvided = getPoints(request.getCourthouse()) != 0 || CollectionUtils.isNotEmpty(request.getCourthouseIds());
         boolean anyDateProvided = request.getDateFrom() != null || request.getDateTo() != null;
+        totalPoints += anyDateProvided ? 1 : 0;
+        totalPoints += courthouseProvided ? 1 : 0;
 
         if (courthouseProvided && anyDateProvided) {
             //allowed case
             return;
         }
-
-        int totalPoints = 0;
-        //give a point for every letter more than 3
-        totalPoints += Math.max(0, StringUtils.length(request.getCaseNumber()) - SEARCH_TEXT_LENGTH_THRESHOLD);
-        totalPoints += courthouseProvided ? 1 : 0;
-        boolean courtroomProvided = request.getCourtroom() != null;
-        totalPoints += courtroomProvided ? 1 : 0;
-        boolean judgeNameLengthOk = StringUtils.length(request.getJudgeName()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
-        totalPoints += judgeNameLengthOk ? 1 : 0;
-        boolean defendantNameLengthOk = StringUtils.length(request.getDefendantName()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
-        totalPoints += defendantNameLengthOk ? 1 : 0;
-        totalPoints += anyDateProvided ? 1 : 0;
-        boolean specificDateProvided = request.getDateFrom() != null && request.getDateFrom().equals(request.getDateTo());
-        totalPoints += specificDateProvided ? 1 : 0;
-        boolean eventTextLengthOk = StringUtils.length(request.getEventTextContains()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
-        totalPoints += eventTextLengthOk ? 1 : 0;
-
-
         if (totalPoints < SEARCH_COMPLEXITY_THRESHOLD) {
             throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD);
         }
     }
 
+    private static int getPoints(String str) {
+        long length = StringUtils.length(str);
+        if (length == 0) {
+            return 0;
+        }
+        if (length >= SEARCH_TEXT_LENGTH_THRESHOLD) {
+            return 1;
+        }
+        throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD,
+                                    "Please include at least " + SEARCH_TEXT_LENGTH_THRESHOLD + " characters.");
+    }
 
-    @SuppressWarnings({"PMD.UnnecessaryVarargsArrayCreation"})
     private static void checkNoCriteriaProvided(GetCasesSearchRequest request) {
         if (BooleanUtils.and(new boolean[]{
             StringUtils.isBlank(request.getCaseNumber()),
