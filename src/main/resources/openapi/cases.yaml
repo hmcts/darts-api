@@ -898,10 +898,12 @@ components:
           type: string
           example: Judge Walker
           maxLength: 2000
+          minLength: 3
         defendant_name:
           type: string
           example: 'David Defendant'
           maxLength: 2000
+          minLength: 3
         date_from:
           type: string
           format: date
@@ -912,6 +914,7 @@ components:
           type: string
           example: 'Event text'
           maxLength: 2000
+          minLength: 3
 
     AdminSingleCaseResponseItem:
       type: object
