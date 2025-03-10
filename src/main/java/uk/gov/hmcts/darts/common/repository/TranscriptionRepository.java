@@ -74,7 +74,8 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         JOIN darts.hearing_transcription_ae ht ON ht.tra_id = t.tra_id
         JOIN darts.hearing h ON h.hea_id = ht.hea_id
         WHERE h.hea_id = :hearingId
-        AND (t.is_manual_transcription = true OR (t.transcription_object_id IS NOT NULL and EXISTS(SELECT 1 FROM darts.transcription_document trd WHERE trd.tra_id = t.tra_id)))
+        AND (t.is_manual_transcription = true 
+                         OR (t.transcription_object_id IS NOT NULL and EXISTS(SELECT 1 FROM darts.transcription_document trd WHERE trd.tra_id = t.tra_id)))
         AND (EXISTS (
             SELECT 1
             FROM darts.transcription_document td
