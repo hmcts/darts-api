@@ -114,8 +114,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     boolean skipSteps(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         if (nonNull(armRpoExecutionDetailEntity.getArmRpoState())) {
-            return (GET_EXTENDED_PRODUCTIONS_BY_MATTER.getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
-                && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId()));
+            return GET_EXTENDED_PRODUCTIONS_BY_MATTER.getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
+                && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
         }
         return false;
     }

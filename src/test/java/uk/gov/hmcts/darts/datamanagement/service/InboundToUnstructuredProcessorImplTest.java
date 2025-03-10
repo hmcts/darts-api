@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -11,12 +12,15 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl;
 import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.time.Duration;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,27 +28,29 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class InboundToUnstructuredProcessorImplTest {
     @Mock
-    ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    ObjectRecordStatusRepository objectRecordStatusRepository;
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
-    ExternalLocationTypeRepository externalLocationTypeRepository;
-    InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
+    private ExternalLocationTypeRepository externalLocationTypeRepository;
     @Mock
-    InboundToUnstructuredProcessorSingleElement singleElementProcessor;
+    private InboundToUnstructuredProcessorSingleElement singleElementProcessor;
     @Mock
-    InboundToUnstructuredAutomatedTaskConfig asyncTaskConfig;
+    private InboundToUnstructuredAutomatedTaskConfig asyncTaskConfig;
+
+    private InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
 
     @BeforeEach
     void setUp() {
         inboundToUnstructuredProcessor = new InboundToUnstructuredProcessorImpl(externalObjectDirectoryRepository,
-                                                                                objectRecordStatusRepository, externalLocationTypeRepository,
+                                                                                objectRecordStatusRepository,
+                                                                                externalLocationTypeRepository,
                                                                                 singleElementProcessor,
                                                                                 asyncTaskConfig);
     }
 
     @Test
-    void testContinuesProcessingNextIterationOnException() {
+    void processInboundToUnstructured_ContinuesProcessingNextIterationOnException() {
         when(asyncTaskConfig.getThreads()).thenReturn(20);
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
         // given
@@ -66,4 +72,23 @@ class InboundToUnstructuredProcessorImplTest {
         verify(singleElementProcessor, times(2)).processSingleElement(any());
     }
 
+    @Test
+    void processInboundToUnstructured_throwsInterruptedException() {
+        // given
+        ExternalObjectDirectoryEntity eod1 = new ExternalObjectDirectoryEntity();
+        eod1.setId(1);
+        ExternalObjectDirectoryEntity eod2 = new ExternalObjectDirectoryEntity();
+        eod2.setId(2);
+        when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any()))
+            .thenReturn(List.of(1, 2));
+
+        try (MockedStatic<AsyncUtil> mockedStatic = mockStatic(AsyncUtil.class)) {
+            // Mock the static method call to throw InterruptedException
+            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(InboundToUnstructuredAutomatedTaskConfig.class)))
+                .thenThrow(new InterruptedException("Mocked InterruptedException"));
+
+            // when
+            inboundToUnstructuredProcessor.processInboundToUnstructured(100);
+        }
+    }
 }
