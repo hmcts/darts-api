@@ -145,7 +145,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
                                                                                                         DOWNLOAD_AUDIT_ACTIVITY_ID,
                                                                                                         fromDate, toDate);
 
-        assertEquals("2", auditEntities.get(0).getCourtCase().getCaseNumber());
+        assertEquals("2", auditEntities.getFirst().getCourtCase().getCaseNumber());
         assertEquals(1, auditEntities.size());
     }
 

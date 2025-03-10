@@ -139,15 +139,15 @@ class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationB
         assertEquals(1, notifications.size());
         assertEquals(
             NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
-            notifications.get(0).getEventId()
+            notifications.getFirst().getEventId()
         );
         assertEquals(
             dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
-            notifications.get(0).getEmailAddress()
+            notifications.getFirst().getEmailAddress()
         );
         assertEquals(
             mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
-            notifications.get(0).getCourtCase().getCaseNumber()
+            notifications.getFirst().getCourtCase().getCaseNumber()
         );
 
         assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());

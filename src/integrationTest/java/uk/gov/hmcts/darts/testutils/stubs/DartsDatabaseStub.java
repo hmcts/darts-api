@@ -865,7 +865,7 @@ public class DartsDatabaseStub {
         return retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
             retentionPolicyEnum.getPolicyKey(),
             currentTimeHelper.currentOffsetDateTime()
-        ).get(0);
+        ).getFirst();
     }
 
     @Transactional

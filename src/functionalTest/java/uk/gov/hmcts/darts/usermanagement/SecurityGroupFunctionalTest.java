@@ -128,7 +128,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                     || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId()))
                 .toList();
 
-        checkGroup(staticGroups.get(0), "CPP", true, 12, false, null);
+        checkGroup(staticGroups.getFirst(), "CPP", true, 12, false, null);
         checkGroup(staticGroups.get(1), "DAR_PC", true, 13, false, null);
         checkGroup(staticGroups.get(2), "DARTS", true, 10, false, null);
         checkGroup(staticGroups.get(3), "hmcts_staff_1", false, 3, true, 127);

@@ -34,7 +34,7 @@ class AudioResponseMapperImplTest {
         List<AudioMetadata> mappedAudioMetadatas = audioResponseMapper.mapToAudioMetadata(Collections.singletonList(mediaEntity));
 
         assertEquals(mappedAudioMetadatas.size(), 1);
-        AudioMetadata mappedAudioMetaData = mappedAudioMetadatas.get(0);
+        AudioMetadata mappedAudioMetaData = mappedAudioMetadatas.getFirst();
 
         assertEquals(1, mappedAudioMetaData.getId());
         assertEquals(START_TIME, mappedAudioMetaData.getMediaStartTimestamp());

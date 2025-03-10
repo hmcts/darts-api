@@ -80,7 +80,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
                                                               });
 
         assertEquals(2, annotations.size());
-        checkAnnotation(annotations.get(0), hearingEntity, testUser, annotationEntity2);
+        checkAnnotation(annotations.getFirst(), hearingEntity, testUser, annotationEntity2);
         checkAnnotation(annotations.get(1), hearingEntity, testUser, annotationEntity3);
     }
 
@@ -113,7 +113,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
                                                               });
 
         assertEquals(4, annotations.size());
-        checkAnnotation(annotations.get(0), hearingEntity2, testUser, annotationEntity3);
+        checkAnnotation(annotations.getFirst(), hearingEntity2, testUser, annotationEntity3);
         checkAnnotation(annotations.get(1), hearingEntity2, testUser, annotationEntity4);
         checkAnnotation(annotations.get(2), hearingEntity1, testUser, annotationEntity1);
         checkAnnotation(annotations.get(3), hearingEntity1, testUser, annotationEntity2);
@@ -148,7 +148,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
                                                               });
 
         assertEquals(3, annotations.size());
-        checkAnnotation(annotations.get(0), hearingEntity, superAdminUser, annotationEntity1);
+        checkAnnotation(annotations.getFirst(), hearingEntity, superAdminUser, annotationEntity1);
         checkAnnotation(annotations.get(1), hearingEntity, testUser, annotationEntity2);
         checkAnnotation(annotations.get(2), hearingEntity, judgeUser, annotationEntity3);
     }

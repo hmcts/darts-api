@@ -115,7 +115,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
                                                                                      null,
                                                                                      null, RESULT_LIMIT);
         assertEquals(2, hearingEntityList.size());
-        assertEquals(generatedHearingEntities.get(recordIndexToFind).getId(), hearingEntityList.get(0).getId());
+        assertEquals(generatedHearingEntities.get(recordIndexToFind).getId(), hearingEntityList.getFirst().getId());
         assertEquals(generatedHearingEntities.get(recordIndexToFindNext).getId(), hearingEntityList.get(1).getId());
     }
 
@@ -275,7 +275,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void findByIsActualCaseIds_shouldReturnHearingEntities() {
-        HearingEntity hearing1 = generatedHearingEntities.get(0);
+        HearingEntity hearing1 = generatedHearingEntities.getFirst();
         HearingEntity hearing2 = generatedHearingEntities.get(1);
         HearingEntity hearing3 = generatedHearingEntities.get(2);
         HearingEntity hearing4 = generatedHearingEntities.get(3);

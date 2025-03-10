@@ -138,7 +138,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         try {
             return getDataFromStorage(storedEodEntities);
         } catch (FileNotDownloadedException fnde) {
-            log.error("Could not retrieve file from any storage for eodId: {}", eodEntities.get(0).getId());
+            log.error("Could not retrieve file from any storage for eodId: {}", eodEntities.getFirst().getId());
             throw fnde;
         }
     }

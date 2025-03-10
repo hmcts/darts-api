@@ -157,14 +157,14 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
         CourtCaseEntity courtCase2 = createCase(1, CaseRetentionStatus.COMPLETE);
 
-        createMediaForHearing(courtCase1.getHearings().get(0));
+        createMediaForHearing(courtCase1.getHearings().getFirst());
         // Link same media to second case
-        linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
+        linkExistingMediaToHearing(courtCase1.getHearings().getFirst().getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
 
         caseExpiryDeletionAutomatedTask.preRunTask();
         caseExpiryDeletionAutomatedTask.runTask();
 
-        List<HearingEntity> hearingsToAssert = List.of(courtCase1.getHearings().get(0), courtCase2.getHearings().get(0));
+        List<HearingEntity> hearingsToAssert = List.of(courtCase1.getHearings().getFirst(), courtCase2.getHearings().getFirst());
 
         hearingsToAssert.forEach(h -> {
             HearingEntity hearing = dartsDatabase.getHearingRepository().findByCaseIdWithMediaList(h.getCourtCase().getId()).get();
@@ -179,14 +179,14 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
         CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
 
-        createMediaForHearing(courtCase1.getHearings().get(0));
+        createMediaForHearing(courtCase1.getHearings().getFirst());
         // Link same media to second case
-        linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
+        linkExistingMediaToHearing(courtCase1.getHearings().getFirst().getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
 
         caseExpiryDeletionAutomatedTask.preRunTask();
         caseExpiryDeletionAutomatedTask.runTask();
 
-        List<HearingEntity> hearingsToAssert = List.of(courtCase1.getHearings().get(0), courtCase2.getHearings().get(0));
+        List<HearingEntity> hearingsToAssert = List.of(courtCase1.getHearings().getFirst(), courtCase2.getHearings().getFirst());
 
         hearingsToAssert.forEach(h -> {
             HearingEntity hearing = dartsDatabase.getHearingRepository().findByCaseIdWithMediaList(h.getCourtCase().getId()).get();
@@ -317,7 +317,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
             .findByEvent(eventEntity);
         assertThat(dataAnonymisationEntities).hasSize(1);
-        DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.get(0);
+        DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.getFirst();
         assertDataAnonymisedEntry(dataAnonymisationEntity, eventEntity, null);
     }
 
@@ -325,7 +325,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
             .findByTranscriptionComment(transcriptionCommentEntity);
         assertThat(dataAnonymisationEntities).hasSize(1);
-        DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.get(0);
+        DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.getFirst();
         assertDataAnonymisedEntry(dataAnonymisationEntity, null, transcriptionCommentEntity);
     }
 
@@ -453,7 +453,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             hearingEntity.setMediaList(mediaList);
             dartsDatabase.getHearingRepository().save(hearingEntity);
 
-            mediaLinkedCaseStub.createCaseLinkedMedia(mediaList.get(0), courtCase);
+            mediaLinkedCaseStub.createCaseLinkedMedia(mediaList.getFirst(), courtCase);
         });
     }
 
