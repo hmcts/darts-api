@@ -111,7 +111,8 @@ public class AbstractLockableAutomatedTaskTest {
             LogUtil.assertOutputHasMessage(output, "LockedTaskTest: Task is running", 10);
             //Ensure task errors are logged correctly
             LogUtil.assertOutputHasMessage(output, "Task: TEST_TASK timed out after 1000ms", 10);
-            WaitUtil.waitFor(() -> abstractLockableAutomatedTask.getAutomatedTaskStatus().equals(AutomatedTaskStatus.FAILED), 100, 10);
+            WaitUtil.waitFor(() -> abstractLockableAutomatedTask.getAutomatedTaskStatus().equals(AutomatedTaskStatus.FAILED),
+                             "Timeout waiting for task status to be FAILED", 10);
             verify(abstractLockableAutomatedTask).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             verify(lockedTask).assertLocked();
         }

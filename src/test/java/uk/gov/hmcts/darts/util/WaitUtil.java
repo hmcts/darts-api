@@ -1,23 +1,24 @@
 package uk.gov.hmcts.darts.util;
 
-import java.util.function.Consumer;
+import lombok.SneakyThrows;
+
 import java.util.function.Supplier;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public final class WaitUtil {
     private WaitUtil() {
     }
 
-    public static void waitFor(Supplier<Boolean> supplier, int intervalMs, int timeoutSeconds) {
+    @SneakyThrows
+    @SuppressWarnings("PMD.DoNotUseThreads")//Required to prevent busy waiting
+    public static void waitFor(Supplier<Boolean> supplier, String message, int timeoutSeconds) {
         long startTime = System.currentTimeMillis();
         while (!supplier.get()) {
             if (System.currentTimeMillis() - startTime > timeoutSeconds * 1000) {
-                throw new RuntimeException("Timeout waiting for condition");
+                fail(message);
             }
-            try {
-                Thread.sleep(intervalMs);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            Thread.sleep(100);
         }
     }
 }

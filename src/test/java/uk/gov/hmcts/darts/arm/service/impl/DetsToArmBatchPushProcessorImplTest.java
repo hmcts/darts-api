@@ -228,7 +228,7 @@ class DetsToArmBatchPushProcessorImplTest {
             asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), any()))
                 .thenThrow(new RuntimeException("Test exception"));
             detsToArmBatchPushProcessor.processDetsToArm(5);
-            LogUtil.waitUntilMessage(output, "DETS to ARM batch unexpected exception", 5);
+            LogUtil.assertOutputHasMessage(output, "DETS to ARM batch unexpected exception", 5);
 
             assertThat(output)
                 .contains("DETS to ARM batch unexpected exception")
