@@ -68,10 +68,10 @@ class TranscriptionRepositoryTest extends IntegrationBase {
 
     @Test
     void doesNotShowAutomated() {
-        createStandardTranscriptionWithDocument();
         TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity, false);
         legacyTranscription.setIsManualTranscription(false);
         dartsDatabase.save(legacyTranscription);
+        dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(legacyTranscription);
 
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
         assertThat(transcriptionEntities).isEmpty();
@@ -103,7 +103,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     void includesHidden() {
         createStandardTranscriptionWithDocument();
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
-        assertThat(transcriptionEntities).isEmpty();
+        assertThat(transcriptionEntities).hasSize(4);
     }
 
     @Test
