@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -229,5 +230,19 @@ class HearingsServiceImplTest {
         return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.now(), isHearingActual);
     }
 
+
+    @Test
+    void validateHearingExsistsElseError_whenHearingExists_noErrorShouldBeThrown() {
+        doReturn(true).when(hearingRepository).existsById(any());
+        service.validateHearingExsistsElseError(123);
+        verify(hearingRepository).existsById(123);
+    }
+
+    @Test
+    void validateHearingExsistsElseError_whenHearingDoesNotExist_errorShouldBeThrown() {
+        doReturn(false).when(hearingRepository).existsById(any());
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.validateHearingExsistsElseError(123));
+        assertEquals(HearingApiError.HEARING_NOT_FOUND, exception.getError());
+    }
 
 }

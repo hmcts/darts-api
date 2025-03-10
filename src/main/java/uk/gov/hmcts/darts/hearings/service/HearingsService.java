@@ -16,6 +16,8 @@ public interface HearingsService {
 
     HearingEntity getHearingById(Integer hearingId);
 
+    void validateHearingExsistsElseError(Integer hearingId);
+
     List<EventResponse> getEvents(Integer hearingId);
 
     List<Transcript> getTranscriptsByHearingId(Integer hearingId);
