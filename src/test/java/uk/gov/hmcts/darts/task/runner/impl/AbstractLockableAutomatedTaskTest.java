@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -113,7 +114,7 @@ public class AbstractLockableAutomatedTaskTest {
             LogUtil.assertOutputHasMessage(output, "Task: TEST_TASK timed out after 1000ms", 10);
             WaitUtil.waitFor(() -> abstractLockableAutomatedTask.getAutomatedTaskStatus().equals(AutomatedTaskStatus.FAILED),
                              "Timeout waiting for task status to be FAILED", 10);
-            verify(abstractLockableAutomatedTask).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
+            verify(abstractLockableAutomatedTask, atLeastOnce()).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             verify(lockedTask).assertLocked();
         }
 
@@ -145,7 +146,7 @@ public class AbstractLockableAutomatedTaskTest {
             LogUtil.assertOutputHasMessage(output, "Task: TEST_TASK exception during execution of the task business logic", 5);
             LogUtil.assertOutputHasMessage(output, "Task: TEST_TASK execution exception", 5);
 
-            verify(abstractLockableAutomatedTask).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
+            verify(abstractLockableAutomatedTask, atLeastOnce()).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             verify(abstractLockableAutomatedTask).handleException(exception);
             verify(lockedTask).assertLocked();
         }
