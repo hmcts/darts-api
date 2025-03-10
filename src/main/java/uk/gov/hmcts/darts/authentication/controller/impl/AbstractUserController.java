@@ -23,6 +23,7 @@ import java.util.Optional;
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public abstract class AbstractUserController implements AuthenticationController {
 
+    public static final String REDIRECT = "redirect:";
     private final AuthenticationService authenticationService;
     private final AuthorisationApi authorisationApi;
     protected final AuthStrategySelector locator;
@@ -37,7 +38,7 @@ public abstract class AbstractUserController implements AuthenticationController
             accessToken = authHeaderValue.replace("Bearer ", "");
         }
         URI url = authenticationService.loginOrRefresh(accessToken, redirectUri);
-        return new ModelAndView("redirect:" + url.toString());
+        return new ModelAndView(REDIRECT + url.toString());
     }
 
     @Override
@@ -67,12 +68,12 @@ public abstract class AbstractUserController implements AuthenticationController
     public ModelAndView logout(String authHeaderValue, String redirectUri) {
         String accessToken = authHeaderValue.replace("Bearer ", "");
         URI url = authenticationService.logout(accessToken, redirectUri);
-        return new ModelAndView("redirect:" + url.toString());
+        return new ModelAndView(REDIRECT + url.toString());
     }
 
     @Override
     public ModelAndView resetPassword(String redirectUri) {
         URI url = authenticationService.resetPassword(redirectUri);
-        return new ModelAndView("redirect:" + url.toString());
+        return new ModelAndView(REDIRECT + url.toString());
     }
 }

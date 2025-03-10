@@ -74,7 +74,7 @@ class CourthouseServiceImplTest {
 
     @Mock
     private AuditApi auditApi;
-
+    
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
 
