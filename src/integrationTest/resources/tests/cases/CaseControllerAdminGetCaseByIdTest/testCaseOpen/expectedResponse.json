@@ -26,6 +26,7 @@
       "event_ts": "2023-06-26T13:00:00Z"
     }
   ],
+  "is_retention_updated": false,
   "case_status": "OPEN",
   "created_at": "<CREATED_AT>",
   "created_by": 0,
