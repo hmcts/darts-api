@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.cases.controller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -50,6 +52,7 @@ import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.TestUtils.substituteHearingDateWithToday;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
@@ -185,12 +188,11 @@ class CaseControllerTest extends IntegrationBase {
         Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
-    @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"MID_TIER", "XHIBIT"}, mode = INCLUDE)
-    void casesPostWithoutExistingCase(SecurityRoleEnum securityRoleEnum) throws Exception {
-        setupExternalUserForCourhouse(null, securityRoleEnum);
+    @Test
+    void casesPostWithoutExistingCase_addCase() throws Exception {
+        setupExternalUserForCourhouse(null, SecurityRoleEnum.MID_TIER);
 
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + "/addCase")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
@@ -203,23 +205,23 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"MID_TIER", "XHIBIT"}, mode = EXCLUDE)
-    void casesPost_shouldThrowError_whenNotAuthenticatied(SecurityRoleEnum securityRoleEnum) throws Exception {
+    @EnumSource(value = SecurityRoleEnum.class, names = {"MID_TIER"}, mode = EXCLUDE)
+    void casesPost_shouldThrowError_whenNotAuthenticatied_addCase(SecurityRoleEnum securityRoleEnum) throws Exception {
         setupExternalUserForCourhouse(null, securityRoleEnum);
 
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + "/addCase")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
     }
 
     @Test
-    void casesPostWithoutExistingCaseWithLeadingAndTrailingSpacesInNames() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
+    void casesPostWithoutExistingCase_addDocument() throws Exception {
+        setupExternalUserForCourhouse(null, XHIBIT);
 
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + "/addDocument")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithSpaces.json"));
+            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
         String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
@@ -229,117 +231,171 @@ class CaseControllerTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    @Test
-    void casesPostCaseNumberMissing() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"XHIBIT"}, mode = EXCLUDE)
+    void casesPost_shouldThrowError_whenNotAuthenticatied(SecurityRoleEnum securityRoleEnum) throws Exception {
+        setupExternalUserForCourhouse(null, securityRoleEnum);
+
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + "/addDocument")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseNumberMissing.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseNumberMissing_400.json");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
     }
 
-    @Test
-    void casesPostCourthouseMissing() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCourthouseMissing.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCourthouseMissing_400.json");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    @Nested
+    @DisplayName(BASE_PATH + "/addCase")
+    class PostCaseByAddCase extends PostCase {
+        PostCaseByAddCase() {
+            super(MID_TIER, "/addCase");
+        }
     }
 
-    @Test
-    void casesPost_courthouseNotFound_404ShouldBeReturned() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCourthouseNotFound.json"));
-
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
-        String content = response.getResponse().getContentAsString();
-        Problem problemResponse = objectMapper.readValue(content, Problem.class);
-        Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
-    }
-
-    @Test
-    void casesPostWithExistingCaseButNoHearing() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
-
-        dartsDatabase.createCase("EDINBURGH", "case1");
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyForCaseWithoutHearing.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
-
-        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
-
-        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseNoHearing.json"));
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void casesPostWithType() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
-
-        dartsDatabase.createCase("EDINBURGH", "case1");
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyForCaseWithType.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-        PostCaseResponse postCaseResponse = objectMapper.readValue(actualResponse, PostCaseResponse.class);
-        Optional<CourtCaseEntity> savedCase = dartsDatabase.getCaseRepository().findById(postCaseResponse.getCaseId());
-        String caseType = savedCase.get().getCaseType();
-        Assertions.assertEquals("1", caseType);
+    @Nested
+    @DisplayName(BASE_PATH + "/addDocument")
+    class PostCaseByAddDocument extends PostCase {
+        PostCaseByAddDocument() {
+            super(XHIBIT, "/addDocument");
+        }
     }
 
 
-    @Test
-    void casesPostUpdateExistingCase() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
+    abstract class PostCase {
+        private final SecurityRoleEnum securityRoleEnum;
+        private final String suffix;
 
-        MockHttpServletRequestBuilder requestBuilder = post("/cases")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseUpdate.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+        public PostCase(SecurityRoleEnum securityRoleEnum, String suffix) {
+            this.securityRoleEnum = securityRoleEnum;
+            this.suffix = suffix;
+        }
 
-        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
+        @Test
+        void casesPostWithoutExistingCaseWithLeadingAndTrailingSpacesInNames() throws Exception {
+            setupExternalUserForCourhouse(null, securityRoleEnum);
 
-        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseUpdate.json"));
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
+            MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + suffix)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithSpaces.json"));
+            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
-    @Test
-    void casesPostDefendant() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
+            String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
 
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyDefendantNameIssues.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+            String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponse.json"));
+            assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        }
 
-        PostCaseResponse postCaseResponse = objectMapper.readValue(response.getResponse().getContentAsString(), PostCaseResponse.class);
+        @Test
+        void casesPostCaseNumberMissing() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + suffix)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(getContentsFromFile(
+                    "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseNumberMissing.json"));
+            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
 
-        Assertions.assertEquals(2, postCaseResponse.getDefendants().size());
-        verify(logApi, times(2)).defendantNameOverflow(any(AddCaseRequest.class));
-        verify(logApi, times(1)).defendantNotAdded("U20240603-103622, U20240603-03622", "CASE1001");
+            String actualResponse = response.getResponse().getContentAsString();
+
+            String expectedResponse = getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseNumberMissing_400.json");
+            assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        }
+
+        @Test
+        void casesPostCourthouseMissing() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + suffix)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(getContentsFromFile(
+                    "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCourthouseMissing.json"));
+            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
+            String actualResponse = response.getResponse().getContentAsString();
+
+            String expectedResponse = getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCourthouseMissing_400.json");
+            assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        }
+
+        @Test
+        void casesPost_courthouseNotFound_404ShouldBeReturned() throws Exception {
+            setupExternalUserForCourhouse(null, securityRoleEnum);
+            MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + suffix)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCourthouseNotFound.json"));
+
+            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+            String content = response.getResponse().getContentAsString();
+            Problem problemResponse = objectMapper.readValue(content, Problem.class);
+            Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
+        }
+
+        @Test
+        void casesPostWithExistingCaseButNoHearing() throws Exception {
+            setupExternalUserForCourhouse(null, securityRoleEnum);
+
+            dartsDatabase.createCase("EDINBURGH", "case1");
+            MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + suffix)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(getContentsFromFile(
+                    "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyForCaseWithoutHearing.json"));
+            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+            String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
+
+            String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseNoHearing.json"));
+            assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        }
+
+        @Test
+        void casesPostWithType() throws Exception {
+            setupExternalUserForCourhouse(null, securityRoleEnum);
+
+            dartsDatabase.createCase("EDINBURGH", "case1");
+            MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + suffix)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(getContentsFromFile(
+                    "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyForCaseWithType.json"));
+            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+            String actualResponse = response.getResponse().getContentAsString();
+            PostCaseResponse postCaseResponse = objectMapper.readValue(actualResponse, PostCaseResponse.class);
+            Optional<CourtCaseEntity> savedCase = dartsDatabase.getCaseRepository().findById(postCaseResponse.getCaseId());
+            String caseType = savedCase.get().getCaseType();
+            Assertions.assertEquals("1", caseType);
+        }
+
+
+        @Test
+        void casesPostUpdateExistingCase() throws Exception {
+            setupExternalUserForCourhouse(null, securityRoleEnum);
+
+            MockHttpServletRequestBuilder requestBuilder = post("/cases" + suffix)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(getContentsFromFile(
+                    "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseUpdate.json"));
+            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+            String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
+
+            String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseUpdate.json"));
+            assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        }
+
+        @Test
+        void casesPostDefendant() throws Exception {
+            setupExternalUserForCourhouse(null, securityRoleEnum);
+
+            MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + suffix)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyDefendantNameIssues.json"));
+            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+            PostCaseResponse postCaseResponse = objectMapper.readValue(response.getResponse().getContentAsString(), PostCaseResponse.class);
+
+            Assertions.assertEquals(2, postCaseResponse.getDefendants().size());
+            verify(logApi, times(2)).defendantNameOverflow(any(AddCaseRequest.class));
+            verify(logApi, times(1)).defendantNotAdded("U20240603-103622, U20240603-03622", "CASE1001");
+        }
     }
 
     private void setupExternalMidTierUserForCourthouse(CourthouseEntity courthouse) {
