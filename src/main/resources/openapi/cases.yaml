@@ -844,6 +844,7 @@ components:
         courthouse:
           type: string
           example: Swansea
+          maxLength: 2000
           minLength: 3
         courtroom:
           type: string
