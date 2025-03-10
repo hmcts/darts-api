@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.task.config.AbstractAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.util.LogUtil;
+import uk.gov.hmcts.darts.util.WaitUtil;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -110,7 +111,7 @@ public class AbstractLockableAutomatedTaskTest {
             LogUtil.assertOutputHasMessage(output, "LockedTaskTest: Task is running", 10);
             //Ensure task errors are logged correctly
             LogUtil.assertOutputHasMessage(output, "Task: TEST_TASK timed out after 1000ms", 10);
-
+            WaitUtil.waitFor(() -> abstractLockableAutomatedTask.getAutomatedTaskStatus().equals(AutomatedTaskStatus.FAILED), 100, 10);
             verify(abstractLockableAutomatedTask).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             verify(lockedTask).assertLocked();
         }
