@@ -41,7 +41,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class AbstractLockableAutomatedTaskTest {
 
-
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
