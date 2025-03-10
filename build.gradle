@@ -236,7 +236,7 @@ pmdMain {
 pmdTestCommon {
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
   //Ensures we don't passively increase pmd errors but we should aim to reduce this
-  maxFailures = 365
+  maxFailures = 79
 }
 pmdTest {
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
@@ -440,7 +440,7 @@ dependencies {
   implementation group: 'io.rest-assured', name: 'rest-assured'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.3.4'
   implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.3.4'
-  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.2'
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.3'
 
   //database
   implementation 'org.postgresql:postgresql:42.7.5'
@@ -457,7 +457,7 @@ dependencies {
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.3'
-  implementation 'org.hibernate.orm:hibernate-ant:6.6.9.Final'
+  implementation 'org.hibernate.orm:hibernate-ant:6.6.10.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.5.Final'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core

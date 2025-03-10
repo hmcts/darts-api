@@ -47,7 +47,7 @@ class CaseCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCaseWithCourthouseNameExistingCase() {
+    void retrieveOrCreateCase_WithCourthouseNameExistingCase() {
         when(caseRepository.findByCaseNumberAndCourthouse_CourthouseName("CASE123", "TEST COURTHOUSE"))
             .thenReturn(Optional.of(existingCase));
         when(caseRepository.saveAndFlush(any(CourtCaseEntity.class))).thenReturn(existingCase);
@@ -61,7 +61,7 @@ class CaseCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCaseWithCourthouseNameNewCase() {
+    void retrieveOrCreateCase_WithCourthouseNameNewCase() {
         when(caseRepository.findByCaseNumberAndCourthouse_CourthouseName("CASE123", "TEST COURTHOUSE"))
             .thenReturn(Optional.empty());
         when(courthouseCommonService.retrieveCourthouse("Test Courthouse")).thenReturn(courthouse);
@@ -80,7 +80,7 @@ class CaseCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCaseWithCourthouseExistingCase() {
+    void retrieveOrCreateCase_WithCourthouseExistingCase() {
         when(caseRepository.findByCaseNumberAndCourthouse("CASE123", courthouse))
             .thenReturn(Optional.of(existingCase));
         when(caseRepository.saveAndFlush(any(CourtCaseEntity.class))).thenReturn(existingCase);
@@ -94,7 +94,7 @@ class CaseCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCaseWithCourthouseNewCase() {
+    void retrieveOrCreateCase_WithCourthouseNewCase() {
         when(caseRepository.findByCaseNumberAndCourthouse("CASE123", courthouse))
             .thenReturn(Optional.empty());
         when(caseRepository.saveAndFlush(any(CourtCaseEntity.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -109,5 +109,23 @@ class CaseCommonServiceImplTest {
         assertFalse(result.getClosed());
         assertFalse(result.getInterpreterUsed());
         verify(caseRepository).saveAndFlush(any(CourtCaseEntity.class));
+    }
+
+    @Test
+    void retrieveOrCreateCase_ReturnsCase_UsingWhitespaceCourthouseName() {
+        // given
+        when(caseRepository.findByCaseNumberAndCourthouse_CourthouseName("CASE123", "TEST COURTHOUSE"))
+            .thenReturn(Optional.of(existingCase));
+        when(caseRepository.saveAndFlush(any(CourtCaseEntity.class))).thenReturn(existingCase);
+
+        // when
+        CourtCaseEntity result = caseService.retrieveOrCreateCase(" Test Courthouse ", "CASE123", userAccount);
+
+        // then
+        assertNotNull(result);
+        assertEquals("CASE123", result.getCaseNumber());
+        assertEquals("TEST COURTHOUSE", result.getCourthouse().getCourthouseName());
+        assertEquals(userAccount, result.getLastModifiedBy());
+        verify(caseRepository).saveAndFlush(existingCase);
     }
 }

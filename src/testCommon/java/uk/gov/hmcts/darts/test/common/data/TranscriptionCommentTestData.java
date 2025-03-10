@@ -10,6 +10,7 @@ public final class TranscriptionCommentTestData
     TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder> {
 
     TranscriptionCommentTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     @Override

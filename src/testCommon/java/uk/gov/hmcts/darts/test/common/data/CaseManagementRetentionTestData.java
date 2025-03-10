@@ -9,6 +9,7 @@ import static uk.gov.hmcts.darts.test.common.data.RetentionPolicyTypeTestData.so
 public final class CaseManagementRetentionTestData {
 
     private CaseManagementRetentionTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static CaseManagementRetentionEntity someMinimalCaseManagementRetention() {

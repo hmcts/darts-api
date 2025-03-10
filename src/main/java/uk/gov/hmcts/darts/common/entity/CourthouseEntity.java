@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.AuditJoinTable;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
@@ -23,7 +24,6 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
@@ -109,6 +109,6 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     }
 
     public void setCourthouseName(String courthouseName) {
-        this.courthouseName = courthouseName.toUpperCase(Locale.ROOT);
+        this.courthouseName = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName));
     }
 }

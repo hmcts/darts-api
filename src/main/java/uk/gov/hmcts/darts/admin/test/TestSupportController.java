@@ -76,7 +76,7 @@ public class TestSupportController {
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
 
-    @SuppressWarnings({"unchecked", "PMD.CloseResource"})
+    @SuppressWarnings({"PMD.CloseResource"})
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
         Session session = sessionFactory.openSession();
@@ -186,11 +186,11 @@ public class TestSupportController {
         if (!courthouseName.startsWith("FUNC-")) {
             return new ResponseEntity<>("Courthouse name must start with FUNC-", BAD_REQUEST);
         }
-        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName));
 
-        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUC, courtroomName).isEmpty()) {
-            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUC)
-                .orElseGet(() -> newCourthouse(courthouseNameUC));
+        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUpperTrimmed, courtroomName).isEmpty()) {
+            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUpperTrimmed)
+                .orElseGet(() -> newCourthouse(courthouseNameUpperTrimmed));
 
             newUserCourthousePermissions(courthouse);
             newCourtroom(courtroomName, courthouse);
@@ -226,7 +226,8 @@ public class TestSupportController {
         courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(courthouseName));
+        Optional<CourthouseEntity> foundCourthouse =
+            courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName)));
         if (foundCourthouse.isPresent()) {
             courtCase.setCourthouse(foundCourthouse.get());
         } else {
@@ -382,8 +383,8 @@ public class TestSupportController {
 
     private static List<Integer> eventIdsToBeDeleted(Session session, List<Integer> heaIds) {
         List<Integer> eventsByHearing = session.createNativeQuery("""
-                                                                 select eve_id from darts.hearing_event_ae where hea_id in (?)
-                                                                 """, Integer.class)
+                                                                      select eve_id from darts.hearing_event_ae where hea_id in (?)
+                                                                      """, Integer.class)
             .setParameter(1, heaIds)
             .getResultList();
 
