@@ -60,7 +60,7 @@ public class AnnotationDataManagement {
             return downloadResponseMetaData.getResource();
         } catch (IOException | FileNotDownloadedException e) {
             log.error("Failed to download annotation document {}",
-                      externalObjectDirectoryEntities.get(0).getAnnotationDocumentEntity().getId(), e);
+                      externalObjectDirectoryEntities.getFirst().getAnnotationDocumentEntity().getId(), e);
             throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT, e);
         }
     }

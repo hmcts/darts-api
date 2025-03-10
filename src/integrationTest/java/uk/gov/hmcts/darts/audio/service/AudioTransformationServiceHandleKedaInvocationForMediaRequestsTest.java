@@ -117,7 +117,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
             .findAll();
         assertEquals(1, scheduledNotifications.size());
 
-        var notificationEntity = scheduledNotifications.get(0);
+        var notificationEntity = scheduledNotifications.getFirst();
         assertEquals(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString(), notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
@@ -168,7 +168,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
             .findAll();
         assertEquals(1, scheduledNotifications.size());
 
-        var notificationEntity = scheduledNotifications.get(0);
+        var notificationEntity = scheduledNotifications.getFirst();
         assertEquals(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString(), notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
@@ -224,7 +224,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
             .findAll();
         assertEquals(1, scheduledNotifications.size());
 
-        var notificationEntity = scheduledNotifications.get(0);
+        var notificationEntity = scheduledNotifications.getFirst();
         assertEquals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(), notificationEntity.getEventId());
 
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());

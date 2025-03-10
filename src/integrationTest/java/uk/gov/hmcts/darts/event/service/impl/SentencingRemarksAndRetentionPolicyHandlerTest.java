@@ -60,12 +60,12 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
@@ -81,12 +81,12 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
@@ -106,12 +106,12 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
@@ -134,12 +134,12 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         dartsGateway.verifyDoesntReceiveDarEvent();
     }
@@ -153,7 +153,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         var persistedTranscriptions = dartsDatabase.getTranscriptionRepository().findAll();
         assertThat(persistedTranscriptions).hasSize(1);
-        var persistedTranscription = persistedTranscriptions.get(0);
+        var persistedTranscription = persistedTranscriptions.getFirst();
         assertThat(persistedTranscription.getStartTime()).isEqualTo(sentencingRemarksDartsEvent.getStartTime());
         assertThat(persistedTranscription.getEndTime()).isEqualTo(sentencingRemarksDartsEvent.getEndTime());
         assertThat(persistedTranscription.getHearing()).isNotNull();
@@ -170,7 +170,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         var transcriptionComments = dartsDatabase.getTranscriptionCommentRepository().findAll();
         assertThat(transcriptionComments).hasSize(1);
-        assertThat(transcriptionComments.get(0).getComment()).isEqualTo("Transcription Automatically approved");
+        assertThat(transcriptionComments.getFirst().getComment()).isEqualTo("Transcription Automatically approved");
     }
 
     @Test
@@ -197,9 +197,9 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
         List<CaseManagementRetentionEntity> caseManagementRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findAll();
 
         assertEquals(1, caseManagementRetentionEntities.size());
-        assertEquals(retentionPolicy.getCaseTotalSentence(), caseManagementRetentionEntities.get(0).getTotalSentence());
+        assertEquals(retentionPolicy.getCaseTotalSentence(), caseManagementRetentionEntities.getFirst().getTotalSentence());
         RetentionPolicyTypeEntity caseManagementRetentionPolicyType = dartsDatabase.getRetentionPolicyTypeRepository()
-            .findById(caseManagementRetentionEntities.get(0).getRetentionPolicyTypeEntity().getId())
+            .findById(caseManagementRetentionEntities.getFirst().getRetentionPolicyTypeEntity().getId())
             .get();
         assertEquals(retentionPolicy.getCaseRetentionFixedPolicy(), caseManagementRetentionPolicyType.getFixedPolicyKey());
     }

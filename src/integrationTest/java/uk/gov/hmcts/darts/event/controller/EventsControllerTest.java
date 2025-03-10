@@ -323,12 +323,12 @@ class EventsControllerTest extends IntegrationBase {
 
         // assert additional audit data
         assertFalse(caseExpiredAuditEntries.isEmpty());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        Assertions.assertEquals(caseExpiredAuditEntries.get(0).getUser().getId(), eventEntity.getLastModifiedBy().getId());
-        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedDateTime());
+        Assertions.assertEquals(caseExpiredAuditEntries.getFirst().getUser().getId(), eventEntity.getLastModifiedBy().getId());
+        assertNull(caseExpiredAuditEntries.getFirst().getCourtCase());
     }
 
     @ParameterizedTest(name = "User with role {0} should not be able to obfuscate events")
@@ -360,7 +360,7 @@ class EventsControllerTest extends IntegrationBase {
             List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
                 .findByEvent(eventEntity);
             assertThat(dataAnonymisationEntities).hasSize(1);
-            DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.get(0);
+            DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.getFirst();
             assertDataAnonymisedEntry(userAccount, dataAnonymisationEntity, eventEntity.getId(), null);
         });
     }

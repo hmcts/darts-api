@@ -55,7 +55,7 @@ class EventLoggerServiceImplTest {
                                      event.getMessageId(), event.getEventId(), EventSource.XHB, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -66,7 +66,7 @@ class EventLoggerServiceImplTest {
                                      event.getMessageId(), event.getEventId(), EventSource.CPP, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -78,7 +78,7 @@ class EventLoggerServiceImplTest {
                                      event.getCourtroom().toUpperCase(Locale.ROOT), EventSource.MIDTIER, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -90,7 +90,7 @@ class EventLoggerServiceImplTest {
                                      event.getCourtroom().toUpperCase(Locale.ROOT), EventSource.XHB, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -102,7 +102,7 @@ class EventLoggerServiceImplTest {
                                      event.getCourtroom().toUpperCase(Locale.ROOT), EventSource.CPP, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -114,7 +114,7 @@ class EventLoggerServiceImplTest {
                                      event.getCourtroom().toUpperCase(Locale.ROOT), EventSource.CPP, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -127,7 +127,7 @@ class EventLoggerServiceImplTest {
                                      event.getCourtroom().toUpperCase(Locale.ROOT), EventSource.UNKNOWN, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -140,7 +140,7 @@ class EventLoggerServiceImplTest {
                                      event.getMessageId(), event.getEventId(), null, null, EventSource.XHB, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -153,7 +153,7 @@ class EventLoggerServiceImplTest {
                                      event.getCourtroom().toUpperCase(Locale.ROOT), "2024-10-10T10:00:00Z");
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
-        assertEquals(logEntry, errorLogs.get(0));
+        assertEquals(logEntry, errorLogs.getFirst());
     }
 
     @Test
@@ -165,7 +165,7 @@ class EventLoggerServiceImplTest {
                                      event.getCourtroom().toUpperCase(Locale.ROOT), "2024-10-10T10:00:00Z");
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
-        assertEquals(logEntry, errorLogs.get(0));
+        assertEquals(logEntry, errorLogs.getFirst());
     }
 
     private DartsEvent createDartsEvent(int eventId, String eventText, boolean isMidTier) {

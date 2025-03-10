@@ -337,7 +337,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         UserAccountEntity userAccountEntity = null;
         List<UserAccountEntity> userAccountEntities = userAccountRepository.findByIdInAndActive(List.of(userId), true);
         if (!userAccountEntities.isEmpty()) {
-            userAccountEntity = userAccountEntities.get(0);
+            userAccountEntity = userAccountEntities.getFirst();
         }
 
         TypedQuery<EnhancedMediaRequestInfo> query = entityManager.createQuery(criteriaQuery);

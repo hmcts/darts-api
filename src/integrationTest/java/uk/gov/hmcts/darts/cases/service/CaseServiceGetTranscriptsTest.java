@@ -82,10 +82,10 @@ class CaseServiceGetTranscriptsTest extends IntegrationBase {
     void testGetTranscriptsByCaseId() {
         var caseTranscripts = service.getTranscriptsByCaseId(caseId);
         assertEquals(3, caseTranscripts.size());
-        assertThat(caseTranscripts.get(0).getRequestedOn()).isAfterOrEqualTo(caseTranscripts.get(1).getRequestedOn());
+        assertThat(caseTranscripts.getFirst().getRequestedOn()).isAfterOrEqualTo(caseTranscripts.get(1).getRequestedOn());
         assertThat(caseTranscripts.get(1).getRequestedOn()).isAfterOrEqualTo(caseTranscripts.get(2).getRequestedOn());
 
-        assertEquals(2, caseTranscripts.get(0).getTranscriptionId());
+        assertEquals(2, caseTranscripts.getFirst().getTranscriptionId());
         assertEquals(1, caseTranscripts.get(1).getTranscriptionId());
         assertEquals(3, caseTranscripts.get(2).getTranscriptionId());
     }

@@ -58,7 +58,7 @@ class NotificationServiceTest extends IntegrationBase {
         service.scheduleNotification(request);
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
-        NotificationEntity notification = resultList.get(0);
+        NotificationEntity notification = resultList.getFirst();
         assertTrue(notification.getId() > 0);
         assertEquals(NotificationStatus.OPEN, notification.getStatus());
         assertEquals(caseId, notification.getCourtCase().getId());
@@ -82,7 +82,7 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         assertEquals(2, resultList.size());
-        assertEquals(TEST_EMAIL_ADDRESS, resultList.get(0).getEmailAddress());
+        assertEquals(TEST_EMAIL_ADDRESS, resultList.getFirst().getEmailAddress());
         assertEquals("test2@test.com", resultList.get(1).getEmailAddress());
     }
 
@@ -109,7 +109,7 @@ class NotificationServiceTest extends IntegrationBase {
         service.sendNotificationToGovNotifyNow();
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
-        NotificationEntity result = resultList.get(0);
+        NotificationEntity result = resultList.getFirst();
         assertEquals(NotificationStatus.SENT, result.getStatus(), "Object may not have sent");
 
         verify(logApi, times(1)).scheduleNotification(any(), any());
@@ -133,7 +133,7 @@ class NotificationServiceTest extends IntegrationBase {
         service.sendNotificationToGovNotifyNow();
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
-        NotificationEntity result = resultList.get(0);
+        NotificationEntity result = resultList.getFirst();
         assertEquals(NotificationStatus.PROCESSING, result.getStatus());
         assertEquals(1, result.getAttempts());
 
@@ -162,7 +162,7 @@ class NotificationServiceTest extends IntegrationBase {
         }
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
-        NotificationEntity result = resultList.get(0);
+        NotificationEntity result = resultList.getFirst();
         assertEquals(NotificationStatus.FAILED, result.getStatus());
         assertEquals(3, result.getAttempts());
 
@@ -187,7 +187,7 @@ class NotificationServiceTest extends IntegrationBase {
         service.sendNotificationToGovNotifyNow();
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
-        NotificationEntity result = resultList.get(0);
+        NotificationEntity result = resultList.getFirst();
         assertEquals(NotificationStatus.FAILED, result.getStatus());
         assertEquals(0, result.getAttempts());
         verify(templateIdHelper).findTemplateId(anyString());
@@ -207,14 +207,14 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         List<String> emailList = resultList.stream().map(NotificationEntity::getEmailAddress).toList();
-        assertTrue(emailList.contains(userAccountEntities.get(0).getEmailAddress()));
+        assertTrue(emailList.contains(userAccountEntities.getFirst().getEmailAddress()));
         assertTrue(emailList.contains(userAccountEntities.get(1).getEmailAddress()));
     }
 
     @Test
     void sendNotificationChecksUserAccountActiveStatus() {
         var userAccountEntities = generateUserAccountEntities();
-        userAccountEntities.get(0).setActive(false);
+        userAccountEntities.getFirst().setActive(false);
 
         var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
@@ -226,7 +226,7 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         List<String> emailList = resultList.stream().map(NotificationEntity::getEmailAddress).toList();
-        assertFalse(emailList.contains(userAccountEntities.get(0).getEmailAddress()));
+        assertFalse(emailList.contains(userAccountEntities.getFirst().getEmailAddress()));
         assertTrue(emailList.contains(userAccountEntities.get(1).getEmailAddress()));
     }
 
@@ -245,7 +245,7 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         List<String> emailList = resultList.stream().map(NotificationEntity::getEmailAddress).toList();
-        assertTrue(emailList.contains(userAccountEntities.get(0).getEmailAddress()));
+        assertTrue(emailList.contains(userAccountEntities.getFirst().getEmailAddress()));
         assertTrue(emailList.contains(userAccountEntities.get(1).getEmailAddress()));
         assertTrue(emailList.contains("testEmail3@test.com"));
         assertTrue(emailList.contains("testEmail4@test.com"));

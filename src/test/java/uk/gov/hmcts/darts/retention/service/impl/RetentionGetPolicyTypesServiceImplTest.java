@@ -107,7 +107,7 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         List<RetentionPolicyType> caseRetentionPolicies = retentionService.getRetentionPolicyTypes();
 
-        assertEquals(1, caseRetentionPolicies.get(0).getId());
+        assertEquals(1, caseRetentionPolicies.getFirst().getId());
 
         verify(retentionPolicyTypeRepository).findAll(Sort.by(RetentionPolicyTypeEntity_.FIXED_POLICY_KEY).descending());
         verify(retentionPolicyTypeMapper).mapToModelList(any());

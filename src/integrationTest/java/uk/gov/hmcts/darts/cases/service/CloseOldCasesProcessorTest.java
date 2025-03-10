@@ -145,7 +145,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, updatedCourtCaseEntity.getRetConfScore());
         assertEquals(RetentionConfidenceReasonEnum.AGED_CASE, updatedCourtCaseEntity.getRetConfReason());
         assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
-        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(closeDate.plusYears(7).truncatedTo(ChronoUnit.DAYS), caseRetentionEntity.getRetainUntil());
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
@@ -221,7 +221,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity.getRetConfScore());
         assertEquals(RetentionConfidenceReasonEnum.MAX_EVENT_CLOSED, updatedCourtCaseEntity.getRetConfReason());
         assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
-        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
     }
@@ -252,7 +252,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity.getRetConfScore());
         assertEquals(RetentionConfidenceReasonEnum.MAX_EVENT_CLOSED, updatedCourtCaseEntity.getRetConfReason());
         assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
-        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
     }
@@ -294,7 +294,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity.getRetConfScore());
         assertEquals(RetentionConfidenceReasonEnum.MAX_MEDIA_CLOSED, updatedCourtCaseEntity.getRetConfReason());
         assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
-        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED, caseRetentionEntity.getConfidenceCategory());
     }
@@ -322,7 +322,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity.getRetConfScore());
         assertEquals(RetentionConfidenceReasonEnum.MAX_HEARING_CLOSED, updatedCourtCaseEntity.getRetConfReason());
         assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
-        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED, caseRetentionEntity.getConfidenceCategory());
     }
@@ -345,7 +345,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity.getRetConfScore());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CREATION_CLOSED, updatedCourtCaseEntity.getRetConfReason());
         assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
-        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED, caseRetentionEntity.getConfidenceCategory());
     }
@@ -384,7 +384,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity1.getRetConfScore());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CREATION_CLOSED, updatedCourtCaseEntity1.getRetConfReason());
         assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity1.getRetConfUpdatedTs());
-        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
         assertEquals(courtCaseEntity1.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED, caseRetentionEntity.getConfidenceCategory());
 
@@ -417,7 +417,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getCaseClosedTimestamp());
         assertNull(updatedCourtCaseEntity.getRetConfScore());
         assertNull(updatedCourtCaseEntity.getRetConfReason());
-        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertNull(caseRetentionEntity.getConfidenceCategory());
     }
