@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -311,5 +312,37 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         mediaLinkedCase.setMedia(media);
         mediaLinkedCase.setCourtCase(courtCase);
         return mediaLinkedCase;
+    }
+
+    @Test
+    void findByCaseIdWithMediaList_shouldReturnCorrectData() {
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        HearingEntity hearing3 = PersistableFactory.getHearingTestData().someMinimalHearing();
+
+        hearing2.setCourtCase(hearing1.getCourtCase());
+
+        dartsPersistence.save(hearing1);
+        dartsPersistence.save(hearing2);
+        dartsPersistence.save(hearing3);
+
+        MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
+        MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
+        MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
+        dartsPersistence.save(media1);
+        dartsPersistence.save(media2);
+        dartsPersistence.save(media3);
+
+        hearing1.addMedia(media1);
+        hearing2.addMedia(media2);
+        hearing3.addMedia(media3);
+
+        hearingRepository.saveAll(List.of(hearing1, hearing2, hearing3));
+
+        List<MediaEntity> mediaEntities = mediaRepository.findByCaseIdWithMediaList(hearing1.getCourtCase().getId());
+
+        assertThat(mediaEntities.stream().map(MediaEntity::getId))
+            .hasSize(2)
+            .containsExactlyInAnyOrder(media1.getId(), media2.getId());
     }
 }
