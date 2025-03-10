@@ -33,6 +33,9 @@ public class AzureCopyUtil {
             if (StringUtils.isNotEmpty(config.getAzCopyLogLevel())) {
                 command.add(config.getAzCopyLogLevel());
             }
+            if (StringUtils.isNotEmpty(config.getAzCopyCheckLength())) {
+                command.add(config.getAzCopyCheckLength());
+            }
             builder.command(command);
 
             var startTime = Instant.now();
