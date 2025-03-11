@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -84,8 +85,10 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         ));
     }
 
+    @AfterEach
     @Override
-    protected void checkCleanup() throws Exception {
+    protected void clearTestData() {
+        super.clearTestData();
         FileStore.getFileStore().remove();
         assertEquals(0, FileUtils.listFiles(tempDirectory.toPath().toFile(), null, true).size());
     }
