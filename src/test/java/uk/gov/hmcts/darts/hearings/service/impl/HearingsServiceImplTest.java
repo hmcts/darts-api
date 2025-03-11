@@ -232,16 +232,16 @@ class HearingsServiceImplTest {
 
 
     @Test
-    void validateHearingExsistsElseError_whenHearingExists_noErrorShouldBeThrown() {
+    void validateHearingExistsElseError_whenHearingExists_noErrorShouldBeThrown() {
         doReturn(true).when(hearingRepository).existsById(any());
-        service.validateHearingExsistsElseError(123);
+        service.validateHearingExistsElseError(123);
         verify(hearingRepository).existsById(123);
     }
 
     @Test
-    void validateHearingExsistsElseError_whenHearingDoesNotExist_errorShouldBeThrown() {
+    void validateHearingExistsElseError_whenHearingDoesNotExist_errorShouldBeThrown() {
         doReturn(false).when(hearingRepository).existsById(any());
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.validateHearingExsistsElseError(123));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.validateHearingExistsElseError(123));
         assertEquals(HearingApiError.HEARING_NOT_FOUND, exception.getError());
     }
 

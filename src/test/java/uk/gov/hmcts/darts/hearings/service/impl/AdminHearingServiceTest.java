@@ -144,7 +144,7 @@ class AdminHearingServiceTest {
         assertHearingsAudiosResponseInner(result.get(1), 2, baseTime.plusMinutes(1), baseTime.plusMinutes(3), "file2", 2, 2);
         assertHearingsAudiosResponseInner(result.get(2), 3, baseTime.plusMinutes(2), baseTime.plusMinutes(4), "file3", 3, 3);
 
-        verify(hearingsService).validateHearingExsistsElseError(123);
+        verify(hearingsService).validateHearingExistsElseError(123);
         verify(mediaRepository).findAllCurrentMediaByHearingId(123);
     }
 
