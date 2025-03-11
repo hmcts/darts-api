@@ -65,12 +65,13 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
                 return false;
             }
             HttpUriRequest request = new HttpGet("http://localhost:" + wiremockPort + "/__admin/mappings");
-            CloseableHttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
-            if (!HttpStatus.valueOf(httpResponse.getCode()).is2xxSuccessful()) {
-                return false;
+            try (CloseableHttpResponse httpResponse = HttpClientBuilder.create().build().execute(request)) {
+                if (!HttpStatus.valueOf(httpResponse.getCode()).is2xxSuccessful()) {
+                    return false;
+                }
+                String res = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+                return res.contains("/discovery/v2.0/keys");
             }
-            String res = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-            return res.contains("/discovery/v2.0/keys");
         } catch (Exception e) {
             log.error("Error checking if wiremock is running", e);
             return false;
