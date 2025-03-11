@@ -251,6 +251,10 @@ pmdSmokeTest {
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
 }
 
+integration {
+  maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+}
+
 
 def coverageExclusions = [
   '**/uk/gov/hmcts/darts/common/entity/**',
