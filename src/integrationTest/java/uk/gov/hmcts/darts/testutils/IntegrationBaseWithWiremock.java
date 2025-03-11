@@ -4,8 +4,9 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,10 +38,10 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
             log.info("Wiremock Port: " + wiremockPort);
             dartsGateway.clearStubs();
             wireMockServer.start();
-            //Wait required to ensure that the wiremock server is up and running before the tests start
-            waitForWiremock(10, Duration.ofSeconds(2));
             // populate the jkws keys endpoint with a global public key
             tokenStub.stubExternalJwksKeys(DartsTokenGenerator.getGlobalKey());
+            //Wait required to ensure that the wiremock server is up and running before the tests start
+            waitForWiremock(10, Duration.ofSeconds(2));
         } catch (Exception e) {
             log.error("Error setting up wiremock", e);
         }
@@ -64,8 +65,12 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
                 return false;
             }
             HttpUriRequest request = new HttpGet("http://localhost:" + wiremockPort + "/__admin/mappings");
-            HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
-            return HttpStatus.valueOf(httpResponse.getCode()).is2xxSuccessful();
+            CloseableHttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+            if(!HttpStatus.valueOf(httpResponse.getCode()).is2xxSuccessful()){
+                return false;
+            }
+            String res = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+            return res.contains("/discovery/v2.0/keys");
         } catch (Exception e) {
             log.error("Error checking if wiremock is running", e);
             return false;
