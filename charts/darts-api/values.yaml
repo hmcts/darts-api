@@ -236,6 +236,8 @@ function:
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
     ARM_RPO_THREAD_SLEEP_DURATION: 60s
     ARM_RPO_POLL_DURATION: 4h
+    AZCOPY_LOG_LEVEL: "--log-level=ERROR"
+    AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:
