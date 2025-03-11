@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AzureCopyUtilTest {
 
+    public static final String NOT_EXISTING_PATH_AZCOPY = "not/existing/path/azcopy";
     @Mock
     private DataManagementConfiguration configuration;
 
@@ -20,7 +21,7 @@ class AzureCopyUtilTest {
     void copy_withExceptionMessageDoesNotIncludeSourceOrDestinationInfoToAvoidSecretsLeak() {
 
         AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
-        when(configuration.getAzCopyExecutable()).thenReturn("not/existing/path/azcopy");
+        when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
         String sourceSasUrl = "someSasUrl";
         String destinationSasUrl = "someOtherSasUrl";
 
@@ -53,7 +54,7 @@ class AzureCopyUtilTest {
         // given
         AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
 
-        when(configuration.getAzCopyExecutable()).thenReturn("/usr/bin/azcopy");
+        when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
         String preserveAccessTier = "--s2s-preserve-access-tier=false";
         when(configuration.getAzCopyPreserveAccessTier()).thenReturn(preserveAccessTier);
 
@@ -69,7 +70,7 @@ class AzureCopyUtilTest {
     void copy_withLogLevel() {
         AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
 
-        when(configuration.getAzCopyExecutable()).thenReturn("/usr/bin/azcopy");
+        when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
         String logLevel = "--log-level=ERROR";
         when(configuration.getAzCopyLogLevel()).thenReturn(logLevel);
 
@@ -85,7 +86,7 @@ class AzureCopyUtilTest {
     void copy_withOutputLevelQuiet() {
         AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
 
-        when(configuration.getAzCopyExecutable()).thenReturn("/usr/bin/azcopy");
+        when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
         String outputLevel = "--output-level=quiet";
         when(configuration.getAzCopyOutputLevel()).thenReturn(outputLevel);
 

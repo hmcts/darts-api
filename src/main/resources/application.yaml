@@ -302,8 +302,8 @@ darts:
         timeout: 60
       az-copy-executable: /usr/bin/azcopy
       az-copy-preserve-access-tier: "--s2s-preserve-access-tier=false"
-      az-copy-log-level: ${AZCOPY_LOG_LEVEL}
-      az-copy-output-level: ${AZCOPY_OUTPUT_LEVEL}
+      az-copy-log-level: ${AZCOPY_LOG_LEVEL:}
+      az-copy-output-level: ${AZCOPY_OUTPUT_LEVEL:}
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   case-document:

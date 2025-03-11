@@ -57,7 +57,7 @@ public class DataManagementConfiguration extends StorageConfiguration {
     @Value("${darts.storage.blob.az-copy-log-level}")
     private String azCopyLogLevel;
 
-    @Value("${darts.storage.az-copy-output-level}")
+    @Value("${darts.storage.blob.az-copy-output-level}")
     private String azCopyOutputLevel;
 
     @Override
