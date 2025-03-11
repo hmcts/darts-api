@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.client;
 
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
@@ -34,9 +33,6 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
     private ArmTokenClient armTokenClient;
-
-    @Autowired
-    private WireMockServer wireMockServer;
 
     private static final String TOKEN_PATH = "/auth/account/token";
 
@@ -74,7 +70,8 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    void getTokenShouldThrowExceptionIfServerReturns403Forbidden() {
+    @SuppressWarnings("PMD.DoNotUseThreads")
+    void getTokenShouldThrowExceptionIfServerReturns403Forbidden() throws InterruptedException {
         // Given
         stubFor(
             WireMock.post(urlEqualTo(TOKEN_PATH))
@@ -83,7 +80,7 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
                         .withStatus(403)));
 
         ArmTokenRequest armTokenRequest = createTokenRequest();
-
+        Thread.sleep(2000);
         // When
         FeignException exception = assertThrows(FeignException.class, () -> armTokenClient.getToken(armTokenRequest));
 
