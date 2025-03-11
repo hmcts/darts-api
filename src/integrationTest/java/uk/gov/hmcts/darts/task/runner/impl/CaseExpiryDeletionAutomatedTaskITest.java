@@ -167,30 +167,33 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         List<HearingEntity> hearingsToAssert = List.of(courtCase1.getHearings().get(0), courtCase2.getHearings().get(0));
 
         hearingsToAssert.forEach(h -> {
-            HearingEntity hearing = dartsDatabase.getHearingRepository().findByCaseIdWithMediaList(h.getCourtCase().getId()).get();
-            assertThat(hearing.getMediaList()).size().isEqualTo(1);
-            assertThat(hearing.getMediaList().getFirst().getId()).isEqualTo(1);
+            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findByCaseIdWithMediaList(h.getCourtCase().getId());
+            assertThat(mediaEntities).size().isEqualTo(1);
+            assertThat(mediaEntities.getFirst().getId()).isEqualTo(1);
         });
     }
 
     @Test
     @DisplayName("Two cases linked to the same media, both cases have passed retention date. Media link should be removed from hearings")
-    void retentionDatePassedForBothCasesThenMediaLinkRemovedFromHearing() {
+    void retentionDatePassedForBothCasesThenMediaLinkRemovedFromHearing() throws InterruptedException {
         CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
         CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
-
         createMediaForHearing(courtCase1.getHearings().get(0));
+
+        //Create a second hearing for case 1 to ensure it can handle multiple hearings
+        transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearing = createHearing(courtCase1);
+            linkExistingMediaToHearing(hearing.getMediaList(), hearing, courtCase1);
+        });
         // Link same media to second case
         linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
 
         caseExpiryDeletionAutomatedTask.preRunTask();
         caseExpiryDeletionAutomatedTask.runTask();
-
         List<HearingEntity> hearingsToAssert = List.of(courtCase1.getHearings().get(0), courtCase2.getHearings().get(0));
-
         hearingsToAssert.forEach(h -> {
-            HearingEntity hearing = dartsDatabase.getHearingRepository().findByCaseIdWithMediaList(h.getCourtCase().getId()).get();
-            assertThat(hearing.getMediaList()).isEmpty();
+            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findByCaseIdWithMediaList(h.getCourtCase().getId());
+            assertThat(mediaEntities).isEmpty();
         });
     }
 
@@ -400,10 +403,8 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
             caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
 
-            HearingEntity hearing = createHearing(caseEntity);
-
             caseEntity = dartsDatabase.getCaseRepository().save(caseEntity);
-
+            HearingEntity hearing = createHearing(caseEntity);
             EventEntity event1 = dartsDatabase.getEventStub()
                 .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
             eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity.getCaseNumber(), caseEntity.getCourthouse().getCourthouseName());
@@ -424,15 +425,15 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private HearingEntity createHearing(CourtCaseEntity caseEntity) {
         HearingEntity hearingEntity = dartsDatabase.getHearingStub()
-            .createHearing("Bristol", "2", caseEntity.getCaseNumber(), DateConverterUtil.toLocalDateTime(EventStub.STARTED_AT));
-
-        createTranscription(hearingEntity);
-        createTranscription(hearingEntity);
-
-        createMediaRequest(hearingEntity);
-        createMediaRequest(hearingEntity);
-
+            .createHearing(caseEntity.getCourthouse().getCourthouseName(), "2", caseEntity.getCaseNumber(),
+                           DateConverterUtil.toLocalDateTime(EventStub.STARTED_AT));
         caseEntity.getHearings().add(hearingEntity);
+        createTranscription(hearingEntity);
+        createTranscription(hearingEntity);
+
+        createMediaRequest(hearingEntity);
+        createMediaRequest(hearingEntity);
+
         return hearingEntity;
     }
 
