@@ -30,7 +30,7 @@ class EventMapperTest {
         }
         List<EventEntity> eventEntityList = Lists.newArrayList(eventEntity);
         List<Event> events = EventMapper.mapToEvents(eventEntityList);
-        Event event = events.get(0);
+        Event event = events.getFirst();
         assertEquals(1, event.getId());
         assertEquals(102, event.getHearingId());
         assertEquals(hearingDate.toLocalDate(), event.getHearingDate());
@@ -59,9 +59,9 @@ class EventMapperTest {
         List<Event> events = EventMapper.mapToEvents(eventEntityList);
 
         assertEquals(2, events.size());
-        assertEquals(2, events.get(0).getId());
+        assertEquals(2, events.getFirst().getId());
         assertEquals(5, events.get(1).getId());
-        
+
     }
 
 }

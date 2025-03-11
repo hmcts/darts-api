@@ -230,7 +230,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             throw new DartsApiException(RetentionApiError.INTERNAL_SERVER_ERROR,
                                         MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", policyKey));
         }
-        return retentionPolicyList.get(0);
+        return retentionPolicyList.getFirst();
     }
 
 }

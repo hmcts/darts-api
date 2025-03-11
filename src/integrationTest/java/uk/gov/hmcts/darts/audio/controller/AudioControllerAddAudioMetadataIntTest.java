@@ -157,7 +157,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         for (HearingEntity hearing : addAudioLinkedHearings) {
             List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearing.getId());
-            MediaEntity media = mediaEntities.get(0);
+            MediaEntity media = mediaEntities.getFirst();
             assertEquals(1, mediaEntities.size());
             assertEquals(STARTED_AT, media.getStart());
             assertEquals(STARTED_AT.plusMinutes(END_FILE_DURATION), media.getEnd());
@@ -178,7 +178,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
 
-        HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
+        HearingEntity hearingEntity = hearingsInAnotherCourtroom.getFirst();
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
     }
@@ -227,7 +227,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         for (HearingEntity hearing : addAudioLinkedHearings) {
             List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearing.getId());
-            MediaEntity media = mediaEntities.get(0);
+            MediaEntity media = mediaEntities.getFirst();
             assertEquals(1, mediaEntities.size());
             assertEquals(STARTED_AT, media.getStart());
             assertEquals(STARTED_AT, media.getEnd());
@@ -248,7 +248,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
 
-        HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
+        HearingEntity hearingEntity = hearingsInAnotherCourtroom.getFirst();
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
 
@@ -280,7 +280,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
             assertEquals(1, mediaEntities.size());
 
-            originalMedia = mediaEntities.get(0);
+            originalMedia = mediaEntities.getFirst();
             assertEquals(STARTED_AT, originalMedia.getStart());
             assertEquals(STARTED_AT, originalMedia.getEnd());
             assertEquals(1, originalMedia.getChannel());
@@ -602,7 +602,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
             assertEquals(1, mediaEntities.size());
 
-            media = mediaEntities.get(0);
+            media = mediaEntities.getFirst();
             assertEquals(STARTED_AT, media.getStart());
             assertEquals(STARTED_AT, media.getEnd());
             assertEquals(1, media.getChannel());
@@ -620,7 +620,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             STARTED_AT.toLocalDate()
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
-        HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
+        HearingEntity hearingEntity = hearingsInAnotherCourtroom.getFirst();
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
         assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())

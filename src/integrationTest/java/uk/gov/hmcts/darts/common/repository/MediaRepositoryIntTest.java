@@ -102,38 +102,38 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testFindMediaDetailsWithHearingId() {
-        MediaEntity expectedMedia = generatedMediaEntities.get(0);
+        MediaEntity expectedMedia = generatedMediaEntities.getFirst();
         Integer hearingId = mediaStub.getHearingId(expectedMedia.getId());
 
         List<MediaEntity> transformedMediaEntityList
             = mediaRepository.findMediaByDetails(
             List.of(hearingId), null, null);
         assertEquals(1, transformedMediaEntityList.size());
-        assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+        assertEquals(expectedMedia.getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
     void testFindMediaDetailsWithHearingIdAndStartDate() {
-        MediaEntity expectedMedia = generatedMediaEntities.get(0);
+        MediaEntity expectedMedia = generatedMediaEntities.getFirst();
         Integer hearingId = mediaStub.getHearingId(expectedMedia.getId());
         OffsetDateTime startTime = expectedMedia.getStart();
 
         List<MediaEntity> transformedMediaEntityList
             = mediaRepository.findMediaByDetails(List.of(hearingId), startTime, null);
         assertEquals(1, transformedMediaEntityList.size());
-        assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+        assertEquals(expectedMedia.getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
     void testFindMediaDetailsWithHearingIdAndStartDateAndEndDate() {
-        MediaEntity expectedMedia = generatedMediaEntities.get(0);
+        MediaEntity expectedMedia = generatedMediaEntities.getFirst();
         Integer hearingId = mediaStub.getHearingId(expectedMedia.getId());
         OffsetDateTime startTime = expectedMedia.getStart();
         OffsetDateTime endTime = expectedMedia.getEnd();
         List<MediaEntity> transformedMediaEntityList
             = mediaRepository.findMediaByDetails(List.of(hearingId), startTime, endTime);
         assertEquals(1, transformedMediaEntityList.size());
-        assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+        assertEquals(expectedMedia.getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -161,7 +161,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
             null, expectedMedia.getStart(), null);
 
         assertEquals(2, transformedMediaEntityList.size());
-        assertEquals(generatedMediaEntities.get(0).getId(), transformedMediaEntityList.get(0).getId());
+        assertEquals(generatedMediaEntities.getFirst().getId(), transformedMediaEntityList.getFirst().getId());
         assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(1).getId());
     }
 
@@ -175,7 +175,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
             = mediaRepository.findMediaByDetails(
             List.of(hearingId), expectedMedia.getStart(), expectedMedia.getEnd());
         assertEquals(1, transformedMediaEntityList.size());
-        assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+        assertEquals(expectedMedia.getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -190,7 +190,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
             = mediaRepository.findMediaByDetails(
             List.of(hearingId, hearingId2), null, null);
         assertEquals(2, transformedMediaEntityList.size());
-        assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+        assertEquals(expectedMedia.getId(), transformedMediaEntityList.getFirst().getId());
         assertEquals(expectedMedia1.getId(), transformedMediaEntityList.get(1).getId());
     }
 

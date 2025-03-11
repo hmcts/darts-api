@@ -64,7 +64,6 @@ class UserManagementFunctionalTest extends FunctionalTest {
     }
 
 
-
     @Test
     void shouldModifyUser() {
         int userId = extractId(createUser());
@@ -145,7 +144,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
     @Test
     void shouldGetUserById() {
-        int userId  = extractId(createUserWithSecurityGroups());
+        int userId = extractId(createUserWithSecurityGroups());
 
         Response getUserByIdResponse = buildRequestWithExternalGlobalAccessAuth()
             .pathParam(ID_PATH_PARAM_NAME, userId)
@@ -189,7 +188,8 @@ class UserManagementFunctionalTest extends FunctionalTest {
         // Then
         assertEquals(200, getUsersResponse.getStatusCode());
         List<UserWithIdAndTimestamps> users = TestUtils.createObjectMapper()
-            .readValue(getUsersResponse.asString(), new TypeReference<>() {});
+            .readValue(getUsersResponse.asString(), new TypeReference<>() {
+            });
         assertFalse(users.isEmpty());
 
         Optional<UserWithIdAndTimestamps> expectedUser = users.stream()
@@ -218,10 +218,11 @@ class UserManagementFunctionalTest extends FunctionalTest {
         // Then
         assertEquals(200, searchResponse.getStatusCode());
         List<UserWithIdAndTimestamps> users = TestUtils.createObjectMapper()
-            .readValue(searchResponse.asString(), new TypeReference<>() {});
+            .readValue(searchResponse.asString(), new TypeReference<>() {
+            });
         assertEquals(1, users.size());
 
-        var user = users.get(0);
+        var user = users.getFirst();
         assertEquals(userId, user.getId());
     }
 

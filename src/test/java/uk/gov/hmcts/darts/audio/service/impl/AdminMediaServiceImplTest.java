@@ -571,7 +571,7 @@ class AdminMediaServiceImplTest {
                                                                                     startDateTime, endDateTime);
 
         assertEquals(1, response.size());
-        assertEquals(mediaEntity.getId(), response.get(0).getId());
+        assertEquals(mediaEntity.getId(), response.getFirst().getId());
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = "[" + MEDIA_ID_5 + "]";
         JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
@@ -832,7 +832,7 @@ class AdminMediaServiceImplTest {
 
             //Check media
             assertThat(result.getMedia()).hasSize(2);
-            assertMedia(result.getMedia().get(0), 321, 1, 4, true, 2);
+            assertMedia(result.getMedia().getFirst(), 321, 1, 4, true, 2);
             assertMedia(result.getMedia().get(1), 4321, 2, 4, true, 3);
             //Check courthouse
             assertCourthouse(result.getCourthouse(), "courthouseName", 1);

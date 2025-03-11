@@ -48,7 +48,7 @@ public interface ObjectActionMapper {
         if (objectAdminActionEntities == null || objectAdminActionEntities.isEmpty()) {
             return null;
         }
-        return toApiModel(objectAdminActionEntities.get(0));
+        return toApiModel(objectAdminActionEntities.getFirst());
     }
 
     @Mappings({

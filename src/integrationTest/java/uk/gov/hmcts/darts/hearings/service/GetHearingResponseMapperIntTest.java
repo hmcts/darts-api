@@ -54,16 +54,16 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
         assertEquals(1, getHearingResponse.getCaseReportingRestrictions().size());
-        assertEquals("Section 11 of the Contempt of Court Act 1981", getHearingResponse.getCaseReportingRestrictions().get(0).getEventName());
-        assertEquals("some-event-text-1", getHearingResponse.getCaseReportingRestrictions().get(0).getEventText());
-        assertEquals(minimalHearing.getId(), getHearingResponse.getCaseReportingRestrictions().get(0).getHearingId());
-        assertEquals(reportingRestrictions.get(0).getId(), getHearingResponse.getCaseReportingRestrictions().get(0).getEventId());
+        assertEquals("Section 11 of the Contempt of Court Act 1981", getHearingResponse.getCaseReportingRestrictions().getFirst().getEventName());
+        assertEquals("some-event-text-1", getHearingResponse.getCaseReportingRestrictions().getFirst().getEventText());
+        assertEquals(minimalHearing.getId(), getHearingResponse.getCaseReportingRestrictions().getFirst().getHearingId());
+        assertEquals(reportingRestrictions.getFirst().getId(), getHearingResponse.getCaseReportingRestrictions().getFirst().getEventId());
     }
 
     @Test
     void getHearingWithThreeReportingRestrictions() {
         var reportingRestrictions = createEventsWithDefaults(3);
-        dartsDatabase.addHandlerToEvent(reportingRestrictions.get(0), SECTION_4_1981_DB_ID);
+        dartsDatabase.addHandlerToEvent(reportingRestrictions.getFirst(), SECTION_4_1981_DB_ID);
         dartsDatabase.addHandlerToEvent(reportingRestrictions.get(1), SECTION_11_1981_DB_ID);
         dartsDatabase.addHandlerToEvent(reportingRestrictions.get(2), SECTION_39_1933_DB_ID);
 
@@ -72,7 +72,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
         assertEquals(3, getHearingResponse.getCaseReportingRestrictions().size());
-        assertEquals("Section 4(2) of the Contempt of Court Act 1981", getHearingResponse.getCaseReportingRestrictions().get(0).getEventName());
+        assertEquals("Section 4(2) of the Contempt of Court Act 1981", getHearingResponse.getCaseReportingRestrictions().getFirst().getEventName());
         assertEquals("Section 11 of the Contempt of Court Act 1981", getHearingResponse.getCaseReportingRestrictions().get(1).getEventName());
         assertEquals("Section 39 of the Children and Young Persons Act 1933", getHearingResponse.getCaseReportingRestrictions().get(2).getEventName());
     }

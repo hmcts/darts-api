@@ -30,7 +30,7 @@ public class TranscriptionUtil {
         if (transcriptionCommentEntities.isEmpty()) {
             return null;
         }
-        return StringUtils.trimToNull(transcriptionCommentEntities.get(0).getComment());
+        return StringUtils.trimToNull(transcriptionCommentEntities.getFirst().getComment());
     }
 
     public OffsetDateTime getDateToLimitResults(Duration dateLimit) {

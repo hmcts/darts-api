@@ -54,7 +54,7 @@ public class RetentionDateHelper {
             throw new DartsApiException(RetentionApiError.INTERNAL_SERVER_ERROR,
                                         MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", policy.getPolicyKey()));
         }
-        return retentionPolicyList.get(0);
+        return retentionPolicyList.getFirst();
     }
 
     public LocalDate applyPolicyString(LocalDate dateToAppend, String policyString) {

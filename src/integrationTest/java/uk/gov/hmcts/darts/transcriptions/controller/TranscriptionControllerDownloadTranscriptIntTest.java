@@ -241,7 +241,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             ))
             .andExpect(header().string(
                 TRANSCRIPTION_DOCUMENT_ID_HEADER,
-                String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
+                String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().getFirst().getId())
             ));
 
         // ensure that the input stream is closed
@@ -312,7 +312,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             ))
             .andExpect(header().string(
                 TRANSCRIPTION_DOCUMENT_ID_HEADER,
-                String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
+                String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().getFirst().getId())
             ));
 
         verify(mockAuditApi).record(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());

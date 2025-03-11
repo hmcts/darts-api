@@ -256,7 +256,7 @@ class CourthouseServiceImplTest {
 
         List<RegionEntity> returnedEntities = courthouseService.getAdminAllRegions();
         assertEquals(2, returnedEntities.size());
-        assertEquals(regionEntity1, returnedEntities.get(0));
+        assertEquals(regionEntity1, returnedEntities.getFirst());
         assertEquals(regionEntity2, returnedEntities.get(1));
     }
 

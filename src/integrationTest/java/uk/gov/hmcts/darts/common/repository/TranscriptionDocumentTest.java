@@ -65,7 +65,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository
             .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
-                                        .getTranscription().getCourtCases().get(0).getCaseNumber(), null, null, null, null, null, null, null);
+                                        .getTranscription().getCourtCases().getFirst().getCaseNumber(), null, null, null, null, null, null, null);
         if (TestType.MODENISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -100,8 +100,8 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             .stream().sorted(Comparator.comparing(TranscriptionDocumentResult::transcriptionDocumentId))
             .toList();
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(testType, generatedDocumentEntities.get(0),
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.getFirst(),
+                                                 getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                    null)));
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
                                                  getExpectedResult(testType, generatedDocumentEntities.get(1),
@@ -123,7 +123,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex)
-                                                                               .getTranscription().getCourtCases().get(0)),
+                                                                               .getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -142,7 +142,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -160,7 +160,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
                                                                            generatedDocumentEntities
@@ -181,7 +181,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
                                                                            generatedDocumentEntities
@@ -200,15 +200,15 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
         Assertions.assertEquals(4, transcriptionDocumentResults.size());
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
-                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0)
-                                                                               .getTranscription().getCourtCases().get(0)),
-                                                         getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0)
+                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst()
+                                                                               .getTranscription().getCourtCases().getFirst()),
+                                                         getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst()
                                                                                .getTranscription().getCourtCases().get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1)
-                                                                               .getTranscription().getCourtCases().get(0)),
+                                                                               .getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1)
                                                                                .getTranscription().getCourtCases().get(1)))));
@@ -227,16 +227,16 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
-                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.get(0),
+                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities
-                                                                               .get(0).getTranscription().getCourtCases().get(0)),
-                                                         getExpectedResult(testType, generatedDocumentEntities.get(0),
+                                                                               .getFirst().getTranscription().getCourtCases().getFirst()),
+                                                         getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities
-                                                                               .get(0).getTranscription().getCourtCases().get(1)),
+                                                                               .getFirst().getTranscription().getCourtCases().get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(1),
                                                                            generatedDocumentEntities
-                                                                               .get(1).getTranscription().getCourtCases().get(0)),
+                                                                               .get(1).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities
                                                                                .get(1).getTranscription().getCourtCases().get(1)))));
@@ -255,16 +255,16 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
-                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.get(0),
+                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities
-                                                                               .get(0).getTranscription().getCourtCases().get(0)),
-                                                         getExpectedResult(testType, generatedDocumentEntities.get(0),
+                                                                               .getFirst().getTranscription().getCourtCases().getFirst()),
+                                                         getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities
-                                                                               .get(0).getTranscription().getCourtCases().get(1)),
+                                                                               .getFirst().getTranscription().getCourtCases().get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(1),
                                                                            generatedDocumentEntities
-                                                                               .get(1).getTranscription().getCourtCases().get(0)),
+                                                                               .get(1).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities
                                                                                .get(1).getTranscription().getCourtCases().get(1)))));
@@ -284,7 +284,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
                                                                            generatedDocumentEntities
@@ -316,7 +316,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
-                                                 List.of(getExpectedResult(testType, generatedDocumentEntitiesWithManualTranscription.get(0),
+                                                 List.of(getExpectedResult(testType, generatedDocumentEntitiesWithManualTranscription.getFirst(),
                                                                            null),
                                                          getExpectedResult(testType, generatedDocumentEntitiesWithManualTranscription.get(1),
                                                                            null))));
@@ -336,7 +336,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -356,7 +356,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -377,7 +377,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -397,7 +397,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -419,7 +419,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -435,12 +435,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             null, null, null, TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix());
         Assertions.assertEquals(4, transcriptionDocumentResults.size());
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
-                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
-                                                         getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1)),
+                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().getFirst()),
+                                                         getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0)),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
     }
@@ -461,7 +461,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -482,7 +482,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -505,7 +505,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -525,7 +525,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -546,7 +546,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
@@ -561,12 +561,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             null, null, null,
             TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(), null, null, null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
-                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
-                                                         getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1)),
+                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().getFirst()),
+                                                         getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0)),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
     }
@@ -584,10 +584,10 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
-                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
-                                                         getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1)))));
+                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().getFirst()),
+                                                         getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -601,7 +601,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             null, generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(), null, null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0)),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
     }
@@ -618,12 +618,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                      generatedDocumentEntities.get(toPosition)
                                                                          .getTranscription().getCreatedDateTime(), null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
-                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
-                                                         getExpectedResult(testType, generatedDocumentEntities.get(0),
-                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1)),
+                                                 List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().getFirst()),
+                                                         getExpectedResult(testType, generatedDocumentEntities.getFirst(),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0)),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().getFirst()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
     }
@@ -634,23 +634,23 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         dataSetup(testType);
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository
-            .findTranscriptionMedia(generatedDocumentEntities.get(0).getTranscription()
+            .findTranscriptionMedia(generatedDocumentEntities.getFirst().getTranscription()
                                         .getCourtCase().getCaseNumber(),
-                                    generatedDocumentEntities.get(0).getTranscription().getCourtroom().getCourthouse().getDisplayName(),
-                                    getHearingDate(testType, generatedDocumentEntities.get(0).getTranscription()),
-                                    generatedDocumentEntities.get(0).getTranscription().getCreatedBy().getUserFullName(),
-                                    generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(),
-                                    generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(), false,
-                                    generatedDocumentEntities.get(0).getTranscription().getTranscriptionWorkflowEntities()
-                                        .get(0).getWorkflowActor().getUserFullName());
+                                    generatedDocumentEntities.getFirst().getTranscription().getCourtroom().getCourthouse().getDisplayName(),
+                                    getHearingDate(testType, generatedDocumentEntities.getFirst().getTranscription()),
+                                    generatedDocumentEntities.getFirst().getTranscription().getCreatedBy().getUserFullName(),
+                                    generatedDocumentEntities.getFirst().getTranscription().getCreatedDateTime(),
+                                    generatedDocumentEntities.getFirst().getTranscription().getCreatedDateTime(), false,
+                                    generatedDocumentEntities.getFirst().getTranscription().getTranscriptionWorkflowEntities()
+                                        .getFirst().getWorkflowActor().getUserFullName());
         if (TestType.MODENISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
         } else {
             Assertions.assertEquals(1, transcriptionDocumentResults.size());
         }
-        Assertions.assertEquals(generatedDocumentEntities.get(0).getId(),
-                                transcriptionDocumentResults.get(0).transcriptionDocumentId());
+        Assertions.assertEquals(generatedDocumentEntities.getFirst().getId(),
+                                transcriptionDocumentResults.getFirst().transcriptionDocumentId());
     }
 
     private boolean assertResultEquals(TranscriptionDocumentResult asserted, TranscriptionDocumentResult expected) {

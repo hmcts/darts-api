@@ -212,7 +212,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     }
 
     GetAdminMediasMarkedForDeletionItem toGetAdminMediasMarkedForDeletionItem(List<ObjectAdminActionEntity> actions) {
-        ObjectAdminActionEntity base = actions.get(0);
+        ObjectAdminActionEntity base = actions.getFirst();
         List<GetAdminMediasMarkedForDeletionMediaItem> media = actions.stream()
             .map(ObjectAdminActionEntity::getMedia)
             .map(mediaEntity -> {

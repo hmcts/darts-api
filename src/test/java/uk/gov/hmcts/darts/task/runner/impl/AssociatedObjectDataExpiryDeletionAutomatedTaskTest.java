@@ -375,7 +375,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
 
         doReturn(true).when(associatedObjectDataExpiryDeletionAutomatedTask)
-            .deleteFromExternalDataStore(data.get(0));
+            .deleteFromExternalDataStore(data.getFirst());
 
         doReturn(false).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(data.get(1));
@@ -391,17 +391,17 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
             .deleteFromExternalDataStore(externalObjectDirectoryEntity));
 
         verify(externalObjectDirectoryRepository)
-            .deleteAll(List.of(data.get(0), data.get(2)));
+            .deleteAll(List.of(data.getFirst(), data.get(2)));
 
         verify(caseDocumentRepository)
-            .softDeleteAll(List.of(caseDocumentEntities.get(0), caseDocumentEntities.get(2)), userAccount);
+            .softDeleteAll(List.of(caseDocumentEntities.getFirst(), caseDocumentEntities.get(2)), userAccount);
 
         verify(auditApi)
             .record(AuditActivity.CASE_DOCUMENT_EXPIRED, userAccount, "123");
         verify(auditApi)
             .record(AuditActivity.CASE_DOCUMENT_EXPIRED, userAccount, "125");
         verify(associatedObjectDataExpiryDeletionAutomatedTask)
-            .shouldDeleteFilter(data.get(0).getCaseDocument());
+            .shouldDeleteFilter(data.getFirst().getCaseDocument());
         verify(associatedObjectDataExpiryDeletionAutomatedTask)
             .shouldDeleteFilter(data.get(2).getCaseDocument());
         verifyNoMoreInteractions(auditApi);
