@@ -252,7 +252,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     private String getHearingDate(AnnotationDocumentEntity annotationDocument) {
         String hearingDate = null;
         if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearingList())) {
-            hearingDate = OffsetDateTime.of(annotationDocument.getAnnotation().getHearingList().getFirst().getHearingDate().atTime(0, 0, 0),
+            hearingDate = OffsetDateTime.of(annotationDocument.getAnnotation().getHearingList().get(0).getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
@@ -284,7 +284,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     private static String getCourtroom(AnnotationDocumentEntity annotationDocument) {
         String courtroom = null;
         if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearingList())) {
-            courtroom = annotationDocument.getAnnotation().getHearingList().getFirst().getCourtroom().getName();
+            courtroom = annotationDocument.getAnnotation().getHearingList().get(0).getCourtroom().getName();
         }
         return courtroom;
     }

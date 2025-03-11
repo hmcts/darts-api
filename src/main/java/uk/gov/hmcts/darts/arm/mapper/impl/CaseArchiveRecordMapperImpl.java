@@ -250,7 +250,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
     private String getHearingDate(CaseDocumentEntity caseDocument) {
         String hearingDate = null;
         if (CollectionUtils.isNotEmpty(caseDocument.getCourtCase().getHearings())) {
-            hearingDate = OffsetDateTime.of(caseDocument.getCourtCase().getHearings().getFirst().getHearingDate().atTime(0, 0, 0),
+            hearingDate = OffsetDateTime.of(caseDocument.getCourtCase().getHearings().get(0).getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
