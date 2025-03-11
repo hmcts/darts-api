@@ -32,7 +32,7 @@ public class CreateRecordFilenameProcessor {
             // CR - Create Record - This is the create record file which represents record creation in ARM.
             // DARTS/response/6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp
             if (tokens.size() == NUMBER_OF_TOKENS) {
-                hashcode = tokens.get(0);
+                hashcode = tokens.getFirst();
                 hashcode2 = tokens.get(1);
                 status = tokens.get(2);
             } else {

@@ -112,7 +112,7 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
 
         assertThat(eventSearchResults)
             .extracting("id")
-            .containsExactly(persistedEvents.get(0).getId());
+            .containsExactly(persistedEvents.getFirst().getId());
     }
 
     @Test
@@ -138,7 +138,7 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
 
     private List<Integer> courthouseIdsAssociatedWithEvents(List<EventEntity> events) {
         return events.stream()
-            .map(eve -> eve.getHearingEntities().get(0).getCourtroom().getCourthouse().getId())
+            .map(eve -> eve.getHearingEntities().getFirst().getCourtroom().getCourthouse().getId())
             .toList();
     }
 }

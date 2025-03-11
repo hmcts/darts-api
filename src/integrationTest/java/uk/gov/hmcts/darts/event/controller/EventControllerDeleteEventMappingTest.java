@@ -53,7 +53,7 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
 
         Assertions.assertFalse(eventHandlerRepository.findById(entity.getId()).isPresent());
         Assertions.assertEquals(1, auditRepository.findAll().size());
-        AuditEntity auditEntity = auditRepository.findAll().get(0);
+        AuditEntity auditEntity = auditRepository.findAll().getFirst();
         Assertions.assertEquals(AuditActivity.DELETE_EVENT_MAPPING.getId(), auditEntity.getAuditActivity().getId());
         Assertions.assertFalse(eventHandlerRepository.findRevisions(entity.getId()).isEmpty());
     }

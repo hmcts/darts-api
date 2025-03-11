@@ -319,9 +319,9 @@ class CaseServiceImplTest {
 
         List<Hearing> caseHearings = caseService.getCaseHearings(existingCaseEntity.getId());
 
-        assertEquals(existingHearings.get(0).getId(), caseHearings.get(0).getId());
-        assertEquals(existingHearings.get(0).getCourtroom().getName(), caseHearings.get(0).getCourtroom());
-        assertEquals(existingHearings.get(0).getHearingDate(), caseHearings.get(0).getDate());
+        assertEquals(existingHearings.getFirst().getId(), caseHearings.getFirst().getId());
+        assertEquals(existingHearings.getFirst().getCourtroom().getName(), caseHearings.getFirst().getCourtroom());
+        assertEquals(existingHearings.getFirst().getHearingDate(), caseHearings.getFirst().getDate());
 
     }
 

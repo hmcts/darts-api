@@ -207,7 +207,7 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
     private Optional<RetentionPolicyTypeEntity> findPriorPolicyForOriginalKey(String originalKey) {
         List<RetentionPolicyTypeEntity> entitiesByFixedPolicyKey = retentionPolicyTypeRepository.findByFixedPolicyKeyOrderByPolicyStartDesc(originalKey);
         if (!entitiesByFixedPolicyKey.isEmpty()) {
-            return Optional.of(entitiesByFixedPolicyKey.get(0));
+            return Optional.of(entitiesByFixedPolicyKey.getFirst());
         }
         return Optional.empty();
     }

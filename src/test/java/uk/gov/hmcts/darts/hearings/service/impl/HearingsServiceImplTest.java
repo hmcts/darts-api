@@ -139,10 +139,10 @@ class HearingsServiceImplTest {
 
         List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());
         assertEquals(1, eventResponses.size());
-        assertEquals(event.get(0).getId(), eventResponses.get(0).getId());
-        assertEquals("Test", eventResponses.get(0).getText());
-        assertEquals("TestEvent", eventResponses.get(0).getName());
-        assertNotNull(eventResponses.get(0).getTimestamp());
+        assertEquals(event.getFirst().getId(), eventResponses.getFirst().getId());
+        assertEquals("Test", eventResponses.getFirst().getText());
+        assertEquals("TestEvent", eventResponses.getFirst().getName());
+        assertNotNull(eventResponses.getFirst().getTimestamp());
 
     }
 

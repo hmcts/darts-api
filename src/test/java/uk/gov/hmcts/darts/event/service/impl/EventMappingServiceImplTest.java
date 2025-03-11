@@ -198,14 +198,14 @@ class EventMappingServiceImplTest {
         List<EventMapping> result = eventMappingServiceImpl.getEventMappings();
 
         assertEquals(2, result.size());
-        assertEquals(eventHandlerEntity.getId(), result.get(0).getId());
-        assertEquals(eventHandlerEntity.getType(), result.get(0).getType());
-        assertEquals(eventHandlerEntity.getSubType(), result.get(0).getSubType());
-        assertEquals(eventHandlerEntity.getEventName(), result.get(0).getName());
-        assertEquals(eventHandlerEntity.getHandler(), result.get(0).getHandler());
-        assertEquals(eventHandlerEntity.getActive(), result.get(0).getIsActive());
-        assertEquals(eventHandlerEntity.isReportingRestriction(), result.get(0).getHasRestrictions());
-        assertEquals(eventHandlerEntity.getCreatedDateTime(), result.get(0).getCreatedAt());
+        assertEquals(eventHandlerEntity.getId(), result.getFirst().getId());
+        assertEquals(eventHandlerEntity.getType(), result.getFirst().getType());
+        assertEquals(eventHandlerEntity.getSubType(), result.getFirst().getSubType());
+        assertEquals(eventHandlerEntity.getEventName(), result.getFirst().getName());
+        assertEquals(eventHandlerEntity.getHandler(), result.getFirst().getHandler());
+        assertEquals(eventHandlerEntity.getActive(), result.getFirst().getIsActive());
+        assertEquals(eventHandlerEntity.isReportingRestriction(), result.getFirst().getHasRestrictions());
+        assertEquals(eventHandlerEntity.getCreatedDateTime(), result.getFirst().getCreatedAt());
 
         verify(eventHandlerRepository).findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).ascending());
     }

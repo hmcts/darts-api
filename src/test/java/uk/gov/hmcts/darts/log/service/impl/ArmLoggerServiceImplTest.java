@@ -51,7 +51,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -62,7 +62,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
-        assertEquals(logEntry, errorLogs.get(0));
+        assertEquals(logEntry, errorLogs.getFirst());
     }
 
     @Test
@@ -73,7 +73,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -84,7 +84,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
-        assertEquals(logEntry, errorLogs.get(0));
+        assertEquals(logEntry, errorLogs.getFirst());
     }
 
     @Test
@@ -95,7 +95,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -106,7 +106,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
-        assertEquals(logEntry, errorLogs.get(0));
+        assertEquals(logEntry, errorLogs.getFirst());
     }
 
     @Test
@@ -120,7 +120,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
-        assertEquals(logEntry, errorLogs.get(0));
+        assertEquals(logEntry, errorLogs.getFirst());
     }
 
     @Test
@@ -131,7 +131,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
-        assertEquals(logEntry, errorLogs.get(0));
+        assertEquals(logEntry, errorLogs.getFirst());
     }
 
     @Test
@@ -142,7 +142,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        assertEquals(logEntry, infoLogs.getFirst());
     }
 
     @Test
@@ -156,7 +156,7 @@ class ArmLoggerServiceImplTest {
 
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
-        assertEquals(logEntry, errorLogs.get(0));
+        assertEquals(logEntry, errorLogs.getFirst());
     }
 
 }

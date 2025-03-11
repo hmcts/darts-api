@@ -222,4 +222,5 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
             eventLinkedCaseStub.createCaseLinkedEvent(eventEntity, caseEntity);
         });
     }
+
 }

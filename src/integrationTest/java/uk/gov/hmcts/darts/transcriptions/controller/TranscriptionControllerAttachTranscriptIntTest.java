@@ -259,7 +259,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         final List<TranscriptionDocumentEntity> transcriptionDocumentEntities = completeTranscriptionEntity.getTranscriptionDocumentEntities();
         assertEquals(1, transcriptionDocumentEntities.size());
-        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentEntities.get(0);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentEntities.getFirst();
         assertEquals("Test Document.docx", transcriptionDocumentEntity.getFileName());
         assertEquals(
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -267,12 +267,12 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         );
         assertTrue(transcriptionDocumentEntity.getFileSize() > 0);
 
-        assertEquals(authorisationStub.getSeparateIntegrationUser(), transcriptionDocumentEntities.get(0).getLastModifiedBy());
+        assertEquals(authorisationStub.getSeparateIntegrationUser(), transcriptionDocumentEntities.getFirst().getLastModifiedBy());
 
         final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = transcriptionDocumentEntity
             .getExternalObjectDirectoryEntities();
         assertEquals(2, externalObjectDirectoryEntities.size());
-        ExternalObjectDirectoryEntity externalObjectDirectoryInboundEntity = externalObjectDirectoryEntities.get(0);
+        ExternalObjectDirectoryEntity externalObjectDirectoryInboundEntity = externalObjectDirectoryEntities.getFirst();
         assertEquals(STORED.getId(), externalObjectDirectoryInboundEntity.getStatus().getId());
         assertEquals(INBOUND.getId(), externalObjectDirectoryInboundEntity.getExternalLocationType().getId());
         assertNotNull(externalObjectDirectoryInboundEntity.getExternalLocation());
@@ -335,7 +335,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         final List<TranscriptionDocumentEntity> transcriptionDocumentEntities = completeTranscriptionEntity.getTranscriptionDocumentEntities();
         assertEquals(1, transcriptionDocumentEntities.size());
-        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentEntities.get(0);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentEntities.getFirst();
         assertEquals("Test Document.doc", transcriptionDocumentEntity.getFileName());
         assertEquals("application/msword", transcriptionDocumentEntity.getFileType());
         assertTrue(transcriptionDocumentEntity.getFileSize() > 0);
@@ -343,7 +343,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = transcriptionDocumentEntity
             .getExternalObjectDirectoryEntities();
         assertEquals(2, externalObjectDirectoryEntities.size());
-        ExternalObjectDirectoryEntity externalObjectDirectoryInboundEntity = externalObjectDirectoryEntities.get(0);
+        ExternalObjectDirectoryEntity externalObjectDirectoryInboundEntity = externalObjectDirectoryEntities.getFirst();
         assertEquals(STORED.getId(), externalObjectDirectoryInboundEntity.getStatus().getId());
         assertEquals(INBOUND.getId(), externalObjectDirectoryInboundEntity.getExternalLocationType().getId());
         assertNotNull(externalObjectDirectoryInboundEntity.getExternalLocation());

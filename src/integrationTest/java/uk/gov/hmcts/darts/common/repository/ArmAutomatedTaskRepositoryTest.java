@@ -24,7 +24,7 @@ class ArmAutomatedTaskRepositoryTest extends PostgresIntegrationBase {
         List<AutomatedTaskEntity> automatedTasks = automatedTaskRepository.findAll();
 
         // Given we have a couple of arbitrary automated tasks
-        var automatedTask1 = automatedTasks.get(0);
+        var automatedTask1 = automatedTasks.getFirst();
         var automatedTask2 = automatedTasks.get(1);
 
         // And we relate them to some arm tasks

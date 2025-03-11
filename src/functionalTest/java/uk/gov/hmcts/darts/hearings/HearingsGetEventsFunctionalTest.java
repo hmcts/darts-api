@@ -36,19 +36,19 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         String randomEventText1 = randomAlphanumeric(15);
         String requestBody = String.format(
             """
-            {
-              "message_id": "12345",
-              "type": "1000",
-              "sub_type": "1002",
-              "event_id": "12345",
-              "courthouse": "%s",
-              "courtroom": "%s",
-              "case_numbers": [
-                "%s"
-              ],
-              "event_text": "%s",
-              "date_time": "2023-08-08T14:01:06Z"
-            }""",
+                {
+                  "message_id": "12345",
+                  "type": "1000",
+                  "sub_type": "1002",
+                  "event_id": "12345",
+                  "courthouse": "%s",
+                  "courtroom": "%s",
+                  "case_numbers": [
+                    "%s"
+                  ],
+                  "event_text": "%s",
+                  "date_time": "2023-08-08T14:01:06Z"
+                }""",
             COURTHOUSE, courtroomName, randomCaseNumber, randomEventText1);
 
         buildRequestWithExternalGlobalAccessAuth()
@@ -63,19 +63,19 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         String randomEventText2 = randomAlphanumeric(15);
         requestBody = String.format(
             """
-            {
-              "message_id": "444",
-              "type": "1000",
-              "sub_type": "1002",
-              "event_id": "98765",
-              "courthouse": "%s",
-              "courtroom": "%s",
-              "case_numbers": [
-                "%s"
-              ],
-              "event_text": "%s",
-              "date_time": "2023-08-08T14:01:06Z"
-            }""",
+                {
+                  "message_id": "444",
+                  "type": "1000",
+                  "sub_type": "1002",
+                  "event_id": "98765",
+                  "courthouse": "%s",
+                  "courtroom": "%s",
+                  "case_numbers": [
+                    "%s"
+                  ],
+                  "event_text": "%s",
+                  "date_time": "2023-08-08T14:01:06Z"
+                }""",
             COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2);
 
         buildRequestWithExternalGlobalAccessAuth()
@@ -90,19 +90,19 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         String versionedEventText3 = randomAlphanumeric(15);
         requestBody = String.format(
             """
-            {
-              "message_id": "888",
-              "type": "1000",
-              "sub_type": "1002",
-              "event_id": "98765",
-              "courthouse": "%s",
-              "courtroom": "%s",
-              "case_numbers": [
-                "%s"
-              ],
-              "event_text": "%s",
-              "date_time": "2023-08-08T14:01:06Z"
-            }""",
+                {
+                  "message_id": "888",
+                  "type": "1000",
+                  "sub_type": "1002",
+                  "event_id": "98765",
+                  "courthouse": "%s",
+                  "courtroom": "%s",
+                  "case_numbers": [
+                    "%s"
+                  ],
+                  "event_text": "%s",
+                  "date_time": "2023-08-08T14:01:06Z"
+                }""",
             COURTHOUSE, courtroomName, randomCaseNumber, versionedEventText3);
 
         buildRequestWithExternalGlobalAccessAuth()
@@ -131,9 +131,9 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
     private int getHearingIdByCaseNumber(String caseNumber) {
         String caseBody = """
-        {
-            "case_number": "<<caseNumber>>"
-        }
+            {
+                "case_number": "<<caseNumber>>"
+            }
             """;
 
         caseBody = caseBody.replace("<<caseNumber>>", caseNumber);
@@ -149,8 +149,8 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             .extract().response();
 
         var caseList = response.jsonPath().getList("", AdvancedSearchResult.class);
-        var firstCase = caseList.get(0);
-        return firstCase.getHearings().get(0).getId();
+        var firstCase = caseList.getFirst();
+        return firstCase.getHearings().getFirst().getId();
     }
 
 }

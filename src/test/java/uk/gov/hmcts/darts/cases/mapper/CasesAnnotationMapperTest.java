@@ -26,10 +26,10 @@ class CasesAnnotationMapperTest {
         assertEquals("Some text", annotation.getAnnotationText());
 
         assertEquals(2, annotation.getAnnotationDocuments().size());
-        assertEquals(1, annotation.getAnnotationDocuments().get(0).getAnnotationDocumentId());
-        assertEquals("filename", annotation.getAnnotationDocuments().get(0).getFileName());
-        assertEquals("filetype", annotation.getAnnotationDocuments().get(0).getFileType());
-        assertEquals("annotator user", annotation.getAnnotationDocuments().get(0).getUploadedBy());
+        assertEquals(1, annotation.getAnnotationDocuments().getFirst().getAnnotationDocumentId());
+        assertEquals("filename", annotation.getAnnotationDocuments().getFirst().getFileName());
+        assertEquals("filetype", annotation.getAnnotationDocuments().getFirst().getFileType());
+        assertEquals("annotator user", annotation.getAnnotationDocuments().getFirst().getUploadedBy());
 
         assertEquals(2, annotation.getAnnotationDocuments().get(1).getAnnotationDocumentId());
         assertEquals(2, annotation.getAnnotationDocuments().get(1).getAnnotationDocumentId());

@@ -205,7 +205,7 @@ class EventMapperTest {
         // Given
         AdminGetVersionsByEventIdResponseResult responseResult = eventMapper.mapToAdminGetEventVersionsResponseForId(eventEntities);
 
-        AdminGetEventResponseDetails previousVersion = responseResult.getPreviousVersions().get(0);
+        AdminGetEventResponseDetails previousVersion = responseResult.getPreviousVersions().getFirst();
         // Then
         assertNull(responseResult.getCurrentVersion());
         assertAdminEventResponseDetails(eventEntity1, previousVersion);

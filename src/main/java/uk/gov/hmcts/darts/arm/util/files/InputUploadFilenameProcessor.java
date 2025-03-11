@@ -34,7 +34,7 @@ public class InputUploadFilenameProcessor {
             List<String> tokens = Arrays.asList(inputUploadFilename.split(ARM_FILENAME_SEPARATOR));
             // DARTS/response/EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
             if (tokens.size() == NUMBER_OF_TOKENS) {
-                externalDirectoryObjectId = tokens.get(0);
+                externalDirectoryObjectId = tokens.getFirst();
                 objectTypeId = tokens.get(1);
                 attempts = tokens.get(2);
                 hashcode = tokens.get(3);

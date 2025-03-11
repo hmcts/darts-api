@@ -34,7 +34,7 @@ class TranscriptionMapperTest {
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
 
         List<Transcript> transcripts = hearingTranscriptionMapper.getTranscriptList(hearingTranscriptionMapper.mapResponse(transcriptionList));
-        Transcript transcript = transcripts.get(0);
+        Transcript transcript = transcripts.getFirst();
         assertEquals(1, transcript.getTranscriptionId());
         assertEquals(102, transcript.getHearingId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());
@@ -64,7 +64,7 @@ class TranscriptionMapperTest {
         transcription.setTranscriptionStatus(transcriptionStatus);
 
         List<Transcript> transcripts = hearingTranscriptionMapper.getTranscriptList(hearingTranscriptionMapper.mapResponse(List.of(transcription)));
-        Transcript transcript = transcripts.get(0);
+        Transcript transcript = transcripts.getFirst();
         assertEquals(1, transcript.getTranscriptionId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());
         assertEquals("SENTENCING_REMARKS", transcript.getType());
@@ -79,7 +79,7 @@ class TranscriptionMapperTest {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
 
-        transcriptionList.get(0).setIsCurrent(false);
+        transcriptionList.getFirst().setIsCurrent(false);
 
         List<Transcript> transcripts = hearingTranscriptionMapper.getTranscriptList(hearingTranscriptionMapper.mapResponse(transcriptionList));
         assertEquals(0, transcripts.size());

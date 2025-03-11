@@ -55,7 +55,7 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
         adminAutomatedTaskService.updateAutomatedTask(1, new AutomatedTaskPatch().isActive(false));
 
         Assertions.assertEquals(1, auditRepository.findAll().size());
-        AuditEntity auditEntity = auditRepository.findAll().get(0);
+        AuditEntity auditEntity = auditRepository.findAll().getFirst();
         Assertions.assertEquals(AuditActivity.ENABLE_DISABLE_JOB.getId(), auditEntity.getAuditActivity().getId());
         Assertions.assertEquals("ProcessDailyList disabled", auditEntity.getAdditionalData());
 
@@ -77,7 +77,7 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
         adminAutomatedTaskService.updateAutomatedTask(1, new AutomatedTaskPatch().isActive(true));
 
         Assertions.assertEquals(1, auditRepository.findAll().size());
-        AuditEntity auditEntity = auditRepository.findAll().get(0);
+        AuditEntity auditEntity = auditRepository.findAll().getFirst();
         Assertions.assertEquals(AuditActivity.ENABLE_DISABLE_JOB.getId(), auditEntity.getAuditActivity().getId());
         Assertions.assertEquals("ProcessDailyList enabled", auditEntity.getAdditionalData());
 

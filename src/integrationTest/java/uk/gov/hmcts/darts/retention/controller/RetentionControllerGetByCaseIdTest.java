@@ -84,7 +84,7 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
 
         assertThat(caseRetentionEntityList).hasSize(3);
         assertThat(caseRetentionEntityList.get(2).getLastModifiedDateTime()).isAfter(caseRetentionEntityList.get(1).getLastModifiedDateTime());
-        assertThat(caseRetentionEntityList.get(1).getLastModifiedDateTime()).isAfter(caseRetentionEntityList.get(0).getLastModifiedDateTime());
+        assertThat(caseRetentionEntityList.get(1).getLastModifiedDateTime()).isAfter(caseRetentionEntityList.getFirst().getLastModifiedDateTime());
 
         var requestBuilder = get(URI.create(String.format("/retentions?case_id=%s", courtCase.getId())));
 
@@ -106,7 +106,7 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].comments", Matchers.is("a comment")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].status", Matchers.is("b_state")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_last_changed_date",
-                                                      Matchers.is(caseRetentionEntityList.get(0).getLastModifiedDateTime()
+                                                      Matchers.is(caseRetentionEntityList.getFirst().getLastModifiedDateTime()
                                                                       .format(DateTimeFormatter.ISO_DATE_TIME))))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_date", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].amended_by", Matchers.is("system")))

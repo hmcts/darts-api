@@ -31,7 +31,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
-class EventControllerPostEventMappingTest extends IntegrationBase  {
+class EventControllerPostEventMappingTest extends IntegrationBase {
 
     private static final String EVENT_MAPPINGS_ENDPOINT = "/admin/event-mappings";
 
@@ -76,7 +76,7 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
         Integer mappingId = mappingResult.getId();
 
         assertEquals(1, auditRepository.findAll().size());
-        AuditEntity auditEntity = auditRepository.findAll().get(0);
+        AuditEntity auditEntity = auditRepository.findAll().getFirst();
         assertEquals(AuditActivity.ADDING_EVENT_MAPPING.getId(), auditEntity.getAuditActivity().getId());
         assertFalse(eventHandlerRepository.findRevisions(mappingId).isEmpty());
     }
@@ -132,7 +132,7 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
         assertNotEquals(mappingId, updatedMappingId);
 
         assertEquals(3, auditRepository.findAll().size());
-        AuditEntity addedInitialEntity = auditRepository.findAll().get(0);
+        AuditEntity addedInitialEntity = auditRepository.findAll().getFirst();
         AuditEntity changedEntity = auditRepository.findAll().get(1);
         AuditEntity addedEntity = auditRepository.findAll().get(2);
 
