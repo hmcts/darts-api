@@ -259,6 +259,33 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         assertThat(mediaRepository.getVersionCount("someIdMultiple")).isEqualTo(2);
     }
 
+    @Test
+    void setAllAssociatedMediaToIsCurrentFalseExcludingMediaId_shouldUpdateAllRelatedMedias() {
+        var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media1.setChronicleId("chronicleId");
+        media1.setIsCurrent(true);
+        dartsPersistence.save(media1);
+        var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media2.setChronicleId("chronicleId");
+        media2.setIsCurrent(true);
+        dartsPersistence.save(media2);
+        var media3 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media3.setChronicleId("chronicleId");
+        media3.setIsCurrent(true);
+        dartsPersistence.save(media3);
+        var media4 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media4.setChronicleId("otherChronicleId");
+        media4.setIsCurrent(true);
+        dartsPersistence.save(media4);
+
+        transactionalUtil.executeInTransaction(() -> mediaRepository.setAllAssociatedMediaToIsCurrentFalseExcludingMediaId("chronicleId", media2.getId()));
+
+        assertThat(mediaRepository.findById(media1.getId()).orElseThrow().getIsCurrent()).isFalse();
+        assertThat(mediaRepository.findById(media2.getId()).orElseThrow().getIsCurrent()).isTrue();
+        assertThat(mediaRepository.findById(media3.getId()).orElseThrow().getIsCurrent()).isFalse();
+        assertThat(mediaRepository.findById(media4.getId()).orElseThrow().getIsCurrent()).isTrue();
+    }
+
     static Stream<Arguments> findAllByMediaTimeContainsTestSource() {
         OffsetDateTime startTime = OffsetDateTime.now();
         OffsetDateTime endTime = startTime.plusHours(2);
