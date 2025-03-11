@@ -56,7 +56,7 @@ class CasesFunctionalTest extends FunctionalTest {
         Response caseResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(CASES_PATH))
+            .baseUri(getUri(CASES_PATH + "/addCase"))
             .body(caseBody)
             .post()
             .then()
