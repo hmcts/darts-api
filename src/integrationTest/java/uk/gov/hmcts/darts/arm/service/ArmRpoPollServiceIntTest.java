@@ -146,10 +146,11 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoPollService.pollArmRpo(false, pollDuration, batchSize);
 
         // then
-        var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
+        var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(
+            armRpoExecutionDetailEntity.getId()).orElseThrow();
         assertNotNull(updatedArmRpoExecutionDetailEntity);
-        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
-        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
+        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.getArmRpoStatus().getId());
 
         verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
         verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
