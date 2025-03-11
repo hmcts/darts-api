@@ -25,7 +25,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_020_KEY;
 
 @Slf4j
-public class BaseArchiveRecordMapper {
+class BaseArchiveRecordMapper {
 
     protected void processStringMetadataProperties(RecordMetadata metadata, String key, String value) {
         switch (key) {
@@ -60,6 +60,4 @@ public class BaseArchiveRecordMapper {
             }
         }
     }
-
-
 }
