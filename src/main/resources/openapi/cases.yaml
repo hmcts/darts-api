@@ -970,10 +970,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/judge'
-        courtrooms:
-          type: array
-          items:
-            $ref: '#/components/schemas/CourtroomResponseObject'
         prosecutors:
           type: array
           items:
@@ -992,6 +988,12 @@ components:
           type: string
           format: date-time
           example: 2023-07-20T15:42:10.361Z
+        is_retention_updated:
+          type: boolean
+          example: false
+        retention_retries:
+          type: integer
+          example: 0
         retention_date_time_applied:
           type: string
           format: date-time
@@ -999,9 +1001,23 @@ components:
         retention_policy_applied:
           type: string
           example: "MANUAL"
+        ret_conf_score:
+          type: integer
+          example: 0
+        ret_conf_reason:
+          type: string
+        ret_conf_updated_ts:
+          type: string
+          format: date-time
         case_object_id:
           type: string
           example: 12345
+        case_object_name:
+          type: string
+        case_type:
+          type: string
+        upload_priority:
+          type: integer
         case_status:
           $ref: '#/components/schemas/CaseOpenStatusEnum'
           example: "OPEN"
@@ -1026,10 +1042,16 @@ components:
           type: string
           format: date-time
           example: 2024-01-01T00:00:00Z
+        case_deleted_by:
+          type: integer
+          example: 0
         is_data_anonymised:
           $ref: '#/components/schemas/IsDataAnonymised'
         data_anonymised_at:
           $ref: '#/components/schemas/DataAnonymisedAt'
+        data_anonymised_by:
+          type: integer
+          example: 0
         is_interpreter_used:
           type: boolean
           example: false
