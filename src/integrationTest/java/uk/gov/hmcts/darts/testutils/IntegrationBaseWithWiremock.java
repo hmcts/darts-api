@@ -66,7 +66,7 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
             }
             HttpUriRequest request = new HttpGet("http://localhost:" + wiremockPort + "/__admin/mappings");
             CloseableHttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
-            if(!HttpStatus.valueOf(httpResponse.getCode()).is2xxSuccessful()){
+            if (!HttpStatus.valueOf(httpResponse.getCode()).is2xxSuccessful()) {
                 return false;
             }
             String res = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
