@@ -277,6 +277,64 @@ paths:
                 title: "User is not authorised for the associated courthouse"
                 status: 401
   /admin/medias/{id}:
+    patch:
+      tags:
+        - Audio
+      operationId: patchAdminMediasById
+      description: Update a media record
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/MediaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_current:
+                  type: boolean
+                  enum: [ true ]
+              required:
+                - is_current
+      responses:
+        '200':
+          description: Accepted
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '409':
+          description: Data conflicting
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
     get:
       tags:
         - Audio
@@ -1179,6 +1237,7 @@ components:
         - "AUDIO_120"
         - "AUDIO_121"
         - "AUDIO_122"
+        - "AUDIO_123"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -1196,6 +1255,7 @@ components:
                          USER_CANT_APPROVE_THEIR_OWN_DELETION,
                          FAILED_TO_ADD_AUDIO_META_DATA,
                          START_TIME_END_TIME_NOT_VALID,
+                         MEDIA_ALREADY_CURRENT
       ]
 
     AddAudioTitleErrors:
@@ -1218,6 +1278,7 @@ components:
         - "User cannot approve their own deletion"
         - "Failed to add audio meta data"
         - "Start time or end time of media not valid"
+        - "Media is already current"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -1235,4 +1296,5 @@ components:
                          USER_CANT_APPROVE_THEIR_OWN_DELETION,
                          FAILED_TO_ADD_AUDIO_META_DATA,
                          START_TIME_END_TIME_NOT_VALID,
+                         MEDIA_ALREADY_CURRENT
       ]

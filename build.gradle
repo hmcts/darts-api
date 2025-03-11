@@ -19,7 +19,7 @@ plugins {
   id "org.openapi.generator" version "7.11.0"
   id "org.flywaydb.flyway" version "11.3.4"
   id 'maven-publish'
-  id("com.dorongold.task-tree") version "4.0.0"
+  id("com.dorongold.task-tree") version "4.0.1"
 }
 
 jacoco {
@@ -382,7 +382,7 @@ repositories {
 
 ext {
   log4JVersion = "2.24.3"
-  tomcatEmbedVersion = "11.0.4"
+  tomcatEmbedVersion = "11.0.5"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -466,7 +466,7 @@ dependencies {
 
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.9.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.10.Final')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body

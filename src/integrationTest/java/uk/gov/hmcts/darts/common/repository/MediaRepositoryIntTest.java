@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -258,6 +259,33 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         assertThat(mediaRepository.getVersionCount("someIdMultiple")).isEqualTo(2);
     }
 
+    @Test
+    void setAllAssociatedMediaToIsCurrentFalseExcludingMediaId_shouldUpdateAllRelatedMedias() {
+        var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media1.setChronicleId("chronicleId");
+        media1.setIsCurrent(true);
+        dartsPersistence.save(media1);
+        var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media2.setChronicleId("chronicleId");
+        media2.setIsCurrent(true);
+        dartsPersistence.save(media2);
+        var media3 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media3.setChronicleId("chronicleId");
+        media3.setIsCurrent(true);
+        dartsPersistence.save(media3);
+        var media4 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        media4.setChronicleId("otherChronicleId");
+        media4.setIsCurrent(true);
+        dartsPersistence.save(media4);
+
+        transactionalUtil.executeInTransaction(() -> mediaRepository.setAllAssociatedMediaToIsCurrentFalseExcludingMediaId("chronicleId", media2.getId()));
+
+        assertThat(mediaRepository.findById(media1.getId()).orElseThrow().getIsCurrent()).isFalse();
+        assertThat(mediaRepository.findById(media2.getId()).orElseThrow().getIsCurrent()).isTrue();
+        assertThat(mediaRepository.findById(media3.getId()).orElseThrow().getIsCurrent()).isFalse();
+        assertThat(mediaRepository.findById(media4.getId()).orElseThrow().getIsCurrent()).isTrue();
+    }
+
     static Stream<Arguments> findAllByMediaTimeContainsTestSource() {
         OffsetDateTime startTime = OffsetDateTime.now();
         OffsetDateTime endTime = startTime.plusHours(2);
@@ -311,5 +339,37 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         mediaLinkedCase.setMedia(media);
         mediaLinkedCase.setCourtCase(courtCase);
         return mediaLinkedCase;
+    }
+
+    @Test
+    void findByCaseIdWithMediaList_shouldReturnCorrectData() {
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        HearingEntity hearing3 = PersistableFactory.getHearingTestData().someMinimalHearing();
+
+        hearing2.setCourtCase(hearing1.getCourtCase());
+
+        dartsPersistence.save(hearing1);
+        dartsPersistence.save(hearing2);
+        dartsPersistence.save(hearing3);
+
+        MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
+        MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
+        MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
+        dartsPersistence.save(media1);
+        dartsPersistence.save(media2);
+        dartsPersistence.save(media3);
+
+        hearing1.addMedia(media1);
+        hearing2.addMedia(media2);
+        hearing3.addMedia(media3);
+
+        hearingRepository.saveAll(List.of(hearing1, hearing2, hearing3));
+
+        List<MediaEntity> mediaEntities = mediaRepository.findByCaseIdWithMediaList(hearing1.getCourtCase().getId());
+
+        assertThat(mediaEntities.stream().map(MediaEntity::getId))
+            .hasSize(2)
+            .containsExactlyInAnyOrder(media1.getId(), media2.getId());
     }
 }

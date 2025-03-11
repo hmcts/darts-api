@@ -27,6 +27,7 @@
     }
   ],
   "retain_until_date_time": "2025-01-01T10:10:00Z",
+  "is_retention_updated": false,
   "retention_date_time_applied": "2025-01-01T10:10:00Z",
   "retention_policy_applied": "2000-01-01T00:00:00Z",
   "case_status": "CLOSED",

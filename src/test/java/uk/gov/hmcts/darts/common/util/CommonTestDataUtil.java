@@ -266,7 +266,7 @@ public class CommonTestDataUtil {
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
-        mediaEntity.setHearingList(List.of(hearing));
+        mediaEntity.setHearingList(new ArrayList<>(List.of(hearing)));
         mediaEntity.setCourtroom(hearing.getCourtroom());
         mediaEntity.setId(getStringId("MEDIA_ID" + caseNumber));
         return mediaEntity;
