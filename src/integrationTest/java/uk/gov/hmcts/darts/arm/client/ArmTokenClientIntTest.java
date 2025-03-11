@@ -70,7 +70,8 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    void getTokenShouldThrowExceptionIfServerReturns403Forbidden() {
+    @SuppressWarnings("PMD.DoNotUseThreads")
+    void getTokenShouldThrowExceptionIfServerReturns403Forbidden() throws InterruptedException {
         // Given
         stubFor(
             WireMock.post(urlEqualTo(TOKEN_PATH))
@@ -79,7 +80,7 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
                         .withStatus(403)));
 
         ArmTokenRequest armTokenRequest = createTokenRequest();
-
+        Thread.sleep(2000);
         // When
         FeignException exception = assertThrows(FeignException.class, () -> armTokenClient.getToken(armTokenRequest));
 
