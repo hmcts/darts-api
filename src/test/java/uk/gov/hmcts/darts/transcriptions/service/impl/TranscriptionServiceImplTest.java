@@ -569,18 +569,19 @@ class TranscriptionServiceImplTest {
         Integer hearingId = null;
         Integer caseId = null;
 
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearingId,
+            caseId,
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
+            TEST_COMMENT,
+            startDateTime,
+            endDateTime
+        );
         var exception = assertThrows(
             DartsApiException.class,
             () ->
-                transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
-                    hearingId,
-                    caseId,
-                    transcriptionUrgencyEnum.getId(),
-                    transcriptionTypeEnum.getId(),
-                    TEST_COMMENT,
-                    startDateTime,
-                    endDateTime
-                ), false)
+                transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, false)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, exception.getError());

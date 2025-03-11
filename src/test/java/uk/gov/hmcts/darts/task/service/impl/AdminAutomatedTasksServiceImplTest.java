@@ -311,8 +311,9 @@ class AdminAutomatedTasksServiceImplTest {
         AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion", false);
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
 
+        AutomatedTaskPatch automatedTaskPatch = new AutomatedTaskPatch();
         DartsApiException exception = assertThrows(
-            DartsApiException.class, () -> adminAutomatedTaskService.updateAutomatedTask(1234, new AutomatedTaskPatch()));
+            DartsApiException.class, () -> adminAutomatedTaskService.updateAutomatedTask(1234, automatedTaskPatch));
         assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND, exception.getError());
     }
 

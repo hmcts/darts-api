@@ -56,12 +56,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DataManagementServiceImplTest {
 
-    public static final String BLOB_CONTAINER_NAME = "dummy_container";
-    public static final String BLOB_ID = UUID.randomUUID().toString();
+    private static final String BLOB_CONTAINER_NAME = "dummy_container";
+    private static final String BLOB_ID = UUID.randomUUID().toString();
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
+
     @Mock
-    public Response<Boolean> responseMock;
+    private Response<Boolean> responseMock;
     @Mock
     private DataManagementAzureClientFactory dataManagementFactory;
     @Mock
@@ -77,7 +78,6 @@ class DataManagementServiceImplTest {
 
     @TempDir
     private File tempDirectory;
-
 
     private BlobServiceClient serviceClient;
 
@@ -249,12 +249,14 @@ class DataManagementServiceImplTest {
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
         doThrow(RuntimeException.class).when(azureCopyUtil).copy(any(), any());
 
+        String uuid1 = UUID.randomUUID().toString();
+        String uuid2 = UUID.randomUUID().toString();
         assertThrows(DartsException.class, () ->
             dataManagementService.copyBlobData(
                 "darts-inbound-container",
                 "darts-unstructured",
-                UUID.randomUUID().toString(),
-                UUID.randomUUID().toString()));
+                uuid1,
+                uuid2));
     }
 
 

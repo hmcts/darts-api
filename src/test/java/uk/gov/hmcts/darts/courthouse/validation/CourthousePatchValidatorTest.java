@@ -55,7 +55,8 @@ class CourthousePatchValidatorTest {
     void throwsIfCourthouseDoesntExist() {
         when(courthouseRepository.findById(1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> validator.validate(new CourthousePatch(), 1))
+        CourthousePatch courthousePatch = new CourthousePatch();
+        assertThatThrownBy(() -> validator.validate(courthousePatch, 1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", COURTHOUSE_NOT_FOUND);
     }
@@ -66,7 +67,8 @@ class CourthousePatchValidatorTest {
         when(courthouseRepository.findById(1)).thenReturn(Optional.of(targetCourthouse));
         when(caseRepository.existsByCourthouse(targetCourthouse)).thenReturn(true);
 
-        assertThatThrownBy(() -> validator.validate(someCourthousePatchWithCourthouseName("some-new-name"), 1))
+        CourthousePatch courthousePatch = someCourthousePatchWithCourthouseName("some-new-name");
+        assertThatThrownBy(() -> validator.validate(courthousePatch, 1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING);
     }
@@ -77,7 +79,8 @@ class CourthousePatchValidatorTest {
         when(caseRepository.existsByCourthouse(any())).thenReturn(false);
         when(courthouseRepository.existsByCourthouseNameAndIdNot("SOME-ALREADY-EXISTING-NAME", 1)).thenReturn(true);
 
-        assertThatThrownBy(() -> validator.validate(someCourthousePatchWithCourthouseName("some-already-existing-name"), 1))
+        CourthousePatch courthousePatch = someCourthousePatchWithCourthouseName("some-already-existing-name");
+        assertThatThrownBy(() -> validator.validate(courthousePatch, 1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
     }
@@ -87,7 +90,8 @@ class CourthousePatchValidatorTest {
         when(courthouseRepository.findById(1)).thenReturn(Optional.of(someCourthouse()));
         when(courthouseRepository.existsByDisplayNameIgnoreCaseAndIdNot("some-already-existing-display-name", 1)).thenReturn(true);
 
-        assertThatThrownBy(() -> validator.validate(someCourthousePatchWithCourthouseDisplayName("some-already-existing-display-name"), 1))
+        CourthousePatch courthousePatch = someCourthousePatchWithCourthouseDisplayName("some-already-existing-display-name");
+        assertThatThrownBy(() -> validator.validate(courthousePatch, 1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
     }
@@ -97,7 +101,8 @@ class CourthousePatchValidatorTest {
         when(courthouseRepository.findById(1)).thenReturn(Optional.of(someCourthouse()));
         when(regionRepository.existsById(2)).thenReturn(false);
 
-        assertThatThrownBy(() -> validator.validate(someCourtHousePatchForRegion(2), 1))
+        CourthousePatch courthousePatch = someCourtHousePatchForRegion(2);
+        assertThatThrownBy(() -> validator.validate(courthousePatch, 1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", CourthouseApiError.REGION_ID_DOES_NOT_EXIST);
     }
@@ -107,7 +112,8 @@ class CourthousePatchValidatorTest {
         when(courthouseRepository.findById(1)).thenReturn(Optional.of(someCourthouse()));
         when(securityGroupRepository.existsAllByIdIn(Set.of(2))).thenReturn(false);
 
-        assertThatThrownBy(() -> validator.validate(someCourtHousePatchForSecurityGroup(2), 1))
+        CourthousePatch courthousePatch = someCourtHousePatchForSecurityGroup(2);
+        assertThatThrownBy(() -> validator.validate(courthousePatch, 1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", SECURITY_GROUP_ID_DOES_NOT_EXIST);
     }
