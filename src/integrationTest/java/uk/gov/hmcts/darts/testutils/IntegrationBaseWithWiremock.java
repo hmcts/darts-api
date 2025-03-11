@@ -41,7 +41,6 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     protected WireMockServer wireMockServer;
 
     @BeforeEach
-    @SuppressWarnings("PMD.DoNotUseThreads")
     void setup() {
         try {
             log.info("Wiremock Port: " + wiremockPort);
@@ -56,6 +55,7 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
         }
     }
 
+    @SuppressWarnings("PMD.DoNotUseThreads")//We need to wait for the wiremock server to start
     private void waitForWiremock(long waitMs, Duration maxTimeout) throws Exception {
         long maxWaitMs = maxTimeout.toMillis();
         while (!isWireMockRunning()) {
