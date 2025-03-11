@@ -36,6 +36,16 @@ public class MediaRequestStub {
     }
 
     @Transactional
+    public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity requestor,
+                                                              HearingEntity hearing,
+                                                              AudioRequestType audioRequestType,
+                                                              MediaRequestStatus status) {
+        return createAndLoadMediaRequestEntity(requestor, requestor, hearing, audioRequestType, status,
+                                               OffsetDateTime.parse("2023-06-26T13:00:00Z"), OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                                               OffsetDateTime.now());
+    }
+
+    @Transactional
     public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity owner, UserAccountEntity requestor,
                                                               AudioRequestType audioRequestType,
                                                               MediaRequestStatus status, String courtName,
@@ -44,6 +54,15 @@ public class MediaRequestStub {
         HearingEntity hearing = hearingStub.createHearing(courtName, "Int Test Courtroom 2",
                                                           caseNumber, hearingDate);
 
+        return createAndLoadMediaRequestEntity(owner, requestor, hearing, audioRequestType, status, startTime, endTime, requestedDate);
+    }
+
+    @Transactional
+    public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity owner, UserAccountEntity requestor,
+                                                              HearingEntity hearing,
+                                                              AudioRequestType audioRequestType,
+                                                              MediaRequestStatus status,
+                                                              OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime requestedDate) {
         var currentMediaRequest = PersistableFactory.getMediaRequestTestData().createCurrentMediaRequest(
             hearing,
             owner,
@@ -68,9 +87,7 @@ public class MediaRequestStub {
 
     @Transactional
     public MediaRequestEntity createAndSaveMediaRequestEntity(UserAccountEntity createdBy, HearingEntity hearingEntity) {
-        MediaRequestEntity mediaRequestEntity = createAndSaveMediaRequestEntity(createdBy);
-        mediaRequestEntity.setHearing(hearingEntity);
-        return mediaRequestRepository.save(mediaRequestEntity);
+        return createAndLoadMediaRequestEntity(createdBy, hearingEntity, AudioRequestType.DOWNLOAD, MediaRequestStatus.COMPLETED);
     }
 
     @Transactional

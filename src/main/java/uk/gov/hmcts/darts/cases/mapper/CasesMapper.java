@@ -23,11 +23,14 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -177,11 +180,25 @@ public class CasesMapper {
         adminCase.setJudges(courtCase.getJudgeStringList());
         adminCase.setProsecutors(courtCase.getProsecutorsStringList());
         adminCase.setDefenders(courtCase.getDefenceStringList());
-
         populateReportingRestrictions(courtCase, adminCase);
 
         adminCase.caseClosedDateTime(courtCase.getCaseClosedTimestamp());
+        adminCase.isRetentionUpdated(courtCase.isRetentionUpdated());
+        adminCase.retentionRetries(courtCase.getRetentionRetries());
+        adminCase.setRetConfScore(
+            Optional.ofNullable(courtCase.getRetConfScore())
+                .map(RetentionConfidenceScoreEnum::getId)
+                .orElse(null));
+        adminCase.setRetConfReason(
+            Optional.ofNullable(courtCase.getRetConfReason())
+                .map(RetentionConfidenceReasonEnum::name)
+                .orElse(null));
+        adminCase.setRetConfUpdatedTs(courtCase.getRetConfUpdatedTs());
+
         adminCase.setCaseObjectId(courtCase.getLegacyCaseObjectId());
+        adminCase.setCaseObjectName(courtCase.getCaseObjectName());
+        adminCase.setCaseType(courtCase.getCaseType());
+        adminCase.setUploadPriority(courtCase.getUploadPriority());
 
         if (courtCase.getClosed()) {
             adminCase.setCaseStatus(CaseOpenStatusEnum.CLOSED);
@@ -194,10 +211,15 @@ public class CasesMapper {
         adminCase.setLastModifiedAt(courtCase.getLastModifiedDateTime());
         adminCase.setLastModifiedBy(courtCase.getLastModifiedBy().getId());
         adminCase.setIsDeleted(courtCase.isDeleted());
+        adminCase.setCaseDeletedBy(
+            Optional.ofNullable(courtCase.getDeletedBy())
+                .map(UserAccountEntity::getId)
+                .orElse(null));
         adminCase.setCaseDeletedAt(courtCase.getDeletedTimestamp());
 
         adminCase.setIsDataAnonymised(courtCase.isDataAnonymised());
         adminCase.setDataAnonymisedAt(courtCase.getDataAnonymisedTs());
+        adminCase.setDataAnonymisedBy(courtCase.getDataAnonymisedBy());
         adminCase.setIsInterpreterUsed(courtCase.getInterpreterUsed());
 
         return adminCase;

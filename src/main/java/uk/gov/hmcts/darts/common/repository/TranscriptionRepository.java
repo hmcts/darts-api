@@ -19,38 +19,39 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
 
     // transcriptions with is_current=false are filtered out downstream
     @Query(value = """
-        SELECT *
-        FROM darts.transcription tr
-        WHERE tr.tra_id IN (
-            SELECT ht.tra_id
-            FROM darts.hearing h
-            JOIN darts.hearing_transcription_ae ht ON ht.hea_id = h.hea_id
-            WHERE h.cas_id = :caseId
-            UNION
-            SELECT ct.tra_id
-            FROM darts.court_case cc
-            JOIN darts.case_transcription_ae ct ON ct.cas_id = cc.cas_id
-            WHERE cc.cas_id = :caseId
-        )
-        AND (
-            tr.is_manual_transcription = true OR tr.transcription_object_id IS NOT NULL
-        )
-        AND (
-            :includeHidden = true
-            OR
-            EXISTS (
-                SELECT 1
-                FROM darts.transcription_document trd
-                WHERE trd.tra_id = tr.tra_id
-                AND trd.is_hidden = false
-            )
-            OR
-            NOT EXISTS (
-                SELECT 1
-                FROM darts.transcription_document trd
-                WHERE trd.tra_id = tr.tra_id
-            )
-        )
+         SELECT *
+         FROM darts.transcription tr
+         WHERE tr.tra_id IN (
+             SELECT ht.tra_id
+             FROM darts.hearing h
+             JOIN darts.hearing_transcription_ae ht ON ht.hea_id = h.hea_id
+             WHERE h.cas_id = :caseId
+             UNION
+             SELECT ct.tra_id
+             FROM darts.court_case cc
+             JOIN darts.case_transcription_ae ct ON ct.cas_id = cc.cas_id
+             WHERE cc.cas_id = :caseId
+         )
+         AND (
+             tr.is_manual_transcription = true 
+                         OR (tr.transcription_object_id IS NOT NULL AND EXISTS(SELECT 1 FROM darts.transcription_document trd WHERE trd.tra_id = tr.tra_id))
+         )
+         AND (
+             :includeHidden = true
+             OR
+             EXISTS (
+                 SELECT 1
+                 FROM darts.transcription_document trd
+                 WHERE trd.tra_id = tr.tra_id
+                 AND trd.is_hidden = false
+             )
+             OR
+             NOT EXISTS (
+                 SELECT 1
+                 FROM darts.transcription_document trd
+                 WHERE trd.tra_id = tr.tra_id
+             )
+         )
         """, nativeQuery = true
     )
     List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId, Boolean includeHidden);
@@ -73,7 +74,8 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         JOIN darts.hearing_transcription_ae ht ON ht.tra_id = t.tra_id
         JOIN darts.hearing h ON h.hea_id = ht.hea_id
         WHERE h.hea_id = :hearingId
-        AND (t.is_manual_transcription = true OR t.transcription_object_id IS NOT NULL)
+        AND (t.is_manual_transcription = true 
+                         OR (t.transcription_object_id IS NOT NULL and EXISTS(SELECT 1 FROM darts.transcription_document trd WHERE trd.tra_id = t.tra_id)))
         AND (EXISTS (
             SELECT 1
             FROM darts.transcription_document td

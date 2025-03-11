@@ -5,7 +5,6 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
 import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 
-import java.util.List;
 import java.util.Set;
 
 public interface EventService {
@@ -14,8 +13,6 @@ public interface EventService {
     AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Integer eventId);
 
     EventEntity getEventByEveId(Integer eveId);
-
-    List<EventEntity> getEventVersionsForEveIdExcludingEventIdZero(Integer eveId);
 
     EventEntity saveEvent(EventEntity eventEntity);
 
