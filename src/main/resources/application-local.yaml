@@ -32,7 +32,9 @@ darts:
       url: ${ARM_URL:http://localhost:4551}
       arm-service-entitlement: "SRV-DARTS-RW-E" # Per the entitlements[*].name value specified in darts-stub-services getProfileEntitlements
       arm-storage-account-name: "local"
-
+    blob:
+      az-copy-log-level: "--log-level=INFO"
+      az-copy-output-level: "--output-level=default"
 logging:
   level:
     uk.gov.hmcts.darts: DEBUG

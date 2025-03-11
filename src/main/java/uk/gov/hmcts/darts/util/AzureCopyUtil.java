@@ -34,9 +34,6 @@ public class AzureCopyUtil {
             if (StringUtils.isNotEmpty(config.getAzCopyLogLevel())) {
                 command.add(config.getAzCopyLogLevel());
             }
-            if (StringUtils.isNotEmpty(config.getAzCopyCheckLength())) {
-                command.add(config.getAzCopyCheckLength());
-            }
             if (StringUtils.isNotEmpty(config.getAzCopyOutputLevel())) {
                 command.add(config.getAzCopyOutputLevel());
             }
@@ -44,7 +41,7 @@ public class AzureCopyUtil {
 
             buildCensoredRunCommand(command, runCommand);
             var startTime = Instant.now();
-            log.info("Copy of blob started at {} - {}", startTime, runCommand);
+            log.info("Copy of blob started at {}", startTime);
             builder.redirectErrorStream(true);
             Process process = builder.start();
             int exitValue = process.waitFor();
@@ -57,7 +54,7 @@ public class AzureCopyUtil {
                     "Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Command: '%s'. Result: %s",
                     source,
                     destination,
-                    runCommand,
+                    builder.command(),
                     result);
                 log.error(errorMessage);
                 throw new DartsException(errorMessage);
@@ -73,9 +70,9 @@ public class AzureCopyUtil {
     private static void buildCensoredRunCommand(List<String> command, StringBuilder runCommand) {
         for (int index = 0; index < command.size(); index++) {
             if (index == 2) {
-                runCommand.append("source ").append(" ");
+                runCommand.append("source ");
             } else if (index == 3) {
-                runCommand.append("destination ").append(" ");
+                runCommand.append("destination ");
             } else {
                 runCommand.append(command.get(index)).append(" ");
             }

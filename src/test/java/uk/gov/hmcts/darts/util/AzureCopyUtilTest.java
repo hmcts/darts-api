@@ -17,7 +17,7 @@ class AzureCopyUtilTest {
     private DataManagementConfiguration configuration;
 
     @Test
-    void testExceptionMessageDoesNotIncludeSourceOrDestinationInfoToAvoidSecretsLeak() {
+    void copy_withExceptionMessageDoesNotIncludeSourceOrDestinationInfoToAvoidSecretsLeak() {
 
         AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
         when(configuration.getAzCopyExecutable()).thenReturn("not/existing/path/azcopy");
@@ -32,7 +32,7 @@ class AzureCopyUtilTest {
     }
 
     @Test
-    void testInterruptedExceptionMessageDoesNotIncludeSourceOrDestinationInfoToAvoidSecretsLeak() {
+    void copy_withInterruptedExceptionMessageDoesNotIncludeSourceOrDestinationInfoToAvoidSecretsLeak() {
 
         AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
         when(configuration.getAzCopyExecutable()).thenAnswer(invocation -> {
@@ -79,22 +79,6 @@ class AzureCopyUtilTest {
         // when
         assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
             .hasMessageContaining(logLevel);
-    }
-
-    @Test
-    void copy_withCheckLength() {
-        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
-
-        when(configuration.getAzCopyExecutable()).thenReturn("/usr/bin/azcopy");
-        String checkLevel = "--check-length=false";
-        when(configuration.getAzCopyCheckLength()).thenReturn(checkLevel);
-
-        String sourceSasUrl = "someSasUrl";
-        String destinationSasUrl = "someOtherSasUrl";
-
-        // when
-        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
-            .hasMessageContaining(checkLevel);
     }
 
     @Test
