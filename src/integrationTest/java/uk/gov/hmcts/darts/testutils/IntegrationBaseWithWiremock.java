@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
 
 import java.time.Duration;
@@ -45,13 +47,13 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     }
 
     @SuppressWarnings("PMD.DoNotUseThreads")//We need to wait for the wiremock server to start
-    private void waitForWiremock(long waitMs, Duration maxTimeout) throws Exception {
+    private void waitForWiremock(long waitMs, Duration maxTimeout) throws InterruptedException {
         long maxWaitMs = maxTimeout.toMillis();
         while (!isWireMockRunning()) {
             Thread.sleep(waitMs);
             maxWaitMs -= waitMs;
             if (maxWaitMs <= 0) {
-                throw new Exception("Wiremock server did not start within the timeout");
+                throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR, "Wiremock server did not start");
             }
         }
     }
@@ -63,12 +65,9 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
             }
             HttpUriRequest request = new HttpGet("http://localhost:" + wiremockPort + "/__admin/mappings");
             HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
-            if (HttpStatus.valueOf(httpResponse.getCode()).is2xxSuccessful()) {
-                return true;
-            }
-            return false;
+            return HttpStatus.valueOf(httpResponse.getCode()).is2xxSuccessful();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error checking if wiremock is running", e);
             return false;
         }
     }
