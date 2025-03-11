@@ -36,7 +36,6 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     @Autowired
     protected DartsGatewayStub dartsGateway;
 
-
     @Autowired
     protected WireMockServer wireMockServer;
 

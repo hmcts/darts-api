@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.client;
 
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
@@ -34,9 +33,6 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
     private ArmTokenClient armTokenClient;
-
-    @Autowired
-    private WireMockServer wireMockServer;
 
     private static final String TOKEN_PATH = "/auth/account/token";
 
