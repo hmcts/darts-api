@@ -73,6 +73,46 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+    post:
+      tags:
+        - Cases
+      summary: Allows user to add case or if the case exists update the details.
+      description: |-
+        Allows user to add case or if the case exists update the details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add_case_request'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post_case_response'
+
+        '400':
+          description: Bad Request - Invalid XML Document
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
   /cases/addCase:
     post:
       tags:
