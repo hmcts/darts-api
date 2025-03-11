@@ -1,9 +1,8 @@
 package uk.gov.hmcts.darts.util;
 
-import lombok.SneakyThrows;
 import org.springframework.boot.test.system.CapturedOutput;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public final class LogUtil {
 
@@ -11,17 +10,9 @@ public final class LogUtil {
 
     }
 
-    @SneakyThrows
-    @SuppressWarnings("PMD.DoNotUseThreads")//Required to prevent busy waiting
-    //Used to allow logs to catch up with the test
-    public static void waitUntilMessage(CapturedOutput capturedOutput, String message,
-                                        int timeoutInSeconds) {
-        long startTime = System.currentTimeMillis();
-        while (!capturedOutput.getAll().contains(message)) {
-            if (System.currentTimeMillis() - startTime > timeoutInSeconds * 1000) {
-                fail("Timeout waiting for message: " + message);
-            }
-            Thread.sleep(100);
-        }
+
+    public static void assertOutputHasMessage(CapturedOutput output, String message, int timeoutInSeconds) {
+        WaitUtil.waitFor(() -> output.getAll().contains(message), message, timeoutInSeconds);
+        assertThat(output).contains(message);
     }
 }
