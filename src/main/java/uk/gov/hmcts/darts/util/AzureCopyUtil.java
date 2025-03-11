@@ -22,7 +22,6 @@ public class AzureCopyUtil {
     public void copy(String source, String destination) {
         StringBuilder runCommand = new StringBuilder();
         try {
-            ProcessBuilder builder = new ProcessBuilder();
             List<String> command = new ArrayList<>();
             command.add(config.getAzCopyExecutable());
             command.add("copy");
@@ -37,8 +36,8 @@ public class AzureCopyUtil {
             if (StringUtils.isNotEmpty(config.getAzCopyOutputLevel())) {
                 command.add(config.getAzCopyOutputLevel());
             }
+            ProcessBuilder builder = new ProcessBuilder();
             builder.command(command);
-
             buildCensoredRunCommand(command, runCommand);
             var startTime = Instant.now();
             log.info("Copy of blob started at {}", startTime);
