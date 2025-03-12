@@ -100,7 +100,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         detsEod.setOsrUuid(objectStateRecordEntity.getUuid());
         detsEod = dartsDatabase.save(detsEod);
 
-        objectStateRecordEntity.setEodId(String.valueOf(detsEod.getId()));
+        objectStateRecordEntity.setEodId(detsEod.getId());
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
@@ -161,8 +161,8 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         armEod.setOsrUuid(objectStateRecordEntity.getUuid());
         armEod = dartsDatabase.save(armEod);
 
-        objectStateRecordEntity.setEodId(String.valueOf(detsEod.getId()));
-        objectStateRecordEntity.setArmEodId(String.valueOf(armEod.getId()));
+        objectStateRecordEntity.setEodId(detsEod.getId());
+        objectStateRecordEntity.setArmEodId(armEod.getId());
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
@@ -223,8 +223,8 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         armEod.setOsrUuid(objectStateRecordEntity.getUuid());
         armEod = dartsDatabase.save(armEod);
 
-        objectStateRecordEntity.setEodId(String.valueOf(detsEod.getId()));
-        objectStateRecordEntity.setArmEodId(String.valueOf(armEod.getId()));
+        objectStateRecordEntity.setEodId(detsEod.getId());
+        objectStateRecordEntity.setArmEodId(armEod.getId());
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
@@ -298,7 +298,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         detsEod.setOsrUuid(objectStateRecordEntity.getUuid());
         detsEod = dartsDatabase.save(detsEod);
 
-        objectStateRecordEntity.setEodId(String.valueOf(detsEod.getId()));
+        objectStateRecordEntity.setEodId(detsEod.getId());
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
@@ -350,7 +350,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         detsEod.setOsrUuid(objectStateRecordEntity.getUuid());
         detsEod = dartsDatabase.save(detsEod);
 
-        objectStateRecordEntity.setEodId(String.valueOf(detsEod.getId()));
+        objectStateRecordEntity.setEodId(detsEod.getId());
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         doThrow(new DartsException("")).when(armDataManagementApi).copyDetsBlobDataToArm(any(), any());
@@ -375,8 +375,8 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
 
         ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
             .findById(foundArmEod.getOsrUuid()).orElseThrow();
-        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
-        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
+        assertEquals(detsEod.getId(), objectStateRecordEntityModified.getEodId());
+        assertEquals(foundArmEod.getId(), objectStateRecordEntityModified.getArmEodId());
 
     }
 
@@ -384,8 +384,8 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
                                                             ObjectStateRecordEntity objectStateRecordEntity) {
         ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
             .findById(foundArmEod.getOsrUuid()).orElseThrow();
-        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
-        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
+        assertEquals(detsEod.getId(), objectStateRecordEntityModified.getEodId());
+        assertEquals(foundArmEod.getId(), objectStateRecordEntityModified.getArmEodId());
         assertTrue(objectStateRecordEntityModified.getFlagFileTransfToarml());
         assertNotNull(objectStateRecordEntityModified.getDateFileTransfToarml());
         assertEquals(detsEod.getChecksum(), objectStateRecordEntityModified.getMd5FileTransfArml());
@@ -401,8 +401,8 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
                                                ObjectStateRecordEntity objectStateRecordEntity) {
         ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
             .findById(foundArmEod.getOsrUuid()).orElseThrow();
-        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
-        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
+        assertEquals(detsEod.getId(), objectStateRecordEntityModified.getEodId());
+        assertEquals(foundArmEod.getId(), objectStateRecordEntityModified.getArmEodId());
         assertTrue(objectStateRecordEntityModified.getFlagFileTransfToarml());
         assertNotNull(objectStateRecordEntityModified.getDateFileTransfToarml());
         assertEquals(detsEod.getChecksum(), objectStateRecordEntityModified.getMd5FileTransfArml());

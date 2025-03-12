@@ -40,7 +40,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -141,13 +141,13 @@ class DetsToArmBatchProcessResponseFilesImplTest {
     @Test
     void preProcessResponseFilesActions() {
         // given
-        when(osrRepository.findByArmEodId(String.valueOf(externalObjectDirectoryEntity.getId()))).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(externalObjectDirectoryEntity.getId())).thenReturn(Optional.of(objectStateRecordEntity));
 
         // when
         detsToArmBatchProcessResponseFilesImpl.preProcessResponseFilesActions(externalObjectDirectoryEntity.getId());
 
         // then
-        verify(osrRepository).findByArmEodId(String.valueOf(1));
+        verify(osrRepository).findByArmEodId(1);
         verify(osrRepository).save(objectStateRecordEntity);
     }
 
@@ -168,7 +168,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             .armResponseUploadFileRecord(uploadFileRecord)
             .uploadFileFilenameProcessor(uploadFileFilenameProcessor)
             .build();
-        when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(anyInt())).thenReturn(Optional.of(objectStateRecordEntity));
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
@@ -180,7 +180,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
                                                                                      userAccount);
 
         // then
-        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).findByArmEodId(1);
         verify(osrRepository).save(objectStateRecordEntity);
     }
 
@@ -190,7 +190,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         ArmResponseUploadFileRecord uploadFileRecord = new ArmResponseUploadFileRecord();
         uploadFileRecord.setA360FileId("a360FileId");
         uploadFileRecord.setMd5("invalidchecksum");
-        when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(anyInt())).thenReturn(Optional.of(objectStateRecordEntity));
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
@@ -198,7 +198,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             .onUploadFileChecksumValidationFailure(uploadFileRecord, externalObjectDirectoryEntity, "checksum", userAccount);
 
         // then
-        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).findByArmEodId(1);
         verify(osrRepository).save(objectStateRecordEntity);
     }
 
@@ -207,14 +207,14 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         // given
         ArmResponseUploadFileRecord uploadFileRecord = mock(ArmResponseUploadFileRecord.class);
         UploadFileFilenameProcessor processor = mock(UploadFileFilenameProcessor.class);
-        when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(anyInt())).thenReturn(Optional.of(objectStateRecordEntity));
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
         detsToArmBatchProcessResponseFilesImpl.processUploadFileDataFailure(uploadFileRecord, processor, externalObjectDirectoryEntity, userAccount);
 
         // then
-        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).findByArmEodId(1);
         verify(osrRepository).save(objectStateRecordEntity);
     }
 
@@ -231,14 +231,14 @@ class DetsToArmBatchProcessResponseFilesImplTest {
                 \\\"recordDate\\\":\\\"2023-12-21T10:03:53Z\\\"}}
                 """);
 
-        when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(anyInt())).thenReturn(Optional.of(objectStateRecordEntity));
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
         detsToArmBatchProcessResponseFilesImpl.processInvalidLineFileActions(invalidLineRecord, externalObjectDirectoryEntity, userAccount);
 
         // then
-        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).findByArmEodId(1);
         verify(osrRepository).save(objectStateRecordEntity);
     }
 
@@ -274,23 +274,4 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         });
     }
 
-    public ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
-        ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
-        objectStateRecordEntity.setUuid(uuid);
-        objectStateRecordEntity.setEodId(String.valueOf(detsEodId));
-        objectStateRecordEntity.setArmEodId(String.valueOf(armEodId));
-        objectStateRecordEntity.setParentObjectId("ParentObject123");
-        objectStateRecordEntity.setContentObjectId("ContentObject123");
-        objectStateRecordEntity.setIdClip("Clip123");
-        objectStateRecordEntity.setDetsLocation("DetsLocation123");
-        objectStateRecordEntity.setFlagFileTransferToDets(false);
-        objectStateRecordEntity.setFlagFileAvScanPass(false);
-        objectStateRecordEntity.setFlagFileTransfToarml(false);
-        objectStateRecordEntity.setFlagFileMfstCreated(false);
-        objectStateRecordEntity.setFlagMfstTransfToArml(false);
-        objectStateRecordEntity.setFlagRspnRecvdFromArml(false);
-        objectStateRecordEntity.setFlagFileIngestStatus(false);
-        objectStateRecordEntity.setFlagFileDetsCleanupStatus(false);
-        return objectStateRecordEntity;
-    }
 }

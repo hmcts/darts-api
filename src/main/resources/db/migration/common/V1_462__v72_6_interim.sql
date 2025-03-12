@@ -1,0 +1,1 @@
+ALTER TABLE case_overflow ALTER COLUMN cof_id DROP DEFAULT;
