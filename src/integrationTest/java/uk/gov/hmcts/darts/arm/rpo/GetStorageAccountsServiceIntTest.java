@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
-import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -30,9 +29,6 @@ class GetStorageAccountsServiceIntTest extends IntegrationBase {
     @MockitoBean
     private ArmRpoClient armRpoClient;
 
-    @MockitoBean
-    private ArmApiConfigurationProperties armApiConfigurationProperties;
-
     @Autowired
     private GetStorageAccountsService getStorageAccountsService;
 
@@ -40,15 +36,13 @@ class GetStorageAccountsServiceIntTest extends IntegrationBase {
     @Test
     void getStorageAccountsSuccess() {
         // given
-        when(armApiConfigurationProperties.getArmStorageAccountName()).thenReturn("expectedAccountName");
-
         StorageAccountResponse.DataDetails dataDetails1 = new StorageAccountResponse.DataDetails();
         dataDetails1.setId("indexId1");
         dataDetails1.setName("unexpectedAccountName");
 
         StorageAccountResponse.DataDetails dataDetails2 = new StorageAccountResponse.DataDetails();
         dataDetails2.setId("indexId2");
-        dataDetails2.setName("expectedAccountName");
+        dataDetails2.setName("some-account-name");
 
         StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
         storageAccountResponse.setStatus(200);

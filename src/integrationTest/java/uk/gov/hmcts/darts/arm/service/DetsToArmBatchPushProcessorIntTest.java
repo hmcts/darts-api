@@ -4,14 +4,11 @@ import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -22,7 +19,6 @@ import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -36,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
@@ -55,11 +50,6 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     private UserIdentity userIdentity;
     @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
-    @MockitoSpyBean
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
-
-    @TempDir
-    private File tempDirectory;
 
     @Autowired
     private DetsToArmBatchPushProcessor detsToArmBatchPushProcessor;
@@ -87,10 +77,6 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             ));
         savedMedia.setFileSize(1000L);
         savedMedia = dartsDatabase.save(savedMedia);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-
     }
 
     @Test
