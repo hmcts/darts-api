@@ -37,7 +37,7 @@ public class RemoveProductionServiceImpl implements RemoveProductionService {
             removeProductionResponse = armRpoClient.removeProduction(bearerToken, request);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append(armRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
         log.debug("ARM RPO Response - removeProduction response: {}", removeProductionResponse);

@@ -42,7 +42,7 @@ public class GetStorageAccountsServiceImpl implements GetStorageAccountsService 
             storageAccountResponse = armRpoClient.getStorageAccounts(bearerToken, storageAccountRequest);
 
         } catch (FeignException e) {
-            log.error(errorMessage.append(armRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
         log.debug("ARM RPO Response - StorageAccountResponse: {}", storageAccountResponse);

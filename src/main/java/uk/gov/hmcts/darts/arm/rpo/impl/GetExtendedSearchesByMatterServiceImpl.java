@@ -42,7 +42,7 @@ public class GetExtendedSearchesByMatterServiceImpl implements GetExtendedSearch
         try {
             requestGenerator = createExtendedSearchesByMatterRequestGenerator(armRpoExecutionDetailEntity.getMatterId());
         } catch (Exception e) {
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(armRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST).append(e)
+            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(ArmRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST).append(e)
                                                                  .toString(), armRpoExecutionDetailEntity, userAccount);
         }
 

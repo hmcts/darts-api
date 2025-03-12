@@ -148,10 +148,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -183,10 +185,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -218,10 +222,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -253,10 +259,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -276,10 +284,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -324,6 +334,7 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
@@ -362,10 +373,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -409,10 +422,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
