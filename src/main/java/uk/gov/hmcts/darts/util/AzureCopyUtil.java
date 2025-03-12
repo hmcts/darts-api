@@ -21,9 +21,9 @@ public class AzureCopyUtil {
 
     private static final int SUCCESS_EXIT_CODE = 0;
     private static final String WHITESPACE = " ";
-    public static final String COPY_COMMAND = "copy";
-    public static final int INDEX_OF_SOURCE = 2;
-    public static final int INDEX_OF_DESTINATION = 3;
+    private static final String COPY_COMMAND = "copy";
+    private static final int INDEX_OF_SOURCE = 2;
+    private static final int INDEX_OF_DESTINATION = 3;
     private final DataManagementConfiguration config;
 
     public void copy(String source, String destination) {
