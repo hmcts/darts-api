@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -134,7 +135,8 @@ class AnnotationDataManagementTest {
 
         when(mockFileBasedDownloadResponseMetaData.getResource()).thenThrow(new IOException());
 
-        assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = Arrays.asList(someExternalObjectDirectoryEntity());
+        assertThatThrownBy(() -> annotationDataManagement.download(externalObjectDirectoryEntities))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
     }

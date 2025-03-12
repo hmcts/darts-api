@@ -98,7 +98,8 @@ class AnnotationUploadTest {
     void throwsIfUploadingDataToContainersFails() {
         when(annotationDataManagement.upload(any(), any())).thenThrow(new DartsApiException(FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT));
 
-        assertThatThrownBy(() -> uploadService.upload(someMultipartFile(), someAnnotationFor(hearing)))
+        Annotation annotation = someAnnotationFor(hearing);
+        assertThatThrownBy(() -> uploadService.upload(someMultipartFile(), annotation))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
 
@@ -107,7 +108,8 @@ class AnnotationUploadTest {
 
     @Test
     void throwsIfDocumentInputStreamFails() {
-        assertThatThrownBy(() -> uploadService.upload(someMultipartFileWithBadInputStream(), someAnnotationFor(hearing)))
+        Annotation annotation = someAnnotationFor(hearing);
+        assertThatThrownBy(() -> uploadService.upload(someMultipartFileWithBadInputStream(), annotation))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
 

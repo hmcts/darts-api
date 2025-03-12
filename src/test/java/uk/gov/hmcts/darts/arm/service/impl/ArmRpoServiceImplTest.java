@@ -100,7 +100,7 @@ class ArmRpoServiceImplTest {
 
         var armRpoExecutionDetail = detailEntityCaptor.getValue();
         assertEquals(userAccountEntity, armRpoExecutionDetail.getCreatedBy());
-        
+
         verifyNoMoreInteractions(entityManager, armRpoExecutionDetailRepository);
     }
 
@@ -215,10 +215,11 @@ class ArmRpoServiceImplTest {
         when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
         File file = new File("Tests/arm/rpo/noFile.csv");
+        List<File> csvFiles = Collections.singletonList(file);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), BATCH_SIZE));
+            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, csvFiles, BATCH_SIZE));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(

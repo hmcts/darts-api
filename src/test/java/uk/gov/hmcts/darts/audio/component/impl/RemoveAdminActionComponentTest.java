@@ -295,10 +295,11 @@ class RemoveAdminActionComponentTest {
                 .chronicleId("2000")
                 .build()
                 .getEntity();
+            List<MediaEntity> mediaEntities = List.of(media1, media2);
 
             // When
             IllegalStateException exception = assertThrows(IllegalStateException.class,
-                                                           () -> removeAdminActionComponent.removeAdminActionFrom(List.of(media1, media2)));
+                                                           () -> removeAdminActionComponent.removeAdminActionFrom(mediaEntities));
 
             // Then
             assertEquals("All media versions must have the same chronicle id", exception.getMessage());

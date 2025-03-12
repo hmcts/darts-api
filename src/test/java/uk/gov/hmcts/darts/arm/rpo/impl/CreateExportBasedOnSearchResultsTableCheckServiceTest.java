@@ -92,8 +92,9 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
 
         // when
+        StringBuilder errorMessage = new StringBuilder();
         assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableService.checkCreateExportBasedOnSearchResultsInProgress(userAccount, response, new StringBuilder(),
+            createExportBasedOnSearchResultsTableService.checkCreateExportBasedOnSearchResultsInProgress(userAccount, response, errorMessage,
                                                                                                          armRpoExecutionDetailEntity, pollDuration));
 
         // then
