@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
 
@@ -60,7 +61,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                                                                                                  eventIdAndHearingIds.getEventId());
         List<EventEntity> eventsToBeSuperseded = eventsWithSameEventIdAndHearings.stream()
             .sorted(Comparator.comparing(EventEntity::getCreatedDateTime).reversed())
-            .toList();
+            .collect(Collectors.toList());
         eventsToBeSuperseded.removeFirst();
         if (CollectionUtils.isNotEmpty(eventsToBeSuperseded)) {
             List<EventEntity> eventsThatHaveBeenSuperseded = new ArrayList<>();
