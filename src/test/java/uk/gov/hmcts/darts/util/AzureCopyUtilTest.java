@@ -97,4 +97,36 @@ class AzureCopyUtilTest {
         assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
             .hasMessageContaining(outputLevel);
     }
+
+    @Test
+    void copy_withOutputLevelEssential() {
+        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
+
+        when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
+        String outputLevel = "--output-level=essential";
+        when(configuration.getAzCopyOutputLevel()).thenReturn(outputLevel);
+
+        String sourceSasUrl = "someSasUrl";
+        String destinationSasUrl = "someOtherSasUrl";
+
+        // when
+        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
+            .hasMessageContaining(outputLevel);
+    }
+
+    @Test
+    void copy_withOutputLevelDefault() {
+        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
+
+        when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
+        String outputLevel = "--output-level=essential";
+        when(configuration.getAzCopyOutputLevel()).thenReturn(outputLevel);
+
+        String sourceSasUrl = "someSasUrl";
+        String destinationSasUrl = "someOtherSasUrl";
+
+        // when
+        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
+            .hasMessageContaining(outputLevel);
+    }
 }
