@@ -2,18 +2,23 @@ package uk.gov.hmcts.darts.util;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AzureCopyUtilTest {
 
-    public static final String NOT_EXISTING_PATH_AZCOPY = "not/existing/path/azcopy";
+    private static final String NOT_EXISTING_PATH_AZCOPY = "not/existing/path/azcopy";
     @Mock
     private DataManagementConfiguration configuration;
 
@@ -62,8 +67,10 @@ class AzureCopyUtilTest {
         String destinationSasUrl = "someOtherSasUrl";
 
         // when
-        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
-            .hasMessageContaining(preserveAccessTier);
+        List<String> results = azureCopyUtil.buildCommand(sourceSasUrl, destinationSasUrl);
+
+        // then
+        assertThat(results).contains(preserveAccessTier);
     }
 
     @Test
@@ -78,55 +85,32 @@ class AzureCopyUtilTest {
         String destinationSasUrl = "someOtherSasUrl";
 
         // when
-        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
-            .hasMessageContaining(logLevel);
+        List<String> results = azureCopyUtil.buildCommand(sourceSasUrl, destinationSasUrl);
+
+        // then
+        assertThat(results).contains(logLevel);
     }
 
-    @Test
-    void copy_withOutputLevelQuiet() {
+    @ParameterizedTest
+    @CsvSource({
+        "--output-level=quiet",
+        "--output-level=essential",
+        "--output-level=default"
+    })
+    void copy_withOutputLevel(String outputLevel) {
+        // given
         AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
 
         when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
-        String outputLevel = "--output-level=quiet";
         when(configuration.getAzCopyOutputLevel()).thenReturn(outputLevel);
 
         String sourceSasUrl = "someSasUrl";
         String destinationSasUrl = "someOtherSasUrl";
 
         // when
-        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
-            .hasMessageContaining(outputLevel);
-    }
+        List<String> results = azureCopyUtil.buildCommand(sourceSasUrl, destinationSasUrl);
 
-    @Test
-    void copy_withOutputLevelEssential() {
-        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
-
-        when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
-        String outputLevel = "--output-level=essential";
-        when(configuration.getAzCopyOutputLevel()).thenReturn(outputLevel);
-
-        String sourceSasUrl = "someSasUrl";
-        String destinationSasUrl = "someOtherSasUrl";
-
-        // when
-        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
-            .hasMessageContaining(outputLevel);
-    }
-
-    @Test
-    void copy_withOutputLevelDefault() {
-        AzureCopyUtil azureCopyUtil = new AzureCopyUtil(configuration);
-
-        when(configuration.getAzCopyExecutable()).thenReturn(NOT_EXISTING_PATH_AZCOPY);
-        String outputLevel = "--output-level=essential";
-        when(configuration.getAzCopyOutputLevel()).thenReturn(outputLevel);
-
-        String sourceSasUrl = "someSasUrl";
-        String destinationSasUrl = "someOtherSasUrl";
-
-        // when
-        assertThatThrownBy(() -> azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)).isInstanceOf(DartsException.class)
-            .hasMessageContaining(outputLevel);
+        // then
+        assertThat(results).contains(outputLevel);
     }
 }

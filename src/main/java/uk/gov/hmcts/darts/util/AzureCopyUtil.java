@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 @Slf4j
 @Component
@@ -20,19 +19,14 @@ import java.util.StringJoiner;
 public class AzureCopyUtil {
 
     private static final int SUCCESS_EXIT_CODE = 0;
-    private static final String WHITESPACE = " ";
     private static final String COPY_COMMAND = "copy";
-    private static final int INDEX_OF_SOURCE = 2;
-    private static final int INDEX_OF_DESTINATION = 3;
     private final DataManagementConfiguration config;
 
     public void copy(String source, String destination) {
-        StringJoiner runCommand = new StringJoiner(WHITESPACE);
         try {
             List<String> command = buildCommand(source, destination);
             ProcessBuilder builder = new ProcessBuilder();
             builder.command(command);
-            buildCensoredRunCommand(command, runCommand);
             var startTime = Instant.now();
             log.info("Copy of blob started at {}", startTime);
             builder.redirectErrorStream(true);
@@ -46,9 +40,9 @@ public class AzureCopyUtil {
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            throw new DartsException("Failed to execute azure copy - interrupted " + runCommand, ie);
+            throw new DartsException("Failed to execute azure copy - interrupted ", ie);
         } catch (Exception e) {
-            throw new DartsException("Failed to execute azure copy " + runCommand, e);
+            throw new DartsException("Failed to execute azure copy ", e);
         }
     }
 
@@ -64,7 +58,7 @@ public class AzureCopyUtil {
         throw new DartsException(errorMessage);
     }
 
-    private List<String> buildCommand(String source, String destination) {
+    List<String> buildCommand(String source, String destination) {
         List<String> command = new ArrayList<>();
         command.add(config.getAzCopyExecutable());
         command.add(COPY_COMMAND);
@@ -80,18 +74,5 @@ public class AzureCopyUtil {
             command.add(config.getAzCopyOutputLevel());
         }
         return command;
-    }
-
-    private void buildCensoredRunCommand(List<String> command, StringJoiner runCommand) {
-        for (int index = SUCCESS_EXIT_CODE; index < command.size(); index++) {
-            if (index == INDEX_OF_SOURCE) {
-                runCommand.add("SOURCE");
-            } else if (index == INDEX_OF_DESTINATION) {
-                runCommand.add("DESTINATION");
-            } else {
-                runCommand.add(command.get(index));
-            }
-
-        }
     }
 }
