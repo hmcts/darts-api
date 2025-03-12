@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
+import net.javacrumbs.shedlock.core.LockProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -20,20 +21,28 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
 class LockServiceImplTest {
 
-    @InjectMocks
     private LockServiceImpl lockService;
 
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private LockProvider lockProvider;
+
+    @BeforeEach
+    void setUp() {
+        lockService = new LockServiceImpl(automatedTaskRepository, currentTimeHelper, lockProvider);
+    }
 
     @Test
     void getLockingTaskExecutor() {
+        assertNotNull("TaskExecutor", lockService.getLockingTaskExecutor());
     }
 
     @Test

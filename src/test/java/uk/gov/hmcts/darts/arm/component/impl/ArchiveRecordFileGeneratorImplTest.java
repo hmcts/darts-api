@@ -53,10 +53,9 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 @Slf4j
 class ArchiveRecordFileGeneratorImplTest {
 
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
-    public static final String READING_FILE = "Reading file {}";
-    public static final String ACTUAL_RESPONSE = "actual Response {}";
-    public static final String EXPECT_RESPONSE = "expect Response {}";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+    private static final String READING_FILE = "Reading file {}";
+
     @TempDir
     private File tempDirectory;
 
@@ -90,8 +89,6 @@ class ArchiveRecordFileGeneratorImplTest {
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveMediaMetadata/expectedResponse.a360");
-        log.info(ACTUAL_RESPONSE, actualResponse);
-        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -108,8 +105,6 @@ class ArchiveRecordFileGeneratorImplTest {
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveTranscriptionMetadata/expectedResponse.a360");
-        log.info(ACTUAL_RESPONSE, actualResponse);
-        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -125,8 +120,6 @@ class ArchiveRecordFileGeneratorImplTest {
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveAnnotationMetadata/expectedResponse.a360");
-        log.info(ACTUAL_RESPONSE, actualResponse);
-        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -142,8 +135,6 @@ class ArchiveRecordFileGeneratorImplTest {
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveCaseMetadata/expectedResponse.a360");
-        log.info(ACTUAL_RESPONSE, actualResponse);
-        log.info(EXPECT_RESPONSE, expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

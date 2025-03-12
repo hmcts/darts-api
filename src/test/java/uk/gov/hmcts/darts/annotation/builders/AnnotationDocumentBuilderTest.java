@@ -9,7 +9,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,9 +33,8 @@ class AnnotationDocumentBuilderTest {
     void buildsAnnotationDocumentCorrectly() {
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
         var document = someMultipartFile();
-        var annotation = someAnnotation();
 
-        assertThat(annotationDocumentBuilder.buildFrom(document, annotation, "some-checksum"))
+        assertThat(annotationDocumentBuilder.buildFrom(document, "some-checksum"))
             .isInstanceOf(AnnotationDocumentEntity.class)
             .hasFieldOrPropertyWithValue("uploadedBy", userAccountEntity)
             .hasFieldOrPropertyWithValue("checksum", "some-checksum")
@@ -52,8 +50,5 @@ class AnnotationDocumentBuilderTest {
             "some-content-type",
             "some-content".getBytes());
     }
-
-    private AnnotationEntity someAnnotation() {
-        return new AnnotationEntity();
-    }
+    
 }

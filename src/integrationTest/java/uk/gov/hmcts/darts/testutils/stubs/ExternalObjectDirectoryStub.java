@@ -127,7 +127,7 @@ public class ExternalObjectDirectoryStub {
      * Creates an ExternalObjectDirectoryEntity.
      *
      * @deprecated Use
-     *     {@link ExternalObjectDirectoryStub#createExternalObjectDirectory(MediaEntity, ObjectRecordStatusEnum, ExternalLocationTypeEnum, UUID)} instead.
+     *     {@link ExternalObjectDirectoryStub#createExternalObjectDirectory(MediaEntity, ObjectRecordStatusEnum, ExternalLocationTypeEnum, String)} instead.
      */
     @Deprecated
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
@@ -512,20 +512,6 @@ public class ExternalObjectDirectoryStub {
                 || !List.of(SystemUsersEnum.INBOUND_AUDIO_DELETER_AUTOMATED_TASK.getId(),
                             SystemUsersEnum.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK.getId()).contains(
                 objectDirectoryEntity.getLastModifiedBy().getId())) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    @Transactional
-    public boolean areObjectDirectoriesMarkedForDeletionWithSystemUser(List<Integer> entities) {
-        for (Integer entity : entities) {
-            ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
-
-            if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
-                || SystemUsersEnum.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK.getId() != objectDirectoryEntity.getLastModifiedBy().getId()) {
                 return false;
             }
         }
