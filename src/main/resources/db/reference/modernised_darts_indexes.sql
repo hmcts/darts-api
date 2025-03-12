@@ -13,7 +13,10 @@
 -- v9 add 2 event and 2 media indexes
 -- v10 amend index on user_account from user_name to user_full_name
 -- v11 add numerous indexes to accommodate all FKs
--- v12 add index on media for chronicle_id
+-- v12 remove index on rps_retainer.cas_id
+--     add index media.chronicle_id
+--     add index case_overflow.cas_id to support FK, implicitly removed when PK changed
+
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -244,7 +247,6 @@ CREATE INDEX cmr_eve_fk         ON CASE_MANAGEMENT_RETENTION(eve_id) TABLESPACE 
 CREATE INDEX rpt_cre_by_fk      ON RETENTION_POLICY_TYPE(created_by) TABLESPACE pg_default;
 CREATE INDEX rpt_lst_mod_by_fk  ON RETENTION_POLICY_TYPE(last_modified_by) TABLESPACE pg_default;
 
-CREATE INDEX rpr_cas_fk         ON RPS_RETAINER(cas_id) TABLESPACE pg_default;
 CREATE INDEX rpr_rpt_fk         ON RPS_RETAINER(rpt_id) TABLESPACE pg_default;
 CREATE INDEX rpr_cre_by_fk      ON RPS_RETAINER(created_by) TABLESPACE pg_default;
 CREATE INDEX rpr_lst_mod_by_fk  ON RPS_RETAINER(last_modified_by) TABLESPACE pg_default;
@@ -260,6 +262,7 @@ CREATE INDEX rcc_cre_by_fk      ON RETENTION_CONFIDENCE_CATEGORY_MAPPER(created_
 CREATE INDEX rcc_lst_mod_by_fk  ON RETENTION_CONFIDENCE_CATEGORY_MAPPER(last_modified_by) TABLESPACE pg_default;
 
 CREATE INDEX cao_rpt_fk         ON CASE_OVERFLOW(rpt_id) TABLESPACE pg_default;
+CREATE INDEX cao_cas_fk         ON CASE_OVERFLOW(cas_id) TABLESPACE pg_default;
 
 --v2 
 CREATE INDEX cas_cn_idx         ON COURT_CASE(case_number)                  TABLESPACE pg_default;
@@ -273,6 +276,7 @@ CREATE INDEX hea_hd_idx         ON HEARING(hearing_date)                    TABL
 CREATE INDEX jud_jn_idx         ON JUDGE(UPPER(judge_name))                 TABLESPACE pg_default;
 CREATE INDEX med_mf_idx         ON MEDIA(media_file)                        TABLESPACE pg_default;
 CREATE INDEX med_st_et_idx      ON MEDIA(start_ts,end_ts)                   TABLESPACE pg_default;
+CREATE INDEX med_chronicle_id_idx ON MEDIA(chronicle_id)                    TABLESPACE pg_default;
 CREATE INDEX prn_pn_idx         ON PROSECUTOR(UPPER(prosecutor_name))       TABLESPACE pg_default;
 CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_full_name)             TABLESPACE pg_default;
 CREATE INDEX usr_upea_idx       ON USER_ACCOUNT(UPPER(user_email_address))  TABLESPACE pg_default;
@@ -311,5 +315,5 @@ CREATE INDEX cas_cn_trgm_idx ON court_case USING gin (case_number gin_trgm_ops);
 
 CREATE INDEX ctr_cn_trgm_idx ON courtroom USING gin (courtroom_name gin_trgm_ops);
 
--- v12
-CREATE INDEX med_chronicle_id_idx ON media (chronicle_id);
+
+
