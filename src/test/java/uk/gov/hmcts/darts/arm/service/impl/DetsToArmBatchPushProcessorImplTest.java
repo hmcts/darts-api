@@ -254,8 +254,8 @@ class DetsToArmBatchPushProcessorImplTest {
     private ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);
-        objectStateRecordEntity.setEodId(String.valueOf(detsEodId));
-        objectStateRecordEntity.setArmEodId(String.valueOf(armEodId));
+        objectStateRecordEntity.setEodId(detsEodId);
+        objectStateRecordEntity.setArmEodId(armEodId);
         objectStateRecordEntity.setParentObjectId("ParentObject123");
         objectStateRecordEntity.setContentObjectId("ContentObject123");
         objectStateRecordEntity.setIdClip("Clip123");

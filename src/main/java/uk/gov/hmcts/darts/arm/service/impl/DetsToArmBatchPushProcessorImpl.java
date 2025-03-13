@@ -167,7 +167,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                         currentEod, batchItem, batchItems, archiveRecordsFileName, userAccount);
                     objectStateRecord = getObjectStateRecordEntity(currentEod);
                     // Save the new ARM EOD to the object state record
-                    objectStateRecord.setArmEodId(String.valueOf(armEod.getId()));
+                    objectStateRecord.setArmEodId(armEod.getId());
                     objectStateRecordRepository.save(objectStateRecord);
                 }
 
