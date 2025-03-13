@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.authentication.dao.AzureDao;
 import uk.gov.hmcts.darts.authentication.exception.AuthenticationError;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
+import uk.gov.hmcts.darts.authentication.model.TokenResponse;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
@@ -44,7 +45,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String handleOauthCode(String code, String redirectUri) {
+    public TokenResponse handleOauthCode(String code, String redirectUri) {
         AuthenticationConfigurationPropertiesStrategy configStrategy = locator.locateAuthenticationConfiguration();
 
         log.debug("Presented authorization code {}", code);
@@ -52,6 +53,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         OAuthProviderRawResponse tokenResponse;
         try {
             tokenResponse = azureDao.fetchAccessToken(code, configStrategy.getProviderConfiguration(), configStrategy.getConfiguration(), redirectUri);
+        } catch (AzureDaoException e) {
+            throw new DartsApiException(AuthenticationError.FAILED_TO_OBTAIN_ACCESS_TOKEN, e);
+        }
+        var refreshToken = tokenResponse.getRefreshToken();
+        var accessToken = Objects.nonNull(tokenResponse.getIdToken()) ? tokenResponse.getIdToken() : tokenResponse.getAccessToken();
+
+        var validationResult = tokenValidator.validate(accessToken, configStrategy.getProviderConfiguration(), configStrategy.getConfiguration());
+        if (!validationResult.valid()) {
+            throw new DartsApiException(AuthenticationError.FAILED_TO_VALIDATE_ACCESS_TOKEN);
+        }
+
+        return new TokenResponse(accessToken, refreshToken);
+    }
+
+    @Override
+    public String refreshAccessToken(String refreshToken) {
+        AuthenticationConfigurationPropertiesStrategy configStrategy = locator.locateAuthenticationConfiguration();
+
+        OAuthProviderRawResponse tokenResponse;
+        try {
+            tokenResponse = azureDao.fetchAccessToken(refreshToken, configStrategy.getProviderConfiguration(), configStrategy.getConfiguration());
         } catch (AzureDaoException e) {
             throw new DartsApiException(AuthenticationError.FAILED_TO_OBTAIN_ACCESS_TOKEN, e);
         }

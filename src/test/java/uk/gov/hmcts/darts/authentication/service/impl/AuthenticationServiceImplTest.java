@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.authentication.dao.AzureDao;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
+import uk.gov.hmcts.darts.authentication.model.TokenResponse;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
@@ -36,6 +37,7 @@ class AuthenticationServiceImplTest {
     private static final URI DUMMY_LANDING_PAGE_URI = URI.create("DUMMY_LANDING_PAGE_URI");
     private static final String DUMMY_CODE = "DUMMY CODE";
     private static final String DUMMY_ID_TOKEN = "DUMMY ID TOKEN";
+    private static final String DUMMY_REFRESH_TOKEN = "DUMMY REFRESH TOKEN";
 
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
@@ -101,16 +103,16 @@ class AuthenticationServiceImplTest {
     @Test
     void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
-            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(true, null));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
             new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties,
                                                             new ExternalAuthProviderConfigurationProperties()));
 
-        String token = authenticationService.handleOauthCode(DUMMY_CODE, null);
+        TokenResponse token = authenticationService.handleOauthCode(DUMMY_CODE, null);
 
-        assertEquals(DUMMY_ID_TOKEN, token);
+        assertEquals(DUMMY_ID_TOKEN, token.accessToken());
     }
 
     @Test
@@ -132,7 +134,7 @@ class AuthenticationServiceImplTest {
     @Test
     void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
-            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
