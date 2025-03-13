@@ -811,6 +811,7 @@ class AdminMediaServiceImplTest {
             when(baseObjectAdminActionEntity.getTicketReference()).thenReturn("ticketReference1");
             when(baseObjectAdminActionEntity.getObjectHiddenReason()).thenReturn(objectHiddenReasonEntity);
             when(baseObjectAdminActionEntity.getHiddenBy()).thenReturn(userAccount);
+            when(baseObjectAdminActionEntity.getHiddenDateTime()).thenReturn(OffsetDateTime.now());
 
             MediaEntity media2 = mock(MediaEntity.class);
             when(media2.getId()).thenReturn(4321);
@@ -822,6 +823,7 @@ class AdminMediaServiceImplTest {
             ObjectAdminActionEntity objectAdminActionEntity2 = mock(ObjectAdminActionEntity.class);
             when(objectAdminActionEntity2.getMedia()).thenReturn(media2);
             when(objectAdminActionEntity2.getComments()).thenReturn("Comment2");
+            when(objectAdminActionEntity2.getHiddenDateTime()).thenReturn(OffsetDateTime.now());
 
             when(mediaRepository.getVersionCount("chronicleId1")).thenReturn(2);
             when(mediaRepository.getVersionCount("chronicleId2")).thenReturn(3);
