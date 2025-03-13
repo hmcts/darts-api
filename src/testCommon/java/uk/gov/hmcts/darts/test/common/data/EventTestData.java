@@ -68,8 +68,9 @@ public final class EventTestData
         return entity;
     }
 
-    public static EventEntity createEventForHearing(HearingEntity hearingEntity) {
+    public static EventEntity createEventForHearing(HearingEntity hearingEntity, boolean isEventCurrent) {
         var eventEntity = someMinimalEvent();
+        eventEntity.setIsCurrent(isEventCurrent);
         eventEntity.getHearingEntities().add(hearingEntity);
         eventEntity.setCourtroom(hearingEntity.getCourtroom());
         return eventEntity;
