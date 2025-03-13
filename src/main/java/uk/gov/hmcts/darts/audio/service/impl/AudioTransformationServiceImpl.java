@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
@@ -231,7 +230,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             .filter(media -> mediaRequestEntity.getStartTime().isBefore(media.getEnd()))
             .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
             .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest)
