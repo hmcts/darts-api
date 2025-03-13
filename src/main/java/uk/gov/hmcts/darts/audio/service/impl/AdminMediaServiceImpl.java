@@ -206,7 +206,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .peek(getAdminMediasMarkedForDeletionItem -> {
                 //We need to add the Media Entities to a List that supports sorting as the default one from Hibernate does not
                 List<GetAdminMediasMarkedForDeletionMediaItem> mediaEntities = new ArrayList<>(getAdminMediasMarkedForDeletionItem.getMedia());
-                mediaEntities.sort((o1, o2) -> o1.getChannel().compareTo(o2.getChannel()));
+                mediaEntities.sort(Comparator.comparing(GetAdminMediasMarkedForDeletionMediaItem::getChannel));
                 getAdminMediasMarkedForDeletionItem.setMedia(mediaEntities);
             }).toList();
     }
@@ -215,6 +215,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         ObjectAdminActionEntity base = actions.getFirst();
         List<GetAdminMediasMarkedForDeletionMediaItem> media = actions.stream()
             .map(ObjectAdminActionEntity::getMedia)
+            .filter(MediaEntity::getIsCurrent)
             .map(mediaEntity -> {
                 GetAdminMediasMarkedForDeletionMediaItem item = adminMarkedForDeletionMapper.toGetAdminMediasMarkedForDeletionMediaItem(mediaEntity);
                 item.setVersionCount(mediaRepository.getVersionCount(mediaEntity.getChronicleId()));
@@ -229,7 +230,12 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         item.setCourtroom(courtroomMapper.toApiModel(base.getMedia().getCourtroom()));
         item.setCourthouse(courthouseMapper.toApiModel(base.getMedia().getCourtroom().getCourthouse()));
         GetAdminMediasMarkedForDeletionAdminAction adminAction = objectActionMapper.toGetAdminMediasMarkedForDeletionAdminAction(base);
-        adminAction.setComments(actions.stream().map(ObjectAdminActionEntity::getComments).toList());
+        adminAction.setComments(actions.stream()
+            .sorted(Comparator.comparing(ObjectAdminActionEntity::getHiddenDateTime))
+            .map(ObjectAdminActionEntity::getComments)
+            .distinct()
+            .toList()
+        );
         item.setAdminAction(adminAction);
         return item;
     }
