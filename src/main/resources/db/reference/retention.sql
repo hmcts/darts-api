@@ -51,6 +51,8 @@
 --     add sequence cof_seq 
 --     add case_object_id to case_overflow
 --v20  remove not null from cas_id on case_overflow
+--     add c_case_id, c_courthouse, c_type, c_upload_priority, c_reporting_restrictions,
+--     case_object_name, r_folder_path, c_interpreter_used to case_overflow
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -210,6 +212,14 @@ CREATE TABLE case_overflow
 ,audio_folder_object_id      CHARACTER VARYING(16)
 ,case_last_modified_ts       TIMESTAMP WITH TIME ZONE                -- to support delta, when case changed
 ,audio_last_modified_ts      TIMESTAMP WITH TIME ZONE                -- to suppor delta, when moj_audio_folder changes
+,c_case_id                   CHARACTER VARYING(32)
+,c_courthouse                CHARACTER VARYING(64)
+,c_type                      CHARACTER VARYING(32)                   -- exclusively 1 or null
+,c_upload_priority           INTEGER                                 -- number(10) in legacy, but contains only 0 !
+,c_reporting_restrictions    CHARACTER VARYING(128)
+,case_object_name            CHARACTER VARYING(255)                  -- from dm_sysobject_s.object_name
+,r_folder_path               CHARACTER VARYING(740)                  -- from dm_folder_r.r_folder_path
+,c_interpreter_used          INTEGER                                 -- number(1) in legacy, contains 0/1/null, hence is really bool
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL     DEFAULT current_timestamp
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE pg_default;

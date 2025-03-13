@@ -347,6 +347,9 @@
 --    add production_name to arm_rpo_execution_detail
 --    add is_dets to external_object_directory
 --v72.5 add storage_id to media, transcription_document, daily_list,annotation_document, object_retrieval_queue
+--v72_6 add osr_uuid to daily_list
+--    amend external_location to be character varying from uuid, in daily_list, external_object_directory & transient_object_directory  
+
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -850,8 +853,9 @@ CREATE TABLE daily_list
 ,clip_id                     CHARACTER VARYING
 ,storage_id                  CHARACTER VARYING(16)
 ,data_ticket                 INTEGER
-,external_location           UUID
+,external_location           CHARACTER VARYING
 ,elt_id                      INTEGER
+,osr_uuid                    BIGINT
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1022,7 +1026,7 @@ CREATE TABLE external_object_directory
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
 ,osr_uuid                    BIGINT                                  -- logical FK to object_state_record
 -- additional optional FKs to other relevant internal objects would require columns here
-,external_location           UUID                                    -- for use where address of Ext Obj requires 1 field
+,external_location           CHARACTER VARYING                       -- for use where address of Ext Obj requires 1 field
 ,external_file_id            CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,external_record_id          CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,checksum                    CHARACTER VARYING                       
@@ -1728,7 +1732,7 @@ CREATE TABLE transient_object_directory
 (tod_id                      INTEGER                       NOT NULL
 ,trm_id                      INTEGER                       NOT NULL  -- FK to transformed_media 
 ,ors_id                      INTEGER                       NOT NULL  -- FK to moj_object_record_status.moj_ors_id
-,external_location           UUID                          NOT NULL
+,external_location           CHARACTER VARYING             NOT NULL
 ,checksum                    CHARACTER VARYING
 ,transfer_attempts           INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
