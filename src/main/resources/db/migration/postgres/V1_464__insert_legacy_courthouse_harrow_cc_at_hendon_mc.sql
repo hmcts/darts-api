@@ -1,6 +1,15 @@
 INSERT INTO courthouse (cth_id, courthouse_name, display_name, folder_path, courthouse_object_id, created_by, created_ts, last_modified_by, last_modified_ts)
 VALUES (nextVal('cth_seq'), 'HARROW CC AT HENDON MC', 'Harrow CC at Hendon MC', '/Area 12/Harrow CC at Hendon MC', '0b1707589ae8caf3', 0, current_timestamp, 0, current_timestamp);
 
+INSERT INTO revinfo (rev, revtstmp, audit_user)
+    VALUES (nextval('revinfo_seq'), EXTRACT(EPOCH FROM NOW()), 0);
+
+INSERT INTO courthouse_aud (cth_id, courthouse_code, courthouse_name, display_name, rev, revtype)
+    SELECT cth_id, courthouse_code, courthouse_name, display_name, currval('revinfo_seq'), 0 as revtype
+    FROM courthouse
+    WHERE cth_id = (SELECT cth_id FROM courthouse WHERE courthouse_name = 'HARROW CC AT HENDON MC');
+
+
 INSERT INTO courthouse_region_ae (cth_id, reg_id)
 VALUES(
     (SELECT cth_id FROM courthouse WHERE courthouse_name = 'HARROW CC AT HENDON MC'),
