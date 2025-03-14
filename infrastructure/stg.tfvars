@@ -1,1 +1,1 @@
-pgsql_storage_mb     = "1000000"
+pgsqlstoragemb     = "1000000"
