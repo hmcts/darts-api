@@ -1,0 +1,46 @@
+{
+  "id": 2,
+  "courthouse": {
+    "id": 2,
+    "display_name": "SOME-COURTHOUSE"
+  },
+  "case_number": "123",
+  "defendants": [
+    "some-defendant"
+  ],
+  "judges": [
+    "123JUDGE1"
+  ],
+  "prosecutors": [
+    "some-prosecutor"
+  ],
+  "defenders": [
+    "aDefence"
+  ],
+  "reporting_restrictions": [
+    {
+      "hearing_id": 4,
+      "event_id": 2,
+      "event_name": "Judge directed on reporting restrictions",
+      "event_text": "some-event-text-1",
+      "event_ts": "2023-06-26T13:00:00Z"
+    }
+  ],
+  "is_retention_updated": true,
+  "retention_retries": 123,
+  "ret_conf_score": 0,
+  "ret_conf_reason": "CASE_CLOSED",
+  "ret_conf_updated_ts": "2024-01-02T03:04:05Z",
+  "case_object_id": "OBJ_ID",
+  "case_object_name": "CASE_OBJ_NAME",
+  "case_type": "CASE_TYPE",
+  "upload_priority": 123,
+  "case_status": "OPEN",
+  "created_at": "<CREATED_AT>",
+  "created_by": 0,
+  "last_modified_at": "<LAST_MODIFIED_AT>",
+  "last_modified_by": 0,
+  "is_deleted": false,
+  "is_data_anonymised": false,
+  "is_interpreter_used": false
+}

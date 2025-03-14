@@ -7,7 +7,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -46,7 +46,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends IntegrationBase {
 
     public static final String ENDPOINT_URL = "/admin/transcriptions/%d";
-    @MockBean
+    @MockitoBean
     private Authorisation authorisation;
 
     @Autowired
@@ -55,9 +55,9 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
-    @MockBean
+    @MockitoBean
     private AuditApi mockAuditApi;
 
     private UserAccountEntity testUser;
@@ -143,7 +143,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
         );
         assertEquals(
             "the comment",
-            dartsDatabase.getTranscriptionCommentRepository().findAll().get(0).getComment()
+            dartsDatabase.getTranscriptionCommentRepository().findAll().getFirst().getComment()
         );
         assertEquals(testUser.getId(), transcriptionWorkflowEntity.getWorkflowActor().getId());
     }

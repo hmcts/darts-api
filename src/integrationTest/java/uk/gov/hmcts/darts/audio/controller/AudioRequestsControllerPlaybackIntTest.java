@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
@@ -53,10 +53,10 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     private static final URI ENDPOINT = URI.create("/audio-requests/playback");
     private static final Integer PLAYBACK_AUDIT_ACTIVITY_ID = AuditActivity.AUDIO_PLAYBACK.getId();
 
-    @MockBean
+    @MockitoBean
     private Authorisation mockAuthorisation;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Autowired
@@ -68,7 +68,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @SpyBean
+    @MockitoSpyBean
     private DataManagementService dataManagementService;
 
     @Autowired
@@ -82,7 +82,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
     @Test
     void audioRequestPlaybackShouldPlaybackFromOutboundStorageAndReturnSuccess() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, PLAYBACK);
@@ -124,13 +124,13 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
                                                                                                         PLAYBACK_AUDIT_ACTIVITY_ID,
                                                                                                         fromDate, toDate);
 
-        assertEquals("2", auditEntities.get(0).getCourtCase().getCaseNumber());
+        assertEquals("2", auditEntities.getFirst().getCourtCase().getCaseNumber());
         assertEquals(1, auditEntities.size());
     }
 
     @Test
     void audioRequestPlaybackShouldReturnInternalServerErrorWhenExceptionDuringDownloadBlobData() throws Exception {
-        var blobId = UUID.randomUUID();
+        var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, PLAYBACK);

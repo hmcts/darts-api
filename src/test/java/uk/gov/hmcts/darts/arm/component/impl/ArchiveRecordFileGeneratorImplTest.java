@@ -53,7 +53,9 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 @Slf4j
 class ArchiveRecordFileGeneratorImplTest {
 
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+    private static final String READING_FILE = "Reading file {}";
+
     @TempDir
     private File tempDirectory;
 
@@ -70,7 +72,9 @@ class ArchiveRecordFileGeneratorImplTest {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void clean() throws Exception {
         FileStore.getFileStore().remove();
-        Assertions.assertEquals(0, Files.list(tempDirectory.toPath()).count());
+        try (var filesStream = Files.list(tempDirectory.toPath())) {
+            Assertions.assertEquals(0, filesStream.count());
+        }
     }
 
     @Test
@@ -81,12 +85,10 @@ class ArchiveRecordFileGeneratorImplTest {
 
         archiveRecordFileGenerator.generateArchiveRecord(createMediaArchiveRecord(relationId), archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
 
-        log.info("Reading file {}", archiveFile.getAbsolutePath());
+        log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveMediaMetadata/expectedResponse.a360");
-        log.info("actual Response {}", actualResponse);
-        log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -99,12 +101,10 @@ class ArchiveRecordFileGeneratorImplTest {
         archiveRecordFileGenerator.generateArchiveRecord(createTranscriptionArchiveRecord(relationId), archiveFile,
                                                          ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE);
 
-        log.info("Reading file {}", archiveFile.getAbsolutePath());
+        log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveTranscriptionMetadata/expectedResponse.a360");
-        log.info("actual Response {}", actualResponse);
-        log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -116,12 +116,10 @@ class ArchiveRecordFileGeneratorImplTest {
 
         archiveRecordFileGenerator.generateArchiveRecord(createAnnotationArchiveRecord(relationId), archiveFile, ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE);
 
-        log.info("Reading file {}", archiveFile.getAbsolutePath());
+        log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveAnnotationMetadata/expectedResponse.a360");
-        log.info("actual Response {}", actualResponse);
-        log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -131,15 +129,12 @@ class ArchiveRecordFileGeneratorImplTest {
         String relationId = "1234";
         File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("1234-1-1.a360"));
 
-
         archiveRecordFileGenerator.generateArchiveRecord(createCaseArchiveRecord(relationId), archiveFile, ArchiveRecordType.CASE_ARCHIVE_TYPE);
 
-        log.info("Reading file {}", archiveFile.getAbsolutePath());
+        log.info(READING_FILE, archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveCaseMetadata/expectedResponse.a360");
-        log.info("actual Response {}", actualResponse);
-        log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -148,8 +143,7 @@ class ArchiveRecordFileGeneratorImplTest {
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("test-media-arm.a360"));
 
-        ArchiveRecord archiveRecord = null;
-        boolean result = archiveRecordFileGenerator.generateArchiveRecord(archiveRecord, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
+        boolean result = archiveRecordFileGenerator.generateArchiveRecord(null, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
         assertFalse(result);
     }
 
@@ -221,22 +215,22 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00Z")
+            .eventDate("2024-01-23T11:40:00.000Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Media")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("mp2")
-            .bf004("2024-01-23T00:00:00Z")
+            .bf004("2024-01-23T00:00:00.000Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30Z")
+            .bf011("2024-01-23T11:39:30.000Z")
             .bf012(1)
             .bf013(1)
             .bf014(3)
             .bf015(4)
-            .bf017("2024-01-23T11:40:00Z")
-            .bf018("2024-01-23T13:40:00Z")
+            .bf017("2024-01-23T11:40:00.000Z")
+            .bf018("2024-01-23T13:40:00.000Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -298,20 +292,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00Z")
+            .eventDate("2024-01-23T11:40:00.000Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Transcription")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("mp2")
-            .bf004("2024-01-23T00:00:00Z")
+            .bf004("2024-01-23T00:00:00.000Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30Z")
+            .bf011("2024-01-23T11:39:30.000Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00Z")
-            .bf018("2024-01-23T13:40:00Z")
+            .bf017("2024-01-23T11:40:00.000Z")
+            .bf018("2024-01-23T13:40:00.000Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -356,20 +350,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00Z")
+            .eventDate("2024-01-23T11:40:00.000Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea & Courtroom 1")
             .bf001("Annotation")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("txt")
-            .bf004("2024-01-23T00:00:00Z")
+            .bf004("2024-01-23T00:00:00.000Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30Z")
+            .bf011("2024-01-23T11:39:30.000Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00Z")
-            .bf018("2024-01-23T13:40:00Z")
+            .bf017("2024-01-23T11:40:00.000Z")
+            .bf018("2024-01-23T13:40:00.000Z")
             .bf019("Swansea")
             .bf020("Courtroom 1")
             .build();
@@ -413,20 +407,20 @@ class ArchiveRecordFileGeneratorImplTest {
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
-            .eventDate("2024-01-23T11:40:00Z")
+            .eventDate("2024-01-23T11:40:00.000Z")
             .title("Filename")
             .clientId("1234")
             .contributor("Swansea")
             .bf001("Case")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("txt")
-            .bf004("2024-01-23T00:00:00Z")
+            .bf004("2024-01-23T00:00:00.000Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
-            .bf011("2024-01-23T11:39:30Z")
+            .bf011("2024-01-23T11:39:30.000Z")
             .bf012(1)
             .bf013(1)
-            .bf017("2024-01-23T11:40:00Z")
-            .bf018("2024-01-23T13:40:00Z")
+            .bf017("2024-01-23T11:40:00.000Z")
+            .bf018("2024-01-23T13:40:00.000Z")
             .bf019("Swansea")
             .build();
     }

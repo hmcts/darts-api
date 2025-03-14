@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -71,13 +71,13 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @Autowired
     private AudioTransformationService audioTransformationService;
 
-    @SpyBean
+    @MockitoSpyBean
     private MediaRequestService mediaRequestService;
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     private HearingEntity hearing;
@@ -117,7 +117,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
             .findAll();
         assertEquals(1, scheduledNotifications.size());
 
-        var notificationEntity = scheduledNotifications.get(0);
+        var notificationEntity = scheduledNotifications.getFirst();
         assertEquals(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString(), notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
@@ -168,7 +168,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
             .findAll();
         assertEquals(1, scheduledNotifications.size());
 
-        var notificationEntity = scheduledNotifications.get(0);
+        var notificationEntity = scheduledNotifications.getFirst();
         assertEquals(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString(), notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
@@ -224,7 +224,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
             .findAll();
         assertEquals(1, scheduledNotifications.size());
 
-        var notificationEntity = scheduledNotifications.get(0);
+        var notificationEntity = scheduledNotifications.getFirst();
         assertEquals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(), notificationEntity.getEventId());
 
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());

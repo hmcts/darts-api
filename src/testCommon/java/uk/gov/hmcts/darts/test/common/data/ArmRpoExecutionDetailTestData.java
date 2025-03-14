@@ -8,10 +8,11 @@ import java.time.OffsetDateTime;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class ArmRpoExecutionDetailTestData implements Persistable<TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilderRetrieve,
+public final class ArmRpoExecutionDetailTestData implements Persistable<TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilderRetrieve,
     ArmRpoExecutionDetailEntity, TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilder> {
 
     ArmRpoExecutionDetailTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public ArmRpoExecutionDetailEntity minimalArmRpoExecutionDetailEntity() {

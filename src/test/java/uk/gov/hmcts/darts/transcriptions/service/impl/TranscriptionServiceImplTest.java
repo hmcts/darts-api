@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -118,6 +120,9 @@ class TranscriptionServiceImplTest {
     @Mock
     private TranscriptionNotifications transcriptionNotifications;
 
+    @Mock
+    private TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
+
     private HearingEntity mockHearing;
     private CourtCaseEntity mockCourtCase;
     private TranscriptionUrgencyEntity mockTranscriptionUrgency;
@@ -145,6 +150,9 @@ class TranscriptionServiceImplTest {
 
     @Captor
     private ArgumentCaptor<TranscriptionCommentEntity> transcriptionCommentEntityArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<TranscriptionLinkedCaseEntity> transcriptionLinkedCaseEntityArgumentCaptor;
 
     @InjectMocks
     private TranscriptionServiceImpl transcriptionService;
@@ -193,7 +201,7 @@ class TranscriptionServiceImplTest {
         doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer hearingId = 1;
-        when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
+        when(mockHearingsService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearing);
 
         Integer caseId = 1;
         when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
@@ -262,19 +270,21 @@ class TranscriptionServiceImplTest {
         ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
 
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.getFirst();
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
 
+        verifyTranscriptionLinkedCaseEntity(mockTranscription, mockCourtCase);
 
         assertTranscriptionComments();
         verifyNotification();
 
         verify(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
+
 
     @Test
     void saveTranscriptionRequestWithValidValuesNullHearingAndCourtLogTypeReturnSuccess() {
@@ -344,13 +354,14 @@ class TranscriptionServiceImplTest {
         ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
 
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.getFirst();
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
 
+        verifyTranscriptionLinkedCaseEntity(mockTranscription, mockCourtCase);
         assertTranscriptionComments();
         verifyNotification();
 
@@ -362,7 +373,7 @@ class TranscriptionServiceImplTest {
         doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer hearingId = 1;
-        when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
+        when(mockHearingsService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearing);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
@@ -429,14 +440,14 @@ class TranscriptionServiceImplTest {
         ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
 
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.getFirst();
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
 
-
+        verifyTranscriptionLinkedCaseEntity(mockTranscription, mockCourtCase);
         assertTranscriptionComments();
         verifyNotification();
 
@@ -448,7 +459,7 @@ class TranscriptionServiceImplTest {
         doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer hearingId = 1;
-        when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
+        when(mockHearingsService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearing);
 
         Integer caseId = 1;
         when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
@@ -517,14 +528,14 @@ class TranscriptionServiceImplTest {
         ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
 
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.getFirst();
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
 
-
+        verifyTranscriptionLinkedCaseEntity(mockTranscription, mockCourtCase);
         assertTranscriptionComments();
         verifyNotification();
 
@@ -558,18 +569,19 @@ class TranscriptionServiceImplTest {
         Integer hearingId = null;
         Integer caseId = null;
 
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearingId,
+            caseId,
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
+            TEST_COMMENT,
+            startDateTime,
+            endDateTime
+        );
         var exception = assertThrows(
             DartsApiException.class,
             () ->
-                transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
-                    hearingId,
-                    caseId,
-                    transcriptionUrgencyEnum.getId(),
-                    transcriptionTypeEnum.getId(),
-                    TEST_COMMENT,
-                    startDateTime,
-                    endDateTime
-                ), false)
+                transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, false)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, exception.getError());
@@ -619,7 +631,7 @@ class TranscriptionServiceImplTest {
 
         verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
         TranscriptionWorkflowEntity workflowEntity = transcriptionWorkflowEntityArgumentCaptor.getValue();
-        assertEquals(transcriptionId, allCaseTranscriptionDocuments.get(0));
+        assertEquals(transcriptionId, allCaseTranscriptionDocuments.getFirst());
         assertEquals(transcriptionStatusEntity, workflowEntity.getTranscriptionStatus());
     }
 
@@ -703,4 +715,12 @@ class TranscriptionServiceImplTest {
         verify(transcriptionNotifications, times(1)).notifyApprovers(any(TranscriptionEntity.class));
     }
 
+    private void verifyTranscriptionLinkedCaseEntity(TranscriptionEntity mockTranscription, CourtCaseEntity mockCourtCase) {
+        verify(transcriptionLinkedCaseRepository)
+            .save(transcriptionLinkedCaseEntityArgumentCaptor.capture());
+
+        TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity = transcriptionLinkedCaseEntityArgumentCaptor.getValue();
+        assertThat(transcriptionLinkedCaseEntity.getTranscription()).isEqualTo(mockTranscription);
+        assertThat(transcriptionLinkedCaseEntity.getCourtCase()).isEqualTo(mockCourtCase);
+    }
 }

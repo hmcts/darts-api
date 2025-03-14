@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 
@@ -66,7 +65,7 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
 
     @Override
     @Transactional
-    public ExternalObjectDirectoryEntity createAndSaveCaseDocumentEod(UUID externalLocation,
+    public ExternalObjectDirectoryEntity createAndSaveCaseDocumentEod(String externalLocation,
                                                                       UserAccountEntity userAccountEntity,
                                                                       CaseDocumentEntity caseDocumentEntity,
                                                                       ExternalLocationTypeEntity externalLocationType) {
@@ -87,7 +86,7 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
         Long fileSize = null;
         if (nonNull(detsExternalObjectDirectory.getMedia())) {
             fileSize = mediaRepository.findById(detsExternalObjectDirectory.getMedia().getId()).map(
-                media -> media.getFileSize()).orElse(null);
+                MediaEntity::getFileSize).orElse(null);
         } else if (nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity())) {
             fileSize = annotationDocumentRepository.findById(detsExternalObjectDirectory.getAnnotationDocumentEntity().getId()).map(
                 annotationDocument -> Long.valueOf(annotationDocument.getFileSize())).orElse(null);

@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.task.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -28,11 +28,11 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
 
-    @SpyBean
+    @MockitoSpyBean
     CaseRepository caseRepository;
-    @SpyBean
+    @MockitoSpyBean
     CaseDocumentRepository caseDocumentRepository;
-    @SpyBean
+    @MockitoSpyBean
     ExternalObjectDirectoryRepository eodRepository;
     @Autowired
     UserAccountRepository userAccountRepository;
@@ -55,13 +55,13 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         courtCase.setClosed(true);
 
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-        var hearing = courtCase.getHearings().get(0);
-        hearing.addMedia(medias.get(0));
+        var hearing = courtCase.getHearings().getFirst();
+        hearing.addMedia(medias.getFirst());
 
         dartsDatabase.save(hearing);
         dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(courtCase, DT_2025);
 
-        dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM,
+        dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.getFirst(), ARM_DROP_ZONE, ARM,
                                                                         eod -> {
                                                                         });
 
@@ -75,7 +75,7 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         // then
         List<CaseDocumentEntity> caseDocumentEntities = caseDocumentRepository.findByCourtCase(courtCase);
         assertThat(caseDocumentEntities.size()).isEqualTo(1);
-        CaseDocumentEntity caseDocument = caseDocumentEntities.get(0);
+        CaseDocumentEntity caseDocument = caseDocumentEntities.getFirst();
         assertThat(caseDocument.getCourtCase().getId()).isEqualTo(courtCase.getId());
 
         List<ExternalObjectDirectoryEntity> eodCaseDocument = eodRepository.findByCaseDocument(caseDocument);

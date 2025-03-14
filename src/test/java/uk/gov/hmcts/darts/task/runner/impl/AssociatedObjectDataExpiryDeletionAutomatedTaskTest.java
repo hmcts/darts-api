@@ -8,6 +8,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
@@ -39,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -69,6 +72,8 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
     private AuditApi auditApi;
     @Mock
     private AssociatedObjectDataExpiryDeletionAutomatedTaskConfig config;
+    @Mock
+    private TransactionTemplate transactionTemplate;
 
     private final AtomicInteger idAddition = new AtomicInteger(123);
 
@@ -83,8 +88,15 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
                 transcriptionDocumentRepository, mediaRepository, annotationDocumentRepository,
                 caseDocumentRepository,
                 externalObjectDirectoryRepository, inboundDeleter, unstructuredDeleter,
-                auditApi, 100)
+                auditApi, 100, transactionTemplate)
         );
+        lenient().doCallRealMethod().when(transactionTemplate).executeWithoutResult(any());
+        lenient().when(transactionTemplate.execute(any()))
+            .thenAnswer(invocation -> {
+                TransactionCallback transactionCallback = invocation.getArgument(0);
+                transactionCallback.doInTransaction(null);
+                return null;
+            });
     }
 
     @Test
@@ -363,7 +375,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
 
         doReturn(true).when(associatedObjectDataExpiryDeletionAutomatedTask)
-            .deleteFromExternalDataStore(data.get(0));
+            .deleteFromExternalDataStore(data.getFirst());
 
         doReturn(false).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(data.get(1));
@@ -379,17 +391,17 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
             .deleteFromExternalDataStore(externalObjectDirectoryEntity));
 
         verify(externalObjectDirectoryRepository)
-            .deleteAll(List.of(data.get(0), data.get(2)));
+            .deleteAll(List.of(data.getFirst(), data.get(2)));
 
         verify(caseDocumentRepository)
-            .softDeleteAll(List.of(caseDocumentEntities.get(0), caseDocumentEntities.get(2)), userAccount);
+            .softDeleteAll(List.of(caseDocumentEntities.getFirst(), caseDocumentEntities.get(2)), userAccount);
 
         verify(auditApi)
             .record(AuditActivity.CASE_DOCUMENT_EXPIRED, userAccount, "123");
         verify(auditApi)
             .record(AuditActivity.CASE_DOCUMENT_EXPIRED, userAccount, "125");
         verify(associatedObjectDataExpiryDeletionAutomatedTask)
-            .shouldDeleteFilter(data.get(0).getCaseDocument());
+            .shouldDeleteFilter(data.getFirst().getCaseDocument());
         verify(associatedObjectDataExpiryDeletionAutomatedTask)
             .shouldDeleteFilter(data.get(2).getCaseDocument());
         verifyNoMoreInteractions(auditApi);
@@ -474,7 +486,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         ExternalObjectDirectoryEntity armEod = createEodWithExternalLocationType(ExternalLocationTypeEnum.ARM);
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().minusYears(100));
+        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().plusYears(100));
         transcriptionDocumentEntity.setExternalObjectDirectoryEntities(List.of(inboundEod, unstructuredEod, armEod));
 
 
@@ -503,7 +515,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         armEod.setEventDateTs(null);
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().minusYears(100));
+        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().plusYears(100));
         transcriptionDocumentEntity.setExternalObjectDirectoryEntities(List.of(inboundEod, unstructuredEod, armEod));
 
 
@@ -519,7 +531,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         ExternalObjectDirectoryEntity armEod = createEodWithExternalLocationType(ExternalLocationTypeEnum.ARM);
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().minusYears(100).minusDays(1));
+        transcriptionDocumentEntity.setRetainUntilTs(OffsetDateTime.now().plusYears(100).minusDays(1));
         transcriptionDocumentEntity.setExternalObjectDirectoryEntities(List.of(inboundEod, unstructuredEod, armEod));
 
         assertThat(associatedObjectDataExpiryDeletionAutomatedTask.shouldDeleteFilter(transcriptionDocumentEntity))

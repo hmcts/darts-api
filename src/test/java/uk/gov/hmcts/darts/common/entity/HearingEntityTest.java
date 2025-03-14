@@ -32,7 +32,7 @@ class HearingEntityTest {
 
         assertThat(hearing.getMediaList()).hasSize(3);
         List<MediaEntity> mediaEntities = hearing.getMediaList();
-        assertThat(mediaEntities.get(0).getId()).isEqualTo(1);
+        assertThat(mediaEntities.getFirst().getId()).isEqualTo(1);
         assertThat(mediaEntities.get(1).getId()).isEqualTo(2);
         assertThat(mediaEntities.get(2).getId()).isEqualTo(3);
 
@@ -40,7 +40,7 @@ class HearingEntityTest {
         assertThat(hearing.getMediaList()).hasSize(4);
 
         mediaEntities = hearing.getMediaList();
-        assertThat(mediaEntities.get(0).getId()).isEqualTo(1);
+        assertThat(mediaEntities.getFirst().getId()).isEqualTo(1);
         assertThat(mediaEntities.get(1).getId()).isEqualTo(2);
         assertThat(mediaEntities.get(2).getId()).isEqualTo(3);
         assertThat(mediaEntities.get(3).getId()).isEqualTo(4);

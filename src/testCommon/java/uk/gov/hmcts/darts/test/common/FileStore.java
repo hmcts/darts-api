@@ -13,15 +13,14 @@ import java.util.List;
  * A thread local class that holds file references for the thread and allows them to be cleaned up.
  */
 @Slf4j
-@SuppressWarnings("java:S6548")
 public class FileStore extends ThreadLocal<List<String>> {
 
-    private static FileStore fileCreatedForThread;
+    private static FileStore fileCreatedForThread = new FileStore();
+
+    private FileStore() {
+    }
 
     public static FileStore getFileStore() {
-        if (fileCreatedForThread == null) {
-            fileCreatedForThread = new FileStore();
-        }
         return fileCreatedForThread;
     }
 

@@ -37,7 +37,6 @@ class CourthousesFunctionalTest extends FunctionalTest {
     private static final String COURTHOUSE_BAD_ID = "/99999";
     private static final int OK = 200;
     private static final int CREATED = 201;
-    private static final int NO_CONTENT = 204;
     private static final int BAD_REQUEST = 400;
     private static final int NOT_FOUND = 404;
 

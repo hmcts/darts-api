@@ -19,7 +19,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -95,12 +94,12 @@ class DuplicateRequestDetectorTest {
 
         when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
             eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(true), anyList()))
-                .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 3));
+            .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 3));
 
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-                .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
     }
 
     @Test
@@ -109,12 +108,12 @@ class DuplicateRequestDetectorTest {
 
         when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
             eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(false), anyList()))
-                .thenReturn(someTranscriptionRequestedAutomaticallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 1));
+            .thenReturn(someTranscriptionRequestedAutomaticallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 1));
 
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-                .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
     }
 
     @Test
@@ -137,7 +136,7 @@ class DuplicateRequestDetectorTest {
 
         when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
             eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(false), anyList()))
-                .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.APPROVED, 1));
+            .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.APPROVED, 1));
 
         DartsApiException throwable = catchThrowableOfType(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false), DartsApiException.class);
         assertEquals(throwable.getError(), TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
@@ -167,7 +166,7 @@ class DuplicateRequestDetectorTest {
                 transcriptionStatusEntity.setId(status.getId());
                 transcription.setTranscriptionStatus(transcriptionStatusEntity);
                 return transcription;
-            }).collect(toList());
+            }).toList();
     }
 
     private List<TranscriptionEntity> someTranscriptionRequestedAutomaticallyThatMatches(
@@ -180,7 +179,7 @@ class DuplicateRequestDetectorTest {
                 transcription.setTranscriptionStatus(transcriptionStatusEntity);
                 transcription.setIsManualTranscription(false);
                 return transcription;
-            }).collect(toList());
+            }).toList();
     }
 
     private static TranscriptionRequestDetails someTranscriptionRequestDetails() {

@@ -52,6 +52,6 @@ public class CaseManagementRetentionServiceImpl implements CaseManagementRetenti
             throw new DartsApiException(EVENT_DATA_NOT_FOUND,
                                         MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", fixedPolicyKey));
         }
-        return retentionPolicyList.get(0);
+        return retentionPolicyList.getFirst();
     }
 }

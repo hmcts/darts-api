@@ -5,11 +5,12 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionCommentEntit
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class TranscriptionCommentTestData
+public final class TranscriptionCommentTestData
     implements Persistable<TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilderRetrieve, TranscriptionCommentEntity,
     TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder> {
 
     TranscriptionCommentTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     @Override

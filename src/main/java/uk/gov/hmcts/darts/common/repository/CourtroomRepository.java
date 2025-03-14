@@ -14,15 +14,15 @@ public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Inte
 
     @Query("""
         SELECT cr FROM CourthouseEntity ch, CourtroomEntity cr
-        WHERE ch.courthouseName = upper(:courthouse)
-        AND cr.name = upper(:courtroom)
+        WHERE ch.courthouseName = upper(trim(:courthouseName))
+        AND cr.name = upper(trim(:courtroom))
         AND cr.courthouse = ch
         """
     )
-    Optional<CourtroomEntity> findByCourthouseNameAndCourtroomName(String courthouse, String courtroom);
+    Optional<CourtroomEntity> findByCourthouseNameAndCourtroomName(String courthouseName, String courtroom);
 
     @Query(value = "SELECT * FROM {h-schema}" + TABLE_NAME + " cr " +
-        "WHERE cr." + CourtroomEntity.COURTROOM_NAME + " = upper(:courtroom) " +
+        "WHERE cr." + CourtroomEntity.COURTROOM_NAME + " = upper(trim(:courtroom)) " +
         "AND cr." + CourtroomEntity.CTH_ID + " = :courthouseId ", nativeQuery = true
     )
     Optional<CourtroomEntity> findByNameAndId(int courthouseId, String courtroom);

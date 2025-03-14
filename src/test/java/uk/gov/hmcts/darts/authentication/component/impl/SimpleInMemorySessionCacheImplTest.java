@@ -32,7 +32,8 @@ class SimpleInMemorySessionCacheImplTest {
 
     @Test
     void putShouldThrowExceptionWhenProvidedWithNullKey() {
-        assertThrows(NullPointerException.class, () -> sessionCache.put(null, createSession()));
+        Session session = createSession();
+        assertThrows(NullPointerException.class, () -> sessionCache.put(null, session));
     }
 
     @Test

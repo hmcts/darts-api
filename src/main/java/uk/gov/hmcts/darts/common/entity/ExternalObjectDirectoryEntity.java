@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "external_object_directory")
@@ -59,7 +58,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
 
     @NaturalId(mutable = true)
     @Column(name = "external_location", unique = true)
-    private UUID externalLocation;
+    private String externalLocation;
 
     @Column(name = "external_file_id")
     private String externalFileId;
@@ -107,13 +106,16 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "force_response_cleanup")
     private Boolean forceResponseCleanup;
 
+    @Column(name = "is_dets", nullable = false)
+    private boolean isDets = false;
+
     @Override
     public int getStatusId() {
         return getStatus().getId();
     }
 
     @Override
-    public UUID getLocation() {
+    public String getLocation() {
         return externalLocation;
     }
 

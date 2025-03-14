@@ -88,7 +88,7 @@ class EventDispatcherImplTest {
 
         @Override
         public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandlerEntity) {
-
+            // empty method
         }
 
         @Override

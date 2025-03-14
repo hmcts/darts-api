@@ -1,51 +1,175 @@
 package uk.gov.hmcts.darts.event.mapper;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetails;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetailsCasesCasesInner;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetailsHearingsHearingsInner;
+import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import uk.gov.hmcts.darts.event.model.CourthouseResponseDetails;
 import uk.gov.hmcts.darts.event.model.CourtroomResponseDetails;
-import uk.gov.hmcts.darts.event.model.EventMappingDetails;
+import uk.gov.hmcts.darts.event.model.EventMapping;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class EventMapper {
 
-    public AdminGetEventForIdResponseResult mapToAdminGetEventsResponseForId(EventEntity eventEntity) {
-        AdminGetEventForIdResponseResult adminGetEventsForIdResponse = new AdminGetEventForIdResponseResult();
+    public AdminGetEventResponseDetails mapToAdminGetEventResponseDetails(EventEntity eventEntity) {
+        return mapToAdminGetEventsResponseForId(eventEntity, new AdminGetEventResponseDetails());
+    }
 
-        adminGetEventsForIdResponse.setId(eventEntity.getId());
-        adminGetEventsForIdResponse.setDocumentumId(eventEntity.getLegacyObjectId());
-        adminGetEventsForIdResponse.setSourceId(eventEntity.getEventId());
-        adminGetEventsForIdResponse.setMessageId(eventEntity.getMessageId());
-        adminGetEventsForIdResponse.setText(eventEntity.getEventText());
-        adminGetEventsForIdResponse.setIsLogEntry(eventEntity.isLogEntry());
+    public AdminGetEventById200Response mapToAdminGetEventById200Response(EventEntity eventEntity) {
+        AdminGetEventById200Response response = new AdminGetEventById200Response();
+        mapToAdminGetEventsResponseForId(eventEntity, response);
 
-        EventMappingDetails eventMappingDetails = new EventMappingDetails();
+        response.setCases(mapAdminGetEventResponseDetailsCasesCases(eventEntity.getLinkedCases()));
+        response.setHearings(mapAdminGetEventResponseDetailsHearings(eventEntity.getHearingEntities()));
+        return response;
+    }
+
+    private <T extends AdminGetEventResponseDetails> T mapToAdminGetEventsResponseForId(EventEntity eventEntity, T adminGetEventResponseDetail) {
+        adminGetEventResponseDetail.setId(eventEntity.getId());
+        adminGetEventResponseDetail.setDocumentumId(eventEntity.getLegacyObjectId());
+        adminGetEventResponseDetail.setSourceId(eventEntity.getEventId());
+        adminGetEventResponseDetail.setMessageId(eventEntity.getMessageId());
+        adminGetEventResponseDetail.setText(eventEntity.getEventText());
+        adminGetEventResponseDetail.setIsLogEntry(eventEntity.isLogEntry());
+
+        EventMapping eventMappingDetails = new EventMapping();
         eventMappingDetails.setId(eventEntity.getEventType().getId());
-        adminGetEventsForIdResponse.setEventMapping(eventMappingDetails);
+        eventMappingDetails.setName(eventEntity.getEventType().getEventName());
+        adminGetEventResponseDetail.setEventMapping(eventMappingDetails);
 
         CourthouseResponseDetails courthouseResponseDetails = new CourthouseResponseDetails();
         courthouseResponseDetails.setId(eventEntity.getCourtroom().getCourthouse().getId());
         courthouseResponseDetails.setDisplayName(eventEntity.getCourtroom().getCourthouse().getDisplayName());
-        adminGetEventsForIdResponse.setCourthouse(courthouseResponseDetails);
+        adminGetEventResponseDetail.setCourthouse(courthouseResponseDetails);
 
         CourtroomResponseDetails courtroomResponseDetails = new CourtroomResponseDetails();
         courtroomResponseDetails.setId(eventEntity.getCourtroom().getId());
         courtroomResponseDetails.setName(eventEntity.getCourtroom().getName());
-        adminGetEventsForIdResponse.setCourtroom(courtroomResponseDetails);
+        adminGetEventResponseDetail.setCourtroom(courtroomResponseDetails);
 
-        adminGetEventsForIdResponse.setVersion(eventEntity.getLegacyVersionLabel());
-        adminGetEventsForIdResponse.setChronicleId(eventEntity.getChronicleId());
-        adminGetEventsForIdResponse.setAntecedentId(eventEntity.getAntecedentId());
-        adminGetEventsForIdResponse.setEventTs(eventEntity.getTimestamp());
-        adminGetEventsForIdResponse.isCurrent(eventEntity.getIsCurrent());
-        adminGetEventsForIdResponse.setCreatedAt(eventEntity.getCreatedDateTime());
-        adminGetEventsForIdResponse.setCreatedBy(eventEntity.getCreatedBy().getId());
-        adminGetEventsForIdResponse.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
-        adminGetEventsForIdResponse.setLastModifiedBy(eventEntity.getLastModifiedBy().getId());
-        adminGetEventsForIdResponse.setIsDataAnonymised(eventEntity.isDataAnonymised());
+        adminGetEventResponseDetail.setVersion(eventEntity.getLegacyVersionLabel());
+        adminGetEventResponseDetail.setChronicleId(eventEntity.getChronicleId());
+        adminGetEventResponseDetail.setAntecedentId(eventEntity.getAntecedentId());
+        adminGetEventResponseDetail.setEventTs(eventEntity.getTimestamp());
+        adminGetEventResponseDetail.isCurrent(eventEntity.getIsCurrent());
+        adminGetEventResponseDetail.setCreatedAt(eventEntity.getCreatedDateTime());
+        adminGetEventResponseDetail.setCreatedBy(eventEntity.getCreatedBy().getId());
+        adminGetEventResponseDetail.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
+        adminGetEventResponseDetail.setLastModifiedBy(eventEntity.getLastModifiedBy().getId());
+        adminGetEventResponseDetail.setIsDataAnonymised(eventEntity.isDataAnonymised());
+        return adminGetEventResponseDetail;
+    }
+
+
+    List<AdminGetEventResponseDetailsHearingsHearingsInner> mapAdminGetEventResponseDetailsHearings(
+        List<HearingEntity> hearingEntities) {
+        if (CollectionUtils.isEmpty(hearingEntities)) {
+            return new ArrayList<>();
+        }
+        return hearingEntities.stream()
+            .map(hearingEntity -> mapAdminGetEventResponseDetailsHearing(hearingEntity))
+            .toList();
+    }
+
+    AdminGetEventResponseDetailsHearingsHearingsInner mapAdminGetEventResponseDetailsHearing(HearingEntity hearingEntity) {
+        if (hearingEntity == null) {
+            return null;
+        }
+        AdminGetEventResponseDetailsHearingsHearingsInner adminGetEventResponseDetailsHearingsHearingsInner =
+            new AdminGetEventResponseDetailsHearingsHearingsInner();
+        adminGetEventResponseDetailsHearingsHearingsInner.setId(hearingEntity.getId());
+        adminGetEventResponseDetailsHearingsHearingsInner.setCaseId(hearingEntity.getCourtCase().getId());
+        adminGetEventResponseDetailsHearingsHearingsInner.setCaseNumber(hearingEntity.getCourtCase().getCaseNumber());
+        adminGetEventResponseDetailsHearingsHearingsInner.setHearingDate(hearingEntity.getHearingDate());
+        adminGetEventResponseDetailsHearingsHearingsInner.setCourtroom(mapCourtRoom(hearingEntity.getCourtroom()));
+        adminGetEventResponseDetailsHearingsHearingsInner.setCourthouse(
+            mapCourtHouse(Optional.ofNullable(hearingEntity.getCourtroom())
+                              .map(CourtroomEntity::getCourthouse)
+                              .orElse(null)));
+        return adminGetEventResponseDetailsHearingsHearingsInner;
+    }
+
+    List<AdminGetEventResponseDetailsCasesCasesInner> mapAdminGetEventResponseDetailsCasesCases(List<CourtCaseEntity> cases) {
+        if (CollectionUtils.isEmpty(cases)) {
+            return new ArrayList<>();
+        }
+        return cases.stream()
+            .map(caseEntity -> mapAdminGetEventResponseDetailsCasesCase(caseEntity))
+            .toList();
+    }
+
+    AdminGetEventResponseDetailsCasesCasesInner mapAdminGetEventResponseDetailsCasesCase(CourtCaseEntity caseEntity) {
+        if (caseEntity == null) {
+            return null;
+        }
+        AdminGetEventResponseDetailsCasesCasesInner adminGetEventResponseDetailsCasesCasesInner = new AdminGetEventResponseDetailsCasesCasesInner();
+
+        adminGetEventResponseDetailsCasesCasesInner.setId(caseEntity.getId());
+        adminGetEventResponseDetailsCasesCasesInner.setCaseNumber(caseEntity.getCaseNumber());
+        adminGetEventResponseDetailsCasesCasesInner.setCourthouse(mapCourtHouse(caseEntity.getCourthouse()));
+        return adminGetEventResponseDetailsCasesCasesInner;
+    }
+
+    CourthouseResponseDetails mapCourtHouse(CourthouseEntity courthouse) {
+        if (courthouse == null) {
+            return null;
+        }
+        CourthouseResponseDetails courthouseResponseDetails = new CourthouseResponseDetails();
+        courthouseResponseDetails.setId(courthouse.getId());
+        courthouseResponseDetails.setDisplayName(courthouse.getDisplayName());
+        return courthouseResponseDetails;
+    }
+
+    CourtroomResponseDetails mapCourtRoom(CourtroomEntity courtroom) {
+        if (courtroom == null) {
+            return null;
+        }
+        CourtroomResponseDetails courthouseResponseDetails = new CourtroomResponseDetails();
+        courthouseResponseDetails.setId(courtroom.getId());
+        courthouseResponseDetails.setName(courtroom.getName());
+        return courthouseResponseDetails;
+    }
+
+    public AdminGetVersionsByEventIdResponseResult mapToAdminGetEventVersionsResponseForId(List<EventEntity> eventEntities) {
+        AdminGetVersionsByEventIdResponseResult adminGetEventsForIdResponse = new AdminGetVersionsByEventIdResponseResult();
+
+        List<AdminGetEventResponseDetails> previousVersions = new ArrayList<>();
+
+        Optional<EventEntity> currentEventEntity = findLatestIsCurrentEvent(eventEntities);
+
+        for (EventEntity eventEntity : eventEntities.stream().sorted(Comparator.comparing(EventEntity::getCreatedDateTime).reversed()).toList()) {
+            if (currentEventEntity.isPresent() && eventEntity.equals(currentEventEntity.get())) {
+                adminGetEventsForIdResponse.setCurrentVersion(mapToAdminGetEventResponseDetails(eventEntity));
+                continue;
+            }
+            previousVersions.add(mapToAdminGetEventResponseDetails(eventEntity));
+        }
+
+        adminGetEventsForIdResponse.setPreviousVersions(previousVersions);
+
         return adminGetEventsForIdResponse;
+    }
+
+    private Optional<EventEntity> findLatestIsCurrentEvent(List<EventEntity> eventEntities) {
+
+        // There could be multiple events with isCurrent = true, so only return the latest one
+        return eventEntities.stream()
+            .filter(EventEntity::getIsCurrent)
+            .max(Comparator.comparing(EventEntity::getCreatedDateTime));
     }
 }

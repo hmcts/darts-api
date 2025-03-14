@@ -528,7 +528,39 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminGetEventForIdResponseResult'
+                allOf:
+                  - $ref: '#/components/schemas/AdminGetEventResponseDetails'
+                  - $ref: '#/components/schemas/AdminGetEventResponseDetailsCases'
+                  - $ref: '#/components/schemas/AdminGetEventResponseDetailsHearings'
+
+        '404':
+          description: Not Found - Event id
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+  /admin/events/{event_id}/versions:
+    get:
+      tags:
+        - Event
+      summary: Gets versions of an event
+      description: |-
+        Retrieves a version of an event for a given event_id
+      operationId: adminGetVersionsByEventId
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          description: "event_id is the internal event_id of the event."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminGetVersionsByEventIdResponseResult'
         '404':
           description: Not Found - Event id
           content:
@@ -797,14 +829,48 @@ components:
           type: integer
         name:
           type: string
-
-    EventMappingDetails:
+    AdminGetEventResponseDetailsCases:
       type: object
       properties:
-        id:
-          type: integer
-
-    AdminGetEventForIdResponseResult:
+        cases:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: 'The case id'
+              case_number:
+                type: string
+                description: 'The case number'
+              courthouse:
+                $ref: '#/components/schemas/CourthouseResponseDetails'
+    AdminGetEventResponseDetailsHearings:
+      type: object
+      properties:
+        hearings:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: 'The hearing id'
+              case_id:
+                type: integer
+                description: 'The case id'
+              case_number:
+                type: string
+                description: 'The case number'
+              hearing_date:
+                type: string
+                format: date
+                description: 'The hearing date'
+              courthouse:
+                $ref: '#/components/schemas/CourthouseResponseDetails'
+              courtroom:
+                $ref: '#/components/schemas/CourtroomResponseDetails'
+    AdminGetEventResponseDetails:
       type: object
       properties:
         id:
@@ -818,7 +884,7 @@ components:
         text:
           type: string
         event_mapping:
-          $ref: '#/components/schemas/EventMappingDetails'
+          $ref: '#/components/schemas/EventMapping'
         is_log_entry:
           type: boolean
         courthouse:
@@ -848,6 +914,16 @@ components:
           format: date-time
         last_modified_by:
           type: integer
+
+    AdminGetVersionsByEventIdResponseResult:
+      type: object
+      properties:
+        current_version:
+          $ref: '#/components/schemas/AdminGetEventResponseDetails'
+        previous_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminGetEventResponseDetails'
 
     GetCourtLogsErrorCode:
       type: string
@@ -910,4 +986,4 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND]
+        EVENT_ID_NOT_FOUND ]

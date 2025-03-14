@@ -22,12 +22,12 @@ public interface AdminMarkedForDeletionMapper {
         @Mapping(target = "channel", source = "channel"),
         @Mapping(target = "courthouse", source = "courtroom.courthouse"),
         @Mapping(target = "courtroom", source = "courtroom"),
-        @Mapping(target = "adminAction", source = "adminActionReasons")
+        @Mapping(target = "adminAction", source = "objectAdminActions")
     })
-    public PostAdminMediasMarkedForDeletionItem toApiModel(MediaEntity mediaEntity);
+    PostAdminMediasMarkedForDeletionItem toApiModel(MediaEntity mediaEntity);
 
     @Mappings({
         @Mapping(target = "versionCount", ignore = true)
     })
-    public GetAdminMediasMarkedForDeletionMediaItem toGetAdminMediasMarkedForDeletionMediaItem(MediaEntity mediaEntity);
+    GetAdminMediasMarkedForDeletionMediaItem toGetAdminMediasMarkedForDeletionMediaItem(MediaEntity mediaEntity);
 }

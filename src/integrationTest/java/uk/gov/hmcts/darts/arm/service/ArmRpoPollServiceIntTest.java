@@ -6,23 +6,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
+import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
+import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
+import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
-import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
-import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRpoPollServiceImpl;
+import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -35,9 +37,13 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +52,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
 @TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=false"})
@@ -55,47 +62,69 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private static final String BEARER_TOKEN = "BearerToken";
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
-    private static final String PRODUCTION_ID = "DARTS_RPO_2024-08-13";
+    private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    private static final String PRODUCTION_ID = " b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";
     private static final String SEARCH_ID = "8271f101-8c14-4c41-8865-edc5d8baed99";
-    private static final String MATTER_ID = "MatterId";
+    private static final String MATTER_ID = "cb70c7fa-8972-4400-af1d-ff5dd76d2104";
     private static final String STORAGE_ACCOUNT_ID = "StorageAccountId";
     private static final String PROPERTY_NAME = "propertyName";
     private static final String INGESTION_DATE = "ingestionDate";
+    private static final int HTTP_STATUS_OK = 200;
+    private static final int HTTP_STATUS_400 = 400;
 
-    @MockBean
+    @Autowired
+    private ArmApiConfigurationProperties armApiConfigurationProperties;
+
+    @MockitoBean
     private UserIdentity userIdentity;
-    @MockBean
+    @MockitoBean
     private ArmRpoClient armRpoClient;
-    @MockBean
-    private ArmApiServiceImpl armApiService;
-    @MockBean
-    private ArmRpoDownloadProduction armRpoDownloadProduction;
-
-    @SpyBean
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @TempDir
-    protected File tempDirectory;
+    @MockitoBean
+    private ArmTokenClient armTokenClient;
+    @MockitoBean
+    private ArmRpoUtil armRpoUtil;
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
+    private String uniqueProductionName;
+    private final Duration pollDuration = Duration.ofHours(4);
+    private int batchSize = 10;
+
 
     @Autowired
     private ArmRpoPollServiceImpl armRpoPollService;
 
     @BeforeEach
     void setUp() {
+        String bearerToken = "bearer";
+        ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
+            .username(armApiConfigurationProperties.getArmUsername())
+            .password(armApiConfigurationProperties.getArmPassword())
+            .build();
+        ArmTokenResponse tokenResponse = ArmTokenResponse.builder().accessToken(bearerToken).build();
+        when(armTokenClient.getToken(tokenRequest)).thenReturn(tokenResponse);
+
+        String armProfileId = "profileId";
+        AvailableEntitlementProfile profile = AvailableEntitlementProfile.builder()
+            .profiles(List.of(AvailableEntitlementProfile.Profiles.builder()
+                                  .profileId(armProfileId)
+                                  .profileName(armApiConfigurationProperties.getArmServiceProfile())
+                                  .build()))
+            .build();
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
+        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
 
         UserAccountEntity userAccountEntity = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armRpoExecutionDetailEntity = dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-
+        uniqueProductionName = PRODUCTION_NAME + "_UUID_CSV";
+        when(armRpoUtil.generateUniqueProductionName(anyString())).thenReturn(uniqueProductionName);
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithSaveBackgroundCompleted() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_WithSaveBackgroundCompleted() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
@@ -105,7 +134,8 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
-        when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
+        batchSize = 5;
+
         when(armRpoClient.getExtendedSearchesByMatter(any(), any()))
             .thenReturn(getExtendedSearchesByMatterResponse());
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any()))
@@ -116,35 +146,33 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getExtendedProductionsByMatterResponse());
         when(armRpoClient.getProductionOutputFiles(any(), any()))
             .thenReturn(getProductionOutputFilesResponse(PRODUCTION_ID));
-
-        when(armRpoDownloadProduction.downloadProduction(any(), any(), any()))
-            .thenReturn(getFeignResponse(200));
-
+        when(armRpoClient.downloadProduction(anyString(), anyString()))
+            .thenReturn(getFeignResponse(HTTP_STATUS_OK));
         when(armRpoClient.removeProduction(any(), any()))
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration, batchSize);
 
         // then
-        var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
+        var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(
+            armRpoExecutionDetailEntity.getId()).orElseThrow();
         assertNotNull(updatedArmRpoExecutionDetailEntity);
-        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
-        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
+        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.getArmRpoStatus().getId());
 
         verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
         verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
         verify(armRpoClient).getExtendedProductionsByMatter(anyString(), any());
         verify(armRpoClient).getProductionOutputFiles(any(), any());
-        verify(armRpoDownloadProduction).downloadProduction(any(), any(), any());
+        verify(armRpoClient).downloadProduction(any(), any());
         verify(armRpoClient).removeProduction(any(), any());
         verifyNoMoreInteractions(armRpoClient);
-
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithGetExtendedSearchesByMatterInProgress() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_WithGetExtendedSearchesByMatterInProgress() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.getExtendedSearchesByMatterRpoState());
@@ -154,7 +182,6 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
-        when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
         when(armRpoClient.getExtendedSearchesByMatter(any(), any()))
             .thenReturn(getExtendedSearchesByMatterResponse());
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any()))
@@ -165,15 +192,13 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getExtendedProductionsByMatterResponse());
         when(armRpoClient.getProductionOutputFiles(any(), any()))
             .thenReturn(getProductionOutputFilesResponse(PRODUCTION_ID));
-
-        when(armRpoDownloadProduction.downloadProduction(any(), any(), any()))
-            .thenReturn(getFeignResponse(200));
-
+        when(armRpoClient.downloadProduction(anyString(), anyString()))
+            .thenReturn(getFeignResponse(HTTP_STATUS_OK));
         when(armRpoClient.removeProduction(any(), any()))
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -186,15 +211,14 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
         verify(armRpoClient).getExtendedProductionsByMatter(anyString(), any());
         verify(armRpoClient).getProductionOutputFiles(any(), any());
-        verify(armRpoDownloadProduction).downloadProduction(any(), any(), any());
+        verify(armRpoClient).downloadProduction(any(), any());
         verify(armRpoClient).removeProduction(any(), any());
 
         verifyNoMoreInteractions(armRpoClient);
-
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithSaveBackgroundCompletedCreateExportInProgress() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_WithSaveBackgroundCompletedAndFinishWithCreateExportInProgress() {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
@@ -204,7 +228,6 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
-        when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
         when(armRpoClient.getExtendedSearchesByMatter(any(), any()))
             .thenReturn(getExtendedSearchesByMatterResponse());
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any()))
@@ -213,7 +236,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getCreateExportBasedOnSearchResultsTableResponseInProgress());
 
         // when
-        armRpoPollService.pollArmRpo(false);
+        armRpoPollService.pollArmRpo(false, pollDuration, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -229,17 +252,19 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithFailedDownloadProductionIsManual() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_WithGetExtendedProductionsByMatterInProgress() throws IOException {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.downloadProductionRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.getExtendedSearchesByMatterRpoState());
         armRpoExecutionDetailEntity.setMatterId(MATTER_ID);
         armRpoExecutionDetailEntity.setSearchId(SEARCH_ID);
         armRpoExecutionDetailEntity.setStorageAccountId(STORAGE_ACCOUNT_ID);
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
+        OffsetDateTime pollCreatedTs = OffsetDateTime.now().minusMinutes(10);
+        armRpoExecutionDetailEntity.setPollingCreatedAt(pollCreatedTs);
+        armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
-        when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
         when(armRpoClient.getExtendedSearchesByMatter(any(), any()))
             .thenReturn(getExtendedSearchesByMatterResponse());
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any()))
@@ -250,15 +275,63 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getExtendedProductionsByMatterResponse());
         when(armRpoClient.getProductionOutputFiles(any(), any()))
             .thenReturn(getProductionOutputFilesResponse(PRODUCTION_ID));
-
-        when(armRpoDownloadProduction.downloadProduction(any(), any(), any()))
-            .thenReturn(getFeignResponse(200));
-
+        when(armRpoClient.downloadProduction(anyString(), anyString()))
+            .thenReturn(getFeignResponse(HTTP_STATUS_OK));
         when(armRpoClient.removeProduction(any(), any()))
             .thenReturn(getRemoveProductionResponse());
 
         // when
-        armRpoPollService.pollArmRpo(true);
+        armRpoPollService.pollArmRpo(false, pollDuration, batchSize);
+
+        // then
+        var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
+        assertNotNull(updatedArmRpoExecutionDetailEntity);
+        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
+        assertEquals(pollCreatedTs.truncatedTo(ChronoUnit.SECONDS),
+                     updatedArmRpoExecutionDetailEntity.get().getPollingCreatedAt().truncatedTo(ChronoUnit.SECONDS));
+        assertThat(updatedArmRpoExecutionDetailEntity.get().getProductionName()).contains(PRODUCTION_NAME);
+
+        verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
+        verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
+        verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
+        verify(armRpoClient).getExtendedProductionsByMatter(anyString(), any());
+        verify(armRpoClient).getProductionOutputFiles(any(), any());
+        verify(armRpoClient).downloadProduction(any(), any());
+        verify(armRpoClient).removeProduction(any(), any());
+
+        verifyNoMoreInteractions(armRpoClient);
+
+    }
+
+    @Test
+    void pollArmRpo_shouldPollSuccessfully_WithGetProductionOutputFilesInProgress() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.getProductionOutputFilesRpoState());
+        armRpoExecutionDetailEntity.setMatterId(MATTER_ID);
+        armRpoExecutionDetailEntity.setSearchId(SEARCH_ID);
+        armRpoExecutionDetailEntity.setStorageAccountId(STORAGE_ACCOUNT_ID);
+        armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
+        armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        when(armRpoClient.getExtendedSearchesByMatter(any(), any()))
+            .thenReturn(getExtendedSearchesByMatterResponse());
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any()))
+            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse(PROPERTY_NAME, INGESTION_DATE));
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any()))
+            .thenReturn(getCreateExportBasedOnSearchResultsTableResponse());
+        when(armRpoClient.getExtendedProductionsByMatter(anyString(), any()))
+            .thenReturn(getExtendedProductionsByMatterResponse());
+        when(armRpoClient.getProductionOutputFiles(any(), any()))
+            .thenReturn(getProductionOutputFilesResponse(PRODUCTION_ID));
+        when(armRpoClient.downloadProduction(anyString(), anyString()))
+            .thenReturn(getFeignResponse(HTTP_STATUS_OK));
+        when(armRpoClient.removeProduction(any(), any()))
+            .thenReturn(getRemoveProductionResponse());
+
+        // when
+        armRpoPollService.pollArmRpo(false, pollDuration, batchSize);
 
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
@@ -271,7 +344,54 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
         verify(armRpoClient).getExtendedProductionsByMatter(anyString(), any());
         verify(armRpoClient).getProductionOutputFiles(any(), any());
-        verify(armRpoDownloadProduction).downloadProduction(any(), any(), any());
+        verify(armRpoClient).downloadProduction(any(), any());
+        verify(armRpoClient).removeProduction(any(), any());
+
+        verifyNoMoreInteractions(armRpoClient);
+
+    }
+
+    @Test
+    void pollArmRpo_shouldPollSuccessfully_WithFailedDownloadProductionIsManual() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.downloadProductionRpoState());
+        armRpoExecutionDetailEntity.setMatterId(MATTER_ID);
+        armRpoExecutionDetailEntity.setSearchId(SEARCH_ID);
+        armRpoExecutionDetailEntity.setStorageAccountId(STORAGE_ACCOUNT_ID);
+        armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
+        armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        when(armRpoClient.getExtendedSearchesByMatter(any(), any()))
+            .thenReturn(getExtendedSearchesByMatterResponse());
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any()))
+            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse(PROPERTY_NAME, INGESTION_DATE));
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any()))
+            .thenReturn(getCreateExportBasedOnSearchResultsTableResponse());
+        when(armRpoClient.getExtendedProductionsByMatter(anyString(), any()))
+            .thenReturn(getExtendedProductionsByMatterResponse());
+        when(armRpoClient.getProductionOutputFiles(any(), any()))
+            .thenReturn(getProductionOutputFilesResponse(PRODUCTION_ID));
+        when(armRpoClient.downloadProduction(anyString(), anyString()))
+            .thenReturn(getFeignResponse(HTTP_STATUS_OK));
+        when(armRpoClient.removeProduction(any(), any()))
+            .thenReturn(getRemoveProductionResponse());
+
+        // when
+        armRpoPollService.pollArmRpo(true, pollDuration, batchSize);
+
+        // then
+        var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
+        assertNotNull(updatedArmRpoExecutionDetailEntity);
+        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
+
+        verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
+        verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
+        verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
+        verify(armRpoClient).getExtendedProductionsByMatter(anyString(), any());
+        verify(armRpoClient).getProductionOutputFiles(any(), any());
+        verify(armRpoClient).downloadProduction(any(), any());
         verify(armRpoClient).removeProduction(any(), any());
         verifyNoMoreInteractions(armRpoClient);
 
@@ -279,7 +399,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private @NotNull RemoveProductionResponse getRemoveProductionResponse() {
         RemoveProductionResponse response = new RemoveProductionResponse();
-        response.setStatus(200);
+        response.setStatus(HTTP_STATUS_OK);
         response.setIsError(false);
         return response;
     }
@@ -307,7 +427,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             }
 
             @Override
-            public Reader asReader(Charset charset) throws IOException {
+            public Reader asReader(Charset charset) {
                 return null;
             }
 
@@ -324,18 +444,18 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .body(body)
             .request(request)
             .build();
-
     }
 
     private @NotNull ProductionOutputFilesResponse getProductionOutputFilesResponse(String fileId) {
         var productionExportFileDetail = new ProductionOutputFilesResponse.ProductionExportFileDetail();
         productionExportFileDetail.setProductionExportFileId(fileId);
+        productionExportFileDetail.setStatus(READY_STATUS.getStatusCode());
 
         var productionExportFile = new ProductionOutputFilesResponse.ProductionExportFile();
         productionExportFile.setProductionExportFileDetails(productionExportFileDetail);
 
         var response = new ProductionOutputFilesResponse();
-        response.setStatus(200);
+        response.setStatus(HTTP_STATUS_OK);
         response.setIsError(false);
         response.setProductionExportFiles(Collections.singletonList(productionExportFile));
 
@@ -344,17 +464,19 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private @NotNull ExtendedProductionsByMatterResponse getExtendedProductionsByMatterResponse() {
         ExtendedProductionsByMatterResponse response = new ExtendedProductionsByMatterResponse();
-        response.setStatus(200);
+        response.setStatus(HTTP_STATUS_OK);
         response.setIsError(false);
         ExtendedProductionsByMatterResponse.Productions productions = new ExtendedProductionsByMatterResponse.Productions();
         productions.setProductionId(PRODUCTION_ID);
+        productions.setName(uniqueProductionName);
+        productions.setEndProductionTime("2025-01-16T12:30:09.9129726+00:00");
         response.setProductions(List.of(productions));
         return response;
     }
 
     private @NotNull CreateExportBasedOnSearchResultsTableResponse getCreateExportBasedOnSearchResultsTableResponse() {
         CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(200);
+        response.setStatus(HTTP_STATUS_OK);
         response.setIsError(false);
         response.setResponseStatus(2);
         return response;
@@ -362,7 +484,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private @NotNull CreateExportBasedOnSearchResultsTableResponse getCreateExportBasedOnSearchResultsTableResponseInProgress() {
         CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
-        response.setStatus(400);
+        response.setStatus(HTTP_STATUS_400);
         response.setIsError(false);
         response.setResponseStatus(2);
         return response;
@@ -370,32 +492,42 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private @NotNull MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchemaResponse(String propertyName1,
                                                                                                                 String propertyName2) {
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField1.setMasterIndexFieldId("1");
-        masterIndexField1.setDisplayName("displayName");
-        masterIndexField1.setPropertyName(propertyName1);
-        masterIndexField1.setPropertyType("propertyType");
-        masterIndexField1.setIsMasked(true);
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = getMasterIndexField1(propertyName1);
 
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField2.setMasterIndexFieldId("2");
-        masterIndexField2.setDisplayName("displayName");
-        masterIndexField2.setPropertyName(propertyName2);
-        masterIndexField2.setPropertyType("propertyType");
-        masterIndexField2.setIsMasked(false);
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = getMasterIndexField2(propertyName2);
 
         MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
         response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2));
         return response;
     }
 
+    private static MasterIndexFieldByRecordClassSchemaResponse.@NotNull MasterIndexField getMasterIndexField2(String propertyName2) {
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField2.setMasterIndexFieldId("2");
+        masterIndexField2.setDisplayName("displayName");
+        masterIndexField2.setPropertyName(propertyName2);
+        masterIndexField2.setPropertyType("propertyType");
+        masterIndexField2.setIsMasked(false);
+        return masterIndexField2;
+    }
+
+    private static MasterIndexFieldByRecordClassSchemaResponse.@NotNull MasterIndexField getMasterIndexField1(String propertyName1) {
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField1.setMasterIndexFieldId("1");
+        masterIndexField1.setDisplayName("displayName");
+        masterIndexField1.setPropertyName(propertyName1);
+        masterIndexField1.setPropertyType("propertyType");
+        masterIndexField1.setIsMasked(true);
+        return masterIndexField1;
+    }
+
     private ExtendedSearchesByMatterResponse getExtendedSearchesByMatterResponse() {
         ExtendedSearchesByMatterResponse response = new ExtendedSearchesByMatterResponse();
-        response.setStatus(200);
+        response.setStatus(HTTP_STATUS_OK);
         response.setIsError(false);
         ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
         search.setTotalCount(4);
-        search.setName(PRODUCTION_ID);
+        search.setName(PRODUCTION_NAME);
         search.setIsSaved(true);
         search.setSearchId(SEARCH_ID);
         ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();

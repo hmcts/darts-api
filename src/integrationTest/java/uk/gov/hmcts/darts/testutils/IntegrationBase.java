@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.testutils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -14,20 +13,22 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 import uk.gov.hmcts.darts.task.runner.AutomatedOnDemandTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.test.common.AwaitabilityUtil;
 import uk.gov.hmcts.darts.test.common.FileStore;
-import uk.gov.hmcts.darts.test.common.LogUtil;
-import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.TokenStub;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,20 +73,12 @@ import java.util.Optional;
 @Slf4j
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 @Import(IntegrationTestConfiguration.class)
-public class IntegrationBase {
+public class IntegrationBase extends TestBase {
 
-    @Autowired
-    protected OpenInViewUtil openInViewUtil;
-    @Autowired
-    protected DartsDatabaseStub dartsDatabase;
-    @Autowired
-    protected DartsPersistence dartsPersistence;
     @Autowired
     protected DartsDatabaseRetrieval dartsDataRetrieval;
     @Autowired
     protected ObjectMapper objectMapper;
-    @Autowired
-    protected TransactionalUtil transactionalUtil;
     @Autowired
     private List<AutomatedOnDemandTask> automatedOnDemandTask;
     @Autowired
@@ -93,10 +86,8 @@ public class IntegrationBase {
 
     protected TokenStub tokenStub = new TokenStub();
 
-    protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
-
     private static final GenericContainer<?> REDIS = new GenericContainer<>(
-        "redis:7.2.4-alpine"
+        "hmctspublic.azurecr.io/imported/redis"
     ).withExposedPorts(6379);
 
     @DynamicPropertySource
@@ -111,31 +102,27 @@ public class IntegrationBase {
         REDIS.start();
     }
 
-    @BeforeEach
-    void clearDb() {
-        dartsDatabase.resetSequences();
-        dartsDatabase.clearDatabaseInThisOrder();
-        dartsDatabase.resetTablesWithPredefinedTestData();
-    }
-
     @AfterEach
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    void clearTestData() throws Exception {
-        logAppender.reset();
+    @Override
+    protected void clearTestData() {
+        super.clearTestData();
         FileStore.getFileStore().remove();
-        checkCleanup();
     }
 
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    protected void checkCleanup() throws Exception {
-
-    }
 
     protected void givenBearerTokenExists(String email) {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("emails", List.of(email))
-            .build();
+        Optional<UserAccountEntity> userAccount = dartsDatabase.getUserAccountRepository().findFirstByEmailAddressIgnoreCase(email);
+        if (userAccount.isEmpty()) {
+            UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
+            dartsDatabase.getUserAccountRepository().save(userAccountEntity);
+            userAccount = Optional.of(userAccountEntity);
+        }
+        DartsJwt jwt = new DartsJwt(
+            Jwt.withTokenValue("test")
+                .header("alg", "RS256")
+                .claim("emails", List.of(email))
+                .build(),
+            userAccount.get().getId());
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
@@ -165,7 +152,14 @@ public class IntegrationBase {
         }, Duration.ofSeconds(30));
     }
 
-    protected void anAuthenticatedUserFor(String userEmail) {
-        GivenBuilder.anAuthenticatedUserFor(userEmail);
+    // UselessOperationOnImmutable suppression: We don't care about the return value of parse(), we just want to know whether it throws an exception
+    @SuppressWarnings("PMD.UselessOperationOnImmutable")
+    protected boolean isIsoDateTimeString(String string) {
+        try {
+            LocalDateTime.parse(string, DateTimeFormatter.ISO_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+        return true;
     }
 }

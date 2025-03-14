@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -60,7 +60,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired
@@ -126,17 +126,18 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         // ensure that the database data is contained in the response
         assertEquals(documentEntity.getId(), transcriptionResponse.getId());
         assertEquals(documentEntity.isHidden(), transcriptionResponse.getIsHidden());
-        assertEquals(objectAdminActionEntity.get(0).getId(), transcriptionResponse.getAdminAction().getId());
-        assertEquals(objectAdminActionEntity.get(0).getComments(), transcriptionResponse.getAdminAction().getComments());
-        assertEquals(objectAdminActionEntity.get(0).getTicketReference(), transcriptionResponse.getAdminAction().getTicketReference());
-        assertEquals(objectAdminActionEntity.get(0).getObjectHiddenReason().getId(), transcriptionResponse.getAdminAction().getReasonId());
-        assertFalse(objectAdminActionEntity.get(0).isMarkedForManualDeletion());
-        assertEquals(objectAdminActionEntity.get(0).getHiddenBy().getId(), transcriptionResponse.getAdminAction().getHiddenById());
-        assertEquals(objectAdminActionEntity.get(0)
+        assertEquals(objectAdminActionEntity.getFirst().getId(), transcriptionResponse.getAdminAction().getId());
+        assertEquals(objectAdminActionEntity.getFirst().getComments(), transcriptionResponse.getAdminAction().getComments());
+        assertEquals(objectAdminActionEntity.getFirst().getTicketReference(), transcriptionResponse.getAdminAction().getTicketReference());
+        assertEquals(objectAdminActionEntity.getFirst().getObjectHiddenReason().getId(), transcriptionResponse.getAdminAction().getReasonId());
+        assertFalse(objectAdminActionEntity.getFirst().isMarkedForManualDeletion());
+        assertEquals(objectAdminActionEntity.getFirst().getHiddenBy().getId(), transcriptionResponse.getAdminAction().getHiddenById());
+        assertEquals(objectAdminActionEntity.getFirst()
                          .getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS),
                      transcriptionResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
-        assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelBy().getId(), transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
-        assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime()
+        assertEquals(objectAdminActionEntity.getFirst().getMarkedForManualDelBy().getId(),
+                     transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
+        assertEquals(objectAdminActionEntity.getFirst().getMarkedForManualDelDateTime()
                          .truncatedTo(ChronoUnit.SECONDS), transcriptionResponse.getAdminAction()
                          .getMarkedForManualDeletionAt().truncatedTo(ChronoUnit.SECONDS));
     }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 class DartsEventNullHandlerTest extends HandlerTestData {
 
-    @SpyBean
+    @MockitoSpyBean
     DartsEventNullHandler nullEventHandler;
 
     @Mock

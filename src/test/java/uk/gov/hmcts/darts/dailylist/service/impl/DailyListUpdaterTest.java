@@ -33,7 +33,6 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.dailylist.mapper.CitizenNameMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.util.CitizenNameComparator;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
 import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapper;
 import uk.gov.hmcts.darts.task.runner.dailylist.schemas.courtservice.DailyListStructure;
@@ -79,9 +78,6 @@ class DailyListUpdaterTest {
     @Mock
     private CitizenNameMapper citizenNameMapper;
     @Mock
-    private CitizenNameComparator citizenNameComparator;
-
-    @Mock
     private DetsApiService detsApiService;
     @Mock
     private XmlParser xmlParser;
@@ -100,8 +96,7 @@ class DailyListUpdaterTest {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         dailyListUpdater = spy(new DailyListUpdater(retrieveCoreObjectService, createCoreObjectService, courthouseRepository,
                                                     hearingRepository, objectMapper, systemUserHelper,
-                                                    currentTimeHelper, citizenNameMapper, citizenNameComparator,
-                                                    detsApiService, xmlParser, dailyListRequestMapper));
+                                                    currentTimeHelper, citizenNameMapper, detsApiService, xmlParser, dailyListRequestMapper));
     }
 
     @Test
@@ -292,7 +287,7 @@ class DailyListUpdaterTest {
         @Test
         void missingEltId() {
             DailyListEntity dailyListEntity = new DailyListEntity();
-            dailyListEntity.setExternalLocation(UUID.randomUUID());
+            dailyListEntity.setExternalLocation(UUID.randomUUID().toString());
             dailyListEntity.setExternalLocationTypeEntity(null);
 
             assertThat(dailyListUpdater.validateXmlElseUpdate(dailyListEntity))
@@ -307,7 +302,7 @@ class DailyListUpdaterTest {
         @EnumSource(value = ExternalLocationTypeEnum.class, mode = EnumSource.Mode.EXCLUDE, names = {"DETS"})
         void incorrectEltId(ExternalLocationTypeEnum externalLocationTypeEnum) {
             DailyListEntity dailyListEntity = new DailyListEntity();
-            dailyListEntity.setExternalLocation(UUID.randomUUID());
+            dailyListEntity.setExternalLocation(UUID.randomUUID().toString());
             ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();
             externalLocationTypeEntity.setId(externalLocationTypeEnum.getId());
             dailyListEntity.setExternalLocationTypeEntity(externalLocationTypeEntity);
@@ -322,7 +317,7 @@ class DailyListUpdaterTest {
 
         @Test
         void failedToDownloadFileFromDebts() throws Exception {
-            UUID externalLocation = UUID.randomUUID();
+            String externalLocation = UUID.randomUUID().toString();
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(externalLocation);
             ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();
@@ -344,7 +339,7 @@ class DailyListUpdaterTest {
         @SuppressWarnings("PMD.CloseResource")
         void positive() throws Exception {
             final String xml = "<has_xml>true</has_xml";
-            UUID externalLocation = UUID.randomUUID();
+            String externalLocation = UUID.randomUUID().toString();
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(externalLocation);
             ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();

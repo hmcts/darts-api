@@ -33,3 +33,9 @@ variable "pgsqlSku" {
   description = "sku set for postgreSQL databse"
   default     = "GP_Standard_D4ds_v5"
 }
+
+variable "pgsqlstoragemb" {
+  description = "Max storage allowed for the PGSql Flexibile instance"
+  type        = number
+  default     = 165536
+}

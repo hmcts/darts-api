@@ -110,7 +110,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     @Test
     void caseHearingsGetEndpointOneObjectReturned() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
@@ -124,7 +124,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     @Test
     void caseHearingsGetEndpoint_shouldBeOrderedByHearingDate() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         HearingEntity hearingEntity2 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
@@ -171,7 +171,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         HearingEntity hearingEntity2 = dartsDatabase.getHearingRepository().findAll().get(1);
 
         hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"), false);
@@ -192,7 +192,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         assertEquals(hearingEntity.getId(), hearing1.getId());
         assertEquals(SOME_COURTROOM.toUpperCase(Locale.ROOT), hearing1.getCourtroom());
         assertEquals(1, hearing1.getJudges().size());
-        assertEquals("1JUDGE1", hearing1.getJudges().get(0));
+        assertEquals("1JUDGE1", hearing1.getJudges().getFirst());
         assertEquals(DateConverterUtil.toLocalDateTime(SOME_DATE_TIME).toLocalDate().toString(), hearing1.getDate().toString());
         assertEquals(0, hearing1.getTranscriptCount());
 
@@ -200,14 +200,14 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         assertEquals(hearingEntity2.getId(), hearing2.getId());
         assertEquals(otherCourtroom, hearing2.getCourtroom());
         assertEquals(1, hearing2.getJudges().size());
-        assertEquals("1JUDGE1", hearing2.getJudges().get(0));
+        assertEquals("1JUDGE1", hearing2.getJudges().getFirst());
         assertEquals(DateConverterUtil.toLocalDateTime(SOME_DATE_TIME).toLocalDate().toString(), hearing2.getDate().toString());
         assertEquals(1, hearing2.getTranscriptCount());
     }
 
     @Test
     void caseHearingsMultipleWithTranscriptsWithHiddenDocument() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"), false);
 

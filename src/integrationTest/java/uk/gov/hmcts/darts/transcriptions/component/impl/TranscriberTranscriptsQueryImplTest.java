@@ -56,7 +56,7 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
         );
 
         var approved = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            transcriptionEntity,  NOW.minusDays(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+            transcriptionEntity, NOW.minusDays(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
         );
         transcriptionEntity.getTranscriptionWorkflowEntities().add(approved);
         transcriptionEntity.setTranscriptionStatus(approved.getTranscriptionStatus());
@@ -125,7 +125,7 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
 
         assertThat(transcriberTranscriptions.size()).isEqualTo(1);
         var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        assertThat(transcriberTranscriptions.get(0).getStateChangeTs().format(format)).isEqualTo(yesterday.format(format));
+        assertThat(transcriberTranscriptions.getFirst().getStateChangeTs().format(format)).isEqualTo(yesterday.format(format));
     }
 
     @Test

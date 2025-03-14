@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.transcriptions.given;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         var transcriptions = persistedTranscriptions(quantity);
         range(0, quantity).forEach(j -> {
             var transcription = transcriptions.get(j);
-            var courthouse = transcription.getCourtroom().getCourthouse();
+            var courthouse = transcription.getCourtCase().getCourthouse();
             courthouse.setDisplayName(displayNames[j]);
             dartsDatabase.save(courthouse);
         });
@@ -56,7 +58,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
     @Override
     public void allAtCourthousesWithDisplayName(List<TranscriptionEntity> transcriptionEntities, String courthouseDisplayName) {
         transcriptionEntities.forEach(t -> {
-            var courthouse = t.getCourtroom().getCourthouse();
+            var courthouse = t.getCourtCase().getCourthouse();
             courthouse.setDisplayName(courthouseDisplayName);
             dartsDatabase.save(courthouse);
         });
@@ -74,13 +76,16 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
     @Override
     public TranscriptionEntity createTranscription() {
         var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+        UserAccountEntity userAccount = dartsDatabase.save(UserAccountTestData.minimalUserAccount());
+        transcription.setCreatedBy(userAccount);
+        transcription.setLastModifiedBy(userAccount);
         var courtroom = someMinimalCourtRoom();
         dartsDatabase.save(courtroom.getCourthouse());
         dartsDatabase.save(courtroom);
         transcription.setHearings(new ArrayList<>());
         transcription.setCourtroom(courtroom);
+        transcription.setIsCurrent(true);
         dartsDatabase.save(transcription.getCourtCase());
-        dartsDatabase.save(transcription.getCreatedBy());
         return dartsDatabase.save(transcription);
     }
 
@@ -93,7 +98,11 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         transcription.setHearings(new ArrayList<>());
         transcription.setCourtroom(courtroom);
         dartsDatabase.save(transcription.getCourtCase());
-        dartsDatabase.save(transcription.getCreatedBy());
+        //Save created by user and reset them on the transcription (Ensures the user is saved in the database)
+        UserAccountEntity user = dartsDatabase.save(transcription.getCreatedBy());
+        transcription.setCreatedBy(user);
+        transcription.setLastModifiedBy(user);
+        transcription.setIsCurrent(true);
         return dartsDatabase.save(transcription);
     }
 }

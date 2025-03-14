@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -48,7 +48,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AW
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
 
-    @MockBean
+    @MockitoBean
     private Authorisation authorisation;
 
     @Autowired
@@ -63,7 +63,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     private Integer transcriptionId;
@@ -287,7 +287,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             }
         );
         assertEquals(1, partialFailureResponse.size());
-        assertEquals(idThatDoesNotExist, partialFailureResponse.get(0).getTranscriptionId());
+        assertEquals(idThatDoesNotExist, partialFailureResponse.getFirst().getTranscriptionId());
 
         // assert partial success i.e. that the hide flags in the database have been set
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
@@ -343,7 +343,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             }
         );
         assertEquals(1, partialFailureResponse.size());
-        assertEquals(transcriptionId1, partialFailureResponse.get(0).getTranscriptionId());
+        assertEquals(transcriptionId1, partialFailureResponse.getFirst().getTranscriptionId());
 
         // assert partial success in the database
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());

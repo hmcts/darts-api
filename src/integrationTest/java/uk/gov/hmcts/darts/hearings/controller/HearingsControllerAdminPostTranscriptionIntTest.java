@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -42,7 +42,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired
@@ -102,7 +102,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
-
+        hearingEntityList.sort((o1, o2) -> o2.getHearingDate().compareTo(o1.getHearingDate()));
         HearingsSearchRequest searchRequest = new HearingsSearchRequest();
 
         // run the test
@@ -133,6 +133,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
+        hearingEntityList.sort((o1, o2) -> o2.getHearingDate().compareTo(o1.getHearingDate()));
 
         HearingsSearchRequest searchRequest = new HearingsSearchRequest();
         searchRequest.setCourthouseIds(new ArrayList<>());
@@ -264,9 +265,9 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         searchRequest.setHearingStartAt(hearingEntityList.get(1).getHearingDate());
 
         List<HearingEntity> expectedHearing = new ArrayList<>();
-        expectedHearing.add(hearingEntityList.get(1));
-        expectedHearing.add(hearingEntityList.get(2));
         expectedHearing.add(hearingEntityList.get(3));
+        expectedHearing.add(hearingEntityList.get(2));
+        expectedHearing.add(hearingEntityList.get(1));
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -301,8 +302,8 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         searchRequest.setHearingEndAt(hearingEntityList.get(1).getHearingDate());
 
         List<HearingEntity> expectedHearing = new ArrayList<>();
-        expectedHearing.add(hearingEntityList.get(0));
         expectedHearing.add(hearingEntityList.get(1));
+        expectedHearing.add(hearingEntityList.getFirst());
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -338,8 +339,8 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
                                                    .getCourtroom().getCourthouse().getId(), hearingEntityList.get(2).getCourtroom().getCourthouse().getId()));
 
         List<HearingEntity> expectedHearing = new ArrayList<>();
-        expectedHearing.add(hearingEntityList.get(1));
         expectedHearing.add(hearingEntityList.get(2));
+        expectedHearing.add(hearingEntityList.get(1));
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -371,7 +372,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(10);
 
         HearingsSearchRequest searchRequest = new HearingsSearchRequest();
-        searchRequest.setCourthouseIds(List.of(hearingEntityList.get(0).getCourtroom().getCourthouse().getId(),
+        searchRequest.setCourthouseIds(List.of(hearingEntityList.getFirst().getCourtroom().getCourthouse().getId(),
                                                hearingEntityList.get(1).getCourtroom().getCourthouse().getId(),
                                                hearingEntityList.get(2).getCourtroom().getCourthouse().getId(),
                                                hearingEntityList.get(3).getCourtroom().getCourthouse().getId(),

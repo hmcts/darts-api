@@ -30,7 +30,7 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
     @Test
     void findsTranscriptionByIdOnly() {
         var persistedTranscriptions = given.persistedTranscriptions(3);
-        var transcription = persistedTranscriptions.get(0);
+        var transcription = persistedTranscriptions.getFirst();
 
         var transcriptionSearchRequest = new TranscriptionSearchRequest()
             .transcriptionId(transcription.getId());
@@ -44,7 +44,7 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
     @Test
     void findsSingleTranscriptionByCaseNumberOnly() {
         var persistedTranscriptions = given.persistedTranscriptions(3);
-        var transcription = persistedTranscriptions.get(0);
+        var transcription = persistedTranscriptions.getFirst();
 
         var transcriptionSearchRequest = new TranscriptionSearchRequest()
             .caseNumber(transcription.getCourtCase().getCaseNumber());
@@ -60,7 +60,7 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
     void findsSingleTranscriptionByPartialMatchOnCourtHouseDisplayName(String courtHouseDisplayNamePattern) {
         var persistedTranscriptions = given.persistedTranscriptionsWithDisplayNames(
             3, "courthouse-1", "courthouse-2", "courthouse-3");
-        var transcription = persistedTranscriptions.get(0);
+        var transcription = persistedTranscriptions.getFirst();
 
         var transcriptionSearchRequest = new TranscriptionSearchRequest()
             .courthouseDisplayName(courtHouseDisplayNamePattern);
@@ -68,7 +68,7 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
         var transcriptionResponse = adminTranscriptionSearchService.searchTranscriptions(transcriptionSearchRequest);
 
         assertThat(transcriptionResponse).extracting("courthouseId")
-            .containsExactly(transcription.getCourtroom().getCourthouse().getId());
+            .containsExactly(transcription.getCourtCase().getCourthouse().getId());
     }
 
     @Test
@@ -80,7 +80,7 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
         var transcriptionResponse = adminTranscriptionSearchService.searchTranscriptions(transcriptionSearchRequest);
 
         assertThat(transcriptionResponse).extracting("transcriptionId")
-            .containsExactly(persistedTranscriptions.get(0).getId());
+            .containsExactly(persistedTranscriptions.getFirst().getId());
     }
 
 
@@ -91,7 +91,7 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
             now().plusWeeks(1),
             now().plusWeeks(2),
             now().plusWeeks(3));
-        var transcription = persistedTranscriptions.get(0);
+        var transcription = persistedTranscriptions.getFirst();
 
         var transcriptionSearchRequest = new TranscriptionSearchRequest()
             .hearingDate(transcription.getHearingDate());
@@ -159,7 +159,7 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
         var transcriptionResponse = adminTranscriptionSearchService.searchTranscriptions(transcriptionSearchRequest);
 
         assertThat(transcriptionResponse).extracting("transcriptionId")
-            .containsExactly(persistedTranscriptions.get(0).getId());
+            .containsExactly(persistedTranscriptions.getFirst().getId());
     }
 
 
@@ -200,18 +200,18 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
 
         assertThat(transcriptionResponse).extracting("transcriptionId")
             .containsExactly(
-                transcriptions.get(0).getId(),
-                transcriptions.get(1).getId(),
-                transcriptions.get(2).getId(),
-                transcriptions.get(3).getId(),
-                transcriptions.get(4).getId(),
-                transcriptions.get(5).getId(),
-                transcriptions.get(6).getId(),
-                transcriptions.get(7).getId(),
-                transcriptions.get(8).getId(),
-                transcriptions.get(9).getId(),
+                transcriptions.get(11).getId(),
                 transcriptions.get(10).getId(),
-                transcriptions.get(11).getId());
+                transcriptions.get(9).getId(),
+                transcriptions.get(8).getId(),
+                transcriptions.get(7).getId(),
+                transcriptions.get(6).getId(),
+                transcriptions.get(5).getId(),
+                transcriptions.get(4).getId(),
+                transcriptions.get(3).getId(),
+                transcriptions.get(2).getId(),
+                transcriptions.get(1).getId(),
+                transcriptions.getFirst().getId());
     }
 
     @Test
@@ -251,19 +251,19 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
 
         assertThat(transcriptionResponse).extracting("transcriptionId")
             .containsExactly(
-                transcriptions.get(0).getId(),
-                transcriptions.get(1).getId(),
-                transcriptions.get(2).getId(),
-                transcriptions.get(3).getId(),
-                transcriptions.get(4).getId(),
-                transcriptions.get(5).getId(),
-                transcriptions.get(6).getId(),
-                transcriptions.get(7).getId(),
-                transcriptions.get(8).getId(),
-                transcriptions.get(9).getId(),
+                transcriptions.get(11).getId(),
                 transcriptions.get(10).getId(),
-                transcriptions.get(11).getId());
-        assertThat(transcriptionResponse.get(0).getApprovedAt()).isEqualTo(WORKFLOW_TIMESTAMP);
+                transcriptions.get(9).getId(),
+                transcriptions.get(8).getId(),
+                transcriptions.get(7).getId(),
+                transcriptions.get(6).getId(),
+                transcriptions.get(5).getId(),
+                transcriptions.get(4).getId(),
+                transcriptions.get(3).getId(),
+                transcriptions.get(2).getId(),
+                transcriptions.get(1).getId(),
+                transcriptions.getFirst().getId());
+        assertThat(transcriptionResponse.getFirst().getApprovedAt()).isEqualTo(WORKFLOW_TIMESTAMP);
         assertThat(transcriptionResponse.get(1).getApprovedAt()).isEqualTo(WORKFLOW_TIMESTAMP);
         assertThat(transcriptionResponse.get(2).getApprovedAt()).isEqualTo(WORKFLOW_TIMESTAMP);
         assertThat(transcriptionResponse.get(3).getApprovedAt()).isEqualTo(WORKFLOW_TIMESTAMP);

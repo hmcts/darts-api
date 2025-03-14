@@ -5,8 +5,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -28,7 +28,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired
@@ -98,7 +98,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                     "id": 9,
                     "role_name": "MEDIA_ACCESSOR",
                     "display_name": "Media Accessor",
-                    "display_state": true
+                    "display_state": false
                   },
                   {
                     "id": 10,
@@ -129,6 +129,12 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                     "role_name": "MID_TIER",
                     "display_name": "Mid Tier",
                     "display_state": false
+                  },
+                  {
+                    "id": 15,
+                    "role_name": "MEDIA_IN_PERPETUITY",
+                    "display_name": "Media in Perpetuity",
+                    "display_state": true
                   }
                 ]
             """;

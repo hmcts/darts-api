@@ -14,7 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
@@ -46,7 +45,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
                 1
             ));
 
-        UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
+        String uuid = "075987ea-b34d-49c7-b8db-439bfbe2496c";
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -75,7 +74,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
                 );
 
             assertEquals(1, foundMediaList.size());
-            ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+            ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
             assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
             assertEquals(USER_EMAIL_ADDRESS, foundMedia.getLastModifiedBy().getEmailAddress());
         });
@@ -95,7 +94,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
                 1
             ));
 
-        UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
+        String uuid = "075987ea-b34d-49c7-b8db-439bfbe2496c";
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -122,7 +121,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(STORED.getId(), foundMedia.getStatus().getId());
     }
 }

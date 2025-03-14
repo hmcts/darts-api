@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.service.impl.ProcessDailyListOnDemandTask;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
+import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -99,6 +100,43 @@ class DailyListProcessorTest extends IntegrationBase {
 
 
     @Test
+    void dailyListProcessor_missingForename_shouldStillCreateUsers() throws IOException {
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
+        LocalTime dailyListTIme = LocalTime.of(13, 0);
+        DailyListEntity dailyListEntity = DailyListTestData.createDailyList(
+            dailyListTIme,
+            String.valueOf(SourceType.CPP),
+            swanseaCourtEntity.getCourthouseName(),
+            "tests/dailyListProcessorTest/dailyListMissingForename.json"
+        );
+
+        dartsDatabase.save(dailyListEntity);
+
+        dailyListProcessor.processAllDailyLists();
+
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(URN_1, SWANSEA).get();
+        assertEquals(URN_1, newCase1.getCaseNumber());
+        assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
+        assertEquals(1, newCase1.getDefendantList().size());
+        assertNameEquals(newCase1.getDefendantList().getFirst(), "DefendantName CPP");
+        assertEquals(1, newCase1.getDefenceList().size());
+        assertNameEquals(newCase1.getDefenceList().getFirst(), "DefenceName CPP");
+        assertEquals(1, newCase1.getProsecutorList().size());
+        assertNameEquals(newCase1.getProsecutorList().getFirst(), "ProsecutorName CPP");
+
+        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).getFirst();
+        assertEquals(LocalDate.now(), newHearing1.getHearingDate());
+        assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
+        assertEquals(1, newHearing1.getJudges().size());
+        assertEquals(LocalTime.of(11, 0), newHearing1.getScheduledStartTime());
+    }
+
+    private void assertNameEquals(IsNamedEntity first, String expected) {
+        Assertions.assertThat(first.getName()).isEqualTo(expected);
+    }
+
+
+    @Test
     void dailyListProcessorMultipleDailyList() throws IOException {
         log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
@@ -142,7 +180,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
 
-        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
+        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).getFirst();
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
@@ -158,10 +196,10 @@ class DailyListProcessorTest extends IntegrationBase {
 
         List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now());
         assertEquals(1, newHearing2.size());
-        assertEquals(LocalDate.now(), newHearing2.get(0).getHearingDate());
-        assertEquals(COURTROOM_2, newHearing2.get(0).getCourtroom().getName());
-        assertEquals(1, newHearing2.get(0).getJudges().size());
-        assertEquals(LocalTime.of(16, 0), newHearing2.get(0).getScheduledStartTime());
+        assertEquals(LocalDate.now(), newHearing2.getFirst().getHearingDate());
+        assertEquals(COURTROOM_2, newHearing2.getFirst().getCourtroom().getName());
+        assertEquals(1, newHearing2.getFirst().getJudges().size());
+        assertEquals(LocalTime.of(16, 0), newHearing2.getFirst().getScheduledStartTime());
         log.info("end dailyListProcessorMultipleDailyList");
     }
 
@@ -289,7 +327,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
 
-        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
+        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).getFirst();
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
@@ -306,10 +344,10 @@ class DailyListProcessorTest extends IntegrationBase {
 
         List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now());
         assertEquals(1, newHearing2.size());
-        assertEquals(LocalDate.now(), newHearing2.get(0).getHearingDate());
-        assertEquals(COURTROOM_2, newHearing2.get(0).getCourtroom().getName());
-        assertEquals(1, newHearing2.get(0).getJudges().size());
-        assertEquals(LocalTime.of(16, 0), newHearing2.get(0).getScheduledStartTime());
+        assertEquals(LocalDate.now(), newHearing2.getFirst().getHearingDate());
+        assertEquals(COURTROOM_2, newHearing2.getFirst().getCourtroom().getName());
+        assertEquals(1, newHearing2.getFirst().getJudges().size());
+        assertEquals(LocalTime.of(16, 0), newHearing2.getFirst().getScheduledStartTime());
         log.info("end dailyListProcessorMultipleDailyList");
 
     }

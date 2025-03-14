@@ -40,14 +40,14 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 public class DataManagementServiceStubImpl implements DataManagementService {
 
     // use this UUID to request stub throwing an exception
-    public static final UUID FAILURE_UUID = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
+    public static final String FAILURE_UUID = "ffffffff-ffff-ffff-ffff-ffffffffffff";
     private final DataManagementConfiguration dataManagementConfiguration;
 
     @Value("${darts.audio.transformation.service.audio.file:#{null}}")
     private String audioFile;
 
     @Override
-    public BinaryData getBlobData(String containerName, UUID blobId) {
+    public BinaryData getBlobData(String containerName, String blobId) {
         logStubUsageWarning();
 
         log.warn("Returning dummy file to mimic Blob storage download");
@@ -56,7 +56,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
     @SneakyThrows
     @Override
-    public Path downloadBlobToFile(String containerName, UUID blobId, String inboundWorkspace) {
+    public Path downloadBlobToFile(String containerName, String blobId, String inboundWorkspace) {
         logStubUsageWarning();
 
         log.warn("Downloading blob to dummy file to mimic Blob storage download to file");
@@ -66,7 +66,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public UUID saveBlobData(String containerName, BinaryData binaryData) {
+    public String saveBlobData(String containerName, BinaryData binaryData) {
         return saveBlobData();
     }
 
@@ -77,16 +77,16 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
     @Override
     public BlobClientUploadResponse saveBlobData(String containerName, InputStream inputStream) {
-        UUID blobName = saveBlobData();
+        String blobName = saveBlobData();
         long blobSize = 1000L; // Some arbitrary value
 
         return new BlobClientUploadResponseStub(blobName, blobSize);
     }
 
-    private UUID saveBlobData() {
+    private String saveBlobData() {
         logStubUsageWarning();
 
-        UUID uuid = UUID.randomUUID();
+        String uuid = UUID.randomUUID().toString();
         log.warn("Returning random UUID to mimic successful upload: {}", uuid);
         return uuid;
     }
@@ -95,9 +95,9 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     public BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata) {
         logStubUsageWarning();
 
-        UUID uuid = UUID.randomUUID();
+        String uuid = UUID.randomUUID().toString();
         BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
-        blobClientBuilder.blobName(uuid.toString());
+        blobClientBuilder.blobName(uuid);
         blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
         blobClientBuilder.containerName(containerName);
         log.warn("Returning random UUID to mimic successful upload: {}", uuid);
@@ -109,7 +109,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     public void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation) {
         logStubUsageWarning();
 
-        if (sourceLocation.equals(FAILURE_UUID.toString())) {
+        if (FAILURE_UUID.equals(sourceLocation)) {
             throw new DartsException("Exception thrown since copy requested with failure UUID");
         }
 
@@ -123,12 +123,12 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public String getChecksum(String containerName, UUID blobId) {
+    public String getChecksum(String containerName, String blobId) {
         return "checksum-" + blobId;
     }
 
     @Override
-    public Response<Boolean> deleteBlobData(String containerName, UUID blobId) {
+    public Response<Boolean> deleteBlobData(String containerName, String blobId) {
         logStubUsageWarning();
 
         log.info("Delete blob data method executed");
@@ -137,7 +137,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
     @Override
     @SneakyThrows
-    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, UUID blobId) throws FileNotDownloadedException {
+    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, String blobId) throws FileNotDownloadedException {
         logStubUsageWarning();
 
         FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
@@ -169,7 +169,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     @RequiredArgsConstructor
     public static class BlobClientUploadResponseStub implements BlobClientUploadResponse {
 
-        private final UUID blobName;
+        private final String blobName;
         private final Long blobSize;
 
         @Override

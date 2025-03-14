@@ -7,7 +7,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -44,7 +44,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
     private static final List<String> TAGS_TO_IGNORE = List.of("tra_id", "hea_id", "transcription_id", "hearing_id");
     @Autowired
     private transient MockMvc mockMvc;
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @BeforeEach
@@ -76,7 +76,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void hearingsGetTranscriptEndpointOneObjectReturned() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(transcription);
@@ -92,7 +92,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void hearingsGetTranscriptEndpointTwoObjectsReturned() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(transcription);
@@ -111,7 +111,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void hearingsGetTranscriptEndpointTranscriptWithHiddenDocumentNotReturned() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
             mockUserIdentity.getUserAccount(), hearingEntity.getCourtCase(), hearingEntity, SOME_DATE_TIME, true
@@ -126,7 +126,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void ignoreAutomaticTranscripts() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         //modernised manual transcription
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
@@ -154,6 +154,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         transcription4.setIsManualTranscription(false);
         transcription4.setLegacyObjectId("Something");
         dartsDatabase.save(transcription4);
+        dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(transcription4);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
@@ -166,7 +167,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void ignoreHiddenTranscripts() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         //transcription with 0 docs - should be visible
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);

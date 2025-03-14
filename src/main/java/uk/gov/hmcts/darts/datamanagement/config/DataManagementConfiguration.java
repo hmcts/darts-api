@@ -54,6 +54,12 @@ public class DataManagementConfiguration extends StorageConfiguration {
     @Value("${darts.storage.blob.az-copy-preserve-access-tier}")
     private String azCopyPreserveAccessTier;
 
+    @Value("${darts.storage.blob.az-copy-log-level}")
+    private String azCopyLogLevel;
+
+    @Value("${darts.storage.blob.az-copy-output-level}")
+    private String azCopyOutputLevel;
+
     @Override
     @Value("${darts.storage.blob.temp-blob-workspace}")
     public void setTempBlobWorkspace(String tempBlobWorkspace) {

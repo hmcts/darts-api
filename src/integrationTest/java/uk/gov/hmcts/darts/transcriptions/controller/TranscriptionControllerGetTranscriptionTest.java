@@ -6,7 +6,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -47,7 +47,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @Autowired
@@ -71,7 +71,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionWithHearing() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription.setStartTime(SOME_DATE_TIME);
@@ -99,7 +99,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionWithHiddenDocumentReturnsNotFound() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         UserAccountEntity userAccount = hearingEntity.getCreatedBy();
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
@@ -113,7 +113,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     @Test
     void getTranscriptionWithHiddenDocumentCanBeSeenBySuperAdmin() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         UserAccountEntity userAccount = hearingEntity.getCreatedBy();
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
@@ -126,7 +126,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionWithLegacyComments() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription.setStartTime(SOME_DATE_TIME);
@@ -156,7 +156,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     void getTranscriptionNoHearing() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity.getCourtroom());
 
         transcription.getCourtCases().add(hearingEntity.getCourtCase());
@@ -187,7 +187,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     void getTranscriptionNoHearingOrCourtroom() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription((CourtroomEntity) null);
 
         transcription.getCourtCases().add(hearingEntity.getCourtCase());
@@ -216,7 +216,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionNoUrgency() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity, false);
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription.setStartTime(SOME_DATE_TIME);
@@ -243,7 +243,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionNotFoundWhenIsCurrentFalse() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription.setStartTime(SOME_DATE_TIME);

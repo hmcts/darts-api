@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
-import uk.gov.hmcts.darts.audio.repository.TransformedMediaSubStringQueryEnum;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaSubStringQueryEnum;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -81,6 +81,7 @@ public class TransformedMediaStub {
      * Unique hearing date starting with today with an incrementing day for each transformed media record
      * Unique requested date with an incrementing hour for each transformed media record
      * Unique file name with unique name for each transformed media record
+     *
      * @param count The number of transformed media objects that are to be generated
      * @return The list of generated media entities in chronological order
      */
