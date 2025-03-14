@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurati
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationPropertiesStrategy;
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
+import uk.gov.hmcts.darts.authentication.model.TokenResponse;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
@@ -85,7 +86,7 @@ class AuthenticationExternalUserControllerTest {
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         final String emailAddress = "test.user@example.com";
         when(authenticationService.handleOauthCode(anyString(), isNull()))
-            .thenReturn(createDummyAccessToken(List.of(emailAddress)));
+            .thenReturn(new TokenResponse(createDummyAccessToken(List.of(emailAddress)), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
             externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
         when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
@@ -120,7 +121,7 @@ class AuthenticationExternalUserControllerTest {
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         String accessToken = createDummyAccessToken(List.of("test.missing@example.com"));
         when(authenticationService.handleOauthCode(anyString(), isNull()))
-            .thenReturn(accessToken);
+            .thenReturn(new TokenResponse(accessToken, null));
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(Optional.empty());
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
@@ -162,7 +163,7 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithNullClaim() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString(), isNull()))
-            .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
+            .thenReturn(new TokenResponse(createDummyAccessToken(List.of("test.user@example.com")), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
             externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
 
@@ -178,7 +179,7 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithEmptyClaim() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString(), isNull()))
-            .thenReturn(createDummyAccessToken(new ArrayList<>()));
+            .thenReturn(new TokenResponse(createDummyAccessToken(new ArrayList<>()), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
             externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
         when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");

@@ -78,11 +78,13 @@ public class SecurityConfig {
                 "/metrics/**",
                 "/external-user/login-or-refresh",
                 "/external-user/handle-oauth-code",
+                "/external-user/refresh-access-token",
                 "/external-user/reset-password",
                 "/internal-user/login-or-refresh",
                 "/internal-user/handle-oauth-code",
+                "/internal-user/refresh-access-token",
                 "/",
-                // temporarily added to test the keep-alive code
+                // TODO temporarily added to test the keep-alive code
                 "/keep-alive-test",
                 "/keep-alive-test-stream"
             )
