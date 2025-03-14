@@ -34,7 +34,7 @@ variable "pgsqlSku" {
   default     = "GP_Standard_D4ds_v5"
 }
 
-variable "pgsql_storage_mb" {
+variable "pgsqlstoragemb" {
   description = "Max storage allowed for the PGSql Flexibile instance"
   type        = number
   default     = 165536
