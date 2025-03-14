@@ -22,6 +22,7 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,7 +73,7 @@ class AzureDaoImplTest {
     }
 
     @Test
-    void fetchAccessToken_ShouldThrowExceptionWhenAzureCallIsNotSuccessful_WithRedirectUrl() {
+    void fetchAccessToken_ShouldThrowException_WhenAzureCallIsNotSuccessful_WithRedirectUrl() {
         HTTPResponse failedResponse = mockFailedResponse();
         when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any())).thenReturn(failedResponse);
 
@@ -87,18 +88,22 @@ class AzureDaoImplTest {
 
     @Test
     void fetchAccessToken_ShouldReturnResponse_WhenAzureCallIsSuccessful_WithRefreshToken() throws AzureDaoException {
+        // given
         HTTPResponse response = mockSuccessResponse();
-        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any())).thenReturn(response);
+        when(azureActiveDirectoryB2CClient.fetchAccessToken(
+            any(AuthProviderConfigurationProperties.class), anyString(), anyString(), anyString(), anyString())).thenReturn(response);
 
+        // when
         OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken("REFRESH_TOKEN", authenticationProviderConfiguration, authenticationConfiguration);
 
+        // then
         assertEquals("test_id_token", rawResponse.getIdToken());
         assertEquals(1234L, rawResponse.getIdTokenExpiresIn());
     }
 
     @ParameterizedTest
     @NullAndEmptySource
-    void fetchAccessToken_ShouldThrowException_WhenRefreshTokenIsBlankOrNull(String refreshToken) {
+    void fetchAccessToken_ShouldThrowException_WhenRefreshTokenIsBlankOrNull_WithRefreshToken(String refreshToken) {
         AzureDaoException exception = assertThrows(AzureDaoException.class,
                                                    () -> azureDaoImpl.fetchAccessToken(refreshToken, authenticationProviderConfiguration,
                                                                                        authenticationConfiguration));
@@ -107,9 +112,10 @@ class AzureDaoImplTest {
     }
 
     @Test
-    void fetchAccessToken_ShouldThrowException_WhenAzureCallIsNotSuccessful() {
+    void fetchAccessToken_ShouldThrowException_WhenAzureCallIsNotSuccessful_WithRefreshToken() {
         HTTPResponse failedResponse = mockFailedResponse();
-        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any())).thenReturn(failedResponse);
+        when(azureActiveDirectoryB2CClient.fetchAccessToken(
+            any(AuthProviderConfigurationProperties.class), anyString(), anyString(), anyString(), anyString())).thenReturn(failedResponse);
 
         AzureDaoException exception = assertThrows(AzureDaoException.class,
                                                    () -> azureDaoImpl.fetchAccessToken("REFRESH_TOKEN", authenticationProviderConfiguration,

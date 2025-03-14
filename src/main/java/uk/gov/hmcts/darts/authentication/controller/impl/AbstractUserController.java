@@ -24,7 +24,7 @@ import java.util.Optional;
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public abstract class AbstractUserController implements AuthenticationController {
 
-    public static final String REDIRECT = "redirect:";
+    private static final String REDIRECT = "redirect:";
     private final AuthenticationService authenticationService;
     private final AuthorisationApi authorisationApi;
     protected final AuthStrategySelector locator;

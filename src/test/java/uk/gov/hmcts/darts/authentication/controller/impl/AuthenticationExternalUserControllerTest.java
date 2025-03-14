@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
 import uk.gov.hmcts.darts.common.service.UserAccountService;
 
 import java.net.URI;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -55,6 +56,7 @@ class AuthenticationExternalUserControllerTest {
     private static final URI DUMMY_LOGOUT_URI = URI.create("https://www.example.com/logout?param=value");
     private static final String DUMMY_CODE = "code";
     private static final String DUMMY_TOKEN = "token";
+    public static final String TEST_USER_EMAIL = "test.user@example.com";
 
     @InjectMocks
     private AuthenticationExternalUserController controller;
@@ -72,7 +74,7 @@ class AuthenticationExternalUserControllerTest {
     private ExternalAuthConfigurationProperties externalAuthConfigurationProperties;
 
     @Test
-    void loginAndRefreshShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
+    void loginAndRefresh_ShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
         when(authenticationService.loginOrRefresh(null, null))
             .thenReturn(DUMMY_AUTHORIZATION_URI);
 
@@ -83,8 +85,8 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
-        final String emailAddress = "test.user@example.com";
+    void handleOauthCode_FromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
+        final String emailAddress = TEST_USER_EMAIL;
         when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(new TokenResponse(createDummyAccessToken(List.of(emailAddress)), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
@@ -118,7 +120,7 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
+    void handleOauthCode_FromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         String accessToken = createDummyAccessToken(List.of("test.missing@example.com"));
         when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(new TokenResponse(accessToken, null));
@@ -163,7 +165,7 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithNullClaim() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString(), isNull()))
-            .thenReturn(new TokenResponse(createDummyAccessToken(List.of("test.user@example.com")), null));
+            .thenReturn(new TokenResponse(createDummyAccessToken(List.of(TEST_USER_EMAIL)), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
             externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
 
@@ -191,6 +193,44 @@ class AuthenticationExternalUserControllerTest {
 
         verify(authenticationService).handleOauthCode(DUMMY_CODE, null);
         verifyNoMoreInteractions(authenticationService, authorisationApi, userAccountService);
+    }
+
+    @Test
+    void refreshAccessToken_ShouldReturnSecurityTokenWithUserState() throws ParseException, JOSEException {
+        // given
+        String refreshToken = "dummyRefreshToken";
+        String accessToken = createDummyAccessToken(List.of(TEST_USER_EMAIL));
+        UserState userState = UserState.builder().userId(1).userName("Test User").build();
+
+        when(authenticationService.refreshAccessToken(refreshToken)).thenReturn(accessToken);
+        when(controller.parseEmailAddressFromAccessToken(accessToken)).thenReturn(Optional.of(TEST_USER_EMAIL));
+        when(authorisationApi.getAuthorisation(TEST_USER_EMAIL)).thenReturn(Optional.of(userState));
+
+        // when
+        SecurityToken securityToken = controller.refreshAccessToken(refreshToken);
+
+        // then
+        assertEquals(accessToken, securityToken.getAccessToken());
+        assertEquals(refreshToken, securityToken.getRefreshToken());
+        assertEquals(userState, securityToken.getUserState());
+    }
+
+    @Test
+    void refreshAccessToken_ShouldReturnSecurityTokenWithoutUserStateWhenEmailNotPresent() throws ParseException, JOSEException {
+        // given
+        String refreshToken = "dummyRefreshToken";
+        String accessToken = createDummyAccessToken(List.of(TEST_USER_EMAIL));
+
+        when(authenticationService.refreshAccessToken(refreshToken)).thenReturn(accessToken);
+        when(controller.parseEmailAddressFromAccessToken(accessToken)).thenReturn(Optional.empty());
+
+        // when
+        SecurityToken securityToken = controller.refreshAccessToken(refreshToken);
+
+        // then
+        assertEquals(accessToken, securityToken.getAccessToken());
+        assertEquals(refreshToken, securityToken.getRefreshToken());
+        assertEquals(null, securityToken.getUserState());
     }
 
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
