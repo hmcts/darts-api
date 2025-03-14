@@ -89,9 +89,9 @@ public class AdvancedSearchRequestHelper {
         if (StringUtils.isNotBlank(request.getCourtroom())) {
             Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
             Join<HearingEntity, CourtroomEntity> courtroomJoin = joinCourtroom(hearingJoin);
-            predicateList.add(criteriaBuilder.ilike(
+            predicateList.add(criteriaBuilder.equal(
                 courtroomJoin.get(CourtroomEntity_.NAME),
-                surroundWithPercentages(request.getCourtroom())
+                request.getCourtroom()
             ));
         }
         return predicateList;
@@ -100,23 +100,37 @@ public class AdvancedSearchRequestHelper {
     private List<Predicate> addCourthouseIdCriteria(Root<CourtCaseEntity> caseRoot, GetCasesSearchRequest request) throws AdvancedSearchNoResultsException {
         List<Predicate> predicateList = new ArrayList<>();
         List<Integer> courthouseIdsUserHasAccessTo = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
-        List<Integer> courtHousesToFilterOn = new ArrayList<>();
+        List<Integer> courthousesToFilterOn;
+        List<Integer> courthouseIdList = request.getCourthouseIds();
 
-        if (StringUtils.isNotBlank(request.getCourthouse())) {
-            List<Integer> courthouseIdList = courthouseRepository.findAllIdByDisplayNameOrNameLike(request.getCourthouse());
-            log.debug("Matching list of courthouse IDs for search = {}", courthouseIdList);
-            //Ensure user has access to the courthouses they are searching for
-            courtHousesToFilterOn = courthouseIdList.stream()
-                .filter(integer -> courthouseIdsUserHasAccessTo.contains(integer))
-                .toList();
-            if (courtHousesToFilterOn.isEmpty()) {
-                throw new AdvancedSearchNoResultsException();
-            }
+        if (CollectionUtils.isNotEmpty(request.getCourthouseIds())) {
+            courthousesToFilterOn = getCourthouseToFilter(courthouseIdList, courthouseIdsUserHasAccessTo);
+        } else if (StringUtils.isNotBlank(request.getCourthouse())) {
+            //FIXME: Remove this block once move to courthouse_ids has been merged (DMP-4912)
+            courthouseIdList = courthouseRepository.findAllIdByDisplayNameOrNameLike(request.getCourthouse());
+            courthousesToFilterOn = getCourthouseToFilter(courthouseIdList, courthouseIdsUserHasAccessTo);
         } else {
-            courtHousesToFilterOn = courthouseIdsUserHasAccessTo;
+            courthousesToFilterOn = courthouseIdsUserHasAccessTo;
         }
-        predicateList.add(caseRoot.get(CourtroomEntity_.COURTHOUSE).get(CourthouseEntity_.ID).in(courtHousesToFilterOn));
+
+        predicateList.add(caseRoot.get(
+            CourtroomEntity_.COURTHOUSE).get(CourthouseEntity_.ID).in(courthousesToFilterOn)
+        );
         return predicateList;
+    }
+
+    private List<Integer> getCourthouseToFilter(List<Integer> courthouseIdList, List<Integer> courthouseIdsUserHasAccessTo)
+        throws AdvancedSearchNoResultsException {
+        log.debug("Matching list of courthouse IDs for search = {}", courthouseIdList);
+        //Ensure user has access to the courthouses they are searching for
+        List<Integer> courthousesToFilterOn = courthouseIdList.stream()
+            .filter(courthouseIdsUserHasAccessTo::contains)
+            .toList();
+        if (courthousesToFilterOn.isEmpty()) {
+            throw new AdvancedSearchNoResultsException();
+        }
+
+        return courthousesToFilterOn;
     }
 
     private List<Predicate> addCaseCriteria(GetCasesSearchRequest request, HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {

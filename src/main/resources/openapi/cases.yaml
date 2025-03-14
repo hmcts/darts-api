@@ -926,6 +926,10 @@ components:
         courthouse:
           type: string
           example: Swansea
+        courthouse_ids:
+          type: array
+          items:
+            type: integer
         courtroom:
           type: string
           example: 2

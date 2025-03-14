@@ -338,8 +338,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourthouseCourtroom() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse(swanseaCourthouse.getCourthouseName())
-            .courtroom("roOm2")
+            .courthouseIds(List.of(swanseaCourthouse.getId()))
+            .courtroom("COURTROOM2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
@@ -352,11 +352,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void getWithCourthouseCourtroomWithoutAccess() throws IOException {
+    void getWithCourthouseCourtroomWithoutAccess() {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse(swanseaCourthouse.getCourthouseName())
-            .courtroom("roOm2")
+            .courthouseIds(List.of(swanseaCourthouse.getId()))
+            .courtroom("COURTROOM2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
@@ -367,6 +367,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     @Test
     void getWithCourthouseNotExist() {
+        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courthouse("jyguiyfgiytfuiytfuyrt")
@@ -380,6 +381,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     @Test
     void getWithCourthouse() {
+        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courthouse(swanseaCourthouse.getCourthouseName())
@@ -392,7 +394,21 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
+    void getWithCourthouseIds() {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouseIds(List.of(swanseaCourthouse.getId()))
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        assertEquals(9, resultList.size());
+    }
+
+    @Test
     void getWithCourthouseWithoutAccess() {
+        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courthouse(swanseaCourthouse.getCourthouseName())
@@ -405,10 +421,23 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
+    void getWithCourthouseIdsWithoutAccess() {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouseIds(List.of(swanseaCourthouse.getId()))
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        assertTrue(resultList.isEmpty());
+    }
+
+    @Test
     void getWithCourtroom() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroom("roOm2")
+            .courtroom("COURTROOM2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
@@ -424,7 +453,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourtroomWithoutAccess() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroom("roOm2")
+            .courtroom("COURTROOM2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
@@ -454,7 +483,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourtroomJudge() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroom("roOm3")
+            .courtroom("COURTROOM3")
             .judgeName("dGe6B")
             .build();
 

@@ -11,21 +11,21 @@
     "hearings": [
       {
         "date": "2023-05-20",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-05-21",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-05-22",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
@@ -45,21 +45,21 @@
     "hearings": [
       {
         "date": "2023-06-20",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-06-21",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-06-22",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
@@ -80,7 +80,7 @@
     "hearings": [
       {
         "date": "2023-07-20",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE",
           "JUDGE3A"
@@ -88,14 +88,14 @@
       },
       {
         "date": "2023-07-21",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-07-22",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
@@ -122,84 +122,14 @@
       },
       {
         "date": "2023-08-21",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-08-22",
-        "courtroom": "COURTROOM1",
-        "judges": [
-          "AJUDGE"
-        ]
-      }
-    ],
-    "is_data_anonymised": false
-  },
-  {
-    "case_number": "case5",
-    "courthouse": "SWANSEA",
-    "defendants": [
-      "aDefendant"
-    ],
-    "judges": [
-      "AJUDGE"
-    ],
-    "hearings": [
-      {
-        "date": "2023-09-20",
-        "courtroom": "COURTROOM2",
-        "judges": [
-          "AJUDGE"
-        ]
-      },
-      {
-        "date": "2023-09-21",
-        "courtroom": "COURTROOM1",
-        "judges": [
-          "AJUDGE"
-        ]
-      },
-      {
-        "date": "2023-09-22",
-        "courtroom": "COURTROOM3",
-        "judges": [
-          "AJUDGE"
-        ]
-      }
-    ],
-    "is_data_anonymised": false
-  },
-  {
-    "case_number": "case6",
-    "courthouse": "SWANSEA",
-    "defendants": [
-      "aDefendant"
-    ],
-    "judges": [
-      "JUDGE6B",
-      "AJUDGE"
-    ],
-    "hearings": [
-      {
-        "date": "2023-09-20",
-        "courtroom": "COURTROOM2",
-        "judges": [
-          "AJUDGE"
-        ]
-      },
-      {
-        "date": "2023-09-21",
-        "courtroom": "COURTROOM3",
-        "judges": [
-          "AJUDGE",
-          "JUDGE6B"
-        ]
-      },
-      {
-        "date": "2023-09-22",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.cases.util;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
@@ -35,7 +36,8 @@ public class RequestValidator {
      */
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     private static void checkComplexity(GetCasesSearchRequest request) {
-        boolean courthouseProvided = StringUtils.length(request.getCourthouse()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
+        boolean courthouseProvided = StringUtils.length(request.getCourthouse()) >= SEARCH_TEXT_LENGTH_THRESHOLD
+            || CollectionUtils.isNotEmpty(request.getCourthouseIds());
         boolean anyDateProvided = request.getDateFrom() != null || request.getDateTo() != null;
 
         if (courthouseProvided && anyDateProvided) {
