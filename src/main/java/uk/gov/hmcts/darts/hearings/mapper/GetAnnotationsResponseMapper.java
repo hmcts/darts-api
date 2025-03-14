@@ -19,7 +19,7 @@ public class GetAnnotationsResponseMapper {
         return emptyIfNull(annotationEntities)
             .stream()
             .map(annotationEntity -> mapToAnnotation(annotationEntity, hearingId))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private Annotation mapToAnnotation(AnnotationEntity annotationEntity, Integer hearingId) {

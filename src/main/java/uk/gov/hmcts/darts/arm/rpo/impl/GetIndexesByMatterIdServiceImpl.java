@@ -41,7 +41,7 @@ public class GetIndexesByMatterIdServiceImpl implements GetIndexesByMatterIdServ
         try {
             indexesByMatterIdResponse = armRpoClient.getIndexesByMatterId(bearerToken, createIndexesByMatterIdRequest(matterId));
         } catch (FeignException e) {
-            log.error(errorMessage.append(armRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
         log.debug("ARM RPO Response - IndexesByMatterIdResponse: {}", indexesByMatterIdResponse);

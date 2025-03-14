@@ -74,7 +74,7 @@ public class TranscriptionResponseMapper {
     public List<TranscriptionTypeResponse> mapToTranscriptionTypeResponses(List<TranscriptionTypeEntity> transcriptionTypeEntities) {
         return emptyIfNull(transcriptionTypeEntities).stream()
             .map(this::mapToTranscriptionTypeResponse)
-            .collect(toList());
+            .toList();
     }
 
     TranscriptionTypeResponse mapToTranscriptionTypeResponse(TranscriptionTypeEntity transcriptionTypeEntity) {
@@ -88,7 +88,7 @@ public class TranscriptionResponseMapper {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities) {
         return emptyIfNull(transcriptionUrgencyEntities).stream()
             .map(this::mapToTranscriptionUrgencyResponse)
-            .collect(toList());
+            .toList();
     }
 
     TranscriptionUrgencyResponse mapToTranscriptionUrgencyResponse(TranscriptionUrgencyEntity transcriptionUrgencyEntity) {
@@ -266,7 +266,7 @@ public class TranscriptionResponseMapper {
     private static List<ReportingRestriction> sortedByTimestamp(List<ReportingRestriction> reportingRestrictions) {
         return reportingRestrictions.stream()
             .sorted(comparing(ReportingRestriction::getEventTs))
-            .collect(toList());
+            .toList();
     }
 
     private static ReportingRestriction reportingRestrictionWithName(String name) {

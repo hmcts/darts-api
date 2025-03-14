@@ -247,7 +247,7 @@ class TranscriptionDownloaderTest {
     private List<ExternalObjectDirectoryEntity> someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(int quantity) {
         return rangeClosed(1, quantity).boxed()
             .map(i -> someExternalObjectDirectoryWithCreationDate(now().minusDays(2).minusDays(i)))
-            .collect(toList());
+            .toList();
     }
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryWithCreationDate(OffsetDateTime createdDateTime) {

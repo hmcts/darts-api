@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -34,7 +33,8 @@ public class SecurityGroupCourthouseMapper {
 
         Set<CourthouseEntity> courthouseEntities = securityGroupEntity.getCourthouseEntities();
         securityGroupWithIdAndRoleAndUsers.setCourthouseIds(courthouseEntities
-                                                                .stream().map(CourthouseEntity::getId).sorted().collect(Collectors.toList()));
+                                                                .stream().map(CourthouseEntity::getId).sorted()
+                                                                .toList());
 
         List<UserAccountEntity> nonSystemUsers = Optional.ofNullable(securityGroupEntity.getUsers())
             .map(usrs -> usrs.stream()

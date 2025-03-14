@@ -59,7 +59,7 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
         try {
             requestGenerator = createAddAsyncSearchRequestGenerator(searchName, executionDetail, armAutomatedTaskEntity, now);
         } catch (Exception e) {
-            throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append(armRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST)
+            throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append(ArmRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST)
                                                                  .append(e)
                                                                  .toString(),
                                                              executionDetail, userAccount);
