@@ -27,7 +27,6 @@ import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
 import uk.gov.hmcts.darts.common.service.UserAccountService;
 
 import java.net.URI;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -56,7 +55,7 @@ class AuthenticationExternalUserControllerTest {
     private static final URI DUMMY_LOGOUT_URI = URI.create("https://www.example.com/logout?param=value");
     private static final String DUMMY_CODE = "code";
     private static final String DUMMY_TOKEN = "token";
-    public static final String TEST_USER_EMAIL = "test.user@example.com";
+    private static final String TEST_USER_EMAIL = "test.user@example.com";
 
     @InjectMocks
     private AuthenticationExternalUserController controller;
@@ -152,7 +151,7 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void resetPasswordShouldReturnResetPageAsRedirect() {
+    void resetPassword_ShouldReturnResetPageAsRedirect() {
         when(authenticationService.resetPassword(any()))
             .thenReturn(DUMMY_AUTHORIZATION_URI);
 
@@ -163,7 +162,7 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void handleOauthCodeFromAzureWhenCodeIsReturnedWithNullClaim() throws JOSEException {
+    void handleOauthCode_FromAzureWhenCodeIsReturnedWithNullClaim() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(new TokenResponse(createDummyAccessToken(List.of(TEST_USER_EMAIL)), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
@@ -196,14 +195,26 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void refreshAccessToken_ShouldReturnSecurityTokenWithUserState() throws ParseException, JOSEException {
+    void refreshAccessToken_ShouldReturnSecurityTokenWithUserState() throws JOSEException {
         // given
         String refreshToken = "dummyRefreshToken";
         String accessToken = createDummyAccessToken(List.of(TEST_USER_EMAIL));
-        UserState userState = UserState.builder().userId(1).userName("Test User").build();
+        UserState userState = Optional.ofNullable(UserState.builder()
+                                                      .userId(-1)
+                                                      .isActive(true)
+                                                      .userName("Test User")
+                                                      .roles(Set.of(UserStateRole.builder()
+                                                                        .roleId(TRANSCRIBER.getId())
+                                                                        .roleName(TRANSCRIBER.toString())
+                                                                        .globalAccess(false)
+                                                                        .permissions(new HashSet<>())
+                                                                        .build()))
+                                                      .build()).get();
 
         when(authenticationService.refreshAccessToken(refreshToken)).thenReturn(accessToken);
-        when(controller.parseEmailAddressFromAccessToken(accessToken)).thenReturn(Optional.of(TEST_USER_EMAIL));
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
+            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+        when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
         when(authorisationApi.getAuthorisation(TEST_USER_EMAIL)).thenReturn(Optional.of(userState));
 
         // when
@@ -216,13 +227,15 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void refreshAccessToken_ShouldReturnSecurityTokenWithoutUserStateWhenEmailNotPresent() throws ParseException, JOSEException {
+    void refreshAccessToken_ShouldReturnSecurityTokenWithoutUserStateWhenEmailNotPresent() throws JOSEException {
         // given
         String refreshToken = "dummyRefreshToken";
         String accessToken = createDummyAccessToken(List.of(TEST_USER_EMAIL));
 
         when(authenticationService.refreshAccessToken(refreshToken)).thenReturn(accessToken);
-        when(controller.parseEmailAddressFromAccessToken(accessToken)).thenReturn(Optional.empty());
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
+            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+        when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
 
         // when
         SecurityToken securityToken = controller.refreshAccessToken(refreshToken);
@@ -233,9 +246,8 @@ class AuthenticationExternalUserControllerTest {
         assertEquals(null, securityToken.getUserState());
     }
 
-    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     private String createDummyAccessToken(List<String> emails) throws JOSEException {
-        RSAKey rsaKey = new RSAKeyGenerator(2048)
+        RSAKey rsaKey = new RSAKeyGenerator(2_048)
             .keyID("123")
             .generate();
 
@@ -244,16 +256,16 @@ class AuthenticationExternalUserControllerTest {
             .issuer(String.format("https://<tenant-name>.b2clogin.com/%s/v2.0/", UUID.randomUUID().toString()))
             .subject(UUID.randomUUID().toString())
             .audience(UUID.randomUUID().toString())
-            .expirationTime(new Date(1690973493))
+            .expirationTime(new Date(1_690_973_493))
             .claim("nonce", "defaultNonce")
-            .issueTime(new Date(1690969893))
-            .claim("auth_time", new Date(1690969893))
+            .issueTime(new Date(1_690_969_893))
+            .claim("auth_time", new Date(1_690_969_893))
             .claim("emails", emails)
             .claim("name", "Test User")
             .claim("given_name", "Test")
             .claim("family_name", "User")
             .claim("tfp", "policy_name")
-            .claim("nbf", new Date(1690969893))
+            .claim("nbf", new Date(1_690_969_893))
             .build();
 
         SignedJWT signedJwt = new SignedJWT(

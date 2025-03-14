@@ -90,6 +90,9 @@ class AzureDaoImplTest {
     void fetchAccessToken_ShouldReturnResponse_WhenAzureCallIsSuccessful_WithRefreshToken() throws AzureDaoException {
         // given
         HTTPResponse response = mockSuccessResponse();
+        when(authenticationConfiguration.getClientId()).thenReturn("CLIENT_ID");
+        when(authenticationConfiguration.getClientSecret()).thenReturn("CLIENT_SECRET");
+        when(authenticationConfiguration.getScope()).thenReturn("SCOPE");
         when(azureActiveDirectoryB2CClient.fetchAccessToken(
             any(AuthProviderConfigurationProperties.class), anyString(), anyString(), anyString(), anyString())).thenReturn(response);
 
@@ -114,6 +117,9 @@ class AzureDaoImplTest {
     @Test
     void fetchAccessToken_ShouldThrowException_WhenAzureCallIsNotSuccessful_WithRefreshToken() {
         HTTPResponse failedResponse = mockFailedResponse();
+        when(authenticationConfiguration.getClientId()).thenReturn("CLIENT_ID");
+        when(authenticationConfiguration.getClientSecret()).thenReturn("CLIENT_SECRET");
+        when(authenticationConfiguration.getScope()).thenReturn("SCOPE");
         when(azureActiveDirectoryB2CClient.fetchAccessToken(
             any(AuthProviderConfigurationProperties.class), anyString(), anyString(), anyString(), anyString())).thenReturn(failedResponse);
 
