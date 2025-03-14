@@ -1,0 +1,70 @@
+[
+  {
+    "case_number": "Case1",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "hearings": [
+      {
+        "date": "2023-05-20",
+        "courtroom": "1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "date": "2023-05-21",
+        "courtroom": "1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "date": "2023-05-22",
+        "courtroom": "1",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_number": "Case7",
+    "courthouse": "MyCourthouseDisplayName",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "hearings": [
+      {
+        "date": "2023-05-20",
+        "courtroom": "COURTROOM7",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "date": "2023-05-21",
+        "courtroom": "COURTROOM7",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "date": "2023-05-22",
+        "courtroom": "COURTROOM7",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false
+  }
+]
