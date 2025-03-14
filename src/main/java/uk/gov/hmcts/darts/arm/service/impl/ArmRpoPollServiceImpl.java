@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -191,10 +192,11 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         try {
             for (var tempProductionFile : tempProductionFiles) {
                 if (tempProductionFile.exists()) {
-                    if (tempProductionFile.delete()) {
+                    try {
+                        Files.delete(tempProductionFile.toPath());
                         log.info("Deleted temp production file {}", tempProductionFile.getName());
-                    } else {
-                        log.warn("Failed to delete temp production file {}", tempProductionFile.getName());
+                    } catch (Exception e) {
+                        log.error("Failed to delete temp production file {}", tempProductionFile.getName(), e);
                     }
                 }
             }
