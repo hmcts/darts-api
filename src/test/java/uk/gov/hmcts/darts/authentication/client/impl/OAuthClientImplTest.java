@@ -11,8 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,11 +31,14 @@ class OAuthClientImplTest {
 
     @Test
     void fetchAccessToken_ShouldReturnResponseWhenAzureCallIsSuccessful() {
+        // given
         HTTPResponse response = mockSuccessResponse();
         when(oAuthClientImpl.fetchAccessToken(any(), any(), any(), any(), any())).thenReturn(response);
 
+        // when
         HTTPResponse result = oAuthClientImpl.fetchAccessToken(providerConfigurationProperties, "REFRESH_TOKEN", "CLIENT_ID", "CLIENT_SECRET", "SCOPE");
 
+        // then
         assertEquals(HttpStatus.SC_OK, result.getStatusCode());
         assertEquals("{\"id_token\":\"test_id_token\", \"id_token_expires_in\":\"1234\"}", result.getContent());
     }
@@ -45,17 +46,21 @@ class OAuthClientImplTest {
     @ParameterizedTest
     @NullAndEmptySource
     void fetchAccessToken_ShouldThrowExceptionWhenRefreshTokenIsBlankOrNull(String refreshToken) {
+        // when
         assertThrows(IllegalArgumentException.class,
                      () -> oAuthClientImpl.fetchAccessToken(providerConfigurationProperties, refreshToken, "CLIENT_ID", "CLIENT_SECRET", "SCOPE"));
     }
 
     @Test
-    void fetchAccessToken_ShouldThrowExceptionWhenAzureCallIsNotSuccessful() throws IOException {
+    void fetchAccessToken_ShouldThrowExceptionWhenAzureCallIsNotSuccessful() {
+        // given
         HTTPResponse failedResponse = mockFailedResponse();
         when(oAuthClientImpl.fetchAccessToken(any(), any(), any(), any(), any())).thenReturn(failedResponse);
 
+        // when
         HTTPResponse result = oAuthClientImpl.fetchAccessToken(providerConfigurationProperties, "REFRESH_TOKEN", "CLIENT_ID", "CLIENT_SECRET", "SCOPE");
 
+        // then
         assertEquals(HttpStatus.SC_BAD_REQUEST, result.getStatusCode());
         assertEquals("body", result.getContent());
     }
