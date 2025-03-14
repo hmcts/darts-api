@@ -52,7 +52,7 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
     @Test
     void findsEventsByCaseNumberOnly() {
         var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
-        var persistedEventsForHearing = given.persistedEventsForHearing(3, hearing);
+        var persistedEventsForHearing = given.persistedEventsForHearing(3, hearing, true);
         given.persistedEvents(3);  // Persist some other events for the other hearings
 
         var eventSearchResults = eventSearchService.searchForEvents(
@@ -126,6 +126,19 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
         assertThat(eventSearchResults)
             .extracting("id")
             .isEqualTo(idsOf(persistedEvents));
+    }
+
+    @Test
+    void searchForEvent_shouldNotFindEvent_whenIsCurrentFalse() {
+        var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
+        given.persistedEventsForHearing(3, hearing, false);
+        given.persistedEvents(3);  // Persist some other events for the other hearings
+
+        var eventSearchResults = eventSearchService.searchForEvents(
+            new AdminEventSearch()
+                .caseNumber(hearing.getCourtCase().getCaseNumber()));
+
+        assertThat(eventSearchResults).isEmpty();
     }
 
 
