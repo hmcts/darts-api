@@ -45,12 +45,12 @@ INSERT INTO revinfo (rev, revtstmp, audit_user)
 INSERT INTO security_group_aud (grp_id, group_name, display_name, description, rev, revtype)
     SELECT grp_id, group_name, display_name, null, currval('revinfo_seq'), 0
     FROM security_group
-    WHERE group_name = 'moj_ch_harrow_cc_at_he_appr';
+    WHERE group_name = 'moj_ch_burnley_cc_at_he_appr';
 
 
 INSERT INTO security_group_courthouse_ae (grp_id, cth_id)
 VALUES (
-    (SELECT grp_id FROM security_group WHERE group_name = 'moj_ch_harrow_cc_at_he_staff'),
+    (SELECT grp_id FROM security_group WHERE group_name = 'moj_ch_burnley_cc_at_he_staff'),
     (SELECT cth_id FROM courthouse WHERE courthouse_name = 'BURNLEY CC SITTING AT BURNLEY MC'));
 
 INSERT INTO revinfo (rev, revtstmp, audit_user)
@@ -59,12 +59,12 @@ INSERT INTO revinfo (rev, revtstmp, audit_user)
 INSERT INTO security_group_courthouse_ae_aud
     SELECT grp_id, cth_id, currval('revinfo_seq'), 0 as revtype
     FROM security_group_courthouse_ae
-    WHERE grp_id = (SELECT grp_id FROM security_group WHERE group_name = 'moj_ch_harrow_cc_at_he_staff');
+    WHERE grp_id = (SELECT grp_id FROM security_group WHERE group_name = 'moj_ch_burnley_cc_at_he_staff');
 
 
 INSERT INTO security_group_courthouse_ae (grp_id, cth_id)
 VALUES (
-    (SELECT grp_id FROM security_group WHERE group_name = 'moj_ch_harrow_cc_at_he_appr'),
+    (SELECT grp_id FROM security_group WHERE group_name = 'moj_ch_burnley_cc_at_he_appr'),
     (SELECT cth_id FROM courthouse WHERE courthouse_name = 'BURNLEY CC SITTING AT BURNLEY MC'));
 
 INSERT INTO revinfo (rev, revtstmp, audit_user)
@@ -73,7 +73,7 @@ INSERT INTO revinfo (rev, revtstmp, audit_user)
 INSERT INTO security_group_courthouse_ae_aud
     SELECT grp_id, cth_id, currval('revinfo_seq'), 0 as revtype
     FROM security_group_courthouse_ae
-    WHERE grp_id = (SELECT grp_id FROM security_group WHERE group_name = 'moj_ch_harrow_cc_at_he_appr');
+    WHERE grp_id = (SELECT grp_id FROM security_group WHERE group_name = 'moj_ch_burnley_cc_at_he_appr');
 
 
 INSERT INTO security_group_courthouse_ae (grp_id, cth_id)
