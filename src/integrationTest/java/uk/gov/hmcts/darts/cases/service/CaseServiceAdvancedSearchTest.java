@@ -394,7 +394,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void getWithCourthouseIds() {
+    void getWithCourthouseIds() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courthouseIds(List.of(swanseaCourthouse.getId()))
@@ -403,7 +403,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertEquals(9, resultList.size());
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithCourthouse/expectedResponse.json"));
+        compareJson(actualResponse, expectedResponse);
     }
 
     @Test

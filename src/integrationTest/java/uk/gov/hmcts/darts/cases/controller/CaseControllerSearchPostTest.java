@@ -164,7 +164,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchByCourthouseIdsPostEndpoint() throws Exception {
+    void casesSearchByCourthouseIdsPost_shouldReturnCasesMatchingSearchCriteria_whenCourthouseIdProvided() throws Exception {
         setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse));
         String requestBody = """
             {
@@ -188,7 +188,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchWithMultipleCourthouseIdsPostEndpoint() throws Exception {
+    void casesSearchByCourthouseIdsPost_shouldReturnCasesMatchingSearchCriteria_whenMultipleCourthouseIdsProvided() throws Exception {
 
         setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse, myCourthouseWithDifferentDisplayName));
         String requestBody = """
