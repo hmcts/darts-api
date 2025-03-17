@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationPropert
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +34,8 @@ class OAuthClientImplTest {
     void fetchAccessToken_ShouldReturnResponseWhenAzureCallIsSuccessful() {
         // given
         HTTPResponse response = mockSuccessResponse();
-        when(oAuthClientImpl.fetchAccessToken(any(), any(), any(), any(), any())).thenReturn(response);
+        when(providerConfigurationProperties.getTokenUri()).thenReturn("http://token.uri");
+        when(oAuthClientImpl.fetchAccessToken(any(), anyString(), anyString(), anyString(), anyString())).thenReturn(response);
 
         // when
         HTTPResponse result = oAuthClientImpl.fetchAccessToken(providerConfigurationProperties, "REFRESH_TOKEN", "CLIENT_ID", "CLIENT_SECRET", "SCOPE");
@@ -55,6 +57,7 @@ class OAuthClientImplTest {
     void fetchAccessToken_ShouldThrowExceptionWhenAzureCallIsNotSuccessful() {
         // given
         HTTPResponse failedResponse = mockFailedResponse();
+        when(providerConfigurationProperties.getTokenUri()).thenReturn("http://token.uri");
         when(oAuthClientImpl.fetchAccessToken(any(), any(), any(), any(), any())).thenReturn(failedResponse);
 
         // when

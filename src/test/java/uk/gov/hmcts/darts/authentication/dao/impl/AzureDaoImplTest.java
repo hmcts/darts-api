@@ -44,8 +44,8 @@ class AzureDaoImplTest {
     @Test
     void fetchAccessToken_ShouldReturnResponse_WhenAzureCallIsSuccessful_WithRedirectUrl() throws AzureDaoException {
         HTTPResponse response = mockSuccessResponse();
-        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any())).thenReturn(
-            response);
+        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any()))
+            .thenReturn(response);
 
         OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken(
             "CODE",
@@ -107,9 +107,9 @@ class AzureDaoImplTest {
     @ParameterizedTest
     @NullAndEmptySource
     void fetchAccessToken_ShouldThrowException_WhenRefreshTokenIsBlankOrNull_WithRefreshToken(String refreshToken) {
-        AzureDaoException exception = assertThrows(AzureDaoException.class,
-                                                   () -> azureDaoImpl.fetchAccessToken(refreshToken, authenticationProviderConfiguration,
-                                                                                       authenticationConfiguration));
+        AzureDaoException exception = assertThrows(
+            AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(refreshToken, authenticationProviderConfiguration,
+                                                                         authenticationConfiguration));
 
         assertEquals("Null refresh token not permitted", exception.getMessage());
     }
