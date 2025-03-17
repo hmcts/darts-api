@@ -140,7 +140,7 @@ class AudioLinkingAutomatedTaskTest {
             eventProcessor.processEvent(1);
 
             verify(mediaLinkedCaseHelper, times(1))
-                .linkMediaByEvent(event, mediaEntities.get(0), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+                .linkMediaByEvent(event, mediaEntities.getFirst(), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaLinkedCaseHelper, times(1))
                 .linkMediaByEvent(event, mediaEntities.get(1), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaLinkedCaseHelper, times(1))
@@ -178,7 +178,7 @@ class AudioLinkingAutomatedTaskTest {
             eventProcessor.processEvent(2);
 
             verify(mediaLinkedCaseHelper, times(1))
-                .linkMediaByEvent(event, mediaEntities.get(0), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+                .linkMediaByEvent(event, mediaEntities.getFirst(), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaLinkedCaseHelper, times(1))
                 .linkMediaByEvent(event, mediaEntities.get(1), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaLinkedCaseHelper, times(1))

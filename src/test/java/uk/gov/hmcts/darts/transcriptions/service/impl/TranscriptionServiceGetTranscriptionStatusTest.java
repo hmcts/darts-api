@@ -32,9 +32,9 @@ class TranscriptionServiceGetTranscriptionStatusTest {
 
         List<TranscriptionStatus> transcriptionStatuses = transcriptionService.getTranscriptionStatuses();
 
-        assertEquals(1, transcriptionStatuses.get(0).getId());
-        assertEquals("Requested", transcriptionStatuses.get(0).getType());
-        assertEquals("Requested", transcriptionStatuses.get(0).getDisplayName());
+        assertEquals(1, transcriptionStatuses.getFirst().getId());
+        assertEquals("Requested", transcriptionStatuses.getFirst().getType());
+        assertEquals("Requested", transcriptionStatuses.getFirst().getDisplayName());
 
         verify(mockTranscriptionStatusRepository, times(1)).findAll();
 

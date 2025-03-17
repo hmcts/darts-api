@@ -12,7 +12,7 @@ public final class CaseDocumentTestData implements Persistable<TestCaseDocumentE
     private final CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalCase();
 
     CaseDocumentTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     @Override

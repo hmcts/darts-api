@@ -21,10 +21,11 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 public final class HearingTestData
     implements Persistable<TestHearingEntity.TestHearingEntityBuilderRetrieve, HearingEntity, TestHearingEntity.TestHearingEntityBuilder> {
 
-    HearingTestData() {
-    }
-
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 20);
+
+    HearingTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
+    }
 
     public HearingEntity someMinimalHearing() {
         var minimalCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();

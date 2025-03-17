@@ -114,10 +114,10 @@ class OutboundFileProcessorImplTest {
 
         // Then
         assertEquals(1, sessions.size());
-        List<AudioFileInfo> session = sessions.get(0);
+        List<AudioFileInfo> session = sessions.getFirst();
 
         assertEquals(1, session.size());
-        assertEquals(trimmedAudioFileInfo, session.get(0));
+        assertEquals(trimmedAudioFileInfo, session.getFirst());
 
         verify(audioOperationService).trim(
             "",
@@ -177,14 +177,14 @@ class OutboundFileProcessorImplTest {
 
         // Then
         assertEquals(2, sessions.size());
-        List<AudioFileInfo> firstSession = sessions.get(0);
+        List<AudioFileInfo> firstSession = sessions.getFirst();
         List<AudioFileInfo> secondSession = sessions.get(1);
 
         assertEquals(1, firstSession.size());
-        assertEquals(firstTrimmedAudioFileInfo, firstSession.get(0));
+        assertEquals(firstTrimmedAudioFileInfo, firstSession.getFirst());
 
         assertEquals(1, secondSession.size());
-        assertEquals(secondTrimmedAudioFileInfo, secondSession.get(0));
+        assertEquals(secondTrimmedAudioFileInfo, secondSession.getFirst());
 
         verify(audioOperationService).trim(
             "",
@@ -262,10 +262,10 @@ class OutboundFileProcessorImplTest {
 
         // Then
         assertEquals(1, sessions.size());
-        List<AudioFileInfo> session = sessions.get(0);
+        List<AudioFileInfo> session = sessions.getFirst();
 
         assertEquals(2, session.size());
-        assertEquals(firstTrimmedAudioFileInfo, session.get(0));
+        assertEquals(firstTrimmedAudioFileInfo, session.getFirst());
         assertEquals(secondTrimmedAudioFileInfo, session.get(1));
 
         verify(audioOperationService).trim(
@@ -343,14 +343,14 @@ class OutboundFileProcessorImplTest {
 
         // Then
         assertEquals(2, sessions.size());
-        List<AudioFileInfo> firstSession = sessions.get(0);
+        List<AudioFileInfo> firstSession = sessions.getFirst();
         List<AudioFileInfo> secondSession = sessions.get(1);
 
         assertEquals(1, firstSession.size());
-        assertEquals(firstTrimmedAudioFileInfo, firstSession.get(0));
+        assertEquals(firstTrimmedAudioFileInfo, firstSession.getFirst());
 
         assertEquals(1, secondSession.size());
-        assertEquals(secondTrimmedAudioFileInfo, secondSession.get(0));
+        assertEquals(secondTrimmedAudioFileInfo, secondSession.getFirst());
 
         verify(audioOperationService).trim(
             "",
@@ -522,7 +522,7 @@ class OutboundFileProcessorImplTest {
 
         // Then
         assertEquals(3, sessions.size());
-        List<AudioFileInfo> firstSession = sessions.get(0);
+        List<AudioFileInfo> firstSession = sessions.getFirst();
         assertEquals(4, firstSession.size());
 
         List<AudioFileInfo> secondSession = sessions.get(1);
@@ -536,7 +536,7 @@ class OutboundFileProcessorImplTest {
                          .channel(1)
                          .mediaFile("0002.a00")
                          .build(),
-                     secondSession.get(0));
+                     secondSession.getFirst());
         assertEquals(session2UntrimmedAudioFileInfoBuilder
                          .channel(2)
                          .mediaFile("0002.a01")
@@ -924,7 +924,7 @@ class OutboundFileProcessorImplTest {
         List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
 
         assertEquals(3, sessions.size());
-        AudioFileInfo firstSession = sessions.get(0);
+        AudioFileInfo firstSession = sessions.getFirst();
         AudioFileInfo secondSession = sessions.get(1);
 
         assertEquals(reEncodedAudioFileInfo1, firstSession);
@@ -1003,7 +1003,7 @@ class OutboundFileProcessorImplTest {
         List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_10_01, TIME_11_59);
 
         assertEquals(2, sessions.size());
-        AudioFileInfo firstSession = sessions.get(0);
+        AudioFileInfo firstSession = sessions.getFirst();
         AudioFileInfo secondSession = sessions.get(1);
 
         assertEquals(TIME_10_01.toInstant(), firstSession.getStartTime());

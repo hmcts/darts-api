@@ -19,9 +19,9 @@ public class CourthouseStubComposable {
     private final UserAccountRepository userAccountRepository;
 
     public CourthouseEntity createCourthouseUnlessExists(String name) {
-        String nameUC = StringUtils.toRootUpperCase(name);
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(nameUC);
-        return foundCourthouse.orElseGet(() -> createCourthouse(nameUC));
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(name));
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(courthouseNameUpperTrimmed);
+        return foundCourthouse.orElseGet(() -> createCourthouse(courthouseNameUpperTrimmed));
     }
 
     private CourthouseEntity createCourthouse(String name) {

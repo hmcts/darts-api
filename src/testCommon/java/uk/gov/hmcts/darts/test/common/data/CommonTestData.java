@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 public final class CommonTestData {
 
     private CommonTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     // Can probably be simplified

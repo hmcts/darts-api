@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
@@ -65,8 +64,6 @@ class AnnotationUploadTest {
     private HearingEntity hearing;
     @Mock
     private AuditApi auditApi;
-    @Mock
-    private UserAccountEntity userAccountEntity;
 
     private final AnnotationEntity annotationEntity = someAnnotationEntity();
     private final AnnotationDocumentEntity annotationDocumentEntity = someAnnotationDocument();
@@ -98,7 +95,8 @@ class AnnotationUploadTest {
     void throwsIfUploadingDataToContainersFails() {
         when(annotationDataManagement.upload(any(), any())).thenThrow(new DartsApiException(FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT));
 
-        assertThatThrownBy(() -> uploadService.upload(someMultipartFile(), someAnnotationFor(hearing)))
+        Annotation annotation = someAnnotationFor(hearing);
+        assertThatThrownBy(() -> uploadService.upload(someMultipartFile(), annotation))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
 
@@ -107,7 +105,8 @@ class AnnotationUploadTest {
 
     @Test
     void throwsIfDocumentInputStreamFails() {
-        assertThatThrownBy(() -> uploadService.upload(someMultipartFileWithBadInputStream(), someAnnotationFor(hearing)))
+        Annotation annotation = someAnnotationFor(hearing);
+        assertThatThrownBy(() -> uploadService.upload(someMultipartFileWithBadInputStream(), annotation))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
 
@@ -138,7 +137,7 @@ class AnnotationUploadTest {
     void makesCallToPersistsEntities() {
         var externalBlobLocations = someExternalBlobLocations();
         when(annotationMapper.mapFrom(any())).thenReturn(annotationEntity);
-        when(annotationDocumentBuilder.buildFrom(any(), any(), any())).thenReturn(annotationDocumentEntity);
+        when(annotationDocumentBuilder.buildFrom(any(), any())).thenReturn(annotationDocumentEntity);
         when(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, externalBlobLocations.get(INBOUND), INBOUND))
             .thenReturn(externalObjectDirectoryEntityForInboundContainer);
         when(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, externalBlobLocations.get(UNSTRUCTURED), UNSTRUCTURED))

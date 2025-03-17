@@ -166,7 +166,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case5PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case5PerfectlyClosed, 1, 1);
 
-        var hearA1 = case1PerfectlyClosed.getHearings().get(0);
+        var hearA1 = case1PerfectlyClosed.getHearings().getFirst();
         hearA1.setScheduledStartTime(LocalTime.NOON);
         var hearA2 = case1PerfectlyClosed.getHearings().get(1);
         hearA2.setScheduledStartTime(LocalTime.NOON);

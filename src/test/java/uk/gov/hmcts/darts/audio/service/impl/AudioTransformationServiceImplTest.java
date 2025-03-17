@@ -265,8 +265,8 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(2, mediaEntitiesResult.size());
-        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_00, mediaEntitiesResult.getFirst().getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.getFirst().getEnd());
         assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
         assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
     }
@@ -285,8 +285,8 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(2, mediaEntitiesResult.size());
-        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_00, mediaEntitiesResult.getFirst().getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.getFirst().getEnd());
         assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
         assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
     }
@@ -322,8 +322,8 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(2, mediaEntitiesResult.size());
-        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_00, mediaEntitiesResult.getFirst().getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.getFirst().getEnd());
         assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
         assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
     }
@@ -358,8 +358,8 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(2, mediaEntitiesResult.size());
-        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_00, mediaEntitiesResult.getFirst().getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.getFirst().getEnd());
         assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
         assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
     }
@@ -390,8 +390,8 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(2, mediaEntitiesResult.size());
-        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_00, mediaEntitiesResult.getFirst().getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.getFirst().getEnd());
         assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
         assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
     }
@@ -422,7 +422,7 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(3, mediaEntitiesResult.size());
-        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_12_00, mediaEntitiesResult.getFirst().getStart());
         assertEquals(TIME_13_00, mediaEntitiesResult.get(2).getEnd());
     }
 
@@ -440,7 +440,7 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(3, mediaEntitiesResult.size());
-        assertEquals(TIME_12_01, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_12_01, mediaEntitiesResult.getFirst().getStart());
         assertEquals(TIME_12_59, mediaEntitiesResult.get(2).getEnd());
     }
 
@@ -458,7 +458,7 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(3, mediaEntitiesResult.size());
-        assertEquals(TIME_11_59, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_11_59, mediaEntitiesResult.getFirst().getStart());
         assertEquals(TIME_13_01, mediaEntitiesResult.get(2).getEnd());
     }
 
@@ -476,8 +476,8 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(1, mediaEntitiesResult.size());
-        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_12_40, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_20, mediaEntitiesResult.getFirst().getStart());
+        assertEquals(TIME_12_40, mediaEntitiesResult.getFirst().getEnd());
     }
 
     @Test
@@ -494,8 +494,8 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(1, mediaEntitiesResult.size());
-        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_12_40, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_20, mediaEntitiesResult.getFirst().getStart());
+        assertEquals(TIME_12_40, mediaEntitiesResult.getFirst().getEnd());
     }
 
     @Test
@@ -528,8 +528,8 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(1, mediaEntitiesResult.size());
-        assertEquals(TIME_10_05, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_10_10, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_10_05, mediaEntitiesResult.getFirst().getStart());
+        assertEquals(TIME_10_10, mediaEntitiesResult.getFirst().getEnd());
     }
 
     @Test
@@ -546,7 +546,7 @@ class AudioTransformationServiceImplTest {
 
         // then
         assertEquals(2, mediaEntitiesResult.size());
-        assertEquals(TIME_09_59, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_09_59, mediaEntitiesResult.getFirst().getStart());
         assertEquals(TIME_10_10, mediaEntitiesResult.get(1).getEnd());
     }
 
@@ -619,7 +619,7 @@ class AudioTransformationServiceImplTest {
         assertEquals(MOCK_HEARING_DATE_BST_FORMATTED, actual.getTemplateValues().get(HEARING_DATE));
         assertEquals(MOCK_COURTHOUSE_NAME, actual.getTemplateValues().get(COURTHOUSE));
         assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
-        assertEquals(mockUserAccountEntity, actual.getUserAccountsToEmail().get(0));
+        assertEquals(mockUserAccountEntity, actual.getUserAccountsToEmail().getFirst());
         assertEquals(actual.getEventId(), NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
         assertEquals(MOCK_CASEID, actual.getCaseId());
     }

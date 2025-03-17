@@ -100,12 +100,13 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
             .createTranscriptionDocument(fileName, fileBytes, fileType, hidden, transcriptionEntity);
 
         ObjectAdminActionEntity adminActionEntity = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                                                .transcriptionDocument(transcriptionDocumentEntity)
-                                                .objectHiddenReason(objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
-                                                .markedForManualDeletion(false)
-                                                .markedForManualDelBy(null)
-                                                .markedForManualDelDateTime(null)
-                                                .build());
+                                                                                            .transcriptionDocument(transcriptionDocumentEntity)
+                                                                                            .objectHiddenReason(
+                                                                                                objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                                                            .markedForManualDeletion(false)
+                                                                                            .markedForManualDelBy(null)
+                                                                                            .markedForManualDelDateTime(null)
+                                                                                            .build());
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(getUrl(transcriptionDocumentEntity.getId().toString()))
                                                   .header("Content-Type", "application/json"))
@@ -186,12 +187,12 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
         // assert additional audit data
         assertFalse(caseExpiredAuditEntries.isEmpty());
         assertEquals(1, caseExpiredAuditEntries.size());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
-        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedDateTime());
+        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.getFirst().getUser().getId());
+        assertNull(caseExpiredAuditEntries.getFirst().getCourtCase());
     }
 
 }

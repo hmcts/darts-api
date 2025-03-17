@@ -43,7 +43,7 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
             throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
         }
 
-        final ExternalObjectDirectoryEntity latestExternalObjectDirectoryEntity = externalObjectDirectoryEntities.get(0);
+        final ExternalObjectDirectoryEntity latestExternalObjectDirectoryEntity = externalObjectDirectoryEntities.getFirst();
 
         final Resource blobStream = annotationDataManagement.download(externalObjectDirectoryEntities);
 

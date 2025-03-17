@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.admin.test;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.RandomStringGenerator;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,12 +43,10 @@ import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.lang.Integer.parseInt;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -60,6 +59,8 @@ import static org.springframework.http.HttpStatus.OK;
 @SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement", "PMD.TestClassWithoutTestCases"})
 public class TestSupportController {
 
+    private static final String FUNCTIONAL_TEST_KEY = "FUNC-";
+    private static final String IDS = "ids";
     private final SessionFactory sessionFactory;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
@@ -76,7 +77,7 @@ public class TestSupportController {
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
 
-    @SuppressWarnings({"unchecked", "PMD.CloseResource"})
+    @SuppressWarnings({"PMD.CloseResource"})
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
         Session session = sessionFactory.openSession();
@@ -168,13 +169,13 @@ public class TestSupportController {
 
         session.createNativeQuery("""
                                       delete from darts.courtroom where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.security_group_courthouse_ae where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.courthouse where cth_id in ( :ids ) 
-                                      """).setParameter("ids", courthouseIds).executeUpdate();
+                                      """).setParameter(IDS, courthouseIds).executeUpdate();
     }
 
     @PostMapping(value = "/courthouse/{courthouse_name}/courtroom/{courtroom_name}")
@@ -183,14 +184,14 @@ public class TestSupportController {
         @PathVariable(name = "courthouse_name") String courthouseName,
         @PathVariable(name = "courtroom_name") String courtroomName) {
 
-        if (!courthouseName.startsWith("FUNC-")) {
+        if (!courthouseName.startsWith(FUNCTIONAL_TEST_KEY)) {
             return new ResponseEntity<>("Courthouse name must start with FUNC-", BAD_REQUEST);
         }
-        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName));
 
-        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUC, courtroomName).isEmpty()) {
-            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUC)
-                .orElseGet(() -> newCourthouse(courthouseNameUC));
+        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUpperTrimmed, courtroomName).isEmpty()) {
+            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUpperTrimmed)
+                .orElseGet(() -> newCourthouse(courthouseNameUpperTrimmed));
 
             newUserCourthousePermissions(courthouse);
             newCourtroom(courtroomName, courthouse);
@@ -226,7 +227,8 @@ public class TestSupportController {
         courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(courthouseName));
+        Optional<CourthouseEntity> foundCourthouse =
+            courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName)));
         if (foundCourthouse.isPresent()) {
             courtCase.setCourthouse(foundCourthouse.get());
         } else {
@@ -382,8 +384,8 @@ public class TestSupportController {
 
     private static List<Integer> eventIdsToBeDeleted(Session session, List<Integer> heaIds) {
         List<Integer> eventsByHearing = session.createNativeQuery("""
-                                                                 select eve_id from darts.hearing_event_ae where hea_id in (?)
-                                                                 """, Integer.class)
+                                                                      select eve_id from darts.hearing_event_ae where hea_id in (?)
+                                                                      """, Integer.class)
             .setParameter(1, heaIds)
             .getResultList();
 
@@ -475,8 +477,11 @@ public class TestSupportController {
         courtCase.setLastModifiedBy(userAccount);
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
-        String courtroomName = "FUNC-" + randomAlphanumeric(7).toUpperCase(Locale.ENGLISH);
-        String courthouseName = "FUNC-" + randomAlphanumeric(7).toUpperCase(Locale.ENGLISH);
+        char[][] allowedCharacterRanges = {{'A', 'Z'}, {'0', '9'}};
+        String courtroomName = FUNCTIONAL_TEST_KEY + RandomStringGenerator.builder()
+            .withinRange(allowedCharacterRanges).withinRange(7, 7);
+        String courthouseName = FUNCTIONAL_TEST_KEY + RandomStringGenerator.builder()
+            .withinRange(allowedCharacterRanges).withinRange(7, 7);
         CourthouseEntity courthouse = newCourthouse(courthouseName);
         newCourtroom(courtroomName, courthouse);
 

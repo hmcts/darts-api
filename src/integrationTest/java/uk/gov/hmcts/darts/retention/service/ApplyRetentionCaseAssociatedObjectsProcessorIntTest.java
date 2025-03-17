@@ -160,7 +160,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         caseRetentionStub.createCaseRetentionObject(caseB, DT_2028);
         caseRetentionStub.createCaseRetentionObject(caseC, DT_2028);
 
-        eodStub.createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
+        eodStub.createAndSaveEod(medias.getFirst(), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
         eodStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
         eodStub.createAndSaveEod(medias.get(2), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
         eodStub.createAndSaveEod(medias.get(3), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));

@@ -49,14 +49,14 @@ class CasesFunctionalTest extends FunctionalTest {
                 "prosecutors": ["Prosecutor A"],
                 "defenders": ["Defender A"]
             }
-                """;
+            """;
         caseBody = caseBody.replace("<<courthouse>>", COURTHOUSE);
         caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
 
         Response caseResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(CASES_PATH))
+            .baseUri(getUri(CASES_PATH + "/addCase"))
             .body(caseBody)
             .post()
             .then()
@@ -112,7 +112,7 @@ class CasesFunctionalTest extends FunctionalTest {
 
         var caseList = response.jsonPath().getList("", ScheduledCase.class);
         assertEquals(1, caseList.size());
-        var firstCase = caseList.get(0);
+        var firstCase = caseList.getFirst();
         assertEquals(CASE_NUMBER, firstCase.getCaseNumber());
     }
 
@@ -123,7 +123,7 @@ class CasesFunctionalTest extends FunctionalTest {
             {
                 "case_number": "<<caseNumber>>"
             }
-                """;
+            """;
 
         caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
 
@@ -140,7 +140,7 @@ class CasesFunctionalTest extends FunctionalTest {
         assertEquals(200, response.statusCode());
         var caseList = response.jsonPath().getList("", AdvancedSearchResult.class);
         assertEquals(1, caseList.size());
-        var firstCase = caseList.get(0);
+        var firstCase = caseList.getFirst();
         caseId = firstCase.getCaseId();
     }
 

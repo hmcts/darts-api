@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
+import uk.gov.hmcts.darts.audio.model.PatchAdminMediasByIdRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
@@ -159,7 +160,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         return responseMediaItemList.stream()
             .filter(item -> uniqueIds.add(item.getId()))
             .sorted((o1, o2) -> o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Transactional
@@ -205,15 +206,16 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .peek(getAdminMediasMarkedForDeletionItem -> {
                 //We need to add the Media Entities to a List that supports sorting as the default one from Hibernate does not
                 List<GetAdminMediasMarkedForDeletionMediaItem> mediaEntities = new ArrayList<>(getAdminMediasMarkedForDeletionItem.getMedia());
-                mediaEntities.sort((o1, o2) -> o1.getChannel().compareTo(o2.getChannel()));
+                mediaEntities.sort(Comparator.comparing(GetAdminMediasMarkedForDeletionMediaItem::getChannel));
                 getAdminMediasMarkedForDeletionItem.setMedia(mediaEntities);
             }).toList();
     }
 
     GetAdminMediasMarkedForDeletionItem toGetAdminMediasMarkedForDeletionItem(List<ObjectAdminActionEntity> actions) {
-        ObjectAdminActionEntity base = actions.get(0);
+        ObjectAdminActionEntity base = actions.getFirst();
         List<GetAdminMediasMarkedForDeletionMediaItem> media = actions.stream()
             .map(ObjectAdminActionEntity::getMedia)
+            .filter(MediaEntity::getIsCurrent)
             .map(mediaEntity -> {
                 GetAdminMediasMarkedForDeletionMediaItem item = adminMarkedForDeletionMapper.toGetAdminMediasMarkedForDeletionMediaItem(mediaEntity);
                 item.setVersionCount(mediaRepository.getVersionCount(mediaEntity.getChronicleId()));
@@ -228,7 +230,12 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         item.setCourtroom(courtroomMapper.toApiModel(base.getMedia().getCourtroom()));
         item.setCourthouse(courthouseMapper.toApiModel(base.getMedia().getCourtroom().getCourthouse()));
         GetAdminMediasMarkedForDeletionAdminAction adminAction = objectActionMapper.toGetAdminMediasMarkedForDeletionAdminAction(base);
-        adminAction.setComments(actions.stream().map(ObjectAdminActionEntity::getComments).toList());
+        adminAction.setComments(actions.stream()
+            .sorted(Comparator.comparing(ObjectAdminActionEntity::getHiddenDateTime))
+            .map(ObjectAdminActionEntity::getComments)
+            .distinct()
+            .toList()
+        );
         item.setAdminAction(adminAction);
         return item;
     }
@@ -272,7 +279,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
         auditApi.record(AuditActivity.MANUAL_DELETION, currentUser, objectAdminActionEntity.getId().toString());
 
-        return getAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
+        return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
     }
 
     @Override
@@ -314,6 +321,21 @@ public class AdminMediaServiceImpl implements AdminMediaService {
                 });
         }
         return getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(currentVersion, versionedMedia);
+    }
+
+    @Override
+    @Transactional
+    public void patchMediasById(Integer id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest) {
+        if (!Boolean.TRUE.equals(patchAdminMediasByIdRequest.getIsCurrent())) {
+            throw new DartsApiException(CommonApiError.INVALID_REQUEST, "is_current must be set to true");
+        }
+        MediaEntity mediaEntity = getMediaEntityById(id);
+        if (Boolean.TRUE.equals(mediaEntity.getIsCurrent())) {
+            throw new DartsApiException(AudioApiError.MEDIA_ALREADY_CURRENT);
+        }
+        mediaRepository.setAllAssociatedMediaToIsCurrentFalseExcludingMediaId(mediaEntity.getChronicleId(), mediaEntity.getId());
+        mediaEntity.setIsCurrent(true);
+        mediaRepository.save(mediaEntity);
     }
 
     private ApplyAdminActionComponent.AdminActionProperties mapToAdminActionProperties(AdminActionRequest adminActionRequest) {

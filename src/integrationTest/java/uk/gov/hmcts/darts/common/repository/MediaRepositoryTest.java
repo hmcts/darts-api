@@ -81,7 +81,7 @@ public class MediaRepositoryTest extends PostgresIntegrationBase {
             // Then
             assertThat(foundMedias, hasSize(2));
 
-            MediaEntity firstFoundMedia = foundMedias.get(0);
+            MediaEntity firstFoundMedia = foundMedias.getFirst();
             assertThat(firstFoundMedia.getId(), equalTo(media1.getId()));
 
             MediaEntity secondFoundMedia = foundMedias.get(1);

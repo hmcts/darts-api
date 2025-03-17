@@ -51,6 +51,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
 @RestController
 @RequiredArgsConstructor
@@ -86,10 +87,18 @@ public class CaseController implements CasesApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {MID_TIER})
-    public ResponseEntity<PostCaseResponse> casesPost(AddCaseRequest addCaseRequest) {
+    public ResponseEntity<PostCaseResponse> casesAddCasePost(AddCaseRequest addCaseRequest) {
         DataUtil.preProcess(addCaseRequest);
         validateRequest(addCaseRequest);
         return new ResponseEntity<>(caseService.addCaseOrUpdate(addCaseRequest), HttpStatus.CREATED);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {XHIBIT})
+    public ResponseEntity<PostCaseResponse> casesAddDocumentPost(AddCaseRequest addCaseRequest) {
+        return casesAddCasePost(addCaseRequest);
     }
 
     private void validateRequest(AddCaseRequest addCaseRequest) {
@@ -109,6 +118,7 @@ public class CaseController implements CasesApi {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber(advancedSearchRequest.getCaseNumber())
             .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
+            .courthouseIds(advancedSearchRequest.getCourthouseIds())
             .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
             .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
             .defendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName()))

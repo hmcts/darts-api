@@ -183,7 +183,7 @@ class TranscriptionDownloaderTest {
             .thenReturn(List.of(new TranscriptionDocumentEntity()));
 
         var transcriptionDocuments = someTranscriptionDocumentsUploadedAtLeast2DaysAgo(1);
-        transcriptionDocuments.get(0).setHidden(true);
+        transcriptionDocuments.getFirst().setHidden(true);
 
         var transcription = someTranscriptionWith(transcriptionDocuments);
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
@@ -201,7 +201,7 @@ class TranscriptionDownloaderTest {
         when(userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(true);
 
         var transcriptionDocuments = someTranscriptionDocumentsUploadedAtLeast2DaysAgo(1);
-        var transcriptionDocument = transcriptionDocuments.get(0);
+        var transcriptionDocument = transcriptionDocuments.getFirst();
         transcriptionDocument.setHidden(true);
 
         var transcription = someTranscriptionWith(transcriptionDocuments);
@@ -247,7 +247,7 @@ class TranscriptionDownloaderTest {
     private List<ExternalObjectDirectoryEntity> someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(int quantity) {
         return rangeClosed(1, quantity).boxed()
             .map(i -> someExternalObjectDirectoryWithCreationDate(now().minusDays(2).minusDays(i)))
-            .collect(toList());
+            .toList();
     }
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryWithCreationDate(OffsetDateTime createdDateTime) {

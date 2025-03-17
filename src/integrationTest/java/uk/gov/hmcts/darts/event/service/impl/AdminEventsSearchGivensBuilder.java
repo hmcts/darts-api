@@ -28,8 +28,8 @@ public class AdminEventsSearchGivensBuilder {
         return range(0, quantity).mapToObj(i -> createEvent(hearingQuantity)).toList();
     }
 
-    public List<EventEntity> persistedEventsForHearing(int quantity, HearingEntity hearing) {
-        return range(0, quantity).mapToObj(i -> createEventWithHearing(hearing)).toList();
+    public List<EventEntity> persistedEventsForHearing(int quantity, HearingEntity hearing, boolean isEventCurrent) {
+        return range(0, quantity).mapToObj(i -> createEventWithHearing(hearing, isEventCurrent)).toList();
     }
 
     public List<EventEntity> persistedEventsForCourtroom(int quantity, CourtroomEntity courtroom) {
@@ -46,15 +46,15 @@ public class AdminEventsSearchGivensBuilder {
         hearingEntity.setCourtroom(courtroom);
         hearingEntity.getCourtCase().setCourthouse(courtroom.getCourthouse());
 
-        var eventForHearing = createEventForHearing(hearingEntity);
+        var eventForHearing = createEventForHearing(hearingEntity, true);
         dartsDatabase.saveEventsForHearing(hearingEntity, eventForHearing);
 
         return eventForHearing;
     }
 
-    private EventEntity createEventWithHearing(HearingEntity hearingEntity) {
+    private EventEntity createEventWithHearing(HearingEntity hearingEntity, boolean isEventCurrent) {
         saveWithTransients(hearingEntity.getCourtroom());
-        var eventForHearing = createEventForHearing(hearingEntity);
+        var eventForHearing = createEventForHearing(hearingEntity, isEventCurrent);
         dartsDatabase.saveEventsForHearing(hearingEntity, eventForHearing);
         return eventForHearing;
     }
@@ -62,7 +62,7 @@ public class AdminEventsSearchGivensBuilder {
     private EventEntity createEvent() {
         var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         saveWithTransients(hearing.getCourtroom());
-        var eventForHearing = createEventForHearing(hearing);
+        var eventForHearing = createEventForHearing(hearing, true);
 
         dartsDatabase.saveEventsForHearing(hearing, eventForHearing);
         return eventForHearing;
@@ -84,7 +84,7 @@ public class AdminEventsSearchGivensBuilder {
         var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         hearing.setHearingDate(date);
         saveWithTransients(hearing.getCourtroom());
-        var eventForHearing = createEventForHearing(hearing);
+        var eventForHearing = createEventForHearing(hearing, true);
         dartsDatabase.saveEventsForHearing(hearing, eventForHearing);
         return eventForHearing;
     }

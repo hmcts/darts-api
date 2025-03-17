@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.repository;
+package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
-import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
@@ -52,10 +51,10 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     void testFindTransformedMediaWithId() {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-            generatedMediaEntities.get(0).getMediaRequest().getId(),
+            generatedMediaEntities.getFirst().getMediaRequest().getId(),
             null, null, null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(0).getId(), transformedMediaEntityList.size());
+        Assertions.assertEquals(generatedMediaEntities.getFirst().getId(), transformedMediaEntityList.size());
     }
 
     @Test
@@ -64,7 +63,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             = transformedMediaRepository.findTransformedMedia(
             null, generatedMediaEntities.get(3).getMediaRequest().getHearing().getCourtCase().getCaseNumber(), null, null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(transformedMediaEntityList.get(0).getId(), generatedMediaEntities.get(3).getId());
+        Assertions.assertEquals(transformedMediaEntityList.getFirst().getId(), generatedMediaEntities.get(3).getId());
     }
 
     @Test
@@ -75,7 +74,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null,
             TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -87,7 +86,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             TransformedMediaSubStringQueryEnum.COURT_HOUSE
                 .getQueryStringPrefix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -98,7 +97,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null,
             TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -110,7 +109,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             TransformedMediaSubStringQueryEnum.COURT_HOUSE
                 .getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -131,7 +130,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null, null,
             generatedMediaEntities.get(3).getMediaRequest().getHearing().getHearingDate(), null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(3).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(3).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -142,7 +141,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null, null, null,
             TransformedMediaSubStringQueryEnum.OWNER.getQueryString(Integer.toString(nameMatchIndex)), null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -154,7 +153,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null);
 
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -168,7 +167,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
                 .toLowerCase(Locale.getDefault()), null, null, null);
 
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -178,7 +177,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             = transformedMediaRepository.findTransformedMedia(
             null, null, null, null,
             TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null);
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -189,7 +188,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null, null, null,
             TransformedMediaSubStringQueryEnum.OWNER
                 .getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null);
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -212,7 +211,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null, null, null, null,
             TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryString(Integer.toString(nameMatchIndex)), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -223,7 +222,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null, null, null, null,
             TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -234,7 +233,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null, null, null, null,
             TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)).toUpperCase(Locale.getDefault()), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -245,7 +244,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null, null, null, null,
             TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -256,7 +255,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             null, null, null, null, null,
             TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)).toLowerCase(Locale.getDefault()), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -281,7 +280,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
             generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities
-                                    .get(fromAtPosition).getId(), transformedMediaEntityList.get(0).getId());
+                                    .get(fromAtPosition).getId(), transformedMediaEntityList.getFirst().getId());
     }
 
     @Test
@@ -323,6 +322,6 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
                                                               transformedMediaEntityFind.getMediaRequest()
                                                                   .getCreatedBy().getCreatedDateTime(), generatedMediaEntities.get(1).getCreatedDateTime());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(transformedMediaEntityFind.getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(transformedMediaEntityFind.getId(), transformedMediaEntityList.getFirst().getId());
     }
 }

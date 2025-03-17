@@ -72,6 +72,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
              AND (c.name ILIKE CONCAT('%', :courtroomName, '%') OR :courtroomName IS NULL)
              AND (cast(:hearingStartDate as LocalDate) IS NULL OR h.hearingDate >= :hearingStartDate)
              AND (cast(:hearingEndDate as LocalDate) IS NULL OR h.hearingDate <= :hearingEndDate)
+             AND e.isCurrent = true
         ORDER BY e.id DESC                          
         """)
     List<EventSearchResult> searchEventsFilteringOn(
@@ -155,6 +156,16 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         AND ee.eventId <> 0
         """)
     List<EventEntity> findAllByEventIdExcludingEventIdZero(Integer eventId);
+
+    @Query("""
+         SELECT ee
+         FROM EventEntity ee
+         JOIN ee.eventLinkedCaseEntities elc
+         WHERE ee.eventId = :eventId
+         AND elc.courtCase.id in :courtCaseIds
+         AND (ee.eventId <> 0 or ee.id = :eveId)
+        """)
+    List<EventEntity> findAllByRelatedEvents(Integer eveId, Integer eventId, List<Integer> courtCaseIds);
 
     @Query("select e.id from EventEntity e where e.eventStatus = :statusNumber")
     List<Integer> findAllByEventStatus(Integer statusNumber, Limit limit);

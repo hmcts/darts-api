@@ -108,15 +108,15 @@ class OutboundFileZipGeneratorHelperImplTest {
         Playlist playlist = unmarshalXmlFile(Playlist.class, playListFile);
         assertEquals("1.0", playlist.getPlaylistVersion());
         assertEquals(2, playlist.getItems().size());
-        assertEquals(CASE_NUMBER, playlist.getItems().get(0).getCaseNumber());
-        assertNotNull(playlist.getItems().get(0).getStartTimeInMillis());
-        assertEquals("2023", playlist.getItems().get(0).getStartTimeYear());
-        assertEquals("6", playlist.getItems().get(0).getStartTimeMonth());
-        assertEquals("11", playlist.getItems().get(0).getStartTimeDate());
-        assertEquals("13", playlist.getItems().get(0).getStartTimeHour());
-        assertEquals("0", playlist.getItems().get(0).getStartTimeMinutes());
-        assertEquals("0", playlist.getItems().get(0).getStartTimeSeconds());
-        assertEquals("daudio\\localaudio\\T2023\\041301_1\\0001\\", playlist.getItems().get(0).getValue());
+        assertEquals(CASE_NUMBER, playlist.getItems().getFirst().getCaseNumber());
+        assertNotNull(playlist.getItems().getFirst().getStartTimeInMillis());
+        assertEquals("2023", playlist.getItems().getFirst().getStartTimeYear());
+        assertEquals("6", playlist.getItems().getFirst().getStartTimeMonth());
+        assertEquals("11", playlist.getItems().getFirst().getStartTimeDate());
+        assertEquals("13", playlist.getItems().getFirst().getStartTimeHour());
+        assertEquals("0", playlist.getItems().getFirst().getStartTimeMinutes());
+        assertEquals("0", playlist.getItems().getFirst().getStartTimeSeconds());
+        assertEquals("daudio\\localaudio\\T2023\\041301_1\\0001\\", playlist.getItems().getFirst().getValue());
     }
 
     @Test

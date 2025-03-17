@@ -56,7 +56,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
     private static final String SOME_TEXT = "some-text";
-    public static final String LOG = "LOG";
+    private static final String LOG = "LOG";
 
     @Autowired
     private EventRepository eventRepository;
@@ -93,7 +93,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         List<EventEntity> persistedEvents = getAllLogEventsMatchingText();
 
         Assertions.assertEquals(1, persistedEvents.size());
-        EventEntity persistedEvent = persistedEvents.get(0);
+        EventEntity persistedEvent = persistedEvents.getFirst();
 
         EventHandlerEntity eventType = persistedEvent.getEventType();
         Assertions.assertEquals(LOG, eventType.getType());
@@ -171,7 +171,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Test
     void courtLogsGetResultMatch() throws Exception {
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
         dartsDatabase.save(event);
@@ -209,7 +209,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Test
     void courtlogsGetOnlyExpectedResults() throws Exception {
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
         var event = createEventWith(LOG, "test", hearingEntity, eventTime);
@@ -241,7 +241,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Test
     void courtLogsWrongCaseNumber() throws Exception {
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
         var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
         var event = createEventWith(LOG, "eventText", hearingEntity, eventTime);

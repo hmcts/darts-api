@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -43,7 +42,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.util.AsyncUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -63,7 +61,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -112,7 +109,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     protected ArmDataManagementApi armDataManagementApi;
     @Autowired
     protected FileOperationService fileOperationService;
-    @MockitoBean
+    @Autowired
     protected ArmDataManagementConfiguration armDataManagementConfiguration;
     @Autowired
     protected ObjectMapper objectMapper;
@@ -128,9 +125,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     @Autowired
     protected LogApi logApi;
 
-    @TempDir
-    protected File tempDirectory;
-
     protected AbstractArmBatchProcessResponseFiles armBatchProcessResponseFiles;
     protected String continuationToken;
 
@@ -145,12 +139,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofSeconds(10));
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        lenient().when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(10);
-        lenient().when(armDataManagementConfiguration.getArmMissingResponseDuration()).thenReturn(Duration.ofHours(24));
         String dateTimeFormatStr = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateTimeFormatStr);
         inputUploadProcessedTimestamp = OffsetDateTime.parse(INPUT_UPLOAD_RESPONSE_DATETIME, formatter);
-        lenient().when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(dateTimeFormatStr);
 
         String inputUploadResponse = INPUT_UPLOAD_RESPONSE.replace(DATETIMEKEY, INPUT_UPLOAD_RESPONSE_DATETIME);
         BinaryData inputUploadFileRecord = convertStringToBinaryData(inputUploadResponse);
@@ -330,12 +321,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -486,12 +471,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -589,12 +568,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -678,12 +651,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -777,12 +744,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -812,9 +773,12 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
-
     @Test
     void batchProcessResponseFiles_WithMediaUsingSmallContinuationTokenReturnsSuccess() throws IOException {
+        // We want to update the existing config value, but we need to set it back to the original afterward so that the change doesn't affect other tests.
+        // Yes, this is ugly, there must be a better way.
+        final Integer originalMaxContinuationBatchSize = armDataManagementConfiguration.getMaxContinuationBatchSize();
+        armDataManagementConfiguration.setMaxContinuationBatchSize(1);
 
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATETIME);
@@ -877,7 +841,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ContinuationTokenBlobs continuationTokenBlobs2 = ContinuationTokenBlobs.builder()
             .blobNamesAndPaths(blobNamesAndPaths2)
             .build();
-        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(1);
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix(), 1, null)).thenReturn(continuationTokenBlobs1);
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix(), 1, "13259aae1895")).thenReturn(continuationTokenBlobs2);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
@@ -933,12 +896,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -947,7 +904,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(inputUploadProcessedTimestamp, foundMedia.getInputUploadProcessedTs());
         assertEquals(ARM_RPO_PENDING.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
@@ -958,7 +915,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList2.size());
-        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
+        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
         assertEquals(inputUploadProcessedTimestamp, foundMedia2.getInputUploadProcessedTs());
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia2.getStatus().getId());
         assertEquals(2, foundMedia2.getVerificationAttempts());
@@ -969,7 +926,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .findByMediaAndExternalLocationType(media3, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList3.size());
-        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.get(0);
+        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.getFirst();
         assertEquals(inputUploadProcessedTimestamp, foundMedia3.getInputUploadProcessedTs());
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia3.getStatus().getId());
         assertEquals(2, foundMedia3.getVerificationAttempts());
@@ -980,7 +937,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .findByMediaAndExternalLocationType(media5, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList5.size());
-        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.get(0);
+        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.getFirst();
         assertEquals(inputUploadProcessedTimestamp, foundMedia5.getInputUploadProcessedTs());
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
         assertEquals(1, foundMedia5.getVerificationAttempts());
@@ -1011,6 +968,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         verify(armDataManagementApi).listResponseBlobs(hashcode2);
         verify(armDataManagementApi).getBlobData(createRecordFilename5);
+
+        armDataManagementConfiguration.setMaxContinuationBatchSize(originalMaxContinuationBatchSize);
     }
 
     @Test
@@ -1133,12 +1092,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -1328,12 +1281,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -1459,12 +1406,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -1551,12 +1492,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -1654,12 +1589,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -1730,12 +1659,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(annotationDocument.getUploadedDateTime());
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -1830,12 +1753,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -1938,12 +1855,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -2021,12 +1932,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -2112,12 +2017,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -2186,12 +2085,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -2231,9 +2124,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
             .build();
 
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
-
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -2276,9 +2166,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         dartsPersistence.save(armEod1);
 
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken)).thenThrow(new AzureException());
-
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -2357,12 +2244,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -2434,12 +2315,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(annotationDocument.getUploadedDateTime());
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -2505,12 +2380,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(annotationDocument.getUploadedDateTime());
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -2564,12 +2433,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(null);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);

@@ -26,7 +26,7 @@ public class EventMapper {
     }
 
     private Event map(EventEntity eventEntity) {
-        HearingEntity hearingEntity = eventEntity.getHearingEntities().get(0);
+        HearingEntity hearingEntity = eventEntity.getHearingEntities().getFirst();
 
         Event event = new Event();
         event.setId(eventEntity.getId());

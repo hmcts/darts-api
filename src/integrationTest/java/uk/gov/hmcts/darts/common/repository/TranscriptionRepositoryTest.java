@@ -20,6 +20,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
@@ -42,12 +43,13 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     private TranscriptionDocumentStub transcriptionDocumentStub;
 
     private CourtCaseEntity courtCaseEntity;
+    private HearingEntity hearingEntity;
 
     private int caseId;
 
     @BeforeEach
     public void setupData() {
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
@@ -55,7 +57,9 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         );
         courtCaseEntity = hearingEntity.getCourtCase();
         caseId = courtCaseEntity.getId();
+    }
 
+    private void createStandardTranscriptionWithDocument() {
         createTranscriptionWithDocument(hearingEntity, false);
         createTranscriptionWithDocument(hearingEntity, true);
         createTranscriptionWithDocument(courtCaseEntity, false);
@@ -67,28 +71,44 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity, false);
         legacyTranscription.setIsManualTranscription(false);
         dartsDatabase.save(legacyTranscription);
+        dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(legacyTranscription);
 
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
-        assertEquals(4, transcriptionEntities.size());
+        assertThat(transcriptionEntities).isEmpty();
     }
 
     @Test
-    void showsLegacyAutomated() {
+    void findByCaseIdManualOrLegacy_shouldReturnLegacyTranscriptionHasDocuments() {
         TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity, false);
         legacyTranscription.setLegacyObjectId("legacy");
         legacyTranscription.setIsManualTranscription(false);
+        dartsDatabase.save(legacyTranscription);
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
-        assertEquals(5, transcriptionEntities.size());
+        assertThat(transcriptionEntities).hasSize(1);
+        assertThat(transcriptionEntities.getFirst().getId())
+            .isEqualTo(legacyTranscription.getId());
+    }
+
+    @Test
+    void findByCaseIdManualOrLegacy_dontReturnLegacyTranscriptionIfHasNoDocuments() {
+        TranscriptionEntity legacyTranscription = transcriptionStub.createTranscription(courtCaseEntity);
+        legacyTranscription.setLegacyObjectId("legacy");
+        legacyTranscription.setIsManualTranscription(false);
+        dartsDatabase.save(legacyTranscription);
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
+        assertThat(transcriptionEntities).isEmpty();
     }
 
     @Test
     void includesHidden() {
+        createStandardTranscriptionWithDocument();
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
-        assertEquals(4, transcriptionEntities.size());
+        assertThat(transcriptionEntities).hasSize(4);
     }
 
     @Test
     void excludesHidden() {
+        createStandardTranscriptionWithDocument();
         var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         persistTwoHiddenTwoNotHiddenTranscriptionsFor(courtCase);
 
@@ -100,6 +120,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     @Test
     void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_ShouldSucceed() {
         // given
+        createStandardTranscriptionWithDocument();
         TranscriptionStatusEntity completeTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(COMPLETE);
         TranscriptionEntity transcriptionCompleteOld =
             PersistableFactory.getTranscriptionTestData().minimalRawTranscription(completeTranscriptionStatus);
@@ -128,12 +149,13 @@ class TranscriptionRepositoryTest extends IntegrationBase {
 
         // then
         assertEquals(1, result.size());
-        assertEquals(transcriptionCompleteOld.getId(), result.get(0));
+        assertEquals(transcriptionCompleteOld.getId(), result.getFirst());
     }
 
     @Test
     void findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore_NoResultsFound() {
         // given
+        createStandardTranscriptionWithDocument();
         TranscriptionEntity transcriptionApproved = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         OffsetDateTime createdDateTime = OffsetDateTime.now().minusDays(1);
         List<TranscriptionStatusEntity> excludedStatuses = List.of(transcriptionApproved.getTranscriptionStatus());
@@ -144,7 +166,41 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         );
 
         // then
-        assertEquals(0, result.size());
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments_shouldReturnLegacyIfHasDocument() {
+        TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity,false);
+        legacyTranscription.addHearing(hearingEntity);
+        legacyTranscription.setLegacyObjectId("legacy");
+        legacyTranscription.setIsManualTranscription(false);
+        dartsDatabase.save(legacyTranscription);
+
+
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments(
+            hearingEntity.getId()
+        );
+
+        assertThat(transcriptionEntities).hasSize(1);
+        assertThat(transcriptionEntities.getFirst().getId())
+            .isEqualTo(legacyTranscription.getId());
+    }
+
+    @Test
+    void findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments_shouldNotReturnLegacyIfNoDocument() {
+        TranscriptionEntity legacyTranscription = transcriptionStub.createTranscription(courtCaseEntity);
+        legacyTranscription.addHearing(hearingEntity);
+        legacyTranscription.setLegacyObjectId("legacy");
+        legacyTranscription.setIsManualTranscription(false);
+        dartsDatabase.save(legacyTranscription);
+
+
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments(
+            hearingEntity.getId()
+        );
+
+        assertThat(transcriptionEntities).isEmpty();
     }
 
     private void persistTwoHiddenTwoNotHiddenTranscriptionsFor(CourtCaseEntity courtCaseEntity) {

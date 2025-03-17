@@ -2,11 +2,8 @@ package uk.gov.hmcts.darts.arm.helper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItem;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItems;
@@ -27,7 +24,6 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -41,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
@@ -64,22 +59,15 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
 
     @MockitoBean
     private UserIdentity userIdentity;
-    @MockitoSpyBean
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Autowired
     private DataStoreToArmHelper dataStoreToArmHelper;
 
     @Autowired
-    private EodHelper eodHelper;
-    @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
     private ExternalObjectDirectoryEntity externalObjectDirectory;
     private ObjectStateRecordEntity objectStateRecordEntity;
-
-    @TempDir
-    private File tempDirectory;
 
     @BeforeEach
     void setupData() {
@@ -120,16 +108,13 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectory.setResponseCleaned(false);
         externalObjectDirectory.setOsrUuid(objectStateRecordEntity.getUuid());
         externalObjectDirectory = dartsDatabase.save(externalObjectDirectory);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
     }
 
     @Test
     void ignoreArmDropZoneStatus() {
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
+        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM);
 
@@ -142,8 +127,8 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     @Test
     void getCorrectEodEntities() {
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
+        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);

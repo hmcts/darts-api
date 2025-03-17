@@ -100,14 +100,14 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
 
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("testuser");
         ObjectAdminActionEntity adminActionEntity = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                                                .media(mediaEntity)
-                                                .objectHiddenReason(
-                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
-                                                .markedForManualDeletion(false)
-                                                .markedForManualDelBy(null)
-                                                .markedForManualDelDateTime(null)
-                                                .hiddenBy(testUser)
-                                                .build());
+                                                                                            .media(mediaEntity)
+                                                                                            .objectHiddenReason(
+                                                                                                objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                                                            .markedForManualDeletion(false)
+                                                                                            .markedForManualDelBy(null)
+                                                                                            .markedForManualDelDateTime(null)
+                                                                                            .hiddenBy(testUser)
+                                                                                            .build());
 
         // when
         MvcResult mvcResult = mockMvc.perform(post(endpoint))
@@ -299,12 +299,12 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         // assert additional audit data
         assertFalse(caseExpiredAuditEntries.isEmpty());
         assertEquals(1, caseExpiredAuditEntries.size());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
-        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedDateTime());
+        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.getFirst().getUser().getId());
+        assertNull(caseExpiredAuditEntries.getFirst().getCourtCase());
     }
 
 }

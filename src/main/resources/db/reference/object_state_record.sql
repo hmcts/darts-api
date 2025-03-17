@@ -10,12 +10,15 @@
 --      add various indexes to object_state_record
 --      remove id_case,courthouse_name,date_last_accessed,flag_file_retained_in_ods from object_state_record
 --      remove relation_id,cas_id,parent_id,object_type from object_state_record
+--v9    add dal_id to object_state_record
+--v10   amend datatypes for eod_id and arm_eod_id to integer
 
 
 CREATE TABLE object_state_record
 (osr_uuid                      BIGINT                     NOT NULL
-,eod_id                        CHARACTER VARYING
-,arm_eod_id                    CHARACTER VARYING
+,eod_id                        INTEGER
+,arm_eod_id                    INTEGER
+,dal_id                        INTEGER
 ,parent_object_id              CHARACTER VARYING 
 ,content_object_id             CHARACTER VARYING   
 ,id_clip                       CHARACTER VARYING

@@ -29,9 +29,9 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
 
     public CleanupCurrentFlagEventProcessorImpl(
         @Value("${darts.events.earliest-is-current-clear-up-date}") String earliestIsCurrentClearUpDate,
-            EventRepository eventRepository,
-            HearingRepository hearingRepository
-        ) {
+        EventRepository eventRepository,
+        HearingRepository hearingRepository
+    ) {
         this.earliestIsCurrentClearUpDate = LocalDate.parse(earliestIsCurrentClearUpDate)
             .atStartOfDay()
             .atOffset(UTC);
@@ -69,8 +69,8 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                 if (eventToBeSuperseded.getCreatedDateTime().isBefore(earliestIsCurrentClearUpDate)) {
                     log.info("Event version with event id {} received into modernised DARTS is for a legacy event. Skipping event is_current cleanup " +
                                  "for eve_id {}",
-                         eventIdAndHearingIds.getEventId(),
-                         eventIdAndHearingIds.getEveId());
+                             eventIdAndHearingIds.getEventId(),
+                             eventIdAndHearingIds.getEveId());
                     continue;
                 }
                 eventToBeSuperseded.setIsCurrent(false);

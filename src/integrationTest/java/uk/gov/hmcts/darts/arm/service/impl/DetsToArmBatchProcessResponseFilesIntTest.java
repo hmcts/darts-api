@@ -107,7 +107,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         ObjectStateRecordEntity osr1 = new ObjectStateRecordEntity();
         osr1.setUuid(1L);
-        osr1.setArmEodId(String.valueOf(armEod1.getId()));
+        osr1.setArmEodId(armEod1.getId());
         osrRepository.save(osr1);
 
         ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
@@ -126,7 +126,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         ObjectStateRecordEntity osr2 = new ObjectStateRecordEntity();
         osr2.setUuid(2L);
-        osr2.setArmEodId(String.valueOf(armEod2.getId()));
+        osr2.setArmEodId(armEod2.getId());
         osrRepository.save(osr2);
 
         ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
@@ -141,7 +141,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         ObjectStateRecordEntity osr3 = new ObjectStateRecordEntity();
         osr3.setUuid(3L);
-        osr3.setArmEodId(String.valueOf(armEod3.getId()));
+        osr3.setArmEodId(armEod3.getId());
         osrRepository.save(osr3);
 
         String manifestFile2 = prefix() + "_" + manifest2Uuid + ".a360";
@@ -158,7 +158,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         ObjectStateRecordEntity osr5 = new ObjectStateRecordEntity();
         osr5.setUuid(5L);
-        osr5.setArmEodId(String.valueOf(armEod5.getId()));
+        osr5.setArmEodId(armEod5.getId());
         osrRepository.save(osr5);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
@@ -225,17 +225,11 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
-        ObjectStateRecordEntity dbOsr1 = osrRepository.findByArmEodId(String.valueOf(armEod1.getId())).orElseThrow();
+        ObjectStateRecordEntity dbOsr1 = osrRepository.findByArmEodId(armEod1.getId()).orElseThrow();
         assertThat(dbOsr1.getFlagRspnRecvdFromArml()).isTrue();
         assertThat(dbOsr1.getDateRspnRecvdFromArml()).isEqualTo(endTime2);
         assertThat(dbOsr1.getFlagFileIngestStatus()).isTrue();
@@ -248,7 +242,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr1.getObjectStatus()).isNull();
         assertThat(dbOsr1.getFileSizeIngestToArm()).isEqualTo(11_997);
 
-        ObjectStateRecordEntity dbOsr2 = osrRepository.findByArmEodId(String.valueOf(armEod2.getId())).orElseThrow();
+        ObjectStateRecordEntity dbOsr2 = osrRepository.findByArmEodId(armEod2.getId()).orElseThrow();
         assertThat(dbOsr2.getFlagRspnRecvdFromArml()).isTrue();
         assertThat(dbOsr2.getDateRspnRecvdFromArml()).isEqualTo(endTime2);
         assertThat(dbOsr2.getFlagFileIngestStatus()).isFalse();
@@ -263,7 +257,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr2.getFileSizeIngestToArm()).isNull();
         assertThat(externalObjectDirectoryRepository.findById(detsEod2.getId())).isPresent();
 
-        ObjectStateRecordEntity dbOsr3 = osrRepository.findByArmEodId(String.valueOf(armEod3.getId())).orElseThrow();
+        ObjectStateRecordEntity dbOsr3 = osrRepository.findByArmEodId(armEod3.getId()).orElseThrow();
         assertThat(dbOsr3.getFlagRspnRecvdFromArml()).isTrue();
         assertThat(dbOsr3.getDateRspnRecvdFromArml()).isEqualTo(endTime2);
         assertThat(dbOsr3.getFlagFileIngestStatus()).isFalse();
@@ -277,7 +271,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr3.getDateFileDetsCleanup()).isNull();
         assertThat(dbOsr3.getFileSizeIngestToArm()).isNull();
 
-        ObjectStateRecordEntity dbOsr5 = osrRepository.findByArmEodId(String.valueOf(armEod5.getId())).orElseThrow();
+        ObjectStateRecordEntity dbOsr5 = osrRepository.findByArmEodId(armEod5.getId()).orElseThrow();
         assertThat(dbOsr5.getFlagRspnRecvdFromArml()).isNull();
         assertThat(dbOsr5.getDateRspnRecvdFromArml()).isNull();
         assertThat(dbOsr5.getFlagFileIngestStatus()).isNull();
@@ -326,7 +320,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         ObjectStateRecordEntity osr = new ObjectStateRecordEntity();
         osr.setUuid(1L);
-        osr.setArmEodId(String.valueOf(armEod.getId()));
+        osr.setArmEodId(armEod.getId());
         osrRepository.save(osr);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
@@ -361,17 +355,11 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         OffsetDateTime currentDateTime = transcriptionEntity.getEndTime();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentDateTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
-        ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
+        ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(armEod.getId()).orElseThrow();
         assertThat(dbOsr.getFlagRspnRecvdFromArml()).isTrue();
         assertThat(dbOsr.getDateRspnRecvdFromArml()).isCloseTo(currentDateTime, within(1, SECONDS));
         assertThat(dbOsr.getFlagFileIngestStatus()).isFalse();
@@ -414,7 +402,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         ObjectStateRecordEntity osr1 = new ObjectStateRecordEntity();
         osr1.setUuid(1L);
-        osr1.setArmEodId(String.valueOf(armEod.getId()));
+        osr1.setArmEodId(armEod.getId());
         osrRepository.save(osr1);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
@@ -448,17 +436,11 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         OffsetDateTime currentDateTime = caseDocument.getCreatedDateTime();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentDateTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
-        ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
+        ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(armEod.getId()).orElseThrow();
         assertThat(dbOsr.getFlagRspnRecvdFromArml()).isTrue();
         assertThat(dbOsr.getDateRspnRecvdFromArml()).isCloseTo(currentDateTime, within(1, SECONDS));
         assertThat(dbOsr.getFlagFileIngestStatus()).isFalse();
@@ -513,12 +495,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(null);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
@@ -567,12 +543,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(null);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);

@@ -26,6 +26,7 @@
       "event_ts": "2023-06-26T13:00:00Z"
     }
   ],
+  "is_retention_updated": false,
   "case_closed_date_time": "2023-06-26T13:00:00Z",
   "case_status": "CLOSED",
   "created_at": "<CREATED_AT>",

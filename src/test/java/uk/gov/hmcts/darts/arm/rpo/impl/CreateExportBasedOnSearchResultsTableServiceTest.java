@@ -87,10 +87,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(200, false, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         boolean result = createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
+            BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertTrue(result);
@@ -109,10 +110,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         boolean result = createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
+            BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertFalse(result);
@@ -130,10 +132,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now());
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         boolean result = createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
+            BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertFalse(result);
@@ -151,11 +154,12 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusHours(5));
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+                BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -174,10 +178,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("400", false, "2"));
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         boolean result = createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-            BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount);
+            BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount);
 
         // then
         assertFalse(result);
@@ -194,10 +199,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(200, true, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -219,11 +225,12 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("200", true, "0"));
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+                BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -243,11 +250,12 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, true, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+                BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -268,10 +276,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("200", true, "0"));
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -292,10 +301,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -317,10 +327,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("200", true, "0"));
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -341,10 +352,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(500, false, 500);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -366,10 +378,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("500", true, "0"));
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -389,11 +402,12 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ThrowsException_WithInvalidRequest() {
         // given
         armRpoExecutionDetailEntity.setSearchId(null);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+                BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -412,11 +426,12 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ThrowsException_WhenClientThrowsFeignException() {
         // given
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(FeignException.class);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+                BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -437,10 +452,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("500", true, "500"));
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -462,10 +478,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(null);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -487,10 +504,11 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn("");
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME,
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME,
                                                                                                     pollDuration, userAccount));
 
         // then
@@ -512,11 +530,12 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn("{");
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+                BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
@@ -537,11 +556,12 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn("{}");
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
-                BEARER_TOKEN, 1, createHeaderColumns(), PRODUCTION_NAME, pollDuration, userAccount));
+                BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(

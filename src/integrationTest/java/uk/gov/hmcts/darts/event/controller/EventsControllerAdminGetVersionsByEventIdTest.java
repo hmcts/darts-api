@@ -8,13 +8,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
-import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.EventLinkedCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 
 import java.time.OffsetDateTime;
@@ -43,13 +43,17 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
     @Autowired
     private EventStub eventStub;
 
+    @Autowired
+    private EventLinkedCaseStub eventLinkedCaseStub;
+
     private static final OffsetDateTime EVENT_TS = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
 
     @Test
     void adminEventsApiGetVersionsByEventIdEndpoint_shouldReturnCurrentEventAndPreviousEvents_whenEventIdIsNotZero() throws Exception {
-
         // Given
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(2, 2, false, EVENT_TS);
+        CourtCaseEntity courtCase = dartsDatabase.createCase("courthouse", "1234567890");
+        linkToCaseNumber(eventEntityVersions.get(1), courtCase);
         EventEntity currentEventEntity = eventEntityVersions.get(1).get(0);
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
@@ -61,7 +65,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
         AdminGetVersionsByEventIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                                                 AdminGetVersionsByEventIdResponseResult.class);
+                                                                                        AdminGetVersionsByEventIdResponseResult.class);
 
         // Then
         assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
@@ -76,15 +80,15 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(currentEventEntity.getCourtroom().getName(), responseResult.getCurrentVersion().getCourtroom().getName());
         assertEquals(currentEventEntity.getCourtroom().getCourthouse().getId(), responseResult.getCurrentVersion().getCourthouse().getId());
         assertEquals(currentEventEntity.getCourtroom().getCourthouse().getDisplayName(),
-                                responseResult.getCurrentVersion().getCourthouse().getDisplayName());
+                     responseResult.getCurrentVersion().getCourthouse().getDisplayName());
         assertEquals(currentEventEntity.getLegacyVersionLabel(), responseResult.getCurrentVersion().getVersion());
         assertEquals(currentEventEntity.getTimestamp(), responseResult.getCurrentVersion().getEventTs());
         assertEquals(currentEventEntity.getIsCurrent(), responseResult.getCurrentVersion().getIsCurrent());
         assertEquals(currentEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
-                                responseResult.getCurrentVersion().getCreatedAt());
+                     responseResult.getCurrentVersion().getCreatedAt());
         assertEquals(currentEventEntity.getCreatedBy().getId(), responseResult.getCurrentVersion().getCreatedBy());
         assertEquals(currentEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
-                                responseResult.getCurrentVersion().getLastModifiedAt());
+                     responseResult.getCurrentVersion().getLastModifiedAt());
         assertEquals(currentEventEntity.getLastModifiedBy().getId(), responseResult.getCurrentVersion().getLastModifiedBy());
 
         // Previous version
@@ -97,23 +101,63 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(previousEventEntity.getEventText(), responseResult.getPreviousVersions().getFirst().getText());
         assertEquals(previousEventEntity.getEventType().getId(), responseResult.getPreviousVersions().getFirst().getEventMapping().getId());
         assertEquals(previousEventEntity.getEventType().getEventName(),
-                                responseResult.getPreviousVersions().getFirst().getEventMapping().getName());
+                     responseResult.getPreviousVersions().getFirst().getEventMapping().getName());
         assertEquals(previousEventEntity.isLogEntry(), responseResult.getPreviousVersions().getFirst().getIsLogEntry());
         assertEquals(previousEventEntity.getCourtroom().getId(), responseResult.getPreviousVersions().getFirst().getCourtroom().getId());
         assertEquals(previousEventEntity.getCourtroom().getName(), responseResult.getPreviousVersions().getFirst().getCourtroom().getName());
         assertEquals(previousEventEntity.getCourtroom().getCourthouse().getId(),
-                                responseResult.getPreviousVersions().getFirst().getCourthouse().getId());
+                     responseResult.getPreviousVersions().getFirst().getCourthouse().getId());
         assertEquals(previousEventEntity.getCourtroom().getCourthouse().getDisplayName(),
-                                responseResult.getPreviousVersions().getFirst().getCourthouse().getDisplayName());
+                     responseResult.getPreviousVersions().getFirst().getCourthouse().getDisplayName());
         assertEquals(previousEventEntity.getLegacyVersionLabel(), responseResult.getPreviousVersions().getFirst().getVersion());
         assertEquals(previousEventEntity.getTimestamp(), responseResult.getPreviousVersions().getFirst().getEventTs());
         assertEquals(previousEventEntity.getIsCurrent(), responseResult.getPreviousVersions().getFirst().getIsCurrent());
         assertEquals(previousEventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
-                                responseResult.getPreviousVersions().getFirst().getCreatedAt());
+                     responseResult.getPreviousVersions().getFirst().getCreatedAt());
         assertEquals(previousEventEntity.getCreatedBy().getId(), responseResult.getPreviousVersions().getFirst().getCreatedBy());
         assertEquals(previousEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
-                                responseResult.getPreviousVersions().getFirst().getLastModifiedAt());
+                     responseResult.getPreviousVersions().getFirst().getLastModifiedAt());
         assertEquals(previousEventEntity.getLastModifiedBy().getId(), responseResult.getPreviousVersions().getFirst().getLastModifiedBy());
+    }
+
+    @Test
+    void adminEventsApiGetVersionsByEventIdEndpoint_shouldReturnCurrentEventAndPreviousEventsOnlyForSameCaseNumbers() throws Exception {
+
+        // Given
+        Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(2, 2, false, EVENT_TS);
+        CourtCaseEntity courtCase = dartsDatabase.createCase("courthouse", "1234567890");
+        linkToCaseNumber(eventEntityVersions.get(1), courtCase);
+
+        EventEntity currentEventEntity = eventEntityVersions.get(1).get(0);
+
+        // Generate another event with the same event id but different case number
+        Map<Integer, List<EventEntity>> eventEntityVersions2 = eventStub.generateEventIdEventsIncludingZeroEventId(2, 2, false, EVENT_TS);
+        eventEntityVersions2.get(1).forEach(eventEntity -> {
+            eventEntity.setEventId(currentEventEntity.getEventId());
+            eventStub.saveEvent(eventEntity);
+        });
+        CourtCaseEntity courtCase2 = dartsDatabase.createCase("courthouse", "new-case");
+        linkToCaseNumber(eventEntityVersions.get(1), courtCase2);
+
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+
+        // When
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/events/" + currentEventEntity.getId() + "/versions")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
+
+        AdminGetVersionsByEventIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
+                                                                                        AdminGetVersionsByEventIdResponseResult.class);
+
+        // Then
+        assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
+
+        // Previous version
+        EventEntity previousEventEntity = eventEntityVersions.get(1).get(1);
+        assertEquals(1, responseResult.getPreviousVersions().size());
+        assertEquals(previousEventEntity.getId(), responseResult.getPreviousVersions().getFirst().getId());
     }
 
     @Test
@@ -121,6 +165,8 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
 
         // Given
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(1, 2, false, EVENT_TS);
+        CourtCaseEntity courtCase = dartsDatabase.createCase("courthouse", "1234567890");
+        linkToCaseNumber(eventEntityVersions.get(0), courtCase);
         EventEntity currentEventEntity = eventEntityVersions.get(0).get(0);
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
@@ -133,7 +179,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
         AdminGetVersionsByEventIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                                                         AdminGetVersionsByEventIdResponseResult.class);
+                                                                                        AdminGetVersionsByEventIdResponseResult.class);
 
         // Then
         assertThat(responseResult.getPreviousVersions()).hasSize(0);
@@ -163,19 +209,18 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
     }
 
     @Test
-    void adminEventsApiGetVersionsByEventIdEndpointFailureNoEventFound() throws Exception {
+    void adminEventsApiGetVersionsByEventIdEndpoint_shouldReturnError_whenEveIdCanNotBeFound() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
-        // When
-        MockHttpServletRequestBuilder requestBuilder = get("/admin/events/-1/versions")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+        mockMvc.perform(get("/admin/events/-1/versions")
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isNotFound());
+    }
 
-        Problem responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                        Problem.class);
-
-        // Then
-        assertEquals(CommonApiError.NOT_FOUND.getType(), responseResult.getType());
+    private void linkToCaseNumber(List<EventEntity> eventEntities, CourtCaseEntity caseEntity) {
+        eventEntities.forEach(eventEntity -> {
+            eventLinkedCaseStub.createCaseLinkedEvent(eventEntity, caseEntity);
+        });
     }
 
 }

@@ -26,6 +26,7 @@
       "event_name": "test reporting restriction name"
     }
   ],
+  "is_retention_updated": false,
   "case_status": "CLOSED",
   "created_at": "2024-03-25T10:00:00Z",
   "last_modified_at": "2024-03-25T10:00:00Z",

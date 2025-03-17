@@ -475,7 +475,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         request.setRequestedAtTo(mediaEntityToRequest.getTranscription().getCreatedDateTime().minusDays(1).toLocalDate());
         request.setCaseNumber(mediaEntityToRequest.getTranscription().getHearing().getCourtCase().getCaseNumber());
         request.setHearingDate(mediaEntityToRequest.getTranscription().getHearing().getHearingDate());
-        request.setOwner(mediaEntityToRequest.getTranscription().getTranscriptionWorkflowEntities().get(0).getWorkflowActor().getUserFullName());
+        request.setOwner(mediaEntityToRequest.getTranscription().getTranscriptionWorkflowEntities().getFirst().getWorkflowActor().getUserFullName());
         request.setRequestedBy(mediaEntityToRequest.getTranscription().getCreatedBy().getUserFullName());
         request.setRequestedAtFrom(mediaEntityToRequest.getTranscription().getCreatedDateTime().toLocalDate());
         request.setRequestedAtTo(mediaEntityToRequest.getTranscription().getCreatedDateTime().toLocalDate());
@@ -531,14 +531,14 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         LocalDate hearingDate = LocalDate.now();
         //Check that only one for the two documents created for both legacy and mod have the same hearing date.
         //Ensure legacy and mod entries are setup correctly
-        assertThat(transcriptionDocumentResultsLegacy.get(0).getTranscription().getHearings()).isNullOrEmpty();
-        assertThat(transcriptionDocumentResultsLegacy.get(0).getTranscription().getHearingDate()).isEqualTo(hearingDate);
+        assertThat(transcriptionDocumentResultsLegacy.getFirst().getTranscription().getHearings()).isNullOrEmpty();
+        assertThat(transcriptionDocumentResultsLegacy.getFirst().getTranscription().getHearingDate()).isEqualTo(hearingDate);
         assertThat(transcriptionDocumentResultsLegacy.get(1).getTranscription().getHearings()).isNullOrEmpty();
         assertThat(transcriptionDocumentResultsLegacy.get(1).getTranscription().getHearingDate()).isNotEqualTo(hearingDate);
 
 
-        assertThat(transcriptionDocumentResultsMod.get(0).getTranscription().getHearings().getFirst().getHearingDate()).isEqualTo(hearingDate);
-        assertThat(transcriptionDocumentResultsMod.get(0).getTranscription().getHearingDate()).isNull();
+        assertThat(transcriptionDocumentResultsMod.getFirst().getTranscription().getHearings().getFirst().getHearingDate()).isEqualTo(hearingDate);
+        assertThat(transcriptionDocumentResultsMod.getFirst().getTranscription().getHearingDate()).isNull();
         assertThat(transcriptionDocumentResultsMod.get(1).getTranscription().getHearings().getFirst().getHearingDate()).isNotEqualTo(hearingDate);
         assertThat(transcriptionDocumentResultsMod.get(1).getTranscription().getHearingDate()).isNull();
 
@@ -546,8 +546,8 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
 
         List<TranscriptionDocumentEntity> transcriptionDocumentResults = new ArrayList<>();
-        transcriptionDocumentResults.add(transcriptionDocumentResultsLegacy.get(0));
-        transcriptionDocumentResults.add(transcriptionDocumentResultsMod.get(0));
+        transcriptionDocumentResults.add(transcriptionDocumentResultsLegacy.getFirst());
+        transcriptionDocumentResults.add(transcriptionDocumentResultsMod.getFirst());
 
         SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
         request.setHearingDate(hearingDate);
@@ -575,7 +575,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1,
                                                                                                                                  true, false, false);
 
-        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentResults.get(0);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentResults.getFirst();
         transcriptionStub.transcriptionLinkedCaseEntity(transcriptionDocumentEntity.getTranscription(),
                                                         transcriptionDocumentEntity.getTranscription().getCourtCase(),
                                                         transcriptionDocumentEntity.getTranscription().getCourtroom().getCourthouse().getCourthouseName(),

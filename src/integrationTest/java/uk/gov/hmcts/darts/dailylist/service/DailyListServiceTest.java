@@ -73,7 +73,7 @@ class DailyListServiceTest extends IntegrationBase {
 
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(1, resultList.size());
-        DailyListEntity dailyListEntity = resultList.get(0);
+        DailyListEntity dailyListEntity = resultList.getFirst();
 
         String expectedResponseLocation = "tests/dailylist/DailyListServiceTest/insert1_ok/expectedResponse.json";
         checkExpectedResponse(dailyListEntity, expectedResponseLocation);
@@ -93,7 +93,7 @@ class DailyListServiceTest extends IntegrationBase {
 
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(1, resultList.size());
-        DailyListEntity dailyListEntity = resultList.get(0);
+        DailyListEntity dailyListEntity = resultList.getFirst();
 
         String expectedResponseLocation = "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/expectedResponse.json";
         checkExpectedResponse(dailyListEntity, expectedResponseLocation);
@@ -121,7 +121,7 @@ class DailyListServiceTest extends IntegrationBase {
 
         String expectedResponseLocation1 = "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/expectedResponse.json";
         String expectedResponseLocation2 = "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/expectedResponse2.json";
-        checkExpectedResponse(resultList.get(0), expectedResponseLocation1);
+        checkExpectedResponse(resultList.getFirst(), expectedResponseLocation1);
         checkExpectedResponse(resultList.get(1), expectedResponseLocation2);
     }
 
@@ -147,7 +147,7 @@ class DailyListServiceTest extends IntegrationBase {
         service.saveDailyListToDatabase(request2);
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(2, resultList.size());
-        DailyListEntity dailyListEntity = resultList.get(0);
+        DailyListEntity dailyListEntity = resultList.getFirst();
         checkExpectedResponse(
             dailyListEntity,
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/expectedResponse.json"
@@ -213,6 +213,6 @@ class DailyListServiceTest extends IntegrationBase {
 
     private DailyListEntity getDailyListFromDb() {
         List<DailyListEntity> resultList = dailyListRepository.findAll();
-        return resultList.get(0);
+        return resultList.getFirst();
     }
 }

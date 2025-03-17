@@ -6,10 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
-import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
@@ -18,14 +17,13 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +37,10 @@ import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -56,29 +56,16 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @Mock
-    private DataManagementApi dataManagementApi;
-    @Mock
-    private ArmDataManagementApi armDataManagementApi;
-    @Mock
     private UserIdentity userIdentity;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @Mock
-    private ExternalObjectDirectoryEntity eod1;
-    @Mock
-    private ExternalObjectDirectoryEntity eod2;
     @Mock
     private FileOperationService fileOperationService;
     @Mock
     private ArchiveRecordService archiveRecordService;
 
     private UnstructuredToArmBatchProcessor unstructuredToArmBatchProcessor;
-    @Mock
-    private ExternalObjectDirectoryService eodService;
-    @Mock
-    private ArchiveRecordFileGenerator archiveRecordFileGenerator;
+
     @InjectMocks
     private DataStoreToArmHelper unstructuredToArmHelper;
 
@@ -157,7 +144,7 @@ class UnstructuredToArmBatchProcessorTest {
     }
 
     @Test
-    void testPaginatedBatchQuery() throws IOException {
+    void testPaginatedBatchQuery() {
         //given
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12, 34));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
@@ -182,5 +169,38 @@ class UnstructuredToArmBatchProcessorTest {
         );
 
         verifyNoMoreInteractions(logApi);
+    }
+
+    @Test
+    void processUnstructuredToArm_throwsInterruptedException() {
+        //given
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12, 34));
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+
+        try (MockedStatic<AsyncUtil> mockedStatic = mockStatic(AsyncUtil.class)) {
+            // Mock the static method call to throw InterruptedException
+            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)))
+                .thenThrow(new InterruptedException("Mocked InterruptedException"));
+
+            // when
+            unstructuredToArmBatchProcessor.processUnstructuredToArm(5000);
+
+            //then
+            verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocation(
+                any(),
+                any(ExternalLocationTypeEntity.class),
+                eq(3),
+                eq(Pageable.ofSize(5000)));
+
+            verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
+                EodHelper.storedStatus(),
+                EodHelper.unstructuredLocation(),
+                EodHelper.armLocation(), 4998
+            );
+
+            verifyNoMoreInteractions(logApi);
+        }
     }
 }

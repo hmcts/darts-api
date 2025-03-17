@@ -3,10 +3,12 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.data.EventTestData;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.EventLinkedCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
@@ -25,6 +27,8 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private HearingStub hearingStub;
+    @Autowired
+    private EventLinkedCaseStub eventLinkedCaseStub;
 
     @Test
     void testEventProcessing() {
@@ -190,6 +194,75 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
         List<EventEntity> eventVersions = eventRepository.findAllByEventIdExcludingEventIdZero(event1.getEventId());
         assertThat(eventVersions).isEmpty();
+    }
+
+    @Test
+    void findAllByRelatedEvents_shouldReturnAllRelatedEvents() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        final EventEntity event3 = EventTestData.someMinimalEvent();
+        final EventEntity event4 = EventTestData.someMinimalEvent();
+        final EventEntity event5 = EventTestData.someMinimalEvent();
+
+
+        event1.setEventId(123);
+        event2.setEventId(123);
+        event3.setEventId(123);
+        event4.setEventId(123);
+        event5.setEventId(1234);
+
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+        dartsDatabase.save(event3);
+        dartsDatabase.save(event4);
+        dartsDatabase.save(event5);
+
+        CourtCaseEntity caseEntity1 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+        CourtCaseEntity caseEntity2 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event3, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event5, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event2, caseEntity2);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event4, caseEntity1.getCaseNumber(), caseEntity1.getCourthouse().getCourthouseName());
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event4, "caseNumber2", "courthouseName");
+
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(),event1.getEventId(), List.of(caseEntity1.getId()));
+        assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
+            .containsExactlyInAnyOrder(event1.getId(), event3.getId());
+    }
+
+    @Test
+    void findAllByRelatedEvents_shouldReturnSingleEvent_whenEventIdIsZero() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+
+
+        event1.setEventId(0);
+        event2.setEventId(0);
+
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+        CourtCaseEntity caseEntity1 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event1, caseEntity1);
+
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(),event1.getEventId(), List.of(caseEntity1.getId()));
+        //Only one event should be returned as the event id is 0
+        assertThat(relatedEvents).hasSize(1);
+        assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
+            .containsExactlyInAnyOrder(event1.getId());
+
     }
 
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {

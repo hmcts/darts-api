@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.hearings.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.mapper.GetAnnotationsResponseMapper;
@@ -46,6 +48,7 @@ public class HearingsServiceImpl implements HearingsService {
     private final HearingTranscriptionMapper transcriptionMapper;
 
     public static final List<SecurityRoleEnum> SUPER_ADMIN_ROLE = List.of(SecurityRoleEnum.SUPER_ADMIN);
+    private final MediaRepository mediaRepository;
 
 
     @Override
@@ -71,6 +74,13 @@ public class HearingsServiceImpl implements HearingsService {
             throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
         }
         return foundHearingOpt.get();
+    }
+
+    @Override
+    public void validateHearingExistsElseError(Integer hearingId) {
+        if (!hearingRepository.existsById(hearingId)) {
+            throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
+        }
     }
 
     @Override
@@ -105,27 +115,32 @@ public class HearingsServiceImpl implements HearingsService {
     }
 
     @Override
+    @Transactional
     public void removeMediaLinkToHearing(Integer courtCaseId) {
-        hearingRepository.findByCaseIdWithMediaList(courtCaseId)
-            .ifPresent(hearing -> hearing.getMediaList()
-                .forEach(media -> {
-                    // Check all cases linked to a hearing have been expired/anonymised
-                    if (!mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(media)) {
-                        log.info(
-                            "Media {} link not removed for case id {} as not all associated cases are expired",
-                            media.getId(), courtCaseId);
-                    } else {
-                        hearingRepository.findHearingIdsByMediaId(media.getId()).forEach(
-                            hearingForMedia -> {
-                                hearingForMedia.setMediaList(null);
-                                hearingRepository.save(hearingForMedia);
-                                log.info(
-                                    "Media id {} link removed for hearing id {} on the expiry of case id {}",
-                                    media.getId(), hearingForMedia.getId(), courtCaseId);
-                            });
-                    }
-                })
-            );
+        mediaRepository.findByCaseIdWithMediaList(courtCaseId)
+            .stream()
+            .filter(media -> {
+                // Check all cases linked to a hearing have been expired/anonymised
+                if (mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(media)) {
+                    return true;
+                }
+                log.info("Media {} link not removed for case id {} as not all associated cases are expired", media.getId(), courtCaseId);
+                return false;
+            })
+            .forEach(media -> {
+                List<HearingEntity> hearingEntities = media.getHearingList();
+                hearingEntities.forEach(media::removeHearing);
+                mediaRepository.save(media);
+                hearingRepository.saveAll(hearingEntities);
+
+                if (log.isInfoEnabled()) {
+                    log.info(
+                        "Media id {} link removed for hearing id's {} on the expiry of case id {}",
+                        media.getId(),
+                        hearingEntities.stream().map(HearingEntity::getId).toList(),
+                        courtCaseId);
+                }
+            });
     }
 
     private void validateCaseIsNotExpiredFromHearingId(Integer hearingId) {

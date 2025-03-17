@@ -300,7 +300,7 @@ class CourthouseApiTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
-                                                                                             AuthorisationError.USER_DETAILS_INVALID.getType()));
+            AuthorisationError.USER_DETAILS_INVALID.getType()));
     }
 
     @Test
@@ -460,7 +460,7 @@ class CourthouseApiTest extends IntegrationBase {
                 .filter(securityGroup -> securityGroup.getSecurityRoleEntity().getRoleName().equals(APPROVER.name()))
                 .toList();
             assertEquals(1, approverGroups.size());
-            SecurityGroupEntity approverGroup = approverGroups.get(0);
+            SecurityGroupEntity approverGroup = approverGroups.getFirst();
             assertEquals("INT-TEST_HAVERFORDWEST_APPROVER", approverGroup.getGroupName());
             assertEquals("Haverfordwest Approver", approverGroup.getDisplayName());
 
@@ -468,7 +468,7 @@ class CourthouseApiTest extends IntegrationBase {
                 .filter(securityGroup -> securityGroup.getSecurityRoleEntity().getRoleName().equals(REQUESTER.name()))
                 .toList();
             assertEquals(1, requesterGroups.size());
-            SecurityGroupEntity requesterGroup = requesterGroups.get(0);
+            SecurityGroupEntity requesterGroup = requesterGroups.getFirst();
             assertEquals("INT-TEST_HAVERFORDWEST_REQUESTER", requesterGroup.getGroupName());
             assertEquals("Haverfordwest Requester", requesterGroup.getDisplayName());
         });

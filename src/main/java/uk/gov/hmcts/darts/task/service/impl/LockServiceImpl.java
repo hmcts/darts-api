@@ -55,7 +55,7 @@ public class LockServiceImpl implements LockService {
 
     private boolean isInFuture(List<Timestamp> lockedUntil) {
         // There should only ever be one item in the list as we search by primary key
-        return toOffsetDateTime(lockedUntil.get(0)).isAfter(currentTimeHelper.currentOffsetDateTime());
+        return toOffsetDateTime(lockedUntil.getFirst()).isAfter(currentTimeHelper.currentOffsetDateTime());
     }
 
     private OffsetDateTime toOffsetDateTime(Timestamp timestamp) {

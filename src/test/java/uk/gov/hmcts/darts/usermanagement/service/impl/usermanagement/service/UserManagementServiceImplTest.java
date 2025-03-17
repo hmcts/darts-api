@@ -123,18 +123,18 @@ class UserManagementServiceImplTest {
 
         List<UserWithIdAndTimestamps> resultList = service.getUsers(EXISTING_EMAIL_ADDRESS, null);
 
-        assertEquals(userAccountEntities.get(0).getUserFullName(), resultList.get(0).getFullName());
-        assertEquals(userAccountEntities.get(0).getEmailAddress(), resultList.get(0).getEmailAddress());
-        assertEquals(userAccountEntities.get(0).getLastLoginTime(), resultList.get(0).getLastLoginAt());
-        assertEquals(userAccountEntities.get(0).getLastModifiedDateTime(), resultList.get(0).getLastModifiedAt());
-        assertEquals(userAccountEntities.get(0).getCreatedDateTime(), resultList.get(0).getCreatedAt());
+        assertEquals(userAccountEntities.getFirst().getUserFullName(), resultList.getFirst().getFullName());
+        assertEquals(userAccountEntities.getFirst().getEmailAddress(), resultList.getFirst().getEmailAddress());
+        assertEquals(userAccountEntities.getFirst().getLastLoginTime(), resultList.getFirst().getLastLoginAt());
+        assertEquals(userAccountEntities.getFirst().getLastModifiedDateTime(), resultList.getFirst().getLastModifiedAt());
+        assertEquals(userAccountEntities.getFirst().getCreatedDateTime(), resultList.getFirst().getCreatedAt());
     }
 
     @Test
     void testModifyUserWithDeactivate() throws IOException {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
-        userAccountEntities.get(0).setActive(false);
-        userAccountEntities.get(0).setIsSystemUser(false);
+        userAccountEntities.getFirst().setActive(false);
+        userAccountEntities.getFirst().setIsSystemUser(false);
 
         Integer userId = 1001;
         Integer transcriptionId = 1001;
@@ -145,19 +145,19 @@ class UserManagementServiceImplTest {
         when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
         when(userAccountRepository.existsById(userId)).thenReturn(true);
-        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
-        when(transcriptionService.rollbackUserTranscriptions(userAccountEntities.get(0))).thenReturn(Arrays.asList(transcriptionId));
+        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.getFirst()));
+        when(transcriptionService.rollbackUserTranscriptions(userAccountEntities.getFirst())).thenReturn(Arrays.asList(transcriptionId));
 
         UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);
 
-        assertEquals(transcriptionId, resultList.getRolledBackTranscriptRequests().get(0));
+        assertEquals(transcriptionId, resultList.getRolledBackTranscriptRequests().getFirst());
         verify(transcriptionService, times(1)).rollbackUserTranscriptions(Mockito.any());
     }
 
     @Test
     void testModifyUserWithoutActivation() throws IOException {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
-        userAccountEntities.get(0).setIsSystemUser(false);
+        userAccountEntities.getFirst().setIsSystemUser(false);
 
         UserPatch patch = new UserPatch();
         String description = "description";
@@ -176,12 +176,12 @@ class UserManagementServiceImplTest {
 
         Set<SecurityGroupEntity> securityGroupEntitySet = new HashSet<>();
         securityGroupEntitySet.add(securityGroupEntity);
-        userAccountEntities.get(0).setSecurityGroupEntities(securityGroupEntitySet);
+        userAccountEntities.getFirst().setSecurityGroupEntities(securityGroupEntitySet);
 
         Integer userId = 1001;
         when(userIdentity.userHasGlobalAccess(argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN)))).thenReturn(true, false);
         when(userAccountRepository.existsById(userId)).thenReturn(true);
-        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
+        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.getFirst()));
         when(securityGroupRepository.findById(secGroupId)).thenReturn(Optional.of(securityGroupEntity));
         when(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(Mockito.notNull())).thenReturn(Arrays.asList(secGroupId));
 
@@ -199,7 +199,7 @@ class UserManagementServiceImplTest {
     @Test
     void testModifyUserWithActivate() throws IOException {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
-        userAccountEntities.get(0).setIsSystemUser(false);
+        userAccountEntities.getFirst().setIsSystemUser(false);
 
         UserPatch patch = new UserPatch();
         patch.setActive(true);
@@ -219,13 +219,13 @@ class UserManagementServiceImplTest {
 
         Set<SecurityGroupEntity> securityGroupEntitySet = new HashSet<>();
         securityGroupEntitySet.add(securityGroupEntity);
-        userAccountEntities.get(0).setSecurityGroupEntities(securityGroupEntitySet);
+        userAccountEntities.getFirst().setSecurityGroupEntities(securityGroupEntitySet);
 
         Integer userId = 1001;
 
         when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
         when(userAccountRepository.existsById(userId)).thenReturn(true);
-        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
+        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.getFirst()));
         when(securityGroupRepository.findById(secGroupId)).thenReturn(Optional.of(securityGroupEntity));
         when(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(Mockito.notNull())).thenReturn(Arrays.asList(secGroupId));
 

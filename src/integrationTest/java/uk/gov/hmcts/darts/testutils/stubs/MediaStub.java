@@ -3,12 +3,12 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.audio.repository.TransformedMediaSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
@@ -141,6 +141,6 @@ public class MediaStub {
     @Transactional
     public Integer getHearingId(Integer id) {
         Optional<MediaEntity> mediaEntity = mediaRepository.findById(id);
-        return mediaEntity.get().getHearingList().get(0).getId();
+        return mediaEntity.get().getHearingList().getFirst().getId();
     }
 }

@@ -69,6 +69,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     protected static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
     protected static final String CREATE_RECORD = "create_record";
+    public static final int MAX_INVALID_LINE_RECORDS = 2;
     protected final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     protected final ArmDataManagementApi armDataManagementApi;
     protected final FileOperationService fileOperationService;
@@ -134,11 +135,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     void runTasksAsync(List<Callable<Void>> tasks, AsyncTaskConfig asyncTaskConfig) {
         try {
             AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
+        } catch (InterruptedException e) {
+            log.error(getClass().getName() + " failed with unexpected exception", e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error(getClass().getName() + " failed with unexpected exception", e);
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
         }
     }
 
@@ -293,8 +294,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             armResponseBatchData -> {
                 //If there is only 1 invalid line file (invalid line processor is added at the same time as the invalid line file so only 1 needs to be checked)
                 //and either a "create_record" or "upload_new_file", process the files
-                if ((CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())
-                    && armResponseBatchData.getInvalidLineFileFilenameProcessors().size() == 1)
+                if (CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())
+                    && armResponseBatchData.getInvalidLineFileFilenameProcessors().size() == 1
                     && (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     || nonNull(armResponseBatchData.getArmResponseUploadFileRecord()))) {
                     preProcessResponseFilesActions(armResponseBatchData.getExternalObjectDirectoryId());
@@ -383,7 +384,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             var invalidLineFileFilenameProcessor2 = armResponseBatchData.getInvalidLineFileFilenameProcessors().getLast();
 
             if (nonNull(externalObjectDirectory)) {
-                if (armResponseBatchData.getArmResponseInvalidLineRecords().size() == 2) {
+                if (armResponseBatchData.getArmResponseInvalidLineRecords().size() == MAX_INVALID_LINE_RECORDS) {
                     var invalidLineRecord1 = armResponseBatchData.getArmResponseInvalidLineRecords().getFirst();
                     var invalidLineRecord2 = armResponseBatchData.getArmResponseInvalidLineRecords().getLast();
 
@@ -461,12 +462,12 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         return StringUtils.isNotEmpty(operation) ? operation : "UNKNOWN";
     }
 
-    private void appendErrorDescription(StringBuilder errorDescription, String operation, ArmResponseInvalidLineRecord record) {
+    private void appendErrorDescription(StringBuilder errorDescription, String operation, ArmResponseInvalidLineRecord invalidLineRecord) {
         errorDescription
             .append("Operation: ")
             .append(operation)
             .append(" - ")
-            .append(record.getExceptionDescription())
+            .append(invalidLineRecord.getExceptionDescription())
             .append("; ");
     }
 

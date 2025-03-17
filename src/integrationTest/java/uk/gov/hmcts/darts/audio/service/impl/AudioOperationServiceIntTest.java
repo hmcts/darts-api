@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -84,8 +85,10 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         ));
     }
 
+    @AfterEach
     @Override
-    protected void checkCleanup() throws Exception {
+    protected void clearTestData() {
+        super.clearTestData();
         FileStore.getFileStore().remove();
         assertEquals(0, FileUtils.listFiles(tempDirectory.toPath().toFile(), null, true).size());
     }
@@ -251,7 +254,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
 
     @Test
     void shouldAdjustTimeDurationWhenValid() {
-        AudioFileInfo audioFileInfo = preloadedInputAudioFileInfos.get(0);
+        AudioFileInfo audioFileInfo = preloadedInputAudioFileInfos.getFirst();
         assertEquals(
             Instant.parse(T_09_00_00_Z),
             audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(0, SECONDS))
@@ -297,7 +300,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
 
         AudioFileInfo audioFileInfo = audioOperationService.reEncode(
             tempDirectory.getAbsolutePath(),
-            preloadedInputAudioFileInfos.get(0)
+            preloadedInputAudioFileInfos.getFirst()
         );
 
         assertTrue(audioFileInfo.getPath().toString().matches(".*/C[0-4]-encode-[0-9]*.mp3"));
@@ -336,11 +339,11 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_09_03_01_Z), audioFileInfo.get(0).getEndTime());
-        assertFalse(audioFileInfo.get(0).isTrimmed());
+        assertTrue(audioFileInfo.getFirst().getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.getFirst().getChannel());
+        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.getFirst().getStartTime());
+        assertEquals(Instant.parse(T_09_03_01_Z), audioFileInfo.getFirst().getEndTime());
+        assertFalse(audioFileInfo.getFirst().isTrimmed());
     }
 
     @Test
@@ -373,13 +376,13 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             ALLOWABLE_GAP_MS
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getEndTime());
+        assertTrue(audioFileInfo.getFirst().getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.getFirst().getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getFirst().getStartTime());
+        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.getFirst().getEndTime());
         assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.get(1).getStartTime());
         assertEquals(Instant.parse(T_09_03_00_Z), audioFileInfo.get(1).getEndTime());
-        assertFalse(audioFileInfo.get(0).isTrimmed());
+        assertFalse(audioFileInfo.getFirst().isTrimmed());
     }
 
     @Test
@@ -411,11 +414,11 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getEndTime());
-        assertFalse(audioFileInfo.get(0).isTrimmed());
+        assertTrue(audioFileInfo.getFirst().getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.getFirst().getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getFirst().getStartTime());
+        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.getFirst().getEndTime());
+        assertFalse(audioFileInfo.getFirst().isTrimmed());
     }
 
     @Test
@@ -427,12 +430,12 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.get(0).getEndTime());
+        assertTrue(audioFileInfo.getFirst().getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.getFirst().getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getFirst().getStartTime());
+        assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.getFirst().getEndTime());
         assertEquals(1, audioFileInfo.size());
-        assertFalse(audioFileInfo.get(0).isTrimmed());
+        assertFalse(audioFileInfo.getFirst().isTrimmed());
     }
 
     private Path createFile(Path path, String name) throws IOException {
