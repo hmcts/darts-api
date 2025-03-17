@@ -38,7 +38,7 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
 
         caseManagementRetentionRepository.deleteAllByEventEntityIn(
             asList(
-                caseManagementRetentionsWithEvents.getFirst().getEventEntity(),
+                caseManagementRetentionsWithEvents.getFirst().getEventEntity().getId(),
                 caseManagementRetentionsWithEvents.get(1).getEventEntity().getId()));
 
         assertThat(dartsDatabase.getCaseManagementRetentionRepository().findAll())
