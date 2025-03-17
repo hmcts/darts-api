@@ -70,6 +70,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 def determineDevEnvironmentDeployment() {
     env.DEV_ENABLE_DARTS_PORTAL = false
+    env.INTEGRATION_TEST_LOGGING_LEVEL = "off"
     env.DEV_DARTS_PORTAL_URL = "https://darts.staging.apps.hmcts.net"
 
     echo "1 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"

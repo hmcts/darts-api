@@ -98,9 +98,9 @@ darts:
         thread-sleep-duration: ${ARM_RPO_THREAD_SLEEP_DURATION:2s}
 logging:
   level:
-    root: off
-    uk.gov.hmcts.darts: off
-    net.javacrumbs.shedlock: off
-    org.springframework.web.servlet.mvc.method.annotation: off
-    org.springframework.web: off
+    root: ${INTEGRATION_TEST_LOGGING_LEVEL:INFO}
+    uk.gov.hmcts.darts: ${INTEGRATION_TEST_LOGGING_LEVEL:DEBUG}
+    net.javacrumbs.shedlock: ${INTEGRATION_TEST_LOGGING_LEVEL:INFO}
+    org.springframework.web.servlet.mvc.method.annotation: ${INTEGRATION_TEST_LOGGING_LEVEL:DEBUG}
+    org.springframework.web: ${INTEGRATION_TEST_LOGGING_LEVEL:DEBUG}
   config: classpath:logback-test.xml
