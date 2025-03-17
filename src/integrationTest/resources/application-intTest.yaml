@@ -1,8 +1,4 @@
 spring:
-  test:
-    context:
-      cache:
-        maxSize: 0
   data-management:
     retention-period:
       inbound:
