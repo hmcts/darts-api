@@ -35,5 +35,4 @@ darts:
 
 logging:
   level:
-    root: off
-    uk.gov.hmcts.darts: off
+    uk.gov.hmcts.darts: DEBUG

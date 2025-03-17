@@ -26,6 +26,7 @@ darts:
 logging:
   level:
     root: off
-    uk.gov.hmcts.darts: off
-    org.springframework.web.servlet.mvc.method.annotation: off
-    org.springframework.web: off
+    uk.gov.hmcts.darts: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
+    org.springframework.web: DEBUG
+

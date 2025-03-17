@@ -556,5 +556,5 @@ dbMigration:
 logging:
   level:
     root: off
-    uk.gov.hmcts.darts: off
-    net.javacrumbs.shedlock: off
+    uk.gov.hmcts.darts: ${DARTS_LOG_LEVEL:INFO}
+    net.javacrumbs.shedlock: ${DARTS_LOG_LEVEL:INFO}
