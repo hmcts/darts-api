@@ -3,9 +3,11 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.event.enums.EventStatus;
 import uk.gov.hmcts.darts.test.common.data.EventTestData;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.EventLinkedCaseStub;
@@ -235,7 +237,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         eventLinkedCaseStub
             .createCaseLinkedEvent(event4, "caseNumber2", "courthouseName");
 
-        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(),event1.getEventId(), List.of(caseEntity1.getId()));
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(), event1.getEventId(), List.of(caseEntity1.getId()));
         assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
             .containsExactlyInAnyOrder(event1.getId(), event3.getId());
     }
@@ -245,24 +247,52 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         final EventEntity event1 = EventTestData.someMinimalEvent();
         final EventEntity event2 = EventTestData.someMinimalEvent();
 
-
         event1.setEventId(0);
         event2.setEventId(0);
 
         dartsDatabase.save(event1);
         dartsDatabase.save(event2);
         CourtCaseEntity caseEntity1 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
-        eventLinkedCaseStub
-            .createCaseLinkedEvent(event1, caseEntity1);
-        eventLinkedCaseStub
-            .createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity1);
 
-        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(),event1.getEventId(), List.of(caseEntity1.getId()));
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(), event1.getEventId(), List.of(caseEntity1.getId()));
         //Only one event should be returned as the event id is 0
         assertThat(relatedEvents).hasSize(1);
         assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
             .containsExactlyInAnyOrder(event1.getId());
 
+    }
+
+    @Test
+    void findAllByEventStatusAndNotCourtCase_shouldReturnSingleEvent() {
+        // given
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+
+        event1.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
+        event2.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
+
+        dartsPersistence.save(event1);
+        dartsPersistence.save(event2);
+
+        CourtCaseEntity caseEntity1 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+        caseEntity1.setId(199);
+        caseEntity1 = dartsPersistence.save(caseEntity1); // Ensure the entity is saved and managed
+        eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity1);
+
+        CourtCaseEntity caseEntity2 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+        eventLinkedCaseStub.createCaseLinkedEvent(event2, caseEntity2);
+
+        // when
+        List<Integer> events = eventRepository.findAllByEventStatusAndNotCourtCase(
+            EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
+            List.of(caseEntity1.getId()),
+            Limit.of(5));
+
+        // then
+        assertThat(events).hasSize(1);
+        assertThat(events.contains(event2.getEventId())).isTrue();
     }
 
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {

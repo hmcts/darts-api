@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -48,6 +49,8 @@ class AudioLinkingAutomatedTaskTest {
     private AudioLinkingAutomatedTask.EventProcessor eventProcessor;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private AudioConfigurationProperties audioConfigurationProperties;
 
     @InjectMocks
     @Spy
@@ -67,17 +70,17 @@ class AudioLinkingAutomatedTaskTest {
 
         List<Integer> eventIds = List.of(1, 2, 3);
 
-        doReturn(eventIds).when(eventRepository).findAllByEventStatus(anyInt(), any());
+        when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers()).thenReturn(List.of("199"));
+        doReturn(eventIds).when(eventRepository).findAllByEventStatusAndNotCourtCase(anyInt(), any(), any());
         doNothing().when(eventProcessor).processEvent(any());
         doReturn(5).when(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
 
         audioLinkingAutomatedTask.runTask();
 
-
         verify(audioLinkingAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();
         verify(eventRepository, times(1))
-            .findAllByEventStatus(2, Limit.of(5));
+            .findAllByEventStatusAndNotCourtCase(2, List.of(199), Limit.of(5));
 
         verify(eventProcessor, times(1))
             .processEvent(1);
