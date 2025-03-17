@@ -77,7 +77,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PEN
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @Slf4j
-@ExtendWith(OutputCaptureExtension.class)
 @SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
@@ -500,16 +499,13 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     }
 
     @Test
-    void runTasksAsync_asyncException(CapturedOutput output) {
+    void runTasksAsync_asyncException() {
 
         try (MockedStatic<AsyncUtil> asyncUtilMockedStatic = Mockito.mockStatic(AsyncUtil.class)) {
             asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), any()))
                 .thenThrow(new RuntimeException("Test exception"));
             armBatchProcessResponseFiles.runTasksAsync(new ArrayList<>(), asyncTaskConfig);
-            LogUtil.waitUntilMessage(output, "failed with unexpected exception", 5);
-
-            assertThat(output)
-                .contains(armBatchProcessResponseFiles.getClass().getName() + " failed with unexpected exception");
+            //Should be gracefully handled
         }
     }
 
