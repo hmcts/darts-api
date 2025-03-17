@@ -39,7 +39,7 @@ public class AudioLinkingAutomatedTask
     private final EventRepository eventRepository;
     private final EventProcessor eventProcessor;
     private final AudioConfigurationProperties audioConfigurationProperties;
-    
+
     protected AudioLinkingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                         AudioLinkingAutomatedTaskConfig automatedTaskConfigurationProperties,
                                         LogApi logApi, LockService lockService,
@@ -60,7 +60,7 @@ public class AudioLinkingAutomatedTask
     @Override
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
-        List<Integer> eveIds = eventRepository.findAllByEventStatusAndNotCourtCase(
+        List<Integer> eveIds = eventRepository.findAllByEventStatusAndNotCourtCases(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
             audioConfigurationProperties.getHandheldAudioCourtroomNumbers().stream().map(Integer::parseInt).toList(),
             Limit.of(getAutomatedTaskBatchSize()));

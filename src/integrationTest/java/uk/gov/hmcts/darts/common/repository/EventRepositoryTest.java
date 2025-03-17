@@ -267,7 +267,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllByEventStatusAndNotCourtCase_shouldReturnSingleEvent() {
+    void findAllByEventStatusAndNotCourtCases_shouldReturnSingleEvent() {
         // given
         EventEntity eventWithCourtCaseToBeExcluded = PersistableFactory.getEventTestData().someMinimal();
         EventEntity eventWithCourtCaseToBeIncluded = PersistableFactory.getEventTestData().someMinimal();
@@ -287,7 +287,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         eventLinkedCaseStub.createCaseLinkedEvent(eventWithCourtCaseToBeIncluded, courtCaseToBeFound);
 
         // when
-        List<Integer> events = eventRepository.findAllByEventStatusAndNotCourtCase(
+        List<Integer> events = eventRepository.findAllByEventStatusAndNotCourtCases(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
             List.of(courtCaseToBeExcluded.getId()),
             Limit.of(5));

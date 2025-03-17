@@ -175,7 +175,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         AND elc.courtCase.id not in :courtCaseIds
         """
     )
-    List<Integer> findAllByEventStatusAndNotCourtCase(Integer statusNumber, List<Integer> courtCaseIds, Limit limit);
+    List<Integer> findAllByEventStatusAndNotCourtCases(Integer statusNumber, List<Integer> courtCaseIds, Limit limit);
 
     @Query(value = """
                         SELECT e3.id from EventEntity e3
