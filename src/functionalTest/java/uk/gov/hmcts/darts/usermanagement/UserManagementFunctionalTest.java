@@ -35,11 +35,6 @@ class UserManagementFunctionalTest extends FunctionalTest {
     private static final String ADMIN_USERS_SEARCH_PATH = "/admin/users/search";
     private static final String EMAIL_ADDRESS_HEADER_NAME = "Email-Address";
 
-    @BeforeEach
-    void beforeEach() {
-        enableAccessTokenCache();
-    }
-
     @AfterEach
     void tearDown() {
         clean();
