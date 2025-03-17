@@ -1,4 +1,8 @@
 spring:
+  test:
+    context:
+      cache:
+        maxSize: 0
   data-management:
     retention-period:
       inbound:
@@ -98,9 +102,5 @@ darts:
         thread-sleep-duration: ${ARM_RPO_THREAD_SLEEP_DURATION:2s}
 logging:
   level:
-    root: DEBUG
-    uk:
-      gov:
-        hmcts:
-          darts: DEBUG
+    root: off
   config: classpath:logback-test.xml
