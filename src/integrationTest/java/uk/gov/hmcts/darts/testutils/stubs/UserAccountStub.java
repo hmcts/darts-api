@@ -275,6 +275,17 @@ public class UserAccountStub {
     public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
                                                 CourthouseEntity courthouseEntity) {
 
+        List<CourthouseEntity> courthouseEntities = null;
+        if (nonNull(courthouseEntity)) {
+            courthouseEntities = List.of(courthouseEntity);
+        }
+
+        return createExternalUser(guid, securityGroupEntity, courthouseEntities);
+    }
+
+    public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
+                                                List<CourthouseEntity> courthouseEntities) {
+
         var testUser = getIntegrationTestUserAccountEntity();
         Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
         securityGroupEntities.add(securityGroupEntity);
@@ -283,8 +294,10 @@ public class UserAccountStub {
         testUser.setAccountGuid(guid);
 
         testUser = dartsDatabaseSaveStub.save(testUser);
-        if (nonNull(courthouseEntity)) {
-            securityGroupStub.addCourthouse(securityGroupEntity, courthouseEntity);
+        if (nonNull(courthouseEntities)) {
+            for (CourthouseEntity courthouse : courthouseEntities) {
+                securityGroupStub.addCourthouse(securityGroupEntity, courthouse);
+            }
         }
         return testUser;
     }

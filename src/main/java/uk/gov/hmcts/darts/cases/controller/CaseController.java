@@ -118,6 +118,7 @@ public class CaseController implements CasesApi {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber(advancedSearchRequest.getCaseNumber())
             .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
+            .courthouseIds(advancedSearchRequest.getCourthouseIds())
             .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
             .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
             .defendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName()))

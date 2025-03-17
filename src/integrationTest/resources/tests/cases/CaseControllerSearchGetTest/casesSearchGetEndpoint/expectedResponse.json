@@ -11,21 +11,21 @@
     "hearings": [
       {
         "date": "2023-05-20",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-05-21",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-05-22",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
