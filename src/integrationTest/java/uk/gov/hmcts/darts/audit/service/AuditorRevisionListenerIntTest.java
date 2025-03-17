@@ -59,7 +59,7 @@ class AuditorRevisionListenerIntTest extends PostgresIntegrationBase {
             .getResultList();
 
         assertThat(audits).hasSize(2);
-        Object[] createAudit = audits.get(0);
+        Object[] createAudit = audits.getFirst();
         Object[] editAudit = audits.get(1);
 
         RevisionInfo createAuditRevisionInfo = (RevisionInfo) createAudit[1];

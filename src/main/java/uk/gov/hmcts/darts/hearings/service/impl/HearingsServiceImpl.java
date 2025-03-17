@@ -77,6 +77,13 @@ public class HearingsServiceImpl implements HearingsService {
     }
 
     @Override
+    public void validateHearingExistsElseError(Integer hearingId) {
+        if (!hearingRepository.existsById(hearingId)) {
+            throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
+        }
+    }
+
+    @Override
     public List<EventResponse> getEvents(Integer hearingId) {
         validateCaseIsNotExpiredFromHearingId(hearingId);
         List<EventEntity> eventEntities = eventRepository.findAllByHearingId(hearingId);

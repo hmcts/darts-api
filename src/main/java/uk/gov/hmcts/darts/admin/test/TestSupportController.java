@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.admin.test;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.RandomStringGenerator;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,12 +43,10 @@ import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.lang.Integer.parseInt;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -60,7 +59,8 @@ import static org.springframework.http.HttpStatus.OK;
 @SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement", "PMD.TestClassWithoutTestCases"})
 public class TestSupportController {
 
-    public static final String IDS = "ids";
+    private static final String FUNCTIONAL_TEST_KEY = "FUNC-";
+    private static final String IDS = "ids";
     private final SessionFactory sessionFactory;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
@@ -184,7 +184,7 @@ public class TestSupportController {
         @PathVariable(name = "courthouse_name") String courthouseName,
         @PathVariable(name = "courtroom_name") String courtroomName) {
 
-        if (!courthouseName.startsWith("FUNC-")) {
+        if (!courthouseName.startsWith(FUNCTIONAL_TEST_KEY)) {
             return new ResponseEntity<>("Courthouse name must start with FUNC-", BAD_REQUEST);
         }
         String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courthouseName));
@@ -442,10 +442,10 @@ public class TestSupportController {
         }
         session.createNativeQuery("""
                                       delete from darts.security_group_courthouse_ae where grp_id in ( :ids )
-                                      """, Integer.class).setParameter(IDS, securityGroupIds).executeUpdate();
+                                      """, Integer.class).setParameter("ids", securityGroupIds).executeUpdate();
         session.createNativeQuery("""
                                       delete from darts.security_group where grp_id in ( :ids )
-                                      """, Integer.class).setParameter(IDS, securityGroupIds).executeUpdate();
+                                      """, Integer.class).setParameter("ids", securityGroupIds).executeUpdate();
     }
 
     private void removeRetentionPolicyTypes(Session session) {
@@ -477,8 +477,11 @@ public class TestSupportController {
         courtCase.setLastModifiedBy(userAccount);
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
-        String courtroomName = "FUNC-" + randomAlphanumeric(7).toUpperCase(Locale.ENGLISH);
-        String courthouseName = "FUNC-" + randomAlphanumeric(7).toUpperCase(Locale.ENGLISH);
+        char[][] allowedCharacterRanges = {{'A', 'Z'}, {'0', '9'}};
+        String courtroomName = FUNCTIONAL_TEST_KEY + RandomStringGenerator.builder()
+            .withinRange(allowedCharacterRanges).withinRange(7, 7);
+        String courthouseName = FUNCTIONAL_TEST_KEY + RandomStringGenerator.builder()
+            .withinRange(allowedCharacterRanges).withinRange(7, 7);
         CourthouseEntity courthouse = newCourthouse(courthouseName);
         newCourtroom(courtroomName, courthouse);
 

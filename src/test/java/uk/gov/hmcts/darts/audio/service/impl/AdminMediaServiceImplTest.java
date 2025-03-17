@@ -571,7 +571,7 @@ class AdminMediaServiceImplTest {
                                                                                     startDateTime, endDateTime);
 
         assertEquals(1, response.size());
-        assertEquals(mediaEntity.getId(), response.get(0).getId());
+        assertEquals(mediaEntity.getId(), response.getFirst().getId());
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = "[" + MEDIA_ID_5 + "]";
         JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
@@ -811,6 +811,7 @@ class AdminMediaServiceImplTest {
             when(baseObjectAdminActionEntity.getTicketReference()).thenReturn("ticketReference1");
             when(baseObjectAdminActionEntity.getObjectHiddenReason()).thenReturn(objectHiddenReasonEntity);
             when(baseObjectAdminActionEntity.getHiddenBy()).thenReturn(userAccount);
+            when(baseObjectAdminActionEntity.getHiddenDateTime()).thenReturn(OffsetDateTime.now());
 
             MediaEntity media2 = mock(MediaEntity.class);
             when(media2.getId()).thenReturn(4321);
@@ -822,6 +823,7 @@ class AdminMediaServiceImplTest {
             ObjectAdminActionEntity objectAdminActionEntity2 = mock(ObjectAdminActionEntity.class);
             when(objectAdminActionEntity2.getMedia()).thenReturn(media2);
             when(objectAdminActionEntity2.getComments()).thenReturn("Comment2");
+            when(objectAdminActionEntity2.getHiddenDateTime()).thenReturn(OffsetDateTime.now());
 
             when(mediaRepository.getVersionCount("chronicleId1")).thenReturn(2);
             when(mediaRepository.getVersionCount("chronicleId2")).thenReturn(3);
@@ -832,7 +834,7 @@ class AdminMediaServiceImplTest {
 
             //Check media
             assertThat(result.getMedia()).hasSize(2);
-            assertMedia(result.getMedia().get(0), 321, 1, 4, true, 2);
+            assertMedia(result.getMedia().getFirst(), 321, 1, 4, true, 2);
             assertMedia(result.getMedia().get(1), 4321, 2, 4, true, 3);
             //Check courthouse
             assertCourthouse(result.getCourthouse(), "courthouseName", 1);

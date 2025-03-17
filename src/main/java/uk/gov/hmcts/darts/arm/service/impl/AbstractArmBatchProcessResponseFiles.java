@@ -462,12 +462,12 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         return StringUtils.isNotEmpty(operation) ? operation : "UNKNOWN";
     }
 
-    private void appendErrorDescription(StringBuilder errorDescription, String operation, ArmResponseInvalidLineRecord record) {
+    private void appendErrorDescription(StringBuilder errorDescription, String operation, ArmResponseInvalidLineRecord invalidLineRecord) {
         errorDescription
             .append("Operation: ")
             .append(operation)
             .append(" - ")
-            .append(record.getExceptionDescription())
+            .append(invalidLineRecord.getExceptionDescription())
             .append("; ");
     }
 

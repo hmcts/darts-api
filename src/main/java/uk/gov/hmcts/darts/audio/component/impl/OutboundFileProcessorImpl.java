@@ -68,7 +68,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         final int numberOfSessions = groupedAudioSessions.size();
         if (numberOfSessions >= 1) {
             finalisedAudioSessions.add(trimAll(
-                groupedAudioSessions.get(0), // trim start of session
+                groupedAudioSessions.getFirst(), // trim start of session
                 mediaRequestStartTime,
                 mediaRequestEndTime
             ));
@@ -163,8 +163,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                 boolean startTimesMatch;
                 audioFileInfosByStartTime.forEach((startTime, audioFileInfoList) -> numberOfStartTimesList.add(audioFileInfoList.size()));
 
-                numberOfChannelsMatch = numberOfChannelsList.stream().allMatch(numberOfChannelsList.get(0)::equals);
-                startTimesMatch = numberOfStartTimesList.stream().allMatch(numberOfStartTimesList.get(0)::equals)
+                numberOfChannelsMatch = numberOfChannelsList.stream().allMatch(numberOfChannelsList.getFirst()::equals);
+                startTimesMatch = numberOfStartTimesList.stream().allMatch(numberOfStartTimesList.getFirst()::equals)
                     && !numberOfStartTimesList.contains(1);
                 log.debug("Do channels match: {}, start times match: {} for audios {}", numberOfChannelsMatch, startTimesMatch, audioFilenames);
                 return numberOfChannelsMatch && startTimesMatch;
@@ -234,7 +234,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                 if (audioFileInfosForChannel.size() == 1) {
                     // If there is only one file then there is nothing to concatenate
                     List<AudioFileInfo> processedAudios = new ArrayList<>();
-                    processedAudios.add(audioFileInfosForChannel.get(0));
+                    processedAudios.add(audioFileInfosForChannel.getFirst());
                     concatenateByChannelWithGaps.add(new ChannelAudio(processedAudios));
                     continue;
                 }
@@ -305,7 +305,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     private static List<ChannelAudio> convertChannelsListToConcatenationsList(List<ChannelAudio> channelsList) {
         List<ChannelAudio> concatenationsList = new ArrayList<>();
         if (isNotEmpty(channelsList)) {
-            int numConcatenations = channelsList.get(0).getAudioFiles().size();
+            int numConcatenations = channelsList.getFirst().getAudioFiles().size();
             for (int i = 0; i < numConcatenations; i++) {
                 List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
                 for (ChannelAudio channelAudio : channelsList) {
@@ -330,7 +330,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
             audioFileInfosByChannel.sort(comparing(AudioFileInfo::getStartTime));
 
-            AudioFileInfo thisAudio = audioFileInfosByChannel.get(0);
+            AudioFileInfo thisAudio = audioFileInfosByChannel.getFirst();
             audioFileInfoList.add(thisAudio);
 
             for (int counter = 1; counter < audioFileInfosByChannel.size(); counter++) {

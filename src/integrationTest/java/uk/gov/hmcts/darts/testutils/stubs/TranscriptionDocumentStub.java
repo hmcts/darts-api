@@ -108,7 +108,7 @@ public class TranscriptionDocumentStub {
                 hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
                     courtroomEntity.getCourthouse().getCourthouseName(),
                     courtroomEntity.getName(),
-                    caseEntityList.get(0).getCaseNumber(),
+                    caseEntityList.getFirst().getCaseNumber(),
                     hearingDate,
                     userAccountRepository.getReferenceById(0)
                 );

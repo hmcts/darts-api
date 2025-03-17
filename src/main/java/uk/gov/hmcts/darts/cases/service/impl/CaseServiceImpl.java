@@ -54,7 +54,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -210,7 +209,7 @@ public class CaseServiceImpl implements CaseService {
                     hearingEntities
                         .stream()
                         .map(HearingEntity::getId)
-                        .collect(Collectors.toList()));
+                        .toList());
 
             for (AnnotationEntity annotationEntity : annotationsEntities) {
                 for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
@@ -223,7 +222,7 @@ public class CaseServiceImpl implements CaseService {
                     hearingEntities
                         .stream()
                         .map(HearingEntity::getId)
-                        .collect(Collectors.toList()), authorisationApi.getCurrentUser());
+                        .toList(), authorisationApi.getCurrentUser());
 
             for (AnnotationEntity annotationEntity : annotationsEntities) {
                 for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {

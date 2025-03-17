@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.CREATE_COURTHOUSE;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
@@ -87,7 +86,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         Set<SecurityGroupEntity> secGrps = courthouseEntity.getSecurityGroups();
         List<Integer> secGrpIds = new ArrayList<>();
         if (secGrps != null && !secGrps.isEmpty()) {
-            secGrpIds = secGrps.stream().map(SecurityGroupEntity::getId).collect(Collectors.toList());
+            secGrpIds = secGrps.stream().map(SecurityGroupEntity::getId).toList();
         }
 
         AdminCourthouse adminCourthouse = adminMapper.mapFromEntityToAdminCourthouse(courthouseEntity);

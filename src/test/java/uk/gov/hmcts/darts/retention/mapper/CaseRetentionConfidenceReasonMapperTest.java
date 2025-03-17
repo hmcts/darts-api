@@ -50,7 +50,7 @@ class CaseRetentionConfidenceReasonMapperTest {
         assertEquals("2023-05-31T10:00:00.000+01", result.getRetentionConfidenceAppliedTimestamp());
         assertEquals(2, result.getRetentionCases().size());
 
-        CaseRetentionConfidenceReason.RetentionCase retentionCase1 = result.getRetentionCases().get(0);
+        CaseRetentionConfidenceReason.RetentionCase retentionCase1 = result.getRetentionCases().getFirst();
         assertEquals(courtCase1.getCaseNumber(), retentionCase1.getCaseNumber());
         assertEquals(courtCase1.getCourthouse().getCourthouseName(), retentionCase1.getCourthouse());
         assertEquals("CASE_CLOSED", retentionCase1.getRetentionConfidenceReason());

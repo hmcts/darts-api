@@ -68,7 +68,7 @@ class CaseServiceAdvancedSearchTempTest extends IntegrationBase {
             .build();
         List<AdvancedSearchResult> resultListForActualDate = service.advancedSearch(requestActualHearingDate);
         assertEquals(1, resultListForActualDate.size());
-        assertEquals(actualHearingDate, resultListForActualDate.get(0).getHearings().get(0).getDate());
+        assertEquals(actualHearingDate, resultListForActualDate.getFirst().getHearings().getFirst().getDate());
 
         GetCasesSearchRequest requestNotActualHearingDate = GetCasesSearchRequest.builder()
             .dateFrom(notActualHearingDate)
@@ -102,7 +102,7 @@ class CaseServiceAdvancedSearchTempTest extends IntegrationBase {
             .build();
         List<AdvancedSearchResult> resultListForActualDate = service.advancedSearch(requestActualHearingDate);
         assertEquals(1, resultListForActualDate.size());
-        assertEquals(actualHearingDate, resultListForActualDate.get(0).getHearings().get(0).getDate());
+        assertEquals(actualHearingDate, resultListForActualDate.getFirst().getHearings().getFirst().getDate());
 
         GetCasesSearchRequest requestNotActualHearingDate = GetCasesSearchRequest.builder()
             .caseNumber(otherHearing.getCourtCase().getCaseNumber().substring(0, 5))

@@ -40,13 +40,20 @@ public class AnnotationUploadServiceImpl implements AnnotationUploadService {
         hearingExistsValidator.validate(annotation);
         fileTypeValidator.validate(multipartFile);
 
+        String checksum;
+        try (var inputStream = multipartFile.getInputStream()) {
+            checksum = fileContentChecksum.calculate(inputStream);
+        } catch (IOException e) {
+            log.error("Failed to calculate checksum for annotation document {}", multipartFile.getOriginalFilename(), e);
+            throw new DartsApiException(FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT, e);
+        }
+
         var binaryData = extractBinaryFrom(multipartFile);
         var containerLocations = annotationDataManagement.upload(binaryData, multipartFile.getOriginalFilename());
 
         var annotationEntity = annotationMapper.mapFrom(annotation);
 
-        var checksum = fileContentChecksum.calculate(binaryData.toBytes());
-        var annotationDocumentEntity = annotationDocumentBuilder.buildFrom(multipartFile, annotationEntity, checksum);
+        var annotationDocumentEntity = annotationDocumentBuilder.buildFrom(multipartFile, checksum);
 
         var inboundExternalObjectDirectory = externalObjectDirectoryBuilder.buildFrom(
             annotationDocumentEntity, containerLocations.get(INBOUND), INBOUND);

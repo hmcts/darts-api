@@ -127,9 +127,10 @@ class AutomatedTaskServiceImplTest {
         );
         when(mockAutomatedTaskRepository.findByTaskName(processDailyListAutomatedTask.getTaskName()))
             .thenReturn(Optional.of(expectedAutomatedTaskEntity));
+        AutomatedTask automatedTask = createAutomatedTask("ProcessDailyList");
         DartsApiException exception = assertThrows(
             DartsApiException.class,
-            () -> automatedTaskService.getAutomatedTaskCronExpression(createAutomatedTask("ProcessDailyList"))
+            () -> automatedTaskService.getAutomatedTaskCronExpression(automatedTask)
         );
         assertEquals("Invalid cron expression", exception.getError().getTitle());
 
@@ -147,10 +148,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -182,10 +185,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -217,10 +222,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -252,10 +259,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -275,10 +284,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -323,6 +334,7 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
@@ -361,10 +373,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override
@@ -408,10 +422,12 @@ class AutomatedTaskServiceImplTest {
             lockService) {
             @Override
             protected void runTask() {
+                // empty method
             }
 
             @Override
             protected void handleException(Exception exception) {
+                // empty method
             }
 
             @Override

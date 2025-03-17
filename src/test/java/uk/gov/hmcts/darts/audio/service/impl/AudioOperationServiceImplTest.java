@@ -182,7 +182,7 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldAdjustTimeDurationWhenValid() {
-        AudioFileInfo audioFileInfo = preloadedInputAudioFileInfos.get(0);
+        AudioFileInfo audioFileInfo = preloadedInputAudioFileInfos.getFirst();
         assertEquals(
             Instant.parse(T_09_00_00_Z),
             audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(0, SECONDS))
@@ -231,7 +231,7 @@ class AudioOperationServiceImplTest {
 
         AudioFileInfo audioFileInfo = audioOperationService.reEncode(
             WORKSPACE_DIR,
-            preloadedInputAudioFileInfos.get(0)
+            preloadedInputAudioFileInfos.getFirst()
         );
 
         assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[0-4]-encode-[0-9]*.mp3"));
@@ -278,13 +278,13 @@ class AudioOperationServiceImplTest {
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
+        assertTrue(audioFileInfo.getFirst().getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.getFirst().getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getFirst().getStartTime());
+        assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.getFirst().getEndTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(1).getStartTime());
         assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
-        assertFalse(audioFileInfo.get(0).isTrimmed());
+        assertFalse(audioFileInfo.getFirst().isTrimmed());
     }
 
     @Test
@@ -316,13 +316,13 @@ class AudioOperationServiceImplTest {
             ALLOWABLE_GAP_MS
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
+        assertTrue(audioFileInfo.getFirst().getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.getFirst().getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getFirst().getStartTime());
+        assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.getFirst().getEndTime());
         assertEquals(Instant.parse(T_10_30_12_Z), audioFileInfo.get(1).getStartTime());
         assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
-        assertFalse(audioFileInfo.get(0).isTrimmed());
+        assertFalse(audioFileInfo.getFirst().isTrimmed());
     }
 
     @Test
@@ -337,11 +337,11 @@ class AudioOperationServiceImplTest {
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(0).getEndTime());
+        assertTrue(audioFileInfo.getFirst().getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.getFirst().getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getFirst().getStartTime());
+        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getFirst().getEndTime());
         assertEquals(1, audioFileInfo.size());
-        assertFalse(audioFileInfo.get(0).isTrimmed());
+        assertFalse(audioFileInfo.getFirst().isTrimmed());
     }
 }

@@ -41,7 +41,7 @@ public class GetExtendedProductionsByMatterServiceImpl implements GetExtendedPro
         try {
             requestGenerator = createExtendedProductionsByMatterRequest(armRpoExecutionDetailEntity.getMatterId());
         } catch (Exception e) {
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(armRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST).append(e)
+            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(ArmRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST).append(e)
                                                                  .toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -49,7 +49,7 @@ public class GetExtendedProductionsByMatterServiceImpl implements GetExtendedPro
         try {
             extendedProductionsByMatterResponse = armRpoClient.getExtendedProductionsByMatter(bearerToken, requestGenerator.getJsonRequest());
         } catch (FeignException e) {
-            log.error(errorMessage.append(armRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
         log.debug("ARM RPO Response - ExtendedProductionsByMatterResponse: {}", extendedProductionsByMatterResponse);

@@ -291,7 +291,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         List<AudioFileInfo> sessionAudio = new ArrayList<>();
         AudioFileInfo previousAudio;
         AudioFileInfo thisAudio;
-        sessionAudio.add(audioFileInfoList.get(0));
+        sessionAudio.add(audioFileInfoList.getFirst());
 
         for (int counter = 1; counter < audioFileInfoList.size(); counter++) {
             previousAudio = audioFileInfoList.get(counter - 1);

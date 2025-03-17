@@ -124,7 +124,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getProsecutorList().size());
         assertNameEquals(newCase1.getProsecutorList().getFirst(), "ProsecutorName CPP");
 
-        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
+        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).getFirst();
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
@@ -180,7 +180,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
 
-        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
+        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).getFirst();
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
@@ -196,10 +196,10 @@ class DailyListProcessorTest extends IntegrationBase {
 
         List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now());
         assertEquals(1, newHearing2.size());
-        assertEquals(LocalDate.now(), newHearing2.get(0).getHearingDate());
-        assertEquals(COURTROOM_2, newHearing2.get(0).getCourtroom().getName());
-        assertEquals(1, newHearing2.get(0).getJudges().size());
-        assertEquals(LocalTime.of(16, 0), newHearing2.get(0).getScheduledStartTime());
+        assertEquals(LocalDate.now(), newHearing2.getFirst().getHearingDate());
+        assertEquals(COURTROOM_2, newHearing2.getFirst().getCourtroom().getName());
+        assertEquals(1, newHearing2.getFirst().getJudges().size());
+        assertEquals(LocalTime.of(16, 0), newHearing2.getFirst().getScheduledStartTime());
         log.info("end dailyListProcessorMultipleDailyList");
     }
 
@@ -327,7 +327,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
 
-        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
+        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).getFirst();
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
@@ -344,10 +344,10 @@ class DailyListProcessorTest extends IntegrationBase {
 
         List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now());
         assertEquals(1, newHearing2.size());
-        assertEquals(LocalDate.now(), newHearing2.get(0).getHearingDate());
-        assertEquals(COURTROOM_2, newHearing2.get(0).getCourtroom().getName());
-        assertEquals(1, newHearing2.get(0).getJudges().size());
-        assertEquals(LocalTime.of(16, 0), newHearing2.get(0).getScheduledStartTime());
+        assertEquals(LocalDate.now(), newHearing2.getFirst().getHearingDate());
+        assertEquals(COURTROOM_2, newHearing2.getFirst().getCourtroom().getName());
+        assertEquals(1, newHearing2.getFirst().getJudges().size());
+        assertEquals(LocalTime.of(16, 0), newHearing2.getFirst().getScheduledStartTime());
         log.info("end dailyListProcessorMultipleDailyList");
 
     }

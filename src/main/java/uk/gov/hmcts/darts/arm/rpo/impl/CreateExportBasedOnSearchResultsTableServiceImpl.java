@@ -67,7 +67,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
                 armRpoExecutionDetailEntity.getStorageAccountId()
             );
         } catch (Exception e) {
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(armRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST).append(e).toString(),
+            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(ArmRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST).append(e).toString(),
                                                              armRpoExecutionDetailEntity, userAccount);
         }
         BaseRpoResponse baseRpoResponse;
@@ -94,7 +94,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
                                                ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         String feignResponse = feignException.contentUTF8();
         if (StringUtils.isEmpty(feignResponse)) {
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(armRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(),
+            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(),
                                                              armRpoExecutionDetailEntity, userAccount);
         }
         log.debug("ARM RPO Response - Feign response: {}", feignResponse);
@@ -103,7 +103,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
             baseRpoResponse = objectMapper.readValue(feignResponse, BaseRpoResponse.class);
         } catch (JsonProcessingException ex) {
             log.warn("Unable to parse feign response: {}", feignResponse, ex);
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(armRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(),
+            throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(),
                                                              armRpoExecutionDetailEntity, userAccount);
         }
         return baseRpoResponse;

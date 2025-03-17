@@ -177,7 +177,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         );
         assertEquals(
             APPROVED.toString(),
-            dartsDatabase.getTranscriptionCommentRepository().findAll().get(0).getComment()
+            dartsDatabase.getTranscriptionCommentRepository().findAll().getFirst().getComment()
         );
         assertEquals(testUser.getId(), transcriptionWorkflowEntity.getWorkflowActor().getId());
 

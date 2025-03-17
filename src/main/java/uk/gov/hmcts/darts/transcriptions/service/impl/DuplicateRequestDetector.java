@@ -34,7 +34,7 @@ public class DuplicateRequestDetector {
             ignoreStatusList
         );
         if (!matchingTranscriptions.isEmpty()) {
-            var duplicateTranscription = matchingTranscriptions.get(0);
+            var duplicateTranscription = matchingTranscriptions.getFirst();
             if (duplicateTranscription.getTranscriptionStatus().getId().equals(TranscriptionStatusEnum.COMPLETE.getId())) {
                 throw new DartsApiException(
                     TranscriptionApiError.DUPLICATE_TRANSCRIPTION,

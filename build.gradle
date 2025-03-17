@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:11.3.4")
+    classpath("org.flywaydb:flyway-database-postgresql:11.4.0")
   }
 }
 
@@ -15,9 +15,9 @@ plugins {
   id 'org.owasp.dependencycheck' version '12.1.0'
   id 'com.github.ben-manes.versions' version '0.52.0'
   id 'org.sonarqube' version '6.0.1.5171'
-  id "io.freefair.lombok" version "8.12.2.1"
-  id "org.openapi.generator" version "7.11.0"
-  id "org.flywaydb.flyway" version "11.3.4"
+  id "io.freefair.lombok" version "8.13"
+  id "org.openapi.generator" version "7.12.0"
+  id "org.flywaydb.flyway" version "11.4.0"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "4.0.1"
 }
@@ -220,7 +220,7 @@ checkstyle {
 }
 
 pmd {
-  toolVersion = "7.10.0"
+  toolVersion = "7.11.0"
   reportsDir = file("$project.buildDir/reports/pmd")
   // https://github.com/pmd/pmd/issues/876
   ruleSets = []
@@ -230,7 +230,7 @@ pmd {
 pmdMain {
   ruleSetFiles = files("config/pmd/main-ruleset.xml")
   //Ensures we don't passively increase pmd errors but we should aim to reduce this
-  maxFailures = 458
+  maxFailures = 432
 }
 
 pmdTestCommon {
@@ -401,7 +401,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.3'
+  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.4'
 
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.4.2'
 
@@ -438,9 +438,9 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.3.4'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.3.4'
-  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.3'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.4.0'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.4.0'
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.5'
 
   //database
   implementation 'org.postgresql:postgresql:42.7.5'
@@ -456,7 +456,7 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
-  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.3'
+  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.4'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.10.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.5.Final'
 
@@ -482,8 +482,8 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.2.0'
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.3'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.12.0'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.4'
   testImplementation 'org.springframework.security:spring-security-test:6.4.3'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
@@ -524,7 +524,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.2.3') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.2.4') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }

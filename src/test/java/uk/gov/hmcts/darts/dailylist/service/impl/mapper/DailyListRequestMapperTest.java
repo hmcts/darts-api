@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapper;
 import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapperImpl;
@@ -22,6 +24,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class DailyListRequestMapperTest {
 
@@ -45,26 +49,36 @@ class DailyListRequestMapperTest {
     }
 
     @Test
-    void test1() throws Exception {
+    void mapToEntity_ReturnsDailyListForSnaresbrook() throws Exception {
+        // given
         String requestXml = TestUtils.getContentsFromFile(
             "Tests/dailylist/DailyListRequestMapperTest/test1/request.xml");
         DailyListStructure legacyDailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
+
+        // when
         DailyListJsonObject modernisedDailyList = dailyListRequestMapper.mapToEntity(legacyDailyList);
 
+        // then
+        assertNotNull(modernisedDailyList);
         String actualResponse = getObjMapper().writeValueAsString(modernisedDailyList);
         String expectedResponse = TestUtils.getContentsFromFile(
             "Tests/dailylist/DailyListRequestMapperTest/test1/expectedResponse.json");
 
-        TestUtils.compareJson(expectedResponse, actualResponse, List.of());
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void test2() throws Exception {
+    void mapToEntity_ReturnsDailyListForSwansea() throws Exception {
+        // given
         String requestXml = TestUtils.getContentsFromFile(
             "Tests/dailylist/DailyListRequestMapperTest/test2/request.xml");
         DailyListStructure legacyDailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
+
+        // when
         DailyListJsonObject modernisedDailyList = dailyListRequestMapper.mapToEntity(legacyDailyList);
 
+        // then
+        assertNotNull(modernisedDailyList);
         String actualResponse = getObjMapper().writeValueAsString(modernisedDailyList);
         String expectedResponse = TestUtils.getContentsFromFile(
             "Tests/dailylist/DailyListRequestMapperTest/test2/expectedResponse.json");

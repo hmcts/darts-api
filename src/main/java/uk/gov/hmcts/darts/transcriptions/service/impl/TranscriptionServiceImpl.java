@@ -84,7 +84,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
 import static java.time.ZoneOffset.UTC;
@@ -680,15 +679,15 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private List<Integer> getTranscriptionIdsForRequest(List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
-        return updateTranscriptionsItems.stream().map(UpdateTranscriptionsItem::getTranscriptionId).collect(Collectors.toList());
+        return updateTranscriptionsItems.stream().map(UpdateTranscriptionsItem::getTranscriptionId).toList();
     }
 
     private List<Integer> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {
-        return transcriptionEntities.stream().map(TranscriptionEntity::getId).collect(Collectors.toList());
+        return transcriptionEntities.stream().map(TranscriptionEntity::getId).toList();
     }
 
     private List<UpdateTranscriptionsItem> getTranscriptionForIds(List<Integer> transcriptionIds, List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
-        return updateTranscriptionsItems.stream().filter(e -> transcriptionIds.contains(e.getTranscriptionId())).collect(Collectors.toList());
+        return updateTranscriptionsItems.stream().filter(e -> transcriptionIds.contains(e.getTranscriptionId())).toList();
     }
 
     private Optional<UpdateTranscriptionsItem> getTranscriptionsItemForId(Integer transcriptionId, List<UpdateTranscriptionsItem> updateTranscriptions) {

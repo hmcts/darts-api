@@ -138,12 +138,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
@@ -170,12 +170,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
@@ -206,12 +206,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
@@ -242,12 +242,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
@@ -276,7 +276,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var allEvents = dartsDatabase.getAllEvents();
         assertEquals(1, allEvents.size());
 
-        var persistedEvent = allEvents.get(0);
+        var persistedEvent = allEvents.getFirst();
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
 
         dartsGateway.verifyReceivedNotificationType(2);
@@ -320,14 +320,14 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
 
-        var hearing = hearingsForCase.get(0);
+        var hearing = hearingsForCase.getFirst();
 
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByHearingId(hearing.getId());
         assertEquals(1, eventsForHearing.size());
 
         List<CaseRetentionEntity> caseRetentionEntities = dartsDatabase.getCaseRetentionRepository().findByCaseId(persistedCase.getId());
         assertEquals(1, caseRetentionEntities.size());
-        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.get(0);
+        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.getFirst();
         assertEquals("20Y3M4D", caseRetentionEntity.getTotalSentence());
         assertEquals(OffsetDateTime.of(2041, 1, 14, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
@@ -382,7 +382,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         // then
         List<CaseRetentionEntity> caseRetentionEntities2 = dartsDatabase.getCaseRetentionRepository().findByCaseId(courtCaseEntity.getId());
         assertEquals(1, caseRetentionEntities2.size());
-        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities2.get(0);
+        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities2.getFirst();
         assertNull(caseRetentionEntity.getTotalSentence());
         var date7YearsLater = testTime.plusYears(7).truncatedTo(ChronoUnit.DAYS);
         assertEquals(date7YearsLater, caseRetentionEntity.getRetainUntil());
@@ -472,10 +472,10 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         // there are 2 case retention entries
         assertEquals(2, caseRetentionEntities2.size());
 
-        assertThat(caseRetentionEntities2.get(0).getCreatedDateTime()).isAfter(caseRetentionEntities2.get(1).getCreatedDateTime());
+        assertThat(caseRetentionEntities2.getFirst().getCreatedDateTime()).isAfter(caseRetentionEntities2.get(1).getCreatedDateTime());
 
         // the latest entry should match the data received from the event
-        CaseRetentionEntity latestCaseRetentionEntity = caseRetentionEntities2.get(0);
+        CaseRetentionEntity latestCaseRetentionEntity = caseRetentionEntities2.getFirst();
         assertNull(latestCaseRetentionEntity.getTotalSentence());
         var date7YearsLater = testTime.plusYears(7).truncatedTo(ChronoUnit.DAYS);
         assertEquals(date7YearsLater, latestCaseRetentionEntity.getRetainUntil());
@@ -496,7 +496,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         // only one event linked to the case
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByCaseId(courtCaseEntity.getId());
         assertEquals(1, eventsForHearing.size());
-        EventEntity latestEvent = eventsForHearing.get(0);
+        EventEntity latestEvent = eventsForHearing.getFirst();
 
         // only one case management retention entity, created with the latest event received
         List<CaseManagementRetentionEntity> caseManagementRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findAll();
@@ -564,7 +564,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         List<CaseRetentionEntity> caseRetentionEntities = dartsDatabase.getCaseRetentionRepository().findByCaseId(courtCaseEntity.getId());
         assertEquals(1, caseRetentionEntities.size());
-        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.get(0);
+        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.getFirst();
         assertEquals("10y0m0d", caseRetentionEntity.getTotalSentence());
         assertEquals(OffsetDateTime.of(2021, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals(String.valueOf(PENDING), caseRetentionEntity.getCurrentState());
@@ -616,14 +616,14 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
 
-        var hearing = hearingsForCase.get(0);
+        var hearing = hearingsForCase.getFirst();
 
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByHearingId(hearing.getId());
         assertEquals(1, eventsForHearing.size());
 
         List<CaseRetentionEntity> caseRetentionEntities = dartsDatabase.getCaseRetentionRepository().findByCaseId(persistedCase.getId());
         assertEquals(1, caseRetentionEntities.size());
-        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.get(0);
+        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.getFirst();
         assertEquals(OffsetDateTime.of(2021, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("COMPLETE", caseRetentionEntity.getCurrentState());
         assertEquals(9, caseRetentionEntity.getRetentionPolicyType().getId());
@@ -661,14 +661,14 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
 
-        var hearing = hearingsForCase.get(0);
+        var hearing = hearingsForCase.getFirst();
 
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByHearingId(hearing.getId());
         assertEquals(1, eventsForHearing.size());
 
         List<CaseRetentionEntity> caseRetentionEntities = dartsDatabase.getCaseRetentionRepository().findByCaseId(persistedCase.getId());
         assertEquals(1, caseRetentionEntities.size());
-        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.get(0);
+        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.getFirst();
         assertNull(caseRetentionEntity.getTotalSentence());
         assertEquals(OffsetDateTime.of(2027, 10, 10, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
@@ -744,7 +744,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     }
 
     private Integer idFrom(List<EventEntity> eventEntities) {
-        return eventEntities.get(0).getId();
+        return eventEntities.getFirst().getId();
     }
 
     private static DartsEvent someMinimalDartsEvent() {

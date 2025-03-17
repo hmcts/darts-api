@@ -270,7 +270,7 @@ class TranscriptionServiceImplTest {
         ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
 
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.getFirst();
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
@@ -354,7 +354,7 @@ class TranscriptionServiceImplTest {
         ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
 
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.getFirst();
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
@@ -440,7 +440,7 @@ class TranscriptionServiceImplTest {
         ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
 
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.getFirst();
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
@@ -528,7 +528,7 @@ class TranscriptionServiceImplTest {
         ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
 
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.getFirst();
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
@@ -569,18 +569,19 @@ class TranscriptionServiceImplTest {
         Integer hearingId = null;
         Integer caseId = null;
 
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearingId,
+            caseId,
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
+            TEST_COMMENT,
+            startDateTime,
+            endDateTime
+        );
         var exception = assertThrows(
             DartsApiException.class,
             () ->
-                transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
-                    hearingId,
-                    caseId,
-                    transcriptionUrgencyEnum.getId(),
-                    transcriptionTypeEnum.getId(),
-                    TEST_COMMENT,
-                    startDateTime,
-                    endDateTime
-                ), false)
+                transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, false)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, exception.getError());
@@ -630,7 +631,7 @@ class TranscriptionServiceImplTest {
 
         verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
         TranscriptionWorkflowEntity workflowEntity = transcriptionWorkflowEntityArgumentCaptor.getValue();
-        assertEquals(transcriptionId, allCaseTranscriptionDocuments.get(0));
+        assertEquals(transcriptionId, allCaseTranscriptionDocuments.getFirst());
         assertEquals(transcriptionStatusEntity, workflowEntity.getTranscriptionStatus());
     }
 

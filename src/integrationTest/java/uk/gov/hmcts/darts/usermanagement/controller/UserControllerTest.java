@@ -99,7 +99,6 @@ class UserControllerTest extends IntegrationBase {
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
 
-
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
@@ -141,7 +140,7 @@ class UserControllerTest extends IntegrationBase {
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
 
         Assertions.assertEquals(1, rolledBackTranscription.size());
-        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.get(0));
+        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.getFirst());
         Assertions.assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
         Assertions.assertTrue(containsApprovedWorkflow(workflowEntityAfter));
     }
@@ -202,7 +201,7 @@ class UserControllerTest extends IntegrationBase {
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
 
         Assertions.assertEquals(1, rolledBackTranscription.size());
-        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.get(0));
+        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.getFirst());
         Assertions.assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
         Assertions.assertTrue(containsApprovedWorkflow(workflowEntityAfter));
     }

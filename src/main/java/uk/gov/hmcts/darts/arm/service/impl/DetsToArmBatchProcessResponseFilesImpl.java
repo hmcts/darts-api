@@ -131,7 +131,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
 
 
     private Optional<ObjectStateRecordEntity> getObjectStateRecord(int armEod) {
-        Optional<ObjectStateRecordEntity> osrOptional = objectStateRecordRepository.findByArmEodId(String.valueOf(armEod));
+        Optional<ObjectStateRecordEntity> osrOptional = objectStateRecordRepository.findByArmEodId(armEod);
         if (osrOptional.isEmpty()) {
             log.error("Object State Record not found for Arm EOD {}", armEod);
         }

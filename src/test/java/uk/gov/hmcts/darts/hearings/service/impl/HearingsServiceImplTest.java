@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -138,10 +139,10 @@ class HearingsServiceImplTest {
 
         List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());
         assertEquals(1, eventResponses.size());
-        assertEquals(event.get(0).getId(), eventResponses.get(0).getId());
-        assertEquals("Test", eventResponses.get(0).getText());
-        assertEquals("TestEvent", eventResponses.get(0).getName());
-        assertNotNull(eventResponses.get(0).getTimestamp());
+        assertEquals(event.getFirst().getId(), eventResponses.getFirst().getId());
+        assertEquals("Test", eventResponses.getFirst().getText());
+        assertEquals("TestEvent", eventResponses.getFirst().getName());
+        assertNotNull(eventResponses.getFirst().getTimestamp());
 
     }
 
@@ -233,5 +234,19 @@ class HearingsServiceImplTest {
         return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.now(), isHearingActual);
     }
 
+
+    @Test
+    void validateHearingExistsElseError_whenHearingExists_noErrorShouldBeThrown() {
+        doReturn(true).when(hearingRepository).existsById(any());
+        service.validateHearingExistsElseError(123);
+        verify(hearingRepository).existsById(123);
+    }
+
+    @Test
+    void validateHearingExistsElseError_whenHearingDoesNotExist_errorShouldBeThrown() {
+        doReturn(false).when(hearingRepository).existsById(any());
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.validateHearingExistsElseError(123));
+        assertEquals(HearingApiError.HEARING_NOT_FOUND, exception.getError());
+    }
 
 }

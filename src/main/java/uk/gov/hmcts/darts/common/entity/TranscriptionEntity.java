@@ -181,7 +181,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         if (CollectionUtils.isEmpty(hearings)) {
             this.courtroom = null;
         } else {
-            this.courtroom = hearings.get(0).getCourtroom();
+            this.courtroom = hearings.getFirst().getCourtroom();
         }
     }
 
@@ -202,7 +202,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
             return hearing.getCourtCase();
         }
         if (!CollectionUtils.isEmpty(courtCases)) {
-            return courtCases.get(0);
+            return courtCases.getFirst();
         }
         return null;
     }
@@ -229,7 +229,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         if (CollectionUtils.isEmpty(hearings)) {
             return null;
         }
-        return hearings.get(0);
+        return hearings.getFirst();
     }
 
     /**
