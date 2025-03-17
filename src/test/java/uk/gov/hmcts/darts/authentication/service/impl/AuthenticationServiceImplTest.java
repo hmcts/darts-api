@@ -169,7 +169,6 @@ class AuthenticationServiceImplTest {
     @Test
     void resetPasswordShouldReturnResetPasswordUri() {
 
-
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
 
@@ -179,5 +178,21 @@ class AuthenticationServiceImplTest {
         URI uri = authenticationService.resetPassword(null);
 
         assertEquals(DUMMY_AUTH_URI, uri);
+    }
+
+    @Test
+    void refreshAccessToken_ShouldReturnAuthUriWhenNoAuthHeaderExists() throws AzureDaoException {
+        // given
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
+            new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties,
+                                                            new ExternalAuthProviderConfigurationProperties()));
+        when(azureDao.fetchAccessToken(any(), any(), any())).thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
+        when(tokenValidator.validate(any(), any(), any())).thenReturn(new JwtValidationResult(true, null));
+
+        // when
+        String refreshAccessToken = authenticationService.refreshAccessToken(null);
+
+        // then
+        assertEquals(DUMMY_ID_TOKEN, refreshAccessToken);
     }
 }
