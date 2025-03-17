@@ -28,4 +28,3 @@ logging:
     uk.gov.hmcts.darts: DEBUG
     org.springframework.web.servlet.mvc.method.annotation: DEBUG
     org.springframework.web: DEBUG
-
