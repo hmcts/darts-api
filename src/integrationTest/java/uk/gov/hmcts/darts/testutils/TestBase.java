@@ -1,15 +1,12 @@
 package uk.gov.hmcts.darts.testutils;
 
 import lombok.Getter;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
-import uk.gov.hmcts.darts.test.common.LogUtil;
-import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
@@ -33,17 +30,11 @@ public class TestBase {
     @Autowired
     protected TransactionalUtil transactionalUtil;
 
-    protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
-
     @BeforeEach
     void clearDb() {
         dartsDatabase.clearDb();
     }
 
-    @AfterEach
-    void clearTestData() {
-        logAppender.reset();
-    }
 
     public void assertStandardErrorJsonResponse(MvcResult mvcResult, DartsApiError dartsApiError) throws UnsupportedEncodingException {
         String expectedJson = """

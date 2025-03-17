@@ -103,9 +103,7 @@ public class IntegrationBase extends TestBase {
     }
 
     @AfterEach
-    @Override
     protected void clearTestData() {
-        super.clearTestData();
         FileStore.getFileStore().remove();
     }
 

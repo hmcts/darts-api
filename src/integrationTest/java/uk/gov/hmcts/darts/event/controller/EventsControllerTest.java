@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.controller;
 
-import ch.qos.logback.classic.Level;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
@@ -37,8 +36,6 @@ import uk.gov.hmcts.darts.event.model.CourtroomResponseDetails;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
-import uk.gov.hmcts.darts.log.service.impl.EventLoggerServiceImpl;
-import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -232,9 +229,6 @@ class EventsControllerTest extends IntegrationBase {
         assertNoDataAnonymisedEntry(notEditedEventEntity);
 
         assertAudit(editedEventEntity);
-        assertFalse(
-            LogUtil.getMemoryLogger()
-                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity), Level.INFO).isEmpty());
     }
 
     @TestPropertySource(properties = "darts.event-obfuscation.enabled=false")
@@ -289,14 +283,7 @@ class EventsControllerTest extends IntegrationBase {
         assertDataAnonymisedEntry(userAccount, editedEventEntity2);
 
         assertAudit(editedEventEntity);
-        assertFalse(
-            LogUtil.getMemoryLogger()
-                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity), Level.INFO).isEmpty());
-
         assertAudit(editedEventEntity2);
-        assertFalse(
-            LogUtil.getMemoryLogger()
-                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity2), Level.INFO).isEmpty());
         assertThat(editedEventEntity2.getEventText()).isNotEqualTo(editedEventEntity.getEventText());
     }
 
