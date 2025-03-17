@@ -101,14 +101,6 @@ public class CaseController implements CasesApi {
         return casesAddCasePost(addCaseRequest);
     }
 
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {MID_TIER})
-    public ResponseEntity<PostCaseResponse> casesPost(AddCaseRequest addCaseRequest) {
-        return casesAddCasePost(addCaseRequest);
-    }
-
     private void validateRequest(AddCaseRequest addCaseRequest) {
         emptyIfNull(addCaseRequest.getDefendants()).forEach(newDefendant -> {
             if (newDefendant.length() > limit) {
@@ -126,6 +118,7 @@ public class CaseController implements CasesApi {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber(advancedSearchRequest.getCaseNumber())
             .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
+            .courthouseIds(advancedSearchRequest.getCourthouseIds())
             .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
             .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
             .defendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName()))
