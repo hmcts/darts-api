@@ -7,6 +7,8 @@ import io.restassured.response.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -33,6 +35,11 @@ class UserManagementFunctionalTest extends FunctionalTest {
     private static final String ADMIN_USERS_BY_ID_PATH = "/admin/users/{" + ID_PATH_PARAM_NAME + "}";
     private static final String ADMIN_USERS_SEARCH_PATH = "/admin/users/search";
     private static final String EMAIL_ADDRESS_HEADER_NAME = "Email-Address";
+
+    @BeforeEach
+    void beforeEach() {
+        enableAccessTokenCache();
+    }
 
     @AfterEach
     void tearDown() {
