@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.dailylist.service;
 
-import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -39,7 +38,6 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.FAILED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.IGNORED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PARTIALLY_PROCESSED;
