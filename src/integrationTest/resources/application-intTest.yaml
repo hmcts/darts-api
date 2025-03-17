@@ -99,4 +99,9 @@ darts:
 logging:
   level:
     root: off
+    uk.gov.hmcts.darts: off
+    net.javacrumbs.shedlock: off
+    org.springframework.web.servlet.mvc.method.annotation: off
+    org.springframework.web: off
+    ch.qos.logback.core: off
   config: classpath:logback-test.xml
