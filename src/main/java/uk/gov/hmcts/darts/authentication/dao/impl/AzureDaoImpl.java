@@ -61,7 +61,6 @@ public class AzureDaoImpl implements AzureDao {
                 OAuthProviderRawResponse.class
             );
 
-            log.debug("Obtained access token for authorization code: {}, {}", code, tokenResponse);
             return tokenResponse;
 
         } catch (IOException e) {
@@ -99,7 +98,6 @@ public class AzureDaoImpl implements AzureDao {
                 OAuthProviderRawResponse.class
             );
 
-            log.debug("Obtained access token for refresh token code: {}, {}", refreshToken, tokenResponse);
             return tokenResponse;
 
         } catch (IOException e) {
