@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventRepositoryTest extends PostgresIntegrationBase {
@@ -43,7 +44,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
 
         List<Integer> eventIdsToBeProcessed1 = eventRepository.findCurrentEventIdsWithDuplicates(1);
-        Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
+        assertEquals(1, eventIdsToBeProcessed1.size());
         EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst())
             .getFirst();
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
@@ -57,7 +58,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
             eventPkidSecond.getEveId(), eventPkidSecond.getEventId(), eventPkidSecond.getHearingIds(), 0);
 
-        Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
+        assertEquals(1, eventIdsToBeProcessed1.size());
         assertTrue(eventIdMap.containsKey(eventIdsToBeProcessed2.getFirst()));
         Assertions.assertNotEquals(eventIdsToBeProcessed1, eventIdsToBeProcessed2);
 
@@ -75,7 +76,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
 
         List<Integer> eventIdsToBeProcessed1 = eventRepository.findCurrentEventIdsWithDuplicates(1);
-        Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
+        assertEquals(1, eventIdsToBeProcessed1.size());
         List<EventEntity> eventEntities = eventIdMap.get(eventIdsToBeProcessed1.getFirst());
         EventEntity eventEntity = eventEntities.getFirst();
         eventEntity.getHearingEntities().add(
@@ -271,9 +272,12 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         // given
         EventEntity eventWithCourtCaseToBeExcluded = PersistableFactory.getEventTestData().someMinimal();
         EventEntity eventWithCourtCaseToBeIncluded = PersistableFactory.getEventTestData().someMinimal();
+        EventEntity eventWithDifferentEventStatus = PersistableFactory.getEventTestData().someMinimal();
+
 
         eventWithCourtCaseToBeExcluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventWithCourtCaseToBeIncluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
+        eventWithDifferentEventStatus.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_HERITAGE.getStatusNumber());
 
         eventWithCourtCaseToBeExcluded = dartsPersistence.save(eventWithCourtCaseToBeExcluded);
         eventWithCourtCaseToBeIncluded = dartsPersistence.save(eventWithCourtCaseToBeIncluded);
@@ -294,7 +298,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
         // then
         assertThat(events).hasSize(1);
-        assertTrue(events.contains(eventWithCourtCaseToBeIncluded.getEventId()));
+        assertEquals(eventWithCourtCaseToBeIncluded.getId(), events.getFirst());
     }
 
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
