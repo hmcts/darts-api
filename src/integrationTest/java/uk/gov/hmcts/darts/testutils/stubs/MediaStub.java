@@ -55,20 +55,13 @@ public class MediaStub {
     }
 
     public MediaEntity createMediaEntity(CourthouseEntity courthouse, String courtroomName,
-                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return mediaStubComposable.createMediaEntity(courtroomStub, courthouse, courtroomName, startTime, endTime, channel);
+                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel, boolean isCurrent) {
+        return mediaStubComposable.createMediaEntity(courtroomStub, courthouse, courtroomName, startTime, endTime, channel, isCurrent);
     }
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         return mediaStubComposable.createMediaEntity(courthouseStubComposable,
                                                      courtroomStub, courthouseName, courtroomName, startTime, endTime, channel);
-    }
-
-    public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName,
-                                               OffsetDateTime startTime, OffsetDateTime endTime, int channel,
-                                               String mediaType) {
-        return mediaStubComposable.createHiddenMediaEntity(courthouseStubComposable,
-                                                           courtroomStub, courthouseName, courtroomName, startTime, endTime, channel, mediaType);
     }
 
     @Transactional

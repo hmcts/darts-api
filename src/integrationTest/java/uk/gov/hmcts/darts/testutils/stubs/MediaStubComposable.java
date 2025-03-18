@@ -45,10 +45,13 @@ public class MediaStubComposable {
 
     public MediaEntity createMediaEntity(CourtroomStubComposable courtroomStub,
                                          CourthouseEntity courthouse, String courtroomName,
-                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel, boolean isCurrent) {
         CourtroomEntity courtroom = courtroomStub
             .createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
-        return dartsPersistence.save(PersistableFactory.getMediaTestData().createMediaWith(courtroom, startTime, endTime, channel, "mp2"));
+        MediaEntity mediaEntity = PersistableFactory.getMediaTestData().createMediaWith(courtroom, startTime, endTime, channel, "mp2");
+        mediaEntity.setIsCurrent(isCurrent);
+
+        return dartsPersistence.save(mediaEntity);
     }
 
     public MediaEntity createMediaEntity(CourthouseStubComposable courthouseStubComposable,
