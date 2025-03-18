@@ -230,13 +230,13 @@ pmd {
 pmdMain {
   ruleSetFiles = files("config/pmd/main-ruleset.xml")
   //Ensures we don't passively increase pmd errors but we should aim to reduce this
-  maxFailures = 432
+  maxFailures = 429
 }
 
 pmdTestCommon {
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
   //Ensures we don't passively increase pmd errors but we should aim to reduce this
-  maxFailures = 79
+  maxFailures = 73
 }
 pmdTest {
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
