@@ -55,7 +55,7 @@ class AuthenticationServiceImplTest {
     private ExternalAuthConfigurationProperties externalAuthConfigurationProperties;
 
     @Test
-    void loginOrRefreshShouldReturnAuthUriWhenNoAuthHeaderExists() {
+    void loginOrRefresh_ShouldReturnAuthUri_WhenNoAuthHeaderExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
@@ -69,7 +69,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void loginOrRefreshShouldReturnAuthUriWhenInvalidAccessTokenExists() {
+    void loginOrRefresh_ShouldReturnAuthUri_WhenInvalidAccessTokenExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
@@ -85,7 +85,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void loginOrRefreshShouldReturnLandingPageUriWhenValidAccessTokenExists() {
+    void loginOrRefresh_ShouldReturnLandingPageUri_WhenValidAccessTokenExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
@@ -101,7 +101,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
+    void handleOauthCode_ShouldReturnLandingPageUri_WhenTokenIsObtainedAndValid() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
@@ -116,7 +116,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void handleOauthCodeShouldThrowExceptionWhenFetchAccessTokenThrowsException() throws AzureDaoException {
+    void handleOauthCode_ShouldThrowException_WhenFetchAccessTokenThrowsException() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenThrow(AzureDaoException.class);
 
@@ -132,7 +132,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
+    void handleOauthCode_ShouldThrowException_WhenValidationFails() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
@@ -152,7 +152,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void logoutShouldReturnLogoutPageUriWhenSessionExists() {
+    void logout_ShouldReturnLogoutPageUri_WhenSessionExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
 
@@ -167,7 +167,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void resetPasswordShouldReturnResetPasswordUri() {
+    void resetPassword_ShouldReturnResetPasswordUri() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
@@ -181,12 +181,12 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void refreshAccessToken_ShouldReturnAuthUriWhenNoAuthHeaderExists() throws AzureDaoException {
+    void refreshAccessToken_ShouldReturnRefreshToken_WhenNoAuthHeaderExists() throws AzureDaoException {
         // given
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
-            new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties,
-                                                            new ExternalAuthProviderConfigurationProperties()));
-        when(azureDao.fetchAccessToken(any(), any(), any())).thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
+            new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+        when(azureDao.fetchAccessToken(any(), any(), any()))
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
         when(tokenValidator.validate(any(), any(), any())).thenReturn(new JwtValidationResult(true, null));
 
         // when
@@ -194,5 +194,23 @@ class AuthenticationServiceImplTest {
 
         // then
         assertEquals(DUMMY_ID_TOKEN, refreshAccessToken);
+    }
+
+    @Test
+    void refreshAccessToken_ShouldThrowException_WhenInvalidJwtReturned() throws AzureDaoException {
+        // given
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
+        when(azureDao.fetchAccessToken(any(), any(), any()))
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
+        when(tokenValidator.validate(DUMMY_ID_TOKEN, authStrategyMock.getProviderConfiguration(), authStrategyMock.getConfiguration()))
+            .thenReturn(new JwtValidationResult(false, "Invalid token"));
+
+        // when
+        var exception = assertThrows(DartsApiException.class, () -> authenticationService.refreshAccessToken(null));
+
+        // then
+        assertEquals("AUTHENTICATION_101", exception.getError().getErrorTypeNumeric());
+        assertEquals("Failed to validate access token", exception.getError().getTitle());
     }
 }
