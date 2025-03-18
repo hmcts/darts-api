@@ -41,14 +41,14 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
 
         MediaEntity media1 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), 1);
+            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), 1, true);
         MediaEntity media2 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusMinutes(10), OffsetDateTime.now().plusHours(2), 1);
+            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusMinutes(10), OffsetDateTime.now().plusHours(2), 1, true);
 
         MediaEntity media3 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusHours(2), OffsetDateTime.now().plusHours(4), 1);
+            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusHours(2), OffsetDateTime.now().plusHours(4), 1, true);
         MediaEntity media4 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusHours(3), OffsetDateTime.now().plusHours(5), 1);
+            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusHours(3), OffsetDateTime.now().plusHours(5), 1, true);
 
         HearingEntity hearing1 = createHearing();
         HearingEntity hearing2 = createHearing();
