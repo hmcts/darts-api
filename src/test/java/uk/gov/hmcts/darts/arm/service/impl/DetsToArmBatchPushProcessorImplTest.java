@@ -254,7 +254,7 @@ class DetsToArmBatchPushProcessorImplTest {
     }
 
     @Test
-    void getObjectStateRecordEntity_shouldThrowError_whenOsrIsNull(){
+    void getObjectStateRecordEntity_shouldThrowError_whenOsrIsNull() {
         ExternalObjectDirectoryEntity externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setOsrUuid(null);
         externalObjectDirectory.setId(123);
