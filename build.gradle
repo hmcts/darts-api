@@ -466,7 +466,7 @@ dependencies {
 
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.10.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.11.Final')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
@@ -482,7 +482,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.2.0'
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.12.0'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.12.1'
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.4'
   testImplementation 'org.springframework.security:spring-security-test:6.4.3'
 

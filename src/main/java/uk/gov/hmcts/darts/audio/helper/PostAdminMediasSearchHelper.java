@@ -69,9 +69,11 @@ public class PostAdminMediasSearchHelper {
         CollectionUtils.addAll(predicates, addCaseNumberCriteria(criteriaBuilder, mediaRoot, request));
         CollectionUtils.addAll(predicates, addCourtroomNameCriteria(criteriaBuilder, mediaRoot, request));
         CollectionUtils.addAll(predicates, addDateCriteria(criteriaBuilder, mediaRoot, request));
+        CollectionUtils.addAll(predicates, addCurrentMedia(criteriaBuilder, mediaRoot));
 
         return predicates;
     }
+
 
     private List<Predicate> addCourthouseIdCriteria(Root<MediaEntity> mediaRoot, PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
@@ -126,6 +128,14 @@ public class PostAdminMediasSearchHelper {
                 ));
             }
         }
+        return predicateList;
+    }
+
+    private List<Predicate> addCurrentMedia(HibernateCriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot) {
+        List<Predicate> predicateList = new ArrayList<>();
+        predicateList.add(criteriaBuilder.isTrue(
+            mediaRoot.get(MediaEntity_.IS_CURRENT)
+        ));
         return predicateList;
     }
 

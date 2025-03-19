@@ -72,6 +72,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     private MediaEntity mediaEntity1d;
     private MediaEntity mediaEntity1e;
     private MediaEntity mediaEntity1f;
+    private MediaEntity mediaEntity1g;
     private MediaEntity mediaEntity2a;
     private MediaEntity mediaEntity2b;
     private MediaEntity mediaEntity2c;
@@ -108,6 +109,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         mediaEntity1a = createMedia(courthouse1, "courtroom1", startTime, "caseNumber1");
         mediaEntity1b = createMedia(courthouse1, "courtroom1", startTime.plusSeconds(1), "caseNumber1");
         mediaEntity1c = createMedia(courthouse1, "courtroom1", startTime.plusSeconds(2), "caseNumber1");
+        mediaEntity1g = createMedia(courthouse1, "courtroom1", startTime.plusSeconds(3), "caseNumber1", false);
 
         startTime = tenth10am.plusHours(1).plusSeconds(1);
         mediaEntity2a = createMedia(courthouse1, "courtroom1", startTime, "caseNumber2");
@@ -158,7 +160,11 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     private MediaEntity createMedia(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, String caseNumber) {
-        MediaEntity newMediaEntity = mediaStub.createMediaEntity(courthouse, courtroomName, startTime, startTime.plusHours(1), 1);
+        return createMedia(courthouse, courtroomName, startTime, caseNumber, true);
+    }
+
+    private MediaEntity createMedia(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, String caseNumber, boolean isCurrent) {
+        MediaEntity newMediaEntity = mediaStub.createMediaEntity(courthouse, courtroomName, startTime, startTime.plusHours(1), 1, isCurrent);
         mediaRepository.save(newMediaEntity);
 
         mediaStub.linkToCase(newMediaEntity, caseNumber);
@@ -176,7 +182,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void multipleFields() throws Exception {
+    void adminSearchForMedia_shouldOnlyReturnCurrentMedia_whenMediaMatchesSearchCriteria() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();

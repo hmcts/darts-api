@@ -29,6 +29,8 @@ public class AzureCopyUtil {
             builder.command(command);
             var startTime = Instant.now();
             log.info("Copy of blob started at {}", startTime);
+            //TODO: remove this log.info once we are confident that the command is being built correctly
+            log.info("Executing command: {}", builder.command());
             builder.redirectErrorStream(true);
             Process process = builder.start();
             int exitValue = process.waitFor();
