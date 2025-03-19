@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.authentication.dao.AzureDao;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
+import uk.gov.hmcts.darts.authentication.model.TokenResponse;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
@@ -36,6 +37,7 @@ class AuthenticationServiceImplTest {
     private static final URI DUMMY_LANDING_PAGE_URI = URI.create("DUMMY_LANDING_PAGE_URI");
     private static final String DUMMY_CODE = "DUMMY CODE";
     private static final String DUMMY_ID_TOKEN = "DUMMY ID TOKEN";
+    private static final String DUMMY_REFRESH_TOKEN = "DUMMY REFRESH TOKEN";
 
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
@@ -53,7 +55,7 @@ class AuthenticationServiceImplTest {
     private ExternalAuthConfigurationProperties externalAuthConfigurationProperties;
 
     @Test
-    void loginOrRefreshShouldReturnAuthUriWhenNoAuthHeaderExists() {
+    void loginOrRefresh_ShouldReturnAuthUri_WhenNoAuthHeaderExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
@@ -67,7 +69,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void loginOrRefreshShouldReturnAuthUriWhenInvalidAccessTokenExists() {
+    void loginOrRefresh_ShouldReturnAuthUri_WhenInvalidAccessTokenExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
@@ -83,7 +85,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void loginOrRefreshShouldReturnLandingPageUriWhenValidAccessTokenExists() {
+    void loginOrRefresh_ShouldReturnLandingPageUri_WhenValidAccessTokenExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
@@ -99,22 +101,22 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
+    void handleOauthCode_ShouldReturnLandingPageUri_WhenTokenIsObtainedAndValid() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
-            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(true, null));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
             new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties,
                                                             new ExternalAuthProviderConfigurationProperties()));
 
-        String token = authenticationService.handleOauthCode(DUMMY_CODE, null);
+        TokenResponse token = authenticationService.handleOauthCode(DUMMY_CODE, null);
 
-        assertEquals(DUMMY_ID_TOKEN, token);
+        assertEquals(DUMMY_ID_TOKEN, token.accessToken());
     }
 
     @Test
-    void handleOauthCodeShouldThrowExceptionWhenFetchAccessTokenThrowsException() throws AzureDaoException {
+    void handleOauthCode_ShouldThrowException_WhenFetchAccessTokenThrowsException() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenThrow(AzureDaoException.class);
 
@@ -130,9 +132,9 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
+    void handleOauthCode_ShouldThrowException_WhenValidationFails() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
-            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
@@ -150,7 +152,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void logoutShouldReturnLogoutPageUriWhenSessionExists() {
+    void logout_ShouldReturnLogoutPageUri_WhenSessionExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
 
@@ -165,8 +167,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void resetPasswordShouldReturnResetPasswordUri() {
-
+    void resetPassword_ShouldReturnResetPasswordUri() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
@@ -177,5 +178,39 @@ class AuthenticationServiceImplTest {
         URI uri = authenticationService.resetPassword(null);
 
         assertEquals(DUMMY_AUTH_URI, uri);
+    }
+
+    @Test
+    void refreshAccessToken_ShouldReturnRefreshToken_WhenNoAuthHeaderExists() throws AzureDaoException {
+        // given
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
+            new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+        when(azureDao.fetchAccessToken(any(), any(), any()))
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
+        when(tokenValidator.validate(any(), any(), any())).thenReturn(new JwtValidationResult(true, null));
+
+        // when
+        String refreshAccessToken = authenticationService.refreshAccessToken(null);
+
+        // then
+        assertEquals(DUMMY_ID_TOKEN, refreshAccessToken);
+    }
+
+    @Test
+    void refreshAccessToken_ShouldThrowException_WhenInvalidJwtReturned() throws AzureDaoException {
+        // given
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
+        when(azureDao.fetchAccessToken(any(), any(), any()))
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0, DUMMY_REFRESH_TOKEN));
+        when(tokenValidator.validate(DUMMY_ID_TOKEN, authStrategyMock.getProviderConfiguration(), authStrategyMock.getConfiguration()))
+            .thenReturn(new JwtValidationResult(false, "Invalid token"));
+
+        // when
+        var exception = assertThrows(DartsApiException.class, () -> authenticationService.refreshAccessToken(null));
+
+        // then
+        assertEquals("AUTHENTICATION_101", exception.getError().getErrorTypeNumeric());
+        assertEquals("Failed to validate access token", exception.getError().getTitle());
     }
 }

@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.authorisation.model.UserState;
 public class SecurityToken {
 
     private String accessToken;
+    private String refreshToken;
     private UserState userState;
 
 }
