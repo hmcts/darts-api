@@ -273,7 +273,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         }
     }
 
-    private ObjectStateRecordEntity getObjectStateRecordEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
+    ObjectStateRecordEntity getObjectStateRecordEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
         if (nonNull(externalObjectDirectory.getOsrUuid())) {
             return objectStateRecordRepository.findById(externalObjectDirectory.getOsrUuid())
                 .orElseThrow(() -> new DartsException(
