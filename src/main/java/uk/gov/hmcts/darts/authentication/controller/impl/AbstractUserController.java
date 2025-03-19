@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
 import uk.gov.hmcts.darts.authentication.controller.AuthenticationController;
 import uk.gov.hmcts.darts.authentication.exception.AuthenticationError;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
+import uk.gov.hmcts.darts.authentication.model.TokenResponse;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public abstract class AbstractUserController implements AuthenticationController {
 
-    public static final String REDIRECT = "redirect:";
+    private static final String REDIRECT = "redirect:";
     private final AuthenticationService authenticationService;
     private final AuthorisationApi authorisationApi;
     protected final AuthStrategySelector locator;
@@ -42,13 +43,25 @@ public abstract class AbstractUserController implements AuthenticationController
     }
 
     @Override
-    public SecurityToken handleOauthCode(String code, String redirectUri) {
-        String accessToken = authenticationService.handleOauthCode(code, redirectUri);
+    public SecurityToken refreshAccessToken(String refreshToken) {
+        String accessToken = authenticationService.refreshAccessToken(refreshToken);
         var securityTokenBuilder = SecurityToken.builder()
-            .accessToken(accessToken);
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .userState(buildUserState(accessToken));
+
+        return securityTokenBuilder.build();
+    }
+
+    @Override
+    public SecurityToken handleOauthCode(String code, String redirectUri) {
+        TokenResponse tokenResponse = authenticationService.handleOauthCode(code, redirectUri);
+        var securityTokenBuilder = SecurityToken.builder()
+            .accessToken(tokenResponse.accessToken())
+            .refreshToken(tokenResponse.refreshToken());
 
         try {
-            Optional<String> emailAddressOptional = parseEmailAddressFromAccessToken(accessToken);
+            Optional<String> emailAddressOptional = parseEmailAddressFromAccessToken(tokenResponse.accessToken());
             if (emailAddressOptional.isPresent()) {
                 Optional<UserState> userStateOptional = authorisationApi.getAuthorisation(emailAddressOptional.get());
                 if (userStateOptional.isPresent()) {
@@ -75,5 +88,18 @@ public abstract class AbstractUserController implements AuthenticationController
     public ModelAndView resetPassword(String redirectUri) {
         URI url = authenticationService.resetPassword(redirectUri);
         return new ModelAndView(REDIRECT + url.toString());
+    }
+
+    private UserState buildUserState(String accessToken) {
+        try {
+            Optional<String> emailAddressOptional = parseEmailAddressFromAccessToken(accessToken);
+            if (emailAddressOptional.isPresent()) {
+                Optional<UserState> userStateOptional = authorisationApi.getAuthorisation(emailAddressOptional.get());
+                return userStateOptional.orElse(null);
+            }
+            return null;
+        } catch (ParseException e) {
+            throw new DartsApiException(AuthenticationError.FAILED_TO_PARSE_ACCESS_TOKEN, e);
+        }
     }
 }
