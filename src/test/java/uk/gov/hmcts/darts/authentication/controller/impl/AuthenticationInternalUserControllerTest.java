@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurati
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurationPropertiesStrategy;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
+import uk.gov.hmcts.darts.authentication.model.TokenResponse;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
@@ -82,7 +83,7 @@ class AuthenticationInternalUserControllerTest {
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         final String emailAddress = "test.user@example.com";
         when(authenticationService.handleOauthCode(anyString(), isNull()))
-            .thenReturn(createDummyAccessToken(emailAddress));
+            .thenReturn(new TokenResponse(createDummyAccessToken(emailAddress), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
         when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
@@ -117,7 +118,7 @@ class AuthenticationInternalUserControllerTest {
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         final String emailAddress = "test.missing@example.com";
         when(authenticationService.handleOauthCode(anyString(), isNull()))
-            .thenReturn(createDummyAccessToken(emailAddress));
+            .thenReturn(new TokenResponse(createDummyAccessToken(emailAddress), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
         when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
@@ -157,7 +158,7 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithoutClaim() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString(), isNull()))
-            .thenReturn(createDummyAccessToken("test.missing@example.com"));
+            .thenReturn(new TokenResponse(createDummyAccessToken("test.missing@example.com"), null));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
 
