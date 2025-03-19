@@ -23,4 +23,7 @@ public class OAuthProviderRawResponse {
 
     @JsonProperty("id_token_expires_in")
     private long idTokenExpiresIn;
+
+    @JsonProperty("refresh_token")
+    private String refreshToken;
 }

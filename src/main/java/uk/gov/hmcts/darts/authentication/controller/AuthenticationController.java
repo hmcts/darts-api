@@ -25,6 +25,12 @@ public interface AuthenticationController {
         @RequestParam(value = "redirect_uri", required = false) String redirectUri
     );
 
+    @Operation(
+        tags = {"Authentication"}
+    )
+    @PostMapping("/refresh-access-token")
+    SecurityToken refreshAccessToken(@RequestParam("refresh_token") String refreshToken);
+
     @GetMapping("/logout")
     ModelAndView logout(
         @RequestHeader("Authorization") String authHeaderValue,
