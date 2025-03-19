@@ -286,28 +286,30 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         assertThat(mediaRepository.findById(media4.getId()).orElseThrow().getIsCurrent()).isTrue();
     }
 
-    static Stream<Arguments> findAllByMediaTimeContainsTestSource() {
+    static Stream<Arguments> findAllByCurrentMediaTimeContains() {
         OffsetDateTime startTime = OffsetDateTime.now();
         OffsetDateTime endTime = startTime.plusHours(2);
 
         return Stream.of(
             Arguments.of("Event time 30 mins before media start time should be returned when buffer is 30 min",
-                         startTime, endTime, startTime.minusMinutes(30), true),
+                         startTime, endTime, startTime.minusMinutes(30), true, true),
             Arguments.of("Event time 30 mins after media end time should be returned when buffer is 30 min",
-                         startTime, endTime, endTime.plusMinutes(30), true),
+                         startTime, endTime, endTime.plusMinutes(30), true, true),
             Arguments.of("Event time is within media time should be returned",
-                         startTime, endTime, startTime.plusMinutes(30), true),
+                         startTime, endTime, startTime.plusMinutes(30), true, true),
             Arguments.of("Event time 31 mins before media start time should not be returned when buffer is 30 min",
-                         startTime, endTime, startTime.minusMinutes(31), false),
+                         startTime, endTime, startTime.minusMinutes(31), false, true),
             Arguments.of("Event time 31 mins after media end time should not be returned when buffer is 30 min",
-                         startTime, endTime, endTime.plusMinutes(31), false)
+                         startTime, endTime, endTime.plusMinutes(31), false, true),
+            Arguments.of("Event time is within media time and media is not current should not be returned",
+                         startTime, endTime, startTime.plusMinutes(30), false, false)
         );
     }
 
     @ParameterizedTest(name = "{0} (StartTime: {1}. EndTime: {2}. EventTime: {3}. ExpectDataToReturn: {4})")
-    @MethodSource("findAllByMediaTimeContainsTestSource")
-    void findAllByMediaTimeContains_tests(String testName, OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime eventTime,
-                                          boolean expectDataToReturn) {
+    @MethodSource("findAllByCurrentMediaTimeContains")
+    void findAllByCurrentMediaTimeContains_tests(String testName, OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime eventTime,
+                                          boolean expectDataToReturn, boolean isMediaCurrent) {
         CourtroomEntity courtroomEntity = PersistableFactory.getCourtroomTestData()
             .someMinimal();
         dartsPersistence.save(courtroomEntity);
@@ -316,12 +318,13 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
             .start(startTime)
             .end(endTime)
             .courtroom(courtroomEntity)
+            .isCurrent(isMediaCurrent)
             .build()
             .getEntity();
         dartsPersistence.save(media);
 
         Duration buffer = Duration.ofMinutes(30);
-        List<MediaEntity> medias = dartsDatabase.getMediaRepository().findAllByMediaTimeContains(
+        List<MediaEntity> medias = dartsDatabase.getMediaRepository().findAllByCurrentMediaTimeContains(
             courtroomEntity.getId(),
             eventTime.plus(buffer),
             eventTime.minus(buffer));
