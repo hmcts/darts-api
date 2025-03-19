@@ -76,7 +76,8 @@ public class RequestValidator {
         }
         if (errorOnShortText) {
             throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD,
-                                        "Please include at least " + SEARCH_TEXT_LENGTH_THRESHOLD + " characters.");
+                                        "Search criteria is too broad, please include at least " + SEARCH_TEXT_LENGTH_THRESHOLD + " characters.",
+                                        false);
         }
         return 0;
     }

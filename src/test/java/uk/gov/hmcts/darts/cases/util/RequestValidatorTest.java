@@ -146,7 +146,7 @@ class RequestValidatorTest {
         DartsApiException exception = assertThrows(DartsApiException.class, () -> RequestValidator.validate(request));
         assertThat(exception.getError()).isEqualTo(CaseApiError.CRITERIA_TOO_BROAD);
         assertThat(exception.getMessage())
-            .isEqualTo("Search criteria is too broad, please add at least 1 more criteria to search for.. Please include at least 3 characters.");
+            .isEqualTo("Search criteria is too broad, please include at least 3 characters.");
 
     }
 
