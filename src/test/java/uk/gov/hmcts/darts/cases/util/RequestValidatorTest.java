@@ -4,18 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.test.common.ParameterisedTestDataGenerator;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
