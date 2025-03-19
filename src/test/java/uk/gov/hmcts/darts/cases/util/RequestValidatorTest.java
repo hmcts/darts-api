@@ -98,7 +98,7 @@ class RequestValidatorTest {
             () -> RequestValidator.validate(request)
         );
         assertEquals(
-            "The request is not valid... The 'From' date cannot be after the 'To' date.",
+            "The request is not valid. The 'From' date cannot be after the 'To' date.",
             exception.getMessage()
         );
     }

@@ -743,7 +743,7 @@ class OutboundFileProcessorImplTest {
         var exception = assertThrows(DartsApiException.class, () ->
             outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00));
 
-        assertEquals("Failed to process audio request. No media present to process", exception.getMessage());
+        assertEquals("Failed to process audio request. No media present to process.", exception.getMessage());
     }
 
     @Test
