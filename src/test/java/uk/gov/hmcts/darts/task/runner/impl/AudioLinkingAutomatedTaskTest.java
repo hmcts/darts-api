@@ -135,7 +135,7 @@ class AudioLinkingAutomatedTaskTest {
             List<MediaEntity> mediaEntities = List.of(
                 mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
             doReturn(mediaEntities).when(mediaRepository)
-                .findAllByMediaTimeContains(any(), any(), any());
+                .findAllByCurrentMediaTimeContains(any(), any(), any());
 
             eventProcessor.processEvent(1);
 
@@ -146,7 +146,7 @@ class AudioLinkingAutomatedTaskTest {
             verify(mediaLinkedCaseHelper, times(1))
                 .linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaRepository, times(1))
-                .findAllByMediaTimeContains(123, timestamp, timestamp);
+                .findAllByCurrentMediaTimeContains(123, timestamp, timestamp);
             verify(event, times(1))
                 .setEventStatus(3);
 
@@ -173,7 +173,7 @@ class AudioLinkingAutomatedTaskTest {
             List<MediaEntity> mediaEntities = List.of(
                 mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
             doReturn(mediaEntities).when(mediaRepository)
-                .findAllByMediaTimeContains(any(), any(), any());
+                .findAllByCurrentMediaTimeContains(any(), any(), any());
 
             eventProcessor.processEvent(2);
 
@@ -184,7 +184,7 @@ class AudioLinkingAutomatedTaskTest {
             verify(mediaLinkedCaseHelper, times(1))
                 .linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaRepository, times(1))
-                .findAllByMediaTimeContains(123, timestamp.plus(Duration.ofSeconds(10)), timestamp.minus(Duration.ofSeconds(20)));
+                .findAllByCurrentMediaTimeContains(123, timestamp.plus(Duration.ofSeconds(10)), timestamp.minus(Duration.ofSeconds(20)));
             verify(event, times(1))
                 .setEventStatus(3);
             verify(eventService, times(1))

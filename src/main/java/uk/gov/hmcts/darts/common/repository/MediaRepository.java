@@ -95,8 +95,9 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
              from MediaEntity me
              where me.start <= :maxStartTime and me.end >= :minEndTime
              and me.courtroom.id = :courtroomId
+             and me.isCurrent = true
         """)
-    List<MediaEntity> findAllByMediaTimeContains(Integer courtroomId, OffsetDateTime maxStartTime, OffsetDateTime minEndTime);
+    List<MediaEntity> findAllByCurrentMediaTimeContains(Integer courtroomId, OffsetDateTime maxStartTime, OffsetDateTime minEndTime);
 
     @Query("""
             SELECT me
