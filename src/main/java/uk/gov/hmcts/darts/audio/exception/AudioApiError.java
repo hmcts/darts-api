@@ -100,6 +100,16 @@ public enum AudioApiError implements DartsApiError {
         AddAudioErrorCode.MEDIA_ALREADY_CURRENT.getValue(),
         HttpStatus.CONFLICT,
         AddAudioTitleErrors.MEDIA_ALREADY_CURRENT.getValue()
+    ),
+    CRITERIA_TOO_BROAD(
+        AddAudioErrorCode.CRITERIA_TOO_BROAD.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioTitleErrors.CRITERIA_TOO_BROAD.toString()
+    ),
+    INVALID_REQUEST(
+        AddAudioErrorCode.INVALID_REQUEST.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioTitleErrors.INVALID_REQUEST.toString()
     );
 
 

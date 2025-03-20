@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
-    "darts.audio.admin-search.max-results=20"
+    "darts.audio.admin-search.max-results=5"
 })
 class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
@@ -190,7 +190,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         request.setCaseNumber("caseNumber1");
         request.setCourtroomName("courtroom1");
 
-
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
@@ -201,7 +200,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         List<MediaEntity> expectedEntities = List.of(mediaEntity1b, mediaEntity1a, mediaEntity1c);
         assertResponseItems(expectedEntities, mvcResult);
 
-        String actualResponse =  mvcResult.getResponse().getContentAsString();
+        String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             [
                {
@@ -265,14 +264,18 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        List<MediaEntity> expectedEntities = List.of(mediaEntity4g, mediaEntity4h, mediaEntity4i,
-                                                     mediaEntity1d, mediaEntity1e, mediaEntity1f,
-                                                     mediaEntity2d, mediaEntity2e, mediaEntity2f,
-                                                     mediaEntity3d, mediaEntity3e, mediaEntity3f);
-        assertResponseItems(expectedEntities, mvcResult);
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        String expectedResponse = """
+            {
+              "type": "AUDIO_124",
+              "title": "Search criteria is too broad",
+              "status": 400
+            }""";
+
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -287,15 +290,18 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        List<MediaEntity> expectedEntities = List.of(mediaEntity1a, mediaEntity1b, mediaEntity1c,
-                                                     mediaEntity2a, mediaEntity2b, mediaEntity2c,
-                                                     mediaEntity3a, mediaEntity3b, mediaEntity3c,
-                                                     mediaEntity4a, mediaEntity4b, mediaEntity4c,
-                                                     mediaEntity4d, mediaEntity4e, mediaEntity4f);
-        assertResponseItems(expectedEntities, mvcResult);
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        String expectedResponse = """
+            {
+              "type": "AUDIO_124",
+              "title": "Search criteria is too broad",
+              "status": 400
+            }""";
+
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -385,6 +391,9 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
+        //request.setCourthouseIds(List.of(courthouse1.getId(), courthouse2.getId()));
+        request.setCaseNumber("caseNumber1");
+        //request.setCourtroomName("courtroom1");
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
