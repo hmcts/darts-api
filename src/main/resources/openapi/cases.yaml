@@ -1067,7 +1067,7 @@ components:
         - "Too many results have been returned. Please change search criteria."
         - "No search criteria has been specified, please add at least 1 criteria to search for."
         - "Search criteria is too broad, please add at least 1 more criteria to search for."
-        - "The request is not valid.."
+        - "The request is not valid"
         - "The requested case cannot be found"
         - "The request does not contain any values that are supported by the PATCH operation."
         - "The requested case does not contain any actual hearings."

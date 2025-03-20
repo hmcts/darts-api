@@ -57,10 +57,4 @@ public class DartsApiException extends RuntimeException {
         this.customProperties.putAll(customProperties);
     }
 
-    public DartsApiException(DartsApiError error, String detail, Throwable throwable) {
-        super(String.format(EXCEPTION_MESSAGE_FORMAT, error.getTitle(), detail), throwable);
-
-        this.error = error;
-        this.detail = detail;
-    }
 }

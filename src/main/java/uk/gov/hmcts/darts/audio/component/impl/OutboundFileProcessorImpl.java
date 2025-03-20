@@ -131,7 +131,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                     );
                     concatenatedAndMergedAudioFileInfos.add(reEncode(trimmedAudio));
                 } else {
-                    throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
+                    throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process.");
                 }
             }
         }

@@ -312,7 +312,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
             .content(requestBody);
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
             .andExpect(jsonPath("type", is("RETENTION_101")))
-            .andExpect(jsonPath("title", is("The retention date being applied is too early.")))
+            .andExpect(jsonPath("title", is("The retention date being applied is too early")))
             .andExpect(jsonPath("status", is(422)))
             .andExpect(jsonPath(
                 "detail",
@@ -357,7 +357,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
             .content(requestBody);
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
             .andExpect(jsonPath("type", is("RETENTION_107")))
-            .andExpect(jsonPath("title", is("The retention date being applied is too late.")))
+            .andExpect(jsonPath("title", is("The retention date being applied is too late")))
             .andExpect(jsonPath("status", is(422)))
             .andExpect(jsonPath(
                 "detail",
