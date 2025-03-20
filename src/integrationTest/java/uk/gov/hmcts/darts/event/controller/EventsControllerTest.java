@@ -6,12 +6,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -36,6 +38,7 @@ import uk.gov.hmcts.darts.event.model.CourtroomResponseDetails;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -53,6 +56,7 @@ import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE;
@@ -86,6 +90,9 @@ class EventsControllerTest extends IntegrationBase {
 
     @Autowired
     private EventLinkedCaseStub eventLinkedCaseStub;
+
+    @MockitoSpyBean
+    private LogApi logApi;
 
     @Test
     void eventsApiPostEndpoint() throws Exception {
@@ -229,6 +236,9 @@ class EventsControllerTest extends IntegrationBase {
         assertNoDataAnonymisedEntry(notEditedEventEntity);
 
         assertAudit(editedEventEntity);
+        ArgumentCaptor<EventEntity> eventEntityCaptor = ArgumentCaptor.forClass(EventEntity.class);
+        verify(logApi).manualObfuscation(eventEntityCaptor.capture());
+        assertThat(eventEntityCaptor.getValue().getId()).isEqualTo(editedEventEntity.getId());
     }
 
     @TestPropertySource(properties = "darts.event-obfuscation.enabled=false")
@@ -283,6 +293,10 @@ class EventsControllerTest extends IntegrationBase {
         assertDataAnonymisedEntry(userAccount, editedEventEntity2);
 
         assertAudit(editedEventEntity);
+        ArgumentCaptor<EventEntity> eventEntityCaptor = ArgumentCaptor.forClass(EventEntity.class);
+        verify(logApi, times(2)).manualObfuscation(eventEntityCaptor.capture());
+        assertThat(eventEntityCaptor.getAllValues().get(0).getId()).isEqualTo(editedEventEntity.getId());
+        assertThat(eventEntityCaptor.getAllValues().get(1).getId()).isEqualTo(editedEventEntity2.getId());
         assertAudit(editedEventEntity2);
         assertThat(editedEventEntity2.getEventText()).isNotEqualTo(editedEventEntity.getEventText());
     }
