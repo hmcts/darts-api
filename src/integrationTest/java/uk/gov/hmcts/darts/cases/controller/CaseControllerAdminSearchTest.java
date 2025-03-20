@@ -286,6 +286,34 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void adminCasesSearchPost_ShouldReturnBadRequest_WhenHearingDateStartIsAfterHearingDateEnd() throws Exception {
+        // Given
+        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
+        request.setCaseNumber("Case1");
+        request.setHearingStartAt(LocalDate.of(2023, 04, 11));
+        request.setHearingEndAt(LocalDate.of(2023, 03, 11));
+
+        // When/Then
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "CASE_103",
+              "title": "The request is not valid",
+              "status": 400,
+              "detail": "The hearing start date cannot be after the end date."
+            }
+            """;
+
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     private void setupUserAccountAndSecurityGroup() {
         var securityGroup = SecurityGroupTestData.createGroupForRole(SUPER_ADMIN);
         securityGroup.setGlobalAccess(true);
