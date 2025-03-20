@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.model.PostAdminSearchRequest;
 import java.time.Period;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Component
 public class AdminSearchRequestValidator {
@@ -19,30 +20,30 @@ public class AdminSearchRequestValidator {
     private String hearingDatesMaxSearchPeriod;
 
     public void validate(PostAdminSearchRequest postAdminSearchRequest, DartsApiError criteriaTooBroad, DartsApiError invalidRequest) {
-        if (StringUtils.isNotEmpty(postAdminSearchRequest.getCaseNumber())) {
-            return;
-        }
-        if (CollectionUtils.isEmpty(postAdminSearchRequest.getCourthouseIds())
+        // if hearing dates are provided, validate them
+        validateHearingDatesDuration(postAdminSearchRequest, invalidRequest);
+
+        if (StringUtils.isEmpty(postAdminSearchRequest.getCaseNumber())
+            && (CollectionUtils.isEmpty(postAdminSearchRequest.getCourthouseIds())
             || isNull(postAdminSearchRequest.getHearingStartAt())
-            || isNull(postAdminSearchRequest.getHearingEndAt())
-        ) {
+            || isNull(postAdminSearchRequest.getHearingEndAt()))) {
             throw new DartsApiException(criteriaTooBroad);
         }
-        validateHearingDatesDuration(postAdminSearchRequest, invalidRequest);
     }
 
-
     private void validateHearingDatesDuration(PostAdminSearchRequest request, DartsApiError invalidRequest) {
-        if (request.getHearingStartAt().isAfter(request.getHearingEndAt())) {
-            throw new DartsApiException(invalidRequest, "The hearing start date cannot be after the end date.");
-        }
+        if (nonNull(request.getHearingStartAt()) && nonNull(request.getHearingEndAt())) {
+            if (request.getHearingStartAt().isAfter(request.getHearingEndAt())) {
+                throw new DartsApiException(invalidRequest, "The hearing start date cannot be after the end date.");
+            }
 
-        Period hearingPeriod = Period.between(request.getHearingStartAt(), request.getHearingEndAt());
-        Period hearingDatesMaxSearch = Period.parse(hearingDatesMaxSearchPeriod);
+            Period hearingPeriod = Period.between(request.getHearingStartAt(), request.getHearingEndAt());
+            Period hearingDatesMaxSearch = Period.parse(hearingDatesMaxSearchPeriod);
 
-        if (hearingPeriod.toTotalMonths() > hearingDatesMaxSearch.toTotalMonths()) {
-            throw new DartsApiException(
-                invalidRequest, "The time between the start and end date cannot be more than " + hearingDatesMaxSearch.toTotalMonths() + " months");
+            if (hearingPeriod.toTotalMonths() > hearingDatesMaxSearch.toTotalMonths()) {
+                throw new DartsApiException(
+                    invalidRequest, "The time between the start and end date cannot be more than " + hearingDatesMaxSearch.toTotalMonths() + " months");
+            }
         }
     }
 }
