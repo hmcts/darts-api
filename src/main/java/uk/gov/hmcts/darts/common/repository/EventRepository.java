@@ -22,7 +22,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
            FROM EventEntity ee
            JOIN ee.hearingEntities he
            WHERE he.id = :hearingId
-           ORDER by ee.timestamp desc 
+           ORDER by ee.timestamp desc
         """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
 
@@ -73,7 +73,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
              AND (cast(:hearingStartDate as LocalDate) IS NULL OR h.hearingDate >= :hearingStartDate)
              AND (cast(:hearingEndDate as LocalDate) IS NULL OR h.hearingDate <= :hearingEndDate)
              AND e.isCurrent = true
-        ORDER BY e.id DESC                          
+        ORDER BY e.id DESC
         """)
     List<EventSearchResult> searchEventsFilteringOn(
         List<Integer> courthouseIds,
@@ -168,8 +168,8 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     List<EventEntity> findAllByRelatedEvents(Integer eveId, Integer eventId, List<Integer> courtCaseIds);
 
     @Query("""
-        SELECT e.id 
-        FROM EventEntity e 
+        SELECT e.id
+        FROM EventEntity e
         WHERE e.eventStatus = :statusNumber
         AND e.courtroom.id not in (:courtroomIds)
         """
@@ -178,7 +178,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 
     @Query(value = """
                         SELECT e3 from EventEntity e3
-                        JOIN (                        
+                        JOIN (
                             SELECT e.eventId as eventId, e.messageId as messageId, e.eventText as eventText
                             FROM EventEntity e
                             WHERE e.eventId IS NOT NULL and e.messageId IS NOT NULL and e.eventId = :eventId
@@ -186,7 +186,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
                             HAVING COUNT(e) > 1) e2
                          ON e2.eventId = e3.eventId and e2.messageId = e3.messageId and e2.eventText = e3.eventText
                          WHERE e3.eventId >= :eventId
-                         ORDER BY e3.createdDateTime ASC  
+                         ORDER BY e3.createdDateTime ASC
         """)
     List<EventEntity> findDuplicateEventIds(Integer eventId);
 

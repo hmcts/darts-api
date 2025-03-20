@@ -60,11 +60,13 @@ public class AudioLinkingAutomatedTask
     @Override
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
+        Integer batchSize = getAutomatedTaskBatchSize();
         List<Integer> eveIds = eventRepository.findAllByEventStatusAndNotCourtrooms(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
             audioConfigurationProperties.getHandheldAudioCourtroomNumbers().stream().map(Integer::parseInt).toList(),
-            Limit.of(getAutomatedTaskBatchSize()));
-
+            Limit.of(batchSize));
+        
+        log.info("Found {} events to process out of a total batch size {}", eveIds.size(), batchSize);
         eveIds.forEach(eventProcessor::processEvent);
     }
 
@@ -95,9 +97,8 @@ public class AudioLinkingAutomatedTask
                     event.getCourtroom().getId(),
                     event.getTimestamp().plus(getPreAmbleDuration()),
                     event.getTimestamp().minus(getPostAmbleDuration()));
-                mediaEntities.forEach(mediaEntity -> {
-                    mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
-                });
+                mediaEntities.forEach(
+                    mediaEntity -> mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount));
                 event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
                 event.setLastModifiedBy(userIdentity.getUserAccount());
                 eventService.saveEvent(event);
