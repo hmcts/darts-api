@@ -314,6 +314,32 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void adminCasesSearchPost_ShouldReturnBadRequest_WhenHearingDateEndIsNull() throws Exception {
+        // Given
+        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
+        request.setCourthouseIds(List.of(1));
+        request.setHearingStartAt(LocalDate.of(2023, 04, 11));
+
+        // When/Then
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+               "type": "CASE_102",
+               "title": "Search criteria is too broad, please add at least 1 more criteria to search for.",
+               "status": 400
+             }
+            """;
+
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     private void setupUserAccountAndSecurityGroup() {
         var securityGroup = SecurityGroupTestData.createGroupForRole(SUPER_ADMIN);
         securityGroup.setGlobalAccess(true);
