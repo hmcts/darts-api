@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.model.PostAdminSearchRequest;
 
+import java.time.LocalDate;
 import java.time.Period;
 
 import static java.util.Objects.isNull;
@@ -31,12 +32,14 @@ public class AdminSearchRequestValidator {
     }
 
     private void validateHearingDatesDuration(PostAdminSearchRequest request, DartsApiError invalidRequest) {
-        if (request.getHearingStartAt() != null && request.getHearingEndAt() != null) {
-            if (request.getHearingStartAt().isAfter(request.getHearingEndAt())) {
+        LocalDate hearingStart = request.getHearingStartAt();
+        LocalDate hearingEnd = request.getHearingEndAt();
+        if (hearingStart != null && hearingEnd != null) {
+            if (hearingStart.isAfter(hearingEnd)) {
                 throw new DartsApiException(invalidRequest, "The hearing start date cannot be after the end date.");
             }
 
-            Period hearingPeriod = Period.between(request.getHearingStartAt(), request.getHearingEndAt());
+            Period hearingPeriod = Period.between(hearingStart, hearingEnd);
             Period hearingDatesMaxSearch = Period.parse(hearingDatesMaxSearchPeriod);
 
             if (hearingPeriod.toTotalMonths() > hearingDatesMaxSearch.toTotalMonths()) {
