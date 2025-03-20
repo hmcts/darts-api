@@ -45,6 +45,4 @@ public class AdminSearchRequestValidator {
                 invalidRequest, "The time between the start and end date cannot be more than " + hearingDatesMaxSearch.toTotalMonths() + " months");
         }
     }
-
-
 }
