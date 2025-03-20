@@ -71,10 +71,10 @@ public class AudioLinkingAutomatedTask
 
 
         @Getter
-        @Value("${darts.automated-tasks.pre-amble-duration:0s}")
+        @Value("${darts.automated.task.audio-linking.pre-amble-duration:0s}")
         private final Duration preAmbleDuration;
         @Getter
-        @Value("${darts.automated-tasks.post-amble-duration:0s}")
+        @Value("${darts.automated.task.audio-linking.post-amble-duration:0s}")
         private final Duration postAmbleDuration;
         private final UserIdentity userIdentity;
 

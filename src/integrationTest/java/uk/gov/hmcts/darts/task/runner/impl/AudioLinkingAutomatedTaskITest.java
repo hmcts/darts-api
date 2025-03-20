@@ -38,23 +38,24 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
         automatedTask.setTaskEnabled(true);
         dartsDatabase.getAutomatedTaskRepository().save(automatedTask);
 
+        var courtroom = "room 1";
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
 
         MediaEntity media1 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), 1, true);
+            courtCaseEntity.getCourthouse(), courtroom, OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), 1, true);
         MediaEntity media2 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusMinutes(10), OffsetDateTime.now().plusHours(2), 1, true);
+            courtCaseEntity.getCourthouse(), courtroom, OffsetDateTime.now().plusMinutes(10), OffsetDateTime.now().plusHours(2), 1, true);
 
         MediaEntity media3 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusHours(2), OffsetDateTime.now().plusHours(4), 1, true);
+            courtCaseEntity.getCourthouse(), courtroom, OffsetDateTime.now().plusHours(2), OffsetDateTime.now().plusHours(4), 1, true);
         MediaEntity media4 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusHours(3), OffsetDateTime.now().plusHours(5), 1, true);
+            courtCaseEntity.getCourthouse(), courtroom, OffsetDateTime.now().plusHours(3), OffsetDateTime.now().plusHours(5), 1, true);
 
         HearingEntity hearing1 = createHearing();
         HearingEntity hearing2 = createHearing();
         HearingEntity hearing3 = createHearing();
 
-        CourtroomEntity courtroomEntity = dartsDatabase.createCourtroomUnlessExists("Bristol", "room 1");
+        CourtroomEntity courtroomEntity = dartsDatabase.createCourtroomUnlessExists("Bristol", courtroom);
         EventEntity event1 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, courtroomEntity, hearing1, OffsetDateTime.now());
         EventEntity event2 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, courtroomEntity, hearing2, OffsetDateTime.now().plusMinutes(20));
         EventEntity event3 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, courtroomEntity, hearing3, OffsetDateTime.now().plusHours(2));
@@ -72,9 +73,9 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
             assertMediaLinked(hearing2, media1);
             assertMediaNotLinked(hearing3, media1);
 
-            assertMediaNotLinked(hearing1, media2);
+            assertMediaLinked(hearing1, media2);
             assertMediaLinked(hearing2, media2);
-            assertMediaNotLinked(hearing3, media2);
+            assertMediaLinked(hearing3, media2);
 
             assertMediaNotLinked(hearing1, media3);
             assertMediaNotLinked(hearing2, media3);
