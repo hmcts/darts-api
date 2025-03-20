@@ -99,6 +99,16 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     private static final List<String> TAGS_TO_IGNORE = List.of("id");
 
     @BeforeEach
+    void setupOpenInView() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeOpenInView() {
+        openInViewUtil.closeEntityManager();
+    }
+
+    @BeforeEach
     @SuppressWarnings({"PMD.NcssCount"})
     void setupDate() {
         OffsetDateTime tenth10am = OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
@@ -159,30 +169,8 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
     }
 
-    private MediaEntity createMedia(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, String caseNumber) {
-        return createMedia(courthouse, courtroomName, startTime, caseNumber, true);
-    }
-
-    private MediaEntity createMedia(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, String caseNumber, boolean isCurrent) {
-        MediaEntity newMediaEntity = mediaStub.createMediaEntity(courthouse, courtroomName, startTime, startTime.plusHours(1), 1, isCurrent);
-        mediaRepository.save(newMediaEntity);
-
-        mediaStub.linkToCase(newMediaEntity, caseNumber);
-        return newMediaEntity;
-    }
-
-    @BeforeEach
-    void setupOpenInView() {
-        openInViewUtil.openEntityManager();
-    }
-
-    @AfterEach
-    void closeOpenInView() {
-        openInViewUtil.closeEntityManager();
-    }
-
     @Test
-    void adminSearchForMedia_shouldOnlyReturnCurrentMedia_whenMediaMatchesSearchCriteria() throws Exception {
+    void adminSearchForMedia_ShouldOnlyReturnCurrentMedia_whenMediaMatchesSearchCriteria() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
@@ -253,13 +241,41 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void onlyHearingStart() throws Exception {
+    void adminSearchForMedia_ShouldThrowException_WhenDatesAreStartAndEndHearingDatesGreaterThanOneYear() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
+        request.setCourthouseIds(List.of(courthouse1.getId(), courthouse2.getId()));
+        request.setCaseNumber("caseNumber1");
+        request.setHearingStartAt(LocalDate.of(2020, 10, 11));
+        request.setHearingEndAt(LocalDate.of(2024, 10, 11));
+
+        // run the test
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "AUDIO_125",
+              "title": "The request is not valid",
+              "status": 400,
+              "detail": "The time between the start and end date cannot be more than 12 months"
+            }
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminSearchForMedia_ShouldThrowSearchCriteriaTooBroad_withOnlyHearingStart() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
         request.setHearingStartAt(LocalDate.of(2020, 10, 11));
 
-
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
@@ -279,13 +295,12 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void onlyHearingEnd() throws Exception {
+    void adminSearchForMedia_ShouldThrowSearchCriteriaTooBroad_WithOnlyHearingEnd() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
         request.setHearingEndAt(LocalDate.of(2020, 10, 10));
 
-
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
@@ -305,7 +320,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void multipleAndHearingStartAndEnd() throws Exception {
+    void adminSearchForMedia_ShouldReturnMultipleMedias_WithCaseNumberAndCourtroonAndHearingStartAndEnd() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
@@ -313,7 +328,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         request.setCourtroomName("1");
         request.setHearingStartAt(LocalDate.of(2020, 10, 10));
         request.setHearingEndAt(LocalDate.of(2020, 10, 11));
-
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -327,7 +341,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void noMatch() throws Exception {
+    void adminSearchForMedia_ShouldReturnNoMatches() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
@@ -335,7 +349,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         request.setCourtroomName("1");
         request.setHearingStartAt(LocalDate.of(2020, 10, 10));
         request.setHearingEndAt(LocalDate.of(2020, 10, 11));
-
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -354,7 +367,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void emptyCourthouses() throws Exception {
+    void adminSearchForMedia_ShouldReturnEmptyCourthouses() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
@@ -375,25 +388,12 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
     }
 
-    private void assertResponseItems(List<MediaEntity> expectedEntities, MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
-        String contentAsString = mvcResult.getResponse().getContentAsString();
-
-        List<Integer> expectedIds = expectedEntities.stream().map(MediaEntity::getId).sorted().toList();
-        List<PostAdminMediasSearchResponseItem> actualResponseItems = objectMapper.readValue(contentAsString,
-                                                                                             new TypeReference<>() {
-                                                                                             });
-        List<Integer> actualIds = actualResponseItems.stream().map(PostAdminMediasSearchResponseItem::getId).sorted().toList();
-        assertThat(actualIds, is(expectedIds));
-    }
-
     @Test
-    void tooManyResults() throws Exception {
+    void adminSearchForMedia_ShouldReturnTooManyResultsException() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
-        //request.setCourthouseIds(List.of(courthouse1.getId(), courthouse2.getId()));
         request.setCaseNumber("caseNumber1");
-        //request.setCourtroomName("courtroom1");
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -415,7 +415,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void noPermissions() throws Exception {
+    void adminSearchForMedia_ShouldReturNoPermissionsException() throws Exception {
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
         request.setCourthouseIds(new ArrayList<>());
 
@@ -438,4 +438,26 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
     }
 
+    private void assertResponseItems(List<MediaEntity> expectedEntities, MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+
+        List<Integer> expectedIds = expectedEntities.stream().map(MediaEntity::getId).sorted().toList();
+        List<PostAdminMediasSearchResponseItem> actualResponseItems = objectMapper.readValue(contentAsString,
+                                                                                             new TypeReference<>() {
+                                                                                             });
+        List<Integer> actualIds = actualResponseItems.stream().map(PostAdminMediasSearchResponseItem::getId).sorted().toList();
+        assertThat(actualIds, is(expectedIds));
+    }
+
+    private MediaEntity createMedia(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, String caseNumber) {
+        return createMedia(courthouse, courtroomName, startTime, caseNumber, true);
+    }
+
+    private MediaEntity createMedia(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, String caseNumber, boolean isCurrent) {
+        MediaEntity newMediaEntity = mediaStub.createMediaEntity(courthouse, courtroomName, startTime, startTime.plusHours(1), 1, isCurrent);
+        mediaRepository.save(newMediaEntity);
+
+        mediaStub.linkToCase(newMediaEntity, caseNumber);
+        return newMediaEntity;
+    }
 }

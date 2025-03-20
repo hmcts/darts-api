@@ -50,9 +50,9 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     private static final String ENDPOINT_URL = "/admin/cases/search";
 
     @Autowired
-    SecurityGroupRepository securityGroupRepository;
+    private SecurityGroupRepository securityGroupRepository;
     @Autowired
-    UserAccountRepository userAccountRepository;
+    private UserAccountRepository userAccountRepository;
     @Autowired
     private MockMvc mockMvc;
     private CourthouseEntity swanseaCourthouse;
@@ -147,7 +147,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void testOk() throws Exception {
+    void adminCaseSearch_ShouldReturnOk() throws Exception {
 
         String requestBody = """
             {
@@ -156,8 +156,8 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
               ],
               "case_number": "Case1",
               "courtroom_name": "COURTROOM1",
-              "hearing_start_at": "2020-06-18",
-              "hearing_end_at": "2024-06-18"
+              "hearing_start_at": "2023-04-18",
+              "hearing_end_at": "2024-04-17"
             }""";
 
         requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
@@ -174,7 +174,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void adminCaseSearch_multipleReturned_shouldBeOrderedByCaseId() throws Exception {
+    void adminCaseSearch_ShouldReturnMultipleOrderedByCaseId() throws Exception {
 
         String requestBody = """
             {
@@ -183,8 +183,8 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
               ],
               "case_number": "Case",
               "courtroom_name": "COURTROOM1",
-              "hearing_start_at": "2020-06-18",
-              "hearing_end_at": "2024-06-18"
+              "hearing_start_at": "2023-04-18",
+              "hearing_end_at": "2024-04-17"
             }""";
 
         requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
@@ -201,7 +201,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void testOkIsAnonymised() throws Exception {
+    void adminCaseSearch_ShouldReturnOkIsAnonymised() throws Exception {
         CourtCaseEntity caseEntity = dartsDatabase.getCaseRepository()
             .findByCaseNumberAndCourthouse_CourthouseName("Case1", "SWANSEA").orElseThrow();
         OffsetDateTime dataAnonymisedTs = OffsetDateTime.parse("2023-01-01T12:00:00Z");
@@ -216,8 +216,8 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
               ],
               "case_number": "Case1",
               "courtroom_name": "COURTROOM1",
-              "hearing_start_at": "2020-06-18",
-              "hearing_end_at": "2024-06-18"
+              "hearing_start_at": "2023-04-18",
+              "hearing_end_at": "2024-04-17"
             }""";
 
         requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
@@ -234,7 +234,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void adminCaseSearch_multipleReturned_SearchByCourthouseIdsAndHearingDates() throws Exception {
+    void adminCaseSearch_ShouldReturnMultiples_WithSearchByCourthouseIdsAndHearingDates() throws Exception {
 
         String requestBody = """
             {
@@ -261,7 +261,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void adminCasesSearchPost_shouldReturnBadRequest_whenCourtroomNameIsLowercase() throws Exception {
+    void adminCasesSearchPost_ShouldReturnBadRequest_WhenCourtroomNameIsLowercase() throws Exception {
         // Given
         AdminCasesSearchRequest request = new AdminCasesSearchRequest();
         request.setCourtroomName("courtroom1");  // lowercase value
@@ -278,7 +278,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         String expectedResponse = """
             {
                "type": "CASE_103",
-               "title": "The request is not valid..",
+               "title": "The request is not valid",
                "status": 400,
                "detail": "Courthouse and courtroom must be uppercase."
              }""";
