@@ -60,7 +60,7 @@ public class AudioLinkingAutomatedTask
     @Override
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
-        List<Integer> eveIds = eventRepository.findAllByEventStatusAndNotCourtCases(
+        List<Integer> eveIds = eventRepository.findAllByEventStatusAndNotCourtrooms(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
             audioConfigurationProperties.getHandheldAudioCourtroomNumbers().stream().map(Integer::parseInt).toList(),
             Limit.of(getAutomatedTaskBatchSize()));

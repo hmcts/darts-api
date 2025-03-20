@@ -268,37 +268,28 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllByEventStatusAndNotCourtCases_shouldReturnSingleEvent() {
+    void findAllByEventStatusAndNotCourtrooms_shouldReturnSingleEvent() {
         // given
-        EventEntity eventWithCourtCaseToBeExcluded = PersistableFactory.getEventTestData().someMinimal();
-        EventEntity eventWithCourtCaseToBeIncluded = PersistableFactory.getEventTestData().someMinimal();
+        EventEntity eventWithCourtroomToBeExcluded = PersistableFactory.getEventTestData().someMinimal();
+        EventEntity eventWithCourtroomToBeIncluded = PersistableFactory.getEventTestData().someMinimal();
         EventEntity eventWithDifferentEventStatus = PersistableFactory.getEventTestData().someMinimal();
 
-
-        eventWithCourtCaseToBeExcluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
-        eventWithCourtCaseToBeIncluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
+        eventWithCourtroomToBeExcluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
+        eventWithCourtroomToBeIncluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventWithDifferentEventStatus.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_HERITAGE.getStatusNumber());
 
-        eventWithCourtCaseToBeExcluded = dartsPersistence.save(eventWithCourtCaseToBeExcluded);
-        eventWithCourtCaseToBeIncluded = dartsPersistence.save(eventWithCourtCaseToBeIncluded);
-
-        CourtCaseEntity courtCaseToBeExcluded = PersistableFactory.getCourtCaseTestData().someMinimal();
-        courtCaseToBeExcluded = dartsPersistence.save(courtCaseToBeExcluded);
-        eventLinkedCaseStub.createCaseLinkedEvent(eventWithCourtCaseToBeExcluded, courtCaseToBeExcluded);
-
-        CourtCaseEntity courtCaseToBeFound = PersistableFactory.getCourtCaseTestData().someMinimal();
-        courtCaseToBeFound = dartsPersistence.save(courtCaseToBeFound);
-        eventLinkedCaseStub.createCaseLinkedEvent(eventWithCourtCaseToBeIncluded, courtCaseToBeFound);
+        eventWithCourtroomToBeExcluded = dartsPersistence.save(eventWithCourtroomToBeExcluded);
+        eventWithCourtroomToBeIncluded = dartsPersistence.save(eventWithCourtroomToBeIncluded);
 
         // when
-        List<Integer> events = eventRepository.findAllByEventStatusAndNotCourtCases(
+        List<Integer> events = eventRepository.findAllByEventStatusAndNotCourtrooms(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
-            List.of(courtCaseToBeExcluded.getId()),
+            List.of(eventWithCourtroomToBeExcluded.getCourtroom().getId()),
             Limit.of(5));
 
         // then
         assertThat(events).hasSize(1);
-        assertEquals(eventWithCourtCaseToBeIncluded.getId(), events.getFirst());
+        assertEquals(eventWithCourtroomToBeIncluded.getId(), events.getFirst());
     }
 
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
