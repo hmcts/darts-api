@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,6 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
-import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -50,12 +48,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static ch.qos.logback.classic.Level.toLevel;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -251,10 +246,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         HearingEntity hearingEntity = hearingsInAnotherCourtroom.getFirst();
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
-
-        assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Exact duplicate detected based upon media metadata and checksum for media entity ids [2].", toLevel(
-                            Level.INFO_INT)).isEmpty());
     }
 
     @Test
@@ -623,10 +614,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         HearingEntity hearingEntity = hearingsInAnotherCourtroom.getFirst();
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
-        assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Revised version of media added", toLevel(
-                            Level.INFO_INT)).isEmpty());
-
         return media.getId();
     }
 

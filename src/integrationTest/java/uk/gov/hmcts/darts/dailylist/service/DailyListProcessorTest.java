@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.dailylist.service;
 
-import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.service.impl.ProcessDailyListOnDemandTask;
+import uk.gov.hmcts.darts.log.api.impl.LogApiImpl;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
@@ -39,7 +40,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.FAILED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.IGNORED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PARTIALLY_PROCESSED;
@@ -81,6 +82,9 @@ class DailyListProcessorTest extends IntegrationBase {
 
     @Autowired
     private AutomatedTasksApi automatedTasksApi;
+
+    @MockitoSpyBean
+    private LogApiImpl logApi;
 
     @BeforeAll
     static void beforeAll() {
@@ -170,7 +174,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, countOfProcessed);
         long countOfIgnored = dailyListStatuses.stream().filter(status -> status.equals(IGNORED)).count();
         assertEquals(1, countOfIgnored);
-        assertFalse(logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).isEmpty());
+        verify(logApi).processedDailyListJob(report);
 
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(URN_1, SWANSEA).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
@@ -316,8 +320,7 @@ class DailyListProcessorTest extends IntegrationBase {
         DailyListLogJobReport report = new DailyListLogJobReport(2, SourceType.CPP);
         report.registerResult(PROCESSED);
         report.registerResult(IGNORED);
-
-        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).size());
+        verify(logApi).processedDailyListJob(report);
 
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(URN_1, SWANSEA).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
@@ -368,9 +371,8 @@ class DailyListProcessorTest extends IntegrationBase {
 
         CourtCaseEntity newCase1 = caseRepository
             .findByCaseNumberAndCourthouse_CourthouseName(URN_1, SWANSEA).get();
-
-        assertEquals(1, logAppender.searchLogApiLogs(reportCpp.toString(), Level.toLevel(Level.INFO_INT)).size());
-        assertEquals(1, logAppender.searchLogApiLogs(reportXhb.toString(), Level.toLevel(Level.INFO_INT)).size());
+        verify(logApi).processedDailyListJob(reportCpp);
+        verify(logApi).processedDailyListJob(reportXhb);
 
         assertEquals(URN_1, newCase1.getCaseNumber());
 
@@ -438,7 +440,7 @@ class DailyListProcessorTest extends IntegrationBase {
 
         DailyListLogJobReport report = new DailyListLogJobReport(1, SourceType.CPP);
         report.registerResult(FAILED);
-        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).size());
+        verify(logApi).processedDailyListJob(report);
 
         var dailyListStatus = dartsDatabase.getDailyListRepository()
             .findById(id).orElseThrow()
@@ -470,7 +472,7 @@ class DailyListProcessorTest extends IntegrationBase {
         report.registerResult(PARTIALLY_PROCESSED);
         report.registerResult(IGNORED);
 
-        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).size());
+        verify(logApi).processedDailyListJob(report);
 
         var dailyListStatus = dartsDatabase.getDailyListRepository()
             .findById(oldDailyList.getId()).orElseThrow()

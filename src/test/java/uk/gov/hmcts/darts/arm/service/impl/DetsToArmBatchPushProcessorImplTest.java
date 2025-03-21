@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
@@ -51,6 +52,7 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -249,6 +251,18 @@ class DetsToArmBatchPushProcessorImplTest {
 
         // then
         LogUtil.assertOutputHasMessage(output, "No DETS EODs to process", 10);
+    }
+
+    @Test
+    void getObjectStateRecordEntity_shouldThrowError_whenOsrIsNull() {
+        ExternalObjectDirectoryEntity externalObjectDirectory = new ExternalObjectDirectoryEntity();
+        externalObjectDirectory.setOsrUuid(null);
+        externalObjectDirectory.setId(123);
+        DartsException exception =
+            assertThrows(DartsException.class, () -> detsToArmBatchPushProcessor.getObjectStateRecordEntity(externalObjectDirectory));
+
+        assertThat(exception.getMessage())
+            .isEqualTo("Unable to find ObjectStateRecordEntity for ARM EOD ID: 123 as OSR UUID is null");
     }
 
     private ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {

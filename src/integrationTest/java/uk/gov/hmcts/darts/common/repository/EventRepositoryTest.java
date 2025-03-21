@@ -109,13 +109,13 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event2, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
 
         assertThat(duplicates)
             .hasSize(3)
-            .anyMatch(eventEntity -> event3.getId().equals(eventEntity.getId()))
-            .anyMatch(eventEntity -> event1.getId().equals(eventEntity.getId()))
-            .anyMatch(eventEntity -> event2.getId().equals(eventEntity.getId()));
+            .anyMatch(eventEntity -> event3.getId().equals(eventEntity))
+            .anyMatch(eventEntity -> event1.getId().equals(eventEntity))
+            .anyMatch(eventEntity -> event2.getId().equals(eventEntity));
     }
 
     @Test
@@ -140,7 +140,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
     }
 
@@ -166,7 +166,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
     }
 
