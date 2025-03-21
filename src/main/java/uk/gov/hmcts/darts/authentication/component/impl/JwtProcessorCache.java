@@ -18,7 +18,7 @@ import java.util.HashSet;
 @Component
 public class JwtProcessorCache {
 
-    @Cacheable("defaultJWTProcessor")
+    @Cacheable(value = "defaultJWTProcessor", cacheManager = "inMemoryCacheManager")
     public DefaultJWTProcessor<SecurityContext> getDefaultJwtProcessor(AuthProviderConfigurationProperties providerConfig,
                                                                        AuthConfigurationProperties configuration) {
         var keySelector = new JWSVerificationKeySelector<>(

@@ -28,7 +28,7 @@ public class ExternalAuthProviderConfigurationProperties implements AuthProvider
     private String resetPasswordUri;
 
     @Override
-    @Cacheable(value = "external_jwk_source")
+    @Cacheable(value = "external_jwk_source", cacheManager = "inMemoryCacheManager")
     public JWKSource<SecurityContext> getJwkSource() {
         return AuthProviderConfigurationProperties.super.getJwkSource();
     }
