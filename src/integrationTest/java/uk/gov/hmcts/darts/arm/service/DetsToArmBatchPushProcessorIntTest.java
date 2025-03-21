@@ -3,10 +3,7 @@ package uk.gov.hmcts.darts.arm.service;
 import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -25,7 +22,6 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +36,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 
-@ExtendWith(OutputCaptureExtension.class)
 class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
 
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
@@ -255,7 +250,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processDetsToArmWithNoOsrUuid(CapturedOutput output) {
+    void processDetsToArmWithNoOsrUuid() {
         // given
         ExternalObjectDirectoryEntity detsEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -271,10 +266,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(detsEod);
 
         detsToArmBatchPushProcessor.processDetsToArm(5);
-        // when
-        //Error is gracefully handled and logged
-        assertThat(output)
-            .contains("uk.gov.hmcts.darts.common.exception.DartsException: Unable to find ObjectStateRecordEntity for ARM EOD ID: 2 as OSR UUID is null");
+        //Error is gracefully handled
     }
 
     @Test

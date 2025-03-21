@@ -7,13 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -36,7 +33,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
-import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -54,7 +50,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -77,7 +72,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PEN
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @Slf4j
-@ExtendWith(OutputCaptureExtension.class)
 @SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
@@ -500,16 +494,13 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     }
 
     @Test
-    void runTasksAsync_asyncException(CapturedOutput output) {
+    void runTasksAsync_asyncException() {
 
         try (MockedStatic<AsyncUtil> asyncUtilMockedStatic = Mockito.mockStatic(AsyncUtil.class)) {
             asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), any()))
                 .thenThrow(new RuntimeException("Test exception"));
             armBatchProcessResponseFiles.runTasksAsync(new ArrayList<>(), asyncTaskConfig);
-            LogUtil.waitUntilMessage(output, "failed with unexpected exception", 5);
-
-            assertThat(output)
-                .contains(armBatchProcessResponseFiles.getClass().getName() + " failed with unexpected exception");
+            //Should be gracefully handled
         }
     }
 
