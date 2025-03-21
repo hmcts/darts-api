@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.testutils;
 
 import lombok.Getter;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -38,12 +37,8 @@ public class TestBase {
     private CacheManager inMemoryCacheManager;
 
     @BeforeEach
-    void clearDb() {
+    void beforeEach() {
         dartsDatabase.clearDb();
-    }
-
-    @AfterEach
-    void clearTestData() {
         evictCache();
     }
 
