@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,5 +31,7 @@ public interface EventLinkedCaseRepository extends JpaRepository<EventLinkedCase
     boolean areAllAssociatedCasesAnonymised(EventEntity eventEntity);
 
     @Transactional
-    void deleteAllByEventIn(List<EventEntity> events);
+    @Modifying
+    @Query("DELETE FROM EventLinkedCaseEntity elc WHERE elc.event.id IN :eventsIds")
+    void deleteAllByEventIn(List<Integer> eventsIds);
 }
