@@ -268,7 +268,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllByEventStatusAndNotCourtrooms_shouldReturnSingleEvent() {
+    void findAllByEventStatusAndNotCourtrooms_shouldReturnSingleEvent_withOneValidEvent() {
         // given
         EventEntity eventWithCourtroomToBeExcluded = PersistableFactory.getEventTestData().someMinimal();
         EventEntity eventWithCourtroomToBeIncluded = PersistableFactory.getEventTestData().someMinimal();
