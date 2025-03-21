@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
+class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/hearings/search";
 
@@ -117,10 +117,10 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-                "type": "HEARING_103",
-                "title": "The search criteria is too broad. Please refine your search.",
-                "status": 400
-              }
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -146,10 +146,10 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-                "type": "HEARING_103",
-                "title": "The search criteria is too broad. Please refine your search.",
-                "status": 400
-              }
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -207,10 +207,10 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-                "type": "HEARING_103",
-                "title": "The search criteria is too broad. Please refine your search.",
-                "status": 400
-              }
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -238,10 +238,10 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-                "type": "HEARING_103",
-                "title": "The search criteria is too broad. Please refine your search.",
-                "status": 400
-              }
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -271,10 +271,10 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-                "type": "HEARING_103",
-                "title": "The search criteria is too broad. Please refine your search.",
-                "status": 400
-              }
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -303,10 +303,10 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-                "type": "HEARING_103",
-                "title": "The search criteria is too broad. Please refine your search.",
-                "status": 400
-              }
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -336,10 +336,10 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-                "type": "HEARING_103",
-                "title": "The search criteria is too broad. Please refine your search.",
-                "status": 400
-              }
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);

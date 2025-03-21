@@ -193,9 +193,7 @@ public class CaseController implements CasesApi {
                                                  .courthouseIds(adminCasesSearchRequest.getCourthouseIds())
                                                  .hearingStartAt(adminCasesSearchRequest.getHearingStartAt())
                                                  .hearingEndAt(adminCasesSearchRequest.getHearingEndAt())
-                                                 .build(),
-                                             CaseApiError.CRITERIA_TOO_BROAD,
-                                             CaseApiError.INVALID_REQUEST);
+                                                 .build());
         validateUppercase(null, adminCasesSearchRequest.getCourtroomName());
         return new ResponseEntity<>(caseService.adminCaseSearch(adminCasesSearchRequest), HttpStatus.OK);
     }

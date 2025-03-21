@@ -614,9 +614,7 @@ components:
         - "HEARING_100"
         - "HEARING_101"
         - "HEARING_102"
-        - "HEARING_103"
-        - "HEARING_104"
-      x-enum-varnames: [ HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL, CRITERIA_TOO_BROAD, INVALID_REQUEST ]
+      x-enum-varnames: [ HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL ]
 
     HearingsTitleErrors:
       type: string
@@ -624,6 +622,4 @@ components:
         - "The requested hearing cannot be found"
         - "Too many results have been returned. Please change search criteria."
         - "The requested hearing is not an actual hearing."
-        - "The search criteria is too broad. Please refine your search."
-        - "The request is invalid. Please check the request and try again."
-      x-enum-varnames: [ HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL, CRITERIA_TOO_BROAD, INVALID_REQUEST ]
+      x-enum-varnames: [ HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL ]

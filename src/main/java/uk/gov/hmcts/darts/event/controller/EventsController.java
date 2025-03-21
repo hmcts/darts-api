@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.model.PostAdminSearchRequest;
@@ -71,7 +70,7 @@ public class EventsController implements EventApi {
     private final DataAnonymisationService dataAnonymisationService;
     private final UserIdentity userIdentity;
     private final AdminSearchRequestValidator adminSearchRequestValidator;
-    
+
     @Value("${darts.event-obfuscation.enabled}")
     private final boolean eventObfuscationEnabled;
 
@@ -182,9 +181,7 @@ public class EventsController implements EventApi {
                                                  .courthouseIds(adminEventSearch.getCourthouseIds())
                                                  .hearingStartAt(adminEventSearch.getHearingStartAt())
                                                  .hearingEndAt(adminEventSearch.getHearingEndAt())
-                                                 .build(),
-                                             CaseApiError.CRITERIA_TOO_BROAD,
-                                             CaseApiError.INVALID_REQUEST);
+                                                 .build());
         var adminSearchEventResponse = eventSearchService.searchForEvents(adminEventSearch);
         return new ResponseEntity<>(adminSearchEventResponse, HttpStatus.OK);
     }
