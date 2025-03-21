@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Profile;
 public class SimpleCacheConfig {
 
     @Bean
+    @Primary
     public CacheManager cacheManager() {
         log.debug("Using in memory caching ...");
         return new ConcurrentMapCacheManager();

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.CacheManager;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -30,11 +32,20 @@ public class TestBase {
     @Autowired
     protected TransactionalUtil transactionalUtil;
 
+    @Autowired
+    @Qualifier("inMemoryCacheManager")
+    private CacheManager inMemoryCacheManager;
+
     @BeforeEach
-    void clearDb() {
+    void beforeEach() {
         dartsDatabase.clearDb();
+        evictCache();
     }
 
+    protected void evictCache() {
+        inMemoryCacheManager.getCacheNames().stream()
+            .forEach(cacheName -> inMemoryCacheManager.getCache(cacheName).clear());
+    }
 
     public void assertStandardErrorJsonResponse(MvcResult mvcResult, DartsApiError dartsApiError) throws UnsupportedEncodingException {
         String expectedJson = """

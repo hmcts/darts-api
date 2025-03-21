@@ -63,7 +63,6 @@ class TokenValidatorImplTest {
     @BeforeEach
     void setUp() {
         keyPair = createKeys();
-
         JWKSource<SecurityContext> testJwkSource = createTestJwkSource();
 
         when(authenticationProviderConfiguration.getJwkSource()).thenReturn(testJwkSource);
@@ -71,7 +70,7 @@ class TokenValidatorImplTest {
         when(authenticationConfiguration.getIssuerUri()).thenReturn(VALID_ISSUER_VALUE);
         when(authenticationConfiguration.getClientId()).thenReturn(VALID_AUDIENCE_VALUE);
 
-        tokenValidator = new TokenValidatorImpl();
+        tokenValidator = new TokenValidatorImpl(new JwtProcessorCache());
     }
 
     @Test
