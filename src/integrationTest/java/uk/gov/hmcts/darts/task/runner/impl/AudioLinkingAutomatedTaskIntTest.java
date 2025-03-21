@@ -24,7 +24,7 @@ import static uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType.AUDIO_LI
 
 @DisplayName("AudioLinkingAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
+class AudioLinkingAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     private final AudioLinkingAutomatedTask audioLinkingAutomatedTask;
     private static int caseNumberIterator;
@@ -62,7 +62,6 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
 
         audioLinkingAutomatedTask.preRunTask();
         audioLinkingAutomatedTask.run();
-
 
         transactionalUtil.executeInTransaction(() -> {
             assertEvent(event1, EventStatus.AUDIO_LINKED);
@@ -114,14 +113,12 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
         event.setTimestamp(timestamp);
         return dartsDatabase.getEventRepository().save(event);
     }
-
-
+    
     private void assertEvent(EventEntity event, EventStatus eventStatus) {
         EventEntity actualEvent = dartsDatabase.getEventRepository().getReferenceById(event.getId());
         assertThat(actualEvent.getEventStatus()).isEqualTo(eventStatus.getStatusNumber());
         assertThat(actualEvent.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
     }
-
 
     private HearingEntity createHearing() {
         return dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", String.valueOf(caseNumberIterator++), LocalDateTime.now());
