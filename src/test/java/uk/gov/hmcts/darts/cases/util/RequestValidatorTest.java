@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,6 +32,22 @@ class RequestValidatorTest {
         );
         assertEquals(
             "No search criteria has been specified, please add at least 1 criteria to search for.",
+            exception.getMessage()
+        );
+    }
+
+    @Test
+    void validate_shouldRaiseNotEnoughCriteriaException_whenOnlyCourthouseIdsSpecified() {
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouseIds(List.of(1))
+            .build();
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> RequestValidator.validate(request)
+        );
+        assertEquals(
+            "Search criteria is too broad, please add at least 1 more criteria to search for.",
             exception.getMessage()
         );
     }
