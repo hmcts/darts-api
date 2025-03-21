@@ -772,7 +772,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
-
+    
     private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse) {
         var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(APPROVER, courthouse);
         securityGroup.setGlobalAccess(false);
