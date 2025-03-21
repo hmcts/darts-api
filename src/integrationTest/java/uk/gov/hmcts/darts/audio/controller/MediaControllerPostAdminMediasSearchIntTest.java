@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,11 +37,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
     "darts.audio.admin-search.max-results=5"
 })
+@Slf4j
 class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/medias/search";
@@ -241,14 +244,38 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
+    void adminSearchForMedia_ShouldReturnResults_WhenDatesAreStartAndEndHearingDatesExactlyOneYearOverLeapYear() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
+        request.setCourthouseIds(List.of(courthouse2.getId()));
+        request.setCaseNumber("caseNumber3");
+        request.setHearingStartAt(LocalDate.of(2020, 01, 11));
+        request.setHearingEndAt(LocalDate.of(2021, 01, 11));
+
+        // run the test
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        log.info("actualResponse: {}", actualResponse);
+        String expectedResponse = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
+            "tests/media/MediaControllerPostAdminMediasSearchIntTest/expectedResultOneYearLeapYear.json"));
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
     void adminSearchForMedia_ShouldThrowException_WhenDatesAreStartAndEndHearingDatesGreaterThanOneYear() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
         request.setCourthouseIds(List.of(courthouse1.getId(), courthouse2.getId()));
         request.setCaseNumber("caseNumber1");
-        request.setHearingStartAt(LocalDate.of(2020, 10, 11));
-        request.setHearingEndAt(LocalDate.of(2024, 10, 11));
+        request.setHearingStartAt(LocalDate.of(2020, 01, 11));
+        request.setHearingEndAt(LocalDate.of(2021, 01, 12));
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -341,7 +368,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void adminSearchForMedia_ShouldReturnNoMatches() throws Exception {
+    void adminSearchForMedia_ShouldReturnNoMatches_WhenNoDataFound() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
@@ -415,7 +442,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     }
 
     @Test
-    void adminSearchForMedia_ShouldReturNoPermissionsException() throws Exception {
+    void adminSearchForMedia_ShouldReturnNoPermissionsException() throws Exception {
         PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
         request.setCourthouseIds(new ArrayList<>());
 

@@ -58,7 +58,7 @@ class EventSearchControllerTest extends IntegrationBase {
     }
 
     @Test
-    void returnsErrorIfTooManyResults() throws Exception {
+    void adminEventSearch_ShouldReturnErrorTooManyResults() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         eventsGivensBuilder.persistedEvents(6);
 
@@ -75,7 +75,7 @@ class EventSearchControllerTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EnumSource.Mode.EXCLUDE)
-    void forbidsNonSuperUsers(SecurityRoleEnum role) throws Exception {
+    void adminEventSearch_ShouldForbidNonSuperUsers(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
@@ -87,7 +87,7 @@ class EventSearchControllerTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EnumSource.Mode.INCLUDE)
-    void allowsSuperUsers() throws Exception {
+    void adminEventSearch_ShouldAllowSuperUsers() throws Exception {
         List<EventEntity> entity = eventsGivensBuilder.persistedEventsWithHearings(1, 1);
         CourtCaseEntity courtCaseEntity = entity.getFirst().getHearingEntities().getFirst().getCourtCase();
         courtCaseEntity.setDataAnonymisedTs(now());
@@ -105,7 +105,7 @@ class EventSearchControllerTest extends IntegrationBase {
     }
 
     @Test
-    void returnsAllFieldsCorrectly() throws Exception {
+    void adminEventSearch_ShouldReturnOK_WithCaseNumber() throws Exception {
         int eventHearingsCount = 2;
         int eventsCount = 2;
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);

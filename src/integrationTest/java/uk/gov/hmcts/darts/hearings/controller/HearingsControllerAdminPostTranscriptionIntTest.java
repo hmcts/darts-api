@@ -61,7 +61,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
 
 
     @Test
-    void testHearingSearchForAllResultsOnMaximumResultBoundary() throws Exception {
+    void adminHearingSearch_ShouldReturnAllResultsOnMaximumResultBoundary() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -100,7 +100,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForAllResultsNoCriteria() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WhenNoCriteria() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -127,7 +127,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForAllResultSWithCourthouseEmptyArray() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithCourthouseEmptyArray() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -156,7 +156,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForResultWithCaseNumber() throws Exception {
+    void adminHearingSearch_ShouldReturnResult_WithCaseNumber() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -187,7 +187,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForResultWithCourtroomName() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithCourtroomName() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -217,7 +217,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForResultWithDateRange() throws Exception {
+    void adminSearchForHearing_ShouldThrowException_WithDateRange() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -248,7 +248,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForResultsWithStartDate() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithJustStartDate() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -281,7 +281,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForResultsWithEndDate() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithJustEndDate() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -313,7 +313,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForResultWithCourthouseIds() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithCourthouseIds() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -346,7 +346,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchResultsExceedMaximumResults() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WhenSearchResultsExceedMaximumResults() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(10);
@@ -375,7 +375,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testSearchForHearingAuthorisationProblem() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithAuthorisationProblem() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.DAR_PC);
 
         HearingsSearchRequest searchRequest = new HearingsSearchRequest();
