@@ -39,6 +39,8 @@ import uk.gov.hmcts.darts.audio.validation.AddAudioMetaDataValidator;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.model.PostAdminSearchRequest;
+import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -76,6 +78,7 @@ public class AudioController implements AudioApi {
     private final MediaRequestService mediaRequestService;
     private final TransformedMediaMapper transformedMediaMapper;
     private final AdminMediaService adminMediaService;
+    private final AdminSearchRequestValidator adminSearchRequestValidator;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -185,6 +188,13 @@ public class AudioController implements AudioApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<List<PostAdminMediasSearchResponseItem>> adminMediasSearchPost(PostAdminMediasSearchRequest adminMediasSearchRequest) {
+        adminSearchRequestValidator.validate(PostAdminSearchRequest.builder()
+                                                 .caseNumber(adminMediasSearchRequest.getCaseNumber())
+                                                 .courthouseIds(adminMediasSearchRequest.getCourthouseIds())
+                                                 .hearingStartAt(adminMediasSearchRequest.getHearingStartAt())
+                                                 .hearingEndAt(adminMediasSearchRequest.getHearingEndAt())
+                                                 .build());
+
         return new ResponseEntity<>(adminMediaService.performAdminMediasSearchPost(adminMediasSearchRequest), HttpStatus.OK);
     }
 

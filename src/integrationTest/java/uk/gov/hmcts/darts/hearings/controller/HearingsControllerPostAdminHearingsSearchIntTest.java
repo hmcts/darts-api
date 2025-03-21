@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.hearings.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -29,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
+class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/hearings/search";
 
@@ -59,7 +61,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
 
 
     @Test
-    void testHearingSearchForAllResultsOnMaximumResultBoundary() throws Exception {
+    void adminHearingSearch_ShouldReturnAllResultsOnMaximumResultBoundary() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -98,7 +100,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForAllResultsNoCriteria() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WhenNoCriteria() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -109,27 +111,23 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(searchRequest)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        HearingsSearchResponse[] actualResponse
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), HearingsSearchResponse[].class);
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
+            """;
 
-        assertEquals(hearingEntityList.size(), actualResponse.length);
-        for (int i = 0; i < hearingEntityList.size(); i++) {
-            assertEquals(hearingEntityList.get(i).getHearingDate(), actualResponse[i].getHearingDate());
-            assertEquals(hearingEntityList.get(i).getId(), actualResponse[i].getId());
-            assertEquals(hearingEntityList.get(i).getCourtroom().getCourthouse().getId(), actualResponse[i].getCourthouse().getId());
-            assertEquals(hearingEntityList.get(i).getCourtroom().getCourthouse().getDisplayName(), actualResponse[i].getCourthouse().getDisplayName());
-            assertEquals(hearingEntityList.get(i).getCourtroom().getId(), actualResponse[i].getCourtroom().getId());
-            assertEquals(hearingEntityList.get(i).getCourtroom().getName(), actualResponse[i].getCourtroom().getName());
-            assertEquals(hearingEntityList.get(i).getCourtCase().getId(), actualResponse[i].getCase().getId());
-            assertEquals(hearingEntityList.get(i).getCourtCase().getCaseNumber(), actualResponse[i].getCase().getCaseNumber());
-        }
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void testHearingSearchForAllResultSWithCourthouseEmptyArray() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithCourthouseEmptyArray() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -142,27 +140,23 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(searchRequest)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        HearingsSearchResponse[] actualResponse
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), HearingsSearchResponse[].class);
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
+            """;
 
-        assertEquals(hearingEntityList.size(), actualResponse.length);
-        for (int i = 0; i < hearingEntityList.size(); i++) {
-            assertEquals(hearingEntityList.get(i).getHearingDate(), actualResponse[i].getHearingDate());
-            assertEquals(hearingEntityList.get(i).getId(), actualResponse[i].getId());
-            assertEquals(hearingEntityList.get(i).getCourtroom().getCourthouse().getId(), actualResponse[i].getCourthouse().getId());
-            assertEquals(hearingEntityList.get(i).getCourtroom().getCourthouse().getDisplayName(), actualResponse[i].getCourthouse().getDisplayName());
-            assertEquals(hearingEntityList.get(i).getCourtroom().getId(), actualResponse[i].getCourtroom().getId());
-            assertEquals(hearingEntityList.get(i).getCourtroom().getName(), actualResponse[i].getCourtroom().getName());
-            assertEquals(hearingEntityList.get(i).getCourtCase().getId(), actualResponse[i].getCase().getId());
-            assertEquals(hearingEntityList.get(i).getCourtCase().getCaseNumber(), actualResponse[i].getCase().getCaseNumber());
-        }
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void testHearingSearchForResultWithCaseNumber() throws Exception {
+    void adminHearingSearch_ShouldReturnResult_WithCaseNumber() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -193,7 +187,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForResultWithCourtroomName() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithCourtroomName() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -207,24 +201,23 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(searchRequest)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        HearingsSearchResponse[] actualResponse
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), HearingsSearchResponse[].class);
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
+            """;
 
-        assertEquals(expectedSearchResult.getHearingDate(), actualResponse[0].getHearingDate());
-        assertEquals(expectedSearchResult.getId(), actualResponse[0].getId());
-        assertEquals(expectedSearchResult.getCourtroom().getCourthouse().getId(), actualResponse[0].getCourthouse().getId());
-        assertEquals(expectedSearchResult.getCourtroom().getCourthouse().getDisplayName(), actualResponse[0].getCourthouse().getDisplayName());
-        assertEquals(expectedSearchResult.getCourtroom().getId(), actualResponse[0].getCourtroom().getId());
-        assertEquals(expectedSearchResult.getCourtroom().getName(), actualResponse[0].getCourtroom().getName());
-        assertEquals(expectedSearchResult.getCourtCase().getId(), actualResponse[0].getCase().getId());
-        assertEquals(expectedSearchResult.getCourtCase().getCaseNumber(), actualResponse[0].getCase().getCaseNumber());
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void testHearingSearchForResultWithDateRange() throws Exception {
+    void adminSearchForHearing_ShouldThrowException_WithDateRange() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -239,24 +232,23 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(searchRequest)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        HearingsSearchResponse[] actualResponse
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), HearingsSearchResponse[].class);
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
+            """;
 
-        assertEquals(expectedSearchResult.getHearingDate(), actualResponse[0].getHearingDate());
-        assertEquals(expectedSearchResult.getId(), actualResponse[0].getId());
-        assertEquals(expectedSearchResult.getCourtroom().getCourthouse().getId(), actualResponse[0].getCourthouse().getId());
-        assertEquals(expectedSearchResult.getCourtroom().getCourthouse().getDisplayName(), actualResponse[0].getCourthouse().getDisplayName());
-        assertEquals(expectedSearchResult.getCourtroom().getId(), actualResponse[0].getCourtroom().getId());
-        assertEquals(expectedSearchResult.getCourtroom().getName(), actualResponse[0].getCourtroom().getName());
-        assertEquals(expectedSearchResult.getCourtCase().getId(), actualResponse[0].getCase().getId());
-        assertEquals(expectedSearchResult.getCourtCase().getCaseNumber(), actualResponse[0].getCase().getCaseNumber());
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void testHearingSearchForResultsWithStartDate() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithJustStartDate() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -273,27 +265,23 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(searchRequest)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        HearingsSearchResponse[] actualResponse
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), HearingsSearchResponse[].class);
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
+            """;
 
-        assertEquals(expectedHearing.size(), actualResponse.length);
-        for (int i = 0; i < expectedHearing.size(); i++) {
-            assertEquals(expectedHearing.get(i).getHearingDate(), actualResponse[i].getHearingDate());
-            assertEquals(expectedHearing.get(i).getId(), actualResponse[i].getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getCourthouse().getId(), actualResponse[i].getCourthouse().getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getCourthouse().getDisplayName(), actualResponse[i].getCourthouse().getDisplayName());
-            assertEquals(expectedHearing.get(i).getCourtroom().getId(), actualResponse[i].getCourtroom().getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getName(), actualResponse[i].getCourtroom().getName());
-            assertEquals(expectedHearing.get(i).getCourtCase().getId(), actualResponse[i].getCase().getId());
-            assertEquals(expectedHearing.get(i).getCourtCase().getCaseNumber(), actualResponse[i].getCase().getCaseNumber());
-        }
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void testHearingSearchForResultsWithEndDate() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithJustEndDate() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -309,27 +297,23 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(searchRequest)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        HearingsSearchResponse[] actualResponse
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), HearingsSearchResponse[].class);
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
+            """;
 
-        assertEquals(expectedHearing.size(), actualResponse.length);
-        for (int i = 0; i < expectedHearing.size(); i++) {
-            assertEquals(expectedHearing.get(i).getHearingDate(), actualResponse[i].getHearingDate());
-            assertEquals(expectedHearing.get(i).getId(), actualResponse[i].getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getCourthouse().getId(), actualResponse[i].getCourthouse().getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getCourthouse().getDisplayName(), actualResponse[i].getCourthouse().getDisplayName());
-            assertEquals(expectedHearing.get(i).getCourtroom().getId(), actualResponse[i].getCourtroom().getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getName(), actualResponse[i].getCourtroom().getName());
-            assertEquals(expectedHearing.get(i).getCourtCase().getId(), actualResponse[i].getCase().getId());
-            assertEquals(expectedHearing.get(i).getCourtCase().getCaseNumber(), actualResponse[i].getCase().getCaseNumber());
-        }
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void testHearingSearchForResultWithCourthouseIds() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithCourthouseIds() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
@@ -346,27 +330,23 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(searchRequest)))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().is4xxClientError())
             .andReturn();
 
-        HearingsSearchResponse[] actualResponse
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), HearingsSearchResponse[].class);
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
+            """;
 
-        assertEquals(expectedHearing.size(), actualResponse.length);
-        for (int i = 0; i < expectedHearing.size(); i++) {
-            assertEquals(expectedHearing.get(i).getHearingDate(), actualResponse[i].getHearingDate());
-            assertEquals(expectedHearing.get(i).getId(), actualResponse[i].getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getCourthouse().getId(), actualResponse[i].getCourthouse().getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getCourthouse().getDisplayName(), actualResponse[i].getCourthouse().getDisplayName());
-            assertEquals(expectedHearing.get(i).getCourtroom().getId(), actualResponse[i].getCourtroom().getId());
-            assertEquals(expectedHearing.get(i).getCourtroom().getName(), actualResponse[i].getCourtroom().getName());
-            assertEquals(expectedHearing.get(i).getCourtCase().getId(), actualResponse[i].getCase().getId());
-            assertEquals(expectedHearing.get(i).getCourtCase().getCaseNumber(), actualResponse[i].getCase().getCaseNumber());
-        }
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void testHearingSearchResultsExceedMaximumResults() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WhenSearchResultsExceedMaximumResults() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(10);
@@ -378,6 +358,8 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
                                                hearingEntityList.get(3).getCourtroom().getCourthouse().getId(),
                                                hearingEntityList.get(4).getCourtroom().getCourthouse().getId(),
                                                hearingEntityList.get(5).getCourtroom().getCourthouse().getId()));
+        searchRequest.setHearingStartAt(hearingEntityList.getFirst().getHearingDate());
+        searchRequest.setHearingEndAt(hearingEntityList.getLast().getHearingDate());
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
@@ -393,7 +375,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testSearchForHearingAuthorisationProblem() throws Exception {
+    void adminHearingSearch_ShouldThrowException_WithAuthorisationProblem() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.DAR_PC);
 
         HearingsSearchRequest searchRequest = new HearingsSearchRequest();

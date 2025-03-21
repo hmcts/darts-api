@@ -29,6 +29,8 @@ import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.model.PostAdminSearchRequest;
+import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DataUtil;
@@ -61,6 +63,7 @@ public class CaseController implements CasesApi {
     private final CaseService caseService;
 
     private final LogApi logApi;
+    private final AdminSearchRequestValidator adminSearchRequestValidator;
 
     @Value("${darts.log.cases.defendant-name-char-limit: 600}")
     private int limit;
@@ -185,6 +188,12 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<List<AdminCasesSearchResponseItem>> adminCasesSearchPost(AdminCasesSearchRequest adminCasesSearchRequest) {
+        adminSearchRequestValidator.validate(PostAdminSearchRequest.builder()
+                                                 .caseNumber(adminCasesSearchRequest.getCaseNumber())
+                                                 .courthouseIds(adminCasesSearchRequest.getCourthouseIds())
+                                                 .hearingStartAt(adminCasesSearchRequest.getHearingStartAt())
+                                                 .hearingEndAt(adminCasesSearchRequest.getHearingEndAt())
+                                                 .build());
         validateUppercase(null, adminCasesSearchRequest.getCourtroomName());
         return new ResponseEntity<>(caseService.adminCaseSearch(adminCasesSearchRequest), HttpStatus.OK);
     }

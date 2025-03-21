@@ -1,0 +1,47 @@
+[
+  {
+    "id": 28,
+    "courthouse": {
+      "id": 2,
+      "display_name": "COURTHOUSE2"
+    },
+    "courtroom": {
+      "id": 3,
+      "name": "COURTROOM2"
+    },
+    "start_at": "2020-10-12T12:00:03Z",
+    "end_at": "2020-10-12T13:00:03Z",
+    "channel": 1,
+    "is_hidden": false
+  },
+  {
+    "id": 27,
+    "courthouse": {
+      "id": 2,
+      "display_name": "COURTHOUSE2"
+    },
+    "courtroom": {
+      "id": 3,
+      "name": "COURTROOM2"
+    },
+    "start_at": "2020-10-12T12:00:02Z",
+    "end_at": "2020-10-12T13:00:02Z",
+    "channel": 1,
+    "is_hidden": false
+  },
+  {
+    "id": 26,
+    "courthouse": {
+      "id": 2,
+      "display_name": "COURTHOUSE2"
+    },
+    "courtroom": {
+      "id": 3,
+      "name": "COURTROOM2"
+    },
+    "start_at": "2020-10-12T12:00:01Z",
+    "end_at": "2020-10-12T13:00:01Z",
+    "channel": 1,
+    "is_hidden": false
+  }
+]
