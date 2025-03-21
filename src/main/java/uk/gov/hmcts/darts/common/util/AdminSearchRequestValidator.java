@@ -39,10 +39,9 @@ public class AdminSearchRequestValidator {
                 throw new DartsApiException(invalidRequest, "The hearing start date cannot be after the end date.");
             }
 
-            Period hearingPeriod = Period.between(hearingStart, hearingEnd);
             Period hearingDatesMaxSearch = Period.parse(hearingDatesMaxSearchPeriod);
 
-            if (hearingPeriod.toTotalMonths() > hearingDatesMaxSearch.toTotalMonths()) {
+            if (hearingStart.plus(hearingDatesMaxSearch).compareTo(hearingEnd) < 0) {
                 throw new DartsApiException(
                     invalidRequest, "The time between the start and end date cannot be more than " + hearingDatesMaxSearch.toTotalMonths() + " months");
             }
