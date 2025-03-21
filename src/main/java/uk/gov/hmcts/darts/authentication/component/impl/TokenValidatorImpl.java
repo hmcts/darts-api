@@ -4,7 +4,6 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.proc.BadJOSEException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authentication.component.TokenValidator;
 import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
@@ -14,7 +13,7 @@ import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 import java.text.ParseException;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 @Slf4j
 public class TokenValidatorImpl implements TokenValidator {
 
