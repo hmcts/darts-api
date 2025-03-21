@@ -9,10 +9,10 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.rangeClosed;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class ProsecutorTestData {
+public final class ProsecutorTestData {
 
     private ProsecutorTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static ProsecutorEntity someMinimalProsecutor() {

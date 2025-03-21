@@ -6,13 +6,13 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestCaseDocumentEntity;
 
 import java.time.OffsetDateTime;
 
-public class CaseDocumentTestData implements Persistable<TestCaseDocumentEntity.TestCaseDocumentEntityBuilderRetrieve,
-    CaseDocumentEntity, TestCaseDocumentEntity.TestCaseDocumentEntityBuilder>  {
+public final class CaseDocumentTestData implements Persistable<TestCaseDocumentEntity.TestCaseDocumentEntityBuilderRetrieve,
+    CaseDocumentEntity, TestCaseDocumentEntity.TestCaseDocumentEntityBuilder> {
 
-    private CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalCase();
+    private final CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalCase();
 
     CaseDocumentTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     @Override

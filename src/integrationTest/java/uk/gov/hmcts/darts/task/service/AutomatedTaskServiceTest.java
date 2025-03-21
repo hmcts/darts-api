@@ -7,8 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
@@ -17,6 +15,8 @@ import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
@@ -60,8 +60,8 @@ import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
+import uk.gov.hmcts.darts.task.model.AutomatedTaskTrigger;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRpoPollingAutomatedTask;
@@ -91,13 +91,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
@@ -130,7 +126,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     private CloseOldCasesProcessor closeOldCasesProcessor;
     @Autowired
     private DailyListService dailyListService;
-    @SpyBean
+    @MockitoSpyBean
     private CaseRepository caseRepository;
     @Autowired
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
@@ -156,7 +152,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
     private UserAccountEntity testUser;
 
@@ -182,7 +178,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
-        log.info("Number of scheduled tasks " + scheduledTasks.size());
+        log.info("Number of scheduled tasks {}", scheduledTasks.size());
         scheduledTasks.forEach(
             scheduledTask -> {
                 Task task = scheduledTask.getTask();
@@ -192,7 +188,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                     );
                 } else if (task instanceof TriggerTask triggerTask) {
 
-                    if (triggerTask.getRunnable() instanceof AbstractLockableAutomatedTask automatedTask) {
+                    if (triggerTask instanceof AutomatedTaskTrigger automatedTaskTrigger) {
+                        AutomatedTask automatedTask = automatedTaskTrigger.getAutomatedTask();
                         log.info("TriggerTask name: {}, cron expression: {}",
                                  automatedTask.getTaskName(), automatedTask.getLastCronExpression());
                     } else {
@@ -208,58 +205,10 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                              fixedDelayTask.getInitialDelayDuration(), fixedDelayTask.getIntervalDuration()
                     );
                 } else {
-                    log.info("Unknown task type: " + task);
+                    log.info("Unknown task type: {}", task);
                 }
             }
         );
-    }
-
-    @Test
-    void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
-        GenerateCaseDocumentAutomatedTask automatedTask
-            = new GenerateCaseDocumentAutomatedTask(
-            automatedTaskRepository, mock(GenerateCaseDocumentAutomatedTaskConfig.class), logApi, lockService,
-            generateCaseDocumentProcessor
-        );
-        doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
-
-        automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), true, "*/7 * * * * *");
-
-        waitForMax10SecondsWithOneSecondPoll(() -> {
-            AutomatedTaskStatus newAutomatedTaskStatus = automatedTaskService.getAutomatedTaskStatus(automatedTask.getTaskName());
-            return newAutomatedTaskStatus == FAILED;
-        });
-    }
-
-    @Test
-    void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
-        ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
-        );
-
-        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-
-        // this may have transitioned to complete. Let's check the history to ensure that
-        // we started with NOT_STARTED state
-        assertTrue(automatedTask.hasTransitionState(NOT_STARTED));
-
-        boolean result1 = automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(
-            automatedTask.getTaskName(), true, "*/7 * * * * *");
-        assertTrue(result1);
-
-        waitForMax10SecondsWithOneSecondPoll(() -> {
-            AutomatedTaskStatus newAutomatedTaskStatus = automatedTaskService.getAutomatedTaskStatus(automatedTask.getTaskName());
-            return COMPLETED.equals(newAutomatedTaskStatus);
-        });
-
-        boolean result2 = automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(
-            originalAutomatedTaskEntity.get().getTaskName(),
-            true,
-            originalAutomatedTaskEntity.get().getCronExpression()
-        );
-        assertTrue(result2);
     }
 
     @Test
@@ -1036,7 +985,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskInboundTranscriptionAndAnnotationDeleterAutomatedTask() throws Exception {
+    void givenConfiguredTaskInboundTranscriptionAndAnnotationDeleterAutomatedTask() {
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 
@@ -1051,7 +1000,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() throws Exception {
+    void givenConfiguredTaskUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() {
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 

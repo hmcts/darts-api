@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
@@ -74,7 +75,7 @@ public class CaseDocumentEntity extends CreatedModifiedBaseEntity
     private OffsetDateTime retainUntilTs;
 
     @Column(name = "ret_conf_score")
-    private Integer retConfScore;
+    private RetentionConfidenceScoreEnum retConfScore;
 
     @Column(name = "ret_conf_reason")
     private String retConfReason;

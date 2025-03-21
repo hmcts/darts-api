@@ -76,6 +76,7 @@ class AuthorisationUnitOfWorkTest {
 
             @Override
             public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
+                // Empty method
             }
 
             @Override
@@ -85,7 +86,7 @@ class AuthorisationUnitOfWorkTest {
 
             @Override
             public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
-
+                // Empty method
             }
         };
 

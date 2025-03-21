@@ -51,18 +51,18 @@ class GetAnnotationsResponseMapperTest {
         List<AnnotationEntity> annotationList = List.of(annotationEntity1, annotationEntity2);
         List<Annotation> annotations = GetAnnotationsResponseMapper.mapToAnnotations(annotationList, hearing.getId());
 
-        Annotation annotation1 = annotations.get(0);
+        Annotation annotation1 = annotations.getFirst();
         assertEquals(1001, annotation1.getAnnotationId());
         assertEquals(102, annotation1.getHearingId());
         assertEquals(LocalDate.of(2020, 10, 10), annotation1.getHearingDate());
         assertEquals(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC), annotation1.getAnnotationTs());
         assertEquals("annotationText", annotation1.getAnnotationText());
         assertEquals(3, annotation1.getAnnotationDocuments().size());
-        assertEquals(11, annotation1.getAnnotationDocuments().get(0).getAnnotationDocumentId());
-        assertEquals("filename11", annotation1.getAnnotationDocuments().get(0).getFileName());
-        assertEquals("filetype11", annotation1.getAnnotationDocuments().get(0).getFileType());
-        assertEquals("userFullName11", annotation1.getAnnotationDocuments().get(0).getUploadedBy());
-        assertEquals(OffsetDateTime.of(2020, 10, 10, 10, 11, 0, 0, ZoneOffset.UTC), annotation1.getAnnotationDocuments().get(0).getUploadedTs());
+        assertEquals(11, annotation1.getAnnotationDocuments().getFirst().getAnnotationDocumentId());
+        assertEquals("filename11", annotation1.getAnnotationDocuments().getFirst().getFileName());
+        assertEquals("filetype11", annotation1.getAnnotationDocuments().getFirst().getFileType());
+        assertEquals("userFullName11", annotation1.getAnnotationDocuments().getFirst().getUploadedBy());
+        assertEquals(OffsetDateTime.of(2020, 10, 10, 10, 11, 0, 0, ZoneOffset.UTC), annotation1.getAnnotationDocuments().getFirst().getUploadedTs());
 
         Annotation annotation2 = annotations.get(1);
         assertEquals(1002, annotation2.getAnnotationId());
@@ -71,13 +71,13 @@ class GetAnnotationsResponseMapperTest {
         assertEquals(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC), annotation2.getAnnotationTs());
         assertEquals("annotationText", annotation2.getAnnotationText());
         assertEquals(3, annotation2.getAnnotationDocuments().size());
-        assertEquals(21, annotation2.getAnnotationDocuments().get(0).getAnnotationDocumentId());
-        assertEquals("filename21", annotation2.getAnnotationDocuments().get(0).getFileName());
-        assertEquals("filetype21", annotation2.getAnnotationDocuments().get(0).getFileType());
-        assertEquals("userFullName21", annotation2.getAnnotationDocuments().get(0).getUploadedBy());
+        assertEquals(21, annotation2.getAnnotationDocuments().getFirst().getAnnotationDocumentId());
+        assertEquals("filename21", annotation2.getAnnotationDocuments().getFirst().getFileName());
+        assertEquals("filetype21", annotation2.getAnnotationDocuments().getFirst().getFileType());
+        assertEquals("userFullName21", annotation2.getAnnotationDocuments().getFirst().getUploadedBy());
         assertEquals("userFullName22", annotation2.getAnnotationDocuments().get(1).getUploadedBy());
         assertEquals("userFullName23", annotation2.getAnnotationDocuments().get(2).getUploadedBy());
-        assertEquals(OffsetDateTime.of(2020, 10, 10, 10, 21, 0, 0, ZoneOffset.UTC), annotation2.getAnnotationDocuments().get(0).getUploadedTs());
+        assertEquals(OffsetDateTime.of(2020, 10, 10, 10, 21, 0, 0, ZoneOffset.UTC), annotation2.getAnnotationDocuments().getFirst().getUploadedTs());
     }
 
     private AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {

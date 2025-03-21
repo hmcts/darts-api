@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @ToString()
-public abstract class BaseRpoResponse {
+public class BaseRpoResponse {
 
     Integer itemsCount;
     Integer status;

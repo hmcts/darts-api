@@ -50,7 +50,8 @@ class UserEmailValidatorTest {
         when(userAccountRepository.findByEmailAddressIgnoreCaseAndActive(EXISTING_EMAIL_ADDRESS, true))
             .thenReturn(List.of(someUserAccountWithEmail(EXISTING_EMAIL_ADDRESS)));
 
-        assertThatThrownBy(() -> userEmailValidator.validate(someUserWithEmail(EXISTING_EMAIL_ADDRESS)))
+        User user = someUserWithEmail(EXISTING_EMAIL_ADDRESS);
+        assertThatThrownBy(() -> userEmailValidator.validate(user))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", DUPLICATE_EMAIL)
             .hasFieldOrPropertyWithValue("detail", String.format("User with email %s already exists", EXISTING_EMAIL_ADDRESS));
@@ -59,7 +60,8 @@ class UserEmailValidatorTest {
     @Test
     void throwsExceptionIfEmailAddressHasNoDomain() {
 
-        assertThatThrownBy(() -> userEmailValidator.validate(someUserWithEmail(EMAIL_ADDRESS_NO_DOMAIN)))
+        User user = someUserWithEmail(EMAIL_ADDRESS_NO_DOMAIN);
+        assertThatThrownBy(() -> userEmailValidator.validate(user))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", INVALID_EMAIL_FORMAT)
             .hasFieldOrPropertyWithValue("detail", String.format("Invalid email format {%s}", EMAIL_ADDRESS_NO_DOMAIN));
@@ -68,7 +70,8 @@ class UserEmailValidatorTest {
     @Test
     void throwsExceptionIfEmailAddressHasNoUser() {
 
-        assertThatThrownBy(() -> userEmailValidator.validate(someUserWithEmail(EMAIL_ADDRESS_NO_USER)))
+        User user = someUserWithEmail(EMAIL_ADDRESS_NO_USER);
+        assertThatThrownBy(() -> userEmailValidator.validate(user))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", INVALID_EMAIL_FORMAT)
             .hasFieldOrPropertyWithValue("detail", String.format("Invalid email format {%s}", EMAIL_ADDRESS_NO_USER));

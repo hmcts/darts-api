@@ -19,11 +19,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.util.UUID;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -43,33 +39,27 @@ public class UnstructuredDataHelper {
     public boolean createUnstructuredDataFromEod(
         ExternalObjectDirectoryEntity eodEntityToDelete,
         ExternalObjectDirectoryEntity eodEntity,
-        InputStream inputStream,
-        File targetFile) {
+        InputStream inputStream) {
         boolean returnVal = true;
-        UUID uuid = saveToUnstructuredDataStore(eodEntity, inputStream);
-        if (uuid == null) {
+        String blobId = saveToUnstructuredDataStore(eodEntity, inputStream);
+        if (blobId == null) {
             returnVal = false;
         } else {
-            saveToDatabase(eodEntity, uuid);
+            saveToDatabase(eodEntity, blobId);
             removeFromDatabase(eodEntityToDelete);
-        }
-        try {
-            Files.delete(targetFile.toPath());
-        } catch (IOException e) {
-            log.error("Unable to delete temporary file {}", targetFile.getPath(), e);
         }
         return returnVal;
     }
 
-    private UUID saveToUnstructuredDataStore(ExternalObjectDirectoryEntity eodEntity, InputStream inputStream) {
-        UUID uuid = null;
+    private String saveToUnstructuredDataStore(ExternalObjectDirectoryEntity eodEntity, InputStream inputStream) {
+        String blobId = null;
         try {
-            uuid = dataManagementService.saveBlobData(dataManagementConfiguration.getUnstructuredContainerName(), inputStream)
+            blobId = dataManagementService.saveBlobData(dataManagementConfiguration.getUnstructuredContainerName(), inputStream)
                 .getBlobName();
             log.debug(
                 "Completed upload to unstructured data store for EOD {}. Successfully uploaded with blobId: {}",
                 eodEntity.getId(),
-                uuid
+                blobId
             );
         } catch (Exception e) {
             log.error(
@@ -78,10 +68,10 @@ public class UnstructuredDataHelper {
                 e
             );
         }
-        return uuid;
+        return blobId;
     }
 
-    private void saveToDatabase(ExternalObjectDirectoryEntity eod, UUID uuid) {
+    private void saveToDatabase(ExternalObjectDirectoryEntity eod, String uuid) {
         ExternalObjectDirectoryEntity eodUnstructured = new ExternalObjectDirectoryEntity();
 
         MediaEntity mediaEntity = eod.getMedia();

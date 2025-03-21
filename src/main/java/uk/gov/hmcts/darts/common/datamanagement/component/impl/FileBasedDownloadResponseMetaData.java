@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.FileUrlResource;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @Slf4j
 public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData {
 
+    @Getter
     private File fileToBeDownloadedTo;
 
     /**
@@ -82,9 +84,11 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         private final InputStream inputStream;
 
         public FileInputStreamWrapper(InputStream inputStream) {
+            super();
             this.inputStream = inputStream;
         }
 
+        @Override
         public int read() throws IOException {
             return inputStream.read();
         }

@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 
 import java.util.List;
@@ -15,15 +14,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ExternalObjectDirectoryRepositoryTest {
 
     @Test
     void findEodsForTransfer_mediaItemsArelessThanLimit_shouldReturnBothMediaAndNonMedia() {
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        ExternalObjectDirectoryEntity mediaEod1 = new ExternalObjectDirectoryEntity();
-        ExternalObjectDirectoryEntity mediaEod2 = new ExternalObjectDirectoryEntity();
-        ExternalObjectDirectoryEntity nonMediaEod1 = new ExternalObjectDirectoryEntity();
+        int mediaEod1 = 1;
+        int mediaEod2 = 2;
+        int nonMediaEod1 = 3;
         doReturn(List.of(mediaEod1, mediaEod2))
             .when(externalObjectDirectoryRepository)
             .findEodsForTransferOnlyMedia(any(), any(), any(), any(), any(), any());
@@ -37,7 +37,7 @@ class ExternalObjectDirectoryRepositoryTest {
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
         int maxTransferAttempts = 5;
 
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryRepository.findEodsForTransfer(
+        List<Integer> eods = externalObjectDirectoryRepository.findEodsForTransfer(
             status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(5));
 
         assertThat(eods)
@@ -53,8 +53,8 @@ class ExternalObjectDirectoryRepositoryTest {
     @Test
     void findEodsForTransfer_mediaItemsAreEqualToLimit_shouldReturnOnlyMedia() {
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        ExternalObjectDirectoryEntity mediaEod1 = new ExternalObjectDirectoryEntity();
-        ExternalObjectDirectoryEntity mediaEod2 = new ExternalObjectDirectoryEntity();
+        int mediaEod1 = 1;
+        int mediaEod2 = 2;
         doReturn(List.of(mediaEod1, mediaEod2))
             .when(externalObjectDirectoryRepository)
             .findEodsForTransferOnlyMedia(any(), any(), any(), any(), any(), any());
@@ -65,7 +65,7 @@ class ExternalObjectDirectoryRepositoryTest {
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
         int maxTransferAttempts = 5;
 
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryRepository.findEodsForTransfer(
+        List<Integer> eods = externalObjectDirectoryRepository.findEodsForTransfer(
             status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(2));
 
         assertThat(eods)
@@ -81,10 +81,16 @@ class ExternalObjectDirectoryRepositoryTest {
 
     @Test
     void findEodsNotInOtherStorage_mediaItemsArelessThanLimit_shouldReturnBothMediaAndNonMedia() {
+        final int mediaEod1Id = 1;
+        final int mediaEod2Id = 2;
+        final int nonMediaEod1Id = 3;
+        final int statusId = 4;
+        final int typeId = 5;
+        final int notExistsTypeId = 6;
+        final int limitRecords = 5;
+        final int numberOfMediaEods = 2;
+
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        int mediaEod1Id = 1;
-        int mediaEod2Id = 2;
-        int nonMediaEod1Id = 3;
         doReturn(List.of(mediaEod1Id, mediaEod2Id))
             .when(externalObjectDirectoryRepository)
             .findEodsNotInOtherStorageOnlyMedia(any(), any(), any(), any());
@@ -92,44 +98,55 @@ class ExternalObjectDirectoryRepositoryTest {
             .when(externalObjectDirectoryRepository)
             .findEodsNotInOtherStorageExcludingMedia(any(), any(), any(), any());
 
+
         ObjectRecordStatusEntity status = mock(ObjectRecordStatusEntity.class);
+        when(status.getId()).thenReturn(statusId);
         ExternalLocationTypeEntity type = mock(ExternalLocationTypeEntity.class);
+        when(type.getId()).thenReturn(typeId);
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
+        when(notExistsType.getId()).thenReturn(notExistsTypeId);
 
         List<Integer> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            status, type, notExistsType, 5);
+            status, type, notExistsType, limitRecords);
 
         assertThat(eods)
             .hasSize(3)
             .containsExactlyInAnyOrder(mediaEod1Id, mediaEod2Id, nonMediaEod1Id);
 
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageOnlyMedia(status, type, notExistsType, 5);
+            .findEodsNotInOtherStorageOnlyMedia(statusId, typeId, notExistsTypeId, limitRecords);
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageExcludingMedia(status, type, notExistsType, 3);
+            .findEodsNotInOtherStorageExcludingMedia(statusId, typeId, notExistsTypeId, limitRecords - numberOfMediaEods);
     }
 
     @Test
     void findEodsNotInOtherStorage_mediaItemsAreEqualToLimit_shouldReturnOnlyMedia() {
+        final int mediaEod1Id = 1;
+        final int mediaEod2Id = 2;
+        final int statusId = 4;
+        final int typeId = 5;
+        final int notExistsTypeId = 6;
+        final int limitRecords = 2;
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        int mediaEod1Id = 1;
-        int mediaEod2Id = 2;
         doReturn(List.of(mediaEod1Id, mediaEod2Id))
             .when(externalObjectDirectoryRepository)
             .findEodsNotInOtherStorageOnlyMedia(any(), any(), any(), any());
         ObjectRecordStatusEntity status = mock(ObjectRecordStatusEntity.class);
+        when(status.getId()).thenReturn(statusId);
         ExternalLocationTypeEntity type = mock(ExternalLocationTypeEntity.class);
+        when(type.getId()).thenReturn(typeId);
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
+        when(notExistsType.getId()).thenReturn(notExistsTypeId);
 
         List<Integer> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            status, type, notExistsType, 2);
+            status, type, notExistsType, limitRecords);
 
         assertThat(eods)
             .hasSize(2)
             .containsExactlyInAnyOrder(mediaEod1Id, mediaEod2Id);
 
         verify(externalObjectDirectoryRepository)
-            .findEodsNotInOtherStorageOnlyMedia(status, type, notExistsType, 2);
+            .findEodsNotInOtherStorageOnlyMedia(statusId, typeId, notExistsTypeId, limitRecords);
         verify(externalObjectDirectoryRepository, never())
             .findEodsNotInOtherStorageExcludingMedia(any(), any(), any(), any());
     }

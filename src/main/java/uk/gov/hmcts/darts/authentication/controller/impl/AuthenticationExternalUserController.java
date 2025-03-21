@@ -34,6 +34,6 @@ public class AuthenticationExternalUserController extends AbstractUserController
         if (emailAddresses == null || emailAddresses.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(emailAddresses.get(0));
+        return Optional.ofNullable(emailAddresses.getFirst());
     }
 }

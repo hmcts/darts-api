@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.dets.service.DetsApiService;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -51,12 +50,12 @@ public class DetsDataManagementApiImpl implements DetsDataManagementApi {
     }
 
     @Override
-    public void deleteBlobDataFromContainer(UUID blobId) throws AzureDeleteBlobException {
+    public void deleteBlobDataFromContainer(String blobId) throws AzureDeleteBlobException {
         service.deleteBlobDataFromContainer(blobId);
     }
 
     @Override
-    public String getChecksum(UUID guid) {
+    public String getChecksum(String guid) {
         return dataManagementService.getChecksum(detsManagementConfiguration.getContainerName(), guid);
     }
 

@@ -81,7 +81,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
         securityRoles = {TRANSCRIBER},
-        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<Resource> download(Integer transformedMediaId) {
         DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.download(transformedMediaId);
         return ResponseEntity.ok().body(downloadResponseMetadata.getResource());
@@ -121,7 +121,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
         securityRoles = {TRANSCRIBER},
-        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<AddAudioResponse> addAudioRequestDownload(AudioRequestDetails audioRequestDetails) {
         audioRequestDetails.setRequestType(AudioRequestType.DOWNLOAD);
         return addAudioRequest(audioRequestDetails);
@@ -134,9 +134,10 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
-        DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.playback(transformedMediaId);
+        try (DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.playback(transformedMediaId)) {
 
-        return StreamingResponseEntityUtil.createResponseEntity(downloadResponseMetadata.getResource().getInputStream(), httpRangeList);
+            return StreamingResponseEntityUtil.createResponseEntity(downloadResponseMetadata.getResource().getInputStream(), httpRangeList);
+        }
     }
 
     @Override
@@ -174,7 +175,7 @@ public class AudioRequestsController implements AudioRequestsApi {
             throw new DartsApiException(AudioRequestsApiError.INVALID_REQUEST, "Courthouse display name must be uppercase.");
         }
 
-            return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
+        return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
     }
 
     @Override

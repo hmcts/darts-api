@@ -3,13 +3,17 @@ package uk.gov.hmcts.darts.arm.service;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmBatchResponses;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
@@ -26,6 +30,8 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -36,9 +42,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -47,6 +56,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Isolated
 class ArmBatchProcessResponseFilesImplTest {
 
     private static final String PREFIX = "DARTS";
@@ -88,11 +98,15 @@ class ArmBatchProcessResponseFilesImplTest {
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
     @Mock
     private DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
+    @Mock
+    private AsyncTaskConfig asyncTaskConfig;
 
     private ArmBatchProcessResponseFilesImplProtectedMethodSupport armBatchProcessResponseFiles;
 
     @BeforeEach
     void setupData() {
+        lenient().when(asyncTaskConfig.getThreads()).thenReturn(1);
+        lenient().when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofSeconds(10));
 
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
@@ -113,8 +127,13 @@ class ArmBatchProcessResponseFilesImplTest {
 
     }
 
+    @BeforeAll
+    static void beforeAll() {
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+    }
+
     @AfterAll
-    public static void close() {
+    static void close() {
         EOD_HELPER_MOCKS.close();
     }
 
@@ -160,7 +179,7 @@ class ArmBatchProcessResponseFilesImplTest {
             .thenReturn(inboundList1, inboundList2);
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);
@@ -235,7 +254,7 @@ class ArmBatchProcessResponseFilesImplTest {
             .thenReturn(List.of(externalObjectDirectoryEntity1), List.of(externalObjectDirectoryEntity2));
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
 
         // then
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);
@@ -276,7 +295,6 @@ class ArmBatchProcessResponseFilesImplTest {
             objectRecordStatusEntity,
             userAccount
         );
-
 
         verify(logApi).logArmMissingResponse(armMissingResponseDuration, 123);
         verify(externalObjectDirectoryEntity, times(2)).getId();
@@ -378,6 +396,42 @@ class ArmBatchProcessResponseFilesImplTest {
         );
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void processResponseFiles_throwsInterruptedException() {
+
+        // given
+        final String continuationToken = null;
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifest2Uuid = UUID.randomUUID().toString();
+
+        List<String> blobNamesAndPaths = new ArrayList<>();
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        blobNamesAndPaths.add(blobNameAndPath1);
+        blobNamesAndPaths.add(blobNameAndPath2);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(blobNamesAndPaths)
+            .build();
+
+        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(2);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 2, continuationToken)).thenReturn(continuationTokenBlobs);
+
+        try (MockedStatic<AsyncUtil> mockedStatic = mockStatic(AsyncUtil.class)) {
+            // Mock the static method call to throw InterruptedException
+            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)))
+                .thenThrow(new InterruptedException("Mocked InterruptedException"));
+
+            // when
+            armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
+
+            // then
+            verifyNoMoreInteractions(logApi);
+        }
+    }
 
     class ArmBatchProcessResponseFilesImplProtectedMethodSupport extends ArmBatchProcessResponseFilesImpl {
 

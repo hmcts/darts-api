@@ -9,9 +9,11 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
@@ -191,21 +193,21 @@ class EventMappingServiceImplTest {
 
         EventHandlerEntity eventHandlerEntity2 = new EventHandlerEntity();
 
-        when(eventHandlerRepository.findAll()).thenReturn(List.of(eventHandlerEntity, eventHandlerEntity2));
+        when(eventHandlerRepository.findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).ascending())).thenReturn(List.of(eventHandlerEntity, eventHandlerEntity2));
 
         List<EventMapping> result = eventMappingServiceImpl.getEventMappings();
 
         assertEquals(2, result.size());
-        assertEquals(eventHandlerEntity.getId(), result.get(0).getId());
-        assertEquals(eventHandlerEntity.getType(), result.get(0).getType());
-        assertEquals(eventHandlerEntity.getSubType(), result.get(0).getSubType());
-        assertEquals(eventHandlerEntity.getEventName(), result.get(0).getName());
-        assertEquals(eventHandlerEntity.getHandler(), result.get(0).getHandler());
-        assertEquals(eventHandlerEntity.getActive(), result.get(0).getIsActive());
-        assertEquals(eventHandlerEntity.isReportingRestriction(), result.get(0).getHasRestrictions());
-        assertEquals(eventHandlerEntity.getCreatedDateTime(), result.get(0).getCreatedAt());
+        assertEquals(eventHandlerEntity.getId(), result.getFirst().getId());
+        assertEquals(eventHandlerEntity.getType(), result.getFirst().getType());
+        assertEquals(eventHandlerEntity.getSubType(), result.getFirst().getSubType());
+        assertEquals(eventHandlerEntity.getEventName(), result.getFirst().getName());
+        assertEquals(eventHandlerEntity.getHandler(), result.getFirst().getHandler());
+        assertEquals(eventHandlerEntity.getActive(), result.getFirst().getIsActive());
+        assertEquals(eventHandlerEntity.isReportingRestriction(), result.getFirst().getHasRestrictions());
+        assertEquals(eventHandlerEntity.getCreatedDateTime(), result.getFirst().getCreatedAt());
 
-        verify(eventHandlerRepository).findAll();
+        verify(eventHandlerRepository).findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).ascending());
     }
 
     @ParameterizedTest

@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.OffsetDateTime;
@@ -55,7 +56,7 @@ public class AnnotationStubComposable {
         final int fileSize = 123;
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "123";
-        final Integer confScore = 100;
+        final RetentionConfidenceScoreEnum confScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
         final String confReason = "confidenceReason";
 
         return createAndSaveAnnotationDocumentEntityWith(
@@ -71,7 +72,7 @@ public class AnnotationStubComposable {
                                                                               UserAccountEntity uploadedBy,
                                                                               OffsetDateTime uploadedDateTime,
                                                                               String checksum,
-                                                                              Integer confScore,
+                                                                              RetentionConfidenceScoreEnum confScore,
                                                                               String confReason) {
         AnnotationDocumentEntity annotationDocument = createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize,
                                                                                      uploadedBy, uploadedDateTime, checksum, confScore, confReason);
@@ -95,7 +96,7 @@ public class AnnotationStubComposable {
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
-                                                                   String checksum, Integer confScore,
+                                                                   String checksum, RetentionConfidenceScoreEnum confScore,
                                                                    String confReason) {
         AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData().someMinimal();
         annotationDocument.setAnnotation(annotationEntity);

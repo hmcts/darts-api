@@ -52,7 +52,7 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
     @Test
     void findsEventsByCaseNumberOnly() {
         var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
-        var persistedEventsForHearing = given.persistedEventsForHearing(3, hearing);
+        var persistedEventsForHearing = given.persistedEventsForHearing(3, hearing, true);
         given.persistedEvents(3);  // Persist some other events for the other hearings
 
         var eventSearchResults = eventSearchService.searchForEvents(
@@ -112,7 +112,7 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
 
         assertThat(eventSearchResults)
             .extracting("id")
-            .containsExactly(persistedEvents.get(0).getId());
+            .containsExactly(persistedEvents.getFirst().getId());
     }
 
     @Test
@@ -128,14 +128,30 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
             .isEqualTo(idsOf(persistedEvents));
     }
 
+    @Test
+    void searchForEvent_shouldNotFindEvent_whenIsCurrentFalse() {
+        var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
+        given.persistedEventsForHearing(3, hearing, false);
+        given.persistedEvents(3);  // Persist some other events for the other hearings
+
+        var eventSearchResults = eventSearchService.searchForEvents(
+            new AdminEventSearch()
+                .caseNumber(hearing.getCourtCase().getCaseNumber()));
+
+        assertThat(eventSearchResults).isEmpty();
+    }
+
 
     private static List<Integer> idsOf(List<EventEntity> persistedEvents) {
-        return persistedEvents.stream().map(EventEntity::getId).toList();
+        return persistedEvents.stream()
+            .sorted((o1, o2) -> o2.getId().compareTo(o1.getId()))
+            .map(EventEntity::getId)
+            .toList();
     }
 
     private List<Integer> courthouseIdsAssociatedWithEvents(List<EventEntity> events) {
         return events.stream()
-            .map(eve -> eve.getHearingEntities().get(0).getCourtroom().getCourthouse().getId())
+            .map(eve -> eve.getHearingEntities().getFirst().getCourtroom().getCourthouse().getId())
             .toList();
     }
 }

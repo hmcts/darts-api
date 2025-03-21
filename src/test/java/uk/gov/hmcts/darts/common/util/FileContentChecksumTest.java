@@ -4,12 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 
 @Slf4j
 class FileContentChecksumTest {
@@ -24,22 +22,6 @@ class FileContentChecksumTest {
     @Test
     void calculateFromBytes() {
         assertEquals(EXPECTED_STRING_MD5_CHECKSUM, checksum.calculate(TEST_DATA));
-    }
-
-    @Test
-    void calculateFromInputStreamUsingAudioFile() {
-        File audioFileTest = getFile("Tests/common/util/FileContentChecksum/testAudio.mp2");
-        String audioFileChecksum = checksum.calculate(audioFileTest.toPath());
-
-        assertEquals(EXPECTED_AUDIO_FILE_MD5_CHECKSUM, audioFileChecksum);
-    }
-
-    @Test
-    void calculateFromInputStreamUsingAudioFileFromAzure() {
-        File audioFileTest = getFile("Tests/common/util/FileContentChecksum/001b1423-1f94-4ce7-b3a8-1534eb18eb06");
-        String audioFileChecksum = checksum.calculate(audioFileTest.toPath());
-
-        assertEquals(EXPECTED_AZURE_AUDIO_FILE_CHECKSUM, audioFileChecksum);
     }
 
     @Test

@@ -1,6 +1,9 @@
 package uk.gov.hmcts.darts.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -14,7 +17,7 @@ public final class AsyncUtil {
 
     }
 
-    public static void shutdownAndAwaitTermination(ExecutorService executorService, int timeout, TimeUnit unit) {
+    public static void shutdownAndAwaitTermination(ExecutorService executorService, long timeout, TimeUnit unit) {
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(timeout, unit)) {
@@ -30,10 +33,27 @@ public final class AsyncUtil {
     }
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
-                                                 int threads, int timeout, TimeUnit timeUnit) throws InterruptedException {
+                                                 AsyncTaskConfig config) throws InterruptedException {
+        invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
+                                                 int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
         log.info("Starting {} tasks with {} threads", tasks.size(), threads);
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //Add authentication to each task as auth is thread local
+        List<Callable<Void>> tasksWithAuth = tasks.stream()
+            .map(voidCallable -> {
+                Callable<Void> wrappedCallable = () -> {
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    return voidCallable.call();
+                };
+                return wrappedCallable;
+            })
+            .toList();
+
         try (ExecutorService executorService = Executors.newFixedThreadPool(threads)) {
-            executorService.invokeAll(tasks, timeout, timeUnit);
+            executorService.invokeAll(tasksWithAuth, timeout, timeUnit);
             shutdownAndAwaitTermination(executorService, timeout, timeUnit);
         }
         log.info("All async tasks completed");

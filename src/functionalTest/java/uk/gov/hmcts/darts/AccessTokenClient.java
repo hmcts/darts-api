@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import uk.gov.hmcts.darts.enums.GrantType;
 
@@ -29,8 +30,16 @@ public class AccessTokenClient {
     private final String clientSecret;
 
 
+    @Setter
+    private boolean enableAccessTokenCache;
+    private String cachedAccessToken;
+
+
     @SneakyThrows
     public String getAccessToken() {
+        if (cachedAccessToken != null && enableAccessTokenCache) {
+            return cachedAccessToken;
+        }
         Map<String, String> params = Map.of("client_id", clientId,
                                             "client_secret", clientSecret,
                                             "scope", scope,
@@ -50,7 +59,8 @@ public class AccessTokenClient {
         TokenResponse tokenResponse = new ObjectMapper()
             .readValue(response, TokenResponse.class);
 
-        return tokenResponse.accessToken();
+        cachedAccessToken = tokenResponse.accessToken();
+        return cachedAccessToken;
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")
@@ -67,6 +77,7 @@ public class AccessTokenClient {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record TokenResponse(@JsonProperty("access_token") String accessToken) {}
+    private record TokenResponse(@JsonProperty("access_token") String accessToken) {
+    }
 
 }

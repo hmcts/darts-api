@@ -2,12 +2,15 @@ package uk.gov.hmcts.darts.event.service;
 
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
+import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 
 import java.util.Set;
 
 public interface EventService {
-    AdminGetEventForIdResponseResult adminGetEventById(Integer eventId);
+    AdminGetEventById200Response adminGetEventById(Integer eventId);
+
+    AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Integer eventId);
 
     EventEntity getEventByEveId(Integer eveId);
 

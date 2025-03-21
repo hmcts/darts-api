@@ -6,8 +6,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
@@ -59,7 +59,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
     @Autowired
     SuperAdminUserStub superAdminUserStub;
 
-    @MockBean
+    @MockitoBean
     UserIdentity userIdentity;
 
     @Autowired
@@ -100,14 +100,14 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
 
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("testuser");
         ObjectAdminActionEntity adminActionEntity = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                                                .media(mediaEntity)
-                                                .objectHiddenReason(
-                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
-                                                .markedForManualDeletion(false)
-                                                .markedForManualDelBy(null)
-                                                .markedForManualDelDateTime(null)
-                                                .hiddenBy(testUser)
-                                                .build());
+                                                                                            .media(mediaEntity)
+                                                                                            .objectHiddenReason(
+                                                                                                objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                                                            .markedForManualDeletion(false)
+                                                                                            .markedForManualDelBy(null)
+                                                                                            .markedForManualDelDateTime(null)
+                                                                                            .hiddenBy(testUser)
+                                                                                            .build());
 
         // when
         MvcResult mvcResult = mockMvc.perform(post(endpoint))
@@ -299,12 +299,12 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         // assert additional audit data
         assertFalse(caseExpiredAuditEntries.isEmpty());
         assertEquals(1, caseExpiredAuditEntries.size());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
-        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedDateTime());
+        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.getFirst().getUser().getId());
+        assertNull(caseExpiredAuditEntries.getFirst().getCourtCase());
     }
 
 }

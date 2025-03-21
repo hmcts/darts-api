@@ -452,14 +452,14 @@ components:
     RetentionTitleErrors:
       type: string
       enum:
-        - "You do not have permission to reduce the retention period."
-        - "The retention date being applied is too early."
-        - "The request is invalid."
-        - "The requested caseId cannot be found."
-        - "The case must be closed before the retention period can be amended."
-        - "The case must have a retention policy applied before being changed."
-        - "An Internal server error has occurred."
-        - "The retention date being applied is too late."
+        - "You do not have permission to reduce the retention period"
+        - "The retention date being applied is too early"
+        - "The request is invalid"
+        - "The requested caseId cannot be found"
+        - "The case must be closed before the retention period can be amended"
+        - "The case must have a retention policy applied before being changed"
+        - "An Internal server error has occurred"
+        - "The retention date being applied is too late"
         - "The retention policy type id does not exist."
         - "Policy name must be unique"
         - "Display name must be unique"
@@ -470,7 +470,7 @@ components:
         - "Fixed policy key not recognised"
         - "Live policies cannot be edited"
         - "Target policy has pending revision"
-        - "The retention date cannot be amended as the case is already expired."
+        - "The retention date cannot be amended as the case is already expired"
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED,
                          NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
                          NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,

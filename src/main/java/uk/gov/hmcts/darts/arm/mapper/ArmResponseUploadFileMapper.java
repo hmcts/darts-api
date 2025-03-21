@@ -27,12 +27,12 @@ public class ArmResponseUploadFileMapper {
     }
 
     private UploadNewFileRecord readInputJson(String input) throws JsonProcessingException, UnableToReadArmFileException {
-        UploadNewFileRecord uploadNewFileRecord = null;
         if (StringUtils.isEmpty(input)) {
             String errorMessage = "\"input\" String is empty, so cannot parse.";
             log.warn(errorMessage);
             throw new UnableToReadArmFileException();
         }
+        UploadNewFileRecord uploadNewFileRecord;
         try {
             uploadNewFileRecord = objectMapper.readValue(input, UploadNewFileRecord.class);
             return uploadNewFileRecord;

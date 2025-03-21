@@ -1,0 +1,277 @@
+[
+  {
+    "case_number": "case8",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-10-22",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE"
+    ]
+  },
+  {
+    "case_number": "case7",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-10-21",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-10-23",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE"
+    ]
+  },
+  {
+    "case_number": "case6",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM2",
+        "date": "2023-09-20",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM3",
+        "date": "2023-09-21",
+        "judges": [
+          "AJUDGE",
+          "JUDGE6B"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-09-22",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE",
+      "JUDGE6B"
+    ]
+  },
+  {
+    "case_number": "case5",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM2",
+        "date": "2023-09-20",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-09-21",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM3",
+        "date": "2023-09-22",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE"
+    ]
+  },
+  {
+    "case_number": "case10",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM4",
+        "date": "2023-10-23",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE"
+    ]
+  },
+  {
+    "case_number": "Case4",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM2",
+        "date": "2023-08-20",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-08-21",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-08-22",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE"
+    ]
+  },
+  {
+    "case_number": "Case3",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-07-20",
+        "judges": [
+          "AJUDGE",
+          "JUDGE3A"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-07-21",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-07-22",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE",
+      "JUDGE3A"
+    ]
+  },
+  {
+    "case_number": "Case2",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "Defendant2"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-06-20",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-06-21",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-06-22",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE"
+    ]
+  },
+  {
+    "case_number": "Case1",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "hearings": [
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-05-20",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-05-21",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "courtroom": "COURTROOM1",
+        "date": "2023-05-22",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false,
+    "judges": [
+      "AJUDGE"
+    ]
+  }
+]

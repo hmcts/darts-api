@@ -8,6 +8,7 @@ public interface AutomatedTask extends Runnable {
 
     void run(boolean isManualRun);
 
+    @Override
     default void run() {
         run(false);
     }

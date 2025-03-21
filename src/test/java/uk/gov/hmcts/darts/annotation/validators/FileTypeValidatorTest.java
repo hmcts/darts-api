@@ -35,8 +35,8 @@ class FileTypeValidatorTest {
         var multipartFile = someMultipartFileWithFilename("some-file.badext");
 
         assertThatThrownBy(() -> fileTypeValidator.validate(multipartFile))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", BAD_REQUEST_DOC_TYPE);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", BAD_REQUEST_DOC_TYPE);
     }
 
     @Test
@@ -44,8 +44,8 @@ class FileTypeValidatorTest {
         var multipartFile = someMultipartFileWithContent(generateBytesOfSize(MAX_FILE_SIZE + 1));
 
         assertThatThrownBy(() -> fileTypeValidator.validate(multipartFile))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", BAD_REQUEST_FILE_SIZE);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", BAD_REQUEST_FILE_SIZE);
     }
 
     @Test
@@ -53,8 +53,8 @@ class FileTypeValidatorTest {
         var multipartFile = someMultipartFileWithContentType("some-bad-content-type");
 
         assertThatThrownBy(() -> fileTypeValidator.validate(multipartFile))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", BAD_REQUEST_CONTENT_TYPE);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", BAD_REQUEST_CONTENT_TYPE);
     }
 
     @Test
@@ -64,19 +64,19 @@ class FileTypeValidatorTest {
 
     private MultipartFile someValidMultipartFile() {
         return new MockMultipartFile(
-                "some-multi-part-file",
-                "some-filename." + VALID_FILE_EXTENSIONS.get(0),
-                VALID_CONTENT_TYPES.get(0),
-                "some-content".getBytes()
+            "some-multi-part-file",
+            "some-filename." + VALID_FILE_EXTENSIONS.getFirst(),
+            VALID_CONTENT_TYPES.getFirst(),
+            "some-content".getBytes()
         );
     }
 
     private MultipartFile someMultipartFileWithContentType(String contentType) {
         return new MockMultipartFile(
-                "some-multi-part-file",
-                "some-filename." + VALID_FILE_EXTENSIONS.get(0),
-                contentType,
-                "some-content".getBytes()
+            "some-multi-part-file",
+            "some-filename." + VALID_FILE_EXTENSIONS.getFirst(),
+            contentType,
+            "some-content".getBytes()
         );
     }
 
@@ -84,17 +84,17 @@ class FileTypeValidatorTest {
         return new MockMultipartFile(
             "some-multi-part-file",
             filename,
-            VALID_CONTENT_TYPES.get(0),
+            VALID_CONTENT_TYPES.getFirst(),
             "some-content".getBytes()
         );
     }
 
     private MultipartFile someMultipartFileWithContent(byte[] fileContent) {
         return new MockMultipartFile(
-                "some-multi-part-file",
-                "some-filename." + VALID_FILE_EXTENSIONS.get(0),
-                VALID_CONTENT_TYPES.get(0),
-                fileContent
+            "some-multi-part-file",
+            "some-filename." + VALID_FILE_EXTENSIONS.getFirst(),
+            VALID_CONTENT_TYPES.getFirst(),
+            fileContent
         );
     }
 

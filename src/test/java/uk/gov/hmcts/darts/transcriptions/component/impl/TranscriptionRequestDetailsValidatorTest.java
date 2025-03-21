@@ -76,7 +76,7 @@ class TranscriptionRequestDetailsValidatorTest {
         var hearingEntity = new HearingEntity();
         hearingEntity.setMediaList(mediaEntityList);
 
-        Mockito.when(hearingsServiceMock.getHearingById(DUMMY_HEARING_ID))
+        Mockito.when(hearingsServiceMock.getHearingByIdWithValidation(DUMMY_HEARING_ID))
             .thenReturn(hearingEntity);
 
         var validatable = new TranscriptionRequestDetails();
@@ -143,7 +143,7 @@ class TranscriptionRequestDetailsValidatorTest {
         // Given
         var hearingEntity = new HearingEntity();
         hearingEntity.setMediaList(createMediaList());
-        Mockito.when(hearingsServiceMock.getHearingById(DUMMY_HEARING_ID))
+        Mockito.when(hearingsServiceMock.getHearingByIdWithValidation(DUMMY_HEARING_ID))
             .thenReturn(hearingEntity);
 
         var requestDetails = createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME);

@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class HiddenReasonsService {
             .stream()
             .filter(objectHiddenReasonEntity -> manualDeletionEnabled || !objectHiddenReasonEntity.isMarkedForDeletion())
             .sorted(Comparator.comparing(ObjectHiddenReasonEntity::getDisplayOrder))
-            .collect(Collectors.toList());
+            .toList();
 
         return hiddenReasonMapper.mapToApiModel(hiddenReasonEntities);
     }

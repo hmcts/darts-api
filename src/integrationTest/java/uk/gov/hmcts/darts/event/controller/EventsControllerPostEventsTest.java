@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -47,7 +47,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @BeforeEach
@@ -68,7 +68,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         EventHandlerEntity inactiveHandler = getInactiveHandler();
         inactiveHandler.setEventName("Old Description");
 
-        dartsDatabase.saveAllWithTransient(activeHandler, inactiveHandler);
+        dartsDatabase.save(activeHandler);
+        dartsDatabase.save(inactiveHandler);
 
         CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("swansea");
 
@@ -102,7 +103,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .toList();
 
         Assertions.assertEquals(1, results.size());
-        EventEntity persistedEvent = results.get(0);
+        EventEntity persistedEvent = results.getFirst();
 
         EventHandlerEntity eventType = persistedEvent.getEventType();
         Assertions.assertEquals("New Description", eventType.getEventName());
@@ -117,7 +118,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         EventHandlerEntity inactiveHandler = getInactiveHandler();
         inactiveHandler.setEventName("Old Description");
 
-        dartsDatabase.saveAllWithTransient(activeHandler, inactiveHandler);
+        dartsDatabase.save(activeHandler);
+        dartsDatabase.save(inactiveHandler);
 
         String requestBody = """
             {
@@ -218,8 +220,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .toList();
 
         Assertions.assertEquals(1, results.size());
-        Assertions.assertEquals("40750", results.get(0).getEventType().getType());
-        Assertions.assertEquals("12309", results.get(0).getEventType().getSubType());
+        Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
+        Assertions.assertEquals("12309", results.getFirst().getEventType().getSubType());
     }
 
     @Test
@@ -257,8 +259,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .toList();
 
         Assertions.assertEquals(1, results.size());
-        Assertions.assertEquals("40750", results.get(0).getEventType().getType());
-        Assertions.assertNull(results.get(0).getEventType().getSubType());
+        Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
+        Assertions.assertNull(results.getFirst().getEventType().getSubType());
     }
 
     private static EventHandlerEntity getActiveHandler() {

@@ -26,10 +26,10 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
     void getCaseManagementRetentionIdsForEvents() {
         var caseManagementRetention = dartsDatabase.save(someMinimalCaseManagementRetention());
 
-        var cmrIds = caseManagementRetentionRepository.getIdsForEvents(List.of(caseManagementRetention.getEventEntity()));
+        var cmrIds = caseManagementRetentionRepository.getIdsForEvents(List.of(caseManagementRetention.getEventEntity().getId()));
 
         assertThat(cmrIds).hasSize(1);
-        assertThat(cmrIds.get(0)).isEqualTo(caseManagementRetention.getId());
+        assertThat(cmrIds.getFirst()).isEqualTo(caseManagementRetention.getId());
     }
 
     @Test
@@ -38,8 +38,8 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
 
         caseManagementRetentionRepository.deleteAllByEventEntityIn(
             asList(
-                caseManagementRetentionsWithEvents.get(0).getEventEntity(),
-                caseManagementRetentionsWithEvents.get(1).getEventEntity()));
+                caseManagementRetentionsWithEvents.getFirst().getEventEntity().getId(),
+                caseManagementRetentionsWithEvents.get(1).getEventEntity().getId()));
 
         assertThat(dartsDatabase.getCaseManagementRetentionRepository().findAll())
             .extracting("id")

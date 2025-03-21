@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -59,7 +59,7 @@ class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationB
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     private HearingEntity hearingEntity;
@@ -139,15 +139,15 @@ class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationB
         assertEquals(1, notifications.size());
         assertEquals(
             NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
-            notifications.get(0).getEventId()
+            notifications.getFirst().getEventId()
         );
         assertEquals(
             dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
-            notifications.get(0).getEmailAddress()
+            notifications.getFirst().getEmailAddress()
         );
         assertEquals(
             mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
-            notifications.get(0).getCourtCase().getCaseNumber()
+            notifications.getFirst().getCourtCase().getCaseNumber()
         );
 
         assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());

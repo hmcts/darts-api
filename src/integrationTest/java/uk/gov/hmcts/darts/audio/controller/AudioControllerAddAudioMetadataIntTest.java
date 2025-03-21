@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -22,15 +20,20 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequestWithStorageGUID;
 import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
-import uk.gov.hmcts.darts.test.common.LogUtil;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
@@ -41,30 +44,23 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static ch.qos.logback.classic.Level.toLevel;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {
-    "spring.servlet.multipart.max-file-size=4MB",
-    "spring.servlet.multipart.max-request-size=4MB",
-})
 class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Value("${local.server.port}")
@@ -81,9 +77,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private static final Path AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE = DataGenerator.createUniqueFile(DataSize.ofMegabytes(5),
                                                                                                                  DataGenerator.FileType.MP2);
 
-    @Value("${darts.audio.max-file-duration}")
-    private Duration maxFileDuration;
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -92,19 +85,21 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private EventStub eventStub;
     @Autowired
     HearingStub hearingStub;
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
-    @MockBean
+    @MockitoBean
     AudioAsyncService audioAsyncService;
-
-    @Value("${spring.servlet.multipart.max-file-size}")
-    private DataSize addAudioThreshold;
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    private UUID guid = UUID.randomUUID();
+    @Autowired
+    private AuditRepository auditRepository;
+
+    private String guid = UUID.randomUUID().toString();
+
+    private static final long END_FILE_DURATION = 1440;
 
 
     @BeforeEach
@@ -136,7 +131,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     void addAudioMetadata() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "Bristol", "1");
 
         mockMvc.perform(
                 post(ENDPOINT)
@@ -157,10 +152,10 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         for (HearingEntity hearing : addAudioLinkedHearings) {
             List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearing.getId());
-            MediaEntity media = mediaEntities.get(0);
+            MediaEntity media = mediaEntities.getFirst();
             assertEquals(1, mediaEntities.size());
             assertEquals(STARTED_AT, media.getStart());
-            assertEquals(STARTED_AT.plus(maxFileDuration), media.getEnd());
+            assertEquals(STARTED_AT.plusMinutes(END_FILE_DURATION), media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
             List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
@@ -178,7 +173,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
 
-        HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
+        HearingEntity hearingEntity = hearingsInAnotherCourtroom.getFirst();
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
     }
@@ -187,7 +182,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     void addAudioMetadataChecksumsDoNotMatch() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        AddAudioMetadataRequestWithStorageGUID addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
+        AddAudioMetadataRequestWithStorageGUID addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION),
+                                                                                               "Bristol", "1");
         addAudioMetadataRequest.setChecksum("invalidchecksum");
         MvcResult mvcResult = mockMvc.perform(
                 post(ENDPOINT)
@@ -226,7 +222,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         for (HearingEntity hearing : addAudioLinkedHearings) {
             List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearing.getId());
-            MediaEntity media = mediaEntities.get(0);
+            MediaEntity media = mediaEntities.getFirst();
             assertEquals(1, mediaEntities.size());
             assertEquals(STARTED_AT, media.getStart());
             assertEquals(STARTED_AT, media.getEnd());
@@ -247,13 +243,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
 
-        HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
+        HearingEntity hearingEntity = hearingsInAnotherCourtroom.getFirst();
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
-
-        assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Exact duplicate detected based upon media metadata and checksum for media entity ids [2].", toLevel(
-                            Level.INFO_INT)).isEmpty());
     }
 
     @Test
@@ -279,7 +271,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
             assertEquals(1, mediaEntities.size());
 
-            originalMedia = mediaEntities.get(0);
+            originalMedia = mediaEntities.getFirst();
             assertEquals(STARTED_AT, originalMedia.getStart());
             assertEquals(STARTED_AT, originalMedia.getEnd());
             assertEquals(1, originalMedia.getChannel());
@@ -298,9 +290,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
 
-        guid = UUID.randomUUID();
+        guid = UUID.randomUUID().toString();
         Integer newMedia = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_2, originalMedia.getId().toString(), originalMedia.getId().toString());
-        guid = UUID.randomUUID();
+        guid = UUID.randomUUID().toString();
         Integer newMedia2 = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_3, newMedia.toString(), originalMedia.getId().toString());
         assertNotEquals(newMedia, newMedia2);
         Optional<MediaEntity> newMediaEntity = dartsDatabase.getMediaRepository().findById(newMedia);
@@ -311,30 +303,10 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     }
 
     @Test
-    void addAudioBeyondAudioFileSizeThresholdExceeded() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        MvcResult mvcResult = makeAddAudioCall(AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE)
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {
-              "type": "AUDIO_108",
-              "title": "The audio metadata size exceeds maximum threshold",
-              "status": 400
-            }
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
     void addAudioMetadataNonExistingCourthouse() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "TEST", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "TEST", "1");
 
         MvcResult mvcResult = mockMvc.perform(
                 post(ENDPOINT)
@@ -350,57 +322,11 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-
-    @Test
-    void addAudioDurationOutOfBounds() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration).plusSeconds(1), "Bristol", "1");
-
-        MvcResult mvcResult = mockMvc.perform(
-                post(ENDPOINT)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(addAudioMetadataRequest)))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(AudioApiError.FILE_DURATION_OUT_OF_BOUNDS.getType(), problem.getType());
-        assertEquals(AudioApiError.FILE_DURATION_OUT_OF_BOUNDS.getTitle(), problem.getTitle());
-    }
-
-    @Test
-    void addAudioSizeOutsideOfBoundaries() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
-
-        // set the file size to be greater than the maximum threshold
-        addAudioMetadataRequest.setFileSize(addAudioThreshold.toBytes() + 1);
-
-
-        MvcResult mvcResult = mockMvc.perform(
-                post(ENDPOINT)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(addAudioMetadataRequest)))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS.getType(), problem.getType());
-        assertEquals(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS.getTitle(), problem.getTitle());
-    }
-
-
     @Test
     void addAudioReturnForbiddenError() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.DAR_PC);
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "TEST", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION), "TEST", "1");
 
 
         MvcResult mvcResult = mockMvc.perform(
@@ -416,6 +342,158 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void shouldHideIncomingMedia_whenIncomingMediaHasExistingVersionThatIsHiddenButHasNoExistingAdminAction() throws Exception {
+        // Given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
+
+        CourtroomEntity existingCourtroom = PersistableFactory.getCourtroomTestData().someMinimalBuilderHolder().getBuilder()
+            .courthouse(PersistableFactory.getCourthouseTestData().someMinimal())
+            .build()
+            .getEntity();
+        dartsPersistence.save(existingCourtroom);
+
+        final OffsetDateTime startAt = OffsetDateTime.parse("2024-10-10T10:00:00Z");
+        final OffsetDateTime endAt = OffsetDateTime.parse("2024-10-10T10:15:00Z");
+        MediaEntity initialMedia = PersistableFactory.getMediaTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .isHidden(true)
+            // The following attributes must align with the data that gets created by createAddAudioRequest(), so that we get a duplicate metadata scenario
+            .courtroom(existingCourtroom)
+            .channel(1)
+            .mediaFile("test")
+            .start(startAt)
+            .end(endAt)
+            .build()
+            .getEntity();
+        dartsPersistence.save(initialMedia);
+        String chronicleId = initialMedia.getId().toString();
+        initialMedia.setChronicleId(chronicleId);
+        dartsPersistence.save(initialMedia);
+
+        AddAudioMetadataRequest request = createAddAudioRequest(startAt,
+                                                                endAt,
+                                                                existingCourtroom.getCourthouse().getCourthouseName(),
+                                                                existingCourtroom.getName(),
+                                                                AUDIO_BINARY_PAYLOAD_1);
+
+        // When
+        mockMvc.perform(
+                post(ENDPOINT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk());
+
+        // Then, assert DB state
+        List<MediaEntity> allMedias = dartsDatabase.getMediaRepository().findAll();
+
+        List<MediaEntity> allVersions = allMedias.stream()
+            .filter(media -> chronicleId.equals(media.getChronicleId()))
+            .toList();
+        assertEquals(2, allVersions.size());
+        assertTrue(allVersions.stream().allMatch(MediaEntity::isHidden));
+
+        // Identify the newly added version
+        List<MediaEntity> newMediaVersions = allMedias.stream()
+            .filter(media -> String.valueOf(initialMedia.getId()).equals(media.getAntecedentId()))
+            .toList();
+        assertEquals(1, newMediaVersions.size());
+        MediaEntity newMediaVersion = newMediaVersions.getFirst();
+
+        Optional<ObjectAdminActionEntity> adminActionOptional = newMediaVersion.getObjectAdminAction();
+        assertTrue(adminActionOptional.isPresent());
+        ObjectAdminActionEntity adminAction = adminActionOptional.get();
+        assertNull(adminAction.getTicketReference());
+        assertEquals("Prior version had no admin action, so no details are available", adminAction.getComments());
+        assertNull(adminAction.getObjectHiddenReason());
+
+        List<AuditEntity> hideAudio = dartsDatabase.getAuditRepository().findAll().stream()
+            .filter(audit -> AuditActivity.HIDE_AUDIO.getId().equals(audit.getAuditActivity().getId()))
+            .toList();
+        assertEquals(1, hideAudio.size());
+    }
+
+    @Test
+    void shouldHideIncomingMediaAndCopyExistingAdminAction_whenIncomingMediaHasExistingVersionThatIsHiddenAndHasExistingAdminAction() throws Exception {
+        // Given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
+
+        CourtroomEntity existingCourtroom = PersistableFactory.getCourtroomTestData().someMinimalBuilderHolder().getBuilder()
+            .courthouse(PersistableFactory.getCourthouseTestData().someMinimal())
+            .build()
+            .getEntity();
+        dartsPersistence.save(existingCourtroom);
+
+        final OffsetDateTime startAt = OffsetDateTime.parse("2024-10-10T10:00:00Z");
+        final OffsetDateTime endAt = OffsetDateTime.parse("2024-10-10T10:15:00Z");
+        MediaEntity initialMedia = PersistableFactory.getMediaTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .isHidden(true)
+            // The following attributes must align with the data that gets created by createAddAudioRequest(), so that we get a duplicate metadata scenario
+            .courtroom(existingCourtroom)
+            .channel(1)
+            .mediaFile("test")
+            .start(startAt)
+            .end(endAt)
+            .build()
+            .getEntity();
+        dartsPersistence.save(initialMedia);
+
+        ObjectAdminActionEntity adminActionForInitialMedia = PersistableFactory.getObjectAdminActionTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .ticketReference("Some ticket ref")
+            .comments("Some comments")
+            .media(initialMedia)
+            .build()
+            .getEntity();
+        dartsPersistence.save(adminActionForInitialMedia);
+
+        String chronicleId = initialMedia.getId().toString();
+        initialMedia.setChronicleId(chronicleId);
+        initialMedia.setObjectAdminAction(adminActionForInitialMedia);
+        dartsPersistence.save(initialMedia);
+
+        AddAudioMetadataRequest request = createAddAudioRequest(startAt,
+                                                                endAt,
+                                                                existingCourtroom.getCourthouse().getCourthouseName(),
+                                                                existingCourtroom.getName(),
+                                                                AUDIO_BINARY_PAYLOAD_1);
+
+        // When
+        mockMvc.perform(
+                post(ENDPOINT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk());
+
+        // Then, assert DB state
+        List<MediaEntity> allMedias = dartsDatabase.getMediaRepository().findAll();
+
+        List<MediaEntity> allVersions = allMedias.stream()
+            .filter(media -> chronicleId.equals(media.getChronicleId()))
+            .toList();
+        assertEquals(2, allVersions.size());
+        assertTrue(allVersions.stream().allMatch(MediaEntity::isHidden));
+
+        // Identify the newly added version
+        List<MediaEntity> newMediaVersions = allMedias.stream()
+            .filter(media -> String.valueOf(initialMedia.getId()).equals(media.getAntecedentId()))
+            .toList();
+        assertEquals(1, newMediaVersions.size());
+        MediaEntity newMediaVersion = newMediaVersions.getFirst();
+
+        Optional<ObjectAdminActionEntity> adminActionOptional = newMediaVersion.getObjectAdminAction();
+        assertTrue(adminActionOptional.isPresent());
+        ObjectAdminActionEntity adminAction = adminActionOptional.get();
+        assertEquals(adminActionForInitialMedia.getTicketReference(), adminAction.getTicketReference());
+        assertEquals(adminActionForInitialMedia.getComments(), adminAction.getComments());
+
+        List<AuditEntity> hideAudio = dartsDatabase.getAuditRepository().findAll().stream()
+            .filter(audit -> AuditActivity.HIDE_AUDIO.getId().equals(audit.getAuditActivity().getId()))
+            .toList();
+        assertEquals(1, hideAudio.size());
     }
 
     private AddAudioMetadataRequestWithStorageGUID createAddAudioRequest(OffsetDateTime startedAt,
@@ -455,7 +533,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         addAudioMetadataRequest.setMediaFile("media file");
         addAudioMetadataRequest.setFileSize(Files.size(audioBinaryPayload));
         addAudioMetadataRequest.setChecksum("calculatedchecksum");
-        addAudioMetadataRequest.storageGuid(guid);
+        addAudioMetadataRequest.storageGuid(UUID.fromString(guid));
         addAudioMetadataRequest.setChecksum("checksum-" + guid);
         return addAudioMetadataRequest;
     }
@@ -515,7 +593,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
             assertEquals(1, mediaEntities.size());
 
-            media = mediaEntities.get(0);
+            media = mediaEntities.getFirst();
             assertEquals(STARTED_AT, media.getStart());
             assertEquals(STARTED_AT, media.getEnd());
             assertEquals(1, media.getChannel());
@@ -533,13 +611,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             STARTED_AT.toLocalDate()
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
-        HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
+        HearingEntity hearingEntity = hearingsInAnotherCourtroom.getFirst();
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
-        assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Revised version of media added", toLevel(
-                            Level.INFO_INT)).isEmpty());
-
         return media.getId();
     }
 

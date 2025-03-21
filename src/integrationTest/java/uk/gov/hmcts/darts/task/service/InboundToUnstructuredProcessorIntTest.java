@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -34,7 +34,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
 
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
-    @SpyBean
+    @MockitoSpyBean
     ExternalObjectDirectoryRepository eodRepository;
 
     @Autowired
@@ -53,7 +53,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
 
         //matches because no corresponding unstructured
-        var media1 = medias.get(0);
+        var media1 = medias.getFirst();
         externalObjectDirectoryStub.createAndSaveEod(media1, STORED, INBOUND);
 
         //matches because unstructured failed with no max attempts reached
@@ -90,7 +90,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
     void processInboundTranscriptionDocumentToUnstructured() {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
 
         var existingUnstructuredStored = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
         assertThat(existingUnstructuredStored).isEmpty();
@@ -101,7 +101,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // then
         var createdUnstructuredStored = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
         assertThat(createdUnstructuredStored).hasSize(1);
-        ExternalObjectDirectoryEntity createdUnstructured = createdUnstructuredStored.get(0);
+        ExternalObjectDirectoryEntity createdUnstructured = createdUnstructuredStored.getFirst();
         TranscriptionDocumentEntity createdUnstructuredStoredTranscriptionDocument = transcriptionDocumentRepository.findById(
             createdUnstructured.getTranscriptionDocumentEntity().getId()).get();
         assertThat(createdUnstructuredStoredTranscriptionDocument.getTranscription().getId()).isEqualTo(transcription.getId());
@@ -112,10 +112,10 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
-            transcription.getTranscriptionDocumentEntities().get(0).getId(),
+            transcription.getTranscriptionDocumentEntities().getFirst().getId(),
             dartsDatabase.getObjectRecordStatusEntity(STORED),
             dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
         );
@@ -129,7 +129,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // then
         var unstructuredAfterProcessing = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
         assertThat(unstructuredAfterProcessing).hasSize(1);
-        assertThat(unstructuredAfterProcessing.get(0).getId()).isEqualTo(unstructuredBeforeProcessing.get(0).getId());
+        assertThat(unstructuredAfterProcessing.getFirst().getId()).isEqualTo(unstructuredBeforeProcessing.getFirst().getId());
     }
 
     @Test
@@ -137,10 +137,10 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
-            transcription.getTranscriptionDocumentEntities().get(0).getId(),
+            transcription.getTranscriptionDocumentEntities().getFirst().getId(),
             dartsDatabase.getObjectRecordStatusEntity(FAILURE),
             dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
         );
@@ -154,7 +154,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // then
         var unstructuredAfterProcessing = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
         assertThat(unstructuredAfterProcessing).hasSize(1);
-        assertThat(unstructuredAfterProcessing.get(0).getId()).isEqualTo(unstructuredBeforeProcessing.get(0).getId());
+        assertThat(unstructuredAfterProcessing.getFirst().getId()).isEqualTo(unstructuredBeforeProcessing.getFirst().getId());
     }
 
     @Test
@@ -172,6 +172,6 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // then
         var createdUnstructuredFailed = eodRepository.findByStatusAndType(failureStatus(), unstructuredLocation());
         assertThat(createdUnstructuredFailed).hasSize(1);
-        assertThat(createdUnstructuredFailed.get(0).getTransferAttempts()).isEqualTo(1);
+        assertThat(createdUnstructuredFailed.getFirst().getTransferAttempts()).isEqualTo(1);
     }
 }

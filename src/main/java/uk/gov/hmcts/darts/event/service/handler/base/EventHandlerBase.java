@@ -58,7 +58,7 @@ public abstract class EventHandlerBase implements EventHandler {
                 log.warn(format(MULTIPLE_CASE_NUMBERS, dartsEvent.getEventId(), join(", ", caseNumbers)));
                 // This needs fixing to deal with multiple case numbers https://tools.hmcts.net/jira/browse/DMP-2835
             }
-            String caseNumber = caseNumbers.get(0);
+            String caseNumber = caseNumbers.getFirst();
 
             LocalDateTime hearingDateTime = DateConverterUtil.toLocalDateTime(dartsEvent.getDateTime());
             HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(

@@ -7,8 +7,6 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
-import java.util.stream.Collectors;
-
 @Component
 public class CasesAnnotationMapper {
 
@@ -20,14 +18,13 @@ public class CasesAnnotationMapper {
         annotation.setAnnotationTs(annotationEntity.getTimestamp());
         annotation.setAnnotationText(annotationEntity.getText());
         annotation.setAnnotationDocuments(
-                annotationEntity.getAnnotationDocuments()
+            annotationEntity.getAnnotationDocuments()
                 .stream()
                 .map(this::map)
-                .collect(Collectors.toList()));
+                .toList());
 
         return annotation;
     }
-
 
 
     private AnnotationDocument map(AnnotationDocumentEntity annotationDocumentEntity) {

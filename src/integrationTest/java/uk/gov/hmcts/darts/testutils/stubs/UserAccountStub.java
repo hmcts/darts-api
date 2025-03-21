@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -25,6 +24,7 @@ import java.util.UUID;
 import static java.util.Objects.nonNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static uk.gov.hmcts.darts.PredefinedPrimaryKeys.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
+import static uk.gov.hmcts.darts.PredefinedPrimaryKeys.TEST_RCJ_APPEALS_GLOBAL_SECURITY_GROUP_ID;
 
 @Component
 @RequiredArgsConstructor
@@ -103,7 +103,7 @@ public class UserAccountStub {
 
     @Transactional
     public void setActiveState(String email, boolean active) {
-        UserAccountEntity userAccountEntity = userAccountRepository.findByEmailAddressIgnoreCase(email).get(0);
+        UserAccountEntity userAccountEntity = userAccountRepository.findFirstByEmailAddressIgnoreCase(email).get();
         userAccountEntity.setActive(active);
         userAccountRepository.save(userAccountEntity);
     }
@@ -222,10 +222,15 @@ public class UserAccountStub {
     }
 
     @Transactional
-    public UserAccountEntity createRcjAppealUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = SecurityGroupTestData
-            .buildGroupForRoleAndCourthouse(SecurityRoleEnum.RCJ_APPEALS, courthouseEntity);
-        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
+    public UserAccountEntity createUser(String identifier) {
+        var testUser = getIntegrationTestUserAccountEntity(identifier);
+        testUser = dartsDatabaseSaveStub.save(testUser);
+        return testUser;
+    }
+
+    @Transactional
+    public UserAccountEntity createRcjAppealUser() {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(TEST_RCJ_APPEALS_GLOBAL_SECURITY_GROUP_ID).get();
 
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().clear();
@@ -270,6 +275,17 @@ public class UserAccountStub {
     public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
                                                 CourthouseEntity courthouseEntity) {
 
+        List<CourthouseEntity> courthouseEntities = null;
+        if (nonNull(courthouseEntity)) {
+            courthouseEntities = List.of(courthouseEntity);
+        }
+
+        return createExternalUser(guid, securityGroupEntity, courthouseEntities);
+    }
+
+    public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
+                                                List<CourthouseEntity> courthouseEntities) {
+
         var testUser = getIntegrationTestUserAccountEntity();
         Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
         securityGroupEntities.add(securityGroupEntity);
@@ -278,8 +294,10 @@ public class UserAccountStub {
         testUser.setAccountGuid(guid);
 
         testUser = dartsDatabaseSaveStub.save(testUser);
-        if (nonNull(courthouseEntity)) {
-            securityGroupStub.addCourthouse(securityGroupEntity, courthouseEntity);
+        if (nonNull(courthouseEntities)) {
+            for (CourthouseEntity courthouse : courthouseEntities) {
+                securityGroupStub.addCourthouse(securityGroupEntity, courthouse);
+            }
         }
         return testUser;
     }

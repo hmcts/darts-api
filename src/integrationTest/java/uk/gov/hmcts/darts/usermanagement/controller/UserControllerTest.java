@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -64,7 +64,7 @@ class UserControllerTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired
@@ -97,7 +97,6 @@ class UserControllerTest extends IntegrationBase {
 
         userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
-
 
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -141,7 +140,7 @@ class UserControllerTest extends IntegrationBase {
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
 
         Assertions.assertEquals(1, rolledBackTranscription.size());
-        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.get(0));
+        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.getFirst());
         Assertions.assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
         Assertions.assertTrue(containsApprovedWorkflow(workflowEntityAfter));
     }
@@ -202,7 +201,7 @@ class UserControllerTest extends IntegrationBase {
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
 
         Assertions.assertEquals(1, rolledBackTranscription.size());
-        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.get(0));
+        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.getFirst());
         Assertions.assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
         Assertions.assertTrue(containsApprovedWorkflow(workflowEntityAfter));
     }

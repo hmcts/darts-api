@@ -69,7 +69,7 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
 
     private static @NotNull List<Integer> firstTwoCmrIdsFrom(List<CaseRetentionEntity> caseRetentionsWithCmr) {
         return asList(
-            caseRetentionsWithCmr.get(0).getCaseManagementRetention().getId(),
+            caseRetentionsWithCmr.getFirst().getCaseManagementRetention().getId(),
             caseRetentionsWithCmr.get(1).getCaseManagementRetention().getId());
     }
 

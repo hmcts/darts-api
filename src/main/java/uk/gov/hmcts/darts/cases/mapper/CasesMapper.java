@@ -7,23 +7,30 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
+import uk.gov.hmcts.darts.cases.model.CaseOpenStatusEnum;
+import uk.gov.hmcts.darts.cases.model.CourthouseResponseObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ReportingRestriction;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +40,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
@@ -129,11 +137,9 @@ public class CasesMapper {
         if (!caseRetentionOptional.isEmpty()) {
             CaseRetentionEntity caseRetention = caseRetentionOptional.get();
             RetentionPolicyTypeEntity retentionPolicy = caseRetention.getRetentionPolicyType();
-
             singleCase.setRetainUntilDateTime(caseRetention.getRetainUntil());
             singleCase.setRetentionDateTimeApplied(caseRetention.getRetainUntilAppliedOn());
             singleCase.setRetentionPolicyApplied(retentionPolicy.getPolicyName());
-
         }
 
         singleCase.setCaseClosedDateTime(caseEntity.getCaseClosedTimestamp());
@@ -160,6 +166,63 @@ public class CasesMapper {
         singleCase.setReportingRestrictions(sortedByTimestamp(reportingRestrictions));
 
         return singleCase;
+    }
+
+    public AdminSingleCaseResponseItem mapToAdminSingleCaseResponseItem(CourtCaseEntity courtCase) {
+        AdminSingleCaseResponseItem adminCase = new AdminSingleCaseResponseItem();
+
+        populateRetentionDetails(courtCase, adminCase);
+
+        adminCase.setId(courtCase.getId());
+        adminCase.setCourthouse(createCourthouse(courtCase.getCourthouse()));
+        adminCase.setCaseNumber(courtCase.getCaseNumber());
+        adminCase.setDefendants(courtCase.getDefendantStringList());
+        adminCase.setJudges(courtCase.getJudgeStringList());
+        adminCase.setProsecutors(courtCase.getProsecutorsStringList());
+        adminCase.setDefenders(courtCase.getDefenceStringList());
+        populateReportingRestrictions(courtCase, adminCase);
+
+        adminCase.caseClosedDateTime(courtCase.getCaseClosedTimestamp());
+        adminCase.isRetentionUpdated(courtCase.isRetentionUpdated());
+        adminCase.retentionRetries(courtCase.getRetentionRetries());
+        adminCase.setRetConfScore(
+            Optional.ofNullable(courtCase.getRetConfScore())
+                .map(RetentionConfidenceScoreEnum::getId)
+                .orElse(null));
+        adminCase.setRetConfReason(
+            Optional.ofNullable(courtCase.getRetConfReason())
+                .map(RetentionConfidenceReasonEnum::name)
+                .orElse(null));
+        adminCase.setRetConfUpdatedTs(courtCase.getRetConfUpdatedTs());
+
+        adminCase.setCaseObjectId(courtCase.getLegacyCaseObjectId());
+        adminCase.setCaseObjectName(courtCase.getCaseObjectName());
+        adminCase.setCaseType(courtCase.getCaseType());
+        adminCase.setUploadPriority(courtCase.getUploadPriority());
+
+        if (courtCase.getClosed()) {
+            adminCase.setCaseStatus(CaseOpenStatusEnum.CLOSED);
+        } else {
+            adminCase.setCaseStatus(CaseOpenStatusEnum.OPEN);
+        }
+
+        adminCase.setCreatedAt(courtCase.getCreatedDateTime());
+        adminCase.setCreatedBy(courtCase.getCreatedBy().getId());
+        adminCase.setLastModifiedAt(courtCase.getLastModifiedDateTime());
+        adminCase.setLastModifiedBy(courtCase.getLastModifiedBy().getId());
+        adminCase.setIsDeleted(courtCase.isDeleted());
+        adminCase.setCaseDeletedBy(
+            Optional.ofNullable(courtCase.getDeletedBy())
+                .map(UserAccountEntity::getId)
+                .orElse(null));
+        adminCase.setCaseDeletedAt(courtCase.getDeletedTimestamp());
+
+        adminCase.setIsDataAnonymised(courtCase.isDataAnonymised());
+        adminCase.setDataAnonymisedAt(courtCase.getDataAnonymisedTs());
+        adminCase.setDataAnonymisedBy(courtCase.getDataAnonymisedBy());
+        adminCase.setIsInterpreterUsed(courtCase.getInterpreterUsed());
+
+        return adminCase;
     }
 
     private static List<ReportingRestriction> sortedByTimestamp(List<ReportingRestriction> reportingRestrictions) {
@@ -211,11 +274,48 @@ public class CasesMapper {
         return defendant;
     }
 
-
     private String toStringOrDefaultTo(LocalTime time) {
         if (Objects.isNull(time)) {
             return "";
         }
         return time.truncatedTo(ChronoUnit.MINUTES).toString();
+    }
+
+
+    private void populateReportingRestrictions(CourtCaseEntity courtCase, AdminSingleCaseResponseItem adminCase) {
+        var reportingRestrictions = hearingReportingRestrictionsRepository
+            .findAllByCaseId(courtCase.getId()).stream()
+            .map(this::toReportingRestriction)
+            .collect(toList());
+
+        if (nonNull(courtCase.getReportingRestrictions()) && reportingRestrictions.isEmpty()) {
+            reportingRestrictions.add(
+                reportingRestrictionWithName(courtCase.getReportingRestrictions().getEventName()));
+        }
+
+        adminCase.setReportingRestrictions(sortedByTimestamp(reportingRestrictions));
+    }
+
+    private void populateRetentionDetails(CourtCaseEntity courtCase, AdminSingleCaseResponseItem adminCase) {
+        Optional<CaseRetentionEntity> caseRetentionOptional = caseRetentionRepository
+            .findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(
+                courtCase,
+                String.valueOf(CaseRetentionStatus.COMPLETE)
+            );
+
+        if (!caseRetentionOptional.isEmpty()) {
+            CaseRetentionEntity caseRetention = caseRetentionOptional.get();
+            RetentionPolicyTypeEntity retentionPolicy = caseRetention.getRetentionPolicyType();
+            adminCase.setRetainUntilDateTime(caseRetention.getRetainUntil());
+            adminCase.setRetentionDateTimeApplied(caseRetention.getRetainUntilAppliedOn());
+            adminCase.setRetentionPolicyApplied(retentionPolicy.getPolicyName());
+        }
+    }
+
+    private CourthouseResponseObject createCourthouse(CourthouseEntity courthouse) {
+        CourthouseResponseObject responseCourthouse = new CourthouseResponseObject();
+        responseCourthouse.setId(courthouse.getId());
+        responseCourthouse.setDisplayName(courthouse.getDisplayName());
+        return responseCourthouse;
     }
 }

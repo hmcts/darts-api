@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,6 +16,7 @@ public class GetCasesSearchRequest {
 
     String caseNumber;
     String courthouse;
+    List<Integer> courthouseIds;
     String courtroom;
     String judgeName;
     String defendantName;

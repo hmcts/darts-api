@@ -10,11 +10,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
@@ -37,9 +39,6 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "event_object_id", unique = true, length = 16)
     private String legacyObjectId;
 
-    @Column(name = "folder_path")
-    private String folderPath;
-
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "evh_id")
     private EventHandlerEntity eventType;
@@ -56,6 +55,9 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @ManyToOne
     @JoinColumn(name = "ctr_id", nullable = false)
     private CourtroomEntity courtroom;
+
+    @OneToMany(mappedBy = EventLinkedCaseEntity_.EVENT)
+    private List<EventLinkedCaseEntity> eventLinkedCaseEntities = new ArrayList<>();
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
@@ -89,5 +91,12 @@ public class EventEntity extends CreatedModifiedBaseEntity {
 
     public void addHearing(HearingEntity hearingEntity) {
         hearingEntities.add(hearingEntity);
+    }
+
+    public List<CourtCaseEntity> getLinkedCases() {
+        if (CollectionUtils.isEmpty(eventLinkedCaseEntities)) {
+            return new ArrayList<>();
+        }
+        return eventLinkedCaseEntities.stream().map(EventLinkedCaseEntity::getCourtCase).toList();
     }
 }

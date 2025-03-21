@@ -124,26 +124,26 @@ class ArmDataManagementApiImplTest {
     @Test
     void copyBlobDataToArm() {
 
-        UUID unstructuredUuid = UUID.randomUUID();
+        String unstructuredUuid = UUID.randomUUID().toString();
         String filename = "someFile";
         when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn(UNSTRUCTURED_CONTAINER_NAME);
         when(armDataManagementConfiguration.getFolders().getSubmission()).thenReturn("DARTS/submission/");
 
-        armDataManagementApi.copyBlobDataToArm(unstructuredUuid.toString(), filename);
+        armDataManagementApi.copyBlobDataToArm(unstructuredUuid, filename);
 
         verify(dataManagementService).copyBlobData(
-            UNSTRUCTURED_CONTAINER_NAME, ARM_BLOB_CONTAINER_NAME, unstructuredUuid.toString(), "DARTS/submission/" + filename);
+            UNSTRUCTURED_CONTAINER_NAME, ARM_BLOB_CONTAINER_NAME, unstructuredUuid, "DARTS/submission/" + filename);
     }
 
     @Test
     void copyDetsBlobDataToArm() {
 
-        UUID detsUuid = UUID.randomUUID();
+        String detsUuid = UUID.randomUUID().toString();
         String filename = "someFile";
         when(armDataManagementConfiguration.getFolders().getSubmission()).thenReturn("DARTS/submission/");
 
-        armDataManagementApi.copyDetsBlobDataToArm(detsUuid.toString(), filename);
+        armDataManagementApi.copyDetsBlobDataToArm(detsUuid, filename);
 
-        verify(detsDataManagementApi).copyDetsBlobDataToArm(detsUuid.toString(), "DARTS/submission/" + filename);
+        verify(detsDataManagementApi).copyDetsBlobDataToArm(detsUuid, "DARTS/submission/" + filename);
     }
 }

@@ -41,10 +41,6 @@ spring:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
-  servlet:
-    multipart:
-      max-file-size: 1KB
-      max-request-size: 10KB #this affects addAudio as well, so needs to handle a 350mb mp2 file
   datasource:
     hikari:
       maximum-pool-size: 10 # Overrides the value in `application.yaml` to a smaller value more appropriate for integration tests, sized below the `max_connections` limit specified in PostgresIntegrationBase.
@@ -61,16 +57,11 @@ darts:
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:${wiremock.server.port}}
   audio:
-    max-file-duration-minutes: 1440
     concat-workspace: ${java.io.tmpdir}/audiotransform/concatenate
     merge-workspace: ${java.io.tmpdir}/audiotransform/merge
     trim-workspace: ${java.io.tmpdir}/audiotransform/trim
     re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
     temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
-    allowed-media-formats:
-      - "mpeg2"
-      - "mp2"
-      - "audio/mpeg"
   transformation:
     service:
       audio:
@@ -88,6 +79,13 @@ darts:
       url: http://localhost:${wiremock.server.port}
       arm-service-entitlement: some-entitlement
       arm-storage-account-name: some-account-name
+    arm:
+      temp-blob-workspace: ${java.io.tmpdir}/armworkspace
+      max-continuation-batch-size: 10
+      continuation-token-duration: PT1M
+      batch-response-cleanup:
+        buffer-minutes: 15
+        manifest-file-suffix: .a360
   transcription:
     max-file-size: 20
   automated:
@@ -96,11 +94,13 @@ darts:
         system-user-email: dartssystemuser@hmcts.net
       case-expiry-deletion:
         enabled: true
+      process-e2e-arm-rpo-pending:
+        thread-sleep-duration: ${ARM_RPO_THREAD_SLEEP_DURATION:2s}
 logging:
   level:
-    root: DEBUG
-    uk:
-      gov:
-        hmcts:
-          darts: DEBUG
+    root: ${INTEGRATION_TEST_LOGGING_LEVEL:INFO}
+    uk.gov.hmcts.darts: ${INTEGRATION_TEST_LOGGING_LEVEL:DEBUG}
+    net.javacrumbs.shedlock: ${INTEGRATION_TEST_LOGGING_LEVEL:INFO}
+    org.springframework.web.servlet.mvc.method.annotation: ${INTEGRATION_TEST_LOGGING_LEVEL:DEBUG}
+    org.springframework.web: ${INTEGRATION_TEST_LOGGING_LEVEL:DEBUG}
   config: classpath:logback-test.xml

@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.hearings.http.api.HearingsApi;
 import uk.gov.hmcts.darts.hearings.model.Annotation;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.hearings.model.HearingsAudiosResponseInner;
+import uk.gov.hmcts.darts.hearings.model.HearingsResponse;
 import uk.gov.hmcts.darts.hearings.model.HearingsSearchRequest;
 import uk.gov.hmcts.darts.hearings.model.HearingsSearchResponse;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
@@ -82,5 +84,21 @@ public class HearingsController implements HearingsApi {
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<List<HearingsSearchResponse>> adminHearingsSearchPost(HearingsSearchRequest hearingsSearchRequest) {
         return new ResponseEntity<>(adminHearingSearch.adminHearingSearch(hearingsSearchRequest), HttpStatus.OK);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    @Override
+    public ResponseEntity<HearingsResponse> adminHearingsIdGet(Integer hearingId) {
+        return new ResponseEntity<>(adminHearingSearch.getAdminHearings(hearingId), HttpStatus.OK);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    @Override
+    public ResponseEntity<List<HearingsAudiosResponseInner>> adminHearingsIdAudiosGet(Integer hearingId) {
+        return new ResponseEntity<>(adminHearingSearch.getHearingAudios(hearingId), HttpStatus.OK);
     }
 }

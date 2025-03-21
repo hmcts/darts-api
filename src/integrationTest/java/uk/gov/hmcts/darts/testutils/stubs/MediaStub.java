@@ -3,12 +3,12 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.audio.repository.TransformedMediaSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
@@ -55,20 +55,13 @@ public class MediaStub {
     }
 
     public MediaEntity createMediaEntity(CourthouseEntity courthouse, String courtroomName,
-                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return mediaStubComposable.createMediaEntity(courtroomStub, courthouse, courtroomName, startTime, endTime, channel);
+                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel, boolean isCurrent) {
+        return mediaStubComposable.createMediaEntity(courtroomStub, courthouse, courtroomName, startTime, endTime, channel, isCurrent);
     }
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         return mediaStubComposable.createMediaEntity(courthouseStubComposable,
                                                      courtroomStub, courthouseName, courtroomName, startTime, endTime, channel);
-    }
-
-    public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName,
-                                               OffsetDateTime startTime, OffsetDateTime endTime, int channel,
-                                               String mediaType) {
-        return mediaStubComposable.createHiddenMediaEntity(courthouseStubComposable,
-                                                           courtroomStub, courthouseName, courtroomName, startTime, endTime, channel, mediaType);
     }
 
     @Transactional
@@ -141,6 +134,6 @@ public class MediaStub {
     @Transactional
     public Integer getHearingId(Integer id) {
         Optional<MediaEntity> mediaEntity = mediaRepository.findById(id);
-        return mediaEntity.get().getHearingList().get(0).getId();
+        return mediaEntity.get().getHearingList().getFirst().getId();
     }
 }
