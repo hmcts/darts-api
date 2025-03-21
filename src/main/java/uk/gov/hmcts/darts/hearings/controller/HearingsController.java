@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.model.PostAdminSearchRequest;
 import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
-import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.http.api.HearingsApi;
 import uk.gov.hmcts.darts.hearings.model.Annotation;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
@@ -92,9 +91,7 @@ public class HearingsController implements HearingsApi {
                                                  .courthouseIds(hearingsSearchRequest.getCourthouseIds())
                                                  .hearingStartAt(hearingsSearchRequest.getHearingStartAt())
                                                  .hearingEndAt(hearingsSearchRequest.getHearingEndAt())
-                                                 .build(),
-                                             HearingApiError.CRITERIA_TOO_BROAD,
-                                             HearingApiError.INVALID_REQUEST);
+                                                 .build());
         return new ResponseEntity<>(adminHearingSearch.adminHearingSearch(hearingsSearchRequest), HttpStatus.OK);
     }
 

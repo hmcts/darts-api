@@ -34,6 +34,11 @@ public enum CommonApiError implements DartsApiError {
         CommonErrorCode.INTERNAL_SERVER_ERROR.getValue(),
         HttpStatus.INTERNAL_SERVER_ERROR,
         CommonTitleErrors.INTERNAL_SERVER_ERROR.getValue()
+    ),
+    CRITERIA_TOO_BROAD(
+        CommonErrorCode.CRITERIA_TOO_BROAD.getValue(),
+        HttpStatus.BAD_REQUEST,
+        CommonTitleErrors.CRITERIA_TOO_BROAD.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "COMMON";

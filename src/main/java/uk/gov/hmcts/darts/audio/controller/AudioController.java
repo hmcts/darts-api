@@ -193,9 +193,7 @@ public class AudioController implements AudioApi {
                                                  .courthouseIds(adminMediasSearchRequest.getCourthouseIds())
                                                  .hearingStartAt(adminMediasSearchRequest.getHearingStartAt())
                                                  .hearingEndAt(adminMediasSearchRequest.getHearingEndAt())
-                                                 .build(),
-                                             AudioApiError.CRITERIA_TOO_BROAD,
-                                             AudioApiError.INVALID_REQUEST);
+                                                 .build());
 
         return new ResponseEntity<>(adminMediaService.performAdminMediasSearchPost(adminMediasSearchRequest), HttpStatus.OK);
     }

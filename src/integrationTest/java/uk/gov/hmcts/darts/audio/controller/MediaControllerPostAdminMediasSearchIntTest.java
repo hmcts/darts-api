@@ -287,11 +287,11 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-              "type": "AUDIO_125",
-              "title": "The request is not valid",
-              "status": 400,
-              "detail": "The time between the start and end date cannot be more than 12 months"
-            }
+               "type": "COMMON_104",
+               "title": "Invalid request",
+               "status": 400,
+               "detail": "The time between the start and end date cannot be more than 12 months"
+             }
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -313,8 +313,8 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         String expectedResponse = """
             {
-              "type": "AUDIO_124",
-              "title": "Search criteria is too broad",
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
               "status": 400
             }""";
 
@@ -337,9 +337,9 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         String expectedResponse = """
-            {
-              "type": "AUDIO_124",
-              "title": "Search criteria is too broad",
+                        {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
               "status": 400
             }""";
 

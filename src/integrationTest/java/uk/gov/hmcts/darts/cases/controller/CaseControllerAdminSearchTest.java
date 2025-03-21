@@ -304,11 +304,11 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-              "type": "CASE_103",
-              "title": "The request is not valid",
-              "status": 400,
-              "detail": "The hearing start date cannot be after the end date."
-            }
+               "type": "COMMON_104",
+               "title": "Invalid request",
+               "status": 400,
+               "detail": "The hearing start date cannot be after the end date."
+             }
             """;
 
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -331,10 +331,10 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-               "type": "CASE_102",
-               "title": "Search criteria is too broad, please add at least 1 more criteria to search for.",
-               "status": 400
-             }
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
             """;
 
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
