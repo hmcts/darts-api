@@ -17,7 +17,7 @@ import static java.util.Objects.isNull;
 public class AdminSearchRequestValidator {
 
     @Value("${darts.admin-search.hearing-dates-max-search-period}")
-    private String hearingDatesMaxSearchPeriod;
+    String hearingDatesMaxSearchPeriod;
 
     public void validate(PostAdminSearchRequest postAdminSearchRequest, DartsApiError criteriaTooBroad, DartsApiError invalidRequest) {
         // if hearing dates are provided, validate them
