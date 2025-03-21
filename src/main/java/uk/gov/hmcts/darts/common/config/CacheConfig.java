@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @EnableCaching
 public class CacheConfig {
 
-    @Bean
+    @Bean(name = "inMemoryCacheManager")
     public CacheManager inMemoryCacheManager() {
         return new ConcurrentMapCacheManager();
     }
