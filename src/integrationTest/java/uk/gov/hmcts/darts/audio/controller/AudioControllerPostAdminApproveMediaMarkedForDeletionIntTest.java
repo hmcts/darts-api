@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -99,15 +100,25 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         var superAdminUser = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("testuser");
-        ObjectAdminActionEntity adminActionEntity = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                                                                                            .media(mediaEntity)
-                                                                                            .objectHiddenReason(
-                                                                                                objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
-                                                                                            .markedForManualDeletion(false)
-                                                                                            .markedForManualDelBy(null)
-                                                                                            .markedForManualDelDateTime(null)
-                                                                                            .hiddenBy(testUser)
-                                                                                            .build());
+
+        mediaEntity.setChronicleId("123");
+        MediaEntity mediaEntity2 = createAndSaveMediaEntity(mediaEntity.getCourtroom());
+        mediaEntity2.setChronicleId("123");
+        MediaEntity mediaEntity3 = createAndSaveMediaEntity(mediaEntity.getCourtroom());
+        mediaEntity3.setChronicleId("123");
+        MediaEntity mediaEntity4UniqueChronicleId = createAndSaveMediaEntity(mediaEntity.getCourtroom());
+        mediaEntity4UniqueChronicleId.setChronicleId("1234");
+
+        dartsDatabase.save(mediaEntity);
+        dartsDatabase.save(mediaEntity2);
+        dartsDatabase.save(mediaEntity3);
+        dartsDatabase.save(mediaEntity4UniqueChronicleId);
+
+        ObjectAdminActionEntity adminActionEntity = createObjectAdminActionEntity(mediaEntity, testUser);
+        ObjectAdminActionEntity adminActionEntity2 = createObjectAdminActionEntity(mediaEntity2, testUser);
+        ObjectAdminActionEntity adminActionEntity3 = createObjectAdminActionEntity(mediaEntity3, testUser);
+        ObjectAdminActionEntity adminActionEntity4UniqueChronicleId = createObjectAdminActionEntity(mediaEntity4UniqueChronicleId, testUser);
+
 
         // when
         MvcResult mvcResult = mockMvc.perform(post(endpoint))
@@ -115,6 +126,11 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
             .andReturn();
 
         assertAudit(adminActionEntity);
+        // assert that the other media with the same chronicle id are also marked for deletion
+        assertAudit(adminActionEntity2);
+        assertAudit(adminActionEntity3);
+        // assert that the media with a different chronicle id is not marked for deletion
+        assertNoAudit(adminActionEntity4UniqueChronicleId);
 
         // then
         MediaApproveMarkedForDeletionResponse mediaApproveMarkedForDeletionResponse
@@ -124,6 +140,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         assertEquals(superAdminUser.getId(), actionResponse.getMarkedForManualDeletionById());
         assertTrue(actionResponse.getIsMarkedForManualDeletion());
     }
+
 
     @Test
     void postAdminApproveMediaMarkedForDeletionWhereCurrentUserMarkedForDeletion() throws Exception {
@@ -307,4 +324,26 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         assertNull(caseExpiredAuditEntries.getFirst().getCourtCase());
     }
 
+    private void assertNoAudit(ObjectAdminActionEntity objectAdminActionEntity) {
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(objectAdminActionEntity.getId())),
+                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
+            ));
+
+        // assert additional audit data
+        assertTrue(caseExpiredAuditEntries.isEmpty());
+    }
+
+    private ObjectAdminActionEntity createObjectAdminActionEntity(MediaEntity mediaEntity, UserAccountEntity testUser) {
+        return objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                       .media(mediaEntity)
+                                                       .objectHiddenReason(
+                                                           objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                       .markedForManualDeletion(false)
+                                                       .markedForManualDelBy(null)
+                                                       .markedForManualDelDateTime(null)
+                                                       .hiddenBy(testUser)
+                                                       .build());
+    }
 }
