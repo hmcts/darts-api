@@ -1,0 +1,2 @@
+CREATE INDEX idx_eod1_full_ors_elt_med_ts ON darts.external_object_directory (ors_id, elt_id, med_id, last_modified_ts) INCLUDE (eod_id);
+CREATE INDEX idx_eod2_med_id_filtered ON darts.external_object_directory (med_id) WHERE elt_id = 2 AND med_id IS NOT NULL AND (ors_id = 2 OR transfer_attempts >= 3);
