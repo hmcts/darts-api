@@ -97,9 +97,6 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
     @Test
     void postAdminApproveMediaMarkedForDeletionShouldReturnSuccess() throws Exception {
         // given
-        var superAdminUser = superAdminUserStub.givenUserIsAuthorised(userIdentity);
-
-        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("testuser");
 
         mediaEntity.setChronicleId("123");
         MediaEntity mediaEntity2 = createAndSaveMediaEntity(mediaEntity.getCourtroom());
@@ -113,6 +110,9 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         dartsDatabase.save(mediaEntity2);
         dartsDatabase.save(mediaEntity3);
         dartsDatabase.save(mediaEntity4UniqueChronicleId);
+
+        var superAdminUser = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("testuser");
 
         ObjectAdminActionEntity adminActionEntity = createObjectAdminActionEntity(mediaEntity, testUser);
         ObjectAdminActionEntity adminActionEntity2 = createObjectAdminActionEntity(mediaEntity2, testUser);
