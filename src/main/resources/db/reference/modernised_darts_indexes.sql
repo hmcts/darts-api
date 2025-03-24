@@ -16,6 +16,7 @@
 -- v12 remove index on rps_retainer.cas_id
 --     add index media.chronicle_id
 --     add index case_overflow.cas_id to support FK, implicitly removed when PK changed
+--v13 removing duplicate indexes or those where col list is exact subset
 
 
 SET ROLE DARTS_OWNER;
@@ -74,7 +75,6 @@ CREATE INDEX cth_lst_mod_by_fk  ON COURTHOUSE(last_modified_by) TABLESPACE pg_de
 --CREATE INDEX cra_cth_fk         ON COURTHOUSE_REGION_AE(cth_id);
 CREATE INDEX cra_reg_fk         ON COURTHOUSE_REGION_AE(reg_id) TABLESPACE pg_default;
 
-CREATE INDEX ctr_cth_fk         ON COURTROOM(cth_id) TABLESPACE pg_default;
 CREATE INDEX ctr_cre_by_fk      ON COURTROOM(created_by) TABLESPACE pg_default;
 
 CREATE INDEX dan_eve_fk         ON DATA_ANONYMISATION(eve_id) TABLESPACE pg_default;
@@ -86,11 +86,9 @@ CREATE INDEX dal_elt_fk         ON DAILY_LIST(elt_id) TABLESPACE pg_default;
 CREATE INDEX dal_cre_by_fk      ON DAILY_LIST(created_by) TABLESPACE pg_default;
 CREATE INDEX dal_lst_mod_by     ON DAILY_LIST(last_modified_by) TABLESPACE pg_default;
 
-CREATE INDEX dfc_cas_fk         ON DEFENCE(cas_id) TABLESPACE pg_default;
 CREATE INDEX dfc_cre_by_fk      ON DEFENCE(created_by) TABLESPACE pg_default;
 CREATE INDEX dfc_lst_mod_by_fk  ON DEFENCE(last_modified_by) TABLESPACE pg_default;
 
-CREATE INDEX dfd_cas_fk         ON DEFENDANT(cas_id) TABLESPACE pg_default;
 CREATE INDEX dfd_cre_by_fk      ON DEFENDANT(created_by) TABLESPACE pg_default;
 CREATE INDEX dfd_lst_mod_by_fk  ON DEFENDANT(last_modified_by) TABLESPACE pg_default;
 
@@ -116,7 +114,6 @@ CREATE INDEX eod_elt_fk         ON EXTERNAL_OBJECT_DIRECTORY(elt_id) TABLESPACE 
 CREATE INDEX esa_cre_by_fk      ON EXTERNAL_SERVICE_AUTH_TOKEN(created_by) TABLESPACE pg_default;
 CREATE INDEX esa_lst_mod_by_fk  ON EXTERNAL_SERVICE_AUTH_TOKEN(last_modified_by) TABLESPACE pg_default;
 
-CREATE INDEX hea_cas_fk         ON HEARING(cas_id) TABLESPACE pg_default;
 CREATE INDEX hea_ctr_fk         ON HEARING(ctr_id) TABLESPACE pg_default;
 CREATE INDEX hea_cre_by_fk      ON HEARING(created_by) TABLESPACE pg_default;
 CREATE INDEX hea_lst_mod_by_fk  ON HEARING(last_modified_by) TABLESPACE pg_default;
@@ -173,7 +170,6 @@ CREATE INDEX orq_trd_fk         ON OBJECT_RETRIEVAL_QUEUE(trd_id) TABLESPACE pg_
 CREATE INDEX orq_cre_by_fk      ON OBJECT_RETRIEVAL_QUEUE(created_by) TABLESPACE pg_default;
 CREATE INDEX orq_lst_mod_by_fk  ON OBJECT_RETRIEVAL_QUEUE(last_modified_by) TABLESPACE pg_default;
 
-CREATE INDEX prn_cas_fk         ON PROSECUTOR(cas_id) TABLESPACE pg_default;
 CREATE INDEX prn_cre_by_fk      ON PROSECUTOR(created_by) TABLESPACE pg_default;
 CREATE INDEX prn_lst_mod_by_fk  ON PROSECUTOR(last_modified_by) TABLESPACE pg_default;
 
@@ -265,7 +261,6 @@ CREATE INDEX cao_rpt_fk         ON CASE_OVERFLOW(rpt_id) TABLESPACE pg_default;
 CREATE INDEX cao_cas_fk         ON CASE_OVERFLOW(cas_id) TABLESPACE pg_default;
 
 --v2 
-CREATE INDEX cas_cn_idx         ON COURT_CASE(case_number)                  TABLESPACE pg_default;
 CREATE INDEX cth_cn_idx         ON COURTHOUSE(UPPER(courthouse_name))       TABLESPACE pg_default;  
 CREATE INDEX ctr_cn_idx         ON COURTROOM(UPPER(courtroom_name))         TABLESPACE pg_default;
 CREATE INDEX dfc_dn_idx         ON DEFENCE(UPPER(defence_name))             TABLESPACE pg_default;
@@ -283,10 +278,6 @@ CREATE INDEX usr_upea_idx       ON USER_ACCOUNT(UPPER(user_email_address))  TABL
 CREATE INDEX usr_ag_idx         ON USER_ACCOUNT(account_guid)               TABLESPACE pg_default;
 
 --v6
-CREATE INDEX event_event_id_is_current_idx
-    ON darts.event USING btree
-    (event_id ASC NULLS LAST, is_current ASC NULLS LAST)
-    TABLESPACE pg_default;
 
 CREATE UNIQUE INDEX event_handler_event_type_event_event_sub_type_unq
     ON darts.event_handler USING btree
