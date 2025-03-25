@@ -36,6 +36,12 @@ public class ModifiedBaseEntity implements LastModifiedBy {
     @Column(name = "last_modified_by")
     private Integer lastModifiedById;
 
+    @Transient
+    @JsonIgnore
+    @Getter(AccessLevel.NONE)
+    private transient UserAccountEntity lastModifiedByUserOverride;
+
+
     @Override
     public void setLastModifiedDateTime(OffsetDateTime lastModifiedTimestamp) {
         this.lastModifiedTimestamp = lastModifiedTimestamp;
@@ -56,11 +62,7 @@ public class ModifiedBaseEntity implements LastModifiedBy {
         this.skipUserAudit = true;
     }
 
-    @Transient
-    @JsonIgnore
-    @Getter(AccessLevel.NONE)
-    private transient UserAccountEntity lastModifiedByUserOverride;
-
+    @Override
     public UserAccountEntity getLastModifiedBy() {
         //Get user override if set else return the lastModifiedBy (Prevents the incorrect log message from being set)
         return Optional.ofNullable(lastModifiedByUserOverride).orElse(lastModifiedBy);

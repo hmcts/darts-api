@@ -36,6 +36,11 @@ public class CreatedModifiedBaseEntity extends CreatedBaseEntity
     @Column(name = "last_modified_by")
     private Integer lastModifiedById;
 
+    @Transient
+    @JsonIgnore
+    @Getter(AccessLevel.NONE)
+    private transient UserAccountEntity lastModifiedByUserOverride;
+
     @Override
     public void setLastModifiedBy(UserAccountEntity userAccount) {
         this.lastModifiedByUserOverride = userAccount;
@@ -46,11 +51,7 @@ public class CreatedModifiedBaseEntity extends CreatedBaseEntity
         this.skipUserAudit = true;
     }
 
-    @Transient
-    @JsonIgnore
-    @Getter(AccessLevel.NONE)
-    private transient UserAccountEntity lastModifiedByUserOverride;
-
+    @Override
     public UserAccountEntity getLastModifiedBy() {
         //Get user override if set else return the lastModifiedBy (Prevents the incorrect log message from being set)
         return Optional.ofNullable(lastModifiedByUserOverride).orElse(lastModifiedBy);
