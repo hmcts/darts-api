@@ -30,6 +30,7 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.buildUserW
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.WORKING_DAYS_12;
 
 class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
@@ -159,7 +160,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
         assertThat(persistedTranscription.getHearing()).isNotNull();
         assertThat(persistedTranscription.getCourtCase().getCaseNumber()).isEqualTo(SOME_CASE_NUMBER);
         assertThat(persistedTranscription.getTranscriptionStatus().getId()).isEqualTo(APPROVED.getId());
-        assertThat(persistedTranscription.getTranscriptionUrgency().getId()).isEqualTo(STANDARD.getId());
+        assertThat(persistedTranscription.getTranscriptionUrgency().getId()).isEqualTo(WORKING_DAYS_12.getId());
 
         var transcriptionWorkflows = dartsDatabase.getTranscriptionWorkflowRepository().findAll().stream()
             .filter(t -> SOME_CASE_NUMBER.equals(t.getTranscription().getCourtCase().getCaseNumber()))
