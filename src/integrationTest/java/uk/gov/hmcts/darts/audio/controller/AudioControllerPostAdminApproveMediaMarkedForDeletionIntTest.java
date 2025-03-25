@@ -95,7 +95,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
     }
 
     @Test
-    void postAdminApproveMediaMarkedForDeletionShouldReturnSuccess() throws Exception {
+    void postAdminApproveMedia_usingMutlipleAssociatedMedia_shouldOnlyMarkRelatedMedia() throws Exception {
         // given
 
         mediaEntity.setChronicleId("123");
@@ -106,10 +106,14 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         MediaEntity mediaEntity4UniqueChronicleId = createAndSaveMediaEntity(mediaEntity.getCourtroom());
         mediaEntity4UniqueChronicleId.setChronicleId("1234");
 
+        MediaEntity mediaEntity5SameChronicleIdNoObjectAdminAction = createAndSaveMediaEntity(mediaEntity.getCourtroom());
+        mediaEntity5SameChronicleIdNoObjectAdminAction.setChronicleId("123");
+
         dartsDatabase.save(mediaEntity);
         dartsDatabase.save(mediaEntity2);
         dartsDatabase.save(mediaEntity3);
         dartsDatabase.save(mediaEntity4UniqueChronicleId);
+        dartsDatabase.save(mediaEntity5SameChronicleIdNoObjectAdminAction);
 
         var superAdminUser = superAdminUserStub.givenUserIsAuthorised(userIdentity);
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("testuser");
@@ -131,6 +135,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         assertAudit(adminActionEntity3);
         // assert that the media with a different chronicle id is not marked for deletion
         assertNoAudit(adminActionEntity4UniqueChronicleId);
+
 
         // then
         MediaApproveMarkedForDeletionResponse mediaApproveMarkedForDeletionResponse

@@ -76,7 +76,7 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
     }
 
     @Test
-    void testAdminApproveMediaMarkedForDeletionSuccess() {
+    void adminApproveMediaMarkedForDeletion_shouldMarkMediaForDeletion_whenUsingTypicalData() {
         // given
         Integer mediaId1 = 1;
         Integer mediaId2 = 2;

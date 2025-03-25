@@ -46,6 +46,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -271,7 +272,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
         List<MediaEntity> mediaEntities = mediaRepository.findAllByChronicleId(mediaEntity.getChronicleId());
 
-        var currentUser = userIdentity.getUserAccount();
+        UserAccountEntity currentUser = userIdentity.getUserAccount();
         List<ObjectAdminActionEntity> objectAdminActionEntities = mediaEntities.stream()
             .map(media -> media.getObjectAdminAction())
             .filter(Optional::isPresent)
