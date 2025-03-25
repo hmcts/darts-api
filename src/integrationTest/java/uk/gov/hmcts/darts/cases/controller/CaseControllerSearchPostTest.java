@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -772,7 +771,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
-    
+
     private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse) {
         var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(APPROVER, courthouse);
         securityGroup.setGlobalAccess(false);
