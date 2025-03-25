@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -135,6 +136,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         assertAudit(adminActionEntity3);
         // assert that the media with a different chronicle id is not marked for deletion
         assertNoAudit(adminActionEntity4UniqueChronicleId);
+        assertThat(dartsDatabase.getAuditRepository().findAll()).hasSize(3);
 
 
         // then
