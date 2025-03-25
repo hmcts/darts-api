@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:11.4.0")
+    classpath("org.flywaydb:flyway-database-postgresql:11.4.1")
   }
 }
 
@@ -438,8 +438,8 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.4.0'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.4.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.4.1'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.4.1'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.5'
 
   //database
