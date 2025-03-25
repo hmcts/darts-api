@@ -29,7 +29,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.buildUserWithRoleFor;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.WORKING_DAYS_12;
 
 class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
