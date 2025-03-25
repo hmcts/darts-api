@@ -953,6 +953,8 @@ components:
         - "EVENT_107"
         - "EVENT_108"
         - "EVENT_109"
+        - "EVENT_110"
+        - "EVENT_111"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -962,7 +964,9 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND
+        EVENT_ID_NOT_FOUND,
+        CRITERIA_TOO_BROAD,
+        INVALID_REQUEST
       ]
 
     EventTitleErrors:
@@ -977,6 +981,8 @@ components:
         - "The mapping has already processed events, so cannot be deleted"
         - "The search resulted in too many results"
         - "Event id does not exist"
+        - "The search criteria is too broad"
+        - "The request is not valid"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -986,4 +992,6 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND ]
+        EVENT_ID_NOT_FOUND,
+        CRITERIA_TOO_BROAD,
+        INVALID_REQUEST ]

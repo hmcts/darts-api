@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.cases.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -230,6 +232,59 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminSearchTest/testOkIsAnonymised/expectedResponse.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminCaseSearch_multipleReturned_SearchByCourthouseIdsAndHearingDates() throws Exception {
+
+        String requestBody = """
+            {
+              "courthouse_ids": [
+                <<courthouseId>>
+              ],
+              "case_number": null,
+              "courtroom_name": null,
+              "hearing_start_at": "2023-03-02",
+              "hearing_end_at": "2024-03-01"
+            }""";
+
+        requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminSearchTest/testOk/expectedResponseMultiple.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminCasesSearchPost_shouldReturnBadRequest_whenCourtroomNameIsLowercase() throws Exception {
+        // Given
+        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
+        request.setCourtroomName("courtroom1");  // lowercase value
+        request.setCaseNumber("Case1");
+
+        // When/Then
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+               "type": "CASE_103",
+               "title": "The request is not valid..",
+               "status": 400,
+               "detail": "Courthouse and courtroom must be uppercase."
+             }""";
+
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     private void setupUserAccountAndSecurityGroup() {

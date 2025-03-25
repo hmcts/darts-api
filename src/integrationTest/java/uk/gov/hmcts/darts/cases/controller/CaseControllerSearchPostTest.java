@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
-import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -40,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.ENDPOINT_URL;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithDifferentNameAndDisplayName;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
@@ -61,9 +59,9 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     UserAccountRepository userAccountRepository;
     @Autowired
     private transient MockMvc mockMvc;
-    CourthouseEntity swanseaCourthouse;
-    CourthouseEntity myCourthouseWithDifferentDisplayName;
-    UserAccountEntity user;
+    private CourthouseEntity swanseaCourthouse;
+    private CourthouseEntity myCourthouseWithDifferentDisplayName;
+    private UserAccountEntity user;
 
 
     @BeforeEach
@@ -669,44 +667,110 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchPost_shouldReturn400_whenCourthouseIsLowercase() throws Exception {
-        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
+    void casesSearchPost_shouldReturn400_whenJudgeNameLengthIs2() throws Exception {
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse));
+        setupUserAccountAndSecurityGroup(swanseaCourthouse);
         String requestBody = """
             {
-              "courthouse": "swansea",
-              "courtroom": "COURTROOM1",
-              "date_to": "2023-05-20"
+             "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "judge_name": "t5"
             }""";
 
         MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest());
+        MvcResult response = mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+
+        String expectedResponse = """
+            {
+              "violations": [
+                {
+                  "field": "judgeName",
+                  "message": "size must be between 3 and 2000"
+                }
+              ],
+              "type": "https://zalando.github.io/problem/constraint-violation",
+              "status": 400,
+              "title": "Constraint Violation"
+            }
+            """;
+        String actualResponse = response.getResponse().getContentAsString();
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
-    void adminCasesSearchPost_shouldReturnBadRequest_whenCourtroomNameIsLowercase() throws Exception {
-        // Given
+    void casesSearchPost_shouldReturn400_whenDefendantNameLengthIs2() throws Exception {
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        SecurityGroupEntity securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(SUPER_ADMIN, swanseaCourthouse);
-        securityGroup.setGlobalAccess(true);
-        assignSecurityGroupToUser(user, securityGroup);
+        setupUserAccountAndSecurityGroup(swanseaCourthouse);
+        String requestBody = """
+            {
+             "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "defendant_name": "t5"
+            }""";
 
-        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
-        request.setCourtroomName("courtroom1");  // lowercase value
-
-        // When/Then
-        mockMvc.perform(post("/admin/cases/search")
-                            .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(objectMapper.writeValueAsString(request)))
+        MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder)
             .andExpect(status().isBadRequest())
-            .andExpect(result -> {
-                String response = result.getResponse().getContentAsString();
-                Assertions.assertTrue(response.contains("Courthouse and courtroom must be uppercase"));
-            });
+            .andReturn();
+
+
+        String expectedResponse = """
+            {
+              "violations": [
+                {
+                  "field": "defendantName",
+                  "message": "size must be between 3 and 2000"
+                }
+              ],
+              "type": "https://zalando.github.io/problem/constraint-violation",
+              "status": 400,
+              "title": "Constraint Violation"
+            }
+            """;
+        String actualResponse = response.getResponse().getContentAsString();
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchPost_shouldReturn400_whenCourthouseNameLengthIs2() throws Exception {
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup(swanseaCourthouse);
+        String requestBody = """
+            {
+             "courthouse": "SW",
+              "courtroom": "1"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+
+        String expectedResponse = """
+            {
+              "violations": [
+                {
+                  "field": "courthouse",
+                  "message": "size must be between 3 and 2000"
+                }
+              ],
+              "type": "https://zalando.github.io/problem/constraint-violation",
+              "status": 400,
+              "title": "Constraint Violation"
+            }
+            """;
+        String actualResponse = response.getResponse().getContentAsString();
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse) {

@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.model.PostAdminSearchRequest;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
+import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
@@ -67,7 +70,8 @@ public class EventsController implements EventApi {
     private final EventService eventService;
     private final DataAnonymisationService dataAnonymisationService;
     private final UserIdentity userIdentity;
-
+    private final AdminSearchRequestValidator adminSearchRequestValidator;
+    
     @Value("${darts.event-obfuscation.enabled}")
     private final boolean eventObfuscationEnabled;
 
@@ -173,6 +177,14 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<List<AdminSearchEventResponseResult>> adminSearchEvents(AdminEventSearch adminEventSearch) {
+        adminSearchRequestValidator.validate(PostAdminSearchRequest.builder()
+                                                 .caseNumber(adminEventSearch.getCaseNumber())
+                                                 .courthouseIds(adminEventSearch.getCourthouseIds())
+                                                 .hearingStartAt(adminEventSearch.getHearingStartAt())
+                                                 .hearingEndAt(adminEventSearch.getHearingEndAt())
+                                                 .build(),
+                                             CaseApiError.CRITERIA_TOO_BROAD,
+                                             CaseApiError.INVALID_REQUEST);
         var adminSearchEventResponse = eventSearchService.searchForEvents(adminEventSearch);
         return new ResponseEntity<>(adminSearchEventResponse, HttpStatus.OK);
     }
