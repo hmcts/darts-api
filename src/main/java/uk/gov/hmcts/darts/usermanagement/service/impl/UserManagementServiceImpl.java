@@ -97,6 +97,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     @Transactional
     public UserWithIdAndTimestamps modifyUser(Integer userId, UserPatch userPatch) {
+        System.out.println("TMP: here");
         userAccountExistsValidator.validate(userId);
         userTypeValidator.validate(userId);
         userActivationPermissionsValidator.validate(userPatch);
@@ -105,6 +106,9 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         var userAccountEntity = userAccountRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("No value present"));
+
+        userAccountEntity.setLastModifiedBy(userAccountEntity);//TODO temp
+        userAccountRepository.saveAndFlush(userAccountEntity);
 
         var activitiesForAudit = auditActivitiesFor(userAccountEntity, userPatch);
         var rolledBackTranscriptionsIds = updatedUserAccount(userPatch, userAccountEntity);
@@ -119,6 +123,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities());
         user.setSecurityGroupIds(securityGroupIds);
+        System.out.println("TMP: here 2");
 
         return user;
     }

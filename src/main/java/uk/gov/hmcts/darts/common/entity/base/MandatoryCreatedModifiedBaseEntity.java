@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity.base;
 
+import com.azure.core.annotation.Get;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -11,16 +12,17 @@ import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostUpdate;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.NotAudited;
+import org.springframework.data.annotation.Transient;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.listener.UserAuditListener;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @MappedSuperclass
 @Getter
@@ -43,7 +45,9 @@ public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEnti
 
     @Override
     public void setLastModifiedBy(UserAccountEntity userAccount) {
-        this.lastModifiedBy = userAccount;
+        this.lastModifiedByUserOverride = userAccount;
+        //Set user override to the new user account. This prevents the incorrect log message (see below) from being set
+        //The [lastModifiedBy] property of the [...] entity was modified, but it won't be updated because the property is immutable.
         this.lastModifiedById = userAccount == null ? null : userAccount.getId();
         //Mark skip user audit as true to prevent audit listener from overriding the lastModifiedBy and lastModifiedDateTime
         this.skipUserAudit = true;
@@ -52,22 +56,10 @@ public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEnti
     @Transient
     @JsonIgnore
     @Getter(AccessLevel.NONE)
-    private transient UserAccountEntity tempLastModifiedBy;
+    private transient UserAccountEntity lastModifiedByUserOverride;
 
-    @PrePersist
-    @PreUpdate
-    public void prePersist() {
-        // Store the lastModifiedBy in a temporary variable to be used in postPersist
-        // This is required to prevent the incorrect log messages of
-        // entity was modified but it wont be updated in the database becuase it is marked as updatable = false
-        tempLastModifiedBy = lastModifiedBy;
-        lastModifiedBy = null;
-    }
-
-    @PostPersist
-    @PostUpdate
-    public void postPersist() {
-        lastModifiedBy = tempLastModifiedBy;
-        tempLastModifiedBy = null;
+    public UserAccountEntity getLastModifiedBy() {
+        //Get user override if set else return the lastModifiedBy (Prevents the incorrect log message from being set)
+        return Optional.ofNullable(lastModifiedByUserOverride).orElse(lastModifiedBy);
     }
 }
