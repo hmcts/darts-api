@@ -158,13 +158,42 @@ withPipeline(type, product, component) {
         ]
 
         publishHTML target: [
-            allowMissing         : true,
-            alwaysLinkToLastBuild: true,
-            keepAll              : true,
-            reportDir            : "build/reports/pmd",
-            reportFiles          : "main.html",
-            reportName           : "PMD Report"
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/pmd",
+                reportFiles          : "main.html",
+                reportName           : "PMD Main Report"
         ]
+
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/pmd",
+                reportFiles          : "test.html",
+                reportName           : "PMD Test Report"
+        ]
+
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/pmd",
+                reportFiles          : "functionalTest.html",
+                reportName           : "PMD Functional Test Report"
+        ]
+
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/pmd",
+                reportFiles          : "integrationTest.html",
+                reportName           : "PMD Integration Test Report"
+        ]
+
+
     }
 
     afterFailure('test') {
