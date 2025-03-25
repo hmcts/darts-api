@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -39,7 +40,8 @@ public class AudioLinkingAutomatedTask
     private final EventRepository eventRepository;
     private final EventProcessor eventProcessor;
     private final AudioConfigurationProperties audioConfigurationProperties;
-    private final List<Integer> handheldCourtroomIds;
+    @SuppressWarnings("checkstyle:ImmutableField")
+    private List<Integer> handheldCourtroomIds = new ArrayList<>();
 
     protected AudioLinkingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                         AudioLinkingAutomatedTaskConfig automatedTaskConfigurationProperties,
