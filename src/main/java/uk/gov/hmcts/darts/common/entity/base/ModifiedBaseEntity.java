@@ -60,7 +60,7 @@ public class ModifiedBaseEntity implements LastModifiedBy {
         this.skipUserAudit = true;
     }
 
-    @org.springframework.data.annotation.Transient
+    @Transient
     @JsonIgnore
     @Getter(AccessLevel.NONE)
     private transient UserAccountEntity lastModifiedByUserOverride;
