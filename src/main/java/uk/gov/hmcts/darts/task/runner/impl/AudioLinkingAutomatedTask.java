@@ -9,6 +9,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -37,15 +38,21 @@ public class AudioLinkingAutomatedTask
 
     private final EventRepository eventRepository;
     private final EventProcessor eventProcessor;
+    private final AudioConfigurationProperties audioConfigurationProperties;
+    private List<Integer> handheldCourtroomIds;
 
     protected AudioLinkingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                         AudioLinkingAutomatedTaskConfig automatedTaskConfigurationProperties,
                                         LogApi logApi, LockService lockService,
                                         EventRepository eventRepository,
-                                        EventProcessor eventProcessor) {
+                                        EventProcessor eventProcessor,
+                                        AudioConfigurationProperties audioConfigurationProperties) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.eventRepository = eventRepository;
         this.eventProcessor = eventProcessor;
+        this.audioConfigurationProperties = audioConfigurationProperties;
+        this.handheldCourtroomIds = audioConfigurationProperties.getHandheldAudioCourtroomNumbers().stream().map(Integer::parseInt).toList();
+
     }
 
     @Override
@@ -56,8 +63,13 @@ public class AudioLinkingAutomatedTask
     @Override
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
-        List<Integer> eveIds = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
-                                                                    Limit.of(getAutomatedTaskBatchSize()));
+        Integer batchSize = getAutomatedTaskBatchSize();
+        List<Integer> eveIds = eventRepository.findAllByEventStatusAndNotCourtrooms(
+            EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
+            handheldCourtroomIds,
+            Limit.of(batchSize));
+
+        log.info("Found {} events to process out of a total batch size {}", eveIds.size(), batchSize);
         eveIds.forEach(eventProcessor::processEvent);
     }
 
@@ -69,7 +81,6 @@ public class AudioLinkingAutomatedTask
         private final EventService eventService;
         private final MediaLinkedCaseHelper mediaLinkedCaseHelper;
 
-
         @Getter
         @Value("${darts.automated.task.audio-linking.pre-amble-duration:0s}")
         private final Duration preAmbleDuration;
@@ -77,7 +88,6 @@ public class AudioLinkingAutomatedTask
         @Value("${darts.automated.task.audio-linking.post-amble-duration:0s}")
         private final Duration postAmbleDuration;
         private final UserIdentity userIdentity;
-
 
         @Transactional
         public void processEvent(Integer eveId) {
@@ -90,9 +100,8 @@ public class AudioLinkingAutomatedTask
                     event.getCourtroom().getId(),
                     event.getTimestamp().plus(getPreAmbleDuration()),
                     event.getTimestamp().minus(getPostAmbleDuration()));
-                mediaEntities.forEach(mediaEntity -> {
-                    mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
-                });
+                mediaEntities.forEach(
+                    mediaEntity -> mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount));
                 event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
                 event.setLastModifiedBy(userIdentity.getUserAccount());
                 eventService.saveEvent(event);
