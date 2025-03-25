@@ -4,11 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -16,12 +15,16 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
+import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.event.service.EventService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
+import uk.gov.hmcts.darts.task.config.AudioLinkingAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -35,7 +38,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,43 +50,53 @@ class AudioLinkingAutomatedTaskTest {
     private AudioLinkingAutomatedTask.EventProcessor eventProcessor;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private AudioConfigurationProperties audioConfigurationProperties;
+    @Mock
+    private AutomatedTaskRepository automatedTaskRepository;
+    @Mock
+    private AudioLinkingAutomatedTaskConfig automatedTaskConfigurationProperties;
+    @Mock
+    private LogApi logApi;
+    @Mock
+    private LockService lockService;
 
-    @InjectMocks
-    @Spy
     private AudioLinkingAutomatedTask audioLinkingAutomatedTask;
 
     @Mock
-    UserAccountEntity userAccount;
+    private UserAccountEntity userAccount;
+
+    @BeforeEach
+    void setupData() {
+        when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers()).thenReturn(List.of("199"));
+
+        audioLinkingAutomatedTask = spy(new AudioLinkingAutomatedTask(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService,
+                                                                      eventRepository, eventProcessor, audioConfigurationProperties));
+    }
 
     @Test
-    void positiveGetAutomatedTaskName() {
+    void getAutomatedTaskName_ReturnsExpectedName() {
         assertThat(audioLinkingAutomatedTask.getAutomatedTaskName())
             .isEqualTo(AutomatedTaskName.AUDIO_LINKING_TASK_NAME);
     }
 
     @Test
-    void positiveRunTask() {
+    void runTask_ExecutesSuccessfully() {
 
         List<Integer> eventIds = List.of(1, 2, 3);
 
-        doReturn(eventIds).when(eventRepository).findAllByEventStatus(anyInt(), any());
+        doReturn(eventIds).when(eventRepository).findAllByEventStatusAndNotCourtrooms(anyInt(), any(), any());
         doNothing().when(eventProcessor).processEvent(any());
         doReturn(5).when(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
 
         audioLinkingAutomatedTask.runTask();
 
+        verify(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
+        verify(eventRepository).findAllByEventStatusAndNotCourtrooms(2, List.of(199), Limit.of(5));
 
-        verify(audioLinkingAutomatedTask, times(1))
-            .getAutomatedTaskBatchSize();
-        verify(eventRepository, times(1))
-            .findAllByEventStatus(2, Limit.of(5));
-
-        verify(eventProcessor, times(1))
-            .processEvent(1);
-        verify(eventProcessor, times(1))
-            .processEvent(2);
-        verify(eventProcessor, times(1))
-            .processEvent(3);
+        verify(eventProcessor).processEvent(1);
+        verify(eventProcessor).processEvent(2);
+        verify(eventProcessor).processEvent(3);
     }
 
     @Nested
@@ -139,27 +151,19 @@ class AudioLinkingAutomatedTaskTest {
 
             eventProcessor.processEvent(1);
 
-            verify(mediaLinkedCaseHelper, times(1))
-                .linkMediaByEvent(event, mediaEntities.getFirst(), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
-            verify(mediaLinkedCaseHelper, times(1))
-                .linkMediaByEvent(event, mediaEntities.get(1), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
-            verify(mediaLinkedCaseHelper, times(1))
-                .linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
-            verify(mediaRepository, times(1))
-                .findAllByCurrentMediaTimeContains(123, timestamp, timestamp);
-            verify(event, times(1))
-                .setEventStatus(3);
+            verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.getFirst(), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+            verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.get(1), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+            verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+            verify(mediaRepository).findAllByCurrentMediaTimeContains(123, timestamp, timestamp);
+            verify(event).setEventStatus(3);
 
-            verify(eventService, times(1))
-                .saveEvent(event);
-            verify(eventService, times(1))
-                .getEventByEveId(1);
+            verify(eventService).saveEvent(event);
+            verify(eventService).getEventByEveId(1);
         }
 
         @Test
         void processEvent_shouldLinkAudio_accountingForBufferTime() {
-            doNothing().when(mediaLinkedCaseHelper)
-                .linkMediaByEvent(any(), any(), any(), any());
+            doNothing().when(mediaLinkedCaseHelper).linkMediaByEvent(any(), any(), any(), any());
             doReturn(Duration.ofSeconds(10)).when(eventProcessor).getPreAmbleDuration();
             doReturn(Duration.ofSeconds(20)).when(eventProcessor).getPostAmbleDuration();
             EventEntity event = mock(EventEntity.class);
@@ -170,25 +174,17 @@ class AudioLinkingAutomatedTaskTest {
             when(courtroomEntity.getId()).thenReturn(123);
             when(event.getCourtroom()).thenReturn(courtroomEntity);
 
-            List<MediaEntity> mediaEntities = List.of(
-                mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
-            doReturn(mediaEntities).when(mediaRepository)
-                .findAllByCurrentMediaTimeContains(any(), any(), any());
+            List<MediaEntity> mediaEntities = List.of(mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
+            doReturn(mediaEntities).when(mediaRepository).findAllByCurrentMediaTimeContains(any(), any(), any());
 
             eventProcessor.processEvent(2);
 
-            verify(mediaLinkedCaseHelper, times(1))
-                .linkMediaByEvent(event, mediaEntities.getFirst(), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
-            verify(mediaLinkedCaseHelper, times(1))
-                .linkMediaByEvent(event, mediaEntities.get(1), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
-            verify(mediaLinkedCaseHelper, times(1))
-                .linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
-            verify(mediaRepository, times(1))
-                .findAllByCurrentMediaTimeContains(123, timestamp.plus(Duration.ofSeconds(10)), timestamp.minus(Duration.ofSeconds(20)));
-            verify(event, times(1))
-                .setEventStatus(3);
-            verify(eventService, times(1))
-                .getEventByEveId(2);
+            verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.getFirst(), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+            verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.get(1), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+            verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+            verify(mediaRepository).findAllByCurrentMediaTimeContains(123, timestamp.plus(Duration.ofSeconds(10)), timestamp.minus(Duration.ofSeconds(20)));
+            verify(event).setEventStatus(3);
+            verify(eventService).getEventByEveId(2);
         }
 
     }

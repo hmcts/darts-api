@@ -22,7 +22,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
            FROM EventEntity ee
            JOIN ee.hearingEntities he
            WHERE he.id = :hearingId
-           ORDER by ee.timestamp desc 
+           ORDER by ee.timestamp desc
         """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
 
@@ -73,7 +73,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
              AND (cast(:hearingStartDate as LocalDate) IS NULL OR h.hearingDate >= :hearingStartDate)
              AND (cast(:hearingEndDate as LocalDate) IS NULL OR h.hearingDate <= :hearingEndDate)
              AND e.isCurrent = true
-        ORDER BY e.id DESC                          
+        ORDER BY e.id DESC
         """)
     List<EventSearchResult> searchEventsFilteringOn(
         List<Integer> courthouseIds,
@@ -167,8 +167,14 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         """)
     List<EventEntity> findAllByRelatedEvents(Integer eveId, Integer eventId, List<Integer> courtCaseIds);
 
-    @Query("select e.id from EventEntity e where e.eventStatus = :statusNumber")
-    List<Integer> findAllByEventStatus(Integer statusNumber, Limit limit);
+    @Query("""
+        SELECT e.id
+        FROM EventEntity e
+        WHERE e.eventStatus = :statusNumber
+        AND e.courtroom.id not in (:courtroomIds)
+        """
+    )
+    List<Integer> findAllByEventStatusAndNotCourtrooms(Integer statusNumber, List<Integer> courtroomIds, Limit limit);
 
     @Query(value = """
                         SELECT e3.id from EventEntity e3

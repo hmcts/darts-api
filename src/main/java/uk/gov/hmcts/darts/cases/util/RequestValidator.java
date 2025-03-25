@@ -43,7 +43,7 @@ public class RequestValidator {
         totalPoints += courtroomProvided ? 1 : 0;
         totalPoints += getPoints(request.getJudgeName());
         totalPoints += getPoints(request.getDefendantName());
-        totalPoints += getPoints(request.getEventTextContains());
+        totalPoints += getPoints(request.getEventTextContains(), true);
         boolean specificDateProvided = request.getDateFrom() != null && request.getDateFrom().equals(request.getDateTo());
         totalPoints += specificDateProvided ? 1 : 0;
 
@@ -63,6 +63,10 @@ public class RequestValidator {
     }
 
     private static int getPoints(String str) {
+        return getPoints(str, false);
+    }
+
+    private static int getPoints(String str, boolean errorOnShortText) {
         long length = StringUtils.length(str);
         if (length == 0) {
             return 0;
@@ -70,8 +74,12 @@ public class RequestValidator {
         if (length >= SEARCH_TEXT_LENGTH_THRESHOLD) {
             return 1;
         }
-        throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD,
-                                    "Please include at least " + SEARCH_TEXT_LENGTH_THRESHOLD + " characters.");
+        if (errorOnShortText) {
+            throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD,
+                                        "Search criteria is too broad, please include at least " + SEARCH_TEXT_LENGTH_THRESHOLD + " characters.",
+                                        false);
+        }
+        return 0;
     }
 
 
@@ -80,6 +88,7 @@ public class RequestValidator {
         if (BooleanUtils.and(new boolean[]{
             StringUtils.isBlank(request.getCaseNumber()),
             StringUtils.isBlank(request.getCourthouse()),
+            CollectionUtils.isEmpty(request.getCourthouseIds()),
             StringUtils.isBlank(request.getCourtroom()),
             StringUtils.isBlank(request.getJudgeName()),
             StringUtils.isBlank(request.getDefendantName()),
