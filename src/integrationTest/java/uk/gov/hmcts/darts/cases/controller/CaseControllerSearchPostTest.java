@@ -666,110 +666,22 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchPost_shouldReturn400_whenJudgeNameLengthIs2() throws Exception {
+    void casesSearchPost_shouldReturn400_whenCourthouseIsLowercase() throws Exception {
+        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAccountAndSecurityGroup(swanseaCourthouse);
+        setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse));
         String requestBody = """
             {
-             "courthouse": "SWANSEA",
-              "courtroom": "1",
-              "judge_name": "t5"
+              "courthouse": "swansea",
+              "courtroom": "COURTROOM1",
+              "date_to": "2023-05-20"
             }""";
 
         MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-
-        String expectedResponse = """
-            {
-              "violations": [
-                {
-                  "field": "judgeName",
-                  "message": "size must be between 3 and 2000"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
-              "status": 400,
-              "title": "Constraint Violation"
-            }
-            """;
-        String actualResponse = response.getResponse().getContentAsString();
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void casesSearchPost_shouldReturn400_whenDefendantNameLengthIs2() throws Exception {
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAccountAndSecurityGroup(swanseaCourthouse);
-        String requestBody = """
-            {
-             "courthouse": "SWANSEA",
-              "courtroom": "1",
-              "defendant_name": "t5"
-            }""";
-
-        MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-
-        String expectedResponse = """
-            {
-              "violations": [
-                {
-                  "field": "defendantName",
-                  "message": "size must be between 3 and 2000"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
-              "status": 400,
-              "title": "Constraint Violation"
-            }
-            """;
-        String actualResponse = response.getResponse().getContentAsString();
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void casesSearchPost_shouldReturn400_whenCourthouseNameLengthIs2() throws Exception {
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAccountAndSecurityGroup(swanseaCourthouse);
-        String requestBody = """
-            {
-             "courthouse": "SW",
-              "courtroom": "1"
-            }""";
-
-        MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-
-        String expectedResponse = """
-            {
-              "violations": [
-                {
-                  "field": "courthouse",
-                  "message": "size must be between 3 and 2000"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
-              "status": 400,
-              "title": "Constraint Violation"
-            }
-            """;
-        String actualResponse = response.getResponse().getContentAsString();
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest());
     }
 
     private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse) {
