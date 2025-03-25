@@ -38,6 +38,11 @@ public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEnti
     @Column(name = "last_modified_by", nullable = false)
     private Integer lastModifiedById;
 
+    @Transient
+    @JsonIgnore
+    @Getter(AccessLevel.NONE)
+    private transient UserAccountEntity lastModifiedByUserOverride;
+
     @Override
     public void setLastModifiedBy(UserAccountEntity userAccount) {
         this.lastModifiedByUserOverride = userAccount;
@@ -48,11 +53,7 @@ public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEnti
         this.skipUserAudit = true;
     }
 
-    @Transient
-    @JsonIgnore
-    @Getter(AccessLevel.NONE)
-    private transient UserAccountEntity lastModifiedByUserOverride;
-
+    @Override
     public UserAccountEntity getLastModifiedBy() {
         //Get user override if set else return the lastModifiedBy (Prevents the incorrect log message from being set)
         return Optional.ofNullable(lastModifiedByUserOverride).orElse(lastModifiedBy);
