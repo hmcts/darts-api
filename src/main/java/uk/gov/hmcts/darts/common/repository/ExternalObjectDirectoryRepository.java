@@ -382,15 +382,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                  FROM darts.external_object_directory
                  WHERE ors_id = :status AND elt_id = :type AND med_id IS NOT NULL
              ),
-                  bad_med_ids AS (
+                  med_ids_to_exclude AS (
                       SELECT DISTINCT med_id
                       FROM darts.external_object_directory
                       WHERE elt_id = :notExistsType AND med_id IS NOT NULL AND (ors_id = :notExistsStatus OR transfer_attempts >= :maxTransferAttempts)
                   )
              SELECT f.eod_id
              FROM filtered_eod f
-                      LEFT JOIN bad_med_ids b ON f.med_id = b.med_id
-             WHERE b.med_id IS NULL
+                      LEFT JOIN med_ids_to_exclude mediaToExclude ON f.med_id = mediaToExclude.med_id
+             WHERE mediaToExclude.med_id IS NULL
              ORDER BY f.last_modified_ts
              FETCH FIRST :limit ROWS ONLY;
             """
