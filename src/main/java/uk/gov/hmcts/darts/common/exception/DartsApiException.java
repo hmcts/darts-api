@@ -12,7 +12,7 @@ import java.util.Map;
 public class DartsApiException extends RuntimeException {
 
     private static final String EXCEPTION_MESSAGE_FORMAT = "%s. %s";
-    
+
     private final DartsApiError error;
     private final String detail;
     private final Map<String, Object> customProperties = new HashMap<>();
@@ -32,8 +32,11 @@ public class DartsApiException extends RuntimeException {
     }
 
     public DartsApiException(DartsApiError error, String detail) {
-        super(String.format(EXCEPTION_MESSAGE_FORMAT, error.getTitle(), detail));
+        this(error, detail, true);
+    }
 
+    public DartsApiException(DartsApiError error, String detail, boolean formatDetail) {
+        super(formatDetail ? String.format(EXCEPTION_MESSAGE_FORMAT, error.getTitle(), detail) : detail);
         this.error = error;
         this.detail = detail;
     }
