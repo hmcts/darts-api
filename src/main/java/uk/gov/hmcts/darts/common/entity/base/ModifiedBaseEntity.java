@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.listener.UserAuditListener;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @MappedSuperclass
 @Getter
@@ -51,29 +52,22 @@ public class ModifiedBaseEntity implements LastModifiedBy {
 
     @Override
     public void setLastModifiedBy(UserAccountEntity userAccount) {
-        this.lastModifiedBy = userAccount;
+        this.lastModifiedByUserOverride = userAccount;
+        //Set user override to the new user account. This prevents the incorrect log message (see below) from being set
+        //The [lastModifiedBy] property of the [...] entity was modified, but it won't be updated because the property is immutable.
         this.lastModifiedById = userAccount == null ? null : userAccount.getId();
         //Mark skip user audit as true to prevent audit listener from overriding the lastModifiedBy and lastModifiedDateTime
         this.skipUserAudit = true;
     }
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     @JsonIgnore
     @Getter(AccessLevel.NONE)
-    private transient UserAccountEntity tempLastModifiedBy;
+    private transient UserAccountEntity lastModifiedByUserOverride;
 
-    @PrePersist
-    @PreUpdate
-    public void prePersist() {
-        tempLastModifiedBy = lastModifiedBy;
-        lastModifiedBy = null;
-    }
-
-    @PostPersist
-    @PostUpdate
-    public void postPersist() {
-        lastModifiedBy = tempLastModifiedBy;
-        tempLastModifiedBy = null;
+    public UserAccountEntity getLastModifiedBy() {
+        //Get user override if set else return the lastModifiedBy (Prevents the incorrect log message from being set)
+        return Optional.ofNullable(lastModifiedByUserOverride).orElse(lastModifiedBy);
     }
 
     @Transient
