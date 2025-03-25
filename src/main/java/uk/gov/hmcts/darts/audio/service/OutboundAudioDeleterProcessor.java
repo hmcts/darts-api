@@ -7,6 +7,4 @@ import java.util.List;
 public interface OutboundAudioDeleterProcessor {
 
     List<TransientObjectDirectoryEntity> markForDeletion(Integer batchSize);
-
-    void setDeletionDays(int deletionDays);
 }
