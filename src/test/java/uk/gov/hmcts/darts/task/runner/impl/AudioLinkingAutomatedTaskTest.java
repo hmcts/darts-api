@@ -60,12 +60,11 @@ class AudioLinkingAutomatedTaskTest {
     private LogApi logApi;
     @Mock
     private LockService lockService;
-    
+
     private AudioLinkingAutomatedTask audioLinkingAutomatedTask;
 
     @Mock
     private UserAccountEntity userAccount;
-
 
     @BeforeEach
     void setupData() {
