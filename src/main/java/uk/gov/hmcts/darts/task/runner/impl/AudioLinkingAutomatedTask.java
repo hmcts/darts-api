@@ -51,7 +51,8 @@ public class AudioLinkingAutomatedTask
         this.eventRepository = eventRepository;
         this.eventProcessor = eventProcessor;
         this.audioConfigurationProperties = audioConfigurationProperties;
-        handheldCourtroomIds = audioConfigurationProperties.getHandheldAudioCourtroomNumbers().stream().map(Integer::parseInt).toList();
+        this.handheldCourtroomIds = audioConfigurationProperties.getHandheldAudioCourtroomNumbers().stream().map(Integer::parseInt).toList();
+
     }
 
     @Override
