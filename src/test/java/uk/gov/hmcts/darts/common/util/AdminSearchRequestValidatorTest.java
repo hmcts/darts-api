@@ -65,7 +65,7 @@ class AdminSearchRequestValidatorTest {
     }
 
     @Test
-    void validate_shouldNotThrowException_WhenHearingPeriodIsWithinMaxSearchPeriod() {
+    void validate_shouldNotThrowException_WhenHearingPeriodIsWithinMaxSearchPeriodAndCourthouseIdProvided() {
         request.setCourthouseIds(List.of(1));
         request.setHearingStartAt(LocalDate.of(2022, 1, 2));
         request.setHearingEndAt(LocalDate.of(2023, 1, 2));
