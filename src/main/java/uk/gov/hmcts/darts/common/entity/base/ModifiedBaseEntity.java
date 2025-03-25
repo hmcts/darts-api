@@ -7,6 +7,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -51,6 +55,25 @@ public class ModifiedBaseEntity implements LastModifiedBy {
         this.lastModifiedById = userAccount == null ? null : userAccount.getId();
         //Mark skip user audit as true to prevent audit listener from overriding the lastModifiedBy and lastModifiedDateTime
         this.skipUserAudit = true;
+    }
+
+    @Transient
+    @JsonIgnore
+    @Getter(AccessLevel.NONE)
+    private transient UserAccountEntity tempLastModifiedBy;
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        tempLastModifiedBy = lastModifiedBy;
+        lastModifiedBy = null;
+    }
+
+    @PostPersist
+    @PostUpdate
+    public void postPersist() {
+        lastModifiedBy = tempLastModifiedBy;
+        tempLastModifiedBy = null;
     }
 
     @Transient
