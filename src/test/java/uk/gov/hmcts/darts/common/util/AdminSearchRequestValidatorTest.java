@@ -41,7 +41,9 @@ class AdminSearchRequestValidatorTest {
         request.setCaseNumber("");
         request.setCourthouseIds(List.of());
 
-        assertThrows(DartsApiException.class, () -> validator.validate(request));
+        var exception = assertThrows(DartsApiException.class, () -> validator.validate(request));
+
+        assertEquals("The search criteria is too broad", exception.getMessage());
     }
 
     @Test
