@@ -106,8 +106,6 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
         Integer transcriptionWorkflowId = JsonPath.parse(response)
             .read("$.transcription_status_id");
         assertEquals(REQUESTED.getId(), transcriptionWorkflowId);
-
-
     }
 
     @Test

@@ -251,7 +251,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         var auditActivityProvider = auditActivitiesFor(transcriptionEntity, updateTranscription);
 
-        final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
+        var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
+
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
             getUserAccount(),
@@ -264,12 +265,34 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 
+        transcriptionStatusEntity = moveTranscriptionRequestedToAwaitingAuthorisation(transcriptionEntity, transcriptionStatusEntity);
+
         UpdateTranscriptionAdminResponse updateTranscriptionResponse = new UpdateTranscriptionAdminResponse();
         updateTranscriptionResponse.setTranscriptionId(transcriptionEntity.getId());
         updateTranscriptionResponse.setTranscriptionStatusId(transcriptionEntity.getTranscriptionStatus().getId());
 
         transcriptionNotifications.handleNotificationsAndAudit(userAccountEntity, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
         return updateTranscriptionResponse;
+    }
+
+    private TranscriptionStatusEntity moveTranscriptionRequestedToAwaitingAuthorisation(TranscriptionEntity transcriptionEntity,
+                                                                                        TranscriptionStatusEntity transcriptionStatusEntity) {
+        if (transcriptionEntity.getIsManualTranscription() && transcriptionStatusEntity.getId().equals(REQUESTED.getId())) {
+
+            transcriptionStatusEntity = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
+            transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
+
+            transcriptionEntity.getTranscriptionWorkflowEntities().add(
+                saveTranscriptionWorkflow(
+                    getUserAccount(),
+                    transcriptionEntity,
+                    transcriptionStatusEntity,
+                    null
+                ));
+
+            transcriptionNotifications.notifyApprovers(transcriptionEntity);
+        }
+        return transcriptionStatusEntity;
     }
 
 
