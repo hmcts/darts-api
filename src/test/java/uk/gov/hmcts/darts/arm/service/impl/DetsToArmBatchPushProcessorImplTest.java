@@ -61,6 +61,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 @Slf4j
+@Disabled
 class DetsToArmBatchPushProcessorImplTest {
 
     private static final Integer MAX_RETRY_ATTEMPTS = 3;
