@@ -231,10 +231,10 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         item.setCourthouse(courthouseMapper.toApiModel(base.getMedia().getCourtroom().getCourthouse()));
         GetAdminMediasMarkedForDeletionAdminAction adminAction = objectActionMapper.toGetAdminMediasMarkedForDeletionAdminAction(base);
         adminAction.setComments(actions.stream()
-            .sorted(Comparator.comparing(ObjectAdminActionEntity::getHiddenDateTime))
-            .map(ObjectAdminActionEntity::getComments)
-            .distinct()
-            .toList()
+                                    .sorted(Comparator.comparing(ObjectAdminActionEntity::getHiddenDateTime))
+                                    .map(ObjectAdminActionEntity::getComments)
+                                    .distinct()
+                                    .toList()
         );
         item.setAdminAction(adminAction);
         return item;
