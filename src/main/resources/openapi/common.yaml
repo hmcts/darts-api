@@ -176,10 +176,14 @@ components:
         - "COMMON_102"
         - "COMMON_103"
         - "COMMON_104"
+        - "COMMON_105"
       x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST,
                          FEATURE_FLAG_NOT_ENABLED,
-                         NOT_FOUND, INTERNAL_SERVER_ERROR,
-                         INVALID_REQUEST ]
+                         NOT_FOUND,
+                         INTERNAL_SERVER_ERROR,
+                         INVALID_REQUEST,
+                         CRITERIA_TOO_BROAD
+      ]
 
     CommonTitleErrors:
       type: string
@@ -189,8 +193,11 @@ components:
         - "Resource not found"
         - "Internal server error"
         - "Invalid request"
+        - "The search criteria is too broad"
       x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST ,
                          FEATURE_FLAG_NOT_ENABLED,
-                         NOT_FOUND, INTERNAL_SERVER_ERROR,
-                         INVALID_REQUEST
+                         NOT_FOUND,
+                         INTERNAL_SERVER_ERROR,
+                         INVALID_REQUEST,
+                         CRITERIA_TOO_BROAD
       ]
