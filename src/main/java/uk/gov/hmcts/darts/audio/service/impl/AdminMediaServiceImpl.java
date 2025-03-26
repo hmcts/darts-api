@@ -274,7 +274,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
         UserAccountEntity currentUser = userIdentity.getUserAccount();
         List<ObjectAdminActionEntity> objectAdminActionEntities = mediaEntities.stream()
-            .map(media -> media.getObjectAdminAction())
+            .map(MediaEntity::getObjectAdminAction)
             .filter(Optional::isPresent)
             .map(Optional::get)
             .peek(objectAdminAction -> {

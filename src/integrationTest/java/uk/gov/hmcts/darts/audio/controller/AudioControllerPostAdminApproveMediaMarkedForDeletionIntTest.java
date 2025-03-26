@@ -116,7 +116,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         dartsDatabase.save(mediaEntity4UniqueChronicleId);
         dartsDatabase.save(mediaEntity5SameChronicleIdNoObjectAdminAction);
 
-        var superAdminUser = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        final var superAdminUser = superAdminUserStub.givenUserIsAuthorised(userIdentity);
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("testuser");
 
         ObjectAdminActionEntity adminActionEntity = createObjectAdminActionEntity(mediaEntity, testUser);
