@@ -36,7 +36,7 @@ public interface AdminMediaMapper {
         @Mapping(target = "antecedentId", source = "antecedentId"),
         @Mapping(target = "retainUntil", source = "retainUntilTs"),
         @Mapping(target = "createdAt", source = "createdDateTime"),
-        @Mapping(target = "createdById", source = "createdBy.id"),
+        @Mapping(target = "createdById", source = "createdById"),
         @Mapping(target = "lastModifiedAt", source = "lastModifiedDateTime"),
         @Mapping(target = "lastModifiedById", source = "lastModifiedById"),
         @Mapping(target = "courthouse", source = "courtroom.courthouse"),

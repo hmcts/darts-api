@@ -86,12 +86,11 @@ public class EntityGraphPersistence {
         Object id = getIdMethod.invoke(entity);
         if (id == null) {
             if (entity instanceof UserAccountEntity user) {
-                var systemUser = entityManager.find(UserAccountEntity.class, 0);
                 if (user.getLastModifiedById() == null) {
                     user.setLastModifiedById(0);
                 }
-                if (user.getCreatedBy() == null) {
-                    user.setCreatedBy(systemUser);
+                if (user.getCreatedById() == null) {
+                    user.setCreatedById(0);
                 }
             }
             if (entity instanceof DefendantEntity def) {

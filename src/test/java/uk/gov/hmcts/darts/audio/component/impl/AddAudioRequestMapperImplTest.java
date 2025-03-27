@@ -95,7 +95,7 @@ class AddAudioRequestMapperImplTest {
         Assertions.assertEquals(media.getChannel(), result.getChannel());
         Assertions.assertEquals(media.getTotalChannels(), result.getTotalChannels());
         Assertions.assertEquals(media.getCourtroom().getName(), result.getCourtroom().getName());
-        Assertions.assertEquals(media.getCreatedBy(), userAccount);
+        Assertions.assertEquals(media.getCreatedById(), userAccount.getId());
         Assertions.assertEquals(media.getLastModifiedById(), userAccount.getId());
         verify(mediaLinkedCaseHelper, times(2))
             .linkMediaToCase(result, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, userAccount);

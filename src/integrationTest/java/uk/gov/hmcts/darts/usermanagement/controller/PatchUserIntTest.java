@@ -114,7 +114,7 @@ class PatchUserIntTest extends IntegrationBase {
             assertThat(latestUserAccountEntity.getLastModifiedDateTime(), greaterThan(existingAccount.getLastModifiedDateTime()));
             assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
             assertEquals(user.getId(), latestUserAccountEntity.getLastModifiedById());
-            assertEquals(user.getId(), latestUserAccountEntity.getCreatedBy().getId());
+            assertEquals(user.getId(), latestUserAccountEntity.getCreatedById());
 
             return null;
         });
@@ -160,7 +160,7 @@ class PatchUserIntTest extends IntegrationBase {
             assertThat(latestUserAccountEntity.getLastModifiedDateTime(), greaterThan(existingAccount.getLastModifiedDateTime()));
             assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
             assertEquals(user.getId(), latestUserAccountEntity.getLastModifiedById());
-            assertEquals(user.getId(), latestUserAccountEntity.getCreatedBy().getId());
+            assertEquals(user.getId(), latestUserAccountEntity.getCreatedById());
 
             return null;
         });
@@ -208,7 +208,7 @@ class PatchUserIntTest extends IntegrationBase {
 
             assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
             assertEquals(user.getId(), latestUserAccountEntity.getLastModifiedById());
-            assertEquals(user.getId(), latestUserAccountEntity.getCreatedBy().getId());
+            assertEquals(user.getId(), latestUserAccountEntity.getCreatedById());
 
             return null;
         });

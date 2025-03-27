@@ -117,7 +117,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         final TranscriptionEntity withTranscriberTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(WITH_TRANSCRIBER.getId(), withTranscriberTranscriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(testUserId, withTranscriberTranscriptionEntity.getCreatedBy().getId());
+        assertEquals(testUserId, withTranscriberTranscriptionEntity.getCreatedById());
         assertEquals(testUserId, withTranscriberTranscriptionEntity.getLastModifiedById());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = withTranscriberTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
@@ -235,7 +235,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         final TranscriptionEntity withTranscriberTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(WITH_TRANSCRIBER.getId(), withTranscriberTranscriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(testUserId, withTranscriberTranscriptionEntity.getCreatedBy().getId());
+        assertEquals(testUserId, withTranscriberTranscriptionEntity.getCreatedById());
         assertEquals(testUserId, withTranscriberTranscriptionEntity.getLastModifiedById());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = withTranscriberTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities

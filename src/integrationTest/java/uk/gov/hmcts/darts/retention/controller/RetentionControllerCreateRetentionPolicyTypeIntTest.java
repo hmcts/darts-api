@@ -116,10 +116,10 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
 
             Integer userId = userAccountEntity.getId();
             assertEquals(userId, createdPolicyTypeEntity.getLastModifiedById());
-            assertEquals(userId, createdPolicyTypeEntity.getCreatedBy().getId());
+            assertEquals(userId, createdPolicyTypeEntity.getCreatedById());
 
             assertNotNull(createdPolicyTypeEntity.getLastModifiedDateTime());
-            assertNotNull(createdPolicyTypeEntity.getCreatedBy());
+            assertNotNull(createdPolicyTypeEntity.getCreatedById());
         });
     }
 

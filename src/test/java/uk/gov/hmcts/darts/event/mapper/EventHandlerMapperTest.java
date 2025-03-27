@@ -27,6 +27,7 @@ class EventHandlerMapperTest {
 
     private void setUpData() {
         when(authorisationApi.getCurrentUser()).thenReturn(USER_ACCOUNT_ENTITY);
+        USER_ACCOUNT_ENTITY.setId(123);
 
         eventHandlerMapper = new EventHandlerMapper(authorisationApi);
     }
@@ -43,7 +44,7 @@ class EventHandlerMapperTest {
             .hasFieldOrPropertyWithValue("handler", eventMapping.getHandler())
             .hasFieldOrPropertyWithValue("isReportingRestriction", eventMapping.getHasRestrictions())
             .hasFieldOrPropertyWithValue("active", true)
-            .hasFieldOrPropertyWithValue("createdBy", USER_ACCOUNT_ENTITY);
+            .hasFieldOrPropertyWithValue("createdById", USER_ACCOUNT_ENTITY.getId());
     }
 
     @ParameterizedTest
@@ -61,7 +62,7 @@ class EventHandlerMapperTest {
             .hasFieldOrPropertyWithValue("handler", "DartsEventNullHandler")
             .hasFieldOrPropertyWithValue("isReportingRestriction", eventMapping.getHasRestrictions())
             .hasFieldOrPropertyWithValue("active", true)
-            .hasFieldOrPropertyWithValue("createdBy", USER_ACCOUNT_ENTITY);
+            .hasFieldOrPropertyWithValue("createdById", USER_ACCOUNT_ENTITY.getId());
     }
 
     @Test

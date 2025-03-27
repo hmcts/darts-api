@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
@@ -457,8 +458,9 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
     private void createMediaRequest(HearingEntity hearingEntity) {
+        UserAccountEntity createdBy = dartsDatabase.getUserAccountRepository().getOne(hearingEntity.getCreatedById());
         MediaRequestEntity mediaRequestEntity = dartsDatabase.getMediaRequestStub()
-            .createAndSaveMediaRequestEntity(hearingEntity.getCreatedBy(), hearingEntity);
+            .createAndSaveMediaRequestEntity(createdBy, hearingEntity);
         createTransformedMediaEntry(mediaRequestEntity);
         createTransformedMediaEntry(mediaRequestEntity);
     }
@@ -481,8 +483,9 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private void createTranscription(HearingEntity hearingEntity) {
         TranscriptionStub transcriptionStub = dartsDatabase.getTranscriptionStub();
+        UserAccountEntity createdBy = dartsDatabase.getUserAccountRepository().getOne(hearingEntity.getCreatedById());
         TranscriptionEntity transcription = transcriptionStub
-            .createTranscription(hearingEntity, hearingEntity.getCreatedBy());
+            .createTranscription(hearingEntity, createdBy);
 
         var transcriptionWorkflow1 = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionWorkflow(

@@ -212,7 +212,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         assertEquals(externalObjectDirectory.getExternalLocation(), result.getExternalLocation());
         assertEquals(externalObjectDirectory.getOsrUuid(), result.getOsrUuid());
         assertEquals(status, result.getStatus());
-        assertEquals(userAccount, result.getCreatedBy());
+        assertEquals(userAccount.getId(), result.getCreatedById());
     }
 
     @Test

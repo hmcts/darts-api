@@ -103,7 +103,7 @@ class AudioLinkingAutomatedTaskIntTest extends PostgresIntegrationBase {
         List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
         assertThat(mediaLinkedCaseEntities)
             .allMatch(mediaLinkedCaseEntity -> mediaLinkedCaseEntity.getSource() == AUDIO_LINKING_TASK)
-            .allMatch(mediaLinkedCaseEntity -> mediaLinkedCaseEntity.getCreatedBy().getId() == AUTOMATION_USER_ID);
+            .allMatch(mediaLinkedCaseEntity -> mediaLinkedCaseEntity.getCreatedById() == AUTOMATION_USER_ID);
     }
 
     private EventEntity createEvent(EventStatus eventStatus, CourtroomEntity courtroomEntity, HearingEntity hearing, OffsetDateTime timestamp) {
