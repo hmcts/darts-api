@@ -1,17 +1,5 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
-import java.text.MessageFormat;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
@@ -30,7 +18,18 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.util.AsyncUtil;
+
+import java.text.MessageFormat;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 
 
 @Slf4j
@@ -81,16 +80,16 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 })
                 .toList();
 
-            try {
-                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
-            } catch (InterruptedException e) {
-                log.error("Unstructured to arm batch unexpected exception", e);
-                Thread.currentThread().interrupt();
-                return;
-            } catch (Exception e) {
-                log.error("Unstructured to arm batch unexpected exception", e);
-                return;
-            }
+//            try {
+//                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
+//            } catch (InterruptedException e) {
+//                log.error("Unstructured to arm batch unexpected exception", e);
+//                Thread.currentThread().interrupt();
+//                return;
+//            } catch (Exception e) {
+//                log.error("Unstructured to arm batch unexpected exception", e);
+//                return;
+//            }
         }
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
     }

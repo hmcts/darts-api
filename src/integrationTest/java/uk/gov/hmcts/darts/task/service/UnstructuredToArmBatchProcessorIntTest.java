@@ -227,7 +227,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     @Test
     void testBatchedQueryWhereSomeFailedToPush() {
-
         //given
         //batch size is 5
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
