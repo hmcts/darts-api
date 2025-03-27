@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -11,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
-import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -40,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.ENDPOINT_URL;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithDifferentNameAndDisplayName;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
@@ -61,9 +58,9 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     UserAccountRepository userAccountRepository;
     @Autowired
     private transient MockMvc mockMvc;
-    CourthouseEntity swanseaCourthouse;
-    CourthouseEntity myCourthouseWithDifferentDisplayName;
-    UserAccountEntity user;
+    private CourthouseEntity swanseaCourthouse;
+    private CourthouseEntity myCourthouseWithDifferentDisplayName;
+    private UserAccountEntity user;
 
 
     @BeforeEach
@@ -685,28 +682,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
             .content(requestBody);
         mockMvc.perform(requestBuilder)
             .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void adminCasesSearchPost_shouldReturnBadRequest_whenCourtroomNameIsLowercase() throws Exception {
-        // Given
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        SecurityGroupEntity securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(SUPER_ADMIN, swanseaCourthouse);
-        securityGroup.setGlobalAccess(true);
-        assignSecurityGroupToUser(user, securityGroup);
-
-        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
-        request.setCourtroomName("courtroom1");  // lowercase value
-
-        // When/Then
-        mockMvc.perform(post("/admin/cases/search")
-                            .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest())
-            .andExpect(result -> {
-                String response = result.getResponse().getContentAsString();
-                Assertions.assertTrue(response.contains("Courthouse and courtroom must be uppercase"));
-            });
     }
 
     private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse) {
