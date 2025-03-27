@@ -60,8 +60,6 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     @MockitoBean
     private AuditApi mockAuditApi;
 
-    private UserAccountEntity testUser;
-
     private Integer transcriptionId;
     private Integer transcriptCreatorId;
 
@@ -78,7 +76,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
         doNothing().when(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(SUPER_ADMIN));
 
-        testUser = dartsDatabase.getUserAccountStub().createSuperAdminUser();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createSuperAdminUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(any())).thenReturn(true);
         transcriptCreatorId = authorisationStub.getTestUser().getId();
