@@ -76,6 +76,8 @@ class ArmRpoReplayServiceImplTest {
             any(), eq(startTs), eq(endTs), any(), any(Limit.class)
         )).thenReturn(List.of(22, 14));
         UserAccountEntity userAccountEntity = mock(UserAccountEntity.class);
+        int userId = 100;
+        when(userAccountEntity.getId()).thenReturn(userId);
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         // when
@@ -85,7 +87,7 @@ class ArmRpoReplayServiceImplTest {
         verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
             EodHelper.failedArmRawDataStatus(),
             0,
-            userAccountEntity,
+            userId,
             List.of(22, 14)
         );
     }

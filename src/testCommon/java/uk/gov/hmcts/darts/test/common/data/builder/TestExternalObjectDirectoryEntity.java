@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -29,7 +28,7 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
                                              OffsetDateTime dataIngestionTs, String manifestFile,
                                              OffsetDateTime eventDateTs, String errorCode, boolean responseCleaned, Long osrUuid,
                                              boolean updateRetention, OffsetDateTime createdDateTime,
-                                             UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy) {
+                                             Integer createdById, OffsetDateTime lastModifiedDateTime, Integer lastModifiedById) {
         setId(id);
         setMedia(media);
         setTranscriptionDocumentEntity(transcriptionDocumentEntity);
@@ -51,9 +50,9 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
         setOsrUuid(osrUuid);
         setUpdateRetention(updateRetention);
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

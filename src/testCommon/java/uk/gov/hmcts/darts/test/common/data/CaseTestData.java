@@ -14,7 +14,6 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimal
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class CaseTestData implements Persistable<TestCourtCaseEntity.TestCourtCaseBuilderRetrieve,
     CourtCaseEntity, TestCourtCaseEntity.TestCourtCaseEntityBuilder> {
@@ -30,9 +29,8 @@ public final class CaseTestData implements Persistable<TestCourtCaseEntity.TestC
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
-        var userAccount = minimalUserAccount();
-        courtCaseEntity.setCreatedBy(userAccount);
-        courtCaseEntity.setLastModifiedBy(userAccount);
+        courtCaseEntity.setCreatedById(0);
+        courtCaseEntity.setLastModifiedById(0);
         return courtCaseEntity;
     }
 
@@ -64,8 +62,8 @@ public final class CaseTestData implements Persistable<TestCourtCaseEntity.TestC
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
-        courtCaseEntity.setCreatedBy(minimalUserAccount());
-        courtCaseEntity.setLastModifiedBy(minimalUserAccount());
+        courtCaseEntity.setCreatedById(0);
+        courtCaseEntity.setLastModifiedById(0);
         return courtCaseEntity;
     }
 
@@ -120,13 +118,12 @@ public final class CaseTestData implements Persistable<TestCourtCaseEntity.TestC
             = new TestCourtCaseEntity.TestCourtCaseBuilderRetrieve();
 
         var postfix = random(10, false, true);
-        var userAccount = minimalUserAccount();
         retrieve.getBuilder().courthouse(someMinimalCourthouse())
             .caseNumber("case-1-" + postfix)
             .closed(false)
             .interpreterUsed(false)
-            .createdBy(userAccount)
-            .lastModifiedBy(userAccount)
+            .createdById(0)
+            .lastModifiedById(0)
             .retentionUpdated(false)
             .deleted(false)
             .dataAnonymised(false).defenceList(new ArrayList<>())

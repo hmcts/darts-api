@@ -129,7 +129,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
             .findById(transcriptionId).orElseThrow();
         assertEquals(AWAITING_AUTHORISATION.getId(), transcriptionEntity.getTranscriptionStatus().getId());
         assertEquals(transcriptCreatorId, transcriptionEntity.getCreatedBy().getId());
-        assertEquals(transcriptCreatorId, transcriptionEntity.getLastModifiedBy().getId());
+        assertEquals(transcriptCreatorId, transcriptionEntity.getLastModifiedById());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);

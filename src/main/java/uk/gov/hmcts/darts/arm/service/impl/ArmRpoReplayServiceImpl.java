@@ -53,7 +53,7 @@ public class ArmRpoReplayServiceImpl implements ArmRpoReplayService {
 
         externalObjectDirectoryRepository.updateEodStatusAndTransferAttemptsWhereIdIn(EodHelper.failedArmRawDataStatus(),
                                                                                       0,
-                                                                                      userIdentity.getUserAccount(),
+                                                                                      userIdentity.getUserAccount().getId(),
                                                                                       eodIdsToBeUpdated);
 
     }

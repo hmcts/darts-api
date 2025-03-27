@@ -28,7 +28,7 @@ class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
         mediaRequestStub.createAndSaveMediaRequestEntity(OPEN);
         mediaRequestStub.createAndSaveMediaRequestEntity(OPEN);
 
-        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(mediaRequestEntity.getLastModifiedBy().getId(),
+        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(mediaRequestEntity.getLastModifiedById(),
                                                                                                    List.of(0));
 
         assertThat(updatedMediaRequest.getId()).isEqualTo(mediaRequest1.getId());
@@ -42,7 +42,7 @@ class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
 
-        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(mediaRequestEntity.getLastModifiedBy().getId(),
+        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(mediaRequestEntity.getLastModifiedById(),
                                                                                                    List.of(0));
 
         assertThat(updatedMediaRequest).isNull();

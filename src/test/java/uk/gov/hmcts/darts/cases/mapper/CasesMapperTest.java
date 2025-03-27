@@ -255,7 +255,9 @@ class CasesMapperTest {
         log.info("actualResponse: {}", actualResponse);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpenNullRestrictions.json");
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpenNullRestrictions.json")
+            .replace("<created_by>", String.valueOf(courtCase.getCreatedById()))
+            .replace("<last_modified_by>", String.valueOf(courtCase.getLastModifiedById()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -284,7 +286,9 @@ class CasesMapperTest {
         log.info("actualResponse: {}", actualResponse);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpenDefaultRestrictions.json");
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseOpenDefaultRestrictions.json")
+            .replace("<created_by>", String.valueOf(courtCase.getCreatedById()))
+            .replace("<last_modified_by>", String.valueOf(courtCase.getLastModifiedById()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -320,7 +324,9 @@ class CasesMapperTest {
         log.info("actualResponse: {}", actualResponse);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseClosed.json");
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseClosed.json")
+            .replace("<created_by>", String.valueOf(courtCase.getCreatedById()))
+            .replace("<last_modified_by>", String.valueOf(courtCase.getLastModifiedById()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -366,7 +372,10 @@ class CasesMapperTest {
         log.info("actualResponse: {}", actualResponse);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseRetentionAndAdditionalCaseDetails.json");
+            "Tests/cases/CasesMapperTest/testMapToAdminSingleCaseResponseItem/expectedResponseRetentionAndAdditionalCaseDetails.json")
+            .replace("<created_by>", String.valueOf(courtCase.getCreatedById()))
+            .replace("<last_modified_by>", String.valueOf(courtCase.getLastModifiedById()));
+
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 }

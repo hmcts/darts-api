@@ -137,7 +137,7 @@ class ExternalObjectDirectoryServiceImplTest {
         assertThat(savedEod.getStatus()).isEqualTo(EodHelper.storedStatus());
         assertThat(savedEod.getExternalLocationType()).isEqualTo(EodHelper.unstructuredLocation());
         assertThat(savedEod.getCreatedBy()).isEqualTo(userAccountEntity);
-        assertThat(savedEod.getLastModifiedBy()).isEqualTo(userAccountEntity);
+        assertThat(savedEod.getLastModifiedById()).isEqualTo(userAccountEntity.getId());
     }
 
     @ParameterizedTest

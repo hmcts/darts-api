@@ -691,12 +691,10 @@ public class DartsDatabaseStub {
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         save(transcriptionEntity.getCourtCase());
         dartsDatabaseSaveStub.save(transcriptionEntity.getCreatedBy());
-        dartsDatabaseSaveStub.save(transcriptionEntity.getLastModifiedBy());
         var transcription = dartsDatabaseSaveStub.save(transcriptionEntity);
         dartsDatabaseSaveStub.save(transcription.getCreatedBy());
         transcription.getTranscriptionDocumentEntities().forEach(td -> {
             dartsDatabaseSaveStub.save(td.getUploadedBy());
-            dartsDatabaseSaveStub.save(td.getLastModifiedBy());
             dartsDatabaseSaveStub.save(td);
         });
         return transcription;
@@ -982,7 +980,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public Integer getLastModifiedByUserId(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
-        return createdModifiedBaseEntity.getLastModifiedBy().getId();
+        return createdModifiedBaseEntity.getLastModifiedById();
     }
 
     @Transactional

@@ -131,7 +131,7 @@ public class EodHelper {
     public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity user, List<Integer> idsToBeUpdated, OffsetDateTime timestamp) {
         eodRepository.updateStatus(
             newStatus,
-            user,
+            user.getId(),
             idsToBeUpdated,
             timestamp
         );

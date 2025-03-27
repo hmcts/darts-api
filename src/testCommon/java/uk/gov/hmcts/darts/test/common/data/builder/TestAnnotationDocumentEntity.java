@@ -22,7 +22,7 @@ public class TestAnnotationDocumentEntity extends AnnotationDocumentEntity imple
                                         OffsetDateTime deletedTs, String contentObjectId, String clipId,
                                         boolean isHidden, OffsetDateTime retainUntilTs, RetentionConfidenceScoreEnum retConfScore,
                                         String retConfReason, AnnotationEntity annotation,
-                                        OffsetDateTime lastModifiedTimestamp, UserAccountEntity lastModifiedBy) {
+                                        OffsetDateTime lastModifiedTimestamp, Integer lastModifiedById) {
         setId(id);
         setFileName(fileName);
         setFileType(fileType);
@@ -41,7 +41,7 @@ public class TestAnnotationDocumentEntity extends AnnotationDocumentEntity imple
         setRetConfReason(retConfReason);
         setAnnotation(annotation);
         setLastModifiedTimestamp(lastModifiedTimestamp);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

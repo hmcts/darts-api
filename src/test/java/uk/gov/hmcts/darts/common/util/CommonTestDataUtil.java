@@ -42,6 +42,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
@@ -55,6 +56,7 @@ public class CommonTestDataUtil {
 
     private static final String SOME_POLICY_DESCRIPTION = "Policy description";
     private static final String SOME_POLICY_DURATION = "1Y0M0D";
+    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
@@ -415,6 +417,7 @@ public class CommonTestDataUtil {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setUserFullName(userName);
         userAccount.setEmailAddress("test@test.com");
+        userAccount.setId(ID_GENERATOR.getAndIncrement());
         return userAccount;
     }
 

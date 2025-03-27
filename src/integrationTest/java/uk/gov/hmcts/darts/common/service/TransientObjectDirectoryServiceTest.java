@@ -48,7 +48,7 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
             1000L
         );
         assertThat(transformedMediaEntity.getCreatedBy()).isEqualTo(mediaRequestEntity.getCreatedBy());
-        assertThat(transformedMediaEntity.getLastModifiedBy()).isEqualTo(mediaRequestEntity.getCreatedBy());
+        assertThat(transformedMediaEntity.getLastModifiedById()).isEqualTo(mediaRequestEntity.getCreatedById());
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobId
@@ -64,6 +64,6 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));
         assertTrue(transientObjectDirectoryEntity.getLastModifiedDateTime()
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:05:00.000Z")));
-        assertNotNull(transientObjectDirectoryEntity.getLastModifiedBy());
+        assertNotNull(transientObjectDirectoryEntity.getLastModifiedById());
     }
 }

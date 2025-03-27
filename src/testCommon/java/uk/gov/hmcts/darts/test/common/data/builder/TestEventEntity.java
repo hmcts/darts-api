@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -39,9 +38,9 @@ public class TestEventEntity extends EventEntity implements DbInsertable<EventEn
         Boolean isCurrent,
         boolean isDataAnonymised,
         OffsetDateTime createdDateTime,
-        UserAccountEntity createdBy,
+        Integer createdById,
         OffsetDateTime lastModifiedDateTime,
-        UserAccountEntity lastModifiedBy
+        Integer lastModifiedById
     ) {
         super();
         setId(id);
@@ -61,9 +60,9 @@ public class TestEventEntity extends EventEntity implements DbInsertable<EventEn
         setIsCurrent(isCurrent);
         setDataAnonymised(isDataAnonymised);
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

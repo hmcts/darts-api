@@ -3,35 +3,41 @@ package uk.gov.hmcts.darts.casedocument.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.mapstruct.Named;
-import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.casedocument.model.AnnotationCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.CaseRetentionCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.CourthouseCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.DefenceCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.DefendantCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.EventCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.HearingCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.JudgeCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.MediaRequestCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.ProsecutorCaseDocument;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 
 @Mapper(componentModel = "spring", uses = {
     BasicCaseDocumentConversions.class,
-    CaseObjectsCaseDocumentMapper.class,
-    ExternalObjectDirectoryRepository.class,
-    UserIdentity.class
+    CaseObjectsCaseDocumentMapper.class
 })
 public abstract class CourtCaseDocumentMapper {
 
-    @Autowired
-    ExternalObjectDirectoryRepository eodRepository;
-    @Autowired
-    UserIdentity userIdentity;
-
     @Mappings({
         @Mapping(source = "id", target = "caseId"),
-        @Mapping(target = "createdBy", qualifiedByName = "retrieveCaseDocumentGenerationUser"),
-        @Mapping(target = "lastModifiedBy", qualifiedByName = "retrieveCaseDocumentGenerationUser"),
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById"),
         @Mapping(target = "createdDateTime", expression = "java(OffsetDateTime.now())"),
         @Mapping(target = "lastModifiedDateTime", expression = "java(OffsetDateTime.now())"),
         @Mapping(source = "defendantList", target = "defendants"),
@@ -50,11 +56,39 @@ public abstract class CourtCaseDocumentMapper {
     @Mappings({
         @Mapping(source = "eventList", target = "events"),
         @Mapping(source = "mediaList", target = "medias"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
     })
     abstract HearingCaseDocument mapToCaseDocument(HearingEntity hearingEntity);
 
-    @Named("retrieveCaseDocumentGenerationUser")
-    protected Integer retrieveCaseDocumentGenerationUser(UserAccountEntity userAccountEntity) {
-        return userIdentity.getUserAccount().getId();
-    }
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract DefendantCaseDocument mapToDefendantCaseDocument(DefendantEntity defendantEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract ProsecutorCaseDocument mapToProsecutorCaseDocument(ProsecutorEntity prosecutorEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract DefenceCaseDocument mapToDefenceCaseDocument(DefenceEntity defenceEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract CaseRetentionCaseDocument.RetentionPolicyTypeCaseDocument mapToRetentionPolicyTypeCaseDocument(
+        RetentionPolicyTypeEntity retentionPolicyTypeEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract CaseRetentionCaseDocument mapToCaseRetentionCaseDocument(CaseRetentionEntity caseRetentionEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract JudgeCaseDocument mapToJudgeCaseDocument(JudgeEntity judgeEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract CourthouseCaseDocument mapToCourthouseCaseDocument(CourthouseEntity courthouseEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract EventCaseDocument mapToEventCaseDocument(EventEntity eventEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract MediaRequestCaseDocument mapToMediaRequestCaseDocument(MediaRequestEntity mediaRequestEntity);
+
+    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    abstract AnnotationCaseDocument mapToAnnotationCaseDocument(AnnotationEntity annotationEntity);
+
 }

@@ -71,13 +71,13 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
                                                                                           OffsetDateTime.of(2024, 4, 23, 10, 0, 0, 0, ZoneOffset.UTC),
                                                                                           transcriptionStub.getTranscriptionStatusByEnum(
                                                                                               TranscriptionStatusEnum.REQUESTED));
-        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow1, "comment1", transcription.getCreatedBy());
+        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow1, "comment1", transcription.getCreatedById());
 
         var transcriptionWorkflow2 = transcriptionStub.createAndSaveTranscriptionWorkflow(transcription,
                                                                                           OffsetDateTime.of(2024, 4, 24, 12, 0, 0, 0, ZoneOffset.UTC),
                                                                                           transcriptionStub.getTranscriptionStatusByEnum(
                                                                                               TranscriptionStatusEnum.APPROVED));
-        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow2, "comment2", transcription.getCreatedBy());
+        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow2, "comment2", transcription.getCreatedById());
 
         transcriptionStub.createAndSaveTranscriptionCommentNotAssociatedToWorkflow(
             transcription,
@@ -97,7 +97,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/transcriptions/transcription_workflow/expectedAllWorkflowResponse.json")
-            .replace("$USER_ACCOUNT_ID", transcription.getCreatedBy().getId().toString());
+            .replace("$USER_ACCOUNT_ID", transcription.getCreatedById().toString());
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }

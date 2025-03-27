@@ -94,7 +94,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         assertEquals(SOME_MASTER_INDEX_FIELD_ID, executionDetail.getSortingField());
         assertNull(executionDetail.getSearchItemCount());
         assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());
-        assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedBy().getId());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedById());
     }
 
     @Test
@@ -119,7 +119,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         assertEquals(ArmRpoStateEnum.GET_RECORD_MANAGEMENT_MATTER.getId(), executionDetail.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), executionDetail.getArmRpoStatus().getId());
         assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());
-        assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedBy().getId());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedById());
     }
 
     private void createAndSetSaveBackgroundSearchMock() {

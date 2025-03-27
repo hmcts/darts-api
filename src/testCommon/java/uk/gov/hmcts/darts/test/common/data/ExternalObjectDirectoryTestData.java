@@ -15,7 +15,6 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTU
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.ExternalLocationTypeTestData.locationTypeOf;
 import static uk.gov.hmcts.darts.test.common.data.ObjectRecordStatusTestData.statusOf;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class ExternalObjectDirectoryTestData implements
     Persistable<TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve, ExternalObjectDirectoryEntity,
@@ -38,9 +37,8 @@ public final class ExternalObjectDirectoryTestData implements
         externalObjectDirectory.setExternalLocationType(locationTypeOf(UNSTRUCTURED));
         externalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());
         externalObjectDirectory.setVerificationAttempts(1);
-        var userAccount = minimalUserAccount();
-        externalObjectDirectory.setCreatedBy(userAccount);
-        externalObjectDirectory.setLastModifiedBy(userAccount);
+        externalObjectDirectory.setCreatedById(0);
+        externalObjectDirectory.setLastModifiedById(0);
         return externalObjectDirectory;
     }
 
@@ -105,7 +103,6 @@ public final class ExternalObjectDirectoryTestData implements
     public TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve someMinimalBuilderHolder() {
         TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve builder
             = new TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryBuilderRetrieve();
-        var userAccount = minimalUserAccount();
 
         builder.getBuilder()
             .media(PersistableFactory.getMediaTestData().someMinimal())
@@ -113,8 +110,8 @@ public final class ExternalObjectDirectoryTestData implements
             .externalLocationType(locationTypeOf(UNSTRUCTURED))
             .externalLocation(UUID.randomUUID().toString())
             .verificationAttempts(0)
-            .createdBy(userAccount)
-            .lastModifiedBy(userAccount)
+            .createdById(0)
+            .lastModifiedById(0)
             .createdDateTime(OffsetDateTime.now())
             .lastModifiedDateTime(OffsetDateTime.now());
 

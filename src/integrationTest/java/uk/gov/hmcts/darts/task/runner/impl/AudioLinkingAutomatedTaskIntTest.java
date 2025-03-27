@@ -117,7 +117,7 @@ class AudioLinkingAutomatedTaskIntTest extends PostgresIntegrationBase {
     private void assertEvent(EventEntity event, EventStatus eventStatus) {
         EventEntity actualEvent = dartsDatabase.getEventRepository().getReferenceById(event.getId());
         assertThat(actualEvent.getEventStatus()).isEqualTo(eventStatus.getStatusNumber());
-        assertThat(actualEvent.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
+        assertThat(actualEvent.getLastModifiedById()).isEqualTo(AUTOMATION_USER_ID);
     }
 
     private HearingEntity createHearing() {

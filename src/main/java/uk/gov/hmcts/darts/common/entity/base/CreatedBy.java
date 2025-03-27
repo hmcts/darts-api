@@ -9,7 +9,11 @@ public interface CreatedBy {
 
     void setCreatedBy(UserAccountEntity userAccount);
 
+    Integer getCreatedById();
+
     void setCreatedById(Integer createdById);
+
+    OffsetDateTime getCreatedDateTime();
 
     void setCreatedDateTime(OffsetDateTime now);
 
@@ -17,5 +21,4 @@ public interface CreatedBy {
 
     void setSkipUserAudit(boolean value);
 
-    OffsetDateTime getCreatedDateTime();
 }

@@ -47,7 +47,7 @@ class AnnotationMapperTest {
             .hasFieldOrPropertyWithValue("timestamp", SOME_OFFSET_DATE_TIME)
             .hasFieldOrPropertyWithValue("createdDateTime", SOME_OFFSET_DATE_TIME)
             .hasFieldOrPropertyWithValue("currentOwner", USER_ACCOUNT_ENTITY)
-            .hasFieldOrPropertyWithValue("lastModifiedBy", USER_ACCOUNT_ENTITY)
+            .hasFieldOrPropertyWithValue("lastModifiedById", USER_ACCOUNT_ENTITY.getId())
             .hasFieldOrPropertyWithValue("createdBy", USER_ACCOUNT_ENTITY);
     }
 

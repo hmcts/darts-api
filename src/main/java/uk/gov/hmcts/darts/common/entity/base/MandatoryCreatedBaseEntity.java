@@ -44,7 +44,12 @@ public class MandatoryCreatedBaseEntity implements CreatedBy {
     @Override
     public void setCreatedBy(UserAccountEntity userAccount) {
         this.createdBy = userAccount;
-        this.createdById = userAccount == null ? null : userAccount.getId();
+        setCreatedById(userAccount == null ? null : createdBy.getId());
+    }
+
+    @Override
+    public void setCreatedById(Integer id) {
+        this.createdById = id;
         //Mark skip user audit as true to prevent audit listener from overriding the createdBy and createdDateTime
         this.skipUserAudit = true;
     }

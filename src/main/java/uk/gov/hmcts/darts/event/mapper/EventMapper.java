@@ -68,9 +68,9 @@ public class EventMapper {
         adminGetEventResponseDetail.setEventTs(eventEntity.getTimestamp());
         adminGetEventResponseDetail.isCurrent(eventEntity.getIsCurrent());
         adminGetEventResponseDetail.setCreatedAt(eventEntity.getCreatedDateTime());
-        adminGetEventResponseDetail.setCreatedBy(eventEntity.getCreatedBy().getId());
+        adminGetEventResponseDetail.setCreatedBy(eventEntity.getCreatedById());
         adminGetEventResponseDetail.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
-        adminGetEventResponseDetail.setLastModifiedBy(eventEntity.getLastModifiedBy().getId());
+        adminGetEventResponseDetail.setLastModifiedBy(eventEntity.getLastModifiedById());
         adminGetEventResponseDetail.setIsDataAnonymised(eventEntity.isDataAnonymised());
         return adminGetEventResponseDetail;
     }

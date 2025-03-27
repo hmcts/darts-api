@@ -756,7 +756,7 @@ class AudioTransformationServiceImplTest {
         );
 
         assertEquals(userAccount, transformedMediaEntity.getCreatedBy());
-        assertEquals(userAccount, transformedMediaEntity.getLastModifiedBy());
+        assertEquals(userAccount.getId(), transformedMediaEntity.getLastModifiedById());
         assertEquals(TEST_FILE_NAME, transformedMediaEntity.getOutputFilename());
         assertEquals(TEST_EXTENSION, transformedMediaEntity.getOutputFormat().getExtension());
         assertEquals(TEST_BINARY_STRING.length(), transformedMediaEntity.getOutputFilesize());

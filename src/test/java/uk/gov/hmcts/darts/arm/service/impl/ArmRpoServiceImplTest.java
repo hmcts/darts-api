@@ -154,7 +154,7 @@ class ArmRpoServiceImplTest {
 
         // then
         assertEquals(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), armRpoExecutionDetailEntity.getArmRpoStatus());
-        assertEquals(userAccountEntity, armRpoExecutionDetailEntity.getLastModifiedBy());
+        assertEquals(userAccountEntity.getId(), armRpoExecutionDetailEntity.getLastModifiedById());
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
     }
 

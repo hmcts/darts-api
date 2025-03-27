@@ -61,7 +61,7 @@ class JudgeCommonServiceImplTest {
         assertNotNull(result);
         assertEquals("JUDGE BROWN", result.getName());
         assertEquals(userAccount, result.getCreatedBy());
-        assertEquals(userAccount, result.getLastModifiedBy());
+        assertEquals(userAccount.getId(), result.getLastModifiedById());
         verify(judgeRepository).findByNameIgnoreCase("Judge Brown");
         verify(judgeRepository).saveAndFlush(any(JudgeEntity.class));
     }

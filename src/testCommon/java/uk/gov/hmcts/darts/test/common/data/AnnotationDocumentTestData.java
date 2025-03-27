@@ -56,7 +56,7 @@ public final class AnnotationDocumentTestData implements Persistable<TestAnnotat
             .isHidden(false)
             .isDeleted(false)
             .uploadedBy(userAccount)
-            .lastModifiedBy(userAccount);
+            .lastModifiedById(0);
 
         return retrieve;
     }

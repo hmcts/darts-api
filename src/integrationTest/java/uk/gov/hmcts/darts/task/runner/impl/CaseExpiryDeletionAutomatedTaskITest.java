@@ -21,8 +21,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
@@ -359,30 +357,30 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     private void assertDefendant(DefendantEntity defendantEntity, boolean isAnonymised) {
         if (isAnonymised) {
             assertThat(defendantEntity.getName()).matches(UUID_REGEX);
-            assertThat(defendantEntity.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
+            assertThat(defendantEntity.getLastModifiedById()).isEqualTo(AUTOMATION_USER_ID);
         } else {
             assertThat(defendantEntity.getName()).doesNotMatch(UUID_REGEX);
-            assertThat(defendantEntity.getLastModifiedBy().getId()).isNotEqualTo(AUTOMATION_USER_ID);
+            assertThat(defendantEntity.getLastModifiedById()).isNotEqualTo(AUTOMATION_USER_ID);
         }
     }
 
     private void assertDefence(DefenceEntity defenceEntity, boolean isAnonymised) {
         if (isAnonymised) {
             assertThat(defenceEntity.getName()).matches(UUID_REGEX);
-            assertThat(defenceEntity.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
+            assertThat(defenceEntity.getLastModifiedById()).isEqualTo(AUTOMATION_USER_ID);
         } else {
             assertThat(defenceEntity.getName()).doesNotMatch(UUID_REGEX);
-            assertThat(defenceEntity.getLastModifiedBy().getId()).isNotEqualTo(AUTOMATION_USER_ID);
+            assertThat(defenceEntity.getLastModifiedById()).isNotEqualTo(AUTOMATION_USER_ID);
         }
     }
 
     private void assertProsecutor(ProsecutorEntity prosecutorEntity, boolean isAnonymised) {
         if (isAnonymised) {
             assertThat(prosecutorEntity.getName()).matches(UUID_REGEX);
-            assertThat(prosecutorEntity.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
+            assertThat(prosecutorEntity.getLastModifiedById()).isEqualTo(AUTOMATION_USER_ID);
         } else {
             assertThat(prosecutorEntity.getName()).doesNotMatch(UUID_REGEX);
-            assertThat(prosecutorEntity.getLastModifiedBy().getId()).isNotEqualTo(AUTOMATION_USER_ID);
+            assertThat(prosecutorEntity.getLastModifiedById()).isNotEqualTo(AUTOMATION_USER_ID);
         }
     }
 
@@ -403,7 +401,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
             caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
 
-            caseEntity = dartsDatabase.getCaseRepository().save(caseEntity);
+            caseEntity = dartsDatabase.getCaseRepository().saveAndFlush(caseEntity);
             HearingEntity hearing = createHearing(caseEntity);
             EventEntity event1 = dartsDatabase.getEventStub()
                 .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
@@ -492,38 +490,19 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
                 OffsetDateTime.of(2024, 4, 23, 10, 0, 0, 0, ZoneOffset.UTC),
                 transcriptionStub.getTranscriptionStatusByEnum(
                     TranscriptionStatusEnum.REQUESTED));
-        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow1, "comment1", transcription.getCreatedBy());
-        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow1, "comment2", transcription.getCreatedBy());
+        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow1, "comment1", transcription.getCreatedById());
+        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow1, "comment2", transcription.getCreatedById());
     }
 
     private DefendantEntity createDefendantEntity(CourtCaseEntity caseEntity) {
-        DefendantEntity defendantEntity = DefendantTestData.createDefendantForCase(caseEntity);
-        createUsers(defendantEntity);
-        return defendantEntity;
+        return DefendantTestData.createDefendantForCase(caseEntity);
     }
 
     private ProsecutorEntity createProsecutorEntity(CourtCaseEntity caseEntity) {
-        ProsecutorEntity prosecutorEntity = ProsecutorTestData.createProsecutorForCase(caseEntity);
-        createUsers(prosecutorEntity);
-        return prosecutorEntity;
+        return ProsecutorTestData.createProsecutorForCase(caseEntity);
     }
 
     private DefenceEntity createDefenceEntity(CourtCaseEntity caseEntity) {
-        DefenceEntity defenceEntity = DefenceTestData.createDefenceForCase(caseEntity);
-        createUsers(defenceEntity);
-        return defenceEntity;
-    }
-
-    private void createUsers(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
-        UserAccountEntity automationUser = dartsDatabase.getUserAccountRepository().findById(AUTOMATION_USER_ID).orElseThrow();
-        UserAccountEntity createdBy = createdModifiedBaseEntity.getCreatedBy();
-        createdBy.setCreatedBy(automationUser);
-        createdBy.setLastModifiedBy(automationUser);
-        createdModifiedBaseEntity.setCreatedBy(dartsDatabase.getUserAccountRepository().save(createdModifiedBaseEntity.getCreatedBy()));
-
-        UserAccountEntity lastModifiedBy = createdModifiedBaseEntity.getLastModifiedBy();
-        lastModifiedBy.setCreatedBy(automationUser);
-        lastModifiedBy.setLastModifiedBy(automationUser);
-        createdModifiedBaseEntity.setLastModifiedBy(dartsDatabase.getUserAccountRepository().save(createdModifiedBaseEntity.getLastModifiedBy()));
+        return DefenceTestData.createDefenceForCase(caseEntity);
     }
 }

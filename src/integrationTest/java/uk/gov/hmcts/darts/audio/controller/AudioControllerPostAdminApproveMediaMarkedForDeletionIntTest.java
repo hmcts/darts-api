@@ -324,7 +324,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         assertFalse(caseExpiredAuditEntries.isEmpty());
         assertEquals(1, caseExpiredAuditEntries.size());
         assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedBy());
-        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedById());
         assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedDateTime());
         assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedDateTime());
         assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.getFirst().getUser().getId());

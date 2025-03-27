@@ -48,8 +48,8 @@ public class TransformedMediaStub {
         transformedMediaEntity.setStartTime(mediaRequestEntity.getStartTime());
         transformedMediaEntity.setEndTime(mediaRequestEntity.getEndTime());
 
-        if (mediaRequestEntity.getLastModifiedBy() != null) {
-            transformedMediaEntity.setLastModifiedBy(mediaRequestEntity.getLastModifiedBy());
+        if (mediaRequestEntity.getLastModifiedById() != null) {
+            transformedMediaEntity.setLastModifiedById(mediaRequestEntity.getLastModifiedById());
         } else {
             transformedMediaEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         }

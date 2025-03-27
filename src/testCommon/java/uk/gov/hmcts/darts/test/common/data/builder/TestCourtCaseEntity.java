@@ -57,9 +57,9 @@ public class TestCourtCaseEntity extends CourtCaseEntity implements DbInsertable
         RetentionConfidenceReasonEnum retConfReason,
         OffsetDateTime retConfUpdatedTs,
         OffsetDateTime createdDateTime,
-        UserAccountEntity createdBy,
+        Integer createdById,
         OffsetDateTime lastModifiedDateTime,
-        UserAccountEntity lastModifiedBy
+        Integer lastModifiedById
     ) {
         setId(id);
         setReportingRestrictions(reportingRestrictions);
@@ -90,9 +90,9 @@ public class TestCourtCaseEntity extends CourtCaseEntity implements DbInsertable
         setRetConfReason(retConfReason);
         setRetConfUpdatedTs(retConfUpdatedTs);
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

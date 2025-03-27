@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionEntity;
 
 import java.util.Arrays;
 
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -83,17 +82,14 @@ public final class TranscriptionTestData
     @Override
     public TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve someMinimalBuilderHolder() {
         TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve builder = new TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve();
-        var userAccount = minimalUserAccount();
-
         builder.getBuilder()
             .transcriptionType(someTranscriptionType())
             .transcriptionStatus(someTranscriptionStatus())
             .hideRequestFromRequestor(false)
             .isManualTranscription(false)
-            .lastModifiedBy(userAccount)
-            .createdBy(userAccount)
+            .lastModifiedById(0)
+            .createdById(0)
             .isCurrent(true);
-
         return builder;
     }
 

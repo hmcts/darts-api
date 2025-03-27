@@ -36,6 +36,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -102,6 +103,7 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
     void setup() {
         ReflectionTestUtils.setField(processor, "caseDocumentFilenamePrefix", FILE_NAME_PREFIX);
         ReflectionTestUtils.setField(processor, "caseDocumentFileExtension", FILE_EXTENSION);
+        doReturn(123).when(user).getId();
     }
 
     @SneakyThrows
@@ -141,7 +143,7 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         assertThat(savedCaseDocument.getFileSize()).isEqualTo(CASE_DOCUMENT_JSON.getBytes(StandardCharsets.UTF_8).length);
         assertThat(savedCaseDocument.getFileType()).isEqualTo("application/json");
         assertThat(savedCaseDocument.getCreatedBy()).isEqualTo(user);
-        assertThat(savedCaseDocument.getLastModifiedBy()).isEqualTo(user);
+        assertThat(savedCaseDocument.getLastModifiedById()).isEqualTo(user.getId());
         assertThat(savedCaseDocument.isHidden()).isEqualTo(false);
 
         verify(caseRepository).save(courtCaseCaptor.capture());
