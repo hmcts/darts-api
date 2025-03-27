@@ -522,7 +522,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned) {
-        List<TranscriberViewSummary> result = new ArrayList<>();
+        List<TranscriberViewSummary> result;
         if (TRUE.equals(assigned)) {
             result = transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
         } else {
@@ -646,16 +646,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public List<Integer> rollbackUserTranscriptions(UserAccountEntity entity) {
         List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
-            .findWorkflowForUserWithTranscriptionState(entity.getId(),
-                                                       TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
+            .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
 
         List<Integer> transcriptionIds = new ArrayList<>();
 
         // add the workflows back
         for (TranscriptionEntity transcription : transcriptionWorkflowEntities) {
             saveTranscriptionWorkflow(entity, transcription,
-                                      transcriptionStatusRepository.getReferenceById(
-                                          TranscriptionStatusEnum.APPROVED.getId()),
+                                      transcriptionStatusRepository.getReferenceById(APPROVED.getId()),
                                       OWNER_DISABLED_COMMENT_MESSAGE);
             transcriptionIds.add(transcription.getId());
         }
