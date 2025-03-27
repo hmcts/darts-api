@@ -3,15 +3,19 @@ package uk.gov.hmcts.darts.task.service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
+import uk.gov.hmcts.darts.audio.service.impl.OutboundAudioDeleterProcessorImpl;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
@@ -33,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
@@ -61,26 +66,22 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
     private UserAccountEntity requestor;
 
-    @Autowired
-    private OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
+    @MockitoSpyBean
+    private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessor;
 
 
     @BeforeEach
     void startHibernateSession() {
         openInViewUtil.openEntityManager();
         anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
+        requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        //setting clock to 2023-10-27
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
     }
 
     @AfterEach
     void closeHibernateSession() {
         openInViewUtil.closeEntityManager();
-    }
-
-    @BeforeEach
-    void setUp() {
-        requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        //setting clock to 2023-10-27
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
     }
 
     @Test
@@ -137,6 +138,82 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
 
 
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SecurityGroupEnum.class, mode = EnumSource.Mode.EXCLUDE, names = "MEDIA_IN_PERPETUITY")
+    void whenMarkForDeletionIsCalled_mediaRequestOwnerIsNotMediaInPerpertuity_shouldUpdate(SecurityGroupEnum securityGroupEnum) throws InterruptedException {
+
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2" + securityGroupEnum,
+            "2",
+            HEARING_DATE
+        );
+        UserAccountEntity currentOwner = dartsDatabase.getUserAccountStub().createUser("user-" + securityGroupEnum.name());
+
+        //This media request should be deleted as its 3 days old
+        MediaRequestEntity currentMediaRequest = getMediaRequestTestData().createCurrentMediaRequest(
+            hearing,
+            currentOwner,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            AudioRequestType.DOWNLOAD,
+            COMPLETED
+        );
+        dartsDatabase.getMediaRequestRepository().save(currentMediaRequest);
+
+        TransientObjectDirectoryEntity markedForDeletion = createStoredTransientDirectory(
+            currentMediaRequest,
+            OffsetDateTime.of(
+                DATE_27TH_OCTOBER.minusDays(3),
+                LOCAL_TIME,
+                ZoneOffset.UTC
+            )
+        );
+
+        assertEquals(1, outboundAudioDeleterProcessor.markForDeletion(1000).size());
+
+        assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
+    }
+
+    @Test
+    void whenMarkForDeletionIsCalled_mediaRequestOwnerIsMediaInPerpertuity_shouldNotUpdate() {
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+
+
+        //This media request should be deleted as its 3 days old
+        MediaRequestEntity currentMediaRequest = getMediaRequestTestData().createCurrentMediaRequest(
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            AudioRequestType.DOWNLOAD,
+            COMPLETED
+        );
+        UserAccountEntity currentOwner = dartsDatabase.getUserAccountStub().createUser("mediaInPerpetuity");
+        currentOwner.getSecurityGroupEntities().clear();
+        dartsDatabase.getUserAccountStub().addSecurityGroup(currentOwner, SecurityGroupEnum.MEDIA_IN_PERPETUITY);
+        currentMediaRequest.setCurrentOwner(currentOwner);
+        dartsDatabase.save(currentMediaRequest);
+
+        TransientObjectDirectoryEntity markedForDeletion = createStoredTransientDirectory(
+            currentMediaRequest,
+            OffsetDateTime.of(
+                DATE_27TH_OCTOBER.minusDays(3),
+                LOCAL_TIME,
+                ZoneOffset.UTC
+            )
+        );
+
+        assertEquals(0, outboundAudioDeleterProcessor.markForDeletion(1000).size());
+
+        assertTransientObjectDirectoryStateNotChanged(markedForDeletion.getId());
     }
 
     @Test
@@ -266,7 +343,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
     @Test
     void shouldNotDeleteIfLastAccessWas10DaysAgoWith3BankHoliday() {
-        outboundAudioDeleterProcessor.setDeletionDays(10);
+        doReturn(10).when(outboundAudioDeleterProcessor).getDeletionDays();
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
