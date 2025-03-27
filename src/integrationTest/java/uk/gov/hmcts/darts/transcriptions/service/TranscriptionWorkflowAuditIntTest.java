@@ -73,7 +73,6 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
     @Test
     void updateTranscriptionAdmin_Succeeds_WhenManualTranscriptionWorkflowTransitionsFromAwaitingAuthToRequestThenMovedToAwaitingAuth() {
         // Given
-        var adminUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "SOME_CASE_ID",
@@ -116,6 +115,7 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
         );
 
         var auditActivity = findAuditActivity("Amend Transcription Workflow", dartsDatabase.findAudits());
+        var adminUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         assertThat(auditActivity.getUser().getId()).isEqualTo(adminUser.getId());
         assertThat(auditActivity.getCourtCase().getId()).isEqualTo(transcription.getCourtCase().getId());
 
