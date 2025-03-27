@@ -62,6 +62,7 @@ class HearingsControllerAdminGetHearingIntTest extends IntegrationBase {
     @BeforeEach
     void beforeEach() {
         var courtCase = PersistableFactory.getCourtCaseTestData().someMinimalCase();
+        dartsPersistence.save(courtCase);
         var hearing = PersistableFactory.getHearingTestData().createHearingWithDefaults(courtCase,
                                                                                         CourtroomTestData
                                                                                             .createCourtRoomWithNameAtCourthouse(
@@ -95,9 +96,9 @@ class HearingsControllerAdminGetHearingIntTest extends IntegrationBase {
                     "1JUDGE1"
                 ],
                 "created_at": "<created_at>",
-                "created_by": 15008,
+                "created_by": <created_by>,
                 "last_modified_at": "<last_modified_at>",
-                "last_modified_by": 15008,
+                "last_modified_by": <last_modified_by>,
                 "case": {
                     "id": 1,
                     "case_number": "case-1",
@@ -122,7 +123,9 @@ class HearingsControllerAdminGetHearingIntTest extends IntegrationBase {
             """
             .replace("<courthouse>", hearingEntity.getCourtroom().getCourthouse().getDisplayName())
             .replace("<created_at>", hearingEntity.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<created_by>", String.valueOf(hearingEntity.getLastModifiedById()))
             .replace("<last_modified_at>", hearingEntity.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<last_modified_by>", String.valueOf(hearingEntity.getLastModifiedById()))
             .replaceAll("<hearing_is_actual>", String.valueOf(hearingIsActual));
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }

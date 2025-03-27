@@ -31,8 +31,8 @@ public final class CaseDocumentTestData implements Persistable<TestCaseDocumentE
         TestCaseDocumentEntity.TestCaseDocumentEntityBuilderRetrieve retrieve =
             new TestCaseDocumentEntity.TestCaseDocumentEntityBuilderRetrieve();
         retrieve.getBuilder().courtCase(courtCaseEntity)
-            .createdBy(UserAccountTestData.minimalUserAccount())
-            .lastModifiedBy(UserAccountTestData.minimalUserAccount())
+            .createdById(0)
+            .lastModifiedById(0)
             .fileName("some-file-name")
             .fileType("some-file-type")
             .fileSize(1024)

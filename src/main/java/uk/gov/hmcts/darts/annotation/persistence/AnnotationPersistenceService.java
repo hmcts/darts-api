@@ -57,6 +57,6 @@ public class AnnotationPersistenceService {
 
     @Transactional
     public void markForDeletion(Integer annotationId) {
-        annotationRepository.markForDeletion(annotationId, authorisationApi.getCurrentUser());
+        annotationRepository.markForDeletion(annotationId, authorisationApi.getCurrentUser().getId());
     }
 }

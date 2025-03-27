@@ -97,21 +97,21 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         TranscriptionWorkflowEntity approvedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
+            transcriptionEntity.getLastModifiedById(),
             transcriptionEntity.getCreatedDateTime().plusHours(1),
             transcriptionStub.getTranscriptionStatusByEnum(APPROVED)
         );
 
         TranscriptionWorkflowEntity withTranscriberTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
+            transcriptionEntity.getLastModifiedById(),
             transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(15),
             transcriptionStub.getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
         );
 
         TranscriptionWorkflowEntity completeTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
+            transcriptionEntity.getLastModifiedById(),
             transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(30),
             transcriptionStub.getTranscriptionStatusByEnum(COMPLETE)
         );

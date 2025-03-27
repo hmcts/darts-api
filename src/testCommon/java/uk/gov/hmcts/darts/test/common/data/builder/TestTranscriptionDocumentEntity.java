@@ -31,8 +31,8 @@ public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity
                                            OffsetDateTime retainUntilTs, RetentionConfidenceScoreEnum retConfScore,
                                            String retConfReason,
                                            List<ObjectAdminActionEntity> adminActions,
-                                           UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
-                                           UserAccountEntity lastModifiedBy) {
+                                           Integer createdById, OffsetDateTime lastModifiedDateTime,
+                                           Integer lastModifiedById) {
         setId(id);
         setTranscription(transcription);
         setClipId(clipId);
@@ -53,9 +53,9 @@ public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity
         setRetConfScore(retConfScore);
         setRetConfReason(retConfReason);
         setAdminActions(adminActions != null ? adminActions : new ArrayList<>());
-        setLastModifiedBy(createdBy);
+        setLastModifiedById(createdById);
         setLastModifiedTimestamp(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

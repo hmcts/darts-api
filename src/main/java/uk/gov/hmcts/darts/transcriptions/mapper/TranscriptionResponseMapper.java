@@ -314,7 +314,7 @@ public class TranscriptionResponseMapper {
     private OffsetDateTime mapToTranscriptionWorkflowsApprovedTimestamp(List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {
         Optional<TranscriptionWorkflowEntity> transcriptionWorkflowEntity = transcriptionWorkflowEntities.stream()
             .filter(trw -> TranscriptionStatusEnum.APPROVED.getId().equals(trw.getTranscriptionStatus().getId()))
-            .max(Comparator.comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp));
+            .max(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp));
 
         return transcriptionWorkflowEntity.map(TranscriptionWorkflowEntity::getWorkflowTimestamp).orElse(null);
     }

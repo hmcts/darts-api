@@ -110,7 +110,7 @@ class PostUserIntTest extends IntegrationBase {
             assertNotNull(createdUserAccountEntity.getCreatedDateTime());
             assertNotNull(createdUserAccountEntity.getLastModifiedDateTime());
             assertNull(createdUserAccountEntity.getLastLoginTime());
-            assertEquals(integrationTestUser.getId(), createdUserAccountEntity.getLastModifiedBy().getId());
+            assertEquals(integrationTestUser.getId(), createdUserAccountEntity.getLastModifiedById());
             assertEquals(integrationTestUser.getId(), createdUserAccountEntity.getCreatedBy().getId());
 
             return null;
@@ -166,7 +166,7 @@ class PostUserIntTest extends IntegrationBase {
             assertNotNull(createdUserAccountEntity.getCreatedDateTime());
             assertNotNull(createdUserAccountEntity.getLastModifiedDateTime());
             assertNull(createdUserAccountEntity.getLastLoginTime());
-            assertEquals(integrationTestUser.getId(), createdUserAccountEntity.getLastModifiedBy().getId());
+            assertEquals(integrationTestUser.getId(), createdUserAccountEntity.getLastModifiedById());
             assertEquals(integrationTestUser.getId(), createdUserAccountEntity.getCreatedBy().getId());
 
             return null;

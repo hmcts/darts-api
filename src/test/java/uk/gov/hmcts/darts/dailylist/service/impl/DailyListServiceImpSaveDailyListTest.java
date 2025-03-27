@@ -95,7 +95,7 @@ class DailyListServiceImpSaveDailyListTest {
         assertThat(savedDailyList.getXmlContent()).isEqualTo("Thexml");
         assertThat(savedDailyList.getContent()).isNull();
         assertThat(savedDailyList.getCreatedBy()).isEqualTo(user);
-        assertThat(savedDailyList.getLastModifiedBy()).isEqualTo(user);
+        assertThat(savedDailyList.getLastModifiedById()).isEqualTo(user.getId());
     }
 
     @Test
@@ -117,7 +117,7 @@ class DailyListServiceImpSaveDailyListTest {
 
         DailyListEntity savedDailyList = dailyListEntityArgumentCaptor.getValue();
         assertThat(savedDailyList.getCreatedBy()).isEqualTo(user);
-        assertThat(savedDailyList.getLastModifiedBy()).isEqualTo(user);
+        assertThat(savedDailyList.getLastModifiedById()).isEqualTo(user.getId());
     }
 
 
@@ -138,7 +138,7 @@ class DailyListServiceImpSaveDailyListTest {
 
         DailyListEntity savedDailyList = dailyListEntityArgumentCaptor.getValue();
         assertThat(savedDailyList.getCreatedBy()).isEqualTo(createdByUser);
-        assertThat(savedDailyList.getLastModifiedBy()).isEqualTo(updatedByUser);
+        assertThat(savedDailyList.getLastModifiedById()).isEqualTo(updatedByUser.getId());
     }
 
     private DailyListJsonObject getDailyListJson() throws IOException {

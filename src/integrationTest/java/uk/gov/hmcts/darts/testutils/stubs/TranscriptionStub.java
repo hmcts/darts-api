@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -56,7 +57,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 @Component
 @RequiredArgsConstructor
 @Deprecated
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.CouplingBetweenObjects"})
 public class TranscriptionStub {
 
     public static final byte[] TRANSCRIPTION_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
@@ -75,6 +76,7 @@ public class TranscriptionStub {
     private final HearingStub hearingStub;
     private final TranscriptionStubComposable transcriptionStubComposable;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
+    private final UserAccountRepository userAccountRepository;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -490,6 +492,14 @@ public class TranscriptionStub {
     }
 
     public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcription,
+                                                                         Integer userId,
+                                                                         OffsetDateTime workflowTimestamp,
+                                                                         TranscriptionStatusEntity transcriptionStatus) {
+        UserAccountEntity user = userAccountRepository.findById(userId).orElseThrow();
+        return createTranscriptionWorkflowEntity(transcription, user, workflowTimestamp, transcriptionStatus);
+    }
+
+    public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcription,
                                                                          UserAccountEntity user,
                                                                          OffsetDateTime workflowTimestamp,
                                                                          TranscriptionStatusEntity transcriptionStatus) {
@@ -703,7 +713,7 @@ public class TranscriptionStub {
         dartsDatabaseSaveStub.save(requestedTranscriptionWorkflowEntity);
 
         if (nonNull(comment)) {
-            final var transcriptionComment = createTranscriptionWorkflowComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity);
+            final var transcriptionComment = createTranscriptionWorkflowComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity.getId());
             dartsDatabaseSaveStub.save(transcriptionComment);
 
             requestedTranscriptionWorkflowEntity.getTranscriptionComments().add(transcriptionComment);
@@ -723,21 +733,21 @@ public class TranscriptionStub {
     }
 
     public TranscriptionCommentEntity createTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity, String comment,
-                                                                         UserAccountEntity userAccountEntity) {
+                                                                         Integer userAccountEntityId) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setTranscription(workflowEntity.getTranscription());
         transcriptionCommentEntity.setTranscriptionWorkflow(workflowEntity);
         transcriptionCommentEntity.setComment(comment);
         transcriptionCommentEntity.setCommentTimestamp(workflowEntity.getWorkflowTimestamp());
-        transcriptionCommentEntity.setAuthorUserId(userAccountEntity.getId());
-        transcriptionCommentEntity.setLastModifiedBy(userAccountEntity);
-        transcriptionCommentEntity.setCreatedBy(userAccountEntity);
+        transcriptionCommentEntity.setAuthorUserId(userAccountEntityId);
+        transcriptionCommentEntity.setLastModifiedById(userAccountEntityId);
+        transcriptionCommentEntity.setCreatedById(userAccountEntityId);
         return transcriptionCommentEntity;
     }
 
     public TranscriptionCommentEntity createAndSaveTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity,
-                                                                                String comment, UserAccountEntity userAccount) {
-        var transcriptionComment = createTranscriptionWorkflowComment(workflowEntity, comment, userAccount);
+                                                                                String comment, Integer userAccountEntityId) {
+        var transcriptionComment = createTranscriptionWorkflowComment(workflowEntity, comment, userAccountEntityId);
         return dartsDatabaseSaveStub.save(transcriptionComment);
     }
 

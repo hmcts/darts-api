@@ -47,8 +47,8 @@ public interface DartsApiTrait extends AdviceTrait {
     static void writeErrorResponse(HttpServletResponse servletResponse, ObjectMapper mapper) throws IOException {
         servletResponse.setStatus(HttpStatus.FORBIDDEN.value());
         servletResponse.setHeader("Content-Type", "application/problem+json");
-        servletResponse.getWriter().write(DartsApiTrait.getJsonForProblem(mapper, DartsApiTrait.getContentForException(new DartsApiException(
-            AuthorisationError.USER_DETAILS_INVALID))));
+        servletResponse.getWriter().write(
+            getJsonForProblem(mapper, getContentForException(new DartsApiException(AuthorisationError.USER_DETAILS_INVALID))));
     }
 
     static String getJsonForProblem(ObjectMapper mapper, Problem problem) throws JsonProcessingException {

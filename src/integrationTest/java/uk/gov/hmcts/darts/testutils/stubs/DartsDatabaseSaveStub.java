@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
 import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -66,15 +65,9 @@ public class DartsDatabaseSaveStub {
             && proxy.getHibernateLazyInitializer().isUninitialized()) {
             return;
         }
-        if (createdBy.getCreatedBy() == null) {
-            createdBy.setCreatedBy(userAccountRepository.getReferenceById(0));
+        if (createdBy.getCreatedById() == null) {
+            createdBy.setCreatedById(0);
             createdBy.setCreatedDateTime(OffsetDateTime.now());
-        } else if (createdBy.getCreatedBy().getId() == null) {
-            UserAccountEntity userAccount = createdBy.getCreatedBy();
-            updateCreatedByLastModifiedBy(userAccount);
-            createdBy.setCreatedBy(userAccountRepository.save(userAccount));
-        } else {
-            userAccountRepository.save(createdBy.getCreatedBy());
         }
         if (createdBy.getCreatedDateTime() == null) {
             createdBy.setCreatedDateTime(OffsetDateTime.now());
@@ -87,16 +80,9 @@ public class DartsDatabaseSaveStub {
             && proxy.getHibernateLazyInitializer().isUninitialized()) {
             return;
         }
-        if (lastModifiedBy.getLastModifiedBy() == null) {
-            lastModifiedBy.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        if (lastModifiedBy.getLastModifiedById() == null) {
+            lastModifiedBy.setLastModifiedById(0);
             lastModifiedBy.setLastModifiedDateTime(OffsetDateTime.now());
-        } else if (lastModifiedBy.getLastModifiedBy().getId() == null) {
-            UserAccountEntity userAccount = lastModifiedBy.getLastModifiedBy();
-            updateCreatedByLastModifiedBy(userAccount);
-            lastModifiedBy.setLastModifiedBy(userAccountRepository.save(userAccount));
-        } else {
-            lastModifiedBy.setLastModifiedBy(lastModifiedBy.getLastModifiedBy());//Ensures lastModifiedById is set
-            userAccountRepository.save(lastModifiedBy.getLastModifiedBy());
         }
         if (lastModifiedBy.getLastModifiedDateTime() == null) {
             lastModifiedBy.setLastModifiedDateTime(OffsetDateTime.now());

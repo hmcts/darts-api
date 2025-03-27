@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestCourtroomEntity;
 
 import java.time.OffsetDateTime;
@@ -11,7 +10,6 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class CourtroomTestData implements Persistable<TestCourtroomEntity.TestCourtroomEntityBuilderRetrieve,
     CourtroomEntity,
@@ -28,13 +26,11 @@ public final class CourtroomTestData implements Persistable<TestCourtroomEntity.
     public TestCourtroomEntity.TestCourtroomEntityBuilderRetrieve someMinimalBuilderHolder() {
         var builderRetrieve = new TestCourtroomEntity.TestCourtroomEntityBuilderRetrieve();
 
-        UserAccountEntity someUser = PersistableFactory.getUserAccountTestData().someMinimal();
-
         builderRetrieve.getBuilder()
             .courthouse(PersistableFactory.getCourthouseTestData().someMinimal())
             .name("SOME COURTROOM (%s)".formatted(UUID.randomUUID().toString()))
             .createdDateTime(NOW)
-            .createdBy(someUser);
+            .createdById(0);
 
         return builderRetrieve;
     }
@@ -53,7 +49,7 @@ public final class CourtroomTestData implements Persistable<TestCourtroomEntity.
         courthouse.setCourtrooms(courtrooms);
         courtroom.setCourthouse(courthouse);
         courtroom.setName("room_a-" + postfix);
-        courtroom.setCreatedBy(minimalUserAccount());
+        courtroom.setCreatedById(0);
         return courtroom;
     }
 

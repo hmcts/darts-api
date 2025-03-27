@@ -166,7 +166,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             .findById(transcriptionId).orElseThrow();
         assertEquals(APPROVED.getId(), approvedTranscriptionEntity.getTranscriptionStatus().getId());
         assertEquals(transcriptCreatorId, approvedTranscriptionEntity.getCreatedBy().getId());
-        assertEquals(transcriptCreatorId, approvedTranscriptionEntity.getLastModifiedBy().getId());
+        assertEquals(transcriptCreatorId, approvedTranscriptionEntity.getLastModifiedById());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = approvedTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);

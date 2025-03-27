@@ -59,7 +59,9 @@ class AuditServiceImplTest {
         auditActivityEntity.setName(String.valueOf(AuditActivity.MOVE_COURTROOM));
         when(auditActivityRepository.getReferenceById(any())).thenReturn(auditActivityEntity);
 
-        auditServiceImpl.recordAudit(AuditActivity.MOVE_COURTROOM, new UserAccountEntity(), Optional.of(new CourtCaseEntity()), Optional.empty());
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(321);
+        auditServiceImpl.recordAudit(AuditActivity.MOVE_COURTROOM, userAccount, Optional.of(new CourtCaseEntity()), Optional.empty());
 
         verify(auditRepository).saveAndFlush(auditEntityArgumentCaptor.capture());
 
@@ -67,7 +69,7 @@ class AuditServiceImplTest {
         assertNotNull(savedValue.getCourtCase());
         assertNotNull(savedValue.getUser());
         assertNotNull(savedValue.getCreatedBy());
-        assertNotNull(savedValue.getLastModifiedBy());
+        assertNotNull(savedValue.getLastModifiedById());
         assertNull(savedValue.getAdditionalData());
         assertEquals(String.valueOf(AuditActivity.MOVE_COURTROOM), savedValue.getAuditActivity().getName());
     }

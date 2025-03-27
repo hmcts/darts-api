@@ -65,7 +65,7 @@ public class UserAuditListener {
 
     void updateCreatedBy(Object object) {
         if (object instanceof CreatedBy entity) {
-            if (entity.isSkipUserAudit() || entity.getCreatedBy() != null) {
+            if (entity.isSkipUserAudit() || entity.getCreatedById() != null) {
                 return;
             }
             Optional<Integer> userAccountOpt = getUserAccount();

@@ -624,7 +624,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     public List<Integer> rollbackUserTranscriptions(UserAccountEntity entity) {
         List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
             .findWorkflowForUserWithTranscriptionState(entity.getId(),
-                                                       TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
+                                                       WITH_TRANSCRIBER.getId());
 
         List<Integer> transcriptionIds = new ArrayList<>();
 
@@ -632,7 +632,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         for (TranscriptionEntity transcription : transcriptionWorkflowEntities) {
             saveTranscriptionWorkflow(entity, transcription,
                                       transcriptionStatusRepository.getReferenceById(
-                                          TranscriptionStatusEnum.APPROVED.getId()),
+                                          APPROVED.getId()),
                                       OWNER_DISABLED_COMMENT_MESSAGE);
             transcriptionIds.add(transcription.getId());
         }

@@ -89,7 +89,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(currentEventEntity.getCreatedBy().getId(), responseResult.getCurrentVersion().getCreatedBy());
         assertEquals(currentEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
                      responseResult.getCurrentVersion().getLastModifiedAt());
-        assertEquals(currentEventEntity.getLastModifiedBy().getId(), responseResult.getCurrentVersion().getLastModifiedBy());
+        assertEquals(currentEventEntity.getLastModifiedById(), responseResult.getCurrentVersion().getLastModifiedBy());
 
         // Previous version
         EventEntity previousEventEntity = eventEntityVersions.get(1).get(1);
@@ -117,7 +117,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(previousEventEntity.getCreatedBy().getId(), responseResult.getPreviousVersions().getFirst().getCreatedBy());
         assertEquals(previousEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
                      responseResult.getPreviousVersions().getFirst().getLastModifiedAt());
-        assertEquals(previousEventEntity.getLastModifiedBy().getId(), responseResult.getPreviousVersions().getFirst().getLastModifiedBy());
+        assertEquals(previousEventEntity.getLastModifiedById(), responseResult.getPreviousVersions().getFirst().getLastModifiedBy());
     }
 
     @Test
@@ -205,7 +205,7 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(currentEventEntity.getCreatedBy().getId(), responseResult.getCurrentVersion().getCreatedBy());
         assertEquals(currentEventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
                      responseResult.getCurrentVersion().getLastModifiedAt());
-        assertEquals(currentEventEntity.getLastModifiedBy().getId(), responseResult.getCurrentVersion().getLastModifiedBy());
+        assertEquals(currentEventEntity.getLastModifiedById(), responseResult.getCurrentVersion().getLastModifiedBy());
     }
 
     @Test

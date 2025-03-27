@@ -255,8 +255,8 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             );
 
             assertEquals(
-                entity.getLastModifiedBy().getId(),
-                savedEntity.getLastModifiedBy().getId()
+                entity.getLastModifiedById(),
+                savedEntity.getLastModifiedById()
             );
 
             assertEquals(entity.getLastModifiedDateTime().toInstant(), savedEntity.getLastModifiedDateTime().toInstant());
@@ -268,7 +268,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             ExternalObjectDirectoryEntity savedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(eod.getId()).get();
 
             assertEquals(eod.getStatus().getId(), savedEod.getStatus().getId());
-            assertEquals(eod.getLastModifiedBy().getId(), savedEod.getLastModifiedBy().getId());
+            assertEquals(eod.getLastModifiedById(), savedEod.getLastModifiedById());
             assertEquals(eod.getLastModifiedDateTime().toInstant(), savedEod.getLastModifiedDateTime().toInstant());
         }
     }

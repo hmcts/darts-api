@@ -275,7 +275,7 @@ class CaseServiceImplTest {
         assertEquals(FIXED_DATETIME, savedCaseEntity.getCreatedDateTime());
         assertEquals(FIXED_DATETIME, savedCaseEntity.getLastModifiedDateTime());
         assertEquals("testUsername", savedCaseEntity.getCreatedBy().getUserFullName());
-        assertEquals("testUsername", savedCaseEntity.getLastModifiedBy().getUserFullName());
+        assertEquals(courtCase.getLastModifiedById(), savedCaseEntity.getLastModifiedById());
         assertEquals("testAddCase", savedCaseEntity.getCaseNumber());
         assertNotNull(savedCaseEntity.getDefendantList());
         assertNotNull(savedCaseEntity.getProsecutorList());

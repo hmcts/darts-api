@@ -384,7 +384,8 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimalBuilder().courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().courtCase(courtCaseEntity)
+            .lastModifiedById(uploadedBy.getId()).build();
         caseDocument.setFileName("test_case_document.docx");
         caseDocument = dartsPersistence.save(caseDocument);
 
