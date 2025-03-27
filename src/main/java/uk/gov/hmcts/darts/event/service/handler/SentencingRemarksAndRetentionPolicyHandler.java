@@ -22,7 +22,7 @@ import uk.gov.hmcts.darts.util.DataUtil;
 import static uk.gov.hmcts.darts.event.mapper.TranscriptionRequestDetailsMapper.transcriptionRequestDetailsFrom;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.WORKING_DAYS_12;
 
 @Slf4j
 @Service
@@ -57,7 +57,7 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
             hearingAndEvent.getHearingEntity());
 
         transcriptionRequestDetails.setTranscriptionTypeId(SENTENCING_REMARKS.getId());
-        transcriptionRequestDetails.setTranscriptionUrgencyId(STANDARD.getId());
+        transcriptionRequestDetails.setTranscriptionUrgencyId(WORKING_DAYS_12.getId());
 
         try {
             var transcriptionResponse = transcriptionsApi.saveTranscriptionRequest(transcriptionRequestDetails, false);

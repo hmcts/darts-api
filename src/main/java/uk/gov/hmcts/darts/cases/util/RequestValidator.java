@@ -88,6 +88,7 @@ public class RequestValidator {
         if (BooleanUtils.and(new boolean[]{
             StringUtils.isBlank(request.getCaseNumber()),
             StringUtils.isBlank(request.getCourthouse()),
+            CollectionUtils.isEmpty(request.getCourthouseIds()),
             StringUtils.isBlank(request.getCourtroom()),
             StringUtils.isBlank(request.getJudgeName()),
             StringUtils.isBlank(request.getDefendantName()),
