@@ -33,7 +33,7 @@ public enum EventError implements DartsApiError {
     ),
     EVENT_HANDLER_NAME_DOES_NOT_EXIST(
         EventErrorCode.INVALID_HANDLER_MAPPING_NAME.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         EventTitleErrors.INVALID_HANDLER_MAPPING_NAME.toString()
     ),
     EVENT_HANDLER_MAPPING_INACTIVE(
@@ -48,7 +48,7 @@ public enum EventError implements DartsApiError {
     ),
     TOO_MANY_SEARCH_RESULTS(
         EventErrorCode.TOO_MANY_RESULTS.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         EventTitleErrors.TOO_MANY_RESULTS.toString()
     ),
     EVENT_ID_NOT_FOUND_RESULTS(

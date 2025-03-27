@@ -139,7 +139,7 @@ class RetentionPostServiceImplTest {
 
         assertEquals("The selected caseId '1' cannot be found.", exception.getDetail());
         assertEquals("RETENTION_103", exception.getError().getType());
-        assertEquals(400, exception.getError().getHttpStatus().value());
+        assertEquals(422, exception.getError().getHttpStatus().value());
     }
 
     @Test
@@ -183,7 +183,7 @@ class RetentionPostServiceImplTest {
 
         assertEquals("caseId '101' must be closed before the retention period can be amended.", exception.getDetail());
         assertEquals("RETENTION_104", exception.getError().getType());
-        assertEquals(400, exception.getError().getHttpStatus().value());
+        assertEquals(422, exception.getError().getHttpStatus().value());
     }
 
     @Test
@@ -203,7 +203,7 @@ class RetentionPostServiceImplTest {
 
         assertEquals("caseId '101' must have a retention policy applied before being changed.", exception.getDetail());
         assertEquals("RETENTION_105", exception.getError().getType());
-        assertEquals(400, exception.getError().getHttpStatus().value());
+        assertEquals(422, exception.getError().getHttpStatus().value());
     }
 
     @Test

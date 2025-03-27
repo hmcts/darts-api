@@ -142,7 +142,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
 
         // when
         MvcResult mvcResult = mockMvc.perform(post(endpoint))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         // then
@@ -181,7 +181,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
 
         // when
         MvcResult mvcResult = mockMvc.perform(post(endpoint))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         // then
@@ -210,7 +210,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
 
         // when
         MvcResult mvcResult = mockMvc.perform(post(endpoint))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         // then

@@ -45,6 +45,12 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/UserSuccessResponseWithId'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           $ref: '#/components/responses/BadUserRequest'
   /admin/users/{user_id}:
@@ -72,6 +78,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/UserSuccessResponseWithIdAndTimestamps'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           $ref: '#/components/responses/BadUserPatchRequest'
         '404':
@@ -88,6 +100,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/UserArraySuccessResponseWithIdAndTimestamps'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -132,6 +150,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/GetSecurityGroupSuccessResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -184,6 +208,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SecurityGroupPatchSuccess'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           $ref: '#/components/responses/SecurityGroupBadRequest'
         '401':
@@ -268,6 +298,12 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/SecurityGroupSuccessResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           $ref: '#/components/responses/SecurityGroupBadRequest'
 

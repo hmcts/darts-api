@@ -21,6 +21,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExtendedCourthousePost'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
@@ -73,6 +79,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdminCourthouse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '403':

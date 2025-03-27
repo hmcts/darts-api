@@ -83,7 +83,7 @@ class AzureDaoImplTest {
         );
 
         assertEquals("Unexpected HTTP response code received from Azure: body", exception.getMessage());
-        assertEquals(400, exception.getHttpStatus());
+        assertEquals(422, exception.getHttpStatus());
     }
 
     @Test
@@ -128,7 +128,7 @@ class AzureDaoImplTest {
                                                                                        authenticationConfiguration));
 
         assertEquals("Unexpected HTTP response code received from Azure: body", exception.getMessage());
-        assertEquals(400, exception.getHttpStatus());
+        assertEquals(422, exception.getHttpStatus());
     }
 
     private HTTPResponse mockSuccessResponse() {

@@ -90,7 +90,7 @@ class DailyListEntityTest extends IntegrationBase {
             .content(requestBody);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
 
-        assertEquals(400, response.getResponse().getStatus());
+        assertEquals(422, response.getResponse().getStatus());
     }
 
     @Test

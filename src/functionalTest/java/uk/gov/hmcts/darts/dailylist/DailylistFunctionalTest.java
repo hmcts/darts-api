@@ -135,7 +135,7 @@ class DailylistFunctionalTest extends FunctionalTest {
             .redirects().follow(false)
             .post().then().extract().response();
 
-        assertEquals(400, response.getStatusCode());
+        assertEquals(422, response.getStatusCode());
         assertTrue(response.getBody().jsonPath().getString("title").contains("xml_document"));
         assertTrue(response.getBody().jsonPath().getString("title").contains("json_document"));
     }

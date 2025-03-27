@@ -48,6 +48,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/cases'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
           content:
@@ -94,6 +100,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/post_case_response'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request - Invalid XML Document
           content:
@@ -135,6 +147,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/post_case_response'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request - Invalid XML Document
           content:
@@ -390,6 +408,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/advancedSearchResult'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
@@ -418,6 +442,12 @@ paths:
                 items:
                   $ref: './hearings.yaml#/components/schemas/annotation'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
         '401':
@@ -456,6 +486,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AdminCasesSearchResponseItem'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '500':
@@ -480,6 +516,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdminSingleCaseResponseItem'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
         '401':
