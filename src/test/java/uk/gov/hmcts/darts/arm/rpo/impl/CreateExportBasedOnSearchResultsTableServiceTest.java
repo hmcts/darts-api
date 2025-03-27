@@ -108,7 +108,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     @Test
     void createExportBasedOnSearchResultsTable_ReturnsInProgress() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(422, false, 2);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
@@ -128,7 +128,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     @Test
     void createExportBasedOnSearchResultsTable_ReturnsInProgress_WithPollingCreatedTimestampInRange() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(422, false, 2);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now());
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
@@ -150,7 +150,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WhenPollingCreatedTimestampOutOfRange() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(422, false, 2);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusHours(5));
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
@@ -246,9 +246,9 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     }
 
     @Test
-    void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus422IsErrorTrueResponseStatusZero() {
+    void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus400IsErrorTrueResponseStatusZero() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(422, true, 0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, true, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
@@ -297,9 +297,9 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     }
 
     @Test
-    void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus422IsErrorFalseResponseStatusZero() {
+    void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus400IsErrorFalseResponseStatusZero() {
         // given
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(422, false, 0);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 0);
         when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
