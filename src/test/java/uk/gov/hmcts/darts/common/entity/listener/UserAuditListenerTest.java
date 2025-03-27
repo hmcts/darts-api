@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
 import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 
@@ -96,7 +95,7 @@ class UserAuditListenerTest {
     void updateCreatedBy_shouldSkipAudit_whenEntityIsCreatedByAndCreatedByIsNotNull() {
         CreatedBy createdBy = mock(CreatedBy.class);
         when(createdBy.isSkipUserAudit()).thenReturn(false);
-        when(createdBy.getCreatedBy()).thenReturn(mock(UserAccountEntity.class));
+        when(createdBy.getCreatedById()).thenReturn(123);
 
         userAuditListener.updateCreatedBy(createdBy);
         verify(createdBy, never()).setCreatedBy(any());
