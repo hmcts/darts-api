@@ -54,8 +54,8 @@ public class TransformedMediaStub {
             transformedMediaEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         }
 
-        if (mediaRequestEntity.getCreatedBy() != null) {
-            transformedMediaEntity.setCreatedBy(mediaRequestEntity.getCreatedBy());
+        if (mediaRequestEntity.getCreatedById() != null) {
+            transformedMediaEntity.setCreatedById(mediaRequestEntity.getCreatedById());
         } else {
             transformedMediaEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         }

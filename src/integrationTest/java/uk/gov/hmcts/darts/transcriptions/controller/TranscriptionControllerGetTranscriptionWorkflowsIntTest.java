@@ -114,7 +114,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/transcriptions/transcription_workflow/expectedCurrentWorkflowResponse.json")
-            .replace("$USER_ACCOUNT_ID", transcription.getCreatedBy().getId().toString());
+            .replace("$USER_ACCOUNT_ID", transcription.getCreatedById().toString());
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }

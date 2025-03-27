@@ -38,6 +38,7 @@ class CaseCommonServiceImplTest {
     @BeforeEach
     void setUp() {
         userAccount = new UserAccountEntity();
+        userAccount.setId(123);
         courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("Test Courthouse");
         existingCase = new CourtCaseEntity();
@@ -72,7 +73,7 @@ class CaseCommonServiceImplTest {
         assertNotNull(result);
         assertEquals("CASE123", result.getCaseNumber());
         assertEquals(courthouse, result.getCourthouse());
-        assertEquals(userAccount, result.getCreatedBy());
+        assertEquals(userAccount.getId(), result.getCreatedById());
         assertEquals(userAccount.getId(), result.getLastModifiedById());
         assertFalse(result.getClosed());
         assertFalse(result.getInterpreterUsed());
@@ -104,7 +105,7 @@ class CaseCommonServiceImplTest {
         assertNotNull(result);
         assertEquals("CASE123", result.getCaseNumber());
         assertEquals(courthouse, result.getCourthouse());
-        assertEquals(userAccount, result.getCreatedBy());
+        assertEquals(userAccount.getId(), result.getCreatedById());
         assertEquals(userAccount.getId(), result.getLastModifiedById());
         assertFalse(result.getClosed());
         assertFalse(result.getInterpreterUsed());

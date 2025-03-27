@@ -90,7 +90,6 @@ public class ModernisedTranscriptionSearchGivensBuilder extends TranscriptionSea
     public TranscriptionEntity createApprovedTranscription() {
         var hearing = dartsDatabase.save(PersistableFactory.getHearingTestData().someMinimalHearing());
         var transcription = PersistableFactory.getTranscriptionTestData().someApprovedTranscriptionForHearing(hearing);
-        dartsDatabase.save(transcription.getCreatedBy());
         return dartsDatabase.save(transcription);
     }
 

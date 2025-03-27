@@ -515,7 +515,7 @@ public class TranscriptionStub {
                                                                           OffsetDateTime workflowTimestamp,
                                                                           TranscriptionStatusEntity transcriptionStatus) {
 
-        var transcriptionWorkflow = createTranscriptionWorkflowEntity(transcription, transcription.getCreatedBy(), workflowTimestamp, transcriptionStatus);
+        var transcriptionWorkflow = createTranscriptionWorkflowEntity(transcription, transcription.getCreatedById(), workflowTimestamp, transcriptionStatus);
 
         return dartsDatabaseSaveStub.save(transcriptionWorkflow);
     }
@@ -552,11 +552,12 @@ public class TranscriptionStub {
         final String confidenceReason = "reason";
         final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
+        UserAccountEntity userAccount = userAccountRepository.findById(transcriptionEntity.getCreatedById()).orElseThrow();
         return updateTranscriptionWithDocument(transcriptionEntity,
                                                fileName,
                                                fileType,
                                                fileSize,
-                                               transcriptionEntity.getCreatedBy(),
+                                               userAccount,
                                                objectRecordStatusEntity,
                                                externalLocationTypeEntity,
                                                eodExternalLocation,
@@ -758,9 +759,9 @@ public class TranscriptionStub {
         transcriptionComment.setTranscription(transcription);
         transcriptionComment.setComment(comment);
         transcriptionComment.setCommentTimestamp(commentTimestamp);
-        transcriptionComment.setAuthorUserId(transcription.getCreatedBy().getId());
-        transcriptionComment.setLastModifiedBy(transcription.getCreatedBy());
-        transcriptionComment.setCreatedBy(transcription.getCreatedBy());
+        transcriptionComment.setAuthorUserId(transcription.getCreatedById());
+        transcriptionComment.setLastModifiedById(transcription.getCreatedById());
+        transcriptionComment.setCreatedById(transcription.getCreatedById());
         return dartsDatabaseSaveStub.save(transcriptionComment);
     }
 

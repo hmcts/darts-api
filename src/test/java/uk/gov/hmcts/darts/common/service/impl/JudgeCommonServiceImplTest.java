@@ -33,6 +33,7 @@ class JudgeCommonServiceImplTest {
     @BeforeEach
     void setUp() {
         userAccount = new UserAccountEntity();
+        userAccount.setId(123);
         existingJudge = new JudgeEntity();
         existingJudge.setName("JUDGE SMITH");
 
@@ -60,7 +61,7 @@ class JudgeCommonServiceImplTest {
 
         assertNotNull(result);
         assertEquals("JUDGE BROWN", result.getName());
-        assertEquals(userAccount, result.getCreatedBy());
+        assertEquals(userAccount.getId(), result.getCreatedById());
         assertEquals(userAccount.getId(), result.getLastModifiedById());
         verify(judgeRepository).findByNameIgnoreCase("Judge Brown");
         verify(judgeRepository).saveAndFlush(any(JudgeEntity.class));

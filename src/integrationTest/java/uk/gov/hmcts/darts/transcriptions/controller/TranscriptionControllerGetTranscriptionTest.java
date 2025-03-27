@@ -78,7 +78,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         transcription.setEndTime(SOME_DATE_TIME);
         transcription = dartsDatabase.save(transcription);
 
-        UserAccountEntity userAccount = transcription.getCreatedBy();
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
         addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
         addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
@@ -100,7 +100,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     @Test
     void getTranscriptionWithHiddenDocumentReturnsNotFound() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        UserAccountEntity userAccount = hearingEntity.getCreatedBy();
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(hearingEntity.getCreatedById()).orElseThrow();
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
             userAccount, hearingEntity.getCourtCase(), hearingEntity, SOME_DATE_TIME, true
@@ -114,7 +114,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     void getTranscriptionWithHiddenDocumentCanBeSeenBySuperAdmin() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        UserAccountEntity userAccount = hearingEntity.getCreatedBy();
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(hearingEntity.getCreatedById()).orElseThrow();
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
             userAccount, hearingEntity.getCourtCase(), hearingEntity, SOME_DATE_TIME, true
@@ -134,7 +134,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         transcription = dartsDatabase.save(transcription);
 
 
-        UserAccountEntity userAccount = transcription.getCreatedBy();
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
         addComment(transcription, null, "comment1", userAccount);
         addComment(transcription, null, "comment2", userAccount);
@@ -165,7 +165,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         transcription.setEndTime(SOME_DATE_TIME);
         transcription = dartsDatabase.save(transcription);
 
-        UserAccountEntity userAccount = transcription.getCreatedBy();
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
         addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
         addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
@@ -196,7 +196,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         transcription.setEndTime(SOME_DATE_TIME);
         transcription = dartsDatabase.save(transcription);
 
-        UserAccountEntity userAccount = transcription.getCreatedBy();
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
         addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
         addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
@@ -223,7 +223,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         transcription.setEndTime(SOME_DATE_TIME);
         transcription = dartsDatabase.save(transcription);
 
-        UserAccountEntity userAccount = transcription.getCreatedBy();
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
         addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
         addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
@@ -251,7 +251,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         transcription.setIsCurrent(false);
         transcription = dartsDatabase.save(transcription);
 
-        UserAccountEntity userAccount = transcription.getCreatedBy();
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
         addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
         addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
@@ -291,7 +291,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     private void addTranscriptionWorkflow(TranscriptionEntity transcription, UserAccountEntity userAccount, String comment, TranscriptionStatusEnum status) {
         TranscriptionWorkflowEntity workflowAEntity = new TranscriptionWorkflowEntity();
         workflowAEntity.setTranscription(transcription);
-        workflowAEntity.setWorkflowActor(transcription.getCreatedBy());
+        workflowAEntity.setWorkflowActor(dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow());
         workflowAEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         workflowAEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(status));
         dartsDatabase.save(workflowAEntity);

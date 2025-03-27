@@ -142,7 +142,7 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         assertThat(savedCaseDocument.getFileName()).isEqualTo(fileName);
         assertThat(savedCaseDocument.getFileSize()).isEqualTo(CASE_DOCUMENT_JSON.getBytes(StandardCharsets.UTF_8).length);
         assertThat(savedCaseDocument.getFileType()).isEqualTo("application/json");
-        assertThat(savedCaseDocument.getCreatedBy()).isEqualTo(user);
+        assertThat(savedCaseDocument.getCreatedById()).isEqualTo(user.getId());
         assertThat(savedCaseDocument.getLastModifiedById()).isEqualTo(user.getId());
         assertThat(savedCaseDocument.isHidden()).isEqualTo(false);
 

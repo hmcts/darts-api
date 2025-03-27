@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -193,6 +194,9 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
 
         TransformedMediaEntity mediaEntityToRequest = transformedMediaEntityList.get(2);
 
+        UserAccountEntity mediaRequestCreatedBy = dartsDatabase.getUserAccountRepository()
+            .findById(mediaEntityToRequest.getMediaRequest().getCreatedById()).orElseThrow();
+
         // use all search criteria
         SearchTransformedMediaRequest request = new SearchTransformedMediaRequest();
         request.setRequestedAtFrom(mediaEntityToRequest.getMediaRequest().getCreatedDateTime().minusDays(2).toLocalDate());
@@ -200,7 +204,7 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
         request.setCaseNumber(mediaEntityToRequest.getMediaRequest().getHearing().getCourtCase().getCaseNumber());
         request.setHearingDate(mediaEntityToRequest.getMediaRequest().getHearing().getHearingDate());
         request.setOwner(mediaEntityToRequest.getMediaRequest().getCurrentOwner().getUserFullName());
-        request.setRequestedBy(mediaEntityToRequest.getMediaRequest().getCreatedBy().getUserFullName());
+        request.setRequestedBy(mediaRequestCreatedBy.getUserFullName());
         request.setRequestedAtFrom(mediaEntityToRequest.getCreatedDateTime().toLocalDate());
         request.setRequestedAtTo(mediaEntityToRequest.getCreatedDateTime().toLocalDate());
 

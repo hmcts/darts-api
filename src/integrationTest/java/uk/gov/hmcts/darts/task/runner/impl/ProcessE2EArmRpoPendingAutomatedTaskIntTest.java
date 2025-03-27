@@ -93,7 +93,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         assertNull(executionDetail.getProductionId());
         assertEquals(SOME_MASTER_INDEX_FIELD_ID, executionDetail.getSortingField());
         assertNull(executionDetail.getSearchItemCount());
-        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedById());
         assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedById());
     }
 
@@ -118,7 +118,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         var executionDetail = allExecutionDetails.getFirst();
         assertEquals(ArmRpoStateEnum.GET_RECORD_MANAGEMENT_MATTER.getId(), executionDetail.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), executionDetail.getArmRpoStatus().getId());
-        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedById());
         assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedById());
     }
 

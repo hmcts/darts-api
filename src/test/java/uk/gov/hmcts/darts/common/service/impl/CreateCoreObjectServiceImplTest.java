@@ -58,7 +58,7 @@ class CreateCoreObjectServiceImplTest {
         // Then
         assertEquals("Test Defence", createdDefence.getName());
         assertEquals(courtCase, createdDefence.getCourtCase());
-        assertEquals(userAccount, createdDefence.getCreatedBy());
+        assertEquals(userAccount.getId(), createdDefence.getCreatedById());
         assertEquals(userAccount.getId(), createdDefence.getLastModifiedById());
 
         verify(defenceRepository, times(1)).saveAndFlush(any(DefenceEntity.class));
@@ -77,7 +77,7 @@ class CreateCoreObjectServiceImplTest {
         // Then
         assertEquals("Test Defendant", createdDefendant.getName());
         assertEquals(courtCase, createdDefendant.getCourtCase());
-        assertEquals(userAccount, createdDefendant.getCreatedBy());
+        assertEquals(userAccount.getId(), createdDefendant.getCreatedById());
         assertEquals(userAccount.getId(), createdDefendant.getLastModifiedById());
 
         verify(defendantRepository, times(1)).saveAndFlush(any(DefendantEntity.class));
@@ -96,7 +96,7 @@ class CreateCoreObjectServiceImplTest {
         // Then
         assertEquals("Test Prosecutor", createdProsecutor.getName());
         assertEquals(courtCase, createdProsecutor.getCourtCase());
-        assertEquals(userAccount, createdProsecutor.getCreatedBy());
+        assertEquals(userAccount.getId(), createdProsecutor.getCreatedById());
         assertEquals(userAccount.getId(), createdProsecutor.getLastModifiedById());
 
         verify(prosecutorRepository, times(1)).saveAndFlush(any(ProsecutorEntity.class));

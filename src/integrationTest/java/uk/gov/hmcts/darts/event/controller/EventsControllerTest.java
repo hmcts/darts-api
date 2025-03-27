@@ -164,7 +164,7 @@ class EventsControllerTest extends IntegrationBase {
         Assertions.assertEquals(eventEntity.getTimestamp(), responseResult.getEventTs());
         Assertions.assertEquals(eventEntity.getIsCurrent(), responseResult.getIsCurrent());
         Assertions.assertEquals(eventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getCreatedAt());
-        Assertions.assertEquals(eventEntity.getCreatedBy().getId(), responseResult.getCreatedBy());
+        Assertions.assertEquals(eventEntity.getCreatedById(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getLastModifiedAt());
         Assertions.assertEquals(eventEntity.getLastModifiedById(), responseResult.getLastModifiedBy());
 
@@ -324,7 +324,7 @@ class EventsControllerTest extends IntegrationBase {
 
         // assert additional audit data
         assertFalse(caseExpiredAuditEntries.isEmpty());
-        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedById());
         assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedDateTime());
         assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedById());
         assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedDateTime());

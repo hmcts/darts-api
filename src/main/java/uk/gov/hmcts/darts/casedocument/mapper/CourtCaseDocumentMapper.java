@@ -8,9 +8,11 @@ import uk.gov.hmcts.darts.casedocument.model.AnnotationCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.CaseRetentionCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.CourthouseCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.CourtroomCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.DefenceCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.DefendantCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.EventCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.EventHandlerCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.HearingCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.JudgeCaseDocument;
 import uk.gov.hmcts.darts.casedocument.model.MediaRequestCaseDocument;
@@ -20,9 +22,11 @@ import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
@@ -32,6 +36,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
     BasicCaseDocumentConversions.class,
     CaseObjectsCaseDocumentMapper.class
 })
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public abstract class CourtCaseDocumentMapper {
 
     @Mappings({
@@ -56,39 +61,76 @@ public abstract class CourtCaseDocumentMapper {
     @Mappings({
         @Mapping(source = "eventList", target = "events"),
         @Mapping(source = "mediaList", target = "medias"),
-        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById"),
+        @Mapping(target = "createdBy", source = "createdById")
     })
     abstract HearingCaseDocument mapToCaseDocument(HearingEntity hearingEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract DefendantCaseDocument mapToDefendantCaseDocument(DefendantEntity defendantEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract ProsecutorCaseDocument mapToProsecutorCaseDocument(ProsecutorEntity prosecutorEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract DefenceCaseDocument mapToDefenceCaseDocument(DefenceEntity defenceEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract CaseRetentionCaseDocument.RetentionPolicyTypeCaseDocument mapToRetentionPolicyTypeCaseDocument(
         RetentionPolicyTypeEntity retentionPolicyTypeEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract CaseRetentionCaseDocument mapToCaseRetentionCaseDocument(CaseRetentionEntity caseRetentionEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract JudgeCaseDocument mapToJudgeCaseDocument(JudgeEntity judgeEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract CourthouseCaseDocument mapToCourthouseCaseDocument(CourthouseEntity courthouseEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract EventCaseDocument mapToEventCaseDocument(EventEntity eventEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract MediaRequestCaseDocument mapToMediaRequestCaseDocument(MediaRequestEntity mediaRequestEntity);
 
-    @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    @Mappings({
+        @Mapping(target = "createdBy", source = "createdById"),
+        @Mapping(target = "lastModifiedBy", source = "lastModifiedById")
+    })
     abstract AnnotationCaseDocument mapToAnnotationCaseDocument(AnnotationEntity annotationEntity);
+
+    @Mapping(target = "createdBy", source = "createdById")
+    abstract EventHandlerCaseDocument mapToEventHandlerCaseDocument(EventHandlerEntity eventHandlerEntity);
+
+    @Mapping(target = "createdBy", source = "createdById")
+    abstract CourtroomCaseDocument mapToCourtroomCaseDocument(CourtroomEntity courtroomEntity);
 
 }

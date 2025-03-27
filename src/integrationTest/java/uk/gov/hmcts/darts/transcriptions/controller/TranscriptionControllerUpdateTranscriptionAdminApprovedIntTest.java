@@ -132,7 +132,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
         final TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(REQUESTED.getId(), transcriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(transcriptCreatorId, transcriptionEntity.getCreatedBy().getId());
+        assertEquals(transcriptCreatorId, transcriptionEntity.getCreatedById());
         assertEquals(transcriptCreatorId, transcriptionEntity.getLastModifiedById());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities

@@ -305,7 +305,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
         if (nonNull(media)) {
             objectRetrievalQueueEntity.setMedia(media);
-            objectRetrievalQueueEntity.setCreatedBy(media.getCreatedBy());
+            objectRetrievalQueueEntity.setCreatedById(media.getCreatedById());
             objectRetrievalQueueEntity.setLastModifiedById(media.getLastModifiedById());
         }
         if (nonNull(transcriptionDocumentEntity)) {

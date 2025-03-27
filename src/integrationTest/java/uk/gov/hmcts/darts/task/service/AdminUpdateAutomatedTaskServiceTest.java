@@ -105,7 +105,7 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
         assertThat(response.getIsActive()).isEqualTo(updatedAutomatedTaskEntity.getTaskEnabled());
         assertThat(response.getIsCronEditable()).isEqualTo(updatedAutomatedTaskEntity.getCronEditable());
         assertThat(response.getCreatedAt()).isEqualTo(updatedAutomatedTaskEntity.getCreatedDateTime());
-        assertThat(response.getCreatedBy()).isEqualTo(updatedAutomatedTaskEntity.getCreatedBy().getId());
+        assertThat(response.getCreatedBy()).isEqualTo(updatedAutomatedTaskEntity.getCreatedById());
         assertThat(response.getLastModifiedAt()).isEqualTo(updatedAutomatedTaskEntity.getLastModifiedDateTime());
         assertThat(response.getLastModifiedBy()).isEqualTo(updatedAutomatedTaskEntity.getLastModifiedById());
     }

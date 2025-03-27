@@ -143,9 +143,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
 
         var currentUser = authorisationApi.getCurrentUser();
-        securityGroupEntity.setLastModifiedBy(currentUser);
-        if (securityGroupEntity.getCreatedBy() == null) {
-            securityGroupEntity.setCreatedBy(currentUser);
+        securityGroupEntity.setLastModifiedById(currentUser.getId());
+        if (securityGroupEntity.getCreatedById() == null) {
+            securityGroupEntity.setCreatedById(currentUser.getId());
         }
         var updatedGroup = securityGroupRepository.saveAndFlush(securityGroupEntity);
 

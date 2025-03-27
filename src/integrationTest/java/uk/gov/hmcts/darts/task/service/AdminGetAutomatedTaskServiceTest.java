@@ -29,7 +29,7 @@ class AdminGetAutomatedTaskServiceTest extends IntegrationBase {
         assertThat(automatedTasks.getIsActive()).isEqualTo(automatedTask.getTaskEnabled());
         assertThat(automatedTasks.getIsCronEditable()).isEqualTo(automatedTask.getCronEditable());
         assertThat(automatedTasks.getCreatedAt()).isEqualTo(automatedTask.getCreatedDateTime());
-        assertThat(automatedTasks.getCreatedBy()).isEqualTo(automatedTask.getCreatedBy().getId());
+        assertThat(automatedTasks.getCreatedBy()).isEqualTo(automatedTask.getCreatedById());
         assertThat(automatedTasks.getLastModifiedAt()).isEqualTo(automatedTask.getLastModifiedDateTime());
         assertThat(automatedTasks.getLastModifiedBy()).isEqualTo(automatedTask.getLastModifiedById());
         assertThat(automatedTasks.getBatchSize()).isEqualTo(automatedTask.getBatchSize());

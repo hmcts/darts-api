@@ -47,7 +47,7 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
             mediaRequestEntity.getEndTime(),
             1000L
         );
-        assertThat(transformedMediaEntity.getCreatedBy()).isEqualTo(mediaRequestEntity.getCreatedBy());
+        assertThat(transformedMediaEntity.getCreatedById()).isEqualTo(mediaRequestEntity.getCreatedById());
         assertThat(transformedMediaEntity.getLastModifiedById()).isEqualTo(mediaRequestEntity.getCreatedById());
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,

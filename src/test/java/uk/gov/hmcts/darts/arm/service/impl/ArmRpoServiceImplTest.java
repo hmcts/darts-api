@@ -80,6 +80,7 @@ class ArmRpoServiceImplTest {
     void setUp() {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(123);
     }
 
     @Test
@@ -99,7 +100,7 @@ class ArmRpoServiceImplTest {
         verify(armRpoExecutionDetailRepository).save(detailEntityCaptor.capture());
 
         var armRpoExecutionDetail = detailEntityCaptor.getValue();
-        assertEquals(userAccountEntity, armRpoExecutionDetail.getCreatedBy());
+        assertEquals(userAccountEntity.getId(), armRpoExecutionDetail.getCreatedById());
 
         verifyNoMoreInteractions(entityManager, armRpoExecutionDetailRepository);
     }
