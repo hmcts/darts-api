@@ -284,8 +284,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
         return response;
     }
-
-
+    
     private List<TransformedMediaDetails> getTransformedMediaDetails(Integer userId, Boolean expired) {
         List<TransformedMediaDetailsDto> transformedMediaDetailsDtoList = transformedMediaRepository.findTransformedMediaDetails(userId, expired);
         return transformedMediaMapper.mapToTransformedMediaDetails(transformedMediaDetailsDtoList);
