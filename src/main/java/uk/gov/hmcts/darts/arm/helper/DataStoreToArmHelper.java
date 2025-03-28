@@ -201,12 +201,12 @@ public class DataStoreToArmHelper {
                 armExternalObjectDirectory.setStatus(EodHelper.armRawDataPushedStatus());
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
             }
+            return true;
         } catch (Exception e) {
             log.error("Error copying BLOB data for file {}", unstructuredExternalObjectDirectory.getExternalLocation(), e);
             return false;
         }
 
-        return true;
     }
 
     public void updateExternalObjectDirectoryFailedTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity,
