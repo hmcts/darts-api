@@ -45,7 +45,7 @@ class ExternalObjectDirectoryRepositoryTest {
             .containsExactlyInAnyOrder(mediaEod1, mediaEod2, nonMediaEod1);
 
         verify(externalObjectDirectoryRepository)
-            .findEodsForTransferOnlyMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(5));
+            .findEodsForTransferOnlyMedia(status.getId(), type.getId(), notExistsStatus.getId(), notExistsType.getId(), maxTransferAttempts, 5);
         verify(externalObjectDirectoryRepository)
             .findEodsForTransferExcludingMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(3));
     }
@@ -73,7 +73,7 @@ class ExternalObjectDirectoryRepositoryTest {
             .containsExactlyInAnyOrder(mediaEod1, mediaEod2);
 
         verify(externalObjectDirectoryRepository)
-            .findEodsForTransferOnlyMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(2));
+            .findEodsForTransferOnlyMedia(status.getId(), type.getId(), notExistsStatus.getId(), notExistsType.getId(), maxTransferAttempts, 2);
         verify(externalObjectDirectoryRepository, never())
             .findEodsForTransferExcludingMedia(any(), any(), any(), any(), any(), any());
     }
