@@ -138,10 +138,11 @@ class AnnotationGetTest extends IntegrationBase {
 
     private AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
         var annotation = PersistableFactory.getAnnotationTestData().someMinimalBuilder()
-                .deleted(false).currentOwner(userAccount)
-                .createdBy(userAccount)
-                .lastModifiedBy(userAccount)
-                .hearingList(new ArrayList<>(List.of(PersistableFactory.getHearingTestData().someMinimalHearing())));
+            .deleted(false)
+            .currentOwner(userAccount)
+            .createdById(0)
+            .lastModifiedById(0)
+            .hearingList(new ArrayList<>(List.of(PersistableFactory.getHearingTestData().someMinimalHearing())));
 
         return dartsPersistence.save(annotation.build().getEntity());
     }

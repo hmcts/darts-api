@@ -133,11 +133,11 @@ class RetentionControllerReviseRetentionPolicyTypeIntTest extends IntegrationBas
             assertNull(createdPolicyTypeEntity.getPolicyEnd());
 
             Integer userId = userAccountEntity.getId();
-            assertEquals(userId, createdPolicyTypeEntity.getLastModifiedBy().getId());
-            assertEquals(userId, createdPolicyTypeEntity.getCreatedBy().getId());
+            assertEquals(userId, createdPolicyTypeEntity.getLastModifiedById());
+            assertEquals(userId, createdPolicyTypeEntity.getCreatedById());
 
             assertNotNull(createdPolicyTypeEntity.getLastModifiedDateTime());
-            assertNotNull(createdPolicyTypeEntity.getCreatedBy());
+            assertNotNull(createdPolicyTypeEntity.getCreatedById());
 
             // Verify state of prior policy
             Optional<RetentionPolicyTypeEntity> updatedPriorPolicy = dartsDatabase.getRetentionPolicyTypeRepository().findById(priorPolicy.getId());

@@ -96,8 +96,8 @@ public class TransformedMediaHelper {
         entity.setStartTime(startTime);
         entity.setEndTime(endTime);
         //By manually setting these values it bypasses the auto update of the last modified by and created by fields
-        entity.setLastModifiedBy(mediaRequest.getCreatedBy());
-        entity.setCreatedBy(mediaRequest.getCreatedBy());
+        entity.setLastModifiedById(mediaRequest.getCreatedById());
+        entity.setCreatedById(mediaRequest.getCreatedById());
         entity.setOutputFormat(audioRequestOutputFormat);
         if (nonNull(fileSize)) {
             entity.setOutputFilesize(fileSize.intValue());

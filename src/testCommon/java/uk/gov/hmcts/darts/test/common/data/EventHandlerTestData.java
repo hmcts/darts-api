@@ -4,8 +4,6 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 
 import java.time.OffsetDateTime;
 
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
-
 public final class EventHandlerTestData {
 
     private EventHandlerTestData() {
@@ -17,7 +15,7 @@ public final class EventHandlerTestData {
         entity.setType("some-type");
         entity.setEventName("some-desc");
         entity.setCreatedDateTime(OffsetDateTime.now());
-        entity.setCreatedBy(minimalUserAccount());
+        entity.setCreatedById(0);
         entity.setActive(true);
         entity.setReportingRestriction(false);
 

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
@@ -632,13 +633,14 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     @EnumSource(TestType.class)
     void testFindTranscriptionDocumentWithAllQueryParameters(TestType testType) {
         dataSetup(testType);
+        UserAccountEntity createdBy = dartsDatabase.getUserAccountRepository()
+            .findById(generatedDocumentEntities.getFirst().getTranscription().getCreatedById()).orElseThrow();
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository
-            .findTranscriptionMedia(generatedDocumentEntities.getFirst().getTranscription()
-                                        .getCourtCase().getCaseNumber(),
+            .findTranscriptionMedia(generatedDocumentEntities.getFirst().getTranscription().getCourtCase().getCaseNumber(),
                                     generatedDocumentEntities.getFirst().getTranscription().getCourtroom().getCourthouse().getDisplayName(),
                                     getHearingDate(testType, generatedDocumentEntities.getFirst().getTranscription()),
-                                    generatedDocumentEntities.getFirst().getTranscription().getCreatedBy().getUserFullName(),
+                                    createdBy.getUserFullName(),
                                     generatedDocumentEntities.getFirst().getTranscription().getCreatedDateTime(),
                                     generatedDocumentEntities.getFirst().getTranscription().getCreatedDateTime(), false,
                                     generatedDocumentEntities.getFirst().getTranscription().getTranscriptionWorkflowEntities()

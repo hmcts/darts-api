@@ -207,9 +207,9 @@ public class CasesMapper {
         }
 
         adminCase.setCreatedAt(courtCase.getCreatedDateTime());
-        adminCase.setCreatedBy(courtCase.getCreatedBy().getId());
+        adminCase.setCreatedBy(courtCase.getCreatedById());
         adminCase.setLastModifiedAt(courtCase.getLastModifiedDateTime());
-        adminCase.setLastModifiedBy(courtCase.getLastModifiedBy().getId());
+        adminCase.setLastModifiedBy(courtCase.getLastModifiedById());
         adminCase.setIsDeleted(courtCase.isDeleted());
         adminCase.setCaseDeletedBy(
             Optional.ofNullable(courtCase.getDeletedBy())

@@ -36,9 +36,9 @@ public class TestUserAccountEntity extends UserAccountEntity implements DbInsert
         String userLoginDomain,
         Short userState,
         OffsetDateTime createdDateTime,
-        UserAccountEntity createdBy,
+        Integer createdById,
         OffsetDateTime lastModifiedDateTime,
-        UserAccountEntity lastModifiedBy
+        Integer lastModifiedById
     ) {
         setId(id);
         setDmObjectId(dmObjectId);
@@ -58,9 +58,9 @@ public class TestUserAccountEntity extends UserAccountEntity implements DbInsert
         setUserLoginDomain(userLoginDomain);
         setUserState(userState);
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

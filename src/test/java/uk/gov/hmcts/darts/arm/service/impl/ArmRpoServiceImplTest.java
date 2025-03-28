@@ -80,6 +80,7 @@ class ArmRpoServiceImplTest {
     void setUp() {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(123);
     }
 
     @Test
@@ -99,7 +100,7 @@ class ArmRpoServiceImplTest {
         verify(armRpoExecutionDetailRepository).save(detailEntityCaptor.capture());
 
         var armRpoExecutionDetail = detailEntityCaptor.getValue();
-        assertEquals(userAccountEntity, armRpoExecutionDetail.getCreatedBy());
+        assertEquals(userAccountEntity.getId(), armRpoExecutionDetail.getCreatedById());
 
         verifyNoMoreInteractions(entityManager, armRpoExecutionDetailRepository);
     }
@@ -154,7 +155,7 @@ class ArmRpoServiceImplTest {
 
         // then
         assertEquals(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), armRpoExecutionDetailEntity.getArmRpoStatus());
-        assertEquals(userAccountEntity, armRpoExecutionDetailEntity.getLastModifiedBy());
+        assertEquals(userAccountEntity.getId(), armRpoExecutionDetailEntity.getLastModifiedById());
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
     }
 

@@ -97,6 +97,6 @@ public class EventLoggerServiceImpl implements EventLoggerService {
     }
 
     public static String manualObfuscationMessage(EventEntity eventEntity) {
-        return String.format("Event id %s manually obfuscated by user %s", eventEntity.getId(), eventEntity.getLastModifiedBy().getId());
+        return String.format("Event id %s manually obfuscated by user %s", eventEntity.getId(), eventEntity.getLastModifiedById());
     }
 }

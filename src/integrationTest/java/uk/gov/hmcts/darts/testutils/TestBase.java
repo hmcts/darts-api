@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
@@ -63,7 +64,7 @@ public class TestBase {
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(dartsApiError.getHttpStatus().value());
     }
 
-    protected void anAuthenticatedUserFor(String userEmail) {
-        GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
+    protected UserAccountEntity anAuthenticatedUserFor(String userEmail) {
+        return GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }
 }

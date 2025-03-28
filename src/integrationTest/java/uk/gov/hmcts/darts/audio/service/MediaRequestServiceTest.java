@@ -81,8 +81,8 @@ class MediaRequestServiceTest extends IntegrationBase {
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
         assertNotNull(mediaRequestEntity.getCreatedDateTime());
-        assertNotNull(mediaRequestEntity.getCreatedBy());
-        assertNotNull(mediaRequestEntity.getLastModifiedBy());
+        assertNotNull(mediaRequestEntity.getCreatedById());
+        assertNotNull(mediaRequestEntity.getLastModifiedById());
         assertNotNull(mediaRequestEntity.getLastModifiedDateTime());
     }
 
@@ -101,8 +101,8 @@ class MediaRequestServiceTest extends IntegrationBase {
         assertEquals(OffsetDateTime.parse(T_09_00_00_Z), mediaRequestEntity.getStartTime());
         assertEquals(OffsetDateTime.parse(T_12_00_00_Z), mediaRequestEntity.getEndTime());
         assertNotNull(mediaRequestEntity.getCreatedDateTime());
-        assertNotNull(mediaRequestEntity.getCreatedBy());
-        assertNotNull(mediaRequestEntity.getLastModifiedBy());
+        assertNotNull(mediaRequestEntity.getCreatedById());
+        assertNotNull(mediaRequestEntity.getLastModifiedById());
         assertNotNull(mediaRequestEntity.getLastModifiedDateTime());
     }
 
@@ -123,8 +123,8 @@ class MediaRequestServiceTest extends IntegrationBase {
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
         assertNotNull(mediaRequestEntity.getCreatedDateTime());
-        assertNotNull(mediaRequestEntity.getCreatedBy());
-        assertNotNull(mediaRequestEntity.getLastModifiedBy());
+        assertNotNull(mediaRequestEntity.getCreatedById());
+        assertNotNull(mediaRequestEntity.getLastModifiedById());
         assertNotNull(mediaRequestEntity.getLastModifiedDateTime());
     }
 
@@ -144,8 +144,8 @@ class MediaRequestServiceTest extends IntegrationBase {
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
         assertNotNull(mediaRequestEntity.getCreatedDateTime());
-        assertNotNull(mediaRequestEntity.getCreatedBy());
-        assertNotNull(mediaRequestEntity.getLastModifiedBy());
+        assertNotNull(mediaRequestEntity.getCreatedById());
+        assertNotNull(mediaRequestEntity.getLastModifiedById());
         assertNotNull(mediaRequestEntity.getLastModifiedDateTime());
     }
 
@@ -202,7 +202,7 @@ class MediaRequestServiceTest extends IntegrationBase {
         assertEquals(COMPLETED, updatedMediaRequest.getStatus());
         assertNotEquals(originalLastModifiedDateTime.atZoneSameInstant(ZoneOffset.UTC),
                         updatedMediaRequest.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC));
-        assertEquals(systemUserHelper.getSystemUser().getId(), updatedMediaRequest.getLastModifiedBy().getId());
+        assertEquals(systemUserHelper.getSystemUser().getId(), updatedMediaRequest.getLastModifiedById());
     }
 
     @Test

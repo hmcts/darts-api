@@ -5,7 +5,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -20,12 +19,12 @@ public class TestCourtroomEntity extends CourtroomEntity implements DbInsertable
     public TestCourtroomEntity(Integer id,
                                String name,
                                CourthouseEntity courthouse,
-                               UserAccountEntity createdBy,
+                               Integer createdById,
                                OffsetDateTime createdDateTime) {
         setId(id);
         setName(name);
         setCourthouse(courthouse);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setCreatedDateTime(createdDateTime);
     }
 

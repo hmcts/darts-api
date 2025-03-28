@@ -35,6 +35,7 @@ class AudioAuditTest extends IntegrationBase {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         MediaRequestEntity mediaRequest = getMediaRequestTestData().someMinimalRequestData();
         dartsDatabase.save(mediaRequest.getHearing());
+        dartsDatabase.save(mediaRequest.getCurrentOwner());
         dartsDatabase.save(mediaRequest);
         UserAccountEntity newOwner = dartsDatabase.save(minimalUserAccount());
 

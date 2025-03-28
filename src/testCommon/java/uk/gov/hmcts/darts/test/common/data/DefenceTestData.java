@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.IntStream.rangeClosed;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class DefenceTestData {
 
@@ -19,9 +18,8 @@ public final class DefenceTestData {
         var defence = new DefenceEntity();
         defence.setCourtCase(PersistableFactory.getCourtCaseTestData().createSomeMinimalCase());
         defence.setName("some-defence");
-        var userAccount = minimalUserAccount();
-        defence.setCreatedBy(userAccount);
-        defence.setLastModifiedBy(userAccount);
+        defence.setCreatedById(0);
+        defence.setLastModifiedById(0);
         return defence;
     }
 

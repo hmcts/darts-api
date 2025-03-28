@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.builder.TestMediaEntity;
@@ -13,7 +12,6 @@ import static java.time.OffsetDateTime.now;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuilderRetrieve,
     MediaEntity,
@@ -32,8 +30,6 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
     public TestMediaEntity.TestMediaBuilderRetrieve someMinimalBuilderHolder() {
         var builderRetrieve = new TestMediaEntity.TestMediaBuilderRetrieve();
 
-        UserAccountEntity someUser = PersistableFactory.getUserAccountTestData().someMinimal();
-
         builderRetrieve.getBuilder()
             .courtroom(PersistableFactory.getCourtroomTestData().someMinimal())
             .channel(1)
@@ -41,9 +37,9 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
             .start(NOW)
             .end(NOW.plusMinutes(1))
             .createdDateTime(NOW)
-            .createdBy(someUser)
+            .createdById(0)
             .lastModifiedDateTime(NOW)
-            .lastModifiedBy(someUser)
+            .lastModifiedById(0)
             .mediaFile("a-media-file")
             .mediaFormat("mp2")
             .fileSize(1000L)
@@ -77,9 +73,8 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
         media.setCourtroom(someMinimalCourtRoom());
         media.setIsCurrent(true);
 
-        var userAccount = minimalUserAccount();
-        media.setCreatedBy(userAccount);
-        media.setLastModifiedBy(userAccount);
+        media.setCreatedById(0);
+        media.setLastModifiedById(0);
 
         return media;
     }

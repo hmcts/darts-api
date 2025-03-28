@@ -7,7 +7,6 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -32,9 +31,9 @@ public class TestCourthouseEntity extends CourthouseEntity implements DbInsertab
                                 String displayName,
                                 String courthouseObjectId,
                                 String folderPath,
-                                UserAccountEntity createdBy,
+                                Integer createdById,
                                 OffsetDateTime createdDateTime,
-                                UserAccountEntity lastModifiedBy,
+                                Integer lastModifiedById,
                                 OffsetDateTime lastModifiedDateTime) {
         setId(id);
         setCode(code);
@@ -45,9 +44,9 @@ public class TestCourthouseEntity extends CourthouseEntity implements DbInsertab
         setDisplayName(displayName);
         setCourthouseObjectId(courthouseObjectId);
         setFolderPath(folderPath);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setCreatedDateTime(createdDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
         setLastModifiedDateTime(lastModifiedDateTime);
     }
 

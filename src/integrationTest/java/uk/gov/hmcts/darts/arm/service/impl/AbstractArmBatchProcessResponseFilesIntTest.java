@@ -1687,7 +1687,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimalBuilder().courtCase(courtCaseEntity).checksum("C3CCA7021CF79B42F245AF350601C284\")").lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().courtCase(courtCaseEntity).checksum("C3CCA7021CF79B42F245AF350601C284\")")
+            .lastModifiedById(uploadedBy.getId())
+            .build();
         caseDocument.setCourtCase(courtCaseEntity);
         caseDocument.setFileName("test_filename");
         caseDocument.setFileType("docx");
@@ -1780,7 +1782,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimalBuilder().checksum("xC3CCA7021CF79B42F245AF350601C284").courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().checksum("xC3CCA7021CF79B42F245AF350601C284").courtCase(courtCaseEntity)
+            .lastModifiedById(uploadedBy.getId())
+            .build();
         caseDocument.setFileName("test_case_document.docx");
 
         caseDocument = dartsPersistence.save(caseDocument);
@@ -1962,7 +1966,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         courtCaseEntity = dartsPersistence.save(courtCaseEntity);
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimalBuilder().courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().courtCase(courtCaseEntity)
+            .lastModifiedById(uploadedBy.getId()).build();
         caseDocument.setFileName("test_case_document.docx");
         caseDocument = dartsPersistence.save(caseDocument);
 
@@ -2030,7 +2035,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimalBuilder().courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().courtCase(courtCaseEntity)
+            .lastModifiedById(uploadedBy.getId()).build();
         caseDocument.setFileName("test_case_document.docx");
         caseDocument = dartsPersistence.save(caseDocument);
 

@@ -54,9 +54,9 @@ class ExternalObjectDirectoryBuilderTest {
             .hasFieldOrPropertyWithValue("externalLocationType", EXTERNAL_LOCATION_TYPE)
             .hasFieldOrPropertyWithValue("externalLocation", SOME_EXTERNAL_LOCATION)
             .hasFieldOrPropertyWithValue("checksum", annotationDocumentEntity.getChecksum())
-            .hasFieldOrPropertyWithValue("createdBy", annotationDocumentEntity.getUploadedBy())
+            .hasFieldOrPropertyWithValue("createdById", annotationDocumentEntity.getUploadedBy().getId())
             .hasFieldOrPropertyWithValue("verificationAttempts", 1)
-            .hasFieldOrPropertyWithValue("lastModifiedBy", annotationDocumentEntity.getUploadedBy());
+            .hasFieldOrPropertyWithValue("lastModifiedById", annotationDocumentEntity.getUploadedBy().getId());
 
         verify(externalLocationTypeRepository, times(1)).getReferenceById(externalLocationType.getId());
     }

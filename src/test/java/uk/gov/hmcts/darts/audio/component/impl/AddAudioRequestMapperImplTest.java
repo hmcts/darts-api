@@ -54,6 +54,7 @@ class AddAudioRequestMapperImplTest {
         addAudioRequestMapperImpl = new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity, mediaLinkedCaseHelper, mediaRepository);
         userAccount = new UserAccountEntity();
         userAccount.setId(0);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
     }
 
     @Test
@@ -73,6 +74,8 @@ class AddAudioRequestMapperImplTest {
         media.setChannel(1);
         media.setTotalChannels(2);
         media.setCourtroom(courtroomEntity);
+        media.setCreatedBy(userAccount);
+        media.setLastModifiedById(userAccount.getId());
 
         MediaEntity result = addAudioRequestMapperImpl.mapToMedia(
             new AddAudioMetadataRequest(
@@ -92,8 +95,8 @@ class AddAudioRequestMapperImplTest {
         Assertions.assertEquals(media.getChannel(), result.getChannel());
         Assertions.assertEquals(media.getTotalChannels(), result.getTotalChannels());
         Assertions.assertEquals(media.getCourtroom().getName(), result.getCourtroom().getName());
-        Assertions.assertEquals(media.getCreatedBy(), userIdentity.getUserAccount());
-        Assertions.assertEquals(media.getLastModifiedBy(), userIdentity.getUserAccount());
+        Assertions.assertEquals(media.getCreatedById(), userAccount.getId());
+        Assertions.assertEquals(media.getLastModifiedById(), userAccount.getId());
         verify(mediaLinkedCaseHelper, times(2))
             .linkMediaToCase(result, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, userAccount);
     }

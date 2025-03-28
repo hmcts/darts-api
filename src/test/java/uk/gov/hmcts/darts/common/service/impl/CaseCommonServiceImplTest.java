@@ -38,6 +38,7 @@ class CaseCommonServiceImplTest {
     @BeforeEach
     void setUp() {
         userAccount = new UserAccountEntity();
+        userAccount.setId(123);
         courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("Test Courthouse");
         existingCase = new CourtCaseEntity();
@@ -56,7 +57,7 @@ class CaseCommonServiceImplTest {
 
         assertNotNull(result);
         assertEquals("CASE123", result.getCaseNumber());
-        assertEquals(userAccount, result.getLastModifiedBy());
+        assertEquals(userAccount.getId(), result.getLastModifiedById());
         verify(caseRepository).saveAndFlush(existingCase);
     }
 
@@ -72,8 +73,8 @@ class CaseCommonServiceImplTest {
         assertNotNull(result);
         assertEquals("CASE123", result.getCaseNumber());
         assertEquals(courthouse, result.getCourthouse());
-        assertEquals(userAccount, result.getCreatedBy());
-        assertEquals(userAccount, result.getLastModifiedBy());
+        assertEquals(userAccount.getId(), result.getCreatedById());
+        assertEquals(userAccount.getId(), result.getLastModifiedById());
         assertFalse(result.getClosed());
         assertFalse(result.getInterpreterUsed());
         verify(caseRepository).saveAndFlush(any(CourtCaseEntity.class));
@@ -89,7 +90,7 @@ class CaseCommonServiceImplTest {
 
         assertNotNull(result);
         assertEquals("CASE123", result.getCaseNumber());
-        assertEquals(userAccount, result.getLastModifiedBy());
+        assertEquals(userAccount.getId(), result.getLastModifiedById());
         verify(caseRepository).saveAndFlush(existingCase);
     }
 
@@ -104,8 +105,8 @@ class CaseCommonServiceImplTest {
         assertNotNull(result);
         assertEquals("CASE123", result.getCaseNumber());
         assertEquals(courthouse, result.getCourthouse());
-        assertEquals(userAccount, result.getCreatedBy());
-        assertEquals(userAccount, result.getLastModifiedBy());
+        assertEquals(userAccount.getId(), result.getCreatedById());
+        assertEquals(userAccount.getId(), result.getLastModifiedById());
         assertFalse(result.getClosed());
         assertFalse(result.getInterpreterUsed());
         verify(caseRepository).saveAndFlush(any(CourtCaseEntity.class));
@@ -125,7 +126,7 @@ class CaseCommonServiceImplTest {
         assertNotNull(result);
         assertEquals("CASE123", result.getCaseNumber());
         assertEquals("TEST COURTHOUSE", result.getCourthouse().getCourthouseName());
-        assertEquals(userAccount, result.getLastModifiedBy());
+        assertEquals(userAccount.getId(), result.getLastModifiedById());
         verify(caseRepository).saveAndFlush(existingCase);
     }
 }

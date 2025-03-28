@@ -31,9 +31,9 @@ public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInse
         RetentionConfidenceScoreEnum retConfScore,
         String retConfReason,
         OffsetDateTime createdDateTime,
-        UserAccountEntity createdBy,
+        Integer createdById,
         OffsetDateTime lastModifiedDateTime,
-        UserAccountEntity lastModifiedBy
+        Integer lastModifiedById
     ) {
         // Set parent properties
         setId(id);
@@ -50,9 +50,9 @@ public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInse
         setRetConfScore(retConfScore);
         setRetConfReason(retConfReason);
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

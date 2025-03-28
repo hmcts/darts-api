@@ -63,8 +63,8 @@ class NotificationServiceTest extends IntegrationBase {
         assertEquals(NotificationStatus.OPEN, notification.getStatus());
         assertEquals(caseId, notification.getCourtCase().getId());
 
-        assertEquals(SYSTEM_USER_ID, notification.getCreatedBy().getId());
-        assertEquals(SYSTEM_USER_ID, notification.getLastModifiedBy().getId());
+        assertEquals(SYSTEM_USER_ID, notification.getCreatedById());
+        assertEquals(SYSTEM_USER_ID, notification.getLastModifiedById());
 
         verify(logApi, times(1)).scheduleNotification(any(), any());
     }

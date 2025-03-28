@@ -57,7 +57,7 @@ public class ProcessArmRpoPendingAutomatedTask
             EodHelper.armRpoPendingStatus(),
             this.currentTimeHelper.currentOffsetDateTime().minus(this.armRpoDuration),
             EodHelper.storedStatus(),
-            userIdentity.getUserAccount(),
+            userIdentity.getUserAccount().getId(),
             Limit.of(this.getAutomatedTaskBatchSize())
         );
     }

@@ -352,7 +352,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         String manifestFileName = manifestFileNameCaptor.getValue();
         assertThat(armDropZoneEodsMedia0.getFirst().getManifestFile()).isEqualTo(manifestFileName);
-        assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedBy().getId()).isEqualTo(testUser.getId());
+        assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedById()).isEqualTo(testUser.getId());
         assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
         assertThat(armDropZoneEodsMedia1.getFirst().getManifestFile()).isEqualTo(manifestFileName);
     }
@@ -399,7 +399,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
         String manifestFileName = manifestFileNameCaptor.getValue();
         assertThat(armDropzoneEodsMedia0.getFirst().getManifestFile()).isEqualTo(manifestFileName);
-        assertThat(armDropzoneEodsMedia0.getFirst().getLastModifiedBy().getId()).isEqualTo(testUser.getId());
+        assertThat(armDropzoneEodsMedia0.getFirst().getLastModifiedById()).isEqualTo(testUser.getId());
         assertThat(armDropzoneEodsMedia0.getFirst().getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
         assertThat(armDropzoneEodsMedia1.getFirst().getManifestFile()).isEqualTo(manifestFileName);
 

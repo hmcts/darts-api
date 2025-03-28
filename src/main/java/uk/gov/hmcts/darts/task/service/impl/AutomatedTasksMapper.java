@@ -19,9 +19,9 @@ public class AutomatedTasksMapper {
             .description(automatedTaskEntity.getTaskDescription())
             .cronExpression(automatedTaskEntity.getCronExpression())
             .createdAt(automatedTaskEntity.getCreatedDateTime())
-            .createdBy(automatedTaskEntity.getCreatedBy().getId())
+            .createdBy(automatedTaskEntity.getCreatedById())
             .lastModifiedAt(automatedTaskEntity.getLastModifiedDateTime())
-            .lastModifiedBy(automatedTaskEntity.getLastModifiedBy().getId())
+            .lastModifiedBy(automatedTaskEntity.getLastModifiedById())
             .isCronEditable(automatedTaskEntity.getCronEditable())
             .batchSize(automatedTaskEntity.getBatchSize());
 

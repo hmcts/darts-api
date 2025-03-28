@@ -56,11 +56,11 @@ public class GivenBuilder {
         return dartsDatabase.getDartsPersistence().refresh(judge);
     }
 
-    public static void anAuthenticatedUserFor(String email, UserAccountRepository userAccountRepository) {
-        anAuthenticatedUserFor(userAccountRepository.findFirstByEmailAddressIgnoreCase(email).orElseThrow());
+    public static UserAccountEntity anAuthenticatedUserFor(String email, UserAccountRepository userAccountRepository) {
+        return anAuthenticatedUserFor(userAccountRepository.findFirstByEmailAddressIgnoreCase(email).orElseThrow());
     }
 
-    public static void anAuthenticatedUserFor(UserAccountEntity userAccountEntity) {
+    public static UserAccountEntity anAuthenticatedUserFor(UserAccountEntity userAccountEntity) {
         DartsJwt jwt = new DartsJwt(
             Jwt.withTokenValue("some-token")
                 .header("alg", "RS256")
@@ -69,5 +69,6 @@ public class GivenBuilder {
                 .build(),
             userAccountEntity.getId());
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+        return userAccountEntity;
     }
 }

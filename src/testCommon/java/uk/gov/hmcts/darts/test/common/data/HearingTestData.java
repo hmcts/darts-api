@@ -16,7 +16,6 @@ import static java.time.OffsetDateTime.now;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class HearingTestData
     implements Persistable<TestHearingEntity.TestHearingEntityBuilderRetrieve, HearingEntity, TestHearingEntity.TestHearingEntityBuilder> {
@@ -37,9 +36,8 @@ public final class HearingTestData
         hearingEntity.setCourtroom(minimalCourtRoom);
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setHearingDate(LocalDate.now().plusWeeks(1));
-        var userAccount = minimalUserAccount();
-        hearingEntity.setCreatedBy(userAccount);
-        hearingEntity.setLastModifiedBy(userAccount);
+        hearingEntity.setCreatedById(0);
+        hearingEntity.setLastModifiedById(0);
 
         hearingEntity.setLastModifiedDateTime(now());
         hearingEntity.setCreatedDateTime(now());
@@ -133,8 +131,8 @@ public final class HearingTestData
         builder.getBuilder().courtCase(courtCaseEntity).courtroom(minimalCourtRoom)
             .hearingIsActual(true)
             .hearingDate(LocalDate.now().plusWeeks(1))
-            .createdBy(minimalUserAccount())
-            .lastModifiedBy(minimalUserAccount())
+            .createdById(0)
+            .lastModifiedById(0)
             .createdDateTime(now())
             .lastModifiedDateTime(now()).judges(new ArrayList<>())
             .mediaList(new ArrayList<>());

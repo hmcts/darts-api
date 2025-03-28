@@ -49,6 +49,7 @@ class CourtroomCommonServiceImplTest {
         courthouse.setCourthouseName(COURTHOUSE_UPPER);
 
         userAccount = new UserAccountEntity();
+        userAccount.setId(123);
 
         existingCourtroom = new CourtroomEntity();
         existingCourtroom.setName(COURTROOM_1);
@@ -69,7 +70,7 @@ class CourtroomCommonServiceImplTest {
         assertNotNull(result);
         assertEquals("COURTROOM 2", result.getName());
         assertEquals(courthouse, result.getCourthouse());
-        assertEquals(userAccount, result.getCreatedBy());
+        assertEquals(userAccount.getId(), result.getCreatedById());
         verify(courtroomRepository).saveAndFlush(any(CourtroomEntity.class));
     }
 
@@ -109,7 +110,7 @@ class CourtroomCommonServiceImplTest {
         assertNotNull(result);
         assertEquals("COURTROOM 2", result.getName());
         assertEquals(courthouse, result.getCourthouse());
-        assertEquals(userAccount, result.getCreatedBy());
+        assertEquals(userAccount.getId(), result.getCreatedById());
         verify(courthouseCommonService).retrieveCourthouse(COURTHOUSE_UPPER);
         verify(courtroomRepository).saveAndFlush(any(CourtroomEntity.class));
     }

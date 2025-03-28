@@ -186,9 +186,9 @@ class EventMapperTest {
         assertEquals(eventEntity2.getTimestamp(), currentVersion.getEventTs());
         assertEquals(eventEntity2.getIsCurrent(), currentVersion.getIsCurrent());
         assertEquals(eventEntity2.getCreatedDateTime(), currentVersion.getCreatedAt());
-        assertEquals(eventEntity2.getCreatedBy().getId(), currentVersion.getCreatedBy());
+        assertEquals(eventEntity2.getCreatedById(), currentVersion.getCreatedBy());
         assertEquals(eventEntity2.getLastModifiedDateTime(), currentVersion.getLastModifiedAt());
-        assertEquals(eventEntity2.getLastModifiedBy().getId(), currentVersion.getLastModifiedBy());
+        assertEquals(eventEntity2.getLastModifiedById(), currentVersion.getLastModifiedBy());
         assertEquals(eventEntity2.isDataAnonymised(), currentVersion.getIsDataAnonymised());
     }
 

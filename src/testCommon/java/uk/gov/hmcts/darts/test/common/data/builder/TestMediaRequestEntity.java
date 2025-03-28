@@ -19,7 +19,7 @@ public class TestMediaRequestEntity extends MediaRequestEntity implements DbInse
     @lombok.Builder
     public TestMediaRequestEntity(Integer id, HearingEntity hearing, UserAccountEntity currentOwner, UserAccountEntity requestor,
                                   MediaRequestStatus status, AudioRequestType requestType, Integer attempts, OffsetDateTime startTime,
-                                  OffsetDateTime endTime, UserAccountEntity createdBy, UserAccountEntity lastModifiedBy,
+                                  OffsetDateTime endTime, Integer createdById, Integer lastModifiedById,
                                   OffsetDateTime createdAt, OffsetDateTime lastModifiedAt) {
         setId(id);
         setHearing(hearing);
@@ -30,8 +30,8 @@ public class TestMediaRequestEntity extends MediaRequestEntity implements DbInse
         setAttempts(attempts);
         setStartTime(startTime);
         setEndTime(endTime);
-        setCreatedBy(createdBy);
-        setLastModifiedBy(lastModifiedBy);
+        setCreatedById(createdById);
+        setLastModifiedById(lastModifiedById);
         setCreatedDateTime(createdAt);
         setLastModifiedDateTime(lastModifiedAt);
     }

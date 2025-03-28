@@ -32,6 +32,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -85,6 +86,7 @@ class ExternalObjectDirectoryServiceImplTest {
                                                             annotationDocumentRepository,
                                                             caseDocumentRepository,
                                                             transcriptionDocumentRepository);
+        lenient().when(userAccountEntity.getId()).thenReturn(123);
     }
 
     @ParameterizedTest
@@ -136,8 +138,8 @@ class ExternalObjectDirectoryServiceImplTest {
         assertThat(savedEod.getVerificationAttempts()).isEqualTo(1);
         assertThat(savedEod.getStatus()).isEqualTo(EodHelper.storedStatus());
         assertThat(savedEod.getExternalLocationType()).isEqualTo(EodHelper.unstructuredLocation());
-        assertThat(savedEod.getCreatedBy()).isEqualTo(userAccountEntity);
-        assertThat(savedEod.getLastModifiedBy()).isEqualTo(userAccountEntity);
+        assertThat(savedEod.getCreatedById()).isEqualTo(userAccountEntity.getId());
+        assertThat(savedEod.getLastModifiedById()).isEqualTo(userAccountEntity.getId());
     }
 
     @ParameterizedTest

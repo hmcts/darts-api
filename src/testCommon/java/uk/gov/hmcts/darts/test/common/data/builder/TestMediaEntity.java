@@ -32,8 +32,8 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
                            List<HearingEntity> hearingList, OffsetDateTime retainUntilTs,
                            List<ObjectAdminActionEntity> objectAdminActions, RetentionConfidenceScoreEnum retConfScore,
                            String retConfReason, OffsetDateTime createdDateTime,
-                           UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
-                           UserAccountEntity lastModifiedBy) {
+                           Integer createdById, OffsetDateTime lastModifiedDateTime,
+                           Integer lastModifiedById) {
         setId(id);
         setCourtroom(courtroom);
         setLegacyObjectId(legacyObjectId);
@@ -64,9 +64,9 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
         setRetConfScore(retConfScore);
         setRetConfReason(retConfReason);
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

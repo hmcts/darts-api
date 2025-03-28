@@ -142,7 +142,7 @@ public final class TranscriptionDocumentTestData
             .uploadedDateTime(OffsetDateTime.now())
             .uploadedBy(minimalUserAccount())
             .isHidden(false)
-            .lastModifiedBy(minimalUserAccount())
+            .lastModifiedById(0)
             .lastModifiedDateTime(OffsetDateTime.now())
             .lastModifiedDateTime(OffsetDateTime.now())
             .transcription(transcription);

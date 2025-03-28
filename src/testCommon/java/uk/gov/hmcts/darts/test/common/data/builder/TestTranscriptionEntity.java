@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
@@ -42,9 +43,9 @@ public class TestTranscriptionEntity extends TranscriptionEntity implements DbIn
                                    List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities,
                                    List<TranscriptionDocumentEntity> transcriptionDocumentEntities,
                                    String transcriptionObjectName, OffsetDateTime createdDateTime,
-                                   UserAccountEntity createdBy,
+                                   Integer createdById,
                                    OffsetDateTime lastModifiedDateTime,
-                                   UserAccountEntity lastModifiedBy) {
+                                   Integer lastModifiedById) {
         setId(id);
         setCourtCases(courtCases);
         setTranscriptionType(transcriptionType);
@@ -71,9 +72,9 @@ public class TestTranscriptionEntity extends TranscriptionEntity implements DbIn
         setTranscriptionDocumentEntities(transcriptionDocumentEntities != null ? transcriptionDocumentEntities : new ArrayList<>());
         setTranscriptionObjectName(transcriptionObjectName);
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(Optional.ofNullable(createdById).orElse(0));
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(Optional.ofNullable(lastModifiedById).orElse(0));
     }
 
     @Override
@@ -81,6 +82,8 @@ public class TestTranscriptionEntity extends TranscriptionEntity implements DbIn
         try {
             TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
             BeanUtils.copyProperties(transcriptionEntity, this);
+            //Ensures setting of createdBy does not override setting getCreatedById.
+            transcriptionEntity.setCreatedById(this.getCreatedById());
             return transcriptionEntity;
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new AssertionFailure("Assumed that there would be no error on mapping data", e);

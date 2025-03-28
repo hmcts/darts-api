@@ -629,17 +629,12 @@ public class DartsDatabaseStub {
         if (courthouse == null) {
             return null;
         }
-        UserAccountEntity createdBy = dartsDatabaseSaveStub.save(courthouse.getCreatedBy());
-        courthouse.setCreatedBy(createdBy);
-        courthouse.setLastModifiedBy(createdBy);
         return dartsDatabaseSaveStub.save(courthouse);
     }
 
     @Transactional
     public CourtroomEntity save(CourtroomEntity courtroom) {
         save(courtroom.getCourthouse());
-        UserAccountEntity createdBy = dartsDatabaseSaveStub.save(courtroom.getCreatedBy());
-        courtroom.setCreatedBy(createdBy);
         return dartsDatabaseSaveStub.save(courtroom);
     }
 
@@ -673,7 +668,6 @@ public class DartsDatabaseStub {
         if (retentionPolicyTypeEntity == null) {
             return null;
         }
-        save(retentionPolicyTypeEntity.getCreatedBy());
         return dartsDatabaseSaveStub.save(retentionPolicyTypeEntity);
     }
 
@@ -690,13 +684,9 @@ public class DartsDatabaseStub {
     @Transactional
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         save(transcriptionEntity.getCourtCase());
-        dartsDatabaseSaveStub.save(transcriptionEntity.getCreatedBy());
-        dartsDatabaseSaveStub.save(transcriptionEntity.getLastModifiedBy());
         var transcription = dartsDatabaseSaveStub.save(transcriptionEntity);
-        dartsDatabaseSaveStub.save(transcription.getCreatedBy());
         transcription.getTranscriptionDocumentEntities().forEach(td -> {
             dartsDatabaseSaveStub.save(td.getUploadedBy());
-            dartsDatabaseSaveStub.save(td.getLastModifiedBy());
             dartsDatabaseSaveStub.save(td);
         });
         return transcription;
@@ -982,7 +972,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public Integer getLastModifiedByUserId(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
-        return createdModifiedBaseEntity.getLastModifiedBy().getId();
+        return createdModifiedBaseEntity.getLastModifiedById();
     }
 
     @Transactional

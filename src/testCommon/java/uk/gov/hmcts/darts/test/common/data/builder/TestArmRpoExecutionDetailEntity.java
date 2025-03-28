@@ -6,7 +6,6 @@ import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -19,7 +18,7 @@ public class TestArmRpoExecutionDetailEntity extends ArmRpoExecutionDetailEntity
     public TestArmRpoExecutionDetailEntity(Integer id, ArmRpoStateEntity armRpoState, ArmRpoStatusEntity armRpoStatus,
                                            String matterId, String indexId, String entitlementId, String storageAccountId,
                                            String searchId, String productionId, String sortingField, Integer searchItemCount,
-                                           UserAccountEntity createdBy, UserAccountEntity lastModifiedBy,
+                                           Integer createdById, Integer lastModifiedById,
                                            OffsetDateTime createdDateTime, OffsetDateTime lastModifiedDateTime) {
         setId(id);
         setArmRpoState(armRpoState);
@@ -32,8 +31,8 @@ public class TestArmRpoExecutionDetailEntity extends ArmRpoExecutionDetailEntity
         setProductionId(productionId);
         setSortingField(sortingField);
         setSearchItemCount(searchItemCount);
-        setCreatedBy(createdBy);
-        setLastModifiedBy(lastModifiedBy);
+        setCreatedById(createdById);
+        setLastModifiedById(lastModifiedById);
         setCreatedDateTime(createdDateTime);
         setLastModifiedDateTime(lastModifiedDateTime);
     }
