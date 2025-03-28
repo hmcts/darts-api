@@ -27,12 +27,6 @@ public class ModifiedBaseEntity implements LastModifiedBy {
     @Column(name = "last_modified_by")
     private Integer lastModifiedById;
 
-    @Transient
-    @JsonIgnore
-    @Getter(AccessLevel.NONE)
-    private transient UserAccountEntity lastModifiedByUserOverride;
-
-
     @Override
     public void setLastModifiedDateTime(OffsetDateTime lastModifiedTimestamp) {
         this.lastModifiedTimestamp = lastModifiedTimestamp;
