@@ -94,7 +94,7 @@ class TranscriptionNotificationsTest {
         assertEquals(actual.getCaseId(), caseEntity.getId());
         assertEquals(actual.getEventId(), TRANSCRIPTION_AVAILABLE.toString());
         assertEquals(actual.getUserAccountsToEmail().size(), 1);
-        assertEquals(actual.getUserAccountsToEmail().get(0).getEmailAddress(), requester.getEmailAddress());
+        assertEquals(actual.getUserAccountsToEmail().getFirst().getEmailAddress(), requester.getEmailAddress());
     }
 
     @Test
@@ -110,7 +110,7 @@ class TranscriptionNotificationsTest {
         assertEquals(actual.getCaseId(), caseEntity.getId());
         assertEquals(actual.getEventId(), TRANSCRIPTION_REQUEST_REJECTED.toString());
         assertEquals(actual.getUserAccountsToEmail().size(), 1);
-        assertEquals(actual.getUserAccountsToEmail().get(0).getEmailAddress(), requester.getEmailAddress());
+        assertEquals(actual.getUserAccountsToEmail().getFirst().getEmailAddress(), requester.getEmailAddress());
         assertEquals(actual.getTemplateValues().size(), 1);
         assertEquals(actual.getTemplateValues().get(REJECTION_REASON), reason);
     }
@@ -135,7 +135,7 @@ class TranscriptionNotificationsTest {
         assertEquals(actual.getCaseId(), caseEntity.getId());
         assertEquals(actual.getEventId(), COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
         assertEquals(actual.getUserAccountsToEmail().size(), 2);
-        assertEquals(actual.getUserAccountsToEmail().get(0).getEmailAddress(), approver1.getEmailAddress());
+        assertEquals(actual.getUserAccountsToEmail().getFirst().getEmailAddress(), approver1.getEmailAddress());
         assertEquals(actual.getUserAccountsToEmail().get(1).getEmailAddress(), approver2.getEmailAddress());
         verify(authorisationApi, times(1))
             .getUsersWithRoleAtCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity, approver3);
@@ -154,7 +154,7 @@ class TranscriptionNotificationsTest {
         assertEquals(actual.getCaseId(), caseEntity.getId());
         assertEquals(actual.getEventId(), REQUEST_TO_TRANSCRIBER.toString());
         assertEquals(actual.getUserAccountsToEmail().size(), 2);
-        assertEquals(actual.getUserAccountsToEmail().get(0).getEmailAddress(), "transcriber1@example.com");
+        assertEquals(actual.getUserAccountsToEmail().getFirst().getEmailAddress(), "transcriber1@example.com");
         assertEquals(actual.getUserAccountsToEmail().get(1).getEmailAddress(), "transcriber2@example.com");
     }
 
@@ -179,14 +179,14 @@ class TranscriptionNotificationsTest {
         var actual = dbNotificationRequestCaptor.getAllValues();
         assertEquals(actual.size(), 2);
         // notification to transcribers
-        assertEquals(actual.get(0).getEventId(), REQUEST_TO_TRANSCRIBER.toString());
-        assertEquals(actual.get(0).getUserAccountsToEmail().size(), 2);
-        assertEquals(actual.get(0).getUserAccountsToEmail().get(0).getEmailAddress(), "transcriber1@example.com");
-        assertEquals(actual.get(0).getUserAccountsToEmail().get(1).getEmailAddress(), "transcriber2@example.com");
+        assertEquals(actual.getFirst().getEventId(), REQUEST_TO_TRANSCRIBER.toString());
+        assertEquals(actual.getFirst().getUserAccountsToEmail().size(), 2);
+        assertEquals(actual.getFirst().getUserAccountsToEmail().getFirst().getEmailAddress(), "transcriber1@example.com");
+        assertEquals(actual.getFirst().getUserAccountsToEmail().get(1).getEmailAddress(), "transcriber2@example.com");
         // notification to requester
         assertEquals(actual.get(1).getEventId(), TRANSCRIPTION_REQUEST_APPROVED.toString());
         assertEquals(actual.get(1).getUserAccountsToEmail().size(), 1);
-        assertEquals(actual.get(1).getUserAccountsToEmail().get(0).getEmailAddress(), requester.getEmailAddress());
+        assertEquals(actual.get(1).getUserAccountsToEmail().getFirst().getEmailAddress(), requester.getEmailAddress());
         // audit
         verify(auditApi).record(AUTHORISE_TRANSCRIPTION, approver, caseEntity);
     }
@@ -207,7 +207,7 @@ class TranscriptionNotificationsTest {
         // notification to requester
         assertEquals(actual.getEventId(), TRANSCRIPTION_REQUEST_REJECTED.toString());
         assertEquals(actual.getUserAccountsToEmail().size(), 1);
-        assertEquals(actual.getUserAccountsToEmail().get(0).getEmailAddress(), requester.getEmailAddress());
+        assertEquals(actual.getUserAccountsToEmail().getFirst().getEmailAddress(), requester.getEmailAddress());
         assertEquals(actual.getTemplateValues().size(), 1);
         assertEquals(actual.getTemplateValues().get(REJECTION_REASON), reason);
         // audit
@@ -241,7 +241,7 @@ class TranscriptionNotificationsTest {
         // notification to requester
         assertEquals(actual.getEventId(), TRANSCRIPTION_AVAILABLE.toString());
         assertEquals(actual.getUserAccountsToEmail().size(), 1);
-        assertEquals(actual.getUserAccountsToEmail().get(0).getEmailAddress(), requester.getEmailAddress());
+        assertEquals(actual.getUserAccountsToEmail().getFirst().getEmailAddress(), requester.getEmailAddress());
         // audit
         verify(auditApi).record(COMPLETE_TRANSCRIPTION, transcriber, caseEntity);
     }

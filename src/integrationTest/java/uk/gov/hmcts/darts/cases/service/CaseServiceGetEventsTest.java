@@ -60,12 +60,12 @@ class CaseServiceGetEventsTest extends IntegrationBase {
         var caseEvents = service.getEventsByCaseId(caseId);
         assertEquals(5, caseEvents.size());
 
-        assertThat(caseEvents.get(0).getHearingDate().isAfter(caseEvents.get(1).getHearingDate()));
+        assertThat(caseEvents.getFirst().getHearingDate().isAfter(caseEvents.get(1).getHearingDate()));
         assertThat(caseEvents.get(1).getHearingDate().isAfter(caseEvents.get(2).getHearingDate()));
         assertThat(caseEvents.get(2).getHearingDate().isAfter(caseEvents.get(3).getHearingDate()));
         assertThat(caseEvents.get(3).getHearingDate().isAfter(caseEvents.get(4).getHearingDate()));
 
-        assertEquals(4, caseEvents.get(0).getId());
+        assertEquals(4, caseEvents.getFirst().getId());
         assertEquals(5, caseEvents.get(1).getId());
         assertEquals(3, caseEvents.get(2).getId());
         assertEquals(1, caseEvents.get(3).getId());

@@ -101,7 +101,7 @@ public class AuthorisationImpl implements Authorisation {
             authorisationApi.checkCourthouseAuthorisation(
                 courthouses
                     .stream()
-                    .collect(Collectors.toUnmodifiableList()),
+                    .toList(),
                 securityRoles
             );
         } catch (EntityNotFoundException ex) {

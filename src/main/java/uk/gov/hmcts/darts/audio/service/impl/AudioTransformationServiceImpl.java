@@ -44,9 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
@@ -91,7 +89,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public Path saveBlobDataToTempWorkspace(InputStream mediaFile, String fileName) throws IOException {
-
         return fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
     }
 
@@ -130,7 +127,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         Integer requestId = mediaRequestEntity.getId();
         HearingEntity hearingEntity = mediaRequestEntity.getHearing();
-        UUID blobId;
+        String blobId;
 
         try {
             log.info("Starting processing for audio request id: {}. Status: {}", requestId, mediaRequestEntity.getStatus());
@@ -233,7 +230,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             .filter(media -> mediaRequestEntity.getStartTime().isBefore(media.getEnd()))
             .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
             .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest)
@@ -252,10 +249,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException {
 
         try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
-            UUID id = downloadResponseMetaData.getEodEntity().getExternalLocation();
+            String id = downloadResponseMetaData.getEodEntity().getExternalLocation();
 
             try (var mediaData = downloadResponseMetaData.getResource().getInputStream()) {
-                return saveBlobDataToTempWorkspace(mediaData, id.toString());
+                return saveBlobDataToTempWorkspace(mediaData, id);
             }
         } catch (FileNotDownloadedException e) {
             throw new RuntimeException("Retrieval from storage failed for MediaId " + mediaEntity.getId(), e);

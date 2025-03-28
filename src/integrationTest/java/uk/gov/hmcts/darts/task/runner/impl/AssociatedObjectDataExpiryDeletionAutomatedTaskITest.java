@@ -35,7 +35,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
-@DisplayName("UnstructuredDataExpiryDeletionAutomatedTask test")
+@DisplayName("AssociatedObjectDataExpiryDeletionAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     private final AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
@@ -542,12 +542,12 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         boolean assignArm, boolean storeArm) {
 
         ExternalObjectDirectoryEntity inbound = externalLocationTypeEnumConsumer.apply(entity, ObjectRecordStatusEnum.STORED, ExternalLocationTypeEnum.INBOUND);
-        inbound.setEventDateTs(OffsetDateTime.now().minusDays(1).plusYears(100));
+        inbound.setEventDateTs(OffsetDateTime.now().minusDays(1).minusYears(100));
         dartsDatabase.save(inbound);
 
         ExternalObjectDirectoryEntity unstructured = externalLocationTypeEnumConsumer
             .apply(entity, ObjectRecordStatusEnum.STORED, ExternalLocationTypeEnum.UNSTRUCTURED);
-        unstructured.setEventDateTs(OffsetDateTime.now().minusDays(1).plusYears(100));
+        unstructured.setEventDateTs(OffsetDateTime.now().minusDays(1).minusYears(100));
         dartsDatabase.save(unstructured);
 
         if (assignArm) {
@@ -555,7 +555,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
                 entity,
                 storeArm ? ObjectRecordStatusEnum.STORED : ObjectRecordStatusEnum.FAILURE,
                 ExternalLocationTypeEnum.ARM);
-            arm.setEventDateTs(OffsetDateTime.now().minusDays(1).plusYears(100));
+            arm.setEventDateTs(OffsetDateTime.now().minusDays(1).minusYears(100));
             dartsDatabase.save(arm);
 
         }
@@ -571,7 +571,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assignExternalObjectDirectory(
             caseDocumentEntity,
             (caseDocument, objectRecordStatusEnum, externalLocationType) -> dartsDatabase.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(caseDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
+                .createExternalObjectDirectory(caseDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID().toString()),
             assignArm, storeArm);
     }
 
@@ -585,7 +585,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assignExternalObjectDirectory(
             annotationDocumentEntity,
             (annotationDocument, objectRecordStatusEnum, externalLocationType) -> dartsDatabase.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(annotationDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
+                .createExternalObjectDirectory(annotationDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID().toString()),
             assignArm, storeArm);
     }
 
@@ -599,7 +599,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assignExternalObjectDirectory(
             mediaEntity,
             (media, objectRecordStatusEnum, externalLocationType) -> dartsDatabase.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
+                .createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationType, UUID.randomUUID().toString()),
             assignArm, storeArm);
     }
 
@@ -613,7 +613,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assignExternalObjectDirectory(
             transcriptionDocumentEntity,
             (transcriptionDocument, objectRecordStatusEnum, externalLocationType) -> dartsDatabase.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(transcriptionDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
+                .createExternalObjectDirectory(transcriptionDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID().toString()),
             assignArm, storeArm);
     }
 

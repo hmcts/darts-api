@@ -31,7 +31,8 @@ class HearingExistsValidatorTest {
     void throwsIfHearingNotFound() {
         when(hearingRepository.existsById(1)).thenReturn(false);
 
-        assertThatThrownBy(() -> hearingExistsValidator.validate(someAnnotationForHearingId(1)))
+        Annotation annotation = someAnnotationForHearingId(1);
+        assertThatThrownBy(() -> hearingExistsValidator.validate(annotation))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", AnnotationApiError.HEARING_NOT_FOUND);
     }

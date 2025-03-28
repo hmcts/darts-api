@@ -7,7 +7,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -50,7 +50,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends IntegrationBase {
 
-    @MockBean
+    @MockitoBean
     private Authorisation authorisation;
 
     @Autowired
@@ -59,9 +59,9 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
-    @MockBean
+    @MockitoBean
     private AuditApi mockAuditApi;
 
     private TranscriptionEntity transcriptionEntity;
@@ -177,7 +177,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         );
         assertEquals(
             APPROVED.toString(),
-            dartsDatabase.getTranscriptionCommentRepository().findAll().get(0).getComment()
+            dartsDatabase.getTranscriptionCommentRepository().findAll().getFirst().getComment()
         );
         assertEquals(testUser.getId(), transcriptionWorkflowEntity.getWorkflowActor().getId());
 

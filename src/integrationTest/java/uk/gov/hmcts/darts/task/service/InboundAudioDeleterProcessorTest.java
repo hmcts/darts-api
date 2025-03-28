@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.task.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -32,7 +31,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
     @Autowired
     private InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
 
-    @MockBean
+    @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
 
     @Test
@@ -55,7 +54,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
                 1
             ));
 
-        UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
+        String uuid = "075987ea-b34d-49c7-b8db-439bfbe2496c";
 
         ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -82,7 +81,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
 
             assertEquals(1, foundMediaList.size());
 
-            ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+            ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
             assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
             assertEquals(USER_EMAIL_ADDRESS, foundMedia.getLastModifiedBy().getEmailAddress());
         });
@@ -108,7 +107,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
                 1
             ));
 
-        UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
+        String uuid = "075987ea-b34d-49c7-b8db-439bfbe2496c";
 
         ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -135,7 +134,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(STORED.getId(), foundMedia.getStatus().getId());
     }
 }

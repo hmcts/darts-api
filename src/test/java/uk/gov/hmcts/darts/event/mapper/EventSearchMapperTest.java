@@ -9,13 +9,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EventSearchMapperTest {
 
-    private final EventSearchMapper eventSearchMapper = new EventSearchMapper();
-
     @Test
     void mapsEventSearchResultToAdminSearchEventResponse() {
         var eventSearchResult = someEventSearchResult();
 
-        var result = eventSearchMapper.adminSearchEventResponseResultFrom(eventSearchResult);
+        var result = EventSearchMapper.adminSearchEventResponseResultFrom(eventSearchResult);
 
         assertThat(result.getId()).isEqualTo(eventSearchResult.id());
         assertThat(result.getName()).isEqualTo(eventSearchResult.eventTypeName());

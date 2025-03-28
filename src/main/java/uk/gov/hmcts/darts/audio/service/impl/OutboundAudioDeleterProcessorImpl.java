@@ -1,10 +1,12 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleElement;
@@ -17,14 +19,10 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
-
 
 @Service
 @RequiredArgsConstructor
@@ -35,8 +33,10 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     private final UserIdentity userIdentity;
     private final TransformedMediaRepository transformedMediaRepository;
     private final OutboundAudioDeleterProcessorSingleElement singleElementProcessor;
+    private final TransformedMediaEntityProcessor transformedMediaEntityProcessor;
 
     @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}")
+    @Getter
     private int deletionDays;
 
     @Override
@@ -46,36 +46,48 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         UserAccountEntity systemUser = userIdentity.getUserAccount();
 
-        OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(deletionDays);
+        OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(getDeletionDays());
 
-        List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findAllDeletableTransformedMedia(
-            deletionStartDateTime, Limit.of(batchSize));
-        if (transformedMediaList.isEmpty()) {
+        List<Integer> transformedMediaListIds = transformedMediaRepository.findAllDeletableTransformedMedia(deletionStartDateTime, Limit.of(batchSize));
+
+        if (transformedMediaListIds.isEmpty()) {
             log.debug("No transformed media to be marked for deletion");
         } else {
-            for (TransformedMediaEntity transformedMedia : transformedMediaList) {
-                try {
-                    if (isTransformedMediaEligibleForDelete(transformedMedia)) {
-                        List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
-                        deletedValues.addAll(deleted);
-                    }
-                } catch (Exception exception) {
-                    log.error("Unable to mark for deletion transformed media {}", transformedMedia.getId(), exception);
+            Set<MediaRequestEntity> mediaRequests = new HashSet<>();
+            for (Integer transformedMediaId : transformedMediaListIds) {
+                MediaRequestEntity mediaRequest = transformedMediaEntityProcessor.process(transformedMediaId, systemUser, deletedValues);
+                if (mediaRequest != null) {
+                    mediaRequests.add(mediaRequest);
                 }
             }
-            Set<MediaRequestEntity> mediaRequests = transformedMediaList.stream().map(TransformedMediaEntity::getMediaRequest).collect(toSet());
             mediaRequests.forEach(mr -> singleElementProcessor.markMediaRequestAsExpired(mr, systemUser));
         }
-
         return deletedValues;
     }
 
-    private boolean isTransformedMediaEligibleForDelete(TransformedMediaEntity transformedMedia) {
-        return !transformedMedia.isOwnerInSecurityGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
-    }
+    @Service
+    @RequiredArgsConstructor
+    public static class TransformedMediaEntityProcessor {
+        private final OutboundAudioDeleterProcessorSingleElement singleElementProcessor;
+        private final TransformedMediaRepository transformedMediaRepository;
 
-    @Override
-    public void setDeletionDays(int deletionDays) {
-        this.deletionDays = deletionDays;
+
+        @Transactional
+        public MediaRequestEntity process(Integer transformedMediaId, UserAccountEntity systemUser, List<TransientObjectDirectoryEntity> deletedValues) {
+            try {
+                log.info("Processing transformed media {}", transformedMediaId);
+                Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
+                if (transformedMediaOpt.isEmpty()) {
+                    log.error("TransformedMediaEntity with id {} not found", transformedMediaId);
+                    return null;
+                }
+                TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
+                deletedValues.addAll(singleElementProcessor.markForDeletion(systemUser, transformedMedia));
+                return transformedMedia.getMediaRequest();
+            } catch (Exception exception) {
+                log.error("Unable to mark for deletion transformed media {}", transformedMediaId, exception);
+            }
+            return null;
+        }
     }
 }

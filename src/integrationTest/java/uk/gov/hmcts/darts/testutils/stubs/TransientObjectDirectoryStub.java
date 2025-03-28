@@ -9,7 +9,6 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class TransientObjectDirectoryStub {
 
     public TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(MediaRequestEntity mediaRequestEntity,
                                                                                ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                               UUID externalLocation) {
+                                                                               String externalLocation) {
         TransformedMediaEntity transformedMediaEntity = transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity, null, null, null);
         return createTransientObjectDirectoryEntity(transformedMediaEntity, objectRecordStatusEntity, externalLocation);
     }
@@ -30,14 +29,14 @@ public class TransientObjectDirectoryStub {
 
     public TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(MediaRequestEntity mediaRequestEntity,
                                                                                ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                               UUID externalLocation, OffsetDateTime lastAccessedDate) {
+                                                                               String externalLocation, OffsetDateTime lastAccessedDate) {
         TransformedMediaEntity transformedMediaEntity = transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity, null, null, lastAccessedDate);
         return createTransientObjectDirectoryEntity(transformedMediaEntity, objectRecordStatusEntity, externalLocation);
     }
 
     public TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
                                                                                ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                               UUID externalLocation) {
+                                                                               String externalLocation) {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
         var userAccount = userAccountStub.getIntegrationTestUserAccountEntity();

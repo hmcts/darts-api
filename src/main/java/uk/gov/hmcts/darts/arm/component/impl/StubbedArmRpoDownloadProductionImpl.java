@@ -36,7 +36,7 @@ public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduc
     @Override
     public feign.Response downloadProduction(String bearerToken, Integer executionId, String productionExportFileId) {
         log.info("Downloading stubbed production data");
-        StringBuilder errorMessage = new StringBuilder("Unable to downloadProduction from ARM RPO");
+        StringBuilder errorMessage = new StringBuilder(93).append("Unable to downloadProduction from ARM RPO");
 
         ArmAutomatedTaskEntity armAutomatedTaskEntity =
             armAutomatedTaskRepository.findByAutomatedTask_taskName(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME.getTaskName())

@@ -172,6 +172,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        dartsDatabase.save(user);
     }
 
     @Test
@@ -182,7 +183,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -199,7 +199,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertTrue(resultList.isEmpty());
@@ -213,7 +212,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroupGlobal(APPROVER, londonCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -229,7 +227,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -246,7 +243,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -264,7 +260,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -282,7 +277,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -299,7 +293,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -317,7 +310,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
         setupUserAccountSecurityGroup(REQUESTER, londonCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -334,7 +326,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroupGlobal(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -347,12 +338,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourthouseCourtroom() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse(swanseaCourthouse.getCourthouseName())
-            .courtroom("roOm2")
+            .courthouseIds(List.of(swanseaCourthouse.getId()))
+            .courtroom("COURTROOM2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -362,15 +352,14 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void getWithCourthouseCourtroomWithoutAccess() throws IOException {
+    void getWithCourthouseCourtroomWithoutAccess() {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse(swanseaCourthouse.getCourthouseName())
-            .courtroom("roOm2")
+            .courthouseIds(List.of(swanseaCourthouse.getId()))
+            .courtroom("COURTROOM2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertTrue(resultList.isEmpty());
@@ -378,13 +367,13 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     @Test
     void getWithCourthouseNotExist() {
+        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courthouse("jyguiyfgiytfuiytfuyrt")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertTrue(resultList.isEmpty());
@@ -392,27 +381,57 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     @Test
     void getWithCourthouse() {
+        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courthouse(swanseaCourthouse.getCourthouseName())
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertEquals(9, resultList.size());
     }
 
     @Test
+    void getWithCourthouseIds() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouseIds(List.of(swanseaCourthouse.getId()))
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithCourthouse/expectedResponse.json"));
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
     void getWithCourthouseWithoutAccess() {
+        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courthouse(swanseaCourthouse.getCourthouseName())
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
-        userAccountRepository.save(user);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        assertTrue(resultList.isEmpty());
+    }
+
+    @Test
+    void getWithCourthouseIdsWithoutAccess() {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouseIds(List.of(swanseaCourthouse.getId()))
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertTrue(resultList.isEmpty());
@@ -422,11 +441,10 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourtroom() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroom("roOm2")
+            .courtroom("COURTROOM2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -439,11 +457,10 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourtroomWithoutAccess() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroom("roOm2")
+            .courtroom("COURTROOM2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertTrue(resultList.isEmpty());
@@ -457,7 +474,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -471,12 +487,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourtroomJudge() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroom("roOm3")
+            .courtroom("COURTROOM3")
             .judgeName("dGe6B")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -515,9 +530,12 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     private void assignSecurityGroupToUser(UserAccountEntity user, SecurityGroupEntity securityGroup) {
-        securityGroup.getUsers().add(user);
-        user.getSecurityGroupEntities().add(securityGroup);
-        securityGroupRepository.save(securityGroup);
+        dartsDatabase.getTransactionalUtil().executeInTransaction(() -> {
+            securityGroupRepository.save(securityGroup);
+            UserAccountEntity refreshedUser = dartsDatabase.getDartsPersistence().refresh(user);
+            refreshedUser.getSecurityGroupEntities().add(securityGroup);
+            dartsDatabase.save(refreshedUser);
+        });
     }
 
     private static void compareJson(String actualResponse, String expectedResponse) {

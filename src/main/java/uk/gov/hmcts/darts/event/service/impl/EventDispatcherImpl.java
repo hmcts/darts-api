@@ -66,7 +66,7 @@ public class EventDispatcherImpl implements EventDispatcher {
         }
 
         //first entry will be what we want because of ordering in sql will put the default null entry last.
-        return foundMappings.get(0);
+        return foundMappings.getFirst();
     }
 
     private static void logEvent(DartsEvent event, EventHandler foundHandler) {

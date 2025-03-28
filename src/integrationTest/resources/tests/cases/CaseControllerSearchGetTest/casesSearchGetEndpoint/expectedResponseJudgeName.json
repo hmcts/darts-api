@@ -12,7 +12,7 @@
     "hearings": [
       {
         "date": "2023-07-20",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE",
           "JUDGE3A"
@@ -20,14 +20,14 @@
       },
       {
         "date": "2023-07-21",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-07-22",
-        "courtroom": "COURTROOM1",
+        "courtroom": "1",
         "judges": [
           "AJUDGE"
         ]

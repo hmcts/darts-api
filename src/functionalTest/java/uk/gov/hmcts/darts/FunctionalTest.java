@@ -60,6 +60,7 @@ public class FunctionalTest {
     @BeforeEach
     void setUp() {
         configureRestAssured();
+        enableAccessTokenCache();
     }
 
 
@@ -67,6 +68,22 @@ public class FunctionalTest {
     public String getUri(String endpoint) {
         return baseUri + endpoint;
     }
+
+    protected void enableAccessTokenCache() {
+        setAccessTokenCache(true);
+    }
+
+    protected void disableAccessTokenCache() {
+        setAccessTokenCache(false);
+    }
+
+    protected void setAccessTokenCache(boolean enable) {
+        externalAccessTokenClient.setEnableAccessTokenCache(enable);
+        externalGlobalAccessTokenClient.setEnableAccessTokenCache(enable);
+        internalAccessTokenClient.setEnableAccessTokenCache(enable);
+        externalDarPcMidTierGlobalAccessTokenClient.setEnableAccessTokenCache(enable);
+    }
+
 
     public RequestSpecification buildRequestWithExternalAuth() {
         return buildRequestWithAuth(externalAccessTokenClient);

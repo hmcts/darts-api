@@ -85,14 +85,14 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
 
 
     @Query("""
-        SELECT c
+        SELECT c.id
         FROM CaseRetentionEntity c
         WHERE c.currentState='PENDING'
         AND c.courtCase.caseClosedTimestamp  <= :pendingCutoff
         ORDER BY c.createdDateTime DESC
         """
     )
-    List<CaseRetentionEntity> findPendingRetention(OffsetDateTime pendingCutoff, Limit limit);
+    List<Integer> findPendingRetention(OffsetDateTime pendingCutoff, Limit limit);
 
     Optional<CaseRetentionEntity> findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(CourtCaseEntity courtCase);
 

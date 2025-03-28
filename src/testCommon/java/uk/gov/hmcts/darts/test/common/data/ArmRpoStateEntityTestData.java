@@ -3,9 +3,10 @@ package uk.gov.hmcts.darts.test.common.data;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 
-public class ArmRpoStateEntityTestData {
+public final class ArmRpoStateEntityTestData {
 
     private ArmRpoStateEntityTestData() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static ArmRpoStateEntity stateOf(ArmRpoStateEnum state) {

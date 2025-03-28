@@ -22,6 +22,7 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,10 +42,10 @@ class AzureDaoImplTest {
 
 
     @Test
-    void fetchAccessTokenShouldReturnResponseWhenAzureCallIsSuccessful() throws AzureDaoException {
+    void fetchAccessToken_ShouldReturnResponse_WhenAzureCallIsSuccessful_WithRedirectUrl() throws AzureDaoException {
         HTTPResponse response = mockSuccessResponse();
-        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any())).thenReturn(
-            response);
+        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any()))
+            .thenReturn(response);
 
         OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken(
             "CODE",
@@ -64,7 +65,7 @@ class AzureDaoImplTest {
     @ParameterizedTest
     @ValueSource(strings = {" "})
     @NullAndEmptySource
-    void fetchAccessTokenShouldThrowExceptionWhenProvidedCodeIsBlankOrNull(String code) {
+    void fetchAccessToken_ShouldThrowException_WhenProvidedCodeIsBlankOrNull_WithRedirectUrl(String code) {
         AzureDaoException exception = assertThrows(AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(
             code, authenticationProviderConfiguration, authenticationConfiguration, null));
 
@@ -72,7 +73,7 @@ class AzureDaoImplTest {
     }
 
     @Test
-    void fetchAccessTokenShouldThrowExceptionWhenAzureCallIsNotSuccessful() {
+    void fetchAccessToken_ShouldThrowException_WhenAzureCallIsNotSuccessful_WithRedirectUrl() {
         HTTPResponse failedResponse = mockFailedResponse();
         when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any())).thenReturn(failedResponse);
 
@@ -80,6 +81,51 @@ class AzureDaoImplTest {
             AzureDaoException.class,
             () -> azureDaoImpl.fetchAccessToken("CODE", authenticationProviderConfiguration, authenticationConfiguration, null)
         );
+
+        assertEquals("Unexpected HTTP response code received from Azure: body", exception.getMessage());
+        assertEquals(400, exception.getHttpStatus());
+    }
+
+    @Test
+    void fetchAccessToken_ShouldReturnResponse_WhenAzureCallIsSuccessful_WithRefreshToken() throws AzureDaoException {
+        // given
+        HTTPResponse response = mockSuccessResponse();
+        when(authenticationConfiguration.getClientId()).thenReturn("CLIENT_ID");
+        when(authenticationConfiguration.getClientSecret()).thenReturn("CLIENT_SECRET");
+        when(authenticationConfiguration.getScope()).thenReturn("SCOPE");
+        when(azureActiveDirectoryB2CClient.fetchAccessToken(
+            any(AuthProviderConfigurationProperties.class), anyString(), anyString(), anyString(), anyString())).thenReturn(response);
+
+        // when
+        OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken("REFRESH_TOKEN", authenticationProviderConfiguration, authenticationConfiguration);
+
+        // then
+        assertEquals("test_id_token", rawResponse.getIdToken());
+        assertEquals(1234L, rawResponse.getIdTokenExpiresIn());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void fetchAccessToken_ShouldThrowException_WhenRefreshTokenIsBlankOrNull_WithRefreshToken(String refreshToken) {
+        AzureDaoException exception = assertThrows(
+            AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(refreshToken, authenticationProviderConfiguration,
+                                                                         authenticationConfiguration));
+
+        assertEquals("Null refresh token not permitted", exception.getMessage());
+    }
+
+    @Test
+    void fetchAccessToken_ShouldThrowException_WhenAzureCallIsNotSuccessful_WithRefreshToken() {
+        HTTPResponse failedResponse = mockFailedResponse();
+        when(authenticationConfiguration.getClientId()).thenReturn("CLIENT_ID");
+        when(authenticationConfiguration.getClientSecret()).thenReturn("CLIENT_SECRET");
+        when(authenticationConfiguration.getScope()).thenReturn("SCOPE");
+        when(azureActiveDirectoryB2CClient.fetchAccessToken(
+            any(AuthProviderConfigurationProperties.class), anyString(), anyString(), anyString(), anyString())).thenReturn(failedResponse);
+
+        AzureDaoException exception = assertThrows(AzureDaoException.class,
+                                                   () -> azureDaoImpl.fetchAccessToken("REFRESH_TOKEN", authenticationProviderConfiguration,
+                                                                                       authenticationConfiguration));
 
         assertEquals("Unexpected HTTP response code received from Azure: body", exception.getMessage());
         assertEquals(400, exception.getHttpStatus());

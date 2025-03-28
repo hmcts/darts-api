@@ -1,18 +1,19 @@
 package uk.gov.hmcts.darts.event.controller;
 
-import ch.qos.logback.classic.Level;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity_;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DataAnonymisationEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -28,15 +30,19 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetailsCasesCasesInner;
+import uk.gov.hmcts.darts.event.model.AdminGetEventResponseDetailsHearingsHearingsInner;
+import uk.gov.hmcts.darts.event.model.CourthouseResponseDetails;
+import uk.gov.hmcts.darts.event.model.CourtroomResponseDetails;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
-import uk.gov.hmcts.darts.log.service.impl.EventLoggerServiceImpl;
-import uk.gov.hmcts.darts.test.common.LogUtil;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.EventLinkedCaseStub;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -50,6 +56,7 @@ import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE;
@@ -66,13 +73,13 @@ class EventsControllerTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private EventDispatcher eventDispatcher;
 
-    @MockBean
+    @MockitoBean
     private AudioApi audioApi;
 
-    @MockBean
+    @MockitoBean
     private DartsEventMapper dartsEventMapper;
 
     @Autowired
@@ -80,6 +87,12 @@ class EventsControllerTest extends IntegrationBase {
 
     @Autowired
     private DartsDatabaseStub dartsDatabaseStub;
+
+    @Autowired
+    private EventLinkedCaseStub eventLinkedCaseStub;
+
+    @MockitoSpyBean
+    private LogApi logApi;
 
     @Test
     void eventsApiPostEndpoint() throws Exception {
@@ -118,10 +131,13 @@ class EventsControllerTest extends IntegrationBase {
 
         // Given
         // setup an event id
-        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         LocalDateTime hearingDate = LocalDateTime.of(2020, 6, 6, 20, 0, 0);
         HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", hearingDate);
         EventEntity eventEntity = dartsDatabaseStub.createEvent(hearing);
+
+        eventLinkedCaseStub.createCaseLinkedEvent(eventEntity, hearing.getCourtCase());
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
         MockHttpServletRequestBuilder requestBuilder = get("/admin/events/" + eventEntity.getId())
@@ -129,8 +145,8 @@ class EventsControllerTest extends IntegrationBase {
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
-        AdminGetEventForIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
-                                                                                 AdminGetEventForIdResponseResult.class);
+        AdminGetEventById200Response responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
+                                                                             AdminGetEventById200Response.class);
 
         // Then
         Assertions.assertEquals(eventEntity.getId(), responseResult.getId());
@@ -151,6 +167,32 @@ class EventsControllerTest extends IntegrationBase {
         Assertions.assertEquals(eventEntity.getCreatedBy().getId(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getLastModifiedAt());
         Assertions.assertEquals(eventEntity.getLastModifiedBy().getId(), responseResult.getLastModifiedBy());
+
+        assertThat(responseResult.getHearings()).hasSize(1);
+        AdminGetEventResponseDetailsHearingsHearingsInner hearingsInner = responseResult.getHearings().getFirst();
+
+        assertThat(hearingsInner.getId()).isEqualTo(hearing.getId());
+        assertThat(hearingsInner.getCaseId()).isEqualTo(hearing.getCourtCase().getId());
+        assertThat(hearingsInner.getCaseNumber()).isEqualTo(hearing.getCourtCase().getCaseNumber());
+        assertThat(hearingsInner.getHearingDate()).isEqualTo(hearing.getHearingDate());
+
+        CourthouseResponseDetails courthouseResponseDetails = hearingsInner.getCourthouse();
+        CourtroomResponseDetails courtroomResponseDetails = hearingsInner.getCourtroom();
+
+        assertThat(courthouseResponseDetails.getId()).isEqualTo(hearing.getCourtroom().getCourthouse().getId());
+        assertThat(courthouseResponseDetails.getDisplayName()).isEqualTo(hearing.getCourtroom().getCourthouse().getDisplayName());
+
+        assertThat(courtroomResponseDetails.getId()).isEqualTo(hearing.getCourtroom().getId());
+        assertThat(courtroomResponseDetails.getName()).isEqualTo(hearing.getCourtroom().getName());
+
+        assertThat(responseResult.getCases()).hasSize(1);
+        AdminGetEventResponseDetailsCasesCasesInner casesCasesInner = responseResult.getCases().getFirst();
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+
+        assertThat(casesCasesInner.getId()).isEqualTo(courtCaseEntity.getId());
+        assertThat(casesCasesInner.getCaseNumber()).isEqualTo(courtCaseEntity.getCaseNumber());
+        assertThat(casesCasesInner.getCourthouse().getId()).isEqualTo(courtCaseEntity.getCourthouse().getId());
+        assertThat(casesCasesInner.getCourthouse().getDisplayName()).isEqualTo(courtCaseEntity.getCourthouse().getDisplayName());
     }
 
     @Test
@@ -194,9 +236,9 @@ class EventsControllerTest extends IntegrationBase {
         assertNoDataAnonymisedEntry(notEditedEventEntity);
 
         assertAudit(editedEventEntity);
-        assertFalse(
-            LogUtil.getMemoryLogger()
-                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity), Level.INFO).isEmpty());
+        ArgumentCaptor<EventEntity> eventEntityCaptor = ArgumentCaptor.forClass(EventEntity.class);
+        verify(logApi).manualObfuscation(eventEntityCaptor.capture());
+        assertThat(eventEntityCaptor.getValue().getId()).isEqualTo(editedEventEntity.getId());
     }
 
     @TestPropertySource(properties = "darts.event-obfuscation.enabled=false")
@@ -251,14 +293,11 @@ class EventsControllerTest extends IntegrationBase {
         assertDataAnonymisedEntry(userAccount, editedEventEntity2);
 
         assertAudit(editedEventEntity);
-        assertFalse(
-            LogUtil.getMemoryLogger()
-                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity), Level.INFO).isEmpty());
-
+        ArgumentCaptor<EventEntity> eventEntityCaptor = ArgumentCaptor.forClass(EventEntity.class);
+        verify(logApi, times(2)).manualObfuscation(eventEntityCaptor.capture());
+        assertThat(eventEntityCaptor.getAllValues().get(0).getId()).isEqualTo(editedEventEntity.getId());
+        assertThat(eventEntityCaptor.getAllValues().get(1).getId()).isEqualTo(editedEventEntity2.getId());
         assertAudit(editedEventEntity2);
-        assertFalse(
-            LogUtil.getMemoryLogger()
-                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity2), Level.INFO).isEmpty());
         assertThat(editedEventEntity2.getEventText()).isNotEqualTo(editedEventEntity.getEventText());
     }
 
@@ -285,12 +324,12 @@ class EventsControllerTest extends IntegrationBase {
 
         // assert additional audit data
         assertFalse(caseExpiredAuditEntries.isEmpty());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        Assertions.assertEquals(caseExpiredAuditEntries.get(0).getUser().getId(), eventEntity.getLastModifiedBy().getId());
-        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedDateTime());
+        Assertions.assertEquals(caseExpiredAuditEntries.getFirst().getUser().getId(), eventEntity.getLastModifiedBy().getId());
+        assertNull(caseExpiredAuditEntries.getFirst().getCourtCase());
     }
 
     @ParameterizedTest(name = "User with role {0} should not be able to obfuscate events")
@@ -322,7 +361,7 @@ class EventsControllerTest extends IntegrationBase {
             List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
                 .findByEvent(eventEntity);
             assertThat(dataAnonymisationEntities).hasSize(1);
-            DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.get(0);
+            DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.getFirst();
             assertDataAnonymisedEntry(userAccount, dataAnonymisationEntity, eventEntity.getId(), null);
         });
     }

@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -40,7 +40,7 @@ class StandardEventHandlerTest extends HandlerTestData {
     @Autowired
     NodeRegisterStub nodeRegisterStub;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity mockUserIdentity;
 
     @BeforeEach
@@ -84,13 +84,13 @@ class StandardEventHandlerTest extends HandlerTestData {
             HEARING_DATE_ODT.toLocalDate()
         );
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
         assertThat(persistedEvent.getEventStatus()).isEqualTo(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
 
         dartsGateway.verifyReceivedNotificationType(3);
@@ -119,13 +119,13 @@ class StandardEventHandlerTest extends HandlerTestData {
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
@@ -156,13 +156,13 @@ class StandardEventHandlerTest extends HandlerTestData {
         var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(caseHearing.size()).isEqualTo(1);
-        assertThat(caseHearing.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(caseHearing.getFirst().getHearingIsActual()).isEqualTo(true);
 
         assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
@@ -193,13 +193,13 @@ class StandardEventHandlerTest extends HandlerTestData {
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
         assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
         assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
         dartsGateway.verifyDoesntReceiveDarEvent();
     }
@@ -321,6 +321,6 @@ class StandardEventHandlerTest extends HandlerTestData {
     }
 
     private Integer idFrom(List<EventEntity> eventEntities) {
-        return eventEntities.get(0).getId();
+        return eventEntities.getFirst().getId();
     }
 }

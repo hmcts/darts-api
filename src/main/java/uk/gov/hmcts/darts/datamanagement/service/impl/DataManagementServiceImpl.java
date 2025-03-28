@@ -50,6 +50,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 @SuppressWarnings("checkstyle:SummaryJavadoc")
 public class DataManagementServiceImpl implements DataManagementService {
 
+    public static final String BLOB_DOES_NOT_EXIST_IN_CONTAINER = "Blob {} does not exist in {} container";
     private final DataManagementConfiguration dataManagementConfiguration;
 
     private final DataManagementAzureClientFactory blobServiceFactory;
@@ -63,12 +64,12 @@ public class DataManagementServiceImpl implements DataManagementService {
      * use an implementation that stores the blob to a temp file instead.
      */
     @Override
-    public BinaryData getBlobData(String containerName, UUID blobId) {
+    public BinaryData getBlobData(String containerName, String blobId) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
         if (!blobClient.exists()) {
-            log.error("Blob {} does not exist in {} container", blobId, containerName);
+            log.error(BLOB_DOES_NOT_EXIST_IN_CONTAINER, blobId, containerName);
         }
 
         Date downloadStartDate = new Date();
@@ -81,12 +82,12 @@ public class DataManagementServiceImpl implements DataManagementService {
 
     @Override
     @SneakyThrows
-    public Path downloadBlobToFile(String containerName, UUID blobId, String workspace) {
+    public Path downloadBlobToFile(String containerName, String blobId, String workspace) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
         if (!blobClient.exists()) {
-            log.error("Blob {} does not exist in {} container", blobId, containerName);
+            log.error(BLOB_DOES_NOT_EXIST_IN_CONTAINER, blobId, containerName);
         }
 
         Path workspacePath = Path.of(workspace);
@@ -104,9 +105,9 @@ public class DataManagementServiceImpl implements DataManagementService {
      */
     @Deprecated
     @Override
-    public UUID saveBlobData(String containerName, BinaryData binaryData) {
+    public String saveBlobData(String containerName, BinaryData binaryData) {
 
-        UUID uniqueBlobId = UUID.randomUUID();
+        String uniqueBlobId = UUID.randomUUID().toString();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
 
@@ -121,7 +122,7 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
 
-        var uniqueBlobId = UUID.randomUUID();
+        var uniqueBlobId = UUID.randomUUID().toString();
 
         var client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
 
@@ -140,7 +141,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
     @Override
     public BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata) {
-        UUID uniqueBlobId = UUID.randomUUID();
+        String uniqueBlobId = UUID.randomUUID().toString();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
 
@@ -183,7 +184,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, UUID blobId) throws FileNotDownloadedException {
+    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, String blobId) throws FileNotDownloadedException {
         DownloadResponseMetaData downloadResponse = new FileBasedDownloadResponseMetaData();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
@@ -191,7 +192,7 @@ public class DataManagementServiceImpl implements DataManagementService {
         boolean exists = blobClient.exists() != null && blobClient.exists();
 
         if (!exists) {
-            log.error("Blob {} does not exist in {} container", blobId, containerName);
+            log.error(BLOB_DOES_NOT_EXIST_IN_CONTAINER, blobId, containerName);
             throw new FileNotDownloadedException(blobId, containerName, "Blob doesn't exist in container.");
         }
 
@@ -211,7 +212,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    public String getChecksum(String containerName, UUID blobId) {
+    public String getChecksum(String containerName, String blobId) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
@@ -241,7 +242,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
 
     @Override
-    public Response<Boolean> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException {
+    public Response<Boolean> deleteBlobData(String containerName, String blobId) throws AzureDeleteBlobException {
         try {
             BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
             BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);

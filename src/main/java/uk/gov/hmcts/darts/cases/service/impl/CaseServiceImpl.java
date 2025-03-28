@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
+import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.CaseTranscriptModel;
@@ -53,7 +54,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -175,11 +175,7 @@ public class CaseServiceImpl implements CaseService {
         if (caseIds.isEmpty()) {
             return new ArrayList<>();
         }
-        List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds).stream()
-            .filter(HearingEntity::getHearingIsActual)
-            .sorted((o1, o2) -> o2.getCourtCase().getCaseNumber().compareTo(o1.getCourtCase().getCaseNumber()))
-            .toList();
-
+        List<HearingEntity> hearings = hearingRepository.findByIsActualCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
 
@@ -213,7 +209,7 @@ public class CaseServiceImpl implements CaseService {
                     hearingEntities
                         .stream()
                         .map(HearingEntity::getId)
-                        .collect(Collectors.toList()));
+                        .toList());
 
             for (AnnotationEntity annotationEntity : annotationsEntities) {
                 for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
@@ -226,7 +222,7 @@ public class CaseServiceImpl implements CaseService {
                     hearingEntities
                         .stream()
                         .map(HearingEntity::getId)
-                        .collect(Collectors.toList()), authorisationApi.getCurrentUser());
+                        .toList(), authorisationApi.getCurrentUser());
 
             for (AnnotationEntity annotationEntity : annotationsEntities) {
                 for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
@@ -244,13 +240,20 @@ public class CaseServiceImpl implements CaseService {
         if (matchingCaseIds.size() > adminSearchMaxResults) {
             throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }
-        List<CourtCaseEntity> matchingCases = caseRepository.findAllById(matchingCaseIds);
-        hearingRepository.findByCaseIds(matchingCaseIds);
+        List<CourtCaseEntity> matchingCases = caseRepository.findAllWithIdMatchingOneOf(matchingCaseIds);
+
         return AdminCasesSearchResponseMapper.mapResponse(matchingCases);
     }
 
     @Override
     public CourtCaseEntity saveCase(CourtCaseEntity courtCase) {
         return caseRepository.saveAndFlush(courtCase);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AdminSingleCaseResponseItem adminGetCaseById(Integer caseId) {
+        CourtCaseEntity caseEntity = getCourtCaseById(caseId);
+        return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity);
     }
 }

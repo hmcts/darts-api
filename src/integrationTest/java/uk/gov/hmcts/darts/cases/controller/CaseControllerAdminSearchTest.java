@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -49,13 +50,13 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     private static final String ENDPOINT_URL = "/admin/cases/search";
 
     @Autowired
-    SecurityGroupRepository securityGroupRepository;
+    private SecurityGroupRepository securityGroupRepository;
     @Autowired
-    UserAccountRepository userAccountRepository;
+    private UserAccountRepository userAccountRepository;
     @Autowired
-    private transient MockMvc mockMvc;
-    CourthouseEntity swanseaCourthouse;
-    UserAccountEntity user;
+    private MockMvc mockMvc;
+    private CourthouseEntity swanseaCourthouse;
+    private UserAccountEntity user;
 
     @BeforeEach
     void setupData() {
@@ -89,21 +90,21 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
 
         HearingEntity hearing1b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 21), judge);
 
-        HearingEntity hearing1c =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 22), judge);
+        HearingEntity hearing1c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 22), judge);
 
-        HearingEntity hearing2a =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 20), judge);
+        HearingEntity hearing2a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 20), judge);
 
-        HearingEntity hearing2b =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 21), judge);
+        HearingEntity hearing2b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 21), judge);
 
-        HearingEntity hearing2c =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 22), judge);
+        HearingEntity hearing2c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 22), judge);
 
-        HearingEntity hearing3a =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 20), judge);
+        HearingEntity hearing3a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 20), judge);
         JudgeEntity judge3a = createJudgeWithName("Judge3a");
         hearing3a.addJudge(judge3a, false);
 
-        HearingEntity hearing3b =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 21), judge);
+        HearingEntity hearing3b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 21), judge);
 
-        HearingEntity hearing3c =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 22), judge);
+        HearingEntity hearing3c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 22), judge);
 
         CourtroomEntity courtroom2 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom2");
 
@@ -118,7 +119,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         HearingEntity hearing5b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case5, courtroom1, LocalDate.of(2023, 9, 21), judge);
 
         CourtroomEntity courtroom3 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom3");
-        HearingEntity hearing5c =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case5, courtroom3, LocalDate.of(2023, 9, 22), judge);
+        HearingEntity hearing5c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case5, courtroom3, LocalDate.of(2023, 9, 22), judge);
 
         HearingEntity hearing6a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case6, courtroom2, LocalDate.of(2023, 9, 20), judge);
 
@@ -143,12 +144,10 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         setupUserAccountAndSecurityGroup();
-
-
     }
 
     @Test
-    void testOk() throws Exception {
+    void adminCaseSearch_ShouldReturnOk() throws Exception {
 
         String requestBody = """
             {
@@ -157,8 +156,8 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
               ],
               "case_number": "Case1",
               "courtroom_name": "COURTROOM1",
-              "hearing_start_at": "2020-06-18",
-              "hearing_end_at": "2024-06-18"
+              "hearing_start_at": "2023-04-18",
+              "hearing_end_at": "2024-04-17"
             }""";
 
         requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
@@ -175,7 +174,34 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void testOkIsAnonymised() throws Exception {
+    void adminCaseSearch_ShouldReturnMultipleOrderedByCaseId() throws Exception {
+
+        String requestBody = """
+            {
+              "courthouse_ids": [
+                <<courthouseId>>
+              ],
+              "case_number": "Case",
+              "courtroom_name": "COURTROOM1",
+              "hearing_start_at": "2023-04-18",
+              "hearing_end_at": "2024-04-17"
+            }""";
+
+        requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminSearchTest/testOk/expectedResponseMultiple.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminCaseSearch_ShouldReturnOkIsAnonymised() throws Exception {
         CourtCaseEntity caseEntity = dartsDatabase.getCaseRepository()
             .findByCaseNumberAndCourthouse_CourthouseName("Case1", "SWANSEA").orElseThrow();
         OffsetDateTime dataAnonymisedTs = OffsetDateTime.parse("2023-01-01T12:00:00Z");
@@ -190,8 +216,8 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
               ],
               "case_number": "Case1",
               "courtroom_name": "COURTROOM1",
-              "hearing_start_at": "2020-06-18",
-              "hearing_end_at": "2024-06-18"
+              "hearing_start_at": "2023-04-18",
+              "hearing_end_at": "2024-04-17"
             }""";
 
         requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
@@ -204,6 +230,113 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
 
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminSearchTest/testOkIsAnonymised/expectedResponse.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminCaseSearch_ShouldReturnMultiples_WithSearchByCourthouseIdsAndHearingDates() throws Exception {
+
+        String requestBody = """
+            {
+              "courthouse_ids": [
+                <<courthouseId>>
+              ],
+              "case_number": null,
+              "courtroom_name": null,
+              "hearing_start_at": "2023-03-02",
+              "hearing_end_at": "2024-03-01"
+            }""";
+
+        requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminSearchTest/testOk/expectedResponseMultiple.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminCasesSearchPost_ShouldReturnBadRequest_WhenCourtroomNameIsLowercase() throws Exception {
+        // Given
+        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
+        request.setCourtroomName("courtroom1");  // lowercase value
+        request.setCaseNumber("Case1");
+
+        // When/Then
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+               "type": "CASE_103",
+               "title": "The request is not valid",
+               "status": 400,
+               "detail": "Courthouse and courtroom must be uppercase."
+             }""";
+
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminCasesSearchPost_ShouldReturnBadRequest_WhenHearingDateStartIsAfterHearingDateEnd() throws Exception {
+        // Given
+        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
+        request.setCaseNumber("Case1");
+        request.setHearingStartAt(LocalDate.of(2023, 04, 11));
+        request.setHearingEndAt(LocalDate.of(2023, 03, 11));
+
+        // When/Then
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+               "type": "COMMON_104",
+               "title": "Invalid request",
+               "status": 400,
+               "detail": "The hearing start date cannot be after the end date."
+             }
+            """;
+
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void adminCasesSearchPost_ShouldReturnBadRequest_WhenHearingDateEndIsNull() throws Exception {
+        // Given
+        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
+        request.setCourthouseIds(List.of(1));
+        request.setHearingStartAt(LocalDate.of(2023, 04, 11));
+
+        // When/Then
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            {
+              "type": "COMMON_105",
+              "title": "The search criteria is too broad",
+              "status": 400
+            }
+            """;
+
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

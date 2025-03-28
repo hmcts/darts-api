@@ -20,13 +20,16 @@ import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.HearingTranscriptionMapper;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -60,6 +64,8 @@ class HearingsServiceImplTest {
 
     @Mock
     AuthorisationApi authorisationApi;
+    @Mock
+    MediaRepository mediaRepository;
 
     HearingsServiceImpl service;
 
@@ -75,7 +81,8 @@ class HearingsServiceImplTest {
             eventRepository,
             annotationRepository,
             authorisationApi,
-            new HearingTranscriptionMapper()
+            new HearingTranscriptionMapper(),
+            mediaRepository
         );
     }
 
@@ -84,7 +91,7 @@ class HearingsServiceImplTest {
         HearingEntity hearingEntity = createHearingEntity(true);
         when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
 
-        HearingEntity result = service.getHearingById(hearingEntity.getId());
+        HearingEntity result = service.getHearingByIdWithValidation(hearingEntity.getId());
         assertEquals(1, result.getId());
     }
 
@@ -92,7 +99,7 @@ class HearingsServiceImplTest {
     void testGetHearingsByIdHearingNotFound() {
         when(hearingRepository.findById(1)).thenReturn(Optional.empty());
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(1));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingByIdWithValidation(1));
 
         assertEquals("HEARING_100", exception.getError().getErrorTypeNumeric());
     }
@@ -103,7 +110,7 @@ class HearingsServiceImplTest {
         hearingEntity.getCourtCase().setDataAnonymised(true);
         when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(1));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingByIdWithValidation(1));
 
         assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
         assertThat(exception.getMessage()).isEqualTo("Case has expired.");
@@ -114,7 +121,7 @@ class HearingsServiceImplTest {
         HearingEntity hearingEntity = createHearingEntity(false);
         when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(hearingEntity.getId()));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingByIdWithValidation(hearingEntity.getId()));
 
         assertEquals("HEARING_102", exception.getError().getErrorTypeNumeric());
     }
@@ -132,10 +139,10 @@ class HearingsServiceImplTest {
 
         List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());
         assertEquals(1, eventResponses.size());
-        assertEquals(event.get(0).getId(), eventResponses.get(0).getId());
-        assertEquals("Test", eventResponses.get(0).getText());
-        assertEquals("TestEvent", eventResponses.get(0).getName());
-        assertNotNull(eventResponses.get(0).getTimestamp());
+        assertEquals(event.getFirst().getId(), eventResponses.getFirst().getId());
+        assertEquals("Test", eventResponses.getFirst().getText());
+        assertEquals("TestEvent", eventResponses.getFirst().getName());
+        assertNotNull(eventResponses.getFirst().getTimestamp());
 
     }
 
@@ -156,14 +163,13 @@ class HearingsServiceImplTest {
     void removeMediaLinkToHearing_shouldRemoveLinkToHearing_whenAllAssociatedCasesAreAnonymised() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
-        hearingEntity.setMediaList(List.of(mediaEntity));
+        hearingEntity.setMediaList(new ArrayList<>(List.of(mediaEntity)));
 
-        when(hearingRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(Optional.of(hearingEntity));
+        when(mediaRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(List.of(mediaEntity));
         when(mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(any())).thenReturn(true);
-        when(hearingRepository.findHearingIdsByMediaId(mediaEntity.getId())).thenReturn(List.of(hearingEntity));
 
         service.removeMediaLinkToHearing(hearingEntity.getCourtCase().getId());
-        verify(hearingRepository).save(hearingEntity);
+        verify(mediaRepository).save(mediaEntity);
     }
 
     @Test
@@ -172,11 +178,11 @@ class HearingsServiceImplTest {
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
         hearingEntity.setMediaList(List.of(mediaEntity));
 
-        when(hearingRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(Optional.of(hearingEntity));
+        when(mediaRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(List.of(mediaEntity));
         when(mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(any())).thenReturn(false);
 
         service.removeMediaLinkToHearing(hearingEntity.getCourtCase().getId());
-        verifyNoMoreInteractions(hearingRepository);
+        verifyNoMoreInteractions(hearingRepository, mediaRepository);
     }
 
     @Test
@@ -184,21 +190,40 @@ class HearingsServiceImplTest {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
 
-        when(hearingRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(Optional.of(hearingEntity));
+        when(mediaRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(List.of(mediaEntity));
 
         service.removeMediaLinkToHearing(hearingEntity.getCourtCase().getId());
-        verifyNoMoreInteractions(hearingRepository);
+        verifyNoMoreInteractions(hearingRepository, mediaRepository);
     }
 
     @Test
     void removeMediaLinkToHearing_shouldDoNothing_whenNoHearingsExist() {
         HearingEntity hearingEntity = createHearingEntity(true);
 
-        when(hearingRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(Optional.empty());
+        when(mediaRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(List.of());
 
         service.removeMediaLinkToHearing(hearingEntity.getCourtCase().getId());
-        verifyNoMoreInteractions(hearingRepository);
+        verifyNoMoreInteractions(hearingRepository, mediaRepository);
     }
+
+
+    @Test
+    void getHearingById_hearingFound_shouldReturnHearing() {
+        HearingEntity hearingEntity = createHearingEntity(true);
+        when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
+
+        HearingEntity result = service.getHearingById(hearingEntity.getId());
+        assertEquals(hearingEntity, result);
+    }
+
+    @Test
+    void getHearingById_hearingNotFound_exceptionShouldBeThrown() {
+        when(hearingRepository.findById(1)).thenReturn(Optional.empty());
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(1));
+        assertEquals(HearingApiError.HEARING_NOT_FOUND, exception.getError());
+    }
+
 
     private HearingEntity createHearingEntity(boolean isHearingActual) {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse("swansea");
@@ -209,5 +234,19 @@ class HearingsServiceImplTest {
         return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.now(), isHearingActual);
     }
 
+
+    @Test
+    void validateHearingExistsElseError_whenHearingExists_noErrorShouldBeThrown() {
+        doReturn(true).when(hearingRepository).existsById(any());
+        service.validateHearingExistsElseError(123);
+        verify(hearingRepository).existsById(123);
+    }
+
+    @Test
+    void validateHearingExistsElseError_whenHearingDoesNotExist_errorShouldBeThrown() {
+        doReturn(false).when(hearingRepository).existsById(any());
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.validateHearingExistsElseError(123));
+        assertEquals(HearingApiError.HEARING_NOT_FOUND, exception.getError());
+    }
 
 }

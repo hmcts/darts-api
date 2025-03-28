@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -82,8 +84,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
 import static java.time.ZoneOffset.UTC;
@@ -150,6 +150,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
     private final TranscriptionResponseMapper transcriptionResponseMapper;
     private final TranscriptionDownloader transcriptionDownloader;
+    private final TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
 
     @Value("${darts.manual-deletion.enabled:false}")
     @Getter(AccessLevel.PACKAGE)
@@ -176,6 +177,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             isManual
         );
 
+        transcriptionLinkedCaseRepository.save(
+            TranscriptionLinkedCaseEntity.builder()
+                .transcription(transcription)
+                .courtCase(transcription.getCourtCase())
+                .build());
+
         transcription.getTranscriptionWorkflowEntities().add(
             saveTranscriptionWorkflow(
                 userAccount,
@@ -184,19 +191,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 transcriptionRequestDetails.getComment()
             ));
 
-        if (transcription.getIsManualTranscription()) {
-            transcriptionStatus = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
-
-            transcription.getTranscriptionWorkflowEntities().add(
-                saveTranscriptionWorkflow(
-                    userAccount,
-                    transcription,
-                    transcriptionStatus,
-                    null
-                ));
-
-            transcriptionNotifications.notifyApprovers(transcription);
-        }
+        moveTranscriptionRequestedToAwaitingAuthorisation(transcription, transcriptionStatus);
 
         auditApi.record(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
 
@@ -244,7 +239,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         var auditActivityProvider = auditActivitiesFor(transcriptionEntity, updateTranscription);
 
-        final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
+        var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
+
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
             getUserAccount(),
@@ -257,12 +253,36 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 
+        if (REQUESTED.getId().equals(transcriptionStatusEntity.getId())) {
+            transcriptionStatusEntity = moveTranscriptionRequestedToAwaitingAuthorisation(transcriptionEntity, transcriptionStatusEntity);
+        }
         UpdateTranscriptionAdminResponse updateTranscriptionResponse = new UpdateTranscriptionAdminResponse();
         updateTranscriptionResponse.setTranscriptionId(transcriptionEntity.getId());
         updateTranscriptionResponse.setTranscriptionStatusId(transcriptionEntity.getTranscriptionStatus().getId());
 
         transcriptionNotifications.handleNotificationsAndAudit(userAccountEntity, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
         return updateTranscriptionResponse;
+    }
+
+    private TranscriptionStatusEntity moveTranscriptionRequestedToAwaitingAuthorisation(TranscriptionEntity transcriptionEntity,
+                                                                                        TranscriptionStatusEntity transcriptionStatusEntity) {
+
+        if (transcriptionEntity.getIsManualTranscription()) {
+
+            transcriptionStatusEntity = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
+            transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
+
+            transcriptionEntity.getTranscriptionWorkflowEntities().add(
+                saveTranscriptionWorkflow(
+                    getUserAccount(),
+                    transcriptionEntity,
+                    transcriptionStatusEntity,
+                    null
+                ));
+
+            transcriptionNotifications.notifyApprovers(transcriptionEntity);
+        }
+        return transcriptionStatusEntity;
     }
 
 
@@ -321,13 +341,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
 
         if (nonNull(transcriptionRequestDetails.getHearingId())) {
-            HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            HearingEntity hearing = hearingsService.getHearingByIdWithValidation(transcriptionRequestDetails.getHearingId());
             transcription.addHearing(hearing);
         }
 
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
+    @Override
     public TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
                                                                  TranscriptionEntity transcription,
                                                                  TranscriptionStatusEntity transcriptionStatus,
@@ -440,9 +461,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
-            UUID.fromString(inboundBlobCLient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);
+            inboundBlobCLient.getBlobName(), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);
         final var externalObjectDirectoryUnstructuredEntity = saveExternalObjectDirectory(
-            UUID.fromString(unstructuredBlobClient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, UNSTRUCTURED);
+            unstructuredBlobClient.getBlobName(), checksum, userAccountEntity, transcriptionDocumentEntity, UNSTRUCTURED);
 
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryInboundEntity);
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryUnstructuredEntity);
@@ -491,7 +512,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned) {
-        List<TranscriberViewSummary> result = new ArrayList<>();
+        List<TranscriberViewSummary> result;
         if (TRUE.equals(assigned)) {
             result = transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
         } else {
@@ -524,7 +545,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(transcriptionWorkflows, migratedTranscriptionComments);
     }
 
-    private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
+    private ExternalObjectDirectoryEntity saveExternalObjectDirectory(String externalLocation,
                                                                       String checksum,
                                                                       UserAccountEntity userAccountEntity,
                                                                       TranscriptionDocumentEntity transcriptionDocumentEntity,
@@ -615,16 +636,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public List<Integer> rollbackUserTranscriptions(UserAccountEntity entity) {
         List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
-            .findWorkflowForUserWithTranscriptionState(entity.getId(),
-                                                       TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
+            .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
 
         List<Integer> transcriptionIds = new ArrayList<>();
 
         // add the workflows back
         for (TranscriptionEntity transcription : transcriptionWorkflowEntities) {
             saveTranscriptionWorkflow(entity, transcription,
-                                      transcriptionStatusRepository.getReferenceById(
-                                          TranscriptionStatusEnum.APPROVED.getId()),
+                                      transcriptionStatusRepository.getReferenceById(APPROVED.getId()),
                                       OWNER_DISABLED_COMMENT_MESSAGE);
             transcriptionIds.add(transcription.getId());
         }
@@ -642,7 +661,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         for (TranscriptionDocumentEntity entity : transcriptionDocumentEntities) {
             transcriptionResponsesLst.add(transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(entity));
         }
-
+        transcriptionResponsesLst.sort((o1, o2) ->
+                                           o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()));
         return transcriptionResponsesLst;
     }
 
@@ -670,15 +690,15 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private List<Integer> getTranscriptionIdsForRequest(List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
-        return updateTranscriptionsItems.stream().map(UpdateTranscriptionsItem::getTranscriptionId).collect(Collectors.toList());
+        return updateTranscriptionsItems.stream().map(UpdateTranscriptionsItem::getTranscriptionId).toList();
     }
 
     private List<Integer> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {
-        return transcriptionEntities.stream().map(TranscriptionEntity::getId).collect(Collectors.toList());
+        return transcriptionEntities.stream().map(TranscriptionEntity::getId).toList();
     }
 
     private List<UpdateTranscriptionsItem> getTranscriptionForIds(List<Integer> transcriptionIds, List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
-        return updateTranscriptionsItems.stream().filter(e -> transcriptionIds.contains(e.getTranscriptionId())).collect(Collectors.toList());
+        return updateTranscriptionsItems.stream().filter(e -> transcriptionIds.contains(e.getTranscriptionId())).toList();
     }
 
     private Optional<UpdateTranscriptionsItem> getTranscriptionsItemForId(Integer transcriptionId, List<UpdateTranscriptionsItem> updateTranscriptions) {

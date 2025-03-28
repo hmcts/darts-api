@@ -2,11 +2,13 @@ package uk.gov.hmcts.darts.usermanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -31,7 +33,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -115,7 +116,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     @Override
     public List<SecurityGroupWithIdAndRoleAndUsers> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser) {
 
-        List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
+        List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.GROUP_NAME).ascending());
 
         securityGroupEntities = filterSecurityGroupEntitiesByRoleIds(securityGroupEntities, roleIds);
         securityGroupEntities = filterSecurityGroupEntitiesByCourthouseId(securityGroupEntities, courthouseId);
@@ -127,7 +128,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         }
 
         return securityGroupEntities.stream()
-            .map(securityGroupWithIdAndRoleAndUsersMapper::mapToSecurityGroupWithIdAndRoleAndUsers).toList();
+            .map(securityGroupWithIdAndRoleAndUsersMapper::mapToSecurityGroupWithIdAndRoleAndUsers)
+            .toList();
     }
 
     @Transactional
@@ -224,7 +226,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         // join the 2 lists - distinct
         List<Integer> combinedUserIds = Stream.concat(systemUserIds.stream(), patchNonSystemUserIds.stream())
             .distinct()
-            .collect(Collectors.toList());
+            .toList();
 
         if (combinedUserIds != null) {
             securityGroupEntity.getUsers().forEach(userAccountEntity -> userAccountEntity.getSecurityGroupEntities().remove(securityGroupEntity));

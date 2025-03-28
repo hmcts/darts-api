@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
@@ -21,8 +22,10 @@ public class CourtLogsServiceImpl implements CourtLogsService {
 
     @Override
     public List<CourtLog> getCourtLogs(String courtHouse, String caseNumber, OffsetDateTime start, OffsetDateTime end) {
+        String courthouseNameUpperTrimmed = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(courtHouse));
+
         List<EventEntity> entities = repository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
-            courtHouse,
+            courthouseNameUpperTrimmed,
             caseNumber,
             start,
             end

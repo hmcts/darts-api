@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
@@ -29,6 +30,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -37,7 +39,6 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
@@ -184,7 +185,7 @@ public class TranscriptionStub {
         return transcriptionType;
     }
 
-    private TranscriptionStatusEntity mapToTranscriptionStatusEntity(TranscriptionStatusEnum statusEnum) {
+    public TranscriptionStatusEntity mapToTranscriptionStatusEntity(TranscriptionStatusEnum statusEnum) {
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(statusEnum.getId());
         transcriptionStatus.setStatusType(statusEnum.name());
@@ -532,14 +533,14 @@ public class TranscriptionStub {
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
                                                                ObjectRecordStatusEnum status,
                                                                ExternalLocationTypeEnum location,
-                                                               UUID eodExternalLocation) {
+                                                               String eodExternalLocation) {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 10;
         final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
         final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
         final String confidenceReason = "reason";
-        final Integer confidenceScore = 232;
+        final RetentionConfidenceScoreEnum confidenceScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
         return updateTranscriptionWithDocument(transcriptionEntity,
                                                fileName,
@@ -562,9 +563,9 @@ public class TranscriptionStub {
                                                                UserAccountEntity testUser,
                                                                ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                               UUID externalLocation,
+                                                               String externalLocation,
                                                                String checksum,
-                                                               Integer confScore,
+                                                               RetentionConfidenceScoreEnum confScore,
                                                                String confReason
     ) {
 
@@ -597,7 +598,7 @@ public class TranscriptionStub {
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize, UserAccountEntity testUser, String checksum) {
-        return createTranscriptionDocumentEntity(transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, 100, "confidence reason");
+        return createTranscriptionDocumentEntity(transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, null, null);
     }
 
 
@@ -605,7 +606,7 @@ public class TranscriptionStub {
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize,
                                                                                 UserAccountEntity testUser,
-                                                                                String checksum, Integer confScore, String confReason) {
+                                                                                String checksum, RetentionConfidenceScoreEnum confScore, String confReason) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(fileName);
@@ -626,7 +627,8 @@ public class TranscriptionStub {
                                                                                 int fileSize, UserAccountEntity testUser, String checksum,
                                                                                 OffsetDateTime uploadedDateTime) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, 100, "confidence reason");
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED,
+            "confidence reason");
         transcriptionDocumentEntity.setUploadedDateTime(uploadedDateTime);
         return transcriptionDocumentEntity;
     }
@@ -758,5 +760,15 @@ public class TranscriptionStub {
 
     private ObjectRecordStatusEntity getStatusEntity(ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
+    }
+
+    public TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity(TranscriptionEntity transcriptionEntity, CourtCaseEntity courtCaseEntity,
+                                                                       String courthouseName, String caseNumber) {
+        TranscriptionLinkedCaseEntity transcriptionLinkedCaseEntity = new TranscriptionLinkedCaseEntity();
+        transcriptionLinkedCaseEntity.setTranscription(transcriptionEntity);
+        transcriptionLinkedCaseEntity.setCourtCase(courtCaseEntity);
+        transcriptionLinkedCaseEntity.setCourthouseName(courthouseName);
+        transcriptionLinkedCaseEntity.setCaseNumber(caseNumber);
+        return dartsDatabaseSaveStub.save(transcriptionLinkedCaseEntity);
     }
 }

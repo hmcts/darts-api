@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.util.EmailAddressFromTokenUtil;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -15,10 +16,10 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
 
@@ -41,34 +42,41 @@ public class UserIdentityImpl implements UserIdentity {
         return null;
     }
 
+    @Override
     public UserAccountEntity getUserAccount() {
         return getUserAccount(getJwt());
     }
 
     @Override
     public UserAccountEntity getUserAccount(Jwt jwt) {
-        UserAccountEntity userAccount = null;
-        String guid = getGuidFromToken(jwt);
-        if (nonNull(guid)) {
-            // System users will use GUID not email address
-            userAccount = userAccountRepository.findByAccountGuidAndActive(guid, true).orElse(null);
-        }
-        if (isNull(userAccount)) {
-            String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
-            userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true).stream()
-                .findFirst()
-                .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
-        }
-        return userAccount;
+        return getUserAccountOptional(jwt)
+            .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
     }
 
-    private Jwt getJwt() {
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
-                return jwt;
-            }
+    @Override
+    public Optional<UserAccountEntity> getUserAccountOptional(Jwt jwt) {
+        String guid = getGuidFromToken(jwt);
+
+        Optional<UserAccountEntity> userAccount = Optional.ofNullable(guid)
+            .map(guidValue -> userAccountRepository.findByAccountGuidAndActive(guidValue, true))
+            .orElse(Optional.empty());
+
+        if (userAccount.isPresent()) {
+            return userAccount;
         }
 
+        String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+        return userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true)
+            .stream()
+            .findFirst();
+    }
+
+    @Override
+    public Jwt getJwt() {
+        if (SecurityContextHolder.getContext().getAuthentication() != null
+            && SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
+            return jwt;
+        }
         return null;
     }
 
@@ -108,5 +116,13 @@ public class UserIdentityImpl implements UserIdentity {
     public List<Integer> getListOfCourthouseIdsUserHasAccessTo() {
         UserAccountEntity userAccount = getUserAccount();
         return userRolesCourthousesRepository.findAllCourthouseIdsByUserAccount(userAccount);
+    }
+
+    @Override
+    public Optional<Integer> getUserIdFromJwt() {
+        if (getJwt() instanceof DartsJwt dartsJwt) {
+            return Optional.ofNullable(dartsJwt.getUserId());
+        }
+        return Optional.empty();
     }
 }

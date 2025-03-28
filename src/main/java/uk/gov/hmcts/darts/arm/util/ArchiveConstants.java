@@ -4,7 +4,6 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor", "java:S1118", "PMD.MissingStaticMethodInNonInstantiatableClass"})
-
 public class ArchiveConstants {
 
     public static class ArchiveRecordOperationValues {

@@ -11,11 +11,13 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
+import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventService;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -27,8 +29,13 @@ public class EventServiceImpl implements EventService {
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
 
     @Override
-    public AdminGetEventForIdResponseResult adminGetEventById(Integer eventId) {
-        return eventMapper.mapToAdminGetEventsResponseForId(getEventByEveId(eventId));
+    public AdminGetEventById200Response adminGetEventById(Integer eventId) {
+        return eventMapper.mapToAdminGetEventById200Response(getEventByEveId(eventId));
+    }
+
+    @Override
+    public AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Integer eventId) {
+        return eventMapper.mapToAdminGetEventVersionsResponseForId(getRelatedEvents(eventId));
     }
 
     @Override
@@ -36,6 +43,22 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findById(eveId)
             .orElseThrow(() -> new DartsApiException(CommonApiError.NOT_FOUND,
                                                      String.format("Event with id %s not found", eveId)));
+    }
+
+    List<EventEntity> getRelatedEvents(Integer eveId) {
+        EventEntity event = getEventByEveId(eveId);
+        if (event.getEventId() == 0) {
+            return List.of(event);
+        }
+        List<Integer> caseIds = event.getEventLinkedCaseEntities().stream()
+            .map(EventLinkedCaseEntity::getCourtCase)
+            .filter(Objects::nonNull)
+            .map(CourtCaseEntity::getId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+        return eventRepository.findAllByRelatedEvents(
+            event.getId(), event.getEventId(), caseIds);
     }
 
     @Override

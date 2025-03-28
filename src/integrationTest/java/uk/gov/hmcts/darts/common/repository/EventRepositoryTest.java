@@ -3,10 +3,15 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.event.enums.EventStatus;
 import uk.gov.hmcts.darts.test.common.data.EventTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.EventLinkedCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
@@ -15,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventRepositoryTest extends PostgresIntegrationBase {
     @Autowired
@@ -25,6 +32,8 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private HearingStub hearingStub;
+    @Autowired
+    private EventLinkedCaseStub eventLinkedCaseStub;
 
     @Test
     void testEventProcessing() {
@@ -35,12 +44,12 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
 
         List<Integer> eventIdsToBeProcessed1 = eventRepository.findCurrentEventIdsWithDuplicates(1);
-        Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
+        assertEquals(1, eventIdsToBeProcessed1.size());
         EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst())
             .getFirst();
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
             eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds(), 0);
-        Assertions.assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.getFirst())));
+        assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.getFirst())));
 
         List<Integer> eventIdsToBeProcessed2 = eventRepository.findCurrentEventIdsWithDuplicates(1);
         EventRepository.EventIdAndHearingIds eventPkidSecond =
@@ -49,13 +58,13 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
             eventPkidSecond.getEveId(), eventPkidSecond.getEventId(), eventPkidSecond.getHearingIds(), 0);
 
-        Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
-        Assertions.assertTrue(eventIdMap.containsKey(eventIdsToBeProcessed2.getFirst()));
+        assertEquals(1, eventIdsToBeProcessed1.size());
+        assertTrue(eventIdMap.containsKey(eventIdsToBeProcessed2.getFirst()));
         Assertions.assertNotEquals(eventIdsToBeProcessed1, eventIdsToBeProcessed2);
 
         // ENSURE WE DONT PROCESS THE THIRD BATCH I.E. THE ZERO EVENT ID
         List<Integer> eventIdsToBeProcessed3 = eventRepository.findCurrentEventIdsWithDuplicates(1);
-        Assertions.assertTrue(eventIdsToBeProcessed3.isEmpty());
+        assertTrue(eventIdsToBeProcessed3.isEmpty());
     }
 
     @Test
@@ -67,7 +76,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
 
         List<Integer> eventIdsToBeProcessed1 = eventRepository.findCurrentEventIdsWithDuplicates(1);
-        Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
+        assertEquals(1, eventIdsToBeProcessed1.size());
         List<EventEntity> eventEntities = eventIdMap.get(eventIdsToBeProcessed1.getFirst());
         EventEntity eventEntity = eventEntities.getFirst();
         eventEntity.getHearingEntities().add(
@@ -105,13 +114,13 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event2, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
 
         assertThat(duplicates)
             .hasSize(3)
-            .anyMatch(eventEntity -> event3.getId().equals(eventEntity.getId()))
-            .anyMatch(eventEntity -> event1.getId().equals(eventEntity.getId()))
-            .anyMatch(eventEntity -> event2.getId().equals(eventEntity.getId()));
+            .anyMatch(eventEntity -> event3.getId().equals(eventEntity))
+            .anyMatch(eventEntity -> event1.getId().equals(eventEntity))
+            .anyMatch(eventEntity -> event2.getId().equals(eventEntity));
     }
 
     @Test
@@ -136,7 +145,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
     }
 
@@ -162,8 +171,125 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
+    }
+
+    @Test
+    void findAllByEventIdExcludingEventIdZero_whenEventIdIsSetAboveZero_willReturnVersions() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        event1.setEventText("eventText");
+        event2.setEventText("eventText");
+        event1.setEventId(1);
+        event2.setEventId(1);
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+
+        List<EventEntity> eventVersions = eventRepository.findAllByEventIdExcludingEventIdZero(event1.getEventId());
+        assertThat(eventVersions).hasSize(2);
+    }
+
+    @Test
+    void findAllByEventIdExcludingEventIdZero_whenEventIdIsSetToZero_willNotReturnVersions() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        event1.setEventText("eventText");
+        event1.setEventId(0);
+        dartsDatabase.save(event1);
+
+        List<EventEntity> eventVersions = eventRepository.findAllByEventIdExcludingEventIdZero(event1.getEventId());
+        assertThat(eventVersions).isEmpty();
+    }
+
+    @Test
+    void findAllByRelatedEvents_shouldReturnAllRelatedEvents() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        final EventEntity event3 = EventTestData.someMinimalEvent();
+        final EventEntity event4 = EventTestData.someMinimalEvent();
+        final EventEntity event5 = EventTestData.someMinimalEvent();
+
+
+        event1.setEventId(123);
+        event2.setEventId(123);
+        event3.setEventId(123);
+        event4.setEventId(123);
+        event5.setEventId(1234);
+
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+        dartsDatabase.save(event3);
+        dartsDatabase.save(event4);
+        dartsDatabase.save(event5);
+
+        CourtCaseEntity caseEntity1 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+        CourtCaseEntity caseEntity2 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event3, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event5, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event2, caseEntity2);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event4, caseEntity1.getCaseNumber(), caseEntity1.getCourthouse().getCourthouseName());
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub
+            .createCaseLinkedEvent(event4, "caseNumber2", "courthouseName");
+
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(), event1.getEventId(), List.of(caseEntity1.getId()));
+        assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
+            .containsExactlyInAnyOrder(event1.getId(), event3.getId());
+    }
+
+    @Test
+    void findAllByRelatedEvents_shouldReturnSingleEvent_whenEventIdIsZero() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+
+        event1.setEventId(0);
+        event2.setEventId(0);
+
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+        CourtCaseEntity caseEntity1 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+        eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity1);
+        eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity1);
+
+        List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(), event1.getEventId(), List.of(caseEntity1.getId()));
+        //Only one event should be returned as the event id is 0
+        assertThat(relatedEvents).hasSize(1);
+        assertThat(relatedEvents.stream().map(EventEntity::getId).toList())
+            .containsExactlyInAnyOrder(event1.getId());
+
+    }
+
+    @Test
+    void findAllByEventStatusAndNotCourtrooms_shouldReturnSingleEvent_withOneValidEvent() {
+        // given
+        EventEntity eventWithCourtroomToBeExcluded = PersistableFactory.getEventTestData().someMinimal();
+        EventEntity eventWithCourtroomToBeIncluded = PersistableFactory.getEventTestData().someMinimal();
+        EventEntity eventWithDifferentEventStatus = PersistableFactory.getEventTestData().someMinimal();
+
+        eventWithCourtroomToBeExcluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
+        eventWithCourtroomToBeIncluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
+        eventWithDifferentEventStatus.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_HERITAGE.getStatusNumber());
+
+        eventWithCourtroomToBeExcluded = dartsPersistence.save(eventWithCourtroomToBeExcluded);
+        eventWithCourtroomToBeIncluded = dartsPersistence.save(eventWithCourtroomToBeIncluded);
+
+        // when
+        List<Integer> events = eventRepository.findAllByEventStatusAndNotCourtrooms(
+            EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
+            List.of(eventWithCourtroomToBeExcluded.getCourtroom().getId()),
+            Limit.of(5));
+
+        // then
+        assertThat(events).hasSize(1);
+        assertEquals(eventWithCourtroomToBeIncluded.getId(), events.getFirst());
     }
 
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {

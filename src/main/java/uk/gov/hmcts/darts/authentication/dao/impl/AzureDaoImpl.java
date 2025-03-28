@@ -61,7 +61,43 @@ public class AzureDaoImpl implements AzureDao {
                 OAuthProviderRawResponse.class
             );
 
-            log.debug("Obtained access token for authorization code: {}, {}", code, tokenResponse);
+            return tokenResponse;
+
+        } catch (IOException e) {
+            throw new AzureDaoException("Failed to fetch Azure AD Access Token", e);
+        }
+    }
+
+    @Override
+    public OAuthProviderRawResponse fetchAccessToken(String refreshToken, AuthProviderConfigurationProperties providerConfig,
+                                                     AuthConfigurationProperties configuration) throws AzureDaoException {
+
+        if (StringUtils.isBlank(refreshToken)) {
+            throw new AzureDaoException("Null refresh token not permitted");
+        }
+
+        try {
+            HTTPResponse response = azureActiveDirectoryClient.fetchAccessToken(providerConfig,
+                                                                                refreshToken,
+                                                                                configuration.getClientId(),
+                                                                                configuration.getClientSecret(),
+                                                                                configuration.getScope());
+            String parsedResponse = response.getContent();
+
+            if (HttpStatus.SC_OK != response.getStatusCode()) {
+                throw new AzureDaoException(
+                    "Unexpected HTTP response code received from Azure",
+                    parsedResponse,
+                    response.getStatusCode()
+                );
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            OAuthProviderRawResponse tokenResponse = mapper.readValue(
+                parsedResponse,
+                OAuthProviderRawResponse.class
+            );
+
             return tokenResponse;
 
         } catch (IOException e) {

@@ -31,7 +31,7 @@ class GetTransformedMediaDetailsMapperTest {
 
         // make the assertions
         Assertions.assertEquals(1, searchResults.size());
-        SearchTransformedMediaResponse response = searchResults.get(0);
+        SearchTransformedMediaResponse response = searchResults.getFirst();
         Assertions.assertEquals(entityToMap.getId(), response.getId());
         Assertions.assertEquals(entityToMap.getOutputFilesize(), response.getFileSizeBytes());
         Assertions.assertEquals(entityToMap.getLastAccessed(), response.getLastAccessedAt());

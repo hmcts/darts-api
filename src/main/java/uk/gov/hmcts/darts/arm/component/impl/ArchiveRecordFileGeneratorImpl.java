@@ -3,10 +3,12 @@ package uk.gov.hmcts.darts.arm.component.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 
 import java.io.BufferedWriter;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
@@ -35,7 +38,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
         try {
             String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
             String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
-            log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordFile.getAbsolutePath());
+            log.debug("About to write {} {} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordFile.getAbsolutePath());
             try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
                 printWriter.println(archiveRecordOperation);
                 printWriter.println(uploadNewFileRecord);
@@ -56,8 +59,10 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                 try {
                     String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
                     String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
-                    archiveRecordsStringBuilder.append(archiveRecordOperation).append(System.lineSeparator());
-                    archiveRecordsStringBuilder.append(uploadNewFileRecord).append(System.lineSeparator());
+                    archiveRecordsStringBuilder.append(archiveRecordOperation)
+                        .append(System.lineSeparator())
+                        .append(uploadNewFileRecord)
+                        .append(System.lineSeparator());
                 } catch (Exception e) {
                     log.error("Unable to write archive record for EOD {}",
                               archiveRecord.getArchiveRecordOperation().getRelationId());
@@ -65,11 +70,21 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                 }
             }
             archiveRecordsString = archiveRecordsStringBuilder.toString();
-            log.info("Contents of manifest file {} for EOD {}\n{}",
+            List<String> relationIds = getRelationIds(archiveRecords);
+            log.info("Contents of manifest file {} for EOD's {}\n{}",
                      archiveFileName,
-                     archiveRecords.get(0).getArchiveRecordOperation().getRelationId(),
+                     StringUtils.join(relationIds, ", "),
                      archiveRecordsString);
         }
         return archiveRecordsString;
+    }
+
+    private static List<String> getRelationIds(List<ArchiveRecord> archiveRecords) {
+        return archiveRecords.stream()
+            .map(ArchiveRecord::getArchiveRecordOperation)
+            .filter(Objects::nonNull)
+            .map(ArchiveRecordOperation::getRelationId)
+            .filter(Objects::nonNull)
+            .toList();
     }
 }

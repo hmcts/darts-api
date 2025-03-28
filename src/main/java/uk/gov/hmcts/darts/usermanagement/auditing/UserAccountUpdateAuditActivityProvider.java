@@ -16,14 +16,15 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USER;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USERS_GROUP;
 
 public class UserAccountUpdateAuditActivityProvider implements AuditActivityProvider {
+    private final Set<AuditActivity> auditActivities = new HashSet<>();
 
     public static UserAccountUpdateAuditActivityProvider auditActivitiesFor(UserAccountEntity entity, UserPatch patch) {
         return new UserAccountUpdateAuditActivityProvider(entity, patch);
     }
 
-    private final Set<AuditActivity> auditActivities = new HashSet<>();
-
-    private UserAccountUpdateAuditActivityProvider() {
+    @Override
+    public Set<AuditActivity> getAuditActivities() {
+        return auditActivities;
     }
 
     private UserAccountUpdateAuditActivityProvider(UserAccountEntity entity, UserPatch patch) {
@@ -41,14 +42,9 @@ public class UserAccountUpdateAuditActivityProvider implements AuditActivityProv
         }
     }
 
-    @Override
-    public Set<AuditActivity> getAuditActivities() {
-        return auditActivities;
-    }
-
     private boolean userInGroupAreUpdated(UserAccountEntity prePatched, UserPatch patch) {
         Set<Integer> patchValues = patch.getSecurityGroupIds() == null ? new HashSet<>() : new HashSet<>(patch.getSecurityGroupIds());
-        var prePatchValues = prePatched.getSecurityGroupEntities().stream().map((SecurityGroupEntity::getId)).collect(toSet());
+        var prePatchValues = prePatched.getSecurityGroupEntities().stream().map(SecurityGroupEntity::getId).collect(toSet());
         return notNullAndDifferent(
             prePatchValues,
             patchValues);

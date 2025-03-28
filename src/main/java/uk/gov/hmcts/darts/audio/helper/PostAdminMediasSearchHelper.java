@@ -54,6 +54,7 @@ public class PostAdminMediasSearchHelper {
         Path<MediaEntity> namePath = mediaRoot;
         criteriaQuery.select(namePath).distinct(true);
         criteriaQuery.where(finalAndPredicate);
+        criteriaQuery.orderBy(criteriaBuilder.desc(mediaRoot.get(MediaEntity_.ID)));
 
         TypedQuery<MediaEntity> query = entityManager.createQuery(criteriaQuery);
         query.setMaxResults(maxResults + 1);
@@ -68,9 +69,11 @@ public class PostAdminMediasSearchHelper {
         CollectionUtils.addAll(predicates, addCaseNumberCriteria(criteriaBuilder, mediaRoot, request));
         CollectionUtils.addAll(predicates, addCourtroomNameCriteria(criteriaBuilder, mediaRoot, request));
         CollectionUtils.addAll(predicates, addDateCriteria(criteriaBuilder, mediaRoot, request));
+        CollectionUtils.addAll(predicates, addCurrentMedia(criteriaBuilder, mediaRoot));
 
         return predicates;
     }
+
 
     private List<Predicate> addCourthouseIdCriteria(Root<MediaEntity> mediaRoot, PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
@@ -128,6 +131,14 @@ public class PostAdminMediasSearchHelper {
         return predicateList;
     }
 
+    private List<Predicate> addCurrentMedia(HibernateCriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot) {
+        List<Predicate> predicateList = new ArrayList<>();
+        predicateList.add(criteriaBuilder.isTrue(
+            mediaRoot.get(MediaEntity_.IS_CURRENT)
+        ));
+        return predicateList;
+    }
+
     private String surroundWithPercentages(String value) {
         return surroundValue(value, "%");
     }
@@ -138,21 +149,22 @@ public class PostAdminMediasSearchHelper {
 
     @SuppressWarnings("unchecked")
     private Join<MediaEntity, CourtroomEntity> getCourtroomJoin(Root<MediaEntity> mediaRoot) {
-        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            MediaEntity_.COURTROOM)).findAny();
+        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream()
+            .filter(join -> join.getAttribute().getName().equals(MediaEntity_.COURTROOM)).findAny();
+
         return foundJoin.map(join -> (Join<MediaEntity, CourtroomEntity>) join)
             .orElseGet(() -> mediaRoot.join(MediaEntity_.COURTROOM, JoinType.INNER));
     }
 
     @SuppressWarnings("unchecked")
     private Join<MediaEntity, HearingEntity> getHearingJoin(Root<MediaEntity> mediaRoot) {
-        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            MediaEntity_.HEARING_LIST)).findAny();
+        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream()
+            .filter(join -> join.getAttribute().getName().equals(MediaEntity_.HEARING_LIST)).findAny();
+
         return foundJoin.map(join -> (Join<MediaEntity, HearingEntity>) join)
             .orElseGet(() -> mediaRoot.join(MediaEntity_.HEARING_LIST, JoinType.INNER));
     }
 
-    @SuppressWarnings("unchecked")
     private Join<MediaEntity, CourtCaseEntity> getCaseJoin(Root<MediaEntity> mediaRoot) {
         Join<MediaEntity, HearingEntity> hearingJoin = getHearingJoin(mediaRoot);
         return hearingJoin.join(HearingEntity_.COURT_CASE, JoinType.INNER);

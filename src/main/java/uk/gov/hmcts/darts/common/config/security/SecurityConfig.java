@@ -27,7 +27,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
-import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
+import uk.gov.hmcts.darts.authentication.component.DartsJwt;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
 import uk.gov.hmcts.darts.authentication.config.DefaultAuthConfigurationPropertiesStrategy;
@@ -78,9 +78,11 @@ public class SecurityConfig {
                 "/metrics/**",
                 "/external-user/login-or-refresh",
                 "/external-user/handle-oauth-code",
+                "/external-user/refresh-access-token",
                 "/external-user/reset-password",
                 "/internal-user/login-or-refresh",
                 "/internal-user/handle-oauth-code",
+                "/internal-user/refresh-access-token",
                 "/"
             )
             .authorizeHttpRequests().anyRequest().permitAll();
@@ -123,16 +125,27 @@ public class SecurityConfig {
 
     private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
                                                                                String jwkSetUri) {
-
         var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
             .jwsAlgorithm(SignatureAlgorithm.RS256)
             .build();
 
+        //Use a custom JWT decoder so that we can add the user id to the JWT without modifying the underlying JWT
+        //This is required for user auditing, as the audit event will need to know the user id but can not call the database to retrieve it
+        //As such by wrapping the JWT we can persist the logged in user id without changing the root authentication
+        var dartsJwtDecoder = new JwtDecoder() {
+            @Override
+            public Jwt decode(String token) {
+                Jwt jwt = jwtDecoder.decode(token);
+                Integer userId = userIdentity.getUserAccountOptional(jwt)
+                    .map(UserAccountEntity::getId)
+                    .orElse(null);
+                return new DartsJwt(jwt, userId);
+            }
+        };
+
         OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(issuer);
         jwtDecoder.setJwtValidator(jwtValidator);
-
-        var authenticationProvider = new JwtAuthenticationProvider(jwtDecoder);
-
+        var authenticationProvider = new JwtAuthenticationProvider(dartsJwtDecoder);
         return Map.entry(issuer, authenticationProvider::authenticate);
     }
 
@@ -168,10 +181,10 @@ public class SecurityConfig {
             } else {
                 try {
                     UserAccountEntity userAccountEntity = userIdentity.getUserAccount(jwt);
-                    if (!userAccountEntity.isActive()) {
-                        writeError(response);
-                    } else {
+                    if (userAccountEntity.isActive()) {
                         filterChain.doFilter(request, response);
+                    } else {
+                        writeError(response);
                     }
                 } catch (Exception exception) {
                     log.error("User is invalid", exception);
@@ -196,7 +209,6 @@ public class SecurityConfig {
             String token = authHeader.replace(TOKEN_BEARER_PREFIX, "").trim();
             String issuer = JWTParser.parse(token).getJWTClaimsSet().getIssuer();
 
-            AuthConfigurationProperties authconfig = getAuthConfig(issuer);
             AuthProviderConfigurationProperties authProviderConfig = getAuthProviderConfig(issuer);
 
             var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(authProviderConfig.getJwkSetUri())
@@ -216,16 +228,6 @@ public class SecurityConfig {
         }
         if (issuer.equals(internalAuthConfigurationProperties.getIssuerUri())) {
             return internalAuthProviderConfigurationProperties;
-        }
-        throw new IllegalArgumentException("Issuer not found");
-    }
-
-    private AuthConfigurationProperties getAuthConfig(String issuer) {
-        if (issuer.equals(externalAuthConfigurationProperties.getIssuerUri())) {
-            return externalAuthConfigurationProperties;
-        }
-        if (issuer.equals(internalAuthConfigurationProperties.getIssuerUri())) {
-            return internalAuthConfigurationProperties;
         }
         throw new IllegalArgumentException("Issuer not found");
     }

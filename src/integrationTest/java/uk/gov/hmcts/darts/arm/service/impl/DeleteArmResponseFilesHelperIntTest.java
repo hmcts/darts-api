@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -39,10 +39,10 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
-    @MockBean
+    @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
 
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
 
     @Autowired
@@ -59,7 +59,7 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-        eodRpoPending = dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_RPO_PENDING, ARM);
+        eodRpoPending = dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.getFirst(), ARM_RPO_PENDING, ARM);
         eodFailed = dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(1), ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED, ARM);
         dartsDatabase.save(eodRpoPending);
         dartsDatabase.save(eodFailed);

@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 import static java.util.stream.IntStream.rangeClosed;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public class DefenceTestData {
+public final class DefenceTestData {
 
     private DefenceTestData() {
-
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 
     public static DefenceEntity someMinimalDefence() {

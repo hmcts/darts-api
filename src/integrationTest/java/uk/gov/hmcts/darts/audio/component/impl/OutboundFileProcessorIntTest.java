@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.component.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -76,8 +77,10 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         dartsPersistence.save(hearing);
     }
 
+    @AfterEach
     @Override
-    protected void checkCleanup() throws Exception {
+    protected void clearTestData() {
+        super.clearTestData();
         FileStore.getFileStore().remove();
         assertEquals(0, FileUtils.listFiles(tempDirectory.toPath().toFile(), null, true).size());
     }
@@ -113,11 +116,11 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
         // Then
         assertEquals(1, sessions.size());
-        List<AudioFileInfo> session = sessions.get(0);
+        List<AudioFileInfo> session = sessions.getFirst();
         assertEquals(1, session.size());
 
         assertEquals(1, session.size());
-        assertEquals(trimmedAudioFileInfo, session.get(0));
+        assertEquals(trimmedAudioFileInfo, session.getFirst());
     }
 
     @Test
@@ -153,7 +156,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
         // Then
         assertEquals(2, sessions.size());
-        List<AudioFileInfo> firstSession = sessions.get(0);
+        List<AudioFileInfo> firstSession = sessions.getFirst();
         List<AudioFileInfo> secondSession = sessions.get(1);
         assertEquals(1, firstSession.size());
         assertEquals(1, secondSession.size());
@@ -193,7 +196,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
         // Then
         assertEquals(1, sessions.size());
-        List<AudioFileInfo> session = sessions.get(0);
+        List<AudioFileInfo> session = sessions.getFirst();
 
         assertEquals(2, session.size());
 
@@ -232,7 +235,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
         // Then
         assertEquals(2, sessions.size());
-        List<AudioFileInfo> firstSession = sessions.get(0);
+        List<AudioFileInfo> firstSession = sessions.getFirst();
         List<AudioFileInfo> secondSession = sessions.get(1);
 
         assertEquals(1, firstSession.size());
@@ -355,7 +358,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
         // Then
         assertEquals(3, sessions.size());
-        List<AudioFileInfo> firstSession = sessions.get(0);
+        List<AudioFileInfo> firstSession = sessions.getFirst();
         assertEquals(4, firstSession.size());
 
         List<AudioFileInfo> secondSession = sessions.get(1);
@@ -370,7 +373,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
                          .mediaFile("0002.a00")
                          .path(audioPath5)
                          .build(),
-                     secondSession.get(0));
+                     secondSession.getFirst());
         assertEquals(session2UntrimmedAudioFileInfoBuilder
                          .channel(2)
                          .mediaFile("0002.a01")
@@ -413,7 +416,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
         // then
         assertEquals(1, audioResults.size());
-        AudioFileInfo firstSession = audioResults.get(0);
+        AudioFileInfo firstSession = audioResults.getFirst();
 
         assertEquals(TIME_12_00.toInstant(), firstSession.getStartTime());
         assertEquals(TIME_12_01.toInstant(), firstSession.getEndTime());
@@ -446,7 +449,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
         // then
         assertEquals(1, audioResults.size());
-        AudioFileInfo firstSession = audioResults.get(0);
+        AudioFileInfo firstSession = audioResults.getFirst();
 
         assertEquals(TIME_12_00.toInstant(), firstSession.getStartTime());
         assertEquals(TIME_12_02.toInstant(), firstSession.getEndTime());
@@ -467,7 +470,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         List<AudioFileInfo> audioResults = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_10_00_15, TIME_10_00_45);
 
         // then
-        AudioFileInfo firstSession = audioResults.get(0);
+        AudioFileInfo firstSession = audioResults.getFirst();
 
         assertEquals(TIME_10_00_15.toInstant(), firstSession.getStartTime());
         assertEquals(TIME_10_00_45.toInstant(), firstSession.getEndTime());
@@ -497,7 +500,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         List<AudioFileInfo> audioResults = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_09, TIME_13_00);
 
         // then
-        AudioFileInfo firstSession = audioResults.get(0);
+        AudioFileInfo firstSession = audioResults.getFirst();
 
         assertEquals(TIME_12_09.toInstant(), firstSession.getStartTime());
         assertEquals(TIME_12_11.toInstant(), firstSession.getEndTime());
@@ -529,7 +532,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToPlaybackLocation, TIME_10_00, TIME_10_03);
 
         assertEquals(2, sessions.size());
-        AudioFileInfo firstSession = sessions.get(0);
+        AudioFileInfo firstSession = sessions.getFirst();
         AudioFileInfo secondSession = sessions.get(1);
 
         assertEquals(TIME_10_00.toInstant(), firstSession.getStartTime());

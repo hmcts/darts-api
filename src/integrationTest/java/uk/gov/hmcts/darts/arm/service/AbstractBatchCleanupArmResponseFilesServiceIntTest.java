@@ -5,10 +5,8 @@ import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -19,7 +17,6 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -40,17 +37,11 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 @SuppressWarnings({"PMD.NcssCount"})
 abstract class AbstractBatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
-    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
-
-    @MockBean
+    @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
-    @MockBean
+    @MockitoBean
     private UserIdentity userIdentity;
-    @Autowired
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @MockBean
-    private ArmBatchCleanupConfiguration batchCleanupConfiguration;
-    @MockBean
+    @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
 
     @Autowired
@@ -70,9 +61,6 @@ abstract class AbstractBatchCleanupArmResponseFilesServiceIntTest extends Integr
         savedMedia = PersistableFactory.getMediaTestData()
             .someMinimal();
         dartsPersistence.save(savedMedia);
-
-        when(batchCleanupConfiguration.getManifestFileSuffix()).thenReturn(".a360");
-        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
     }
 
     @Test
@@ -318,7 +306,7 @@ abstract class AbstractBatchCleanupArmResponseFilesServiceIntTest extends Integr
             savedMedia,
             STORED,
             ARM,
-            UUID.randomUUID()
+            UUID.randomUUID().toString()
         );
         eodEntity.setLastModifiedDateTime(latestModifiedDateTime);
         eodEntity.setResponseCleaned(false);

@@ -18,11 +18,14 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.model.PostAdminSearchRequest;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
+import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
-import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
+import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import uk.gov.hmcts.darts.event.model.AdminObfuscateEveByIdsRequest;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
 import uk.gov.hmcts.darts.event.model.CourtLog;
@@ -54,7 +57,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 @RequiredArgsConstructor
 @RestController
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
-@SuppressWarnings({"checkstyle.LineLengthCheck"})
+@SuppressWarnings({"checkstyle.LineLengthCheck", "PMD.TooManyMethods"})
 public class EventsController implements EventApi {
 
     private final CourtLogsService courtLogsService;
@@ -66,6 +69,7 @@ public class EventsController implements EventApi {
     private final EventService eventService;
     private final DataAnonymisationService dataAnonymisationService;
     private final UserIdentity userIdentity;
+    private final AdminSearchRequestValidator adminSearchRequestValidator;
 
     @Value("${darts.event-obfuscation.enabled}")
     private final boolean eventObfuscationEnabled;
@@ -172,6 +176,12 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<List<AdminSearchEventResponseResult>> adminSearchEvents(AdminEventSearch adminEventSearch) {
+        adminSearchRequestValidator.validate(PostAdminSearchRequest.builder()
+                                                 .caseNumber(adminEventSearch.getCaseNumber())
+                                                 .courthouseIds(adminEventSearch.getCourthouseIds())
+                                                 .hearingStartAt(adminEventSearch.getHearingStartAt())
+                                                 .hearingEndAt(adminEventSearch.getHearingEndAt())
+                                                 .build());
         var adminSearchEventResponse = eventSearchService.searchForEvents(adminEventSearch);
         return new ResponseEntity<>(adminSearchEventResponse, HttpStatus.OK);
     }
@@ -180,8 +190,16 @@ public class EventsController implements EventApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<AdminGetEventForIdResponseResult> adminGetEventById(Integer eventId) {
+    public ResponseEntity<AdminGetEventById200Response> adminGetEventById(Integer eventId) {
         return new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<AdminGetVersionsByEventIdResponseResult> adminGetVersionsByEventId(Integer eventId) {
+        return new ResponseEntity<>(eventService.adminGetVersionsByEventId(eventId), HttpStatus.OK);
     }
 
     @Override
