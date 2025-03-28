@@ -224,6 +224,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
         CourtCaseEntity caseEntity1 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
         CourtCaseEntity caseEntity2 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
+        CourtCaseEntity caseEntity3 = dartsDatabase.getCourtCaseStub().createAndSaveMinimalCourtCase();
 
         eventLinkedCaseStub
             .createCaseLinkedEvent(event1, caseEntity1);
@@ -234,11 +235,9 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         eventLinkedCaseStub
             .createCaseLinkedEvent(event2, caseEntity2);
         eventLinkedCaseStub
-            .createCaseLinkedEvent(event4, caseEntity1.getCaseNumber(), caseEntity1.getCourthouse().getCourthouseName());
+            .createCaseLinkedEvent(event4, caseEntity3);
         eventLinkedCaseStub
             .createCaseLinkedEvent(event1, caseEntity1);
-        eventLinkedCaseStub
-            .createCaseLinkedEvent(event4, "caseNumber2", "courthouseName");
 
         List<EventEntity> relatedEvents = eventRepository.findAllByRelatedEvents(event1.getId(), event1.getEventId(), List.of(caseEntity1.getId()));
         assertThat(relatedEvents.stream().map(EventEntity::getId).toList())

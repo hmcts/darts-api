@@ -21,9 +21,7 @@ public interface EventLinkedCaseRepository extends JpaRepository<EventLinkedCase
     @Query("""
         SELECT COUNT(DISTINCT cc) = (COUNT(cc.isDataAnonymised) filter (where cc.isDataAnonymised = true))
                     FROM EventLinkedCaseEntity elc 
-                    LEFT JOIN CourtCaseEntity cc 
-                    ON (elc.courtCase = cc 
-                    or (cc.courthouse.courthouseName = elc.courthouseName and cc.caseNumber = elc.caseNumber)) 
+                    LEFT JOIN CourtCaseEntity cc ON elc.courtCase = cc 
                     WHERE elc.event = :eventEntity
                     group by elc.event
         """
