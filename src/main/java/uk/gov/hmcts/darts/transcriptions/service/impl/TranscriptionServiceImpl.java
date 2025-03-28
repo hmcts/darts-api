@@ -191,19 +191,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 transcriptionRequestDetails.getComment()
             ));
 
-        if (transcription.getIsManualTranscription()) {
-            transcriptionStatus = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
-
-            transcription.getTranscriptionWorkflowEntities().add(
-                saveTranscriptionWorkflow(
-                    userAccount,
-                    transcription,
-                    transcriptionStatus,
-                    null
-                ));
-
-            transcriptionNotifications.notifyApprovers(transcription);
-        }
+        moveTranscriptionRequestedToAwaitingAuthorisation(transcription, transcriptionStatus);
 
         auditApi.record(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
 
@@ -265,8 +253,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 
-        transcriptionStatusEntity = moveTranscriptionRequestedToAwaitingAuthorisation(transcriptionEntity, transcriptionStatusEntity);
-
+        if (REQUESTED.getId().equals(transcriptionStatusEntity.getId())) {
+            transcriptionStatusEntity = moveTranscriptionRequestedToAwaitingAuthorisation(transcriptionEntity, transcriptionStatusEntity);
+        }
         UpdateTranscriptionAdminResponse updateTranscriptionResponse = new UpdateTranscriptionAdminResponse();
         updateTranscriptionResponse.setTranscriptionId(transcriptionEntity.getId());
         updateTranscriptionResponse.setTranscriptionStatusId(transcriptionEntity.getTranscriptionStatus().getId());
@@ -278,7 +267,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private TranscriptionStatusEntity moveTranscriptionRequestedToAwaitingAuthorisation(TranscriptionEntity transcriptionEntity,
                                                                                         TranscriptionStatusEntity transcriptionStatusEntity) {
 
-        if (transcriptionEntity.getIsManualTranscription() && REQUESTED.getId().equals(transcriptionStatusEntity.getId())) {
+        if (transcriptionEntity.getIsManualTranscription()) {
 
             transcriptionStatusEntity = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
             transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
