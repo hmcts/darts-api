@@ -93,7 +93,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     }
 
     @Test
-    void getMediaIsBadRequestFailureAllParameters() throws Exception {
+    void getMediaIsUnprocessableEntityFailureAllParameters() throws Exception {
 
         transformedMedia = setupData();
         setupMediaBeforeAndAfter(transformedMedia).get(DATE_NOW_INDEX);
@@ -106,7 +106,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
                                                   .queryParam("start_at", transformedMedia.getStartTime().toString())
                                                   .queryParam("end_at", transformedMedia.getEndTime().toString())
             )
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -115,14 +115,14 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     }
 
     @Test
-    void getMediaIsBadRequestFailureNoParameters() throws Exception {
+    void getMediaIsUnprocessableEntityFailureNoParameters() throws Exception {
 
         transformedMedia = setupData();
         setupMediaBeforeAndAfter(transformedMedia).get(DATE_NOW_INDEX);
 
         // when
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();

@@ -114,7 +114,7 @@ class CourthousePatchTest extends IntegrationBase {
     }
 
     @Test
-    void updateCourthouse_shouldReturnBadRequest_whenNameIsLowercase() throws Exception {
+    void updateCourthouse_shouldReturnUnprocessableEntity_whenNameIsLowercase() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var courthouse = dartsDatabase.save(someMinimalCourthouse());
 
@@ -122,7 +122,7 @@ class CourthousePatchTest extends IntegrationBase {
                 patch(ENDPOINT + courthouse.getId().toString())
                     .content(courthouseNamePatch("lowercase-name"))
                     .contentType("application/json"))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isUnprocessableEntity());
     }
 
     private String regionPatch(Integer regionId) {

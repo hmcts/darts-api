@@ -152,7 +152,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void attachTranscriptShouldReturnBadRequestErrorWithFileExtensionTypeBlocked() throws Exception {
+    void attachTranscriptShouldReturnUnprocessableEntityErrorWithFileExtensionTypeBlocked() throws Exception {
         setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
@@ -167,13 +167,13 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
                     URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
+            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -181,7 +181,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void attachTranscriptShouldReturnBadRequestErrorWithFileSizeLimitExceeded() throws Exception {
+    void attachTranscriptShouldReturnUnprocessableEntityErrorWithFileSizeLimitExceeded() throws Exception {
 
         setPermissions(authorisationStub.getSeparateIntegrationUser());
 
@@ -197,13 +197,13 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
                     URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
+            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 

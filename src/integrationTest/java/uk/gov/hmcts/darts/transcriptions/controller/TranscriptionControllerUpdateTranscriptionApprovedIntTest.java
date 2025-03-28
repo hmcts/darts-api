@@ -253,13 +253,13 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_114","title":"Transcription requestor cannot approve or reject their own transcription requests.","status":400}
+            {"type":"TRANSCRIPTION_114","title":"Transcription requestor cannot approve or reject their own transcription requests.","status":422}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 

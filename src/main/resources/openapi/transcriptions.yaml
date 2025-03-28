@@ -29,6 +29,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetYourTranscriptsResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
         '401':
@@ -45,6 +51,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RequestTranscriptionResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -127,6 +139,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UpdateTranscriptionsItem'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -254,6 +272,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateTranscriptionResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -352,6 +376,12 @@ paths:
               schema:
                 type: string
                 format: binary
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -434,6 +464,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttachTranscriptResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -532,6 +568,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TranscriberViewSummary'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
         '401':
@@ -629,6 +671,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateTranscriptionAdminResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -716,6 +764,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TranscriptionStatus'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
         '401':
@@ -742,6 +796,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TranscriptionSearchResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
         '401':

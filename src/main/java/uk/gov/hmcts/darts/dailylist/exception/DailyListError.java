@@ -18,22 +18,22 @@ public enum DailyListError implements DartsApiError {
     ),
     XML_OR_JSON_NEEDS_TO_BE_PROVIDED(
         DailyListErrorCode.XML_OR_JSON_NEEDS_TO_BE_PROVIDED.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         DailyListTitleErrors.XML_OR_JSON_NEEDS_TO_BE_PROVIDED.toString()
     ),
     XML_EXTRA_PARAMETERS_MISSING(
         DailyListErrorCode.XML_EXTRA_PARAMETERS_MISSING.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         DailyListTitleErrors.XML_EXTRA_PARAMETERS_MISSING.toString()
     ),
     DAILY_LIST_NOT_FOUND(
         DailyListErrorCode.DAILY_LIST_NOT_FOUND.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         DailyListTitleErrors.DAILY_LIST_NOT_FOUND.toString()
     ),
     INVALID_SOURCE_SYSTEM(
         DailyListErrorCode.INVALID_SOURCE_SYSTEM.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         DailyListTitleErrors.INVALID_SOURCE_SYSTEM.toString()
     ),
     INTERNAL_ERROR(

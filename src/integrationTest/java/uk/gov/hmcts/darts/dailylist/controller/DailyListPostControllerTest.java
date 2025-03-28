@@ -51,7 +51,7 @@ class DailyListPostControllerTest extends IntegrationBase {
     private ProcessDailyListOnDemandTask dailyListAutomatedTask;
 
     private static String getExpectedResponse() {
-        return "{\"type\":\"DAILYLIST_101\",\"title\":\"Either xml_document or json_document or both needs to be provided.\",\"status\":400}";
+        return "{\"type\":\"DAILYLIST_101\",\"title\":\"Either xml_document or json_document or both needs to be provided.\",\"status\":422}";
     }
 
     @Test
@@ -122,7 +122,7 @@ class DailyListPostControllerTest extends IntegrationBase {
         String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
         String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
-        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400}";
+        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":422}";
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
 
@@ -189,7 +189,7 @@ class DailyListPostControllerTest extends IntegrationBase {
         String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
         String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
-        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400}";
+        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":422}";
 
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 

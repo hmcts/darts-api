@@ -65,7 +65,7 @@ class EventSearchControllerTest extends IntegrationBase {
         var mvcResult = mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
                                             .content("{}")
                                             .contentType("application/json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         var response = json.from(mvcResult.getResponse().getContentAsString());

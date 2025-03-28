@@ -28,6 +28,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PostDailyListResponse'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request - Invalid XML Document
           content:
@@ -88,6 +94,12 @@ paths:
       responses:
         '202':
           description: ACCEPTED
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Provided courthouse does not exist.
           content:

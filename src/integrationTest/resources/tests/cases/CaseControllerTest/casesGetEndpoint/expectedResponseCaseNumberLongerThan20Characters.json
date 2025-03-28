@@ -1,6 +1,6 @@
 {
   "type": "CASE_103",
   "title": "The request is not valid..",
-  "status": 400,
+  "status": 422,
   "detail": "CaseNumber is larger than 20 Characters"
 }

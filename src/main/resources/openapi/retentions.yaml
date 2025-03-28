@@ -246,6 +246,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RetentionPolicyType'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: "Bad request"
           content:

@@ -38,6 +38,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/post_annotation_response'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -67,6 +73,12 @@ paths:
       responses:
         '204':
           description: Annotation has been deleted
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -115,6 +127,12 @@ paths:
               schema:
                 type: string
                 format: binary
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:

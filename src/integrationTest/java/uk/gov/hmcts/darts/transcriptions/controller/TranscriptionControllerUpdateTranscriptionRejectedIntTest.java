@@ -88,7 +88,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
     }
 
     @Test
-    void updateTranscriptionRejectedWithoutCommentShouldReturnTranscriptionBadRequestError() throws Exception {
+    void updateTranscriptionRejectedWithoutCommentShouldReturnTranscriptionUnprocessableEntityError() throws Exception {
 
         UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(REJECTED.getId());
@@ -98,12 +98,12 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_103","title":"The workflow comment is required for this transcription update","status":400}
+            {"type":"TRANSCRIPTION_103","title":"The workflow comment is required for this transcription update","status":422}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 

@@ -26,9 +26,9 @@ public interface DartsApiTrait extends AdviceTrait {
     @ExceptionHandler
     default ResponseEntity<Problem> handleDartsApiException(DartsApiException exception, NativeWebRequest request) {
         var error = exception.getError();
-
-        DARTS_API_EXCEPTION_LOGGER.error("A darts exception occurred", exception);
-
+        if (shouldLogException(exception)) {
+            DARTS_API_EXCEPTION_LOGGER.error("A darts exception occurred", exception);
+        }
         HttpStatusAdapter problemHttpStatus = new HttpStatusAdapter(error.getHttpStatus());
 
         ProblemBuilder problemBuilder = Problem.builder()
@@ -47,8 +47,8 @@ public interface DartsApiTrait extends AdviceTrait {
     static void writeErrorResponse(HttpServletResponse servletResponse, ObjectMapper mapper) throws IOException {
         servletResponse.setStatus(HttpStatus.FORBIDDEN.value());
         servletResponse.setHeader("Content-Type", "application/problem+json");
-        servletResponse.getWriter().write(DartsApiTrait.getJsonForProblem(mapper, DartsApiTrait.getContentForException(new DartsApiException(
-            AuthorisationError.USER_DETAILS_INVALID))));
+        servletResponse.getWriter().write(
+            getJsonForProblem(mapper, getContentForException(new DartsApiException(AuthorisationError.USER_DETAILS_INVALID))));
     }
 
     static String getJsonForProblem(ObjectMapper mapper, Problem problem) throws JsonProcessingException {
@@ -58,8 +58,9 @@ public interface DartsApiTrait extends AdviceTrait {
     static Problem getContentForException(DartsApiException exception) {
         var error = exception.getError();
 
-        DARTS_API_EXCEPTION_LOGGER.error("A darts exception occurred", exception);
-
+        if (shouldLogException(exception)) {
+            DARTS_API_EXCEPTION_LOGGER.error("A darts exception occurred", exception);
+        }
         HttpStatusAdapter problemHttpStatus = new HttpStatusAdapter(error.getHttpStatus());
 
         ProblemBuilder problemBuilder = Problem.builder()
@@ -73,5 +74,10 @@ public interface DartsApiTrait extends AdviceTrait {
         }
 
         return problemBuilder.build();
+    }
+
+    private static boolean shouldLogException(DartsApiException exception) {
+        DartsApiError error = exception.getError();
+        return error != null && error.getHttpStatus() != HttpStatus.UNPROCESSABLE_ENTITY;
     }
 }

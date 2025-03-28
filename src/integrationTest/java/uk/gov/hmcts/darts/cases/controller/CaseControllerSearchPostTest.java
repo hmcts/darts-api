@@ -666,7 +666,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchPost_shouldReturn400_whenCourthouseIsLowercase() throws Exception {
+    void casesSearchPost_shouldReturn422_whenCourthouseIsLowercase() throws Exception {
         //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse));
@@ -681,7 +681,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isUnprocessableEntity());
     }
 
     private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse) {

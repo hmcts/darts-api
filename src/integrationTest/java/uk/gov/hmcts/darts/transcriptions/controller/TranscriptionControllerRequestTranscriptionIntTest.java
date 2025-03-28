@@ -100,7 +100,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             {
               "type": "TRANSCRIPTION_100",
               "title": "Failed to validate transcription request",
-              "status": 400
+              "status": 422
             }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -435,7 +435,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
@@ -463,7 +463,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
@@ -487,7 +487,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_106")));
 
         assertAudit(0);
@@ -529,7 +529,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_104")));
 
         assertAudit(0);

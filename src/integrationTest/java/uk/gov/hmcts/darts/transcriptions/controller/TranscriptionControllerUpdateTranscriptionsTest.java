@@ -271,7 +271,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             .andReturn();
 
         // assert a partial failure
-        assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(422, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class
@@ -327,7 +327,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             .andExpect(status().is4xxClientError())
             .andReturn();
 
-        assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(422, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class
@@ -431,7 +431,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             .andExpect(status().is4xxClientError())
             .andReturn();
 
-        assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(422, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class
