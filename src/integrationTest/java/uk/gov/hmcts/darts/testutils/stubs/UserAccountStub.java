@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
@@ -370,5 +371,11 @@ public class UserAccountStub {
             .thenReturn(true);
 
         return user;
+    }
+
+    public void addSecurityGroup(UserAccountEntity currentOwner, SecurityGroupEnum securityGroupEnum) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findByGroupNameIgnoreCase(securityGroupEnum.name()).orElseThrow();
+        currentOwner.getSecurityGroupEntities().add(securityGroupEntity);
+        userAccountRepository.save(currentOwner);
     }
 }

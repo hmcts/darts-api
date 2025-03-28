@@ -61,7 +61,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         )
         AND upper(tod.status.description) <> 'MARKED FOR DELETION'   
         AND not exists (SELECT sge from tm.mediaRequest.currentOwner.securityGroupEntities sge 
-               where sge.securityRoleEntity.roleName in ('MEDIA_IN_PERPETUITY', 'SUPER_ADMIN', 'SUPER_USER')) 
+               where sge.securityRoleEntity.roleName = 'MEDIA_IN_PERPETUITY') 
         """)
     List<Integer> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime, Limit limit);
 

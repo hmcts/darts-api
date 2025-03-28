@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +36,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     private final TransformedMediaEntityProcessor transformedMediaEntityProcessor;
 
     @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}")
+    @Getter
     private int deletionDays;
 
     @Override
@@ -44,7 +46,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         UserAccountEntity systemUser = userIdentity.getUserAccount();
 
-        OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(deletionDays);
+        OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(getDeletionDays());
 
         List<Integer> transformedMediaListIds = transformedMediaRepository.findAllDeletableTransformedMedia(deletionStartDateTime, Limit.of(batchSize));
 
@@ -87,10 +89,5 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
             }
             return null;
         }
-    }
-
-    @Override
-    public void setDeletionDays(int deletionDays) {
-        this.deletionDays = deletionDays;
     }
 }
