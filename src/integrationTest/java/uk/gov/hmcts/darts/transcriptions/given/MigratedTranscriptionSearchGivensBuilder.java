@@ -98,7 +98,6 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         transcription.setHearings(new ArrayList<>());
         transcription.setCourtroom(courtroom);
         dartsDatabase.save(transcription.getCourtCase());
-        //Save created by user and reset them on the transcription (Ensures the user is saved in the database)
         transcription.setIsCurrent(true);
         return dartsDatabase.save(transcription);
     }
