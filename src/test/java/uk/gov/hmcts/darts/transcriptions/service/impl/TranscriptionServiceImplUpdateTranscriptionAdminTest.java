@@ -119,6 +119,7 @@ class TranscriptionServiceImplUpdateTranscriptionAdminTest {
 
         verify(transcriptionRepository).findById(transcriptionId);
         verify(transcriptionStatusRepository).getReferenceById(AWAITING_AUTHORISATION.getId());
+        verify(transcriptionNotifications).notifyApprovers(transcriptionEntity);
     }
 
     @Test
@@ -153,7 +154,7 @@ class TranscriptionServiceImplUpdateTranscriptionAdminTest {
         transcriptionEntity.setTranscriptionType(transcriptionTypeEntity);
 
         when(transcriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcriptionEntity));
-        
+
         DartsApiException exception = assertThrows(DartsApiException.class, () ->
             transcriptionService.updateTranscriptionAdmin(transcriptionId, updateRequest, true));
 

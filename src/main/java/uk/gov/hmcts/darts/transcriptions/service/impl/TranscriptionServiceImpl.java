@@ -277,7 +277,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private TranscriptionStatusEntity moveTranscriptionRequestedToAwaitingAuthorisation(TranscriptionEntity transcriptionEntity,
                                                                                         TranscriptionStatusEntity transcriptionStatusEntity) {
-        if (transcriptionEntity.getIsManualTranscription() && transcriptionStatusEntity.getId().equals(REQUESTED.getId())) {
+
+        if (transcriptionEntity.getIsManualTranscription() && REQUESTED.getId().equals(transcriptionStatusEntity.getId())) {
 
             transcriptionStatusEntity = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
             transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);

@@ -62,6 +62,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
 
     private Integer transcriptionId;
     private Integer transcriptCreatorId;
+    private UserAccountEntity testUser;
 
     @BeforeEach
     void beforeEach() {
@@ -76,7 +77,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
         doNothing().when(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(SUPER_ADMIN));
 
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createSuperAdminUser();
+        testUser = dartsDatabase.getUserAccountStub().createSuperAdminUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(any())).thenReturn(true);
         transcriptCreatorId = authorisationStub.getTestUser().getId();
@@ -86,7 +87,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     }
 
     @Test
-    void updateAwaitingAuthorisationTranscriptionToRequested() throws Exception {
+    void updateTranscriptionAdmin_ShouldUpdateAwaitingAuthorisationTranscriptionToRequested() throws Exception {
 
         dartsDatabase.getUserAccountStub().createSuperAdminUser();
         UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
@@ -107,7 +108,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     }
 
     @Test
-    void updateAwaitingAuthorisationTranscriptionToRequestedWithComment() throws Exception {
+    void updateTranscriptionAdmin_ShouldSetAwaitingAuthorisationTranscriptionToRequestedWithComment() throws Exception {
 
         UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(REQUESTED.getId());
@@ -121,8 +122,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
             .andExpect(status().isOk())
             .andReturn();
 
-        Integer transcriptionStatusId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.transcription_status_id");
+        Integer transcriptionStatusId = JsonPath.parse(mvcResult.getResponse().getContentAsString()).read("$.transcription_status_id");
         assertNotNull(transcriptionStatusId);
 
         final TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -134,15 +134,12 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);
         assertEquals(AWAITING_AUTHORISATION.getId(), transcriptionWorkflowEntity.getTranscriptionStatus().getId());
-        assertEquals(
-            "the comment",
-            dartsDatabase.getTranscriptionCommentRepository().findAll().getFirst().getComment()
-        );
-        //assertEquals(testUser.getId(), transcriptionWorkflowEntity.getWorkflowActor().getId());
+        assertEquals("the comment", dartsDatabase.getTranscriptionCommentRepository().findAll().getFirst().getComment());
+        assertEquals(testUser.getId(), transcriptionWorkflowEntity.getWorkflowActor().getId());
     }
 
     @Test
-    void updateTranscriptionShouldReturnTranscriptionNotFoundError() throws Exception {
+    void updateTranscriptionAdmin_ShouldReturnTranscriptionNotFoundError() throws Exception {
         UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
         updateTranscription.setWorkflowComment("APPROVED");
@@ -163,7 +160,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     }
 
     @Test
-    void updateTranscriptionShouldReturnTranscriptionWorkflowActionInvalidError() throws Exception {
+    void updateTranscriptionAdmin_ShouldReturnTranscriptionWorkflowActionInvalidError() throws Exception {
         UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
         updateTranscription.setWorkflowComment("APPROVED");
