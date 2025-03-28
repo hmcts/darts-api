@@ -38,7 +38,7 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
     private GivenBuilder given;
 
     @Test
-    void auditsWhenTranscriptionsAreCreated() {
+    void updateTranscriptionAdmin_ShouldAudit_WhenTranscriptionsAreCreated() {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var transcriptionRequestDetails = createTranscriptionRequestDetailsWithDefaults();
 
@@ -49,7 +49,7 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
     }
 
     @Test
-    void auditsWhenTranscriptionsWorkflowsAreTransitioned() {
+    void updateTranscriptionAdmin_ShouldAudit_WhenTranscriptionsWorkflowsAreTransitioned() {
         var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var transcriptionRequestDetails = createTranscriptionRequestDetailsWithDefaults();
         var createTranscriptionResponse = transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, false);
@@ -145,6 +145,5 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
             .startDateTime(startTime)
             .endDateTime(startTime.plusHours(1));
     }
-
-
+    
 }
