@@ -53,7 +53,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as transcription_urgency_description,
                     tru.tru_id  as transcription_urgency_id,
                     tru.priority_order as transcription_urgency_priority_order,
-                    trw.workflow_ts as requested_ts,
+                    (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts
                     (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
@@ -86,7 +86,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 AND trw.workflow_ts >= :date_limit
                 AND tra.is_current = true
                 UNION
-
+                
                 -- Migrated "requester_transcriptions"
                 SELECT
                     tra.tra_id as transcription_id,
@@ -99,7 +99,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as transcription_urgency_description,
                     tru.tru_id  as transcription_urgency_id,
                     tru.priority_order as transcription_urgency_priority_order,
-                    trw.workflow_ts as requested_ts,
+                    (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts
                     (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
@@ -201,9 +201,9 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 )
                 AND trw.workflow_ts >= :date_limit
                 AND tra.is_current = true
-
+                
                 UNION
-
+                
                 -- Migrated approver_transcriptions
                 SELECT
                     tra.tra_id as transcription_id,
