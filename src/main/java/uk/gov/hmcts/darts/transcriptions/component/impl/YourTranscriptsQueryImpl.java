@@ -86,7 +86,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 AND trw.workflow_ts >= :date_limit
                 AND tra.is_current = true
                 UNION
-                
                 -- Migrated "requester_transcriptions"
                 SELECT
                     tra.tra_id as transcription_id,
