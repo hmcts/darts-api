@@ -33,6 +33,16 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
     }
 
     @Override
+    public List<T> deleteTod(Integer batchSize) {
+        List<T> toBeDeleted = finder.findMarkedForDeletion(batchSize);
+
+        for (T entityToBeDeleted : toBeDeleted) {
+            deleteTod(entityToBeDeleted, false);
+        }
+        return toBeDeleted;
+    }
+
+    @Override
     public boolean delete(T entityToBeDeleted) {
         String externalLocation = entityToBeDeleted.getLocation();
         Integer entityId = entityToBeDeleted.getId();
@@ -52,11 +62,48 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
                 externalLocation, entityId, statusId, e
             );
         }
+
         repository.delete(entityToBeDeleted);
+
+        return deleted;
+    }
+
+    @Override
+    public boolean deleteTod(T entityToBeDeleted, boolean forceDelete) {
+        String externalLocation = entityToBeDeleted.getLocation();
+        Integer entityId = entityToBeDeleted.getId();
+        boolean deleted = false;
+        int statusId = entityToBeDeleted.getStatusId();
+        log.info(
+            "Deleting storage data with externalLocation={} for entityId={} and statusId={}",
+            externalLocation, entityId, statusId
+        );
+
+        try {
+            if (entityToBeDeleted.getLocation() != null) {
+                deleter.delete(externalLocation);
+                deleted = true;
+
+                entityToBeDeleted.setLocation(null);
+
+                repository.save(entityToBeDeleted);
+            }
+        } catch (AzureDeleteBlobException e) {
+            log.error(
+                "Failed to delete storage data with externalLocation={} for entityId={} and statusId={}",
+                externalLocation, entityId, statusId, e
+            );
+        }
+
         if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity
-            && transientObjectDirectoryEntity.getTransformedMedia() != null) {
+            && transientObjectDirectoryEntity.getTransformedMedia() != null
+            && (forceDelete || transientObjectDirectoryEntity.getTransformedMedia().getExpiryTime() < DateTime.now().getMillis())) {
+
+             repository.delete(entityToBeDeleted);
+
             log.debug("Deleting transformed media {} with transient object directory id={}",
                       transientObjectDirectoryEntity.getTransformedMedia().getId(), transientObjectDirectoryEntity.getId());
+
             transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
         }
         return deleted;
