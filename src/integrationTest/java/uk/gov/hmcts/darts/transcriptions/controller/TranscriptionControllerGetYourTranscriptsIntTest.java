@@ -80,6 +80,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
         systemUser = authorisationStub.getSystemUser();
         testUser = authorisationStub.getTestUser();
+
     }
 
     @Test
@@ -366,6 +367,72 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
     }
 
+    @Test
+    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenReverted() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        OffsetDateTime now = now();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+        TranscriptionWorkflowEntity transcriptionWorkflowEntityUserRequest =
+            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), systemUser,
+                                                                now, transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntityUserRequest);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntityUserAwaitingAuth =
+            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), testUser,
+                                                                now,
+                                                                transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.AWAITING_AUTHORISATION));
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntityUserAwaitingAuth);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.AWAITING_AUTHORISATION));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntityAdminRequest =
+            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), testUser,
+                                                                now, transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntityAdminRequest);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntityAwaitingAuth =
+            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), systemUser,
+                                                                now,
+                                                                transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.AWAITING_AUTHORISATION));
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntityAwaitingAuth);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.AWAITING_AUTHORISATION));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                "user_id",
+                testUser.getId()
+            );
+
+        TranscriptionUrgencyEntity urgencyEntity = transcriptionStub.getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD);
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath(
+                "$.requester_transcriptions[0].case_id",
+                is(courtCase.getId())
+            ))
+            .andExpect(jsonPath(
+                "$.requester_transcriptions[0].case_number",
+                is(courtCase.getCaseNumber())
+            ))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0]." +
+                                    "transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
+
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString());
+
+    }
 
     private OffsetDateTime getRequestedTs(TranscriptionEntity transcriptionEntity) {
         return transcriptionEntity.getTranscriptionWorkflowEntities()
