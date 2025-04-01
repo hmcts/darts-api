@@ -113,6 +113,8 @@ darts:
   manual-deletion:
     enabled: ${MANUAL_DELETION_ENABLED:false}
     grace-period: ${MANUAL_DELETION_GRACE_PERIOD:24h}
+  admin-search:
+    hearing-dates-max-search-period: P1Y
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   audio:
@@ -125,6 +127,7 @@ darts:
     ffmpeg-executable: ffmpeg
     handheld-audio-courtroom-numbers:
       - 199
+      - 99
     merge-workspace: ${user.home}/audiotransform/merge
     outbounddeleter:
       last-accessed-deletion-day: 2
