@@ -365,15 +365,16 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     @Test
     void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenReverted() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
-        OffsetDateTime now = now();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
-        createTranscriptionWorkflow(systemUser, now, TranscriptionStatusEnum.REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), TranscriptionStatusEnum.REQUESTED, transcriptionEntity);
 
-        createTranscriptionWorkflow(testUser, now, TranscriptionStatusEnum.AWAITING_AUTHORISATION, transcriptionEntity);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), TranscriptionStatusEnum.AWAITING_AUTHORISATION,
+                                    transcriptionEntity);
 
-        createTranscriptionWorkflow(testUser, now, TranscriptionStatusEnum.REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-23T14:00:00Z"), TranscriptionStatusEnum.REQUESTED, transcriptionEntity);
 
-        createTranscriptionWorkflow(systemUser, now, TranscriptionStatusEnum.AWAITING_AUTHORISATION, transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-23T14:00:00Z"), TranscriptionStatusEnum.AWAITING_AUTHORISATION,
+                                    transcriptionEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -385,25 +386,19 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
-            .andExpect(jsonPath(
-                "$.requester_transcriptions[0].case_id",
-                is(courtCase.getId())
-            ))
-            .andExpect(jsonPath(
-                "$.requester_transcriptions[0].case_number",
-                is(courtCase.getCaseNumber())
-            ))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
             .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id",
+                                is(TranscriptionUrgencyEnum.STANDARD.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
-            .andExpect(jsonPath("$.requester_transcriptions[0]." +
-                                    "transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
-
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString());
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")));
 
     }
 
