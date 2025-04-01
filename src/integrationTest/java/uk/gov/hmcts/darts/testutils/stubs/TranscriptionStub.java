@@ -141,8 +141,7 @@ public class TranscriptionStub {
         TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
         TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
-        UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(courtCase
-                                                                                                                  .getCourthouse());
+        UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(courtCase.getCourthouse());
         return createAndSaveTranscriptionEntity(null,
                                                 List.of(courtCase),
                                                 null,

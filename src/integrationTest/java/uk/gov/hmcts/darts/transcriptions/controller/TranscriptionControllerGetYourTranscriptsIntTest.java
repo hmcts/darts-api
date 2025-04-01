@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
+@Slf4j
 @AutoConfigureMockMvc
 class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
@@ -359,18 +363,15 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenReverted() throws Exception {
+    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenRevertedForModernised() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
-        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), TranscriptionStatusEnum.REQUESTED, transcriptionEntity);
 
-        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), TranscriptionStatusEnum.AWAITING_AUTHORISATION,
-                                    transcriptionEntity);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionEntity);
 
-        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-23T14:00:00Z"), TranscriptionStatusEnum.REQUESTED, transcriptionEntity);
-
-        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-23T14:00:00Z"), TranscriptionStatusEnum.AWAITING_AUTHORISATION,
-                                    transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-23T14:00:00Z"), REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-23T14:00:00Z"), AWAITING_AUTHORISATION, transcriptionEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -408,6 +409,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(transcriptionStatusEnum));
         dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
     }
+
 
     private OffsetDateTime getRequestedTs(TranscriptionEntity transcriptionEntity) {
         return transcriptionEntity.getTranscriptionWorkflowEntities()
