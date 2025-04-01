@@ -327,12 +327,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         var courtCase = authorisationStub.getCourtCaseEntity();
         OffsetDateTime now = now();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
-        TranscriptionWorkflowEntity transcriptionWorkflowEntity =
-            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), systemUser,
-                                                                now, transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
-        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
-        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, now, TranscriptionStatusEnum.APPROVED, transcriptionEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -372,35 +367,13 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         var courtCase = authorisationStub.getCourtCaseEntity();
         OffsetDateTime now = now();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
-        TranscriptionWorkflowEntity transcriptionWorkflowEntityUserRequest =
-            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), systemUser,
-                                                                now, transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
-        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntityUserRequest);
-        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, now, TranscriptionStatusEnum.REQUESTED, transcriptionEntity);
 
-        TranscriptionWorkflowEntity transcriptionWorkflowEntityUserAwaitingAuth =
-            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), testUser,
-                                                                now,
-                                                                transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.AWAITING_AUTHORISATION));
-        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntityUserAwaitingAuth);
-        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.AWAITING_AUTHORISATION));
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+        createTranscriptionWorkflow(testUser, now, TranscriptionStatusEnum.AWAITING_AUTHORISATION, transcriptionEntity);
 
-        TranscriptionWorkflowEntity transcriptionWorkflowEntityAdminRequest =
-            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), testUser,
-                                                                now, transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
-        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntityAdminRequest);
-        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+        createTranscriptionWorkflow(testUser, now, TranscriptionStatusEnum.REQUESTED, transcriptionEntity);
 
-        TranscriptionWorkflowEntity transcriptionWorkflowEntityAwaitingAuth =
-            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), systemUser,
-                                                                now,
-                                                                transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.AWAITING_AUTHORISATION));
-        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntityAwaitingAuth);
-        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.AWAITING_AUTHORISATION));
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, now, TranscriptionStatusEnum.AWAITING_AUTHORISATION, transcriptionEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -432,6 +405,17 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString());
 
+    }
+
+    private void createTranscriptionWorkflow(UserAccountEntity systemUser, OffsetDateTime now, TranscriptionStatusEnum transcriptionStatusEnum,
+                                             TranscriptionEntity transcriptionEntity) {
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity =
+            transcriptionStub.createTranscriptionWorkflowEntity(authorisationStub.getTranscriptionEntity(), systemUser,
+                                                                now,
+                                                                transcriptionStub.getTranscriptionStatusByEnum(transcriptionStatusEnum));
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(transcriptionStatusEnum));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
     }
 
     private OffsetDateTime getRequestedTs(TranscriptionEntity transcriptionEntity) {
