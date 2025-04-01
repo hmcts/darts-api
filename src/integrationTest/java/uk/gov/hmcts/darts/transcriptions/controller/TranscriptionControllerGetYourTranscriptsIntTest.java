@@ -56,10 +56,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
     private static final OffsetDateTime MINUS_90_DAYS = now(UTC).minusDays(90);
 
-    public static final int RETENTION_CONFIDENCE_SCORE = 2;
-    public static final String RETENTION_CONFIDENCE_REASON = "RetentionConfidenceReason";
-    private static final String REQUESTED_TRANSCRIPTION_COMMENT = "Requested transcription";
-
     @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
 
