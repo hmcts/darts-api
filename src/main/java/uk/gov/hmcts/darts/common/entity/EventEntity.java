@@ -17,10 +17,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -117,6 +119,8 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Deprecated
     public HearingEntity getHearingEntity() {
         return this.getHearingEntities().stream()
+            .sorted(Comparator.comparing(HearingEntity::getCreatedDateTime)
+                        .thenComparing(HearingEntity::getId))
             .findFirst()
             .orElseThrow(NoSuchElementException::new);
     }
