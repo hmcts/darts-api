@@ -1,1 +1,1 @@
-pgsqlstoragemb     = "32768"
+pgsqlstoragemb     = "1048576"
