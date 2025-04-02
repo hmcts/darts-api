@@ -25,7 +25,7 @@ public enum RetentionApiError implements DartsApiError {
         RetentionTitleErrors.INVALID_REQUEST.toString()
     ), CASE_NOT_FOUND(
         RetentionErrorCode.CASE_NOT_FOUND.getValue(),
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.NOT_FOUND,
         RetentionTitleErrors.CASE_NOT_FOUND.toString()
     ), CASE_NOT_CLOSED(
         RetentionErrorCode.CASE_NOT_CLOSED.getValue(),
@@ -73,7 +73,7 @@ public enum RetentionApiError implements DartsApiError {
         RetentionTitleErrors.NON_UNIQUE_FIXED_POLICY_KEY.toString()
     ), FIXED_POLICY_KEY_NOT_FOUND(
         RetentionErrorCode.FIXED_POLICY_KEY_NOT_FOUND.getValue(),
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.BAD_REQUEST,
         RetentionTitleErrors.FIXED_POLICY_KEY_NOT_FOUND.toString()
     ), LIVE_POLICIES_CANNOT_BE_EDITED(
         RetentionErrorCode.LIVE_POLICIES_CANNOT_BE_EDITED.getValue(),

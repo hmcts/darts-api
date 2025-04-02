@@ -139,7 +139,7 @@ class RetentionPostServiceImplTest {
 
         assertEquals("The selected caseId '1' cannot be found.", exception.getDetail());
         assertEquals("RETENTION_103", exception.getError().getType());
-        assertEquals(422, exception.getError().getHttpStatus().value());
+        assertEquals(404, exception.getError().getHttpStatus().value());
     }
 
     @Test

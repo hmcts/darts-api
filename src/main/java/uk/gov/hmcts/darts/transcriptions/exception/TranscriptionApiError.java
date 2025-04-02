@@ -60,7 +60,7 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     FAILED_TO_DOWNLOAD_TRANSCRIPT(
         TranscriptionsErrorCode.FAILED_TO_DOWNLOAD_TRANSCRIPT.getValue(),
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.INTERNAL_SERVER_ERROR,
         TranscriptionsTitleErrors.FAILED_TO_DOWNLOAD_TRANSCRIPT.toString()
     ),
     AUDIO_NOT_FOUND(
@@ -70,7 +70,7 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     FAILED_TO_UPDATE_TRANSCRIPTIONS(
         UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.INTERNAL_SERVER_ERROR,
         "Failed to update some of the transcriptions"
     ),
     USER_NOT_TRANSCRIBER(
