@@ -365,7 +365,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
     @Test
     void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenReverted() throws Exception {
-        var courtCase = authorisationStub.getCourtCaseEntity();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionEntity);
@@ -375,12 +374,10 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-23T14:00:00Z"), AWAITING_AUTHORISATION, transcriptionEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
-            .header(
-                "user_id",
-                testUser.getId()
-            );
+            .header("user_id", testUser.getId());
 
         TranscriptionUrgencyEntity urgencyEntity = transcriptionStub.getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD);
+        var courtCase = authorisationStub.getCourtCaseEntity();
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())

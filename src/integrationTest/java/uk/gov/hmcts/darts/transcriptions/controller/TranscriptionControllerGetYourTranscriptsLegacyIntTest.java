@@ -57,7 +57,6 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
     @Test
     void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenReverted() throws Exception {
         var transcriptionEntity = PersistableFactory.getTranscriptionTestData().minimalTranscription();
-        var courtCase = transcriptionEntity.getCourtCase();
 
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionEntity);
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionEntity);
@@ -67,6 +66,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header("user_id", testUser.getId());
+        var courtCase = transcriptionEntity.getCourtCase();
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
