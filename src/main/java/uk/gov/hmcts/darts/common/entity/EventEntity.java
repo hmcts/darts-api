@@ -21,7 +21,10 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 @Entity
 @Table(name = "event")
@@ -78,7 +81,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = "eve_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})
-    private List<HearingEntity> hearingEntities = new ArrayList<>();
+    private Set<HearingEntity> hearingEntities = new HashSet<>();
 
     @Column(name = "event_status")
     private Integer eventStatus;
@@ -98,5 +101,23 @@ public class EventEntity extends CreatedModifiedBaseEntity {
             return new ArrayList<>();
         }
         return eventLinkedCaseEntities.stream().map(EventLinkedCaseEntity::getCourtCase).toList();
+    }
+
+
+    /**
+     * This method was added to simplify the switch from List to Set on HearingEntity in which existing code uses .getFirst()
+     * This switch was needed to prevent data integirty issues when inserting/deleting values.
+     * As when using a list spring will first delete all values on the mapping table. Then reinsert only the new ones.
+     * Where as using a Set it will only add the new values and remove the old ones.
+     * A tech debt ticket has be raised to refactor all the code that uses this method, to ensure it uses a many to many safe equivelent
+     *
+     * @return the first hearing entity found within the set
+     * @deprecated because this is not many to many safe. Implementation should account for multiple hearings
+     */
+    @Deprecated
+    public HearingEntity getHearingEntity() {
+        return this.getHearingEntities().stream()
+            .findFirst()
+            .orElseThrow(NoSuchElementException::new);
     }
 }

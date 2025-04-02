@@ -89,7 +89,7 @@ class EventSearchControllerTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EnumSource.Mode.INCLUDE)
     void adminEventSearch_ShouldAllowSuperUsers() throws Exception {
         List<EventEntity> entity = eventsGivensBuilder.persistedEventsWithHearings(1, 1);
-        CourtCaseEntity courtCaseEntity = entity.getFirst().getHearingEntities().getFirst().getCourtCase();
+        CourtCaseEntity courtCaseEntity = entity.getFirst().getHearingEntity().getCourtCase();
         courtCaseEntity.setDataAnonymisedTs(now());
         dartsDatabase.save(courtCaseEntity);
         AdminEventSearch request = new AdminEventSearch();
@@ -111,7 +111,7 @@ class EventSearchControllerTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         List<EventEntity> entity = eventsGivensBuilder.persistedEventsWithHearings(eventsCount, eventHearingsCount);
-        CourtCaseEntity courtCaseEntity = entity.getFirst().getHearingEntities().getFirst().getCourtCase();
+        CourtCaseEntity courtCaseEntity = entity.getFirst().getHearingEntity().getCourtCase();
         courtCaseEntity.setDataAnonymisedTs(now());
         dartsDatabase.save(courtCaseEntity);
         AdminEventSearch request = new AdminEventSearch();
