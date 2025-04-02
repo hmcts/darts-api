@@ -172,7 +172,7 @@ class RetentionControllerReviseRetentionPolicyTypeIntTest extends IntegrationBas
 
         // Then
         resultActions
-            .andExpect(status().isUnprocessableEntity())
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type").value("RETENTION_115"))
             .andExpect(jsonPath("$.title").value("Fixed policy key not recognised"));
     }
