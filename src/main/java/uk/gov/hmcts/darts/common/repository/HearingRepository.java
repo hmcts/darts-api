@@ -41,7 +41,7 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
 
     @Query("""
         SELECT h.id FROM HearingEntity h
-        JOIN h.eventList event
+        JOIN h.events event
         WHERE event.id = :eventId
         """
     )
