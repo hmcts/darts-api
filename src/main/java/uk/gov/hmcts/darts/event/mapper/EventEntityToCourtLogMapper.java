@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.mapper;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.event.model.CourtLog;
 
 import java.util.ArrayList;
@@ -24,14 +25,12 @@ public class EventEntityToCourtLogMapper {
     private CourtLog mapToCourtLog(EventEntity eventEntity) {
 
         CourtLog log = new CourtLog();
-
-        log.setCourthouse(eventEntity.getHearingEntities().getFirst().getCourtroom().getCourthouse().getDisplayName());
-        log.setCaseNumber(eventEntity.getHearingEntities().getFirst().getCourtCase().getCaseNumber());
+        HearingEntity hearingEntity = eventEntity.getHearingEntity();
+        log.setCourthouse(hearingEntity.getCourtroom().getCourthouse().getDisplayName());
+        log.setCaseNumber(hearingEntity.getCourtCase().getCaseNumber());
         log.setEventText(eventEntity.getEventText());
         log.setTimestamp(eventEntity.getTimestamp());
 
         return log;
-
     }
-
 }
