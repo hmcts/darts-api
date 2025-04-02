@@ -191,19 +191,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 transcriptionRequestDetails.getComment()
             ));
 
-        if (transcription.getIsManualTranscription()) {
-            transcriptionStatus = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
-
-            transcription.getTranscriptionWorkflowEntities().add(
-                saveTranscriptionWorkflow(
-                    userAccount,
-                    transcription,
-                    transcriptionStatus,
-                    null
-                ));
-
-            transcriptionNotifications.notifyApprovers(transcription);
-        }
+        moveTranscriptionRequestedToAwaitingAuthorisation(transcription, transcriptionStatus);
 
         auditApi.record(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
 
@@ -251,7 +239,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         var auditActivityProvider = auditActivitiesFor(transcriptionEntity, updateTranscription);
 
-        final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
+        var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
+
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
             getUserAccount(),
@@ -264,12 +253,36 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 
+        if (REQUESTED.getId().equals(transcriptionStatusEntity.getId())) {
+            transcriptionStatusEntity = moveTranscriptionRequestedToAwaitingAuthorisation(transcriptionEntity, transcriptionStatusEntity);
+        }
         UpdateTranscriptionAdminResponse updateTranscriptionResponse = new UpdateTranscriptionAdminResponse();
         updateTranscriptionResponse.setTranscriptionId(transcriptionEntity.getId());
         updateTranscriptionResponse.setTranscriptionStatusId(transcriptionEntity.getTranscriptionStatus().getId());
 
         transcriptionNotifications.handleNotificationsAndAudit(userAccountEntity, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
         return updateTranscriptionResponse;
+    }
+
+    private TranscriptionStatusEntity moveTranscriptionRequestedToAwaitingAuthorisation(TranscriptionEntity transcriptionEntity,
+                                                                                        TranscriptionStatusEntity transcriptionStatusEntity) {
+
+        if (transcriptionEntity.getIsManualTranscription()) {
+
+            transcriptionStatusEntity = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
+            transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
+
+            transcriptionEntity.getTranscriptionWorkflowEntities().add(
+                saveTranscriptionWorkflow(
+                    getUserAccount(),
+                    transcriptionEntity,
+                    transcriptionStatusEntity,
+                    null
+                ));
+
+            transcriptionNotifications.notifyApprovers(transcriptionEntity);
+        }
+        return transcriptionStatusEntity;
     }
 
 
@@ -499,7 +512,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned) {
-        List<TranscriberViewSummary> result = new ArrayList<>();
+        List<TranscriberViewSummary> result;
         if (TRUE.equals(assigned)) {
             result = transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
         } else {
@@ -623,16 +636,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public List<Integer> rollbackUserTranscriptions(UserAccountEntity entity) {
         List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
-            .findWorkflowForUserWithTranscriptionState(entity.getId(),
-                                                       TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
+            .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
 
         List<Integer> transcriptionIds = new ArrayList<>();
 
         // add the workflows back
         for (TranscriptionEntity transcription : transcriptionWorkflowEntities) {
             saveTranscriptionWorkflow(entity, transcription,
-                                      transcriptionStatusRepository.getReferenceById(
-                                          TranscriptionStatusEnum.APPROVED.getId()),
+                                      transcriptionStatusRepository.getReferenceById(APPROVED.getId()),
                                       OWNER_DISABLED_COMMENT_MESSAGE);
             transcriptionIds.add(transcription.getId());
         }

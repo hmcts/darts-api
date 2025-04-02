@@ -365,7 +365,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                               ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                               Integer maxTransferAttempts, Limit limit) {
         List<Integer> results = new ArrayList<>();//Ensures no duplicates
-        results.addAll(findEodsForTransferOnlyMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts, limit));
+        results.addAll(findEodsForTransferOnlyMedia(status.getId(), type.getId(), notExistsStatus.getId(),
+                                                    notExistsType.getId(), maxTransferAttempts, limit.max()));
         if (results.size() < limit.max()) {
             results.addAll(findEodsForTransferExcludingMedia(status, type, notExistsStatus, notExistsType, maxTransferAttempts,
                                                              Limit.of(limit.max() - results.size())));
@@ -374,21 +375,29 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     }
 
     @Query(
-        """
-            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status = :status
-            AND eod.externalLocationType = :type
-            AND eod.media is not null            
-            AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
-            where (eod2.status = :notExistsStatus or eod2.transferAttempts >= :maxTransferAttempts)
-            AND eod2.externalLocationType = :notExistsType
-            and (eod.media is not null and eod.media = eod2.media))
-            order by eod.lastModifiedDateTime
+        nativeQuery = true,
+        value = """
+            WITH filtered_eod AS (
+                 SELECT eod_id, med_id, last_modified_ts
+                 FROM darts.external_object_directory
+                 WHERE ors_id = :status AND elt_id = :type AND med_id IS NOT NULL
+             ),
+                  med_ids_to_exclude AS (
+                      SELECT DISTINCT med_id
+                      FROM darts.external_object_directory
+                      WHERE elt_id = :notExistsType AND med_id IS NOT NULL AND (ors_id = :notExistsStatus OR transfer_attempts >= :maxTransferAttempts)
+                  )
+             SELECT f.eod_id
+             FROM filtered_eod f
+                      LEFT JOIN med_ids_to_exclude mediaToExclude ON f.med_id = mediaToExclude.med_id
+             WHERE mediaToExclude.med_id IS NULL
+             ORDER BY f.last_modified_ts
+             FETCH FIRST :limit ROWS ONLY;
             """
     )
-    List<Integer> findEodsForTransferOnlyMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
-                                               ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
-                                               Integer maxTransferAttempts, Limit limit);
+    List<Integer> findEodsForTransferOnlyMedia(Integer status, Integer type,
+                                               Integer notExistsStatus, Integer notExistsType,
+                                               Integer maxTransferAttempts, Integer limit);
 
     @Query(
         """
