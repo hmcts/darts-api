@@ -48,7 +48,7 @@ public abstract class CourtCaseDocumentMapper {
     abstract CaseRetentionCaseDocument.CaseManagementRetentionCaseDocument mapToCaseDocument(CaseManagementRetentionEntity caseManagementRetentionEntity);
 
     @Mappings({
-        @Mapping(source = "eventList", target = "events"),
+        @Mapping(source = "events", target = "events"),
         @Mapping(source = "mediaList", target = "medias"),
     })
     abstract HearingCaseDocument mapToCaseDocument(HearingEntity hearingEntity);
