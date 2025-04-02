@@ -28,7 +28,6 @@ public class EventLinkedCaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "eve_id")
-    @EqualsAndHashCode.Exclude
     private EventEntity event;
 
     @ManyToOne
@@ -48,5 +47,10 @@ public class EventLinkedCaseEntity {
      * Use {@link CourtCaseEntity#getCaseNumber()} instead
      */
     private String caseNumber;
+
+    @EqualsAndHashCode.Include(replaces = "event")
+    public Integer getEventId() {
+        return event != null ? event.getId() : null;
+    }
 
 }
