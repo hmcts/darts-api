@@ -28,6 +28,7 @@ public class EventLinkedCaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "eve_id")
+    @EqualsAndHashCode.Exclude
     private EventEntity event;
 
     @ManyToOne
