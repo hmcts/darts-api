@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
-@Slf4j
+/**
+ * Integration test for the TranscriptionController class, specifically for the "Get Your Transcripts" endpoint for modernised data.
+ */
 @AutoConfigureMockMvc
 class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
@@ -363,7 +364,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenRevertedForModernised() throws Exception {
+    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenReverted() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
@@ -395,7 +396,8 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
                                 is(TranscriptionUrgencyEnum.STANDARD.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")));
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts").doesNotExist());
 
     }
 

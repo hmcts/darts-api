@@ -55,7 +55,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenRevertedForLegacy() throws Exception {
+    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenReverted() throws Exception {
         var transcriptionEntity = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         var courtCase = transcriptionEntity.getCourtCase();
 
@@ -81,7 +81,8 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")));
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts").doesNotExist());
 
     }
 
