@@ -1,0 +1,1 @@
+pgsqlstoragemb     = "32768"
