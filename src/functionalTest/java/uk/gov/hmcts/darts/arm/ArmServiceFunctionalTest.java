@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
@@ -26,10 +27,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SpringBootTest
-@ActiveProfiles({"dev", "h2db"})
+@ActiveProfiles({"dev", "h2db", "functionalTest"})
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class ArmServiceFunctionalTest {
+class ArmServiceFunctionalTest extends FunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final String FUNCTIONAL_TEST = "functional_test";

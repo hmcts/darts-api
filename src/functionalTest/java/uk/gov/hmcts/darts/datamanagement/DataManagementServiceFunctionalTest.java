@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -32,10 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles({"dev", "h2db"})
+@ActiveProfiles({"dev", "h2db", "functionalTest"})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(MockitoExtension.class)
-class DataManagementServiceFunctionalTest {
+class DataManagementServiceFunctionalTest extends FunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
 

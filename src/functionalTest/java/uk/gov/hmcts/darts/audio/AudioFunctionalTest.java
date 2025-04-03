@@ -11,10 +11,11 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequestWithStorageGUID;
-import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
+import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutil.TestUtils;
 
 import java.io.IOException;
@@ -24,11 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-//@SpringBootTest
-//@RunWith(SpringRunner.class)
-//@ActiveProfiles({"dev", "h2db"})
-@ComponentScan(basePackages = "uk.gov.hmcts.darts.datamanagement")
-//@ContextConfiguration(classes = {DataManagementServiceImpl.class})
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+@SpringBootTest
+@ActiveProfiles({"dev", "h2db", "functionalTest"})
 @Slf4j
 class AudioFunctionalTest extends FunctionalTest {
 
@@ -41,17 +42,17 @@ class AudioFunctionalTest extends FunctionalTest {
     private List<String> inboundAudioBlobsToBeDeleted = new ArrayList<>();
 
     @Autowired
-    private DataManagementServiceImpl dataManagementService;
+    private DataManagementService dataManagementService;
 
     @AfterEach
     void cleanupBlobData() {
         if (CollectionUtils.isNotEmpty(inboundAudioBlobsToBeDeleted)) {
             for (String blobId : inboundAudioBlobsToBeDeleted) {
-//                try {
-//                    dataManagementService.deleteBlobData(inboundStorageContainerName, blobId);
-//                } catch (Exception e) {
-//                    log.error("Failed to delete blob with ID: {}", blobId, e);
-//                }
+                try {
+                    dataManagementService.deleteBlobData(inboundStorageContainerName, blobId);
+                } catch (Exception e) {
+                    log.error("Failed to delete blob with ID: {}", blobId, e);
+                }
             }
         }
         clean();
@@ -61,13 +62,12 @@ class AudioFunctionalTest extends FunctionalTest {
     void addAudioMetadata_ShouldFail_WhenCourthouseInvalidAndBlobGetsCleanedUp() throws IOException {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData originalData = BinaryData.fromBytes(testStringInBytes);
-        String blobId = UUID.randomUUID().toString();
-        //blobId = dataManagementService.saveBlobData(inboundStorageContainerName, originalData);
+        String blobId = dataManagementService.saveBlobData(inboundStorageContainerName, originalData);
         inboundAudioBlobsToBeDeleted.add(blobId);
 
         String checksum = "123";
-        //var savedBlobData = dataManagementService.getBlobData(inboundStorageContainerName, blobId);
-        //assertEquals(savedBlobData, originalData);
+        var savedBlobData = dataManagementService.getBlobData(inboundStorageContainerName, blobId);
+        assertEquals(savedBlobData, originalData);
 
         AddAudioMetadataRequestWithStorageGUID request = createAddAudioRequest(
             OffsetDateTime.parse("2023-10-01T10:00:00Z"),
@@ -93,8 +93,8 @@ class AudioFunctionalTest extends FunctionalTest {
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
-        //var blobData = dataManagementService.getBlobData(inboundStorageContainerName, blobId);
-        //assertNull(blobData);
+        var blobData = dataManagementService.getBlobData(inboundStorageContainerName, blobId);
+        assertNull(blobData);
     }
 
     private AddAudioMetadataRequestWithStorageGUID createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
@@ -107,7 +107,7 @@ class AudioFunctionalTest extends FunctionalTest {
         addAudioMetadataRequest.setChannel(1);
         addAudioMetadataRequest.totalChannels(2);
         addAudioMetadataRequest.format(filetype);
-        addAudioMetadataRequest.filename("functionaltest");
+        addAudioMetadataRequest.filename("functional_test");
         addAudioMetadataRequest.courthouse(courthouse);
         addAudioMetadataRequest.courtroom(courtroom);
         addAudioMetadataRequest.cases(List.of(casesList));
