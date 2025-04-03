@@ -112,7 +112,7 @@ class AudioFunctionalTest extends FunctionalTest {
         addAudioMetadataRequest.courtroom(courtroom);
         addAudioMetadataRequest.cases(List.of(casesList));
         addAudioMetadataRequest.setMediaFile("media file");
-        addAudioMetadataRequest.setFileSize(123l);
+        addAudioMetadataRequest.setFileSize(123L);
         addAudioMetadataRequest.setChecksum(checksum);
         addAudioMetadataRequest.storageGuid(UUID.fromString(guid));
         return addAudioMetadataRequest;
