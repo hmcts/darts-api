@@ -330,8 +330,10 @@ public class TranscriptionResponseMapper {
         // prioritise the case from the hearing
         SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
         if (transcriptionDocumentResponse.hearingCaseNumber() != null) {
+            caseResponse.setId(transcriptionDocumentResponse.hearingCaseId());
             caseResponse.setCaseNumber(transcriptionDocumentResponse.hearingCaseNumber());
         } else {
+            caseResponse.setId(transcriptionDocumentResponse.caseId());
             caseResponse.setCaseNumber(transcriptionDocumentResponse.caseNumber());
         }
         transformedMediaDetails.setCase(caseResponse);
