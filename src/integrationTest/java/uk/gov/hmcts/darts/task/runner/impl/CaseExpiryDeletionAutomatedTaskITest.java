@@ -406,7 +406,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             HearingEntity hearing = createHearing(caseEntity);
             EventEntity event1 = dartsDatabase.getEventStub()
                 .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
-            eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity.getCaseNumber(), caseEntity.getCourthouse().getCourthouseName());
+            eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity);
 
             EventEntity event2 = dartsDatabase.getEventStub()
                 .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
