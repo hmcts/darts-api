@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db", "functionalTest"})
@@ -93,8 +95,11 @@ class AudioFunctionalTest extends FunctionalTest {
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
-        var blobData = dataManagementService.getBlobData(inboundStorageContainerName, blobId);
-        assertNull(blobData);
+        var exception = assertThrows(
+            BlobStorageException.class, () -> dataManagementService.getBlobData(inboundStorageContainerName, blobId));
+
+        assertThat(exception.getMessage()).contains("The specified blob does not exist");
+
     }
 
     private AddAudioMetadataRequestWithStorageGUID createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
