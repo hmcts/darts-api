@@ -39,7 +39,7 @@ class AudioFunctionalTest extends FunctionalTest {
     @Value("${darts.storage.blob.container-name.inbound}")
     private String inboundStorageContainerName;
 
-    private List<String> inboundAudioBlobsToBeDeleted = new ArrayList<>();
+    private final List<String> inboundAudioBlobsToBeDeleted = new ArrayList<>();
 
     @Autowired
     private DataManagementService dataManagementService;
