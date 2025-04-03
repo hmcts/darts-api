@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class ArmServiceFunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
-    public static final String FUNCTIONAL_TEST = "functional_test";
+    private static final String FUNCTIONAL_TEST = "functional_test";
 
     @Value("${darts.storage.arm.container-name}")
     private String armContainerName;
@@ -168,7 +168,7 @@ class ArmServiceFunctionalTest {
             }
         }
         assertFalse(allBlobs.isEmpty());
-        
+
     }
 
     private void uploadBatchedSubmissionBlobs(BinaryData data) {
