@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
@@ -41,9 +40,9 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         CourtCaseEntity courtCase,
         List<AnnotationEntity> annotations,
         OffsetDateTime createdDateTime,
-        UserAccountEntity createdBy,
+        Integer createdById,
         OffsetDateTime lastModifiedDateTime,
-        UserAccountEntity lastModifiedBy
+        Integer lastModifiedById
     ) {
         // Set parent properties
         setId(id);
@@ -60,9 +59,9 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         setCourtCase(courtCase);
         setAnnotations(annotations != null ? annotations : new ArrayList<>());
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

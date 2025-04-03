@@ -300,7 +300,7 @@ class RetentionPostServiceImplTest {
         assertEquals("COMPLETE", savedRetention.getCurrentState());
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2026-01-01T00:00Z", savedRetention.getRetainUntil().toString());
-        assertEquals(10, savedRetention.getCreatedBy().getId());
+        assertEquals(10, savedRetention.getCreatedById());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
         assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
     }
@@ -322,7 +322,7 @@ class RetentionPostServiceImplTest {
         assertEquals("COMPLETE", savedRetention.getCurrentState());
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2027-01-01T00:00Z", savedRetention.getRetainUntil().toString());
-        assertEquals(10, savedRetention.getCreatedBy().getId());
+        assertEquals(10, savedRetention.getCreatedById());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
         assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
     }
@@ -345,7 +345,7 @@ class RetentionPostServiceImplTest {
         assertEquals("COMPLETE", savedRetention.getCurrentState());
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2025-10-01T00:00Z", savedRetention.getRetainUntil().toString());
-        assertEquals(10, savedRetention.getCreatedBy().getId());
+        assertEquals(10, savedRetention.getCreatedById());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
         assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
     }
@@ -383,7 +383,7 @@ class RetentionPostServiceImplTest {
         assertEquals("COMPLETE", savedRetention.getCurrentState());
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2123-10-01T00:00Z", savedRetention.getRetainUntil().toString());
-        assertEquals(10, savedRetention.getCreatedBy().getId());
+        assertEquals(10, savedRetention.getCreatedById());
         assertEquals(RetentionPolicyEnum.PERMANENT.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
         assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
     }

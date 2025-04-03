@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.DatabaseDateSetter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -62,6 +64,7 @@ public class ExternalObjectDirectoryStub {
     private final DartsDatabaseComposable dartsDatabaseComposable;
     private final TranscriptionStubComposable transcriptionStubComposable;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
+    private final UserAccountRepository userAccountRepository;
 
     public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
                                                           ObjectRecordStatusEnum objectRecordStatusEnum,
@@ -511,7 +514,7 @@ public class ExternalObjectDirectoryStub {
             if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
                 || !List.of(SystemUsersEnum.INBOUND_AUDIO_DELETER_AUTOMATED_TASK.getId(),
                             SystemUsersEnum.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK.getId()).contains(
-                objectDirectoryEntity.getLastModifiedBy().getId())) {
+                objectDirectoryEntity.getLastModifiedById())) {
                 return false;
             }
         }
@@ -521,14 +524,15 @@ public class ExternalObjectDirectoryStub {
 
     @Transactional
     public boolean areObjectDirectoriesMarkedForDeletionWithUser(List<Integer> entities, String userEmail) {
+        UserAccountEntity userAccount = userAccountRepository.findFirstByEmailAddressIgnoreCase(userEmail).orElseThrow();
         for (Integer entity : entities) {
             ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
 
             if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
-                || SystemUsersEnum.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK.getId() != objectDirectoryEntity.getLastModifiedBy().getId()) {
+                || SystemUsersEnum.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK.getId() != objectDirectoryEntity.getLastModifiedById()) {
                 return false;
             }
-            if (!objectDirectoryEntity.getLastModifiedBy().getEmailAddress().equals(userEmail)) {
+            if (!objectDirectoryEntity.getLastModifiedById().equals(userAccount.getId())) {
                 return false;
             }
         }

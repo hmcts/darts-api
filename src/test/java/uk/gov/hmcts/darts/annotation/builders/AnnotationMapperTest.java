@@ -35,6 +35,7 @@ class AnnotationMapperTest {
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(SOME_OFFSET_DATE_TIME);
         when(authorisationApi.getCurrentUser()).thenReturn(USER_ACCOUNT_ENTITY);
+        USER_ACCOUNT_ENTITY.setId(123);
     }
 
     @Test
@@ -47,8 +48,8 @@ class AnnotationMapperTest {
             .hasFieldOrPropertyWithValue("timestamp", SOME_OFFSET_DATE_TIME)
             .hasFieldOrPropertyWithValue("createdDateTime", SOME_OFFSET_DATE_TIME)
             .hasFieldOrPropertyWithValue("currentOwner", USER_ACCOUNT_ENTITY)
-            .hasFieldOrPropertyWithValue("lastModifiedBy", USER_ACCOUNT_ENTITY)
-            .hasFieldOrPropertyWithValue("createdBy", USER_ACCOUNT_ENTITY);
+            .hasFieldOrPropertyWithValue("lastModifiedById", USER_ACCOUNT_ENTITY.getId())
+            .hasFieldOrPropertyWithValue("createdById", USER_ACCOUNT_ENTITY.getId());
     }
 
     private Annotation someAnnotation() {

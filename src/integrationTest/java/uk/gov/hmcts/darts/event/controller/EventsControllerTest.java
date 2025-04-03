@@ -164,9 +164,9 @@ class EventsControllerTest extends IntegrationBase {
         Assertions.assertEquals(eventEntity.getTimestamp(), responseResult.getEventTs());
         Assertions.assertEquals(eventEntity.getIsCurrent(), responseResult.getIsCurrent());
         Assertions.assertEquals(eventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getCreatedAt());
-        Assertions.assertEquals(eventEntity.getCreatedBy().getId(), responseResult.getCreatedBy());
+        Assertions.assertEquals(eventEntity.getCreatedById(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getLastModifiedAt());
-        Assertions.assertEquals(eventEntity.getLastModifiedBy().getId(), responseResult.getLastModifiedBy());
+        Assertions.assertEquals(eventEntity.getLastModifiedById(), responseResult.getLastModifiedBy());
 
         assertThat(responseResult.getHearings()).hasSize(1);
         AdminGetEventResponseDetailsHearingsHearingsInner hearingsInner = responseResult.getHearings().getFirst();
@@ -324,11 +324,11 @@ class EventsControllerTest extends IntegrationBase {
 
         // assert additional audit data
         assertFalse(caseExpiredAuditEntries.isEmpty());
-        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedById());
         assertNotNull(caseExpiredAuditEntries.getFirst().getCreatedDateTime());
-        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedById());
         assertNotNull(caseExpiredAuditEntries.getFirst().getLastModifiedDateTime());
-        Assertions.assertEquals(caseExpiredAuditEntries.getFirst().getUser().getId(), eventEntity.getLastModifiedBy().getId());
+        Assertions.assertEquals(caseExpiredAuditEntries.getFirst().getUser().getId(), eventEntity.getLastModifiedById());
         assertNull(caseExpiredAuditEntries.getFirst().getCourtCase());
     }
 

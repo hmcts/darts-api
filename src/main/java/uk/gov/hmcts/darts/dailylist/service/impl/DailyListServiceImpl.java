@@ -71,10 +71,10 @@ public class DailyListServiceImpl implements DailyListService {
         dailyListEntity.setPublishedTimestamp(postRequest.getPublishedDateTime());
         dailyListEntity.setMessageId(postRequest.getMessageId());
         UserAccountEntity user = userIdentity.getUserAccount();
-        if (dailyListEntity.getCreatedBy() == null) {
-            dailyListEntity.setCreatedBy(user);
+        if (dailyListEntity.getCreatedById() == null) {
+            dailyListEntity.setCreatedById(user.getId());
         }
-        dailyListEntity.setLastModifiedBy(user);
+        dailyListEntity.setLastModifiedById(user.getId());
         dailyListRepository.saveAndFlush(dailyListEntity);
 
         PostDailyListResponse postDailyListResponse = new PostDailyListResponse();

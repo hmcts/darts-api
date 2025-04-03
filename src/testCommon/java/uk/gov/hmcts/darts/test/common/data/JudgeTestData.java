@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static java.util.stream.IntStream.rangeClosed;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class JudgeTestData {
 
@@ -19,9 +18,8 @@ public final class JudgeTestData {
     public static JudgeEntity someMinimalJudge() {
         var judge = new JudgeEntity();
         judge.setName("some-judge");
-        var userAccount = minimalUserAccount();
-        judge.setCreatedBy(userAccount);
-        judge.setLastModifiedBy(userAccount);
+        judge.setCreatedById(0);
+        judge.setLastModifiedById(0);
         return judge;
     }
 

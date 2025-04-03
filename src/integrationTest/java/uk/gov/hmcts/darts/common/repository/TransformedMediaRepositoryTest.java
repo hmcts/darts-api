@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
@@ -311,6 +312,11 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     @Test
     void testFindTransformedMediaWithAllQueryParameters() {
         TransformedMediaEntity transformedMediaEntityFind = generatedMediaEntities.get(1);
+        UserAccountEntity transformedMediaCreatedBy = dartsDatabase.getUserAccountRepository()
+            .findById(transformedMediaEntityFind.getCreatedById()).orElseThrow();
+        UserAccountEntity mediaRequestCreatedBy = dartsDatabase.getUserAccountRepository()
+            .findById(transformedMediaEntityFind.getMediaRequest().getCreatedById()).orElseThrow();
+
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(transformedMediaEntityFind.getMediaRequest().getId(), transformedMediaEntityFind.getMediaRequest()
                                                                   .getHearing().getCourtCase().getCaseNumber(), transformedMediaEntityFind.getMediaRequest()
@@ -318,9 +324,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
                                                               transformedMediaEntityFind.getMediaRequest()
                                                                   .getHearing().getHearingDate(), transformedMediaEntityFind.getMediaRequest()
                                                                   .getCurrentOwner().getUserFullName(),
-                                                              transformedMediaEntityFind.getCreatedBy().getUserFullName(),
-                                                              transformedMediaEntityFind.getMediaRequest()
-                                                                  .getCreatedBy().getCreatedDateTime(), generatedMediaEntities.get(1).getCreatedDateTime());
+                                                              transformedMediaCreatedBy.getUserFullName(),
+                                                              mediaRequestCreatedBy.getCreatedDateTime(), generatedMediaEntities.get(1).getCreatedDateTime());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(transformedMediaEntityFind.getId(), transformedMediaEntityList.getFirst().getId());
     }

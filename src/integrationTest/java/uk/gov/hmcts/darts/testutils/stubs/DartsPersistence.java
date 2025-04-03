@@ -39,8 +39,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
-import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -91,11 +89,13 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.builder.DbInsertable;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -181,15 +181,15 @@ public class DartsPersistence {
     @SuppressWarnings("PMD.AvoidReassigningParameters")
     public HearingEntity save(HearingEntity hearing) {
         hearing = (HearingEntity) preCheckPersist(hearing);
-
+        hearing.setJudges(saveJudgeList(hearing.getJudges()));
         hearing.setCourtCase(save(hearing.getCourtCase()));
         hearing.setCourtroom(save(hearing.getCourtroom()));
-        hearing.setCreatedBy(save(hearing.getCreatedBy()));
-        hearing.setLastModifiedBy(save(hearing.getLastModifiedBy()));
-        hearing.setJudges(saveJudgeList(hearing.getJudges()));
+        saveMediaList(hearing.getMediaList());
+        hearing.setCreatedById(Optional.ofNullable(hearing.getCreatedById()).orElse(0));
+        hearing.setLastModifiedById(Optional.ofNullable(hearing.getLastModifiedById()).orElse(0));
+
         hearing = hearingRepository.save(hearing);
 
-        saveMediaList(hearing.getMediaList());
         return hearing;
     }
 
@@ -200,8 +200,8 @@ public class DartsPersistence {
 
         if (annotationEntity.getId() == null) {
             annotationEntity.setCurrentOwner(save(annotationEntity.getCurrentOwner()));
-            annotationEntity.setCreatedBy(save(annotationEntity.getCreatedBy()));
-            annotationEntity.setLastModifiedBy(save(annotationEntity.getLastModifiedBy()));
+            annotationEntity.setCreatedById(Optional.ofNullable(annotationEntity.getCreatedById()).orElse(0));
+            annotationEntity.setLastModifiedById(Optional.ofNullable(annotationEntity.getLastModifiedById()).orElse(0));
             if (annotationEntity.getHearingList() != null) {
                 annotationEntity.setHearingList(saveHearingEntity(annotationEntity.getHearingList()));
             }
@@ -217,8 +217,8 @@ public class DartsPersistence {
         courthouse = (CourthouseEntity) preCheckPersist(courthouse);
 
         if (courthouse.getId() == null) {
-            courthouse.setCreatedBy(save(courthouse.getCreatedBy()));
-            courthouse.setLastModifiedBy(save(courthouse.getLastModifiedBy()));
+            courthouse.setCreatedById(Optional.ofNullable(courthouse.getCreatedById()).orElse(0));
+            courthouse.setLastModifiedById(Optional.ofNullable(courthouse.getLastModifiedById()).orElse(0));
             courthouseRepository.save(courthouse);
         } else {
             courthouse = entityManager.merge(courthouse);
@@ -236,7 +236,7 @@ public class DartsPersistence {
             if (isNull(courtroom.getCourthouse().getId())) {
                 courtroom.setCourthouse(save(courtroom.getCourthouse()));
             }
-            courtroom.setCreatedBy(save(courtroom.getCreatedBy()));
+            courtroom.setCreatedById(Optional.ofNullable(courtroom.getCreatedById()).orElse(0));
             return courtroomRepository.save(courtroom);
         } else {
             return entityManager.merge(courtroom);
@@ -252,8 +252,8 @@ public class DartsPersistence {
             mediaRequest.setHearing(save(mediaRequest.getHearing()));
             mediaRequest.setRequestor(save(mediaRequest.getRequestor()));
             mediaRequest.setCurrentOwner(save(mediaRequest.getCurrentOwner()));
-            mediaRequest.setCreatedBy(save(mediaRequest.getCreatedBy()));
-            mediaRequest.setLastModifiedBy(save(mediaRequest.getLastModifiedBy()));
+            mediaRequest.setCreatedById(Optional.ofNullable(mediaRequest.getCreatedById()).orElse(0));
+            mediaRequest.setLastModifiedById(Optional.ofNullable(mediaRequest.getLastModifiedById()).orElse(0));
 
             return mediaRequestRepository.save(mediaRequest);
         } else {
@@ -280,7 +280,7 @@ public class DartsPersistence {
         eventHandlerEntity = (EventHandlerEntity) preCheckPersist(eventHandlerEntity);
 
         if (eventHandlerEntity.getId() == null) {
-            eventHandlerEntity.setCreatedBy(save(eventHandlerEntity.getCreatedBy()));
+            eventHandlerEntity.setCreatedById(Optional.ofNullable(eventHandlerEntity.getCreatedById()).orElse(0));
             return eventHandlerRepository.save(eventHandlerEntity);
         } else {
             return entityManager.merge(eventHandlerEntity);
@@ -293,8 +293,8 @@ public class DartsPersistence {
         courtCase = (CourtCaseEntity) preCheckPersist(courtCase);
 
         if (courtCase.getId() == null) {
-            courtCase.setCreatedBy(save(courtCase.getCreatedBy()));
-            courtCase.setLastModifiedBy(save(courtCase.getLastModifiedBy()));
+            courtCase.setCreatedById(Optional.ofNullable(courtCase.getCreatedById()).orElse(0));
+            courtCase.setLastModifiedById(Optional.ofNullable(courtCase.getLastModifiedById()).orElse(0));
             courtCase.setCourthouse(save(courtCase.getCourthouse()));
 
             if (courtCase.getJudges() != null) {
@@ -333,7 +333,7 @@ public class DartsPersistence {
 
         if (transcriptionDocumentEntity.getId() == null) {
             transcriptionDocumentEntity.setUploadedBy(save(transcriptionDocumentEntity.getUploadedBy()));
-            transcriptionDocumentEntity.setLastModifiedBy(save(transcriptionDocumentEntity.getLastModifiedBy()));
+            transcriptionDocumentEntity.setLastModifiedById(Optional.ofNullable(transcriptionDocumentEntity.getLastModifiedById()).orElse(0));
             transcriptionDocumentEntity.setTranscription(save(transcriptionDocumentEntity.getTranscription()));
             if (transcriptionDocumentEntity.getAdminActions() != null) {
                 transcriptionDocumentEntity.getAdminActions().forEach(this::save);
@@ -388,8 +388,8 @@ public class DartsPersistence {
                 eod.setTranscriptionDocumentEntity(save(eod.getTranscriptionDocumentEntity()));
             }
 
-            eod.setCreatedBy(save(eod.getCreatedBy()));
-            eod.setLastModifiedBy(save(eod.getLastModifiedBy()));
+            eod.setCreatedById(Optional.ofNullable(eod.getCreatedById()).orElse(0));
+            eod.setLastModifiedById(Optional.ofNullable(eod.getLastModifiedById()).orElse(0));
             return externalObjectDirectoryRepository.save(eod);
         } else {
             return entityManager.merge(eod);
@@ -402,8 +402,8 @@ public class DartsPersistence {
         defence = (DefenceEntity) preCheckPersist(defence);
 
         if (defence.getId() == null) {
-            defence.setCreatedBy(save(defence.getCreatedBy()));
-            defence.setLastModifiedBy(save(defence.getLastModifiedBy()));
+            defence.setCreatedById(Optional.ofNullable(defence.getCreatedById()).orElse(0));
+            defence.setLastModifiedById(Optional.ofNullable(defence.getLastModifiedById()).orElse(0));
             defence.setCourtCase(save(defence.getCourtCase()));
             return defenceRepository.save(defence);
         } else {
@@ -417,8 +417,8 @@ public class DartsPersistence {
         defendant = (DefendantEntity) preCheckPersist(defendant);
 
         if (defendant.getId() == null) {
-            defendant.setCreatedBy(save(defendant.getCreatedBy()));
-            defendant.setLastModifiedBy(save(defendant.getLastModifiedBy()));
+            defendant.setCreatedById(Optional.ofNullable(defendant.getCreatedById()).orElse(0));
+            defendant.setLastModifiedById(Optional.ofNullable(defendant.getLastModifiedById()).orElse(0));
             defendant.setCourtCase(save(defendant.getCourtCase()));
             return defendantRepository.save(defendant);
         } else {
@@ -432,8 +432,8 @@ public class DartsPersistence {
         prosecutor = (ProsecutorEntity) preCheckPersist(prosecutor);
 
         if (prosecutor.getId() == null) {
-            prosecutor.setCreatedBy(save(prosecutor.getCreatedBy()));
-            prosecutor.setLastModifiedBy(save(prosecutor.getCreatedBy()));
+            prosecutor.setCreatedById(Optional.ofNullable(prosecutor.getCreatedById()).orElse(0));
+            prosecutor.setLastModifiedById(Optional.ofNullable(prosecutor.getLastModifiedById()).orElse(0));
             prosecutor.setCourtCase(save(prosecutor.getCourtCase()));
             return prosecutorRepository.save(prosecutor);
         } else {
@@ -462,9 +462,6 @@ public class DartsPersistence {
                 }
                 transcription.setCourtCases(listOfCases);
             }
-
-            saveCreatedBy(transcription);
-            saveLastModifiedBy(transcription);
             transcription = transcriptionRepository.save(transcription);
 
         } else {
@@ -504,8 +501,8 @@ public class DartsPersistence {
 
         if (event.getId() == null) {
             event.setCourtroom(save(event.getCourtroom()));
-            event.setCreatedBy(save(event.getCreatedBy()));
-            event.setLastModifiedBy(save(event.getLastModifiedBy()));
+            event.setCreatedById(Optional.ofNullable(event.getCreatedById()).orElse(0));
+            event.setLastModifiedById(Optional.ofNullable(event.getLastModifiedById()).orElse(0));
             return eventRepository.save(event);
         } else {
             return entityManager.merge(event);
@@ -518,8 +515,8 @@ public class DartsPersistence {
         retentionPolicyType = (RetentionPolicyTypeEntity) preCheckPersist(retentionPolicyType);
 
         if (retentionPolicyType.getId() == null) {
-            retentionPolicyType.setLastModifiedBy(save(retentionPolicyType.getLastModifiedBy()));
-            retentionPolicyType.setCreatedBy(save(retentionPolicyType.getCreatedBy()));
+            retentionPolicyType.setLastModifiedById(Optional.ofNullable(retentionPolicyType.getLastModifiedById()).orElse(0));
+            retentionPolicyType.setCreatedById(Optional.ofNullable(retentionPolicyType.getCreatedById()).orElse(0));
             return retentionPolicyTypeRepository.save(retentionPolicyType);
         } else {
             return entityManager.merge(retentionPolicyType);
@@ -563,7 +560,7 @@ public class DartsPersistence {
 
         if (annotationDocument.getId() == null) {
             annotationDocument.setAnnotation(save(annotationDocument.getAnnotation()));
-            annotationDocument.setLastModifiedBy(save(annotationDocument.getLastModifiedBy()));
+            annotationDocument.setLastModifiedById(Optional.ofNullable(annotationDocument.getLastModifiedById()).orElse(0));
             annotationDocument.setUploadedBy(save(annotationDocument.getUploadedBy()));
             save(annotationDocument.getAnnotation());
             return annotationDocumentRepository.save(annotationDocument);
@@ -576,10 +573,9 @@ public class DartsPersistence {
     @Transactional
     public JudgeEntity save(JudgeEntity judge) {
         judge = (JudgeEntity) preCheckPersist(judge);
-
         if (judge.getId() == null) {
-            judge.setCreatedBy(save(judge.getCreatedBy()));
-            judge.setLastModifiedBy(save(judge.getLastModifiedBy()));
+            judge.setCreatedById(Optional.ofNullable(judge.getCreatedById()).orElse(0));
+            judge.setLastModifiedById(Optional.ofNullable(judge.getLastModifiedById()).orElse(0));
 
             return judgeRepository.save(judge);
         } else {
@@ -601,8 +597,8 @@ public class DartsPersistence {
         caseDocumentEntity = (CaseDocumentEntity) preCheckPersist(caseDocumentEntity);
 
         if (caseDocumentEntity.getId() == null) {
-            caseDocumentEntity.setCreatedBy(save(caseDocumentEntity.getCreatedBy()));
-            caseDocumentEntity.setLastModifiedBy(save(caseDocumentEntity.getLastModifiedBy()));
+            caseDocumentEntity.setCreatedById(Optional.ofNullable(caseDocumentEntity.getCreatedById()).orElse(0));
+            caseDocumentEntity.setLastModifiedById(Optional.ofNullable(caseDocumentEntity.getLastModifiedById()).orElse(0));
             caseDocumentEntity.setCourtCase(save(caseDocumentEntity.getCourtCase()));
             return caseDocumentRepository.save(caseDocumentEntity);
         } else {
@@ -617,8 +613,8 @@ public class DartsPersistence {
 
         if (media.getId() == null) {
             media.setCourtroom(save(media.getCourtroom()));
-            media.setCreatedBy(save(media.getCreatedBy()));
-            media.setLastModifiedBy(save(media.getLastModifiedBy()));
+            media.setCreatedById(Optional.ofNullable(media.getCreatedById()).orElse(0));
+            media.setLastModifiedById(Optional.ofNullable(media.getLastModifiedById()).orElse(0));
 
             if (media.getMediaLinkedCaseList() != null) {
                 media.setMediaLinkedCaseList(saveLinkedCaseList(media.getMediaLinkedCaseList()));
@@ -637,8 +633,8 @@ public class DartsPersistence {
         transformedMedia = (TransformedMediaEntity) preCheckPersist(transformedMedia);
 
         if (transformedMedia.getId() == null) {
-            transformedMedia.setCreatedBy(save(transformedMedia.getCreatedBy()));
-            transformedMedia.setLastModifiedBy(save(transformedMedia.getLastModifiedBy()));
+            transformedMedia.setCreatedById(Optional.ofNullable(transformedMedia.getCreatedById()).orElse(0));
+            transformedMedia.setLastModifiedById(Optional.ofNullable(transformedMedia.getLastModifiedById()).orElse(0));
             transformedMedia.setMediaRequest(save(transformedMedia.getMediaRequest()));
             return transformedMediaRepository.save(transformedMedia);
         } else {
@@ -654,8 +650,8 @@ public class DartsPersistence {
         commentEntity = (TranscriptionCommentEntity) preCheckPersist(commentEntity);
 
         if (commentEntity.getId() == null) {
-            commentEntity.setCreatedBy(save(commentEntity.getCreatedBy()));
-            commentEntity.setLastModifiedBy(save(commentEntity.getLastModifiedBy()));
+            commentEntity.setCreatedById(Optional.ofNullable(commentEntity.getCreatedById()).orElse(0));
+            commentEntity.setLastModifiedById(Optional.ofNullable(commentEntity.getLastModifiedById()).orElse(0));
             commentEntity.setTranscription(save(commentEntity.getTranscription()));
             return transcriptionCommentRepository.save(commentEntity);
         } else {
@@ -671,8 +667,8 @@ public class DartsPersistence {
         armRpoExecutionDetailEntity = (ArmRpoExecutionDetailEntity) preCheckPersist(armRpoExecutionDetailEntity);
 
         if (armRpoExecutionDetailEntity.getId() == null) {
-            armRpoExecutionDetailEntity.setCreatedBy(save(armRpoExecutionDetailEntity.getCreatedBy()));
-            armRpoExecutionDetailEntity.setLastModifiedBy(save(armRpoExecutionDetailEntity.getLastModifiedBy()));
+            armRpoExecutionDetailEntity.setCreatedById(Optional.ofNullable(armRpoExecutionDetailEntity.getCreatedById()).orElse(0));
+            armRpoExecutionDetailEntity.setLastModifiedById(Optional.ofNullable(armRpoExecutionDetailEntity.getLastModifiedById()).orElse(0));
             return armRpoExecutionDetailRepository.save(armRpoExecutionDetailEntity);
         } else {
             entityManager.merge(armRpoExecutionDetailEntity);
@@ -749,6 +745,11 @@ public class DartsPersistence {
     }
 
     private void saveMediaList(List<MediaEntity> mediaList) {
+        if (mediaList == null
+            || TestUtils.isProxy(mediaList)
+            || mediaList.isEmpty()) {
+            return;
+        }
         mediaList.forEach(media -> {
             if (media.getId() == null) {
                 media = (MediaEntity) preCheckPersist(media);
@@ -842,8 +843,8 @@ public class DartsPersistence {
         defence = (DefenceEntity) preCheckPersist(defence);
 
         if (defence.getId() == null) {
-            defence.setCreatedBy(save(defence.getCreatedBy()));
-            defence.setLastModifiedBy(save(defence.getLastModifiedBy()));
+            defence.setCreatedById(Optional.ofNullable(defence.getCreatedById()).orElse(0));
+            defence.setLastModifiedById(Optional.ofNullable(defence.getLastModifiedById()).orElse(0));
         }
 
         return defence;
@@ -853,8 +854,8 @@ public class DartsPersistence {
     private DefendantEntity saveForCase(DefendantEntity defendant) {
         defendant = (DefendantEntity) preCheckPersist(defendant);
 
-        defendant.setCreatedBy(save(defendant.getCreatedBy()));
-        defendant.setLastModifiedBy(save(defendant.getLastModifiedBy()));
+        defendant.setCreatedById(Optional.ofNullable(defendant.getCreatedById()).orElse(0));
+        defendant.setLastModifiedById(Optional.ofNullable(defendant.getLastModifiedById()).orElse(0));
 
         return defendant;
     }
@@ -863,8 +864,8 @@ public class DartsPersistence {
     private ProsecutorEntity saveForCase(ProsecutorEntity prosecutor) {
         prosecutor = (ProsecutorEntity) preCheckPersist(prosecutor);
 
-        prosecutor.setCreatedBy(save(prosecutor.getCreatedBy()));
-        prosecutor.setLastModifiedBy(save(prosecutor.getCreatedBy()));
+        prosecutor.setCreatedById(Optional.ofNullable(prosecutor.getCreatedById()).orElse(0));
+        prosecutor.setLastModifiedById(Optional.ofNullable(prosecutor.getLastModifiedById()).orElse(0));
 
         return prosecutor;
     }
@@ -888,17 +889,5 @@ public class DartsPersistence {
             return entity;
         }
         return repository.findById(entity.getId()).orElseThrow();
-    }
-
-    private void saveLastModifiedBy(LastModifiedBy lastModifiedBy) {
-        if (lastModifiedBy.getLastModifiedBy() != null) {
-            lastModifiedBy.setLastModifiedBy(save(lastModifiedBy.getLastModifiedBy()));
-        }
-    }
-
-    private void saveCreatedBy(CreatedBy createdBy) {
-        if (createdBy.getCreatedBy() != null) {
-            createdBy.setCreatedBy(save(createdBy.getCreatedBy()));
-        }
     }
 }

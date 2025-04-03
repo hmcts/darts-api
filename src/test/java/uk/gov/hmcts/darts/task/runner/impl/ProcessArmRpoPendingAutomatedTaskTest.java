@@ -98,6 +98,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
         doReturn(50).when(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
 
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        int userId = 1;
+        when(userAccount.getId()).thenReturn(userId);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         processArmRpoPendingAutomatedTask.runTask();
@@ -107,7 +109,7 @@ class ProcessArmRpoPendingAutomatedTaskTest {
                 objectRecordStatusEntityPending,
                 currentTime.minus(Duration.ofHours(1)),
                 objectRecordStatusEntityStored,
-                userAccount,
+                userId,
                 Limit.of(50)
             );
 
@@ -132,6 +134,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
         doReturn(75).when(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
 
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        int userId = 1;
+        when(userAccount.getId()).thenReturn(userId);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         processArmRpoPendingAutomatedTask.runTask();
@@ -141,7 +145,7 @@ class ProcessArmRpoPendingAutomatedTaskTest {
                 objectRecordStatusEntityPending,
                 currentTime.minus(Duration.ofHours(24)),
                 objectRecordStatusEntityStored,
-                userAccount,
+                userId,
                 Limit.of(75)
             );
 
