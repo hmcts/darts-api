@@ -22,6 +22,7 @@ public class EventEntityToCourtLogMapper {
         return logs;
     }
 
+    @SuppressWarnings("java:S1874")//Required as we replaced getFirst with getHearingEntity(). A ticket will be raised clean this up across the app
     private CourtLog mapToCourtLog(EventEntity eventEntity) {
 
         CourtLog log = new CourtLog();
