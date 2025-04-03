@@ -106,7 +106,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_ATTACH_TRANSCRIPT;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_UPLOAD_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_WORKFLOW_ACTION_INVALID;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.USER_NOT_TRANSCRIBER;
@@ -444,7 +444,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             inboundBlobCLient = dataManagementApi.saveBlobDataToContainer(binaryData, DatastoreContainerType.INBOUND, metadata);
             unstructuredBlobClient = dataManagementApi.saveBlobDataToContainer(binaryData, DatastoreContainerType.UNSTRUCTURED, metadata);
         } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_ATTACH_TRANSCRIPT, e);
+            throw new DartsApiException(FAILED_TO_UPLOAD_TRANSCRIPT, e);
         }
 
         final var userAccountEntity = getUserAccount();

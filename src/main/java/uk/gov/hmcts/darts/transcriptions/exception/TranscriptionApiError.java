@@ -58,10 +58,10 @@ public enum TranscriptionApiError implements DartsApiError {
         HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.FAILED_TO_ATTACH_TRANSCRIPT.toString()
     ),
-    FAILED_TO_DOWNLOAD_TRANSCRIPT(
-        TranscriptionsErrorCode.FAILED_TO_DOWNLOAD_TRANSCRIPT.getValue(),
+    FAILED_TO_UPLOAD_TRANSCRIPT(
+        TranscriptionsErrorCode.FAILED_TO_UPLOAD_TRANSCRIPT.getValue(),
         HttpStatus.INTERNAL_SERVER_ERROR,
-        TranscriptionsTitleErrors.FAILED_TO_DOWNLOAD_TRANSCRIPT.toString()
+        TranscriptionsTitleErrors.FAILED_TO_UPLOAD_TRANSCRIPT.toString()
     ),
     AUDIO_NOT_FOUND(
         TranscriptionsErrorCode.AUDIO_NOT_FOUND.getValue(),
@@ -70,7 +70,7 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     FAILED_TO_UPDATE_TRANSCRIPTIONS(
         UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         "Failed to update some of the transcriptions"
     ),
     USER_NOT_TRANSCRIBER(
