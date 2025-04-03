@@ -25,6 +25,7 @@ public class EventMapper {
             .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("java:S1874")//Required as we replaced getFirst with getHearingEntity(). A ticket will be raised clean this up across the app
     private Event map(EventEntity eventEntity) {
         HearingEntity hearingEntity = eventEntity.getHearingEntity();
 
