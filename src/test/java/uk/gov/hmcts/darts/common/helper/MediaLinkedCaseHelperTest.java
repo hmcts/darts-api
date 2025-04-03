@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -57,7 +56,7 @@ class MediaLinkedCaseHelperTest {
         when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity1);
         when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity2);
 
-        List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
+        Set<HearingEntity> hearingEntities = Set.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
         EventEntity event = mock(EventEntity.class);
         when(event.getHearingEntities()).thenReturn(hearingEntities);
@@ -104,7 +103,7 @@ class MediaLinkedCaseHelperTest {
         CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
         when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
 
-        List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
+        Set<HearingEntity> hearingEntities = Set.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
         EventEntity event = mock(EventEntity.class);
         when(event.getHearingEntities()).thenReturn(hearingEntities);

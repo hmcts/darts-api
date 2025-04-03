@@ -48,4 +48,9 @@ public class EventLinkedCaseEntity {
      */
     private String caseNumber;
 
+    @EqualsAndHashCode.Include(replaces = "event")
+    public Integer getEventId() {
+        return event != null ? event.getId() : null;
+    }
+
 }

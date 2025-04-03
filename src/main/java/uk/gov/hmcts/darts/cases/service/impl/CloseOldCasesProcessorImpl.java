@@ -91,7 +91,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             log.debug("About to close court case id {}", courtCase.getId());
             List<EventEntity> eventList = new ArrayList<>();
             for (HearingEntity hearingEntity : courtCase.getHearings()) {
-                eventList.addAll(hearingEntity.getEventList());
+                eventList.addAll(hearingEntity.getEvents());
             }
             if (CollectionUtils.isNotEmpty(eventList)) {
                 eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());

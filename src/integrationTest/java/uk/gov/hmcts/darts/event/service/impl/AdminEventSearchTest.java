@@ -151,7 +151,7 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
 
     private List<Integer> courthouseIdsAssociatedWithEvents(List<EventEntity> events) {
         return events.stream()
-            .map(eve -> eve.getHearingEntities().getFirst().getCourtroom().getCourthouse().getId())
+            .map(eve -> eve.getHearingEntity().getCourtroom().getCourthouse().getId())
             .toList();
     }
 }

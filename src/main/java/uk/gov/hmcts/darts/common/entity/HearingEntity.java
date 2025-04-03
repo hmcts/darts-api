@@ -26,7 +26,9 @@ import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "hearing")
@@ -80,7 +82,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "eve_id")})
-    private List<EventEntity> eventList = new ArrayList<>();
+    private Set<EventEntity> events = new HashSet<>();
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "cas_id")

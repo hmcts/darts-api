@@ -251,6 +251,6 @@ public class AdvancedSearchRequestHelper {
 
     private Join<CourtCaseEntity, EventEntity> joinEventEntity(Root<CourtCaseEntity> caseRoot) {
         Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
-        return hearingJoin.join(HearingEntity_.EVENT_LIST, JoinType.INNER);
+        return hearingJoin.join(HearingEntity_.EVENTS, JoinType.INNER);
     }
 }
