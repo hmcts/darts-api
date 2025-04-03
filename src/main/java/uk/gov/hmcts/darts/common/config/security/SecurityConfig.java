@@ -40,6 +40,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiTrait;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -60,6 +61,8 @@ public class SecurityConfig {
     private final UserIdentity userIdentity;
     private final JwtDecoder jwtDecoder;
     private static final String TOKEN_BEARER_PREFIX = "Bearer";
+
+    private final Map<String, NimbusJwtDecoder> decoderMap = new HashMap<>();
 
     @Bean
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
@@ -115,19 +118,14 @@ public class SecurityConfig {
 
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {
         Map<String, AuthenticationManager> authenticationManagers = Map.ofEntries(
-            createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri(),
-                                      externalAuthProviderConfigurationProperties.getJwkSetUri()),
-            createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri(),
-                                      internalAuthProviderConfigurationProperties.getJwkSetUri())
+            createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri()),
+            createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri())
         );
         return new JwtIssuerAuthenticationManagerResolver(authenticationManagers::get);
     }
 
-    private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
-                                                                               String jwkSetUri) {
-        var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
-            .jwsAlgorithm(SignatureAlgorithm.RS256)
-            .build();
+    private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer) {
+        var jwtDecoder = getNimbusJwtDecoder(issuer);
 
         //Use a custom JWT decoder so that we can add the user id to the JWT without modifying the underlying JWT
         //This is required for user auditing, as the audit event will need to know the user id but can not call the database to retrieve it
@@ -209,17 +207,24 @@ public class SecurityConfig {
             String token = authHeader.replace(TOKEN_BEARER_PREFIX, "").trim();
             String issuer = JWTParser.parse(token).getJWTClaimsSet().getIssuer();
 
-            AuthProviderConfigurationProperties authProviderConfig = getAuthProviderConfig(issuer);
-
-            var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(authProviderConfig.getJwkSetUri())
-                .jwsAlgorithm(SignatureAlgorithm.RS256)
-                .build();
-
-            return jwtDecoder.decode(token);
+            return getNimbusJwtDecoder(issuer).decode(token);
         } catch (Exception exception) {
             log.error("Problem decoding the token", exception);
             return null;
         }
+    }
+
+    public NimbusJwtDecoder getNimbusJwtDecoder(String issuer) {
+        if (decoderMap.containsKey(issuer)) {
+            return decoderMap.get(issuer);
+        }
+
+        AuthProviderConfigurationProperties authProviderConfig = getAuthProviderConfig(issuer);
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(authProviderConfig.getJwkSetUri())
+            .jwsAlgorithm(SignatureAlgorithm.RS256)
+            .build();
+        decoderMap.put(issuer, decoder);
+        return decoder;
     }
 
     private AuthProviderConfigurationProperties getAuthProviderConfig(String issuer) {
