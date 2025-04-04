@@ -52,16 +52,18 @@ public interface CaseRepository
     List<Integer> findOpenCasesToClose(OffsetDateTime cutoffDate, Limit limit);
 
     @Query("""
-        SELECT cc.id
+        SELECT distinct cc.id
         FROM CourtCaseEntity cc
-        WHERE cc.isRetentionUpdated = true
+        JOIN cc.caseRetentionEntities cr                
+        WHERE cr is not null
+        AND cc.isRetentionUpdated = true
         AND cc.retentionRetries < :maxRetentionRetries
         ORDER BY cc.id ASC
         """)
     List<Integer> findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries, Limit limit);
 
     @Query("""
-        SELECT courtCase.id 
+        SELECT cc.id 
         FROM CourtCaseEntity cc,
         CaseRetentionEntity cr,
         (select cr2.courtCase.id as caseId, max(cr2.createdDateTime) latest_ts

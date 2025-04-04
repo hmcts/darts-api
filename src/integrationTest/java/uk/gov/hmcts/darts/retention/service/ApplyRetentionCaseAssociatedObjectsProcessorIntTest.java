@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
@@ -491,9 +492,8 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
 
         var actualCaseA = caseRepository.findById(caseA.getId());
         assertThat(actualCaseA.get().isRetentionUpdated()).isTrue();
-        assertThat(actualCaseA.get().getRetentionRetries()).isEqualTo(2);
-
-        verify(singleCaseProcessor).processApplyRetentionToCaseAssociatedObjects(caseB.getId());
+        //Processor should not get called as case should not get selected for processing
+        verify(singleCaseProcessor, never()).processApplyRetentionToCaseAssociatedObjects(caseB.getId());
     }
 
     private MediaLinkedCaseEntity createMediaLinkedCase(MediaEntity media, CourtCaseEntity courtCase) {
