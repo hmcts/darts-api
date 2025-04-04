@@ -13,9 +13,9 @@ import static org.springframework.cloud.contract.spec.internal.HttpStatus.OK;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventMapperFunctionalTest extends FunctionalTest {
 
-    public static final String EVENT_MAPPINGS_ENDPOINT_URL = "/admin/event-mappings";
+    private static final String EVENT_MAPPINGS_ENDPOINT_URL = "/admin/event-mappings";
 
-    public static final String EVENT_HANDLERS_ENDPOINT_URL = "/admin/event-handlers";
+    private static final String EVENT_HANDLERS_ENDPOINT_URL = "/admin/event-handlers";
 
     @AfterEach
     void tearDown() {
