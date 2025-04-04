@@ -289,7 +289,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             {
                "type": "COMMON_104",
                "title": "Invalid request",
-               "status": 400,
+               "status": 422,
                "detail": "The time between the start and end date cannot be more than 12 months"
              }
             """;
@@ -315,7 +315,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }""";
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -340,7 +340,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
                         {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }""";
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -434,7 +434,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             {
               "type": "AUDIO_116",
               "title": "Too many results",
-              "status": 400
+              "status": 422
             }""";
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);

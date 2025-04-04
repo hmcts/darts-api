@@ -505,7 +505,7 @@ class CourthouseApiTest extends IntegrationBase {
         /// When
         mockMvc.perform(requestBuilder)
             // Then
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("COURTHOUSE_104"))
             .andExpect(jsonPath("$.title").value("Only TRANSCRIBER roles may be assigned"));
     }
@@ -663,7 +663,7 @@ class CourthouseApiTest extends IntegrationBase {
         // When
         mockMvc.perform(requestBuilder)
             // Then
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("COURTHOUSE_105"))
             .andExpect(jsonPath("$.title").value("Region ID does not exist"));
 
@@ -722,7 +722,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
-    void adminCourthousesPost_shouldReturnBadRequest_whenCourthouseNameIsLowercase() throws Exception {
+    void adminCourthousesPost_shouldReturnUnprocessableEntity_whenCourthouseNameIsLowercase() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
         createEnabledUserAccountEntity(user);
 
@@ -735,7 +735,7 @@ class CourthouseApiTest extends IntegrationBase {
         mockMvc.perform(post("/admin/courthouses")
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(jsonRequestBody))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("COURTHOUSE_108"))
             .andExpect(jsonPath("$.title").value("Invalid request"));
     }

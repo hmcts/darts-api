@@ -76,13 +76,13 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     @Test
-    void shouldReturn400_whenIsCurrentIsSetToFalse() throws Exception {
+    void shouldReturn422_whenIsCurrentIsSetToFalse() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         mockMvc.perform(patch(ENDPOINT.resolve("123456789"))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(createPayload(false)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isUnprocessableEntity());
     }
 
     @Test

@@ -317,7 +317,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                          }
                            """);
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_106"))
             .andExpect(jsonPath("$.detail").value(
                 "A group with a role of type APPROVER has been requested, but only roles of type [TRANSCRIBER, TRANSLATION_QA] are allowed."));

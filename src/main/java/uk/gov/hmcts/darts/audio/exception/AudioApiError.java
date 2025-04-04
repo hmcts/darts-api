@@ -28,7 +28,7 @@ public enum AudioApiError implements DartsApiError {
     ),
     FAILED_TO_UPLOAD_AUDIO_FILE(
         AddAudioErrorCode.FAILED_TO_UPLOAD_AUDIO_FILE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.FAILED_TO_UPLOAD_AUDIO_FILE.toString()
     ),
     MISSING_SYSTEM_USER(
@@ -43,27 +43,27 @@ public enum AudioApiError implements DartsApiError {
     ),
     MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE(
         AddAudioErrorCode.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()
     ),
     MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE(
         AddAudioErrorCode.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()
     ),
     MEDIA_HIDE_ACTION_REASON_NOT_FOUND(
         AddAudioErrorCode.MEDIA_HIDE_ACTION_REASON_NOT_FOUND.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.MEDIA_HIDE_ACTION_REASON_NOT_FOUND.getValue()
     ),
     ADMIN_SEARCH_CRITERIA_NOT_SUITABLE(
         AddAudioErrorCode.ADMIN_SEARCH_CRITERIA_NOT_SUITABLE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.ADMIN_SEARCH_CRITERIA_NOT_SUITABLE.getValue()
     ),
     TOO_MANY_RESULTS(
         AddAudioErrorCode.TOO_MANY_RESULTS.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.TOO_MANY_RESULTS.getValue()
     ),
     MEDIA_ALREADY_MARKED_FOR_DELETION(
@@ -78,12 +78,12 @@ public enum AudioApiError implements DartsApiError {
     ),
     MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND(
         AddAudioErrorCode.MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue()
     ),
     USER_CANNOT_APPROVE_THEIR_OWN_DELETION(
         AddAudioErrorCode.USER_CANT_APPROVE_THEIR_OWN_DELETION.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddAudioTitleErrors.USER_CANT_APPROVE_THEIR_OWN_DELETION.getValue()
     ),
     FAILED_TO_ADD_AUDIO_META_DATA(

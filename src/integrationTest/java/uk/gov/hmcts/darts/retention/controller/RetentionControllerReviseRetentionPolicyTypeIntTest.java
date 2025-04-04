@@ -276,7 +276,7 @@ class RetentionControllerReviseRetentionPolicyTypeIntTest extends IntegrationBas
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_112"))
             .andExpect(jsonPath("$.title").value("The provided start date must be in the future"));
     }
@@ -310,7 +310,7 @@ class RetentionControllerReviseRetentionPolicyTypeIntTest extends IntegrationBas
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_113"))
             .andExpect(jsonPath("$.title").value("To revise a policy, the start date of the prior revision must be in the past"));
     }

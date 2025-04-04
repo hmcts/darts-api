@@ -1,6 +1,6 @@
 {
   "isValid": false,
-  "status": 400,
+  "status": 422,
   "demoMode": false,
   "isError": true,
   "responseStatus": 2,

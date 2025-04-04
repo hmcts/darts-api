@@ -261,7 +261,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void adminCasesSearchPost_ShouldReturnBadRequest_WhenCourtroomNameIsLowercase() throws Exception {
+    void adminCasesSearchPost_ShouldReturnUnprocessableEntity_WhenCourtroomNameIsLowercase() throws Exception {
         // Given
         AdminCasesSearchRequest request = new AdminCasesSearchRequest();
         request.setCourtroomName("courtroom1");  // lowercase value
@@ -271,7 +271,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .contentType(MediaType.APPLICATION_JSON_VALUE)
                                                   .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
@@ -279,7 +279,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
             {
                "type": "CASE_103",
                "title": "The request is not valid",
-               "status": 400,
+               "status": 422,
                "detail": "Courthouse and courtroom must be uppercase."
              }""";
 
@@ -287,7 +287,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void adminCasesSearchPost_ShouldReturnBadRequest_WhenHearingDateStartIsAfterHearingDateEnd() throws Exception {
+    void adminCasesSearchPost_ShouldReturnUnprocessableEntity_WhenHearingDateStartIsAfterHearingDateEnd() throws Exception {
         // Given
         AdminCasesSearchRequest request = new AdminCasesSearchRequest();
         request.setCaseNumber("Case1");
@@ -298,7 +298,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .contentType(MediaType.APPLICATION_JSON_VALUE)
                                                   .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
@@ -306,7 +306,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
             {
                "type": "COMMON_104",
                "title": "Invalid request",
-               "status": 400,
+               "status": 422,
                "detail": "The hearing start date cannot be after the end date."
              }
             """;
@@ -315,7 +315,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    void adminCasesSearchPost_ShouldReturnBadRequest_WhenHearingDateEndIsNull() throws Exception {
+    void adminCasesSearchPost_ShouldReturnUnprocessableEntity_WhenHearingDateEndIsNull() throws Exception {
         // Given
         AdminCasesSearchRequest request = new AdminCasesSearchRequest();
         request.setCourthouseIds(List.of(1));
@@ -325,7 +325,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .contentType(MediaType.APPLICATION_JSON_VALUE)
                                                   .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
@@ -333,7 +333,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }
             """;
 

@@ -15,7 +15,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions400ErrorCode;
 public enum TranscriptionApiError implements DartsApiError {
     FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST(
         TranscriptionsErrorCode.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.toString()
     ),
     TRANSCRIPTION_NOT_FOUND(
@@ -25,17 +25,17 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     BAD_REQUEST_TRANSCRIPTION_STATUS(
         TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_STATUS.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.BAD_REQUEST_TRANSCRIPTION_STATUS.toString()
     ),
     BAD_REQUEST_WORKFLOW_COMMENT(
         TranscriptionsErrorCode.BAD_REQUEST_WORKFLOW_COMMENT.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.BAD_REQUEST_WORKFLOW_COMMENT.toString()
     ),
     BAD_REQUEST_TRANSCRIPTION_TYPE(
         TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_TYPE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.BAD_REQUEST_TRANSCRIPTION_TYPE.toString()
     ),
     TRANSCRIPTION_WORKFLOW_ACTION_INVALID(
@@ -45,7 +45,7 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     BAD_REQUEST_TRANSCRIPTION_URGENCY(
         TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_URGENCY.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.BAD_REQUEST_TRANSCRIPTION_URGENCY.toString()
     ),
     DUPLICATE_TRANSCRIPTION(
@@ -55,13 +55,13 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     FAILED_TO_ATTACH_TRANSCRIPT(
         TranscriptionsErrorCode.FAILED_TO_ATTACH_TRANSCRIPT.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.FAILED_TO_ATTACH_TRANSCRIPT.toString()
     ),
-    FAILED_TO_DOWNLOAD_TRANSCRIPT(
-        TranscriptionsErrorCode.FAILED_TO_DOWNLOAD_TRANSCRIPT.getValue(),
-        HttpStatus.BAD_REQUEST,
-        TranscriptionsTitleErrors.FAILED_TO_DOWNLOAD_TRANSCRIPT.toString()
+    FAILED_TO_UPLOAD_TRANSCRIPT(
+        TranscriptionsErrorCode.FAILED_TO_UPLOAD_TRANSCRIPT.getValue(),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        TranscriptionsTitleErrors.FAILED_TO_UPLOAD_TRANSCRIPT.toString()
     ),
     AUDIO_NOT_FOUND(
         TranscriptionsErrorCode.AUDIO_NOT_FOUND.getValue(),
@@ -70,7 +70,7 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     FAILED_TO_UPDATE_TRANSCRIPTIONS(
         UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         "Failed to update some of the transcriptions"
     ),
     USER_NOT_TRANSCRIBER(
@@ -80,7 +80,7 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER(
         UpdateTranscription400ErrorCode.REQUESTER_CANNOT_BE_APPROVER_OR_REJECTER.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         "Transcription requestor cannot approve or reject their own transcription requests."
     ),
     TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND(
@@ -110,16 +110,16 @@ public enum TranscriptionApiError implements DartsApiError {
     ),
     TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()
     ),
     TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()),
     TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue()
     ),
     TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND(

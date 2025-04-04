@@ -28,12 +28,12 @@ public enum CourthouseApiError implements DartsApiError {
     ),
     ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED(
         CourthouseErrorCode.ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CourthouseTitleErrors.ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED.toString()
     ),
     REGION_ID_DOES_NOT_EXIST(
         CourthouseErrorCode.REGION_ID_DOES_NOT_EXIST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CourthouseTitleErrors.REGION_ID_DOES_NOT_EXIST.toString()
     ),
     COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS(
@@ -43,7 +43,7 @@ public enum CourthouseApiError implements DartsApiError {
     ),
     SECURITY_GROUP_ID_DOES_NOT_EXIST(
         CourthouseErrorCode.SECURITY_GROUP_ID_DOES_NOT_EXIST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CourthouseTitleErrors.SECURITY_GROUP_ID_DOES_NOT_EXIST.toString()
     ),
     COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING(
@@ -53,7 +53,7 @@ public enum CourthouseApiError implements DartsApiError {
     ),
     INVALID_REQUEST(
         CourthouseErrorCode.INVALID_REQUEST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CourthouseTitleErrors.INVALID_REQUEST.toString()
     );
 

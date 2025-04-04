@@ -282,7 +282,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
                                                   .content(objectMapper.writeValueAsString(mediaHideRequest))
                                                   .header("Content-Type", "application/json"))
 
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
@@ -311,7 +311,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
                                                   .content(objectMapper.writeValueAsString(mediaHideRequest))
                                                   .header("Content-Type", "application/json"))
 
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
@@ -350,7 +350,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
                 MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
                                                    .header("Content-Type", "application/json")
                                                    .content(objectMapper.writeValueAsString(mediaHideRequest)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String content = showResult.getResponse().getContentAsString();

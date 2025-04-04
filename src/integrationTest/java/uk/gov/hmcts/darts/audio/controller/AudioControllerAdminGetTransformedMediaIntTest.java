@@ -265,7 +265,7 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
     }
 
     @Test
-    void searchForTransformedMedia_shouldReturnBadRequest_whenCourthouseDisplayNameIsLowercase() throws Exception {
+    void searchForTransformedMedia_shouldReturnUnprocessableEntity_whenCourthouseDisplayNameIsLowercase() throws Exception {
         // Authorize the user
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
@@ -277,7 +277,7 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
         mockMvc.perform(post(ENDPOINT_URL)
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(result -> {
                 String response = result.getResponse().getContentAsString();
                 Assertions.assertTrue(response.contains("Courthouse display name must be uppercase"));

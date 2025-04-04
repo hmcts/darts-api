@@ -119,7 +119,7 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }
             """;
 
@@ -148,7 +148,7 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }
             """;
 
@@ -209,7 +209,7 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }
             """;
 
@@ -240,7 +240,7 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }
             """;
 
@@ -273,7 +273,7 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }
             """;
 
@@ -305,7 +305,7 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }
             """;
 
@@ -338,7 +338,7 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 400
+              "status": 422
             }
             """;
 
@@ -365,7 +365,7 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(searchRequest)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         Problem actualResponse

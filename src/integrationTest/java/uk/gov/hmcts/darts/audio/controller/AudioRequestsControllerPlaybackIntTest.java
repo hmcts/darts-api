@@ -172,7 +172,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     }
 
     @Test
-    void audioRequestPlaybackGetShouldReturnBadRequestWhenMediaRequestEntityIsDownload() throws Exception {
+    void audioRequestPlaybackGetShouldReturnUnprocessableEntityWhenMediaRequestEntityIsDownload() throws Exception {
         authorisationStub.givenTestSchema();
 
         final Integer transformedMediaId = authorisationStub.getTransformedMediaEntity().getId();
@@ -188,7 +188,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_102"));
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(

@@ -48,6 +48,12 @@ paths:
                   summary: No media metadata exists for the given hearing id
                   value:
                     [ ]
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -106,6 +112,12 @@ paths:
               schema:
                 type: string
                 format: byte
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -256,6 +268,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/GetAdminMediaResponseItem'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -303,6 +321,12 @@ paths:
       responses:
         '200':
           description: Accepted
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:
@@ -456,6 +480,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MediaApproveMarkedForDeletionResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
@@ -495,6 +525,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PostAdminMediasSearchResponseItem'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '500':

@@ -323,7 +323,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_111"))
             .andExpect(jsonPath("$.title").value("Duration too short"))
             .andExpect(jsonPath("$.min_allowable_days").value(1));
@@ -356,7 +356,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_112"))
             .andExpect(jsonPath("$.title").value("The provided start date must be in the future"));
     }

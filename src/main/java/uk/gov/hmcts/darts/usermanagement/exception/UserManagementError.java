@@ -33,7 +33,7 @@ public enum UserManagementError implements DartsApiError {
     ),
     INVALID_EMAIL_FORMAT(
         UserManagementErrorCode.INVALID_EMAIL_FORMAT.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         UserManagementTitleErrors.INVALID_EMAIL_FORMAT.toString()
     ),
     SECURITY_GROUP_NOT_FOUND(
@@ -43,7 +43,7 @@ public enum UserManagementError implements DartsApiError {
     ),
     SECURITY_GROUP_NOT_ALLOWED(
         UserManagementErrorCode.SECURITY_GROUP_NOT_ALLOWED.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         UserManagementTitleErrors.SECURITY_GROUP_NOT_ALLOWED.toString()
     ),
     COURTHOUSE_NOT_FOUND(
