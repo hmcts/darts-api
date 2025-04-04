@@ -117,6 +117,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     @Query("""
          SELECT new uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult(
              t.id,
+             coalesce(hcc.id, tcc.id),
              coalesce(hcc.caseNumber, tcc.caseNumber),
              coalesce(hcth.id, tcth.id),
              coalesce(h.hearingDate, t.hearingDate),

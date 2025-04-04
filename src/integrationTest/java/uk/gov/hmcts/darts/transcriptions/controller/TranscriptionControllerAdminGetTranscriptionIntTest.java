@@ -790,8 +790,8 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         }
 
         if (response.getCase() != null) {
-            assertEquals(response.getCase().getCaseNumber(),
-                         entity.getTranscription().getCourtCase().getCaseNumber());
+            assertEquals(response.getCase().getId(),
+                         entity.getTranscription().getCourtCase().getId());
             assertEquals(response.getCase().getCaseNumber(),
                          entity.getTranscription().getCourtCase().getCaseNumber());
         }

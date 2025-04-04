@@ -20,6 +20,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
          SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
          courtCase.id,
          courtCase.caseNumber,
+         hearingCase.id,
          hearingCase.caseNumber,
          courthouse.displayName,
          hearingcourthouse.displayName,
