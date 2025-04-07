@@ -333,7 +333,7 @@ class DataAnonymisationServiceImplTest {
 
         EventEntity entityEntity1 = mock(EventEntity.class);
         EventEntity entityEntity2 = mock(EventEntity.class);
-        hearingEntity.setEventList(List.of(entityEntity1, entityEntity2));
+        hearingEntity.setEvents(Set.of(entityEntity1, entityEntity2));
 
         doNothing().when(dataAnonymisationService).anonymiseTranscriptionEntity(any(), any(), anyBoolean());
 

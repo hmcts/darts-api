@@ -18,7 +18,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
@@ -55,7 +57,7 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         setTranscriptions(transcriptions != null ? transcriptions : new ArrayList<>());
         setMediaRequests(mediaRequests != null ? mediaRequests : new ArrayList<>());
         setNew(isNew);
-        setEventList(eventList != null ? eventList : new ArrayList<>());
+        setEvents(eventList != null ? Set.of(eventList.toArray(new EventEntity[0])) : new HashSet<>());
         setCourtCase(courtCase);
         setAnnotations(annotations != null ? annotations : new ArrayList<>());
         setCreatedDateTime(createdDateTime);

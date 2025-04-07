@@ -125,10 +125,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
@@ -819,10 +820,10 @@ public class DartsDatabaseStub {
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
         if (event.getHearingEntities().isEmpty()) {
-            event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
+            event.setHearingEntities(Set.of(hearingRepository.getReferenceById(hearing.getId())));
             dartsDatabaseSaveStub.save(event);
         } else {
-            List<HearingEntity> hearingEntities = new ArrayList<>();
+            Set<HearingEntity> hearingEntities = new HashSet<>();
             hearingEntities.addAll(event.getHearingEntities());
             boolean alreadyExists = hearingEntities.stream().anyMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()));
             if (!alreadyExists) {
