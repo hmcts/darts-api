@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequestWithStorageGUID;
 import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
+import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
@@ -33,6 +35,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
+import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -50,7 +53,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,6 +105,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private String guid = UUID.randomUUID().toString();
 
     private static final long END_FILE_DURATION = 1440;
+    @Autowired
+    private AudioUploadService audioUploadService;
 
 
     @BeforeEach
@@ -494,6 +501,91 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             .filter(audit -> AuditActivity.HIDE_AUDIO.getId().equals(audit.getAuditActivity().getId()))
             .toList();
         assertEquals(1, hideAudio.size());
+    }
+
+
+    @Test
+    void whenAddAudioIsCalled_withTheLastCurrentValueNotBeingTheLastAntecendntValue_shouldUseLastCurrentValueForDuplicateChecks() throws Exception {
+        UserAccountEntity userAccount = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
+        final AddAudioMetadataRequestWithStorageGUID addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(END_FILE_DURATION),
+                                                                                                     "Bristol", "1");
+
+        final String oldVersionChecksum = UUID.randomUUID().toString();
+        final CourtroomEntity courtroomEntity = dartsDatabase.getRetrieveCoreObjectService().retrieveOrCreateCourtroom(addAudioMetadataRequest.getCourthouse(),
+                                                                                                                       addAudioMetadataRequest.getCourtroom(),
+                                                                                                                       userAccount);
+
+        Function<MediaEntity, MediaEntity> alignRequest = (media) -> {
+            media.setCourtroom(courtroomEntity);
+            media.setChannel(addAudioMetadataRequest.getChannel());
+            media.setMediaFile(addAudioMetadataRequest.getFilename());
+            media.setStart(addAudioMetadataRequest.getStartedAt());
+            media.setEnd(addAudioMetadataRequest.getEndedAt());
+            media.setChecksum(oldVersionChecksum);
+            media.setIsCurrent(false);
+            return dartsDatabase.save(media);
+        };
+        TriConsumer<Integer, MediaEntity, MediaEntity> alignDataMediaEntity = (chronicleId, previousMedia, newMediaEntity) -> {
+            newMediaEntity.setChronicleId(String.valueOf(chronicleId));
+            newMediaEntity.setAntecedentId(String.valueOf(previousMedia.getId()));
+        };
+
+        /*
+        Values pulled from staging which caused the origional failure (These values are replicated in this test)
+        TestId, m.chronicle_id, m.antecedent_id, m.created_ts, m.is_current,m.checksum, m.med_id
+        MED5: 41017 41077 2025-04-02 11:15:22.382 +0100 false  47f13e9b2248d73730e165a50fb8c395 162825
+        MED4: 41017 41037 2024-05-16 16:54:36.551 +0100 false  81ef8524d69c7ae6605baf37e425b574 41057
+        MED3: 41017 41057 2024-05-16 16:53:34.321 +0100 false  81ef8524d69c7ae6605baf37e425b573 41077
+        MED2: 41017 41017 2024-05-16 16:49:47.107 +0100 true   1ef8524d69c7ae6605baf37e425b572  41037
+        MED1: 41017       2024-05-16 16:49:34.247 +0100 false  81ef8524d69c7ae6605baf37e425b571 41017
+
+        chronicle_id & antecedent_id mapped to media variable names instead of id's for clarity
+        MED5: MED1 MED3 2025-04-02 11:15:22.382 +0100 fals 47f13e9b2248d73730e165a50fb8c395 162825
+        MED4: MED1 MED2 2024-05-16 16:54:36.551 +0100 fals 81ef8524d69c7ae6605baf37e425b574 41057
+        MED3: MED1 MED4 2024-05-16 16:53:34.321 +0100 fals 81ef8524d69c7ae6605baf37e425b573 41077
+        MED2: MED1 MED1 2024-05-16 16:49:47.107 +0100 true 81ef8524d69c7ae6605baf37e425b572 41037
+        MED1: MED1      2024-05-16 16:49:34.247 +0100 fals 81ef8524d69c7ae6605baf37e425b571 41017
+        */
+
+        MediaEntity media1 = alignRequest.apply(new MediaTestData().someMinimal());
+        MediaEntity media2 = alignRequest.apply(new MediaTestData().someMinimal());
+        MediaEntity media3 = alignRequest.apply(new MediaTestData().someMinimal());
+        MediaEntity media4 = alignRequest.apply(new MediaTestData().someMinimal());
+        MediaEntity media5 = alignRequest.apply(new MediaTestData().someMinimal());
+
+        media1.setChronicleId(String.valueOf(media1.getId()));
+        alignDataMediaEntity.accept(media1.getId(), media1, media2);
+        alignDataMediaEntity.accept(media1.getId(), media4, media3);
+        alignDataMediaEntity.accept(media1.getId(), media2, media4);
+        alignDataMediaEntity.accept(media1.getId(), media3, media5);
+        media2.setIsCurrent(true);
+
+        dartsDatabase.getMediaRepository().saveAndFlush(media1);
+        dartsDatabase.getMediaRepository().saveAndFlush(media2);
+        dartsDatabase.getMediaRepository().saveAndFlush(media3);
+        dartsDatabase.getMediaRepository().saveAndFlush(media4);
+        dartsDatabase.getMediaRepository().saveAndFlush(media5);
+
+        mockMvc.perform(
+                post(ENDPOINT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(addAudioMetadataRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAll()
+            .stream()
+            .filter(media -> oldVersionChecksum.equals(media.getChecksum()) || addAudioMetadataRequest.getChecksum().equals(media.getChecksum()))
+            .sorted((o1, o2) -> o2.getId().compareTo(o1.getId()))
+            .toList();
+        assertThat(mediaEntities).hasSize(6);
+        //There should only be one current media
+        assertThat(mediaEntities.get(0).getIsCurrent()).isTrue();
+        assertThat(mediaEntities.get(1).getIsCurrent()).isFalse();
+        assertThat(mediaEntities.get(2).getIsCurrent()).isFalse();
+        assertThat(mediaEntities.get(3).getIsCurrent()).isFalse();
+        assertThat(mediaEntities.get(4).getIsCurrent()).isFalse();
+        assertThat(mediaEntities.get(5).getIsCurrent()).isFalse();
     }
 
     private AddAudioMetadataRequestWithStorageGUID createAddAudioRequest(OffsetDateTime startedAt,

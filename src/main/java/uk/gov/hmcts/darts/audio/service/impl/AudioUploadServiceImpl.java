@@ -93,7 +93,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         List<MediaEntity> duplicatesToBeSuperseded = getLatestDuplicateMediaFiles(addAudioMetadataRequest);
 
         List<MediaEntity> duplicatesWithDifferentChecksum = filterForMediaWithMismatchingChecksum(duplicatesToBeSuperseded, incomingChecksum);
-
         if (isNotEmpty(duplicatesToBeSuperseded) && isEmpty(duplicatesWithDifferentChecksum)) {
             try {
                 dataManagementApi.deleteBlobDataFromInboundContainer(blodId);
@@ -204,7 +203,15 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             addAudioMetadataRequest.getStartedAt(),
             addAudioMetadataRequest.getEndedAt());
 
-        // now lets get the lowest level media objects so that they can act as a basis for the antecedent
+        List<MediaEntity> currentDuplicates = identicalMediaEntities
+            .stream()
+            .filter(media -> Boolean.TRUE.equals(media.getIsCurrent()))
+            .toList();
+
+        //Return only is_current true items if there are any
+        if (!currentDuplicates.isEmpty()) {
+            return currentDuplicates;
+        }
         Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();
         identicalMediaEntities.stream().forEach(entry ->
                                                     tree.addNode(new MediaEntityTreeNodeImpl(entry))
