@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.EventSearchResult;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -84,23 +83,6 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         Limit limit);
 
     @Query(value = """
-        SELECT distinct e2.event_id
-        FROM (
-          SELECT e.event_id, he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids
-          FROM darts.event e
-          LEFT JOIN darts.hearing_event_ae he ON he.eve_id = e.eve_id
-          WHERE e.is_current = true
-          AND e.event_id <> 0
-          AND e.event_id IS NOT null
-          GROUP by he.eve_id, e.event_id
-        ) e2
-        GROUP BY e2.event_id, e2.hearing_ids
-        HAVING count(e2.event_id) > 1
-        LIMIT :limit
-        """, nativeQuery = true)
-    List<Integer> findCurrentEventIdsWithDuplicates(long limit);
-
-    @Query(value = """
         select distinct on (event_id, hearing_ids) e.* from (
             SELECT e.eve_id, event_id, e.created_ts, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids
             FROM darts.event e
@@ -110,52 +92,6 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         ) e ORDER BY event_id, hearing_ids, e.created_ts DESC
         """, nativeQuery = true)
     List<EventIdAndHearingIds> getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
-
-    /**
-     * string_agg(he.hea_id::varchar, ',' order by he.hea_id) to ensure we only update the events that have the same hearing ids
-     * This is done by reading the hearing ids from the latest event created and only updating the events that have the same hearing ids
-     *
-     * @param eventIdsPrimaryKey the primary key of the event that is the latest created
-     * @param eventId            the event id that we want to close old events for
-     * @param hearingIds         the hearing ids that we want to close old events for (Should match hearing ids of the latest event created)
-     */
-    @Transactional
-    @Modifying
-    @Query(value = """
-        UPDATE darts.event e
-        SET is_current = false,
-            last_modified_ts = current_timestamp,
-            last_modified_by = :userId
-        FROM (
-           SELECT he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids
-           FROM darts.event e
-           LEFT JOIN darts.hearing_event_ae he ON he.eve_id = e.eve_id
-           WHERE e.event_id = :eventId
-           GROUP by he.eve_id
-        ) h
-        WHERE e.eve_id != :eventIdsPrimaryKey
-        AND e.event_id = :eventId
-        AND h.hearing_ids = :hearingIds
-        AND h.eve_id = e.eve_id
-        """, nativeQuery = true)
-    void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-        Integer eventIdsPrimaryKey, Integer eventId, String hearingIds, int userId);
-
-    @Query("""
-        SELECT ee
-        FROM EventEntity ee
-        WHERE ee.timestamp >= :startDateTime
-        AND ee.timestamp <= :endDateTime
-        """)
-    List<EventEntity> findAllBetweenDateTimesInclusive(OffsetDateTime startDateTime, OffsetDateTime endDateTime);
-
-    @Query("""
-        SELECT ee
-        FROM EventEntity ee
-        WHERE ee.eventId = :eventId
-        AND ee.eventId <> 0
-        """)
-    List<EventEntity> findAllByEventIdExcludingEventIdZero(Integer eventId);
 
     @Query("""
          SELECT ee
