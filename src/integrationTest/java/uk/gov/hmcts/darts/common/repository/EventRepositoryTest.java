@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
 import uk.gov.hmcts.darts.test.common.data.EventTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -203,6 +205,51 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         // then
         assertThat(events).hasSize(1);
         assertEquals(eventWithCourtroomToBeIncluded.getId(), events.getFirst());
+    }
+
+
+    @Test
+    void deleteAllAssocaiatedHearing_shouldOnlyDeleteAssociatedHearingsForProvidedIds() {
+        final EventEntity event1HasHearingsIncluded = EventTestData.someMinimalEvent();
+        final EventEntity event2HasHearingsIncluded = EventTestData.someMinimalEvent();
+        final EventEntity event3HasHearingsExcluded = EventTestData.someMinimalEvent();
+        final EventEntity event4NoHearingsIncluded = EventTestData.someMinimalEvent();
+
+        final HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimal();
+        final HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimal();
+        final HearingEntity hearing3 = PersistableFactory.getHearingTestData().someMinimal();
+
+        dartsDatabase.save(hearing1);
+        dartsDatabase.save(hearing2);
+        dartsDatabase.save(hearing3);
+
+        event1HasHearingsIncluded.setHearingEntities(Set.of(hearing1, hearing2, hearing3));
+        event2HasHearingsIncluded.setHearingEntities(Set.of(hearing1, hearing2));
+        event3HasHearingsExcluded.setHearingEntities(Set.of(hearing3, hearing1));
+
+        dartsDatabase.save(event1HasHearingsIncluded);
+        dartsDatabase.save(event2HasHearingsIncluded);
+        dartsDatabase.save(event3HasHearingsExcluded);
+        dartsDatabase.save(event4NoHearingsIncluded);
+
+
+        eventRepository.deleteAllAssocaiatedHearing(List.of(
+            event1HasHearingsIncluded.getId(),
+            event2HasHearingsIncluded.getId(),
+            event4NoHearingsIncluded.getId()
+        ));
+
+        dartsDatabase.getTransactionalUtil().executeInTransaction(() -> {
+            EventEntity afterEventEntity1 = eventRepository.findById(event1HasHearingsIncluded.getId()).orElseThrow();
+            assertThat(afterEventEntity1.getHearingEntities()).isEmpty();
+            EventEntity afterEventEntity2 = eventRepository.findById(event2HasHearingsIncluded.getId()).orElseThrow();
+            assertThat(afterEventEntity2.getHearingEntities()).isEmpty();
+            EventEntity afterEventEntity3 = eventRepository.findById(event3HasHearingsExcluded.getId()).orElseThrow();
+            assertThat(afterEventEntity3.getHearingEntities().stream().map(HearingEntity::getId).toList()
+            ).isNotEmpty().contains(hearing1.getId(), hearing3.getId());
+            EventEntity afterEventEntity4 = eventRepository.findById(event4NoHearingsIncluded.getId()).orElseThrow();
+            assertThat(afterEventEntity4.getHearingEntities()).isEmpty();
+        });
     }
 
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {

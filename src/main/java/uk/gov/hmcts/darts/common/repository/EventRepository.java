@@ -126,6 +126,12 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         """)
     List<Integer> findDuplicateEventIds(Integer eventId);
 
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM darts.hearing_event_ae WHERE eve_id IN (:eventEntitiesIdsToDelete)", nativeQuery = true)
+    void deleteAllAssocaiatedHearing(List<Integer> eventEntitiesIdsToDelete);
+
     interface EventIdAndHearingIds {
 
         @Column(name = "eve_id")
