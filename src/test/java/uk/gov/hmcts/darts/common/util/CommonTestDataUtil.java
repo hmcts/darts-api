@@ -42,8 +42,8 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.time.ZoneOffset.UTC;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
