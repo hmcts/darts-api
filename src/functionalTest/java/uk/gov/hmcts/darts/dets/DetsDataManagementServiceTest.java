@@ -96,6 +96,5 @@ class DetsDataManagementServiceTest {
                      () -> dataManagementService.copyDetsBlobDataToArm(uuid, blobPathAndName));
 
     }
-
-
+    
 }

@@ -260,7 +260,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         assertThat(hearingEntity.getMediaRequests()).hasSizeGreaterThan(0);
         hearingEntity.getTranscriptions().forEach(transcriptionEntity -> assertTranscription(transcriptionEntity, isAnonymised));
         hearingEntity.getMediaRequests().forEach(mediaRequestEntity -> assertMediaRequest(mediaRequestEntity, isAnonymised));
-        hearingEntity.getEventList().forEach(eventEntity -> assertEvent(eventEntity, isAnonymised));
+        hearingEntity.getEvents().forEach(eventEntity -> assertEvent(eventEntity, isAnonymised));
     }
 
     private void assertMediaRequest(MediaRequestEntity mediaRequestEntity, boolean isAnonymised) {

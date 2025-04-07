@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestEventEntity;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
@@ -40,7 +41,7 @@ public final class EventTestData
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity, OffsetDateTime eventTime) {
         EventEntity event = someMinimalEvent();
-        event.setHearingEntities(List.of(hearingEntity));
+        event.setHearingEntities(Set.of(hearingEntity));
         event.setCourtroom(hearingEntity.getCourtroom());
         event.setEventText(eventText);
         event.setTimestamp(eventTime);
