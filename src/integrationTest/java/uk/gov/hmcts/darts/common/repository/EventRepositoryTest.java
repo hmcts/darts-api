@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
 import uk.gov.hmcts.darts.test.common.data.EventTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -16,10 +18,12 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventRepositoryTest extends PostgresIntegrationBase {
     @Autowired
@@ -32,6 +36,62 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     private HearingStub hearingStub;
     @Autowired
     private EventLinkedCaseStub eventLinkedCaseStub;
+
+    @Test
+    void testEventProcessing() {
+        dartsDatabase.createCase("Bristol", "case1");
+        dartsDatabase.createCase("Bristol", "case2");
+        dartsDatabase.createCase("Bristol", "case3");
+
+        Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
+
+        List<Integer> eventIdsToBeProcessed1 = eventRepository.findCurrentEventIdsWithDuplicates(1);
+        assertEquals(1, eventIdsToBeProcessed1.size());
+        EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst())
+            .getFirst();
+        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+            eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds(), 0);
+        assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.getFirst())));
+
+        List<Integer> eventIdsToBeProcessed2 = eventRepository.findCurrentEventIdsWithDuplicates(1);
+        EventRepository.EventIdAndHearingIds eventPkidSecond =
+            eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed2.getFirst())
+                .getFirst();
+        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+            eventPkidSecond.getEveId(), eventPkidSecond.getEventId(), eventPkidSecond.getHearingIds(), 0);
+
+        assertEquals(1, eventIdsToBeProcessed1.size());
+        assertTrue(eventIdMap.containsKey(eventIdsToBeProcessed2.getFirst()));
+        Assertions.assertNotEquals(eventIdsToBeProcessed1, eventIdsToBeProcessed2);
+
+        // ENSURE WE DONT PROCESS THE THIRD BATCH I.E. THE ZERO EVENT ID
+        List<Integer> eventIdsToBeProcessed3 = eventRepository.findCurrentEventIdsWithDuplicates(1);
+        assertTrue(eventIdsToBeProcessed3.isEmpty());
+    }
+
+    @Test
+    void givenEventCleanUpTask_whenVersionedEventsAreFound_thenOlderVersionsAreNotMarkedAsNonCurrentWhenHearingsDoNotMatch() {
+        dartsDatabase.createCase("Bristol", "case1");
+        dartsDatabase.createCase("Bristol", "case2");
+        dartsDatabase.createCase("Bristol", "case3");
+
+        Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
+
+        List<Integer> eventIdsToBeProcessed1 = eventRepository.findCurrentEventIdsWithDuplicates(1);
+        assertEquals(1, eventIdsToBeProcessed1.size());
+        List<EventEntity> eventEntities = eventIdMap.get(eventIdsToBeProcessed1.getFirst());
+        EventEntity eventEntity = eventEntities.getFirst();
+        eventEntity.getHearingEntities().add(
+            hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(EventStub.STARTED_AT))
+        );
+        eventRepository.save(eventEntity);
+
+        EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst())
+            .getFirst();
+        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+            eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds(), 0);
+        Assertions.assertFalse(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventEntities));
+    }
 
 
     @Test
@@ -115,6 +175,32 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
         List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
+    }
+
+    @Test
+    void findAllByEventIdExcludingEventIdZero_whenEventIdIsSetAboveZero_willReturnVersions() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        event1.setEventText("eventText");
+        event2.setEventText("eventText");
+        event1.setEventId(1);
+        event2.setEventId(1);
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+
+        List<EventEntity> eventVersions = eventRepository.findAllByEventIdExcludingEventIdZero(event1.getEventId());
+        assertThat(eventVersions).hasSize(2);
+    }
+
+    @Test
+    void findAllByEventIdExcludingEventIdZero_whenEventIdIsSetToZero_willNotReturnVersions() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        event1.setEventText("eventText");
+        event1.setEventId(0);
+        dartsDatabase.save(event1);
+
+        List<EventEntity> eventVersions = eventRepository.findAllByEventIdExcludingEventIdZero(event1.getEventId());
+        assertThat(eventVersions).isEmpty();
     }
 
     @Test
