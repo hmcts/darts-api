@@ -1087,8 +1087,12 @@ public class DartsDatabaseStub {
         return securityRoleRepository.findById(role.getId()).orElseThrow();
     }
 
+    /**
+     * Creates a media linked case.
+     * @Deprecated use createMediaLinkedCase(MediaEntity mediaEntity, CourtCaseEntity courtCase)
+     */
     @Transactional
-    @Deprecated//Use createMediaLinkedCase using CourtCaseEntity instead of caseNumber and courthouseName
+    @Deprecated
     public MediaLinkedCaseEntity createMediaLinkedCase(
         MediaEntity mediaEntity,
         CourtCaseEntity courtCase,
