@@ -295,7 +295,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
 
     @Test
-    void deleteAllAssocaiatedHearing_shouldOnlyDeleteAssociatedHearingsForProvidedIds() {
+    void deleteAllAssociatedHearings_shouldOnlyDeleteAssociatedHearingsForProvidedIds() {
         final EventEntity event1HasHearingsIncluded = EventTestData.someMinimalEvent();
         final EventEntity event2HasHearingsIncluded = EventTestData.someMinimalEvent();
         final EventEntity event3HasHearingsExcluded = EventTestData.someMinimalEvent();
@@ -319,7 +319,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         dartsDatabase.save(event4NoHearingsIncluded);
 
 
-        eventRepository.deleteAllAssocaiatedHearing(List.of(
+        eventRepository.deleteAllAssociatedHearings(List.of(
             event1HasHearingsIncluded.getId(),
             event2HasHearingsIncluded.getId(),
             event4NoHearingsIncluded.getId()

@@ -39,7 +39,7 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         caseManagementRetentionRepository.flush();
         eventLinkedCaseRepository.deleteAllByEventIn(eventEntitiesIdsToDelete);
         eventLinkedCaseRepository.flush();
-        eventRepository.deleteAllAssocaiatedHearing(eventEntitiesIdsToDelete);
+        eventRepository.deleteAllAssociatedHearings(eventEntitiesIdsToDelete);
         eventRepository.deleteAllById(eventEntitiesIdsToDelete);
         eventRepository.flush();
 

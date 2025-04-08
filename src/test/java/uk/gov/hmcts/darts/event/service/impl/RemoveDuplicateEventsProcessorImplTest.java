@@ -88,7 +88,7 @@ class RemoveDuplicateEventsProcessorImplTest {
         verify(caseManagementRetentionRepository).flush();
         verify(eventLinkedCaseRepository).deleteAllByEventIn(toBeDeleted);
         verify(eventLinkedCaseRepository).flush();
-        verify(eventRepository).deleteAllAssocaiatedHearing(toBeDeleted);
+        verify(eventRepository).deleteAllAssociatedHearings(toBeDeleted);
         verify(eventRepository).deleteAllById(toBeDeleted);
         verify(eventRepository).flush();
         verifyNoMoreInteractions(eventRepository);

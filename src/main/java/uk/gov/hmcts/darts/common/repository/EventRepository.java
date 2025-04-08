@@ -194,7 +194,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM darts.hearing_event_ae WHERE eve_id IN (:eventEntitiesIdsToDelete)", nativeQuery = true)
-    void deleteAllAssocaiatedHearing(List<Integer> eventEntitiesIdsToDelete);
+    void deleteAllAssociatedHearings(List<Integer> eventEntitiesIdsToDelete);
 
     interface EventIdAndHearingIds {
 
