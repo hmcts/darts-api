@@ -60,7 +60,7 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
     @Override
     @Transactional
     public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp) {
-        eodRepository.updateStatus(newStatus, userAccount, idsToUpdate, timestamp);
+        eodRepository.updateStatus(newStatus, userAccount.getId(), idsToUpdate, timestamp);
     }
 
     @Override

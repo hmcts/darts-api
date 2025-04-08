@@ -95,7 +95,7 @@ class EventMappingServiceImplTest {
         EventHandlerEntity savedEventHandlerEntity = eventHandlerEntityArgumentCaptor.getValue();
 
         assertEquals(FIXED_DATETIME, savedEventHandlerEntity.getCreatedDateTime());
-        assertEquals(eventHandlerEntity.getCreatedBy(), savedEventHandlerEntity.getCreatedBy());
+        assertEquals(eventHandlerEntity.getCreatedById(), savedEventHandlerEntity.getCreatedById());
         verify(auditApi, times(1)).record(AuditActivity.ADDING_EVENT_MAPPING);
     }
 
@@ -116,7 +116,7 @@ class EventMappingServiceImplTest {
         EventHandlerEntity savedEventHandlerEntity = eventHandlerEntityArgumentCaptor.getValue();
 
         assertEquals(FIXED_DATETIME, savedEventHandlerEntity.getCreatedDateTime());
-        assertEquals(eventHandlerEntity.getCreatedBy(), savedEventHandlerEntity.getCreatedBy());
+        assertEquals(eventHandlerEntity.getCreatedById(), savedEventHandlerEntity.getCreatedById());
 
         List<EventHandlerEntity> updatedEVentHandlerEntities = eventHandlerEntitiesArgumentCaptor.getValue();
         for (EventHandlerEntity updatedEntity : updatedEVentHandlerEntities) {

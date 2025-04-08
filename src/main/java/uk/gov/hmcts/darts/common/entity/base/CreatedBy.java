@@ -5,11 +5,14 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.time.OffsetDateTime;
 
 public interface CreatedBy {
-    UserAccountEntity getCreatedBy();
 
     void setCreatedBy(UserAccountEntity userAccount);
 
+    Integer getCreatedById();
+
     void setCreatedById(Integer createdById);
+
+    OffsetDateTime getCreatedDateTime();
 
     void setCreatedDateTime(OffsetDateTime now);
 
@@ -17,5 +20,4 @@ public interface CreatedBy {
 
     void setSkipUserAudit(boolean value);
 
-    OffsetDateTime getCreatedDateTime();
 }

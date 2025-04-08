@@ -50,7 +50,7 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
                 externalObjectDirectoryEntityOriginal.getId()).orElseThrow();
             assertThat(externalObjectDirectoryEntityAfter.getStatus().getId())
                 .isEqualTo(ObjectRecordStatusEnum.STORED.getId());
-            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedBy().getId())
+            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedById())
                 .isEqualTo(AUTOMATION_USER_ID);
             assertThat(externalObjectDirectoryEntityAfter.getLastModifiedDateTime())
                 .isCloseTo(OffsetDateTime.now(), within(1, ChronoUnit.MINUTES));
@@ -80,8 +80,8 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
             ExternalObjectDirectoryEntity externalObjectDirectoryEntityAfter = dartsDatabase.getExternalObjectDirectoryRepository().findById(
                 externalObjectDirectoryEntityOriginal.getId()).orElseThrow();
             assertThat(externalObjectDirectoryEntityAfter.getStatus().getId()).isEqualTo(status.getId());
-            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedBy().getId()).isEqualTo(
-                externalObjectDirectoryEntityOriginal.getLastModifiedBy().getId());
+            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedById()).isEqualTo(
+                externalObjectDirectoryEntityOriginal.getLastModifiedById());
         });
     }
 
@@ -106,8 +106,8 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
                 externalObjectDirectoryEntityOriginal.getId()).orElseThrow();
             assertThat(externalObjectDirectoryEntityAfter.getStatus().getId()).isEqualTo(
                 ObjectRecordStatusEnum.ARM_RPO_PENDING.getId());
-            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedBy().getId())
-                .isEqualTo(externalObjectDirectoryEntityOriginal.getLastModifiedBy().getId());
+            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedById())
+                .isEqualTo(externalObjectDirectoryEntityOriginal.getLastModifiedById());
         });
     }
 }

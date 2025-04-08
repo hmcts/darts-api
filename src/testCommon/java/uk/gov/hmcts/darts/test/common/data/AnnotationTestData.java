@@ -35,8 +35,10 @@ public final class AnnotationTestData implements Persistable<TestAnnotationEntit
         TestAnnotationEntity.TestAnnotationEntityRetrieve retrieve = new
             TestAnnotationEntity.TestAnnotationEntityRetrieve();
         UserAccountEntity userAccount = minimalUserAccount();
-        retrieve.getBuilder().currentOwner(userAccount).lastModifiedBy(userAccount)
-            .createdBy(userAccount).createdTimestamp(OffsetDateTime.now())
+        retrieve.getBuilder().currentOwner(userAccount)
+            .lastModifiedById(0)
+            .createdById(0)
+            .createdTimestamp(OffsetDateTime.now())
             .lastModifiedDateTime(OffsetDateTime.now())
             .hearingList(new ArrayList<>());
         return retrieve;

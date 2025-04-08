@@ -48,14 +48,14 @@ public class TransformedMediaStub {
         transformedMediaEntity.setStartTime(mediaRequestEntity.getStartTime());
         transformedMediaEntity.setEndTime(mediaRequestEntity.getEndTime());
 
-        if (mediaRequestEntity.getLastModifiedBy() != null) {
-            transformedMediaEntity.setLastModifiedBy(mediaRequestEntity.getLastModifiedBy());
+        if (mediaRequestEntity.getLastModifiedById() != null) {
+            transformedMediaEntity.setLastModifiedById(mediaRequestEntity.getLastModifiedById());
         } else {
             transformedMediaEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         }
 
-        if (mediaRequestEntity.getCreatedBy() != null) {
-            transformedMediaEntity.setCreatedBy(mediaRequestEntity.getCreatedBy());
+        if (mediaRequestEntity.getCreatedById() != null) {
+            transformedMediaEntity.setCreatedById(mediaRequestEntity.getCreatedById());
         } else {
             transformedMediaEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         }

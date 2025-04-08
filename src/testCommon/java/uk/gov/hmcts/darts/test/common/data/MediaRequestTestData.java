@@ -34,10 +34,6 @@ public final class MediaRequestTestData implements Persistable<TestMediaRequestE
 
     private final OffsetDateTime endTime = YESTERDAY.plusHours(1);
 
-    private final UserAccountEntity createdBy = UserAccountTestData.minimalUserAccount();
-
-    private final UserAccountEntity lastModifiedBy = UserAccountTestData.minimalUserAccount();
-
     private final OffsetDateTime createdAt = NOW;
 
     private final OffsetDateTime lastModifiedAt = NOW;
@@ -66,8 +62,8 @@ public final class MediaRequestTestData implements Persistable<TestMediaRequestE
         var userAccount = minimalUserAccount();
         mediaRequest.setRequestor(userAccount);
         mediaRequest.setCurrentOwner(userAccount);
-        mediaRequest.setCreatedBy(userAccount);
-        mediaRequest.setLastModifiedBy(userAccount);
+        mediaRequest.setCreatedById(0);
+        mediaRequest.setLastModifiedById(0);
         return mediaRequest;
     }
 
@@ -101,8 +97,8 @@ public final class MediaRequestTestData implements Persistable<TestMediaRequestE
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);
-        mediaRequestEntity.setCreatedBy(requestor);
-        mediaRequestEntity.setLastModifiedBy(requestor);
+        mediaRequestEntity.setCreatedById(0);
+        mediaRequestEntity.setLastModifiedById(0);
         mediaRequestEntity.setCreatedDateTime(requestedDate);
         return mediaRequestEntity;
     }
@@ -112,7 +108,7 @@ public final class MediaRequestTestData implements Persistable<TestMediaRequestE
         TestMediaRequestEntity.TestMediaBuilderRetrieve builder = new TestMediaRequestEntity.TestMediaBuilderRetrieve();
         builder.getBuilder().hearing(hearing).currentOwner(currentOwner).requestor(requestor)
             .attempts(attempts).startTime(startTime)
-            .endTime(endTime).createdBy(createdBy).lastModifiedBy(lastModifiedBy).createdAt(createdAt)
+            .endTime(endTime).createdById(0).lastModifiedById(0).createdAt(createdAt)
             .lastModifiedAt(lastModifiedAt)
             .status(MediaRequestStatus.PROCESSING)
             .requestType(AudioRequestType.PLAYBACK);

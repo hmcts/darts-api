@@ -95,6 +95,8 @@ class ArmRpoReplayAutomatedTaskTest {
         )).thenReturn(List.of(22, 14));
 
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        int userId = 123;
+        when(userAccount.getId()).thenReturn(userId);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         // when
@@ -108,7 +110,7 @@ class ArmRpoReplayAutomatedTaskTest {
         verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
             EodHelper.failedArmRawDataStatus(),
             0,
-            userAccount,
+            userId,
             List.of(22, 14)
         );
     }

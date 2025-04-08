@@ -71,6 +71,7 @@ public class MediaRequestStub {
             endTime,
             audioRequestType, status, requestedDate
         );
+        currentMediaRequest.setCreatedBy(requestor);
         currentMediaRequest.setCreatedDateTime(requestedDate);
         return dartsDatabaseSaveStub.save(currentMediaRequest);
     }

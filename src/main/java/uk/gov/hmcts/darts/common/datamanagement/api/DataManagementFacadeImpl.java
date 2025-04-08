@@ -305,13 +305,13 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
         if (nonNull(media)) {
             objectRetrievalQueueEntity.setMedia(media);
-            objectRetrievalQueueEntity.setCreatedBy(media.getCreatedBy());
-            objectRetrievalQueueEntity.setLastModifiedBy(media.getLastModifiedBy());
+            objectRetrievalQueueEntity.setCreatedById(media.getCreatedById());
+            objectRetrievalQueueEntity.setLastModifiedById(media.getLastModifiedById());
         }
         if (nonNull(transcriptionDocumentEntity)) {
             objectRetrievalQueueEntity.setTranscriptionDocument(transcriptionDocumentEntity);
             objectRetrievalQueueEntity.setCreatedBy(transcriptionDocumentEntity.getUploadedBy());
-            objectRetrievalQueueEntity.setLastModifiedBy(transcriptionDocumentEntity.getLastModifiedBy());
+            objectRetrievalQueueEntity.setLastModifiedById(transcriptionDocumentEntity.getLastModifiedById());
         }
 
         objectRetrievalQueueEntity.setParentObjectId(parentObjectId);

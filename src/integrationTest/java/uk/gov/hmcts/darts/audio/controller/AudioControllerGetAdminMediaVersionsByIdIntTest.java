@@ -96,8 +96,8 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
     void shouldReturn200_whenChronicleIdHasOnlyCurrentAndNoVersions() throws Exception {
         final String chronicleId = "chronicleId";
         MediaEntity currentMediaEntity = createAndSaveMediaEntity(true, chronicleId, Duration.ofDays(3));
-        //Craeted unrelated media to ensure not returned
-        createAndSaveMediaEntity(true, "unrealted");
+        //Created unrelated media to ensure not returned
+        createAndSaveMediaEntity(true, "unrelated");
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
