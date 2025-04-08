@@ -66,7 +66,7 @@ class EventDispatcherImplTest {
         when(eventHandlerRepository.findByTypeAndSubType(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
 
         List<EventHandler> eventHandlers = new ArrayList<>();
-        MockEventHandler mockEventHandler = Mockito.mock(MockEventHandler.class);
+        MockEventHandler mockEventHandler = mock(MockEventHandler.class);
         when(mockEventHandler.isHandlerFor(any())).thenReturn(true);
         eventHandlers.add(mockEventHandler);
         EventEntity eventEntity = mock(EventEntity.class);
