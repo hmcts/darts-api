@@ -232,7 +232,8 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
     }
 
-    void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
+    @Override
+    public void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
         List<HearingEntity> hearingList = mediaEntity.getHearingList();
         for (HearingEntity hearing : hearingList) {
             mediaEntity.removeHearing(hearing);

@@ -97,10 +97,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     public void addMedia(MediaEntity mediaEntity) {
         if (!containsMedia(mediaEntity)) {
             mediaList.add(mediaEntity);
-            /*TODO review if this is required or not if not remove comments
-            if (this.id == null || mediaEntity.getHearingList().stream().noneMatch(hearing -> this.id.equals(hearing.getId()))) {
-                mediaEntity.getHearingList().add(this);
-            }*/
+            mediaEntity.addHearing(this);
         }
     }
 
@@ -130,6 +127,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     }
 
     public boolean containsMedia(MediaEntity mediaEntity) {
-        return mediaEntity.getId() != null && mediaList.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
+        return mediaList.contains(mediaEntity)
+            || mediaEntity.getId() != null && mediaList.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
     }
 }

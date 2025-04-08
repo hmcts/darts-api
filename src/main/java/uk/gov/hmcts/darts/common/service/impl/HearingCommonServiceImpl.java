@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class HearingCommonServiceImpl implements HearingCommonService {
 
     private final HearingRepository hearingRepository;
@@ -69,4 +71,50 @@ public class HearingCommonServiceImpl implements HearingCommonService {
         hearingEntity.setLastModifiedBy(userAccountEntity);
         return hearingRepository.saveAndFlush(hearingEntity);
     }
+
+    /**
+     * Links an audio media entity to a hearing if it exists.
+     *
+     * @param courtCaseEntity the court case entity associated with the hearing
+     * @param mediaEntity     the media entity to link
+     * @return true if the media was successfully linked, false otherwise
+     */
+    @Override
+    public boolean linkAudioToHearings(
+        CourtCaseEntity courtCaseEntity,
+        MediaEntity mediaEntity) {
+        if (courtCaseEntity == null) {
+            log.info("Can not link hearing to media {} as CourtCaseEntity is null", mediaEntity.getId());
+            return false;
+        }
+
+        Optional<HearingEntity> hearingEntityOptional = hearingRepository
+            .findHearing(
+                mediaEntity.getCourtroom().getCourthouse().getCourthouseName(),
+                mediaEntity.getCourtroom().getName(),
+                courtCaseEntity.getCaseNumber(),
+                mediaEntity.getStart().toLocalDate()
+            );
+
+        if (hearingEntityOptional.isEmpty()) {
+            log.info("Can not link hearing to media {} as no hearings could be found for CourtHouse {}, Courtroom {}, CaseNumber {} and Date {}",
+                     mediaEntity.getId(),
+                     mediaEntity.getCourtroom().getCourthouse().getCourthouseName(),
+                     mediaEntity.getCourtroom().getName(),
+                     courtCaseEntity.getCaseNumber(),
+                     mediaEntity.getStart().toLocalDate()
+            );
+            return false;
+        }
+        HearingEntity hearing = hearingEntityOptional.get();
+        log.debug("Linking media {} to hearing {}",
+                  mediaEntity.getId(),
+                  hearing.getId()
+        );
+        hearing.addMedia(mediaEntity);
+        hearing.setHearingIsActual(true);
+        hearingRepository.saveAndFlush(hearing);
+        return true;
+    }
+
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -15,12 +16,18 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.CaseCommonService;
 import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -126,6 +133,75 @@ class HearingServiceImplTest {
 
         assertEquals(newHearing, result);
         verify(hearingRepository).saveAndFlush(any(HearingEntity.class));
+    }
+
+    @Test
+    void linkAudioToHearings_whenNullCourtCase_shouldNotLinkAndReturnFalse() {
+        MediaEntity media = mock(MediaEntity.class);
+        assertThat(hearingService.linkAudioToHearings(null, media))
+            .isFalse();
+        verifyNoInteractions(hearingRepository, media);
+    }
+
+    @Test
+    void linkAudioToHearings_whenHearingNotFound_shouldNotLinkAndReturnFalse() {
+        MediaEntity media = new MediaEntity();
+        media.setStart(OffsetDateTime.now().minusDays(5));
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SOME-COURTHOUSE-NAME");
+        CourtroomEntity courtroom = new CourtroomEntity();
+        courtroom.setName("SOME-ROOM-NAME");
+        courtroom.setCourthouse(courthouse);
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseNumber("SOME-COURT-CASE");
+        media.setCourtroom(courtroom);
+
+        HearingEntity hearing = new HearingEntity();
+        when(hearingRepository.findHearing(any(), any(), any(), any()))
+            .thenReturn(Optional.empty());
+
+        assertThat(hearingService.linkAudioToHearings(courtCase, media)).isFalse();
+        assertThat(hearing.getMediaList()).isEmpty();
+        verify(hearingRepository, never()).saveAndFlush(any());
+        verify(hearingRepository).findHearing(
+            "SOME-COURTHOUSE-NAME",
+            "SOME-ROOM-NAME",
+            "SOME-COURT-CASE",
+            LocalDate.now().minusDays(5)
+        );
+    }
+
+    @Test
+    void linkAudioToHearings_whenCourtCaseExistsAndHearingFound_shouldLinkAndReturnTrue() {
+        MediaEntity media = new MediaEntity();
+        media.setStart(OffsetDateTime.now().minusDays(5));
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SOME-COURTHOUSE-NAME");
+        CourtroomEntity courtroom = new CourtroomEntity();
+        courtroom.setName("SOME-ROOM-NAME");
+        courtroom.setCourthouse(courthouse);
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseNumber("SOME-COURT-CASE");
+        media.setCourtroom(courtroom);
+
+        HearingEntity hearing = new HearingEntity();
+        when(hearingRepository.findHearing(any(), any(), any(), any()))
+            .thenReturn(Optional.of(hearing));
+
+        assertThat(hearingService.linkAudioToHearings(courtCase, media)).isTrue();
+
+        assertThat(hearing.getMediaList())
+            .hasSize(1)
+            .contains(media);
+        assertThat(hearing.getHearingIsActual()).isTrue();
+
+        verify(hearingRepository).saveAndFlush(hearing);
+        verify(hearingRepository).findHearing(
+            "SOME-COURTHOUSE-NAME",
+            "SOME-ROOM-NAME",
+            "SOME-COURT-CASE",
+            LocalDate.now().minusDays(5)
+        );
     }
 }
 

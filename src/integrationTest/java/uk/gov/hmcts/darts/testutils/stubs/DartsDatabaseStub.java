@@ -1088,6 +1088,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
+    @Deprecated//Use createMediaLinkedCase using CourtCaseEntity instead of caseNumber and courthouseName
     public MediaLinkedCaseEntity createMediaLinkedCase(
         MediaEntity mediaEntity,
         CourtCaseEntity courtCase,

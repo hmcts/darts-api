@@ -159,6 +159,13 @@ public class MediaEntity extends CreatedModifiedBaseEntity
         getHearingList().remove(this);
     }
 
+    public void addHearing(HearingEntity hearing) {
+        if (!hearingList.contains(hearing)) {
+            hearingList.add(hearing);
+            hearing.addMedia(this);
+        }
+    }
+
     @Override
     public void setDeletedTs(OffsetDateTime deletedTs) {
         setDeletedTimestamp(deletedTs);
@@ -179,6 +186,10 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     public void setObjectAdminAction(ObjectAdminActionEntity adminAction) {
         objectAdminActions.clear();
         objectAdminActions.add(adminAction);
+    }
+
+    public boolean isCurrent() {
+        return isCurrent != null && isCurrent;
     }
 
 }
