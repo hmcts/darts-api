@@ -178,15 +178,16 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 
     @Query(value = """
                         SELECT e3.id from EventEntity e3
-                        JOIN EventEntity origionalEvent on origionalEvent.id = :eveId
+                        JOIN EventEntity originalEvent on origionalEvent.id = :eveId
                         JOIN (                        
                             SELECT e.eventId as eventId, e.messageId as messageId, e.eventText as eventText
                             FROM EventEntity e
-                            WHERE e.eventId IS NOT NULL and e.messageId IS NOT NULL and e.eventId = :eventId and e.createdDateTime <= origionalEvent.createdDateTime
+                            WHERE e.eventId IS NOT NULL and e.messageId IS NOT NULL and e.eventId = :eventId 
+                                    and e.createdDateTime <= originalEvent.createdDateTime
                             GROUP BY e.eventId, e.messageId, e.eventText
                             HAVING COUNT(e) > 1) e2
                          ON e2.eventId = e3.eventId and e2.messageId = e3.messageId and e2.eventText = e3.eventText
-                         WHERE e3.eventId = :eventId and e3.createdDateTime <= origionalEvent.createdDateTime
+                         WHERE e3.eventId = :eventId and e3.createdDateTime <= originalEvent.createdDateTime
                          ORDER BY e3.createdDateTime ASC  
         """)
     List<Integer> findDuplicateEventIds(Integer eventId, Integer eveId);
