@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.event.service.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -31,12 +32,13 @@ public class DartsEventNullHandler extends EventHandlerBase {
     }
 
     @Override
-    public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+    public EventEntity handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         log.debug(
             "Null handler selected for message: {} type: {} and subtype: {}. ",
             dartsEvent.getMessageId(),
             dartsEvent.getType(),
             dartsEvent.getSubType()
         );
+        return null;
     }
 }

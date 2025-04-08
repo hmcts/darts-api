@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -80,7 +81,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
     @Override
     @Transactional
     @SuppressWarnings("PMD.EmptyCatchBlock")
-    public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+    public EventEntity handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         DataUtil.preProcess(dartsEvent);
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler); // saveEvent
         var courtCase = hearingAndEvent.getHearingEntity().getCourtCase();
@@ -103,7 +104,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
         if (latestCompletedManualRetention.isPresent()) {
             log.info("Ignoring retention for event with id {} because there is an existing manual retention for caseId {}.",
                      dartsEvent.getEventId(), courtCase.getId());
-            return;
+            return hearingAndEvent.getEventEntity();
         }
 
         // ignore the caseTotalSentence if it's not an overridable policy
@@ -126,6 +127,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
                          dartsEvent.getDateTime(), latestPendingRetention.getEventTimestamp(), courtCase.getId());
             }
         }
+        return hearingAndEvent.getEventEntity();
     }
 
     private void setDefaultPolicyIfNotDefined(DartsEvent dartsEvent) {

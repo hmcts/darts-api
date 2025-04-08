@@ -3,11 +3,13 @@ package uk.gov.hmcts.darts.event.service.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventPersistenceService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
@@ -30,8 +32,9 @@ public class StandardEventHandler extends EventHandlerBase {
     }
 
     @Override
-    public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+    public EventEntity handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         DataUtil.preProcess(dartsEvent);
-        createHearingAndSaveEvent(dartsEvent, eventHandler);
+        CreatedHearingAndEvent createdHearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
+        return createdHearingAndEvent.getEventEntity();
     }
 }

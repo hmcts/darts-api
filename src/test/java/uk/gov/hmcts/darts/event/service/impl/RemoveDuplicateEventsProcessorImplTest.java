@@ -49,11 +49,11 @@ class RemoveDuplicateEventsProcessorImplTest {
 
     @Test
     void findAndRemoveDuplicateEvent_noDuplicateEvents_nothingHappens() {
-        when(eventRepository.findDuplicateEventIds(any())).thenReturn(List.of());
+        when(eventRepository.findDuplicateEventIds(any(), any())).thenReturn(List.of());
 
-        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(123)).isFalse();
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(123, 321)).isFalse();
 
-        verify(eventRepository).findDuplicateEventIds(123);
+        verify(eventRepository).findDuplicateEventIds(123, 321);
         verifyNoMoreInteractions(eventRepository);
         verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository);
     }
@@ -66,19 +66,19 @@ class RemoveDuplicateEventsProcessorImplTest {
         int duplicateEvent3Id = 3;
 
         List<Integer> duplicateEvents = new ArrayList<>(List.of(duplicateEvent1Id, duplicateEvent2Id, duplicateEvent3Id));
-        when(eventRepository.findDuplicateEventIds(any())).thenReturn(duplicateEvents);
+        when(eventRepository.findDuplicateEventIds(any(),any())).thenReturn(duplicateEvents);
 
         List<Integer> caseManagementIdsToBeDeleted = List.of(2, 3);
         when(caseManagementRetentionRepository.getIdsForEvents(any()))
             .thenReturn(caseManagementIdsToBeDeleted);
         //Execution
-        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(123)).isTrue();
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(123,321)).isTrue();
 
 
         //Verification
         List<Integer> toBeDeleted = List.of(duplicateEvent2Id, duplicateEvent3Id);
 
-        verify(eventRepository).findDuplicateEventIds(123);
+        verify(eventRepository).findDuplicateEventIds(123,321);
 
         verify(caseManagementRetentionRepository).getIdsForEvents(toBeDeleted);
 

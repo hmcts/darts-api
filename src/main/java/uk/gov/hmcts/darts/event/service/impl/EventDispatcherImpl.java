@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
@@ -43,8 +44,11 @@ public class EventDispatcherImpl implements EventDispatcher {
             .findAny();
         if (foundHandler.isPresent()) {
             logEvent(event, foundHandler.get());
-            foundHandler.get().handle(event, foundHandlerEntity);
-            asyncEventProcessor.processEvent(NumberUtils.createInteger(event.getEventId()));
+            EventEntity eventEntity = foundHandler.get().handle(event, foundHandlerEntity);
+            Integer eveId = Optional.ofNullable(eventEntity)
+                .map(EventEntity::getId)
+                .orElse(null);
+            asyncEventProcessor.processEvent(NumberUtils.createInteger(event.getEventId()), eveId);
         } else {
             // Event registered in DB, but no handler defined...just log and return OK.
             log.warn(format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));

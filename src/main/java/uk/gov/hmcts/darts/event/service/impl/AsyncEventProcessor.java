@@ -13,8 +13,8 @@ public class AsyncEventProcessor {
 
 
     @Async("eventTaskExecutor")
-    public void processEvent(Integer eventId) {
-        if (!removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(eventId)) {
+    public void processEvent(Integer eventId, Integer eveId) {
+        if (!removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(eventId, eveId)) {
             cleanupCurrentFlagEventProcessor.processEvent(eventId);
         }
     }
