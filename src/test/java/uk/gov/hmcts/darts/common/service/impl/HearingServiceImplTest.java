@@ -140,7 +140,7 @@ class HearingServiceImplTest {
         MediaEntity media = mock(MediaEntity.class);
         assertThat(hearingService.linkAudioToHearings(null, media))
             .isFalse();
-        verifyNoInteractions(hearingRepository, media);
+        verifyNoInteractions(hearingRepository);
     }
 
     @Test
