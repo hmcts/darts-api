@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.datamanagement.api;
 import com.azure.core.util.BinaryData;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -168,7 +169,7 @@ class DataManagementFacadeImplTest {
         downloadResponseMetaData.close();
 
         FileStore.getFileStore().remove();
-
+        FileUtils.cleanDirectory(new File(SOME_TEMP_WORKSPACE));
         try (Stream<Path> files = Files.list(tempDirectory.toPath())) {
             assertEquals(0, files.count());
         }
