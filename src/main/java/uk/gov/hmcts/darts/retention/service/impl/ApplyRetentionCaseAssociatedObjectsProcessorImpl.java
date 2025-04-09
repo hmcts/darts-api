@@ -39,7 +39,7 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
             CourtCaseEntity courtCase = courtCaseOpt.get();
             courtCase.setRetentionUpdated(false);
             courtCase.setLastModifiedBy(userIdentity.getUserAccount());
-            caseRepository.save(courtCase);
+            caseRepository.saveAndFlush(courtCase);
             try {
                 singleCaseProcessor.processApplyRetentionToCaseAssociatedObjects(courtCase.getId());
             } catch (Exception exc) {
@@ -47,7 +47,7 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
                 courtCase.setRetentionRetries(courtCase.getRetentionRetries() + 1);
                 courtCase.setRetentionUpdated(true);
                 courtCase.setLastModifiedBy(userIdentity.getUserAccount());
-                caseRepository.save(courtCase);
+                caseRepository.saveAndFlush(courtCase);
             }
         }
     }
