@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -353,12 +352,12 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """
             update ExternalObjectDirectoryEntity eod
             set eod.status = :newStatus,
-            eod.lastModifiedBy = :userAccount,
+            eod.lastModifiedById = :userAccount,
             eod.lastModifiedDateTime = :timestamp
             where eod.id in :idsToUpdate
             """
     )
-    void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
+    void updateStatus(ObjectRecordStatusEntity newStatus, Integer userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
 
 
     default List<Integer> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
@@ -614,7 +613,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query("""
         update ExternalObjectDirectoryEntity eod
         set eod.status = :newStatus,
-            eod.lastModifiedBy = :currentUser,
+            eod.lastModifiedById = :currentUser,
             eod.lastModifiedDateTime = current_timestamp
         where eod.status = :currentStatus
         and eod.dataIngestionTs <= :maxDataIngestionTs
@@ -622,24 +621,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Transactional
     void updateByStatusEqualsAndDataIngestionTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxDataIngestionTs,
                                                       ObjectRecordStatusEntity newStatus,
-                                                      UserAccountEntity currentUser,
+                                                      Integer currentUser,
                                                       Limit limit);
-
-    @Query("""
-            update ExternalObjectDirectoryEntity eod
-            set eod.status = :newStatus,
-                eod.transferAttempts = :transferAttempts,
-                eod.lastModifiedBy = :currentUser,
-                eod.lastModifiedDateTime = current_timestamp
-            where eod.status = :oldStatus
-            and eod.lastModifiedDateTime between :startTime and :endTime
-        """)
-    @Modifying
-    void updateEodStatusAndTransferAttemptsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
-        ObjectRecordStatusEntity newStatus, Integer transferAttempts,
-        ObjectRecordStatusEntity oldStatus,
-        OffsetDateTime startTime, OffsetDateTime endTime,
-        UserAccountEntity currentUser);
 
     @Modifying(clearAutomatically = true)
     @Query(
@@ -647,12 +630,12 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             update ExternalObjectDirectoryEntity eod
             set eod.status = :newStatus,
                 eod.transferAttempts = :transferAttempts,
-                eod.lastModifiedBy = :currentUser,
+                eod.lastModifiedById = :currentUser,
                 eod.lastModifiedDateTime = current_timestamp
             where eod.id in :idsToUpdate
             """
     )
-    void updateEodStatusAndTransferAttemptsWhereIdIn(ObjectRecordStatusEntity newStatus, Integer transferAttempts, UserAccountEntity currentUser,
+    void updateEodStatusAndTransferAttemptsWhereIdIn(ObjectRecordStatusEntity newStatus, Integer transferAttempts, Integer currentUser,
                                                      List<Integer> idsToUpdate);
 
 

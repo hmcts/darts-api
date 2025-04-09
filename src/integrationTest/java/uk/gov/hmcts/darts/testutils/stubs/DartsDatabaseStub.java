@@ -125,10 +125,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
@@ -629,17 +630,12 @@ public class DartsDatabaseStub {
         if (courthouse == null) {
             return null;
         }
-        UserAccountEntity createdBy = dartsDatabaseSaveStub.save(courthouse.getCreatedBy());
-        courthouse.setCreatedBy(createdBy);
-        courthouse.setLastModifiedBy(createdBy);
         return dartsDatabaseSaveStub.save(courthouse);
     }
 
     @Transactional
     public CourtroomEntity save(CourtroomEntity courtroom) {
         save(courtroom.getCourthouse());
-        UserAccountEntity createdBy = dartsDatabaseSaveStub.save(courtroom.getCreatedBy());
-        courtroom.setCreatedBy(createdBy);
         return dartsDatabaseSaveStub.save(courtroom);
     }
 
@@ -673,7 +669,6 @@ public class DartsDatabaseStub {
         if (retentionPolicyTypeEntity == null) {
             return null;
         }
-        save(retentionPolicyTypeEntity.getCreatedBy());
         return dartsDatabaseSaveStub.save(retentionPolicyTypeEntity);
     }
 
@@ -690,13 +685,9 @@ public class DartsDatabaseStub {
     @Transactional
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         save(transcriptionEntity.getCourtCase());
-        dartsDatabaseSaveStub.save(transcriptionEntity.getCreatedBy());
-        dartsDatabaseSaveStub.save(transcriptionEntity.getLastModifiedBy());
         var transcription = dartsDatabaseSaveStub.save(transcriptionEntity);
-        dartsDatabaseSaveStub.save(transcription.getCreatedBy());
         transcription.getTranscriptionDocumentEntities().forEach(td -> {
             dartsDatabaseSaveStub.save(td.getUploadedBy());
-            dartsDatabaseSaveStub.save(td.getLastModifiedBy());
             dartsDatabaseSaveStub.save(td);
         });
         return transcription;
@@ -829,10 +820,10 @@ public class DartsDatabaseStub {
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
         if (event.getHearingEntities().isEmpty()) {
-            event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
+            event.setHearingEntities(Set.of(hearingRepository.getReferenceById(hearing.getId())));
             dartsDatabaseSaveStub.save(event);
         } else {
-            List<HearingEntity> hearingEntities = new ArrayList<>();
+            Set<HearingEntity> hearingEntities = new HashSet<>();
             hearingEntities.addAll(event.getHearingEntities());
             boolean alreadyExists = hearingEntities.stream().anyMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()));
             if (!alreadyExists) {
@@ -982,7 +973,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public Integer getLastModifiedByUserId(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
-        return createdModifiedBaseEntity.getLastModifiedBy().getId();
+        return createdModifiedBaseEntity.getLastModifiedById();
     }
 
     @Transactional

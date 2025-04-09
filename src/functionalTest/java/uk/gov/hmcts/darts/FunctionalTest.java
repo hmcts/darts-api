@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.configuration.AccessTokenClientConfiguration;
 import uk.gov.hmcts.darts.configuration.AzureAdAuthenticationProperties;
@@ -37,6 +38,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
     webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
+@Import(AccessTokenClientConfiguration.class)
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class FunctionalTest {
 

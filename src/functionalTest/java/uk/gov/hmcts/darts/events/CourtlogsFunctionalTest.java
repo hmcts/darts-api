@@ -13,13 +13,11 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// To do: Not sure how to clean up for tests that are inter-dependent
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CourtlogsFunctionalTest extends FunctionalTest {
 
-    public static final String ENDPOINT_URL = "/courtlogs";
-    public final String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
-
+    private static final String ENDPOINT_URL = "/courtlogs";
+    private final String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
 
     @AfterAll
     void cleanData() {

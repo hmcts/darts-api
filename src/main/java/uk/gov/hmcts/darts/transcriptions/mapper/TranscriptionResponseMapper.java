@@ -54,7 +54,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
@@ -314,7 +316,7 @@ public class TranscriptionResponseMapper {
     private OffsetDateTime mapToTranscriptionWorkflowsApprovedTimestamp(List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {
         Optional<TranscriptionWorkflowEntity> transcriptionWorkflowEntity = transcriptionWorkflowEntities.stream()
             .filter(trw -> TranscriptionStatusEnum.APPROVED.getId().equals(trw.getTranscriptionStatus().getId()))
-            .max(Comparator.comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp));
+            .max(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp));
 
         return transcriptionWorkflowEntity.map(TranscriptionWorkflowEntity::getWorkflowTimestamp).orElse(null);
     }
@@ -393,7 +395,7 @@ public class TranscriptionResponseMapper {
     }
 
     private AdminAction buildAdminAction(TranscriptionDocumentEntity entity) {
-        if (entity.getAdminActions().isEmpty()) {
+        if (CollectionUtils.isEmpty(entity.getAdminActions())) {
             return null;
         }
 
@@ -453,46 +455,94 @@ public class TranscriptionResponseMapper {
     }
 
     public AdminMarkedForDeletionResponseItem mapTranscriptionDocumentMarkedForDeletion(TranscriptionDocumentEntity transcriptionDocumentEntity) {
-        AdminMarkedForDeletionResponseItem response = new AdminMarkedForDeletionResponseItem();
+        TranscriptionEntity transcription = transcriptionDocumentEntity.getTranscription();
+        HearingEntity hearingEntity = transcription.getHearing();
 
-        response.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());
+        CourtCaseEntity courtCaseEntity = getFirstNotNull(
+            hearingEntity == null ? null : hearingEntity.getCourtCase(),
+            transcription.getCourtCase()
+        );
+
+        CourtroomEntity courtroom = getFirstNotNull(
+            hearingEntity == null ? null : hearingEntity.getCourtroom(),
+            transcription.getCourtroom()
+        );
+
+        CourthouseEntity courthouseEntity = getFirstNotNull(
+            courtroom == null ? null : courtroom.getCourthouse(),
+            courtCaseEntity == null ? null : courtCaseEntity.getCourthouse()
+        );
 
         AdminAction adminAction = buildAdminAction(transcriptionDocumentEntity);
 
-        // if the hearing is null then don't read any associated information
-        if (transcriptionDocumentEntity.getTranscription().getHearing() != null) {
-            CaseResponseDetails caseResponseDetails = new CaseResponseDetails();
-            caseResponseDetails.setId(transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getId());
-            caseResponseDetails.setCaseNumber(transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getCaseNumber());
-
-            HearingEntity hearingEntity = transcriptionDocumentEntity.getTranscription().getHearing();
-
-            CourthouseResponseDetails courthouseResponseDetails = new CourthouseResponseDetails();
-            courthouseResponseDetails.setId(hearingEntity.getCourtroom().getCourthouse().getId());
-            courthouseResponseDetails.setDisplayName(hearingEntity.getCourtroom().getCourthouse().getDisplayName());
-
-            CourtroomResponseDetails courtroomResponseDetails = new CourtroomResponseDetails();
-            courtroomResponseDetails.setId(hearingEntity.getCourtroom().getId());
-            courtroomResponseDetails.setName(hearingEntity.getCourtroom().getName());
-
-            HearingResponseDetails hearingResponseDetails = new HearingResponseDetails();
-            hearingResponseDetails.setId(transcriptionDocumentEntity.getTranscription().getHearing().getId());
-            hearingResponseDetails.setHearingDate(hearingEntity.getHearingDate());
-
-            response.setCourthouse(courthouseResponseDetails);
-            response.setCourtroom(courtroomResponseDetails);
-            response.setHearing(hearingResponseDetails);
-            response.setCase(caseResponseDetails);
-        }
-
-        TranscriptionResponseDetails transcriptionResponseDetails = new TranscriptionResponseDetails();
-        transcriptionResponseDetails.setId(transcriptionDocumentEntity.getTranscription().getId());
-
+        AdminMarkedForDeletionResponseItem response = new AdminMarkedForDeletionResponseItem();
+        response.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());
+        response.setTranscription(mapTranscriptionEntity(transcription));
+        response.setHearing(mapHearing(hearingEntity));
+        response.setCourthouse(mapCourthouse(courthouseEntity));
+        response.setCourtroom(mapCourtroom(courtroom));
+        response.setCase(mapCase(courtCaseEntity));
         response.setAdminAction(adminAction);
-        response.setTranscription(transcriptionResponseDetails);
         response.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());
 
         return response;
     }
 
+    TranscriptionResponseDetails mapTranscriptionEntity(TranscriptionEntity transcription) {
+        if (transcription == null) {
+            return null;
+        }
+        TranscriptionResponseDetails transcriptionResponseDetails = new TranscriptionResponseDetails();
+        transcriptionResponseDetails.setId(transcription.getId());
+        return transcriptionResponseDetails;
+    }
+
+    HearingResponseDetails mapHearing(HearingEntity hearingEntity) {
+        if (hearingEntity == null) {
+            return null;
+        }
+        HearingResponseDetails hearingResponseDetails = new HearingResponseDetails();
+        hearingResponseDetails.setId(hearingEntity.getId());
+        hearingResponseDetails.setHearingDate(hearingEntity.getHearingDate());
+        return hearingResponseDetails;
+    }
+
+    CaseResponseDetails mapCase(CourtCaseEntity courtCaseEntity) {
+        if (courtCaseEntity == null) {
+            return null;
+        }
+        CaseResponseDetails caseResponseDetails = new CaseResponseDetails();
+        caseResponseDetails.setId(courtCaseEntity.getId());
+        caseResponseDetails.setCaseNumber(courtCaseEntity.getCaseNumber());
+        return caseResponseDetails;
+    }
+
+    CourtroomResponseDetails mapCourtroom(CourtroomEntity courtroom) {
+        if (courtroom == null) {
+            return null;
+        }
+        CourtroomResponseDetails courtroomResponseDetails = new CourtroomResponseDetails();
+        courtroomResponseDetails.setId(courtroom.getId());
+        courtroomResponseDetails.setName(courtroom.getName());
+        return courtroomResponseDetails;
+    }
+
+    CourthouseResponseDetails mapCourthouse(CourthouseEntity courthouseEntity) {
+        if (courthouseEntity == null) {
+            return null;
+        }
+
+        CourthouseResponseDetails courthouseResponseDetails = new CourthouseResponseDetails();
+        courthouseResponseDetails.setId(courthouseEntity.getId());
+        courthouseResponseDetails.setDisplayName(courthouseEntity.getDisplayName());
+        return courthouseResponseDetails;
+    }
+
+    @SafeVarargs
+    final <T> T getFirstNotNull(T... objects) {
+        return Stream.of(objects)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+    }
 }

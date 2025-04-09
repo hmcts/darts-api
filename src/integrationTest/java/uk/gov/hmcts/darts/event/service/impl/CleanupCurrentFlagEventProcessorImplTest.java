@@ -165,7 +165,7 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         List<EventEntity> editedEvents = new ArrayList<>(currentEvents);
         editedEvents.remove(currentEvents.getFirst());
         editedEvents.forEach(eventEntity -> {
-            assertThat(eventEntity.getLastModifiedBy().getId()).isEqualTo(TestUtils.AUTOMATION_USER_ID);
+            assertThat(eventEntity.getLastModifiedById()).isEqualTo(TestUtils.AUTOMATION_USER_ID);
             assertThat(eventEntity.getLastModifiedDateTime())
                 .isCloseTo(OffsetDateTime.now(), TestUtils.TIME_TOLERANCE);
         });

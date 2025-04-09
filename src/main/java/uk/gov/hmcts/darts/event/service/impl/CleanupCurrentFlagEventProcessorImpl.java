@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,7 +75,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                     continue;
                 }
                 eventToBeSuperseded.setIsCurrent(false);
-                eventToBeSuperseded.setHearingEntities(new ArrayList<>());
+                eventToBeSuperseded.setHearingEntities(new HashSet<>());
                 eventsThatHaveBeenSuperseded.add(eventToBeSuperseded);
             }
 

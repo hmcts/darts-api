@@ -92,7 +92,7 @@ class DataAnonymisationServiceImplTest {
     }
 
     private void assertLastModifiedByAndAt(CreatedModifiedBaseEntity entity, UserAccountEntity userAccount) {
-        assertThat(entity.getLastModifiedBy()).isEqualTo(userAccount);
+        assertThat(entity.getLastModifiedById()).isEqualTo(userAccount.getId());
         assertThat(entity.getLastModifiedDateTime()).isEqualTo(offsetDateTime);
     }
 
@@ -221,7 +221,7 @@ class DataAnonymisationServiceImplTest {
         dataAnonymisationService.anonymiseTranscriptionCommentEntity(userAccount, transcriptionCommentEntity, isManuallyRequested);
 
         assertThat(transcriptionCommentEntity.getComment()).matches(TestUtils.UUID_REGEX);
-        assertThat(transcriptionCommentEntity.getLastModifiedBy()).isEqualTo(userAccount);
+        assertThat(transcriptionCommentEntity.getLastModifiedById()).isEqualTo(userAccount.getId());
         assertThat(transcriptionCommentEntity.isDataAnonymised()).isTrue();
         assertLastModifiedByAndAt(transcriptionCommentEntity, userAccount);
         verify(dataAnonymisationService).registerDataAnonymisation(userAccount, transcriptionCommentEntity, isManuallyRequested);
@@ -333,7 +333,7 @@ class DataAnonymisationServiceImplTest {
 
         EventEntity entityEntity1 = mock(EventEntity.class);
         EventEntity entityEntity2 = mock(EventEntity.class);
-        hearingEntity.setEventList(List.of(entityEntity1, entityEntity2));
+        hearingEntity.setEvents(Set.of(entityEntity1, entityEntity2));
 
         doNothing().when(dataAnonymisationService).anonymiseTranscriptionEntity(any(), any(), anyBoolean());
 

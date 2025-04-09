@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.event.model.CourtroomResponseDetails;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,9 +66,12 @@ class EventMapperTest {
         doReturn(adminGetEventResponseDetailsCasesCasesInner3).when(eventMapper).mapAdminGetEventResponseDetailsCasesCase(courtCaseEntity3);
 
         HearingEntity hearingEntity1 = mock(HearingEntity.class);
+        when(hearingEntity1.getId()).thenReturn(1);
         HearingEntity hearingEntity2 = mock(HearingEntity.class);
+        when(hearingEntity2.getId()).thenReturn(2);
         HearingEntity hearingEntity3 = mock(HearingEntity.class);
-        doReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3)).when(eventEntity).getHearingEntities();
+        when(hearingEntity3.getId()).thenReturn(3);
+        doReturn(Set.of(hearingEntity3, hearingEntity1, hearingEntity2)).when(eventEntity).getHearingEntities();
 
         AdminGetEventResponseDetailsHearingsHearingsInner adminGetEventResponseDetailsHearingsHearingsInner1 = mock(
             AdminGetEventResponseDetailsHearingsHearingsInner.class);
@@ -186,9 +190,9 @@ class EventMapperTest {
         assertEquals(eventEntity2.getTimestamp(), currentVersion.getEventTs());
         assertEquals(eventEntity2.getIsCurrent(), currentVersion.getIsCurrent());
         assertEquals(eventEntity2.getCreatedDateTime(), currentVersion.getCreatedAt());
-        assertEquals(eventEntity2.getCreatedBy().getId(), currentVersion.getCreatedBy());
+        assertEquals(eventEntity2.getCreatedById(), currentVersion.getCreatedBy());
         assertEquals(eventEntity2.getLastModifiedDateTime(), currentVersion.getLastModifiedAt());
-        assertEquals(eventEntity2.getLastModifiedBy().getId(), currentVersion.getLastModifiedBy());
+        assertEquals(eventEntity2.getLastModifiedById(), currentVersion.getLastModifiedBy());
         assertEquals(eventEntity2.isDataAnonymised(), currentVersion.getIsDataAnonymised());
     }
 

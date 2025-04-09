@@ -11,8 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PostEventsFunctionalTest extends FunctionalTest {
 
-
-    public static final String ENDPOINT_URL = "/events";
+    private static final String ENDPOINT_URL = "/events";
 
     @AfterEach
     void cleanData() {

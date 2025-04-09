@@ -34,6 +34,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -344,7 +345,7 @@ class OutboundFileZipGeneratorHelperImplTest {
         );
 
         eventEntities.add(eventEntity);
-        hearingEntity.setEventList(eventEntities);
+        hearingEntity.setEvents(new HashSet<>(eventEntities));
         when(eventRepository.findAllByHearingId(anyInt())).thenReturn(eventEntities);
         return hearingEntity;
     }

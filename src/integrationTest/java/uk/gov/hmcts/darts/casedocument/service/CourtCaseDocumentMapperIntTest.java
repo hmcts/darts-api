@@ -6,7 +6,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
 import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
-import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
@@ -46,14 +45,15 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         when(eodRepository.findByTranscriptionDocumentEntity(any())).thenReturn(List.of(transcriptionDocumentEodEntity));
         ExternalObjectDirectoryEntity annotationDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByAnnotationDocumentEntity(any())).thenReturn(List.of(annotationDocumentEodEntity));
-        CaseDocumentEntity caseDocumentEntity = dartsDatabase.getCaseDocumentStub().createCaseDocumentWithRandomValues();
-        when(caseDocumentRepository.findByCourtCase(any())).thenReturn(List.of(caseDocumentEntity));
+        dartsDatabase.getCaseDocumentStub().createCaseDocumentWithRandomValues();
         ExternalObjectDirectoryEntity caseDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByCaseDocument(any())).thenReturn(List.of(caseDocumentEodEntity));
 
         CourtCaseEntity cc = courtCaseStub.createCourtCaseAndAssociatedEntitiesWithRandomValues();
 
         givenBearerTokenExists("darts.global.user@hmcts.net");
+        cc.setLastModifiedBy(userIdentity.getUserAccount());
+        cc.setCreatedBy(userIdentity.getUserAccount());
 
         // when
         CourtCaseDocument doc = mapper.mapToCaseDocument(cc);
@@ -84,7 +84,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             "Grouped assertions for Case Document reporting restrictions",
             () -> assertThat(doc.getReportingRestrictions().getId()).isNotNull().isEqualTo(cc.getReportingRestrictions().getId()),
             () -> assertThat(doc.getReportingRestrictions().getCreatedDateTime()).isNotNull().isEqualTo(cc.getReportingRestrictions().getCreatedDateTime()),
-            () -> assertThat(doc.getReportingRestrictions().getCreatedBy()).isNotNull().isEqualTo(cc.getReportingRestrictions().getCreatedBy().getId()),
+            () -> assertThat(doc.getReportingRestrictions().getCreatedBy()).isNotNull().isEqualTo(cc.getReportingRestrictions().getCreatedById()),
             () -> assertThat(doc.getReportingRestrictions().getType()).isNotNull().isEqualTo(cc.getReportingRestrictions().getType()),
             () -> assertThat(doc.getReportingRestrictions().getSubType()).isNotNull().isEqualTo(cc.getReportingRestrictions().getSubType()),
             () -> assertThat(doc.getReportingRestrictions().getEventName()).isNotNull().isEqualTo(cc.getReportingRestrictions().getEventName()),
@@ -99,8 +99,8 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getCourthouse().getId()).isNotNull().isEqualTo(cc.getCourthouse().getId()),
             () -> assertThat(doc.getCourthouse().getCreatedDateTime()).isNotNull().isEqualTo(cc.getCourthouse().getCreatedDateTime()),
             () -> assertThat(doc.getCourthouse().getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getCourthouse().getLastModifiedDateTime()),
-            () -> assertThat(doc.getCourthouse().getCreatedBy()).isNotNull().isEqualTo(cc.getCourthouse().getCreatedBy().getId()),
-            () -> assertThat(doc.getCourthouse().getLastModifiedBy()).isNotNull().isEqualTo(cc.getCourthouse().getLastModifiedBy().getId()),
+            () -> assertThat(doc.getCourthouse().getCreatedBy()).isNotNull().isEqualTo(cc.getCourthouse().getCreatedById()),
+            () -> assertThat(doc.getCourthouse().getLastModifiedBy()).isNotNull().isEqualTo(cc.getCourthouse().getLastModifiedById()),
             () -> assertThat(doc.getCourthouse().getCode()).isNotNull().isEqualTo(cc.getCourthouse().getCode()),
             () -> assertThat(doc.getCourthouse().getDisplayName()).isNotNull().isEqualTo(cc.getCourthouse().getDisplayName()),
             () -> assertThat(doc.getCourthouse().getCourthouseName()).isNotNull().isEqualTo(cc.getCourthouse().getCourthouseName()),
@@ -116,9 +116,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getDefendants().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(cc.getDefendantList().getFirst().getCreatedDateTime()),
             () -> assertThat(doc.getDefendants().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 cc.getDefendantList().getFirst().getLastModifiedDateTime()),
-            () -> assertThat(doc.getDefendants().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getDefendantList().getFirst().getCreatedBy().getId()),
+            () -> assertThat(doc.getDefendants().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getDefendantList().getFirst().getCreatedById()),
             () -> assertThat(doc.getDefendants().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getDefendantList().getFirst().getLastModifiedBy().getId()),
+                cc.getDefendantList().getFirst().getLastModifiedById()),
 
             () -> assertThat(doc.getProsecutors().getFirst().getId()).isNotNull().isEqualTo(cc.getProsecutorList().getFirst().getId()),
             () -> assertThat(doc.getProsecutors().getFirst().getName()).isNotNull().isEqualTo(cc.getProsecutorList().getFirst().getName()),
@@ -126,17 +126,17 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getProsecutorList().getFirst().getCreatedDateTime()),
             () -> assertThat(doc.getProsecutors().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 cc.getProsecutorList().getFirst().getLastModifiedDateTime()),
-            () -> assertThat(doc.getProsecutors().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getProsecutorList().getFirst().getCreatedBy().getId()),
+            () -> assertThat(doc.getProsecutors().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getProsecutorList().getFirst().getCreatedById()),
             () -> assertThat(doc.getProsecutors().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getProsecutorList().getFirst().getLastModifiedBy().getId()),
+                cc.getProsecutorList().getFirst().getLastModifiedById()),
 
             () -> assertThat(doc.getDefences().getFirst().getId()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getId()),
             () -> assertThat(doc.getDefences().getFirst().getName()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getName()),
             () -> assertThat(doc.getDefences().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getCreatedDateTime()),
             () -> assertThat(doc.getDefences().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 cc.getDefenceList().getFirst().getLastModifiedDateTime()),
-            () -> assertThat(doc.getDefences().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getCreatedBy().getId()),
-            () -> assertThat(doc.getDefences().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getLastModifiedBy().getId())
+            () -> assertThat(doc.getDefences().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getCreatedById()),
+            () -> assertThat(doc.getDefences().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getLastModifiedById())
         );
 
         assertAll(
@@ -145,8 +145,8 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getJudges().getFirst().getName()).isNotNull().isEqualTo(cc.getJudges().getFirst().getName()),
             () -> assertThat(doc.getJudges().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(cc.getJudges().getFirst().getCreatedDateTime()),
             () -> assertThat(doc.getJudges().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getJudges().getFirst().getLastModifiedDateTime()),
-            () -> assertThat(doc.getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getJudges().getFirst().getCreatedBy().getId()),
-            () -> assertThat(doc.getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getJudges().getFirst().getLastModifiedBy().getId())
+            () -> assertThat(doc.getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getJudges().getFirst().getCreatedById()),
+            () -> assertThat(doc.getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getJudges().getFirst().getLastModifiedById())
         );
 
         assertAll(
@@ -237,7 +237,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 doc.getCaseRetentions().getFirst().getCaseManagementRetention().getEvent().getEventType().getCreatedDateTime()).isNotNull().isEqualTo(
                 cc.getCaseRetentionEntities().getFirst().getCaseManagementRetention().getEventEntity().getEventType().getCreatedDateTime()),
             () -> assertThat(doc.getCaseRetentions().getFirst().getCaseManagementRetention().getEvent().getEventType().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getCaseRetentionEntities().getFirst().getCaseManagementRetention().getEventEntity().getEventType().getCreatedBy().getId()),
+                cc.getCaseRetentionEntities().getFirst().getCaseManagementRetention().getEventEntity().getEventType().getCreatedById()),
             () -> assertThat(doc.getCaseRetentions().getFirst().getCaseManagementRetention().getEvent().getEventType().getType()).isNotNull().isEqualTo(
                 cc.getCaseRetentionEntities().getFirst().getCaseManagementRetention().getEventEntity().getEventType().getType()),
             () -> assertThat(doc.getCaseRetentions().getFirst().getCaseManagementRetention().getEvent().getEventType().getSubType()).isNotNull().isEqualTo(
@@ -263,7 +263,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().getFirst().getCourtroom().getId()).isNotNull().isEqualTo(cc.getHearings().getFirst().getCourtroom().getId()),
             () -> assertThat(doc.getHearings().getFirst().getCourtroom().getName()).isNotNull().isEqualTo(cc.getHearings().getFirst().getCourtroom().getName()),
             () -> assertThat(doc.getHearings().getFirst().getCourtroom().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getCourtroom().getCreatedBy().getId()),
+                cc.getHearings().getFirst().getCourtroom().getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getCourtroom().getCreatedDateTime()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getCourtroom().getCreatedDateTime()),
 
@@ -276,9 +276,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getJudges().getFirst().getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getCreatedBy().getId()),
+                cc.getHearings().getFirst().getJudges().getFirst().getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getLastModifiedBy().getId())
+                cc.getHearings().getFirst().getJudges().getFirst().getLastModifiedById())
         );
 
         assertAll(
@@ -304,9 +304,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getCreatedBy().getId()),
+                cc.getHearings().getFirst().getMediaRequests().getFirst().getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedBy().getId())
+                cc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedById())
         );
 
 
@@ -319,9 +319,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getMediaList().getFirst().getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getCreatedBy().getId()),
+                cc.getHearings().getFirst().getMediaList().getFirst().getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getLastModifiedBy().getId()),
+                cc.getHearings().getFirst().getMediaList().getFirst().getLastModifiedById()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getLegacyObjectId()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getMediaList().getFirst().getLegacyObjectId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getChannel()).isNotNull().isEqualTo(
@@ -450,13 +450,13 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 mediaEodEntity.isUpdateRetention()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getExternalObjectDirectories().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                mediaEodEntity.getCreatedBy().getId()),
+                mediaEodEntity.getCreatedById()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getExternalObjectDirectories().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(
                 mediaEodEntity.getCreatedDateTime()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getExternalObjectDirectories().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                mediaEodEntity.getLastModifiedBy().getId()),
+                mediaEodEntity.getLastModifiedById()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getExternalObjectDirectories().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 mediaEodEntity.getLastModifiedDateTime())
@@ -471,9 +471,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getCreatedBy().getId()),
+                cc.getHearings().getFirst().getTranscriptions().getFirst().getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedBy().getId()),
+                cc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedById()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getLegacyObjectId()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getTranscriptions().getFirst().getLegacyObjectId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionType()).isNotNull().isEqualTo(
@@ -509,7 +509,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getLastModifiedBy().getId()),
+                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getLastModifiedById()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getLastModifiedTimestamp()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getLastModifiedTimestamp()),
@@ -646,13 +646,13 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                     0).isUpdateRetention()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.isUpdateRetention()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getExternalObjectDirectories().get(
-                    0).getCreatedBy()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getCreatedBy().getId()),
+                    0).getCreatedBy()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getCreatedById()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getExternalObjectDirectories().get(
                     0).getCreatedDateTime()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getCreatedDateTime()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getExternalObjectDirectories().get(
-                    0).getLastModifiedBy()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getLastModifiedBy().getId()),
+                    0).getLastModifiedBy()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getLastModifiedById()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getExternalObjectDirectories().get(
                     0).getLastModifiedDateTime()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getLastModifiedDateTime()),
@@ -700,9 +700,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getCreatedBy().getId()),
+                cc.getHearings().getFirst().getAnnotations().getFirst().getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedBy().getId()),
+                cc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedById()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getLegacyObjectId()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getAnnotations().getFirst().getLegacyObjectId()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getLegacyVersionLabel()).isNotNull().isEqualTo(
@@ -718,7 +718,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedBy().getId()),
+                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedById()),
             () -> assertThat(
                 doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedTimestamp()).isNotNull().isEqualTo(
                 cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedTimestamp()),
@@ -784,11 +784,11 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getExternalObjectDirectories().get(
                 0).isUpdateRetention()).isNotNull().isEqualTo(annotationDocumentEodEntity.isUpdateRetention()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getExternalObjectDirectories().get(
-                0).getCreatedBy()).isNotNull().isEqualTo(annotationDocumentEodEntity.getCreatedBy().getId()),
+                0).getCreatedBy()).isNotNull().isEqualTo(annotationDocumentEodEntity.getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getExternalObjectDirectories().get(
                 0).getCreatedDateTime()).isNotNull().isEqualTo(annotationDocumentEodEntity.getCreatedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getExternalObjectDirectories().get(
-                0).getLastModifiedBy()).isNotNull().isEqualTo(annotationDocumentEodEntity.getLastModifiedBy().getId()),
+                0).getLastModifiedBy()).isNotNull().isEqualTo(annotationDocumentEodEntity.getLastModifiedById()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getExternalObjectDirectories().get(
                 0).getLastModifiedDateTime()).isNotNull().isEqualTo(annotationDocumentEodEntity.getLastModifiedDateTime())
         );
