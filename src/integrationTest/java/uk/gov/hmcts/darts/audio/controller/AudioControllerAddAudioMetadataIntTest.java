@@ -516,7 +516,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
                                                                                                                        addAudioMetadataRequest.getCourtroom(),
                                                                                                                        userAccount);
 
-        Function<MediaEntity, MediaEntity> alignRequest = (media) -> {
+        final Function<MediaEntity, MediaEntity> alignRequest = (media) -> {
             media.setCourtroom(courtroomEntity);
             media.setChannel(addAudioMetadataRequest.getChannel());
             media.setMediaFile(addAudioMetadataRequest.getFilename());
@@ -526,7 +526,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             media.setIsCurrent(false);
             return dartsDatabase.save(media);
         };
-        TriConsumer<Integer, MediaEntity, MediaEntity> alignDataMediaEntity = (chronicleId, previousMedia, newMediaEntity) -> {
+        final TriConsumer<Integer, MediaEntity, MediaEntity> alignDataMediaEntity = (chronicleId, previousMedia, newMediaEntity) -> {
             newMediaEntity.setChronicleId(String.valueOf(chronicleId));
             newMediaEntity.setAntecedentId(String.valueOf(previousMedia.getId()));
         };
