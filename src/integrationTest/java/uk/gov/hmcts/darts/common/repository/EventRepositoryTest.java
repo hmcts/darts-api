@@ -285,7 +285,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         // when
         List<Integer> events = eventRepository.findAllByEventStatusAndNotCourtrooms(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
-            List.of(eventWithCourtroomToBeExcluded.getCourtroom().getId()),
+            List.of(eventWithCourtroomToBeExcluded.getCourtroom().getName()),
             Limit.of(5));
 
         // then

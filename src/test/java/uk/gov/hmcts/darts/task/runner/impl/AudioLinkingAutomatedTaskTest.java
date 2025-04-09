@@ -92,7 +92,7 @@ class AudioLinkingAutomatedTaskTest {
         audioLinkingAutomatedTask.runTask();
 
         verify(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
-        verify(eventRepository).findAllByEventStatusAndNotCourtrooms(2, List.of(199, 99), Limit.of(5));
+        verify(eventRepository).findAllByEventStatusAndNotCourtrooms(2, List.of("199", "99"), Limit.of(5));
 
         verify(eventProcessor).processEvent(1);
         verify(eventProcessor).processEvent(2);
