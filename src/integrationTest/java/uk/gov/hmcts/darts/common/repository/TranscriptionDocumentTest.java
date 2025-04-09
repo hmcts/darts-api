@@ -681,6 +681,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         String hearingCourthouseDisplayName = null;
         LocalDate hearingDate = null;
         String hearingCaseNumber = null;
+        Integer hearingCaseId = null;
 
         if (TestType.MODENISED.equals(testType) && transcriptionDocumentEntity.getTranscription().getHearing() != null) {
             hearingCourthouseDisplayName = transcriptionDocumentEntity.getTranscription().getHearing().getCourtroom().getCourthouse().getDisplayName();
@@ -691,13 +692,16 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
         if (transcriptionDocumentEntity.getTranscription().getHearing() != null
             && transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase() != null) {
-            hearingCaseNumber = transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getCaseNumber();
+            CourtCaseEntity hearingCaseEntity = transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase();
+            hearingCaseNumber = hearingCaseEntity.getCaseNumber();
+            hearingCaseId = hearingCaseEntity.getId();
         }
 
         return new TranscriptionDocumentResult(transcriptionDocumentEntity.getId(),
                                                transcriptionDocumentEntity.getTranscription().getId(),
                                                caseId,
                                                caseNumber,
+                                               hearingCaseId,
                                                hearingCaseNumber,
                                                courthouseDisplayName,
                                                hearingCourthouseDisplayName,

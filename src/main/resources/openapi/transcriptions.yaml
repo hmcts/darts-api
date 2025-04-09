@@ -1123,6 +1123,9 @@ components:
         transcription_id:
           type: integer
           example: 1234
+        case_id:
+          type: integer
+          description: 'The case id'
         case_number:
           type: string
           example: C123
@@ -1669,6 +1672,9 @@ components:
           type: object
           description: 'The case related details'
           properties:
+            id:
+              type: integer
+              description: 'The case id'
             case_number:
               type: string
               description: 'The case number'
