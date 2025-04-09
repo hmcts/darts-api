@@ -145,47 +145,36 @@ class HearingServiceImplTest {
 
     @Test
     void linkAudioToHearings_whenHearingNotFound_shouldNotLinkAndReturnFalse() {
+        CourtroomEntity courtroom = new CourtroomEntity();
+        CourtCaseEntity courtCase = new CourtCaseEntity();
         MediaEntity media = new MediaEntity();
         media.setStart(OffsetDateTime.now().minusDays(5));
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("SOME-COURTHOUSE-NAME");
-        CourtroomEntity courtroom = new CourtroomEntity();
-        courtroom.setName("SOME-ROOM-NAME");
-        courtroom.setCourthouse(courthouse);
-        CourtCaseEntity courtCase = new CourtCaseEntity();
-        courtCase.setCaseNumber("SOME-COURT-CASE");
         media.setCourtroom(courtroom);
 
         HearingEntity hearing = new HearingEntity();
-        when(hearingRepository.findHearing(any(), any(), any(), any()))
+        when(hearingRepository.findHearing(any(), any(), any()))
             .thenReturn(Optional.empty());
 
         assertThat(hearingService.linkAudioToHearings(courtCase, media)).isFalse();
         assertThat(hearing.getMediaList()).isEmpty();
         verify(hearingRepository, never()).saveAndFlush(any());
         verify(hearingRepository).findHearing(
-            "SOME-COURTHOUSE-NAME",
-            "SOME-ROOM-NAME",
-            "SOME-COURT-CASE",
+            courtCase,
+            courtroom,
             LocalDate.now().minusDays(5)
         );
     }
 
     @Test
     void linkAudioToHearings_whenCourtCaseExistsAndHearingFound_shouldLinkAndReturnTrue() {
+        CourtroomEntity courtroom = new CourtroomEntity();
+        CourtCaseEntity courtCase = new CourtCaseEntity();
         MediaEntity media = new MediaEntity();
         media.setStart(OffsetDateTime.now().minusDays(5));
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("SOME-COURTHOUSE-NAME");
-        CourtroomEntity courtroom = new CourtroomEntity();
-        courtroom.setName("SOME-ROOM-NAME");
-        courtroom.setCourthouse(courthouse);
-        CourtCaseEntity courtCase = new CourtCaseEntity();
-        courtCase.setCaseNumber("SOME-COURT-CASE");
         media.setCourtroom(courtroom);
 
         HearingEntity hearing = new HearingEntity();
-        when(hearingRepository.findHearing(any(), any(), any(), any()))
+        when(hearingRepository.findHearing(any(), any(), any()))
             .thenReturn(Optional.of(hearing));
 
         assertThat(hearingService.linkAudioToHearings(courtCase, media)).isTrue();
@@ -197,9 +186,8 @@ class HearingServiceImplTest {
 
         verify(hearingRepository).saveAndFlush(hearing);
         verify(hearingRepository).findHearing(
-            "SOME-COURTHOUSE-NAME",
-            "SOME-ROOM-NAME",
-            "SOME-COURT-CASE",
+            courtCase,
+            courtroom,
             LocalDate.now().minusDays(5)
         );
     }

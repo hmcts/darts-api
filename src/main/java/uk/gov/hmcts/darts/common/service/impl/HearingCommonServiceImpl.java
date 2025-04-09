@@ -90,18 +90,15 @@ public class HearingCommonServiceImpl implements HearingCommonService {
 
         Optional<HearingEntity> hearingEntityOptional = hearingRepository
             .findHearing(
-                mediaEntity.getCourtroom().getCourthouse().getCourthouseName(),
-                mediaEntity.getCourtroom().getName(),
-                courtCaseEntity.getCaseNumber(),
+                courtCaseEntity,
+                mediaEntity.getCourtroom(),
                 mediaEntity.getStart().toLocalDate()
             );
 
         if (hearingEntityOptional.isEmpty()) {
-            log.info("Can not link hearing to media {} as no hearings could be found for CourtHouse {}, Courtroom {}, CaseNumber {} and Date {}",
-                     mediaEntity.getId(),
-                     mediaEntity.getCourtroom().getCourthouse().getCourthouseName(),
-                     mediaEntity.getCourtroom().getName(),
-                     courtCaseEntity.getCaseNumber(),
+            log.info("Can not link hearing to media {} as no hearings could be found for cas_id {}, ctr_id {}, and Date {}",
+                     courtCaseEntity.getId(),
+                     mediaEntity.getCourtroom().getId(),
                      mediaEntity.getStart().toLocalDate()
             );
             return false;
