@@ -112,7 +112,6 @@ class MediaEntityTest {
         assertThat(media.getHearingList())
             .hasSize(1)
             .contains(hearing);
-        verify(hearing).addMedia(media);
     }
 
     @Test

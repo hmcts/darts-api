@@ -162,7 +162,6 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     public void addHearing(HearingEntity hearing) {
         if (!hearingList.contains(hearing)) {
             hearingList.add(hearing);
-            hearing.addMedia(this);
         }
     }
 

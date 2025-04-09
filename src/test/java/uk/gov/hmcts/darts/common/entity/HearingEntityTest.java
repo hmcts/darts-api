@@ -45,10 +45,6 @@ class HearingEntityTest {
         assertThat(mediaEntities.get(1).getId()).isEqualTo(2);
         assertThat(mediaEntities.get(2).getId()).isEqualTo(3);
         assertThat(mediaEntities.get(3).getId()).isEqualTo(4);
-
-        assertThat(media.getHearingList())
-            .hasSize(1)
-            .contains(hearing);
     }
 
     private MediaEntity createMedia(int id) {
