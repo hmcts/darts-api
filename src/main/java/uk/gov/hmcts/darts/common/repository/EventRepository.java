@@ -178,7 +178,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 
     @Query(value = """
                         SELECT e3.id from EventEntity e3
-                        JOIN EventEntity originalEvent on origionalEvent.id = :eveId
+                        JOIN EventEntity originalEvent on originalEvent.id = :eveId
                         JOIN (                        
                             SELECT e.eventId as eventId, e.messageId as messageId, e.eventText as eventText
                             FROM EventEntity e
