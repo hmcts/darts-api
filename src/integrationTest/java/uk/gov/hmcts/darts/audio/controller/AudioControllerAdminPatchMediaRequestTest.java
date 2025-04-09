@@ -143,7 +143,7 @@ class AudioControllerAdminPatchMediaRequestTest extends IntegrationBase {
     }
 
     @Test
-    void throwsBadRequestWhenMediaRequestOwnerIdDoesntExist() throws Exception {
+    void throwsUnprocessableEntityWhenMediaRequestOwnerIdDoesntExist() throws Exception {
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
         userAccountRepository.save(userAccountEntity);
@@ -160,7 +160,7 @@ class AudioControllerAdminPatchMediaRequestTest extends IntegrationBase {
         MvcResult result = mockMvc.perform(
                 patch(ENDPOINT + String.valueOf(mediaRequestEntity.getId()))
                     .contentType("application/json").content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         Problem problemResponse

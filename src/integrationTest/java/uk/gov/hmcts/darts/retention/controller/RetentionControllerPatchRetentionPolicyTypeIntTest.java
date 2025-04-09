@@ -544,7 +544,7 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_112"))
             .andExpect(jsonPath("$.title").value("The provided start date must be in the future"));
     }
@@ -656,7 +656,7 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_111"))
             .andExpect(jsonPath("$.title").value("Duration too short"))
             .andExpect(jsonPath("$.min_allowable_days").value(1));
@@ -725,7 +725,7 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_117"))
             .andExpect(jsonPath("$.title").value("Target policy has pending revision"))
             .andExpect(jsonPath("$.pending_revision_id").value(pendingPolicy200.getId()));

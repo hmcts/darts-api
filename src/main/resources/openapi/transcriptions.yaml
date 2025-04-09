@@ -29,6 +29,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetYourTranscriptsResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
         '401':
@@ -45,6 +51,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RequestTranscriptionResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -127,6 +139,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UpdateTranscriptionsItem'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -254,6 +272,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateTranscriptionResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -352,19 +376,18 @@ paths:
               schema:
                 type: string
                 format: binary
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
             application/json+problem:
               schema:
-                allOf:
-                  - $ref: './problem.yaml'
-                  - type: object
-                    required:
-                      - type
-                    properties:
-                      type:
-                        $ref: '#/components/schemas/DownloadTranscript400ErrorCode'
+                $ref: './problem.yaml'
               example:
                 type: "TRANSCRIPTION_109"
                 title: "Failed to download transcript"
@@ -434,6 +457,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttachTranscriptResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -532,6 +561,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TranscriberViewSummary'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
         '401':
@@ -629,6 +664,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateTranscriptionAdminResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -716,6 +757,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TranscriptionStatus'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
         '401':
@@ -742,6 +789,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TranscriptionSearchResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
         '401':
@@ -1362,11 +1415,6 @@ components:
       enum:
         - "TRANSCRIPTION_105"
       x-enum-varnames: [ TRANSCRIPTION_WORKFLOW_ACTION_INVALID ]
-    DownloadTranscript400ErrorCode:
-      type: string
-      enum:
-        - "TRANSCRIPTION_109"
-      x-enum-varnames: [ FAILED_TO_DOWNLOAD_TRANSCRIPT ]
     DownloadTranscript404ErrorCode:
       type: string
       enum:
@@ -1887,7 +1935,6 @@ components:
         - "TRANSCRIPTION_106"
         - "TRANSCRIPTION_107"
         - "TRANSCRIPTION_108"
-        - "TRANSCRIPTION_109"
         - "TRANSCRIPTION_110"
         - "TRANSCRIPTION_112"
         - "TRANSCRIPTION_113"
@@ -1900,8 +1947,9 @@ components:
         - "TRANSCRIPTION_120"
         - "TRANSCRIPTION_121"
         - "TRANSCRIPTION_122"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND, TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND,
-                        TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED, TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST, TOO_MANY_RESULTS, TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND]
+        - "TRANSCRIPTION_123"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, AUDIO_NOT_FOUND, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND, TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND,
+                         TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED, TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST, TOO_MANY_RESULTS, TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND,FAILED_TO_UPLOAD_TRANSCRIPT ]
 
     TranscriptionsTitleErrors:
       type: string
@@ -1915,7 +1963,6 @@ components:
         - "Unexpected transcription urgency for this workflow"
         - "A transcription already exists with these properties"
         - "Failed to attach transcript"
-        - "Failed to download transcript"
         - "Transcription could not be requested, no audio"
         - "The user is not a transcriber"
         - "Transcription document not found"
@@ -1929,6 +1976,7 @@ components:
         - "Approval attempted by the same user who marked the transcription document as hidden"
         - "Too many results"
         - "Transcription document marked for deletion reason not found"
+        - "Failed to upload transcript"
 
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND,  TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION, TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED, TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST, TOO_MANY_RESULTS, TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND]
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, AUDIO_NOT_FOUND, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND,  TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION, TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED, TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST, TOO_MANY_RESULTS, TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND,FAILED_TO_UPLOAD_TRANSCRIPT ]

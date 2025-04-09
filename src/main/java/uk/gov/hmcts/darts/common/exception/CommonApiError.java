@@ -27,7 +27,7 @@ public enum CommonApiError implements DartsApiError {
     ),
     INVALID_REQUEST(
         CommonErrorCode.INVALID_REQUEST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CommonTitleErrors.INVALID_REQUEST.getValue()
     ),
     INTERNAL_SERVER_ERROR(
@@ -37,7 +37,7 @@ public enum CommonApiError implements DartsApiError {
     ),
     CRITERIA_TOO_BROAD(
         CommonErrorCode.CRITERIA_TOO_BROAD.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CommonTitleErrors.CRITERIA_TOO_BROAD.toString()
     );
 
