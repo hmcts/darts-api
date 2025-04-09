@@ -113,16 +113,15 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         OffsetDateTime createdTime = OffsetDateTime.now().minusDays(3);
         updateCreatedBy(event3, createdTime);
         updateCreatedBy(event1, createdTime.plusMinutes(1));
-        updateCreatedBy(event2, createdTime.plusMinutes(2));
-        updateCreatedBy(event4, createdTime.plusMinutes(3));
+        updateCreatedBy(event2, createdTime.plusMinutes(2));//Should not be selected as created after event 1
+        updateCreatedBy(event4, createdTime);
 
         List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), event1.getId());
 
         assertThat(duplicates)
-            .hasSize(3)
+            .hasSize(2)
             .anyMatch(eventEntity -> event3.getId().equals(eventEntity))
-            .anyMatch(eventEntity -> event1.getId().equals(eventEntity))
-            .anyMatch(eventEntity -> event2.getId().equals(eventEntity));
+            .anyMatch(eventEntity -> event1.getId().equals(eventEntity));
     }
 
     @Test
