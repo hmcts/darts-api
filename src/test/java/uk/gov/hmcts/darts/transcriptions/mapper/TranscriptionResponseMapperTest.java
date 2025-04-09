@@ -454,11 +454,12 @@ class TranscriptionResponseMapperTest {
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
-        String hearingCaseNumber = "hearing case" + caseId;
+        Integer hearingCaseId = caseId + 2;
+        String hearingCaseNumber = "hearing case" + hearingCaseId;
 
         String courthouseDisplayNumber = "courthouse" + caseId;
 
-        String hearingcourthouseDisplayName = "hearingcourthouse" + caseId;
+        String hearingcourthouseDisplayName = "hearingcourthouse" + hearingCaseId;
 
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
 
@@ -469,6 +470,7 @@ class TranscriptionResponseMapperTest {
                                                                              transactionId,
                                                                              caseId,
                                                                              caseNumber,
+                                                                             hearingCaseId,
                                                                              hearingCaseNumber,
                                                                              courthouseDisplayNumber,
                                                                              hearingcourthouseDisplayName,
@@ -497,7 +499,8 @@ class TranscriptionResponseMapperTest {
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
-        String hearingCaseNumber = "hearing case" + caseId;
+        Integer hearingCaseId = caseId + 2;
+        String hearingCaseNumber = "hearing case" + hearingCaseId;
 
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
 
@@ -509,6 +512,7 @@ class TranscriptionResponseMapperTest {
                                                                              transactionId,
                                                                              caseId,
                                                                              caseNumber,
+                                                                             hearingCaseId,
                                                                              hearingCaseNumber,
                                                                              courthouseDisplayName,
                                                                              null,
@@ -546,6 +550,7 @@ class TranscriptionResponseMapperTest {
                                                                              caseId,
                                                                              caseNumber,
                                                                              null,
+                                                                             null,
                                                                              courthouseDisplayName,
                                                                              null,
                                                                              hearingDate,
@@ -573,6 +578,7 @@ class TranscriptionResponseMapperTest {
 
         TranscriptionDocumentResult result = new TranscriptionDocumentResult(transcriptionDocumentId,
                                                                              transactionId,
+                                                                             null,
                                                                              null,
                                                                              null,
                                                                              null,
