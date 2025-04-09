@@ -34,13 +34,18 @@ import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.AdminActionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.AdminApproveDeletionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
+import uk.gov.hmcts.darts.transcriptions.model.CaseResponseDetails;
+import uk.gov.hmcts.darts.transcriptions.model.CourthouseResponseDetails;
+import uk.gov.hmcts.darts.transcriptions.model.CourtroomResponseDetails;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
+import uk.gov.hmcts.darts.transcriptions.model.HearingResponseDetails;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponseDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionWorkflowsComment;
@@ -52,12 +57,15 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
@@ -67,6 +75,7 @@ import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
 
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.CouplingBetweenObjects")//Required to accuratly test the code
 class TranscriptionResponseMapperTest {
     private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper();
 
@@ -77,7 +86,7 @@ class TranscriptionResponseMapperTest {
 
     @BeforeEach
     void setUp() {
-        transcriptionResponseMapper = new TranscriptionResponseMapper(hearingReportingRestrictionsRepository);
+        transcriptionResponseMapper = spy(new TranscriptionResponseMapper(hearingReportingRestrictionsRepository));
     }
 
     @Test
@@ -445,11 +454,12 @@ class TranscriptionResponseMapperTest {
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
-        String hearingCaseNumber = "hearing case" + caseId;
+        Integer hearingCaseId = caseId + 2;
+        String hearingCaseNumber = "hearing case" + hearingCaseId;
 
         String courthouseDisplayNumber = "courthouse" + caseId;
 
-        String hearingcourthouseDisplayName = "hearingcourthouse" + caseId;
+        String hearingcourthouseDisplayName = "hearingcourthouse" + hearingCaseId;
 
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
 
@@ -460,6 +470,7 @@ class TranscriptionResponseMapperTest {
                                                                              transactionId,
                                                                              caseId,
                                                                              caseNumber,
+                                                                             hearingCaseId,
                                                                              hearingCaseNumber,
                                                                              courthouseDisplayNumber,
                                                                              hearingcourthouseDisplayName,
@@ -488,7 +499,8 @@ class TranscriptionResponseMapperTest {
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
-        String hearingCaseNumber = "hearing case" + caseId;
+        Integer hearingCaseId = caseId + 2;
+        String hearingCaseNumber = "hearing case" + hearingCaseId;
 
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
 
@@ -500,6 +512,7 @@ class TranscriptionResponseMapperTest {
                                                                              transactionId,
                                                                              caseId,
                                                                              caseNumber,
+                                                                             hearingCaseId,
                                                                              hearingCaseNumber,
                                                                              courthouseDisplayName,
                                                                              null,
@@ -537,6 +550,7 @@ class TranscriptionResponseMapperTest {
                                                                              caseId,
                                                                              caseNumber,
                                                                              null,
+                                                                             null,
                                                                              courthouseDisplayName,
                                                                              null,
                                                                              hearingDate,
@@ -564,6 +578,7 @@ class TranscriptionResponseMapperTest {
 
         TranscriptionDocumentResult result = new TranscriptionDocumentResult(transcriptionDocumentId,
                                                                              transactionId,
+                                                                             null,
                                                                              null,
                                                                              null,
                                                                              null,
@@ -903,4 +918,172 @@ class TranscriptionResponseMapperTest {
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
+    @Test
+    void mapTranscriptionDocumentMarkedForDeletion_nullHearing_shouldReutrnTranscriptionCaseDetails() {
+        CourtCaseEntity courtCaseEntity = mock(CourtCaseEntity.class);
+        CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+        CourthouseEntity courtHouseEntity = mock(CourthouseEntity.class);
+        doReturn(courtHouseEntity).when(courtroomEntity).getCourthouse();
+
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.setHearings(null);
+        transcription.setCourtCases(List.of(courtCaseEntity));
+        transcription.setCourtroom(courtroomEntity);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setTranscription(transcription);
+
+        CaseResponseDetails caseResponseDetails = mock(CaseResponseDetails.class);
+        CourtroomResponseDetails courtroomResponseDetails = mock(CourtroomResponseDetails.class);
+        CourthouseResponseDetails courthouseResponseDetails = mock(CourthouseResponseDetails.class);
+        TranscriptionResponseDetails transcriptionResponseDetails = mock(TranscriptionResponseDetails.class);
+
+        doReturn(caseResponseDetails).when(transcriptionResponseMapper).mapCase(courtCaseEntity);
+        doReturn(courtroomResponseDetails).when(transcriptionResponseMapper).mapCourtroom(courtroomEntity);
+        doReturn(courthouseResponseDetails).when(transcriptionResponseMapper).mapCourthouse(courtHouseEntity);
+        doReturn(transcriptionResponseDetails).when(transcriptionResponseMapper).mapTranscriptionEntity(transcription);
+
+        AdminMarkedForDeletionResponseItem responseDetails = transcriptionResponseMapper
+            .mapTranscriptionDocumentMarkedForDeletion(transcriptionDocumentEntity);
+
+
+        assertThat(responseDetails).isNotNull();
+        assertThat(responseDetails.getCase()).isEqualTo(caseResponseDetails);
+        assertThat(responseDetails.getCourtroom()).isEqualTo(courtroomResponseDetails);
+        assertThat(responseDetails.getCourthouse()).isEqualTo(courthouseResponseDetails);
+        assertThat(responseDetails.getTranscription()).isEqualTo(transcriptionResponseDetails);
+        assertThat(responseDetails.getHearing()).isNull();
+    }
+
+    @Test
+    void mapTranscriptionDocumentMarkedForDeletion_nullHearingAndNullTranscriptionCourtroom_shouldReutrnCourtHouseFromCase() {
+        CourtCaseEntity courtCaseEntity = mock(CourtCaseEntity.class);
+        CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+        CourthouseEntity courtHouseEntity = mock(CourthouseEntity.class);
+        doReturn(courtHouseEntity).when(courtCaseEntity).getCourthouse();
+
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.setHearings(null);
+        transcription.setCourtCases(List.of(courtCaseEntity));
+        transcription.setCourtroom(courtroomEntity);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setTranscription(transcription);
+
+        CaseResponseDetails caseResponseDetails = mock(CaseResponseDetails.class);
+        CourtroomResponseDetails courtroomResponseDetails = mock(CourtroomResponseDetails.class);
+        CourthouseResponseDetails courthouseResponseDetails = mock(CourthouseResponseDetails.class);
+        TranscriptionResponseDetails transcriptionResponseDetails = mock(TranscriptionResponseDetails.class);
+
+        doReturn(caseResponseDetails).when(transcriptionResponseMapper).mapCase(courtCaseEntity);
+        doReturn(courtroomResponseDetails).when(transcriptionResponseMapper).mapCourtroom(courtroomEntity);
+        doReturn(courthouseResponseDetails).when(transcriptionResponseMapper).mapCourthouse(courtHouseEntity);
+        doReturn(transcriptionResponseDetails).when(transcriptionResponseMapper).mapTranscriptionEntity(transcription);
+
+        AdminMarkedForDeletionResponseItem responseDetails = transcriptionResponseMapper
+            .mapTranscriptionDocumentMarkedForDeletion(transcriptionDocumentEntity);
+
+        assertThat(responseDetails).isNotNull();
+        assertThat(responseDetails.getCase()).isEqualTo(caseResponseDetails);
+        assertThat(responseDetails.getCourtroom()).isEqualTo(courtroomResponseDetails);
+        assertThat(responseDetails.getCourthouse()).isEqualTo(courthouseResponseDetails);
+        assertThat(responseDetails.getTranscription()).isEqualTo(transcriptionResponseDetails);
+        assertThat(responseDetails.getHearing()).isNull();
+    }
+
+    @Test
+    void mapTranscriptionEntity_whenNull_shouldReturnNull() {
+        assertNull(transcriptionResponseMapper.mapTranscriptionEntity(null));
+    }
+
+    @Test
+    void mapTranscriptionEntity_whenNotNull_shouldReturnCorrectlyMappedData() {
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.setId(123);
+
+        TranscriptionResponseDetails responseDetails = transcriptionResponseMapper.mapTranscriptionEntity(transcription);
+        assertThat(responseDetails).isNotNull();
+        assertThat(responseDetails.getId()).isEqualTo(123);
+    }
+
+    @Test
+    void mapHearing_whenNull_shouldReturnNull() {
+        assertNull(transcriptionResponseMapper.mapHearing(null));
+    }
+
+    @Test
+    void mapHearing_whenNotNull_shouldReturnCorrectlyMappedData() {
+        HearingEntity hearing = new HearingEntity();
+        hearing.setId(123);
+        hearing.setHearingDate(LocalDate.of(2023, 6, 20));
+
+        HearingResponseDetails responseDetails = transcriptionResponseMapper.mapHearing(hearing);
+        assertThat(responseDetails).isNotNull();
+        assertThat(responseDetails.getId()).isEqualTo(123);
+        assertThat(responseDetails.getHearingDate()).isEqualTo(LocalDate.of(2023, 6, 20));
+    }
+
+    @Test
+    void mapCase_whenNull_shouldReturnNull() {
+        assertNull(transcriptionResponseMapper.mapCase(null));
+    }
+
+    @Test
+    void mapCase_whenNotNull_shouldReturnCorrectlyMappedData() {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setId(123);
+        courtCase.setCaseNumber("some-case-number");
+
+        CaseResponseDetails responseDetails = transcriptionResponseMapper.mapCase(courtCase);
+        assertThat(responseDetails).isNotNull();
+        assertThat(responseDetails.getId()).isEqualTo(123);
+        assertThat(responseDetails.getCaseNumber()).isEqualTo("some-case-number");
+    }
+
+    @Test
+    void mapCourtroom_whenNull_shouldReturnNull() {
+        assertNull(transcriptionResponseMapper.mapCourtroom(null));
+    }
+
+    @Test
+    void mapCourtroom_whenNotNull_shouldReturnCorrectlyMappedData() {
+        CourtroomEntity courtroom = new CourtroomEntity();
+        courtroom.setId(123);
+        courtroom.setName("some-name");
+
+        CourtroomResponseDetails responseDetails = transcriptionResponseMapper.mapCourtroom(courtroom);
+        assertThat(responseDetails).isNotNull();
+        assertThat(responseDetails.getId()).isEqualTo(123);
+        assertThat(responseDetails.getName()).isEqualTo("SOME-NAME");
+    }
+
+    @Test
+    void mapCourthouse_whenNull_shouldReturnNull() {
+        assertNull(transcriptionResponseMapper.mapTranscriptionEntity(null));
+    }
+
+    @Test
+    void mapCourthouse_whenNotNull_shouldReturnCorrectlyMappedData() {
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setId(123);
+        courthouse.setDisplayName("some-display-name");
+
+        CourthouseResponseDetails responseDetails = transcriptionResponseMapper.mapCourthouse(courthouse);
+        assertThat(responseDetails).isNotNull();
+        assertThat(responseDetails.getId()).isEqualTo(123);
+        assertThat(responseDetails.getDisplayName()).isEqualTo("some-display-name");
+    }
+
+    @Test
+    void getFirstNotNull_whenAllNull_shouldReturnNull() {
+        assertNull(transcriptionResponseMapper.getFirstNotNull(null, null, null));
+    }
+
+    @Test
+    void getFirstNotNull_whenFirstNull_shouldReturnSecond() {
+        assertEquals("second", transcriptionResponseMapper.getFirstNotNull(null, "second", null));
+    }
+
+    @Test
+    void getFirstNotNull_whenFirstNotNull_shouldReturnFirst() {
+        assertEquals("first", transcriptionResponseMapper.getFirstNotNull("first", "second", null));
+    }
 }

@@ -68,7 +68,7 @@ class AudioLinkingAutomatedTaskTest {
 
     @BeforeEach
     void setupData() {
-        when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers()).thenReturn(List.of("199"));
+        when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers()).thenReturn(List.of("199", "99"));
 
         audioLinkingAutomatedTask = spy(new AudioLinkingAutomatedTask(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService,
                                                                       eventRepository, eventProcessor, audioConfigurationProperties));
@@ -92,7 +92,7 @@ class AudioLinkingAutomatedTaskTest {
         audioLinkingAutomatedTask.runTask();
 
         verify(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
-        verify(eventRepository).findAllByEventStatusAndNotCourtrooms(2, List.of(199), Limit.of(5));
+        verify(eventRepository).findAllByEventStatusAndNotCourtrooms(2, List.of("199", "99"), Limit.of(5));
 
         verify(eventProcessor).processEvent(1);
         verify(eventProcessor).processEvent(2);

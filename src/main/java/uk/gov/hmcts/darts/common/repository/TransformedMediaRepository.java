@@ -61,7 +61,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         )
         AND upper(tod.status.description) <> 'MARKED FOR DELETION'   
         AND not exists (SELECT sge from tm.mediaRequest.currentOwner.securityGroupEntities sge 
-               where sge.securityRoleEntity.roleName in ('MEDIA_IN_PERPETUITY', 'SUPER_ADMIN', 'SUPER_USER')) 
+               where sge.securityRoleEntity.roleName = 'MEDIA_IN_PERPETUITY') 
         """)
     List<Integer> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime, Limit limit);
 
@@ -73,6 +73,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
             JOIN hearing.courtCase courtCase
             JOIN hearing.courtroom courtroom
             JOIN courtroom.courthouse courthouse
+            JOIN UserAccountEntity ua on ua.id = tm.createdById      
         WHERE
            (:mediaId IS NULL OR (media.id=:mediaId)) AND
            (:caseNumber IS NULL OR (courtCase.caseNumber=cast(:caseNumber as text))) AND
@@ -80,7 +81,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%'))) AND
            ((cast(:hearingDate as LocalDate)) IS NULL OR (cast(:hearingDate as LocalDate) IS NOT NULL AND hearing.hearingDate=:hearingDate )) AND
            (:owner IS NULL OR (media.currentOwner.userFullName ILIKE CONCAT('%', cast(:owner as text), '%'))) AND
-           (:requestedBy IS NULL OR (tm.createdBy.userFullName ILIKE CONCAT('%', cast (:requestedBy as text), '%'))) AND
+           (:requestedBy IS NULL OR (ua.userFullName ILIKE CONCAT('%', cast (:requestedBy as text), '%'))) AND
            ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR media.createdDateTime >= :requestedAtFrom) AND
            ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
            ORDER BY tm.id DESC

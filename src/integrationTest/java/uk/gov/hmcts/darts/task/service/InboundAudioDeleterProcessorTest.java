@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTes
 class InboundAudioDeleterProcessorTest extends IntegrationBase {
 
     private static final String USER_EMAIL_ADDRESS = "system_InboundAudioDeleter@hmcts.net";
+    private UserAccountEntity userAccount;
     public static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
 
     @Autowired
@@ -36,7 +38,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
 
     @Test
     void updatedMoreThan24HrsAgo() {
-        anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
+        UserAccountEntity userAccount = anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusHours(500));
         HearingEntity hearing = dartsDatabase.createHearing(
@@ -83,7 +85,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
 
             ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
             assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
-            assertEquals(USER_EMAIL_ADDRESS, foundMedia.getLastModifiedBy().getEmailAddress());
+            assertEquals(userAccount.getId(), foundMedia.getLastModifiedById());
         });
     }
 

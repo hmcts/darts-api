@@ -69,7 +69,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         PostNodeRegistrationResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PostNodeRegistrationResponse.class);
         Optional<NodeRegisterEntity> nodeRegisterEntity = dartsDatabase.findByNodeId(response.getNodeId());
 
-        Assertions.assertEquals(userCreated.getId(), nodeRegisterEntity.get().getCreatedBy().getId());
+        Assertions.assertEquals(userCreated.getId(), nodeRegisterEntity.get().getCreatedById());
     }
 
     @Test

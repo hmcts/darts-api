@@ -22,10 +22,10 @@ public final class CaseRetentionTestData {
         caseRetention.setRetainUntil(OffsetDateTime.now().plusYears(7));
         caseRetention.setCurrentState("some-state");
         caseRetention.setCreatedDateTime(OffsetDateTime.now());
-        caseRetention.setCreatedBy(minimalUserAccount());
+        caseRetention.setCreatedById(0);
         caseRetention.setSubmittedBy(minimalUserAccount());
         caseRetention.setLastModifiedDateTime(OffsetDateTime.now());
-        caseRetention.setLastModifiedBy(minimalUserAccount());
+        caseRetention.setLastModifiedById(0);
         return caseRetention;
     }
 

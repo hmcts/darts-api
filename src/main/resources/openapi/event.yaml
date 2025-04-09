@@ -986,4 +986,5 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND ]
+        EVENT_ID_NOT_FOUND
+      ]

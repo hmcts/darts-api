@@ -12,6 +12,7 @@ import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.data.TemporalUnitOffset;
+import org.hibernate.LazyInitializationException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.zalando.problem.jackson.ProblemModule;
@@ -26,6 +27,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -217,5 +219,14 @@ public final class TestUtils {
                 }
             }
         } while (maxRetries > 0);
+    }
+
+    public static boolean isProxy(Collection<?> collection) {
+        try {
+            collection.size();
+            return false;
+        } catch (LazyInitializationException e) {
+            return true;
+        }
     }
 }

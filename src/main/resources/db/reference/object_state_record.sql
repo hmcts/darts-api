@@ -12,6 +12,7 @@
 --      remove relation_id,cas_id,parent_id,object_type from object_state_record
 --v9    add dal_id to object_state_record
 --v10   amend datatypes for eod_id and arm_eod_id to integer
+--v11   remove 4 indexes
 
 
 CREATE TABLE object_state_record
@@ -61,16 +62,7 @@ ALTER TABLE object_state_record                         ADD PRIMARY KEY USING IN
 -- multicolumn index, as two columns will be referenced together
 CREATE INDEX osr_storage_id_data_ticket                 ON object_state_record(storage_id,data_ticket) TABLESPACE pg_default;
 
--- only one of the following two indexes should be retained
 CREATE INDEX osr_id_clip                                ON object_state_record(id_clip) TABLESPACE pg_default;
--- if the queries that neccesitate this index remain, remove single column, otherwise retain this one,and remove id_clip.
-CREATE INDEX osr_id_clip_md5_doc_tx_dets                ON object_state_record(id_clip,md5_doc_transfer_to_dets) TABLESPACE pg_default;
-
--- obviously if the md5 column is not needed in the 2 column index above, the following would also be redundant
-CREATE INDEX osr_md5_doc_tx_dets                        ON object_state_record(md5_doc_transfer_to_dets) TABLESPACE pg_default;
-
-CREATE INDEX osr_content_object_id                      ON object_state_record(content_object_id) TABLESPACE pg_default;
-CREATE INDEX osr_flag_file_transfer_to_dets             ON object_state_record(flag_file_transfer_to_dets) TABLESPACE pg_default;
 
 
 CREATE TABLE revinfo

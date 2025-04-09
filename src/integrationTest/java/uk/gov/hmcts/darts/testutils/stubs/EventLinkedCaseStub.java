@@ -19,12 +19,4 @@ public class EventLinkedCaseStub {
         eventLinkedCaseEntity.setCourtCase(caseEntity);
         return eventLinkedCaseRepository.save(eventLinkedCaseEntity);
     }
-
-    public EventLinkedCaseEntity createCaseLinkedEvent(EventEntity event, String caseNumber, String courthouseName) {
-        EventLinkedCaseEntity eventLinkedCaseEntity = new EventLinkedCaseEntity();
-        eventLinkedCaseEntity.setEvent(event);
-        eventLinkedCaseEntity.setCaseNumber(caseNumber);
-        eventLinkedCaseEntity.setCourthouseName(courthouseName);
-        return eventLinkedCaseRepository.save(eventLinkedCaseEntity);
-    }
 }

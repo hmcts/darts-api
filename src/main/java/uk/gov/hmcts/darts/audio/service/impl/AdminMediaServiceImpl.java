@@ -46,6 +46,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -231,10 +232,10 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         item.setCourthouse(courthouseMapper.toApiModel(base.getMedia().getCourtroom().getCourthouse()));
         GetAdminMediasMarkedForDeletionAdminAction adminAction = objectActionMapper.toGetAdminMediasMarkedForDeletionAdminAction(base);
         adminAction.setComments(actions.stream()
-            .sorted(Comparator.comparing(ObjectAdminActionEntity::getHiddenDateTime))
-            .map(ObjectAdminActionEntity::getComments)
-            .distinct()
-            .toList()
+                                    .sorted(Comparator.comparing(ObjectAdminActionEntity::getHiddenDateTime))
+                                    .map(ObjectAdminActionEntity::getComments)
+                                    .distinct()
+                                    .toList()
         );
         item.setAdminAction(adminAction);
         return item;
@@ -263,23 +264,29 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         }
 
         mediaApproveMarkForDeletionValidator.validate(mediaId);
-        List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
-
         Optional<MediaEntity> mediaEntityOptional = mediaRepository.findByIdIncludeDeleted(mediaId);
         if (mediaEntityOptional.isEmpty()) {
             throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
         }
         MediaEntity mediaEntity = mediaEntityOptional.get();
-        var currentUser = userIdentity.getUserAccount();
-        var objectAdminActionEntity = objectAdminActionEntityList.getFirst();
-        objectAdminActionEntity.setMarkedForManualDeletion(true);
-        objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
-        objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
-        objectAdminActionRepository.save(objectAdminActionEntity);
 
-        auditApi.record(AuditActivity.MANUAL_DELETION, currentUser, objectAdminActionEntity.getId().toString());
+        List<MediaEntity> mediaEntities = mediaRepository.findAllByChronicleId(mediaEntity.getChronicleId());
 
-        return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
+        UserAccountEntity currentUser = userIdentity.getUserAccount();
+        List<ObjectAdminActionEntity> objectAdminActionEntities = mediaEntities.stream()
+            .map(MediaEntity::getObjectAdminAction)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .peek(objectAdminAction -> {
+                objectAdminAction.setMarkedForManualDeletion(true);
+                objectAdminAction.setMarkedForManualDelBy(currentUser);
+                objectAdminAction.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
+                auditApi.record(AuditActivity.MANUAL_DELETION, currentUser, objectAdminAction.getId().toString());
+            })
+            .toList();
+        objectAdminActionRepository.saveAll(objectAdminActionEntities);
+
+        return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, mediaEntity.getObjectAdminAction().get());
     }
 
     @Override

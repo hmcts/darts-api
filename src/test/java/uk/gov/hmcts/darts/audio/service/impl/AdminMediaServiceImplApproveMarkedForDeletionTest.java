@@ -27,12 +27,12 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -76,38 +76,58 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
     }
 
     @Test
-    void testAdminApproveMediaMarkedForDeletionSuccess() {
+    void adminApproveMediaMarkedForDeletion_shouldMarkMediaForDeletion_whenUsingTypicalData() {
         // given
-        Integer mediaId = 1;
-        MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(mediaId);
+        Integer mediaId1 = 1;
+        Integer mediaId2 = 2;
+        MediaEntity mediaEntity1 = new MediaEntity();
+        mediaEntity1.setId(mediaId1);
+        mediaEntity1.setChronicleId("123");
+        MediaEntity mediaEntity2 = new MediaEntity();
+        mediaEntity2.setId(mediaId2);
+        mediaEntity2.setChronicleId("123");
 
         var hiddenByUserAccount = UserAccountTestData.minimalUserAccount();
         hiddenByUserAccount.setId(123);
-        var objectAdminAction = ObjectAdminActionTestData.minimalObjectAdminAction();
-        objectAdminAction.setMedia(mediaEntity);
-        objectAdminAction.setMarkedForManualDeletion(false);
-        objectAdminAction.setHiddenBy(hiddenByUserAccount);
-        objectAdminAction.setId(1);
+
+        var objectAdminAction1 = ObjectAdminActionTestData.minimalObjectAdminAction();
+        objectAdminAction1.setMedia(mediaEntity1);
+        objectAdminAction1.setMarkedForManualDeletion(false);
+        objectAdminAction1.setHiddenBy(hiddenByUserAccount);
+        objectAdminAction1.setId(1);
         var hiddenReason = ObjectHiddenReasonTestData.otherDelete();
-        objectAdminAction.setObjectHiddenReason(hiddenReason);
+        objectAdminAction1.setObjectHiddenReason(hiddenReason);
+        mediaEntity1.setObjectAdminAction(objectAdminAction1);
 
-        var authorisedByUserAccount = UserAccountTestData.minimalUserAccount();
-        authorisedByUserAccount.setId(345);
+        var objectAdminAction2 = ObjectAdminActionTestData.minimalObjectAdminAction();
+        objectAdminAction2.setMedia(mediaEntity2);
+        objectAdminAction2.setMarkedForManualDeletion(false);
+        objectAdminAction2.setHiddenBy(hiddenByUserAccount);
+        objectAdminAction2.setId(2);
+        var hiddenReason2 = ObjectHiddenReasonTestData.otherDelete();
+        objectAdminAction2.setObjectHiddenReason(hiddenReason2);
+        mediaEntity2.setObjectAdminAction(objectAdminAction2);
 
-        when(mediaRepository.findByIdIncludeDeleted(mediaId)).thenReturn(Optional.of(mediaEntity));
+        when(mediaRepository.findByIdIncludeDeleted(mediaId1)).thenReturn(Optional.of(mediaEntity1));
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
-        when(userIdentity.getUserAccount()).thenReturn(authorisedByUserAccount);
+        when(mediaRepository.findAllByChronicleId("123")).thenReturn(List.of(mediaEntity1,mediaEntity2));
 
-        MediaApproveMarkedForDeletionResponse response = adminMediaService.adminApproveMediaMarkedForDeletion(mediaId);
+        MediaApproveMarkedForDeletionResponse response = adminMediaService.adminApproveMediaMarkedForDeletion(mediaId1);
 
-        verify(auditApi).record(eq(AuditActivity.MANUAL_DELETION), notNull(), eq(objectAdminAction.getId().toString()));
+        verify(auditApi).record(eq(AuditActivity.MANUAL_DELETION), eq(userAccount), eq(objectAdminAction1.getId().toString()));
+        verify(auditApi).record(eq(AuditActivity.MANUAL_DELETION), eq(userAccount), eq(objectAdminAction2.getId().toString()));
 
         assertNotNull(response);
-        verify(mediaApproveMarkForDeletionValidator, times(1)).validate(mediaId);
-        verify(objectAdminActionRepository, times(1)).save(objectAdminAction);
+        verify(mediaApproveMarkForDeletionValidator, times(1)).validate(mediaId1);
+        verify(objectAdminActionRepository, times(1)).saveAll(List.of(objectAdminAction1,objectAdminAction2));
+        verify(mediaRepository).findAllByChronicleId("123");
+
+        assertThat(objectAdminAction1.isMarkedForManualDeletion()).isTrue();
+        assertThat(objectAdminAction1.getMarkedForManualDelBy()).isEqualTo(userAccount);
+        assertThat(objectAdminAction2.isMarkedForManualDeletion()).isTrue();
+        assertThat(objectAdminAction2.getMarkedForManualDelBy()).isEqualTo(userAccount);
+
     }
 
     @Test

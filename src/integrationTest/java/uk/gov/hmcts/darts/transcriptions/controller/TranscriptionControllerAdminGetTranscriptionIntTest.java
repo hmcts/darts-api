@@ -108,7 +108,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
         TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
 
-        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(), null)))
+        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedById().toString(), null)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
@@ -137,7 +137,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         TranscriptionEntity transcriptionEntity
             = transcriptionStub.createTranscription((HearingEntity) null, userAccountEntity);
 
-        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
+        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedById().toString(),
                                                                                null)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
@@ -170,7 +170,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
         TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
 
-        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
+        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedById().toString(),
                                                                                OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
@@ -206,16 +206,17 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             .getTranscriptionStatusByEnum(TranscriptionStatusEnum.WITH_TRANSCRIBER);
 
         TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
+        UserAccountEntity createdBy = dartsDatabase.getUserAccountRepository().findById(transcriptionEntity.getCreatedById()).orElseThrow();
         TranscriptionEntity transcriptionEntity1
-            = transcriptionStub.createTranscription(headerEntity, transcriptionEntity.getCreatedBy(), TranscriptionStatusEnum.WITH_TRANSCRIBER);
+            = transcriptionStub.createTranscription(headerEntity, createdBy, TranscriptionStatusEnum.WITH_TRANSCRIBER);
 
 
         transcriptionStub.createTranscriptionWorkflowEntity(transcriptionEntity1,
-                                                            courtroomAtNewcastleEntity.getCreatedBy(),
+                                                            courtroomAtNewcastleEntity.getCreatedById(),
                                                             OffsetDateTime.now(),
                                                             statusEntity);
 
-        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
+        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedById().toString(),
                                                                                OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
@@ -284,7 +285,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         transcriptionEntity.setIsCurrent(false);
         dartsDatabase.save(transcriptionEntity);
 
-        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
+        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedById().toString(),
                                                                                OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
@@ -469,6 +470,9 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
         TranscriptionDocumentEntity mediaEntityToRequest = transcriptionDocumentResults.get(2);
 
+        UserAccountEntity transcriptionCreatedBy = dartsDatabase.getUserAccountRepository()
+            .findById(mediaEntityToRequest.getTranscription().getCreatedById()).orElseThrow();
+
         // use all search criteria
         SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
         request.setRequestedAtFrom(mediaEntityToRequest.getTranscription().getCreatedDateTime().minusDays(2).toLocalDate());
@@ -476,7 +480,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         request.setCaseNumber(mediaEntityToRequest.getTranscription().getHearing().getCourtCase().getCaseNumber());
         request.setHearingDate(mediaEntityToRequest.getTranscription().getHearing().getHearingDate());
         request.setOwner(mediaEntityToRequest.getTranscription().getTranscriptionWorkflowEntities().getFirst().getWorkflowActor().getUserFullName());
-        request.setRequestedBy(mediaEntityToRequest.getTranscription().getCreatedBy().getUserFullName());
+        request.setRequestedBy(transcriptionCreatedBy.getUserFullName());
         request.setRequestedAtFrom(mediaEntityToRequest.getTranscription().getCreatedDateTime().toLocalDate());
         request.setRequestedAtTo(mediaEntityToRequest.getTranscription().getCreatedDateTime().toLocalDate());
 
@@ -730,18 +734,20 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             .getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED);
 
         TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
+        UserAccountEntity createdBy = dartsDatabase.getUserAccountRepository().findById(transcriptionEntity.getCreatedById()).orElseThrow();
         TranscriptionEntity transcriptionEntity1
-            = transcriptionStub.createTranscription(headerEntity, transcriptionEntity.getCreatedBy(), TranscriptionStatusEnum.APPROVED);
+            = transcriptionStub.createTranscription(headerEntity, createdBy, TranscriptionStatusEnum.APPROVED);
 
 
-        TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(transcriptionEntity1,
-                                                                                                                      courtroomAtNewcastleEntity.getCreatedBy(),
-                                                                                                                      now,
-                                                                                                                      statusEntity);
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionStub
+            .createTranscriptionWorkflowEntity(transcriptionEntity1,
+                                               courtroomAtNewcastleEntity.getCreatedById(),
+                                               now,
+                                               statusEntity);
         transcriptionEntity1.setTranscriptionWorkflowEntities(List.of(transcriptionWorkflowEntity));
         dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity1);
 
-        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
+        MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedById().toString(),
                                                                                OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
@@ -784,8 +790,8 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         }
 
         if (response.getCase() != null) {
-            assertEquals(response.getCase().getCaseNumber(),
-                         entity.getTranscription().getCourtCase().getCaseNumber());
+            assertEquals(response.getCase().getId(),
+                         entity.getTranscription().getCourtCase().getId());
             assertEquals(response.getCase().getCaseNumber(),
                          entity.getTranscription().getCourtCase().getCaseNumber());
         }

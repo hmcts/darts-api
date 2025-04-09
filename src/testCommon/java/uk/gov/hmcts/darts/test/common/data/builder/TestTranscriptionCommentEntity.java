@@ -5,7 +5,6 @@ import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
@@ -25,9 +24,9 @@ public class TestTranscriptionCommentEntity extends TranscriptionCommentEntity i
         boolean isMigrated,
         boolean isDataAnonymised,
         OffsetDateTime createdDateTime,
-        UserAccountEntity createdBy,
+        Integer createdById,
         OffsetDateTime lastModifiedDateTime,
-        UserAccountEntity lastModifiedBy
+        Integer lastModifiedById
     ) {
         // Set parent properties
         setId(id);
@@ -40,9 +39,9 @@ public class TestTranscriptionCommentEntity extends TranscriptionCommentEntity i
         setMigrated(isMigrated);
         setDataAnonymised(isDataAnonymised);
         setCreatedDateTime(createdDateTime);
-        setCreatedBy(createdBy);
+        setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(lastModifiedById);
     }
 
     @Override

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -28,11 +27,9 @@ public class CourthouseStubComposable {
         CourthouseEntity newCourthouse = new CourthouseEntity();
         newCourthouse.setCourthouseName(name);
         newCourthouse.setDisplayName(name);
-        UserAccountEntity defaultUser = userAccountRepository.getReferenceById(0);
-        newCourthouse.setCreatedBy(defaultUser);
-        newCourthouse.setLastModifiedBy(defaultUser);
-        courthouseRepository.saveAndFlush(newCourthouse);
-        return newCourthouse;
+        newCourthouse.setCreatedById(0);
+        newCourthouse.setLastModifiedById(0);
+        return courthouseRepository.saveAndFlush(newCourthouse);
     }
 
 }

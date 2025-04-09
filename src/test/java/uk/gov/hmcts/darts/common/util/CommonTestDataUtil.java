@@ -42,9 +42,10 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.time.ZoneOffset.UTC;
-import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
@@ -55,6 +56,7 @@ public class CommonTestDataUtil {
 
     private static final String SOME_POLICY_DESCRIPTION = "Policy description";
     private static final String SOME_POLICY_DURATION = "1Y0M0D";
+    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
@@ -91,7 +93,7 @@ public class CommonTestDataUtil {
                                               boolean isCurrent) {
 
         EventEntity event = new EventEntity();
-        event.setHearingEntities(asList(hearingEntity));
+        event.setHearingEntities(Set.of(hearingEntity));
         event.setCourtroom(hearingEntity.getCourtroom());
         event.setEventText(eventText);
         event.setId(id);
@@ -415,6 +417,7 @@ public class CommonTestDataUtil {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setUserFullName(userName);
         userAccount.setEmailAddress("test@test.com");
+        userAccount.setId(ID_GENERATOR.getAndIncrement());
         return userAccount;
     }
 

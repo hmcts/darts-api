@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.event.model.CourtroomResponseDetails;
 import uk.gov.hmcts.darts.event.model.EventMapping;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -68,20 +69,20 @@ public class EventMapper {
         adminGetEventResponseDetail.setEventTs(eventEntity.getTimestamp());
         adminGetEventResponseDetail.isCurrent(eventEntity.getIsCurrent());
         adminGetEventResponseDetail.setCreatedAt(eventEntity.getCreatedDateTime());
-        adminGetEventResponseDetail.setCreatedBy(eventEntity.getCreatedBy().getId());
+        adminGetEventResponseDetail.setCreatedBy(eventEntity.getCreatedById());
         adminGetEventResponseDetail.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
-        adminGetEventResponseDetail.setLastModifiedBy(eventEntity.getLastModifiedBy().getId());
+        adminGetEventResponseDetail.setLastModifiedBy(eventEntity.getLastModifiedById());
         adminGetEventResponseDetail.setIsDataAnonymised(eventEntity.isDataAnonymised());
         return adminGetEventResponseDetail;
     }
 
 
-    List<AdminGetEventResponseDetailsHearingsHearingsInner> mapAdminGetEventResponseDetailsHearings(
-        List<HearingEntity> hearingEntities) {
+    List<AdminGetEventResponseDetailsHearingsHearingsInner> mapAdminGetEventResponseDetailsHearings(Collection<HearingEntity> hearingEntities) {
         if (CollectionUtils.isEmpty(hearingEntities)) {
             return new ArrayList<>();
         }
         return hearingEntities.stream()
+            .sorted(Comparator.comparing(HearingEntity::getId))
             .map(hearingEntity -> mapAdminGetEventResponseDetailsHearing(hearingEntity))
             .toList();
     }

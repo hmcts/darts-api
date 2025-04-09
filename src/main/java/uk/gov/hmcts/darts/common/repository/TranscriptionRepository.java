@@ -117,6 +117,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     @Query("""
          SELECT new uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult(
              t.id,
+             coalesce(hcc.id, tcc.id),
              coalesce(hcc.caseNumber, tcc.caseNumber),
              coalesce(hcth.id, tcth.id),
              coalesce(h.hearingDate, t.hearingDate),
@@ -126,7 +127,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              (SELECT MAX(w.workflowTimestamp) FROM TranscriptionWorkflowEntity w WHERE w.transcription = t AND w.transcriptionStatus = :transcriptionStatus))
          FROM TranscriptionEntity t
          JOIN t.transcriptionStatus ts
-         JOIN t.createdBy ua
+         JOIN UserAccountEntity ua on ua.id = t.createdById
          LEFT JOIN t.hearings h
          LEFT JOIN h.courtCase hcc
          LEFT JOIN h.courtroom hcr
