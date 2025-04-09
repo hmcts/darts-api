@@ -58,21 +58,28 @@ public class CaseExpiryDeletionAutomatedTask
     }
 
     @Override
-    @Transactional
     public void runTask() {
-        final UserAccountEntity userAccount = userAccountService.getUserAccount();
-        OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
-            .minus(getConfig().getBufferDuration());
+        new CaseExpiryDeleter().delete();
+    }
 
-        caseRepository.findCaseIdsToBeAnonymised(maxRetentionDate, Limit.of(getAutomatedTaskBatchSize()))
-            .forEach(courtCaseId -> {
-                try {
-                    log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
-                    dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId, false);
-                    hearingsService.removeMediaLinkToHearing(courtCaseId);
-                } catch (Exception e) {
-                    log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
-                }
-            });
+    private class CaseExpiryDeleter {
+
+        @Transactional
+        public void delete() {
+            final UserAccountEntity userAccount = userAccountService.getUserAccount();
+            OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
+                .minus(getConfig().getBufferDuration());
+
+            caseRepository.findCaseIdsToBeAnonymised(maxRetentionDate, Limit.of(getAutomatedTaskBatchSize()))
+                .forEach(courtCaseId -> {
+                    try {
+                        log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
+                        dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId, false);
+                        hearingsService.removeMediaLinkToHearing(courtCaseId);
+                    } catch (Exception e) {
+                        log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
+                    }
+                });
+        }
     }
 }
