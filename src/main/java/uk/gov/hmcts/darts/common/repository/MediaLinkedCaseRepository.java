@@ -19,9 +19,7 @@ public interface MediaLinkedCaseRepository extends JpaRepository<MediaLinkedCase
     @Query("""
         SELECT COUNT(DISTINCT cc) = (COUNT(cc.isDataAnonymised) filter (where cc.isDataAnonymised = true))
                     FROM MediaLinkedCaseEntity mlc
-                    LEFT JOIN CourtCaseEntity cc
-                    ON (mlc.courtCase = cc
-                    or (cc.courthouse.courthouseName = mlc.courthouseName and cc.caseNumber = mlc.caseNumber))
+                    LEFT JOIN CourtCaseEntity cc ON mlc.courtCase = cc
                     WHERE mlc.media = :mediaEntity
                     group by mlc.media
         """

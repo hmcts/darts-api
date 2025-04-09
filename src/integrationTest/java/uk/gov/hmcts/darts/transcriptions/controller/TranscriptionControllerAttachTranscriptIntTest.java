@@ -86,14 +86,14 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         TranscriptionWorkflowEntity approvedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
+            transcriptionEntity.getLastModifiedById(),
             transcriptionEntity.getCreatedDateTime().plusHours(1),
             transcriptionStub.getTranscriptionStatusByEnum(APPROVED)
         );
 
         TranscriptionWorkflowEntity withTranscriberTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
+            transcriptionEntity.getLastModifiedById(),
             transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(15),
             transcriptionStub.getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
         );
@@ -267,7 +267,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         );
         assertTrue(transcriptionDocumentEntity.getFileSize() > 0);
 
-        assertEquals(authorisationStub.getSeparateIntegrationUser(), transcriptionDocumentEntities.getFirst().getLastModifiedBy());
+        assertEquals(authorisationStub.getSeparateIntegrationUser().getId(), transcriptionDocumentEntities.getFirst().getLastModifiedById());
 
         final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = transcriptionDocumentEntity
             .getExternalObjectDirectoryEntities();

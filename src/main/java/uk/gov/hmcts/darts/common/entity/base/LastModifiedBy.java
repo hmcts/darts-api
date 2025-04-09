@@ -5,8 +5,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.time.OffsetDateTime;
 
 public interface LastModifiedBy {
-    UserAccountEntity getLastModifiedBy();
-
     void setLastModifiedBy(UserAccountEntity userAccount);
 
     void setLastModifiedDateTime(OffsetDateTime now);
@@ -18,4 +16,6 @@ public interface LastModifiedBy {
     OffsetDateTime getLastModifiedDateTime();
 
     void setLastModifiedById(Integer lastModifiedById);
+
+    Integer getLastModifiedById();
 }

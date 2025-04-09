@@ -1,12 +1,9 @@
 package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestArmRpoExecutionDetailEntity;
 
 import java.time.OffsetDateTime;
-
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class ArmRpoExecutionDetailTestData implements Persistable<TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilderRetrieve,
     ArmRpoExecutionDetailEntity, TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilder> {
@@ -33,11 +30,10 @@ public final class ArmRpoExecutionDetailTestData implements Persistable<TestArmR
     public TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilderRetrieve someMinimalBuilderHolder() {
         TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilderRetrieve retrieve = new
             TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilderRetrieve();
-        UserAccountEntity userAccount = minimalUserAccount();
 
         retrieve.getBuilder()
-            .lastModifiedBy(userAccount)
-            .createdBy(userAccount)
+            .lastModifiedById(0)
+            .createdById(0)
             .createdDateTime(OffsetDateTime.now())
             .lastModifiedDateTime(OffsetDateTime.now());
         return retrieve;

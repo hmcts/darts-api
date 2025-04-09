@@ -20,6 +20,8 @@ import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
 class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
@@ -28,7 +30,7 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
     protected DartsDatabaseStub dartsDatabase;
 
     @Autowired
-    TranscriberTranscriptsQueryImpl transcriberTranscriptsQuery;
+    private TranscriberTranscriptsQueryImpl transcriberTranscriptsQuery;
 
     private UserAccountEntity userAccountEntity;
 
@@ -209,5 +211,40 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
         );
 
         assertThat(approvedTranscriptionCount).isEqualTo(1);
+    }
+
+    @Test
+    void getTranscriptRequests_ReturnsTranscriptionWithMultipleTranscriberWorkflows_WhenWorkflowReversed() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+        var reRunRequestedDate = OffsetDateTime.parse("2025-03-20T13:00:00Z");
+        var approvedDate = OffsetDateTime.parse("2025-03-20T15:00:00Z");
+        // Create a transcription with multiple workflows REQUESTED -> AWAITING_AUTHORISATION
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
+            userAccountEntity, courtCaseEntity, hearingEntity, transcriptionDate, false
+        );
+        // Rewind back to REQUESTED
+        var requestedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, reRunRequestedDate, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED)
+        );
+        // Move workflow to AWAITING_AUTHORISATION
+        var awaitingAuthWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, reRunRequestedDate.plusSeconds(1),
+            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(AWAITING_AUTHORISATION)
+        );
+        // Move workflow to APPROVED
+        var approvedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, approvedDate, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+        );
+
+        transcriptionEntity.getTranscriptionWorkflowEntities()
+            .addAll(List.of(requestedWorkflow, awaitingAuthWorkflow, approvedWorkflow));
+        transcriptionEntity.setTranscriptionStatus(approvedWorkflow.getTranscriptionStatus());
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriptRequests(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+        var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        assertThat(transcriberTranscriptions.getFirst().getRequestedTs().format(format)).isEqualTo(transcriptionDate.format(format));
     }
 }

@@ -35,9 +35,22 @@ public class EventLinkedCaseEntity {
     private CourtCaseEntity courtCase;
 
     @Column(name = "courthouse_name")
+    @Deprecated(forRemoval = true)
+    /**
+     * Use {@link CourtCaseEntity#getCourthouseName()} instead
+     */
     private String courthouseName;
 
     @Column(name = "case_number")
+    @Deprecated(forRemoval = true)
+    /**
+     * Use {@link CourtCaseEntity#getCaseNumber()} instead
+     */
     private String caseNumber;
+
+    @EqualsAndHashCode.Include(replaces = "event")
+    public Integer getEventId() {
+        return event != null ? event.getId() : null;
+    }
 
 }

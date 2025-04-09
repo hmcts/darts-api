@@ -29,7 +29,6 @@ class DailylistFunctionalTest extends FunctionalTest {
 
     public static final String POST_DAILYLIST_URL = "/dailylists";
 
-
     ObjectMapper objectMapper;
 
     @BeforeEach
@@ -39,15 +38,12 @@ class DailylistFunctionalTest extends FunctionalTest {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()
             .baseUri(getUri("/functional-tests/clean"))
             .redirects().follow(false)
             .delete();
-
-
     }
 
     @ParameterizedTest

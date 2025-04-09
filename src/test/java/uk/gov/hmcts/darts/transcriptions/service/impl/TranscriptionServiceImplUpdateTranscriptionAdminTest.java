@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
@@ -54,6 +55,8 @@ class TranscriptionServiceImplUpdateTranscriptionAdminTest {
     private AuditApi auditApi;
     @Mock
     private TranscriptionNotifications transcriptionNotifications;
+    @Mock
+    private UserAccountRepository userAccountRepository;
 
     @Mock
     private UserAccountEntity userAccountEntity;
@@ -154,7 +157,7 @@ class TranscriptionServiceImplUpdateTranscriptionAdminTest {
         transcriptionEntity.setTranscriptionType(transcriptionTypeEntity);
 
         when(transcriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcriptionEntity));
-
+        when(userAccountRepository.getReferenceById(any())).thenReturn(userAccountEntity);
         DartsApiException exception = assertThrows(DartsApiException.class, () ->
             transcriptionService.updateTranscriptionAdmin(transcriptionId, updateRequest, true));
 

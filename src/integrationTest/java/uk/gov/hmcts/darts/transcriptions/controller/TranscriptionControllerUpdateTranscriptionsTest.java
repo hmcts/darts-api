@@ -176,9 +176,13 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             transcriptionId1).orElseThrow();
         TranscriptionStatusEntity status = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REJECTED);
 
+
+        UserAccountEntity transcriptionCreatedBy = dartsDatabase.getUserAccountRepository()
+            .findById(existingTranscription1.getCreatedById()).orElseThrow();
+
         TranscriptionWorkflowEntity workflowBEntity = new TranscriptionWorkflowEntity();
         workflowBEntity.setTranscription(existingTranscription1);
-        workflowBEntity.setWorkflowActor(existingTranscription1.getCreatedBy());
+        workflowBEntity.setWorkflowActor(transcriptionCreatedBy);
         workflowBEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         workflowBEntity.setTranscriptionStatus(status);
         existingTranscription1.getTranscriptionWorkflowEntities().add(workflowBEntity);

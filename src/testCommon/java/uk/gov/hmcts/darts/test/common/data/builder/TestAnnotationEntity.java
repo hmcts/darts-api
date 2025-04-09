@@ -23,7 +23,7 @@ public class TestAnnotationEntity extends AnnotationEntity implements DbInsertab
                                 UserAccountEntity deletedBy, OffsetDateTime deletedTimestamp,
                                 List<AnnotationDocumentEntity> annotationDocuments, List<HearingEntity> hearingList,
                                 OffsetDateTime createdTimestamp,
-                                OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy, UserAccountEntity createdBy) {
+                                OffsetDateTime lastModifiedDateTime, Integer lastModifiedById, Integer createdById) {
         setId(id);
         setText(text);
         setTimestamp(timestamp);
@@ -36,9 +36,9 @@ public class TestAnnotationEntity extends AnnotationEntity implements DbInsertab
         setAnnotationDocuments(annotationDocuments != null ? annotationDocuments : new ArrayList<>());
         setHearingList(hearingList);
         setCreatedDateTime(createdTimestamp);
-        setCreatedBy(createdBy);
+        setCreatedById(lastModifiedById);
         setLastModifiedDateTime(lastModifiedDateTime);
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedById(createdById);
     }
 
     @Override
