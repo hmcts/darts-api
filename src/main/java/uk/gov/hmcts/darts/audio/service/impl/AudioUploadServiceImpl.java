@@ -212,6 +212,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         if (!currentDuplicates.isEmpty()) {
             return currentDuplicates;
         }
+        // now lets get the lowest level media objects so that they can act as a basis for the antecedent
         Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();
         identicalMediaEntities.stream().forEach(entry ->
                                                     tree.addNode(new MediaEntityTreeNodeImpl(entry))

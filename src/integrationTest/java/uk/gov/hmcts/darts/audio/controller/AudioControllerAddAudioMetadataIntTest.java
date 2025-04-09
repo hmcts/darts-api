@@ -531,7 +531,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         };
 
         /*
-        Values pulled from staging which caused the origional failure (These values are replicated in this test)
+        Values pulled from staging which caused the original failure (These values are replicated in this test)
         TestId, m.chronicle_id, m.antecedent_id, m.created_ts, m.is_current,m.checksum, m.med_id
         MED5: 41017 41077 2025-04-02 11:15:22.382 +0100 false  47f13e9b2248d73730e165a50fb8c395 162825
         MED4: 41017 41037 2024-05-16 16:54:36.551 +0100 false  81ef8524d69c7ae6605baf37e425b574 41057
