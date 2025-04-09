@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -121,7 +122,7 @@ class DataManagementFacadeImplTest {
     @SneakyThrows
     @BeforeEach
     void setup() {
-
+        Files.createDirectories(Paths.get(SOME_TEMP_WORKSPACE));
         List<DatastoreContainerType> datastoreOrder = new ArrayList<>();
         datastoreOrder.add(DatastoreContainerType.UNSTRUCTURED);
         datastoreOrder.add(DatastoreContainerType.DETS);
