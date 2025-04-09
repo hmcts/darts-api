@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.CTH_ID, CourtroomEntity.COURTROOM_NAME})})
@@ -33,7 +34,7 @@ public class CourtroomEntity extends CreatedBaseEntity {
     @Id
     @Column(name = CTR_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ctr_gen")
-    @SequenceGenerator(name = "ctr_gen", sequenceName = "ctr_seq", allocationSize = 1)
+    @SequenceGenerator(name = "ctr_gen", sequenceName = "ctr_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = COURTROOM_NAME)

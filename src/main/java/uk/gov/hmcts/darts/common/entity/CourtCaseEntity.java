@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = CAS_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cas_gen")
-    @SequenceGenerator(name = "cas_gen", sequenceName = "cas_seq", allocationSize = 1)
+    @SequenceGenerator(name = "cas_gen", sequenceName = "cas_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     /**

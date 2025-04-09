@@ -16,6 +16,7 @@ import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -33,7 +34,7 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "car_gen")
-    @SequenceGenerator(name = "car_gen", sequenceName = "car_seq", allocationSize = 1)
+    @SequenceGenerator(name = "car_gen", sequenceName = "car_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne

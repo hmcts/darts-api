@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "external_location_type")
@@ -24,7 +25,7 @@ public class ExternalLocationTypeEntity {
     @Id
     @Column(name = "elt_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "elt_gen")
-    @SequenceGenerator(name = "elt_gen", sequenceName = "elt_seq", allocationSize = 1)
+    @SequenceGenerator(name = "elt_gen", sequenceName = "elt_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "elt_description")

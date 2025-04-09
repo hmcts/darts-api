@@ -21,6 +21,7 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -38,7 +39,7 @@ public class SecurityGroupEntity extends MandatoryCreatedModifiedBaseEntity {
     @Id
     @Column(name = "grp_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "grp_gen")
-    @SequenceGenerator(name = "grp_gen", sequenceName = "grp_seq", allocationSize = 1)
+    @SequenceGenerator(name = "grp_gen", sequenceName = "grp_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @NotAudited

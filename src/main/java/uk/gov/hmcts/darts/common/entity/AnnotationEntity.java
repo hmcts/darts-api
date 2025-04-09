@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = "ann_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ann_gen")
-    @SequenceGenerator(name = "ann_gen", sequenceName = "ann_seq", allocationSize = 1)
+    @SequenceGenerator(name = "ann_gen", sequenceName = "ann_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "annotation_text")

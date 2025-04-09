@@ -17,6 +17,7 @@ import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -29,7 +30,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Id
     @Column(name = "eod_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eod_gen")
-    @SequenceGenerator(name = "eod_gen", sequenceName = "eod_seq", allocationSize = 1)
+    @SequenceGenerator(name = "eod_gen", sequenceName = "eod_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)

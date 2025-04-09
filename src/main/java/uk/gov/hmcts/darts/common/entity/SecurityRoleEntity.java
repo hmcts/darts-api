@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class SecurityRoleEntity {
     @Id
     @Column(name = "rol_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rol_gen")
-    @SequenceGenerator(name = "rol_gen", sequenceName = "rol_seq", allocationSize = 1)
+    @SequenceGenerator(name = "rol_gen", sequenceName = "rol_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "role_name", nullable = false)

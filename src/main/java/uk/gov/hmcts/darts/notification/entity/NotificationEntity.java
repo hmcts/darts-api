@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
@@ -43,7 +44,7 @@ public class NotificationEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "not_gen")
-    @SequenceGenerator(name = "not_gen", sequenceName = "not_seq", allocationSize = 1)
+    @SequenceGenerator(name = "not_gen", sequenceName = "not_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = EVENT_ID)

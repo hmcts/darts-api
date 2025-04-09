@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,7 +42,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @Id
     @Column(name = HEA_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hea_gen")
-    @SequenceGenerator(name = "hea_gen", sequenceName = "hea_seq", allocationSize = 1)
+    @SequenceGenerator(name = "hea_gen", sequenceName = "hea_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @JoinColumn(name = "ctr_id")

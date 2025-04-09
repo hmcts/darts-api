@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 
 @Entity
@@ -23,7 +24,7 @@ public class ReportEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = "rep_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rep_gen")
-    @SequenceGenerator(name = "rep_gen", sequenceName = "rep_seq", allocationSize = 1)
+    @SequenceGenerator(name = "rep_gen", sequenceName = "rep_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "report_object_id", length = 16)

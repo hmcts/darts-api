@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = ID_COLUMN_NAME)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "media_request_gen")
-    @SequenceGenerator(name = "media_request_gen", sequenceName = "mer_seq", allocationSize = 1)
+    @SequenceGenerator(name = "media_request_gen", sequenceName = "mer_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     @Audited
     private Integer id;
 

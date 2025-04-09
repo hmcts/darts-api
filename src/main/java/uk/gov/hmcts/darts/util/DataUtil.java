@@ -13,6 +13,9 @@ import static java.util.Objects.isNull;
 
 
 public final class DataUtil {
+
+    public static final int DEFAULT_SEQUENCE_ALLOCATION_SIZE = 20;
+
     private DataUtil() {
 
     }

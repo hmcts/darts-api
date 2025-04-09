@@ -16,6 +16,7 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -32,7 +33,7 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = "trc_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trc_gen")
-    @SequenceGenerator(name = "trc_gen", sequenceName = "trc_seq", allocationSize = 1)
+    @SequenceGenerator(name = "trc_gen", sequenceName = "trc_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Audited(targetAuditMode = NOT_AUDITED)

@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -48,7 +49,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dal_gen")
-    @SequenceGenerator(name = "dal_gen", sequenceName = "dal_seq", allocationSize = 1)
+    @SequenceGenerator(name = "dal_gen", sequenceName = "dal_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = LISTING_COURTHOUSE)

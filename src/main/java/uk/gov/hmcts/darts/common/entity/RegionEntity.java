@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class RegionEntity {
     @Id
     @Column(name = "reg_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reg_gen")
-    @SequenceGenerator(name = "reg_gen", sequenceName = "reg_seq", allocationSize = 1)
+    @SequenceGenerator(name = "reg_gen", sequenceName = "reg_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "region_name")

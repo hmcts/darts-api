@@ -33,7 +33,7 @@ public class DefendantEntity extends CreatedModifiedBaseEntity
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dfd_gen")
-    @SequenceGenerator(name = "dfd_gen", sequenceName = "dfd_seq", allocationSize = 1)
+    @SequenceGenerator(name = "dfd_gen", sequenceName = "dfd_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(optional = false)

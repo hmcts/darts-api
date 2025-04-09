@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "media_linked_case")
@@ -29,7 +30,7 @@ public class MediaLinkedCaseEntity extends CreatedBaseEntity {
     @Id
     @Column(name = "mlc_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mlc_gen")
-    @SequenceGenerator(name = "mlc_gen", sequenceName = "mlc_seq", allocationSize = 1)
+    @SequenceGenerator(name = "mlc_gen", sequenceName = "mlc_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne

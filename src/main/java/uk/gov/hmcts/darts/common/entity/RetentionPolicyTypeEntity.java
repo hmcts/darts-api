@@ -13,6 +13,7 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -29,7 +30,7 @@ public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rpt_gen")
-    @SequenceGenerator(name = "rpt_gen", sequenceName = "rpt_seq", allocationSize = 1)
+    @SequenceGenerator(name = "rpt_gen", sequenceName = "rpt_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "fixed_policy_key", nullable = false)

@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity
     @Id
     @Column(name = "ado_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ado_gen")
-    @SequenceGenerator(name = "ado_gen", sequenceName = "ado_seq", allocationSize = 1)
+    @SequenceGenerator(name = "ado_gen", sequenceName = "ado_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)

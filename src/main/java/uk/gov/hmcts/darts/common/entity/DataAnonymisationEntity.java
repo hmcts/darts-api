@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -26,7 +27,7 @@ public class DataAnonymisationEntity {
     @Id
     @Column(name = "dan_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dan_gen")
-    @SequenceGenerator(name = "dan_gen", sequenceName = "dan_seq", allocationSize = 1)
+    @SequenceGenerator(name = "dan_gen", sequenceName = "dan_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)

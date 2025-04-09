@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -26,7 +27,7 @@ public class ObjectRetrievalQueueEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = "orq_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orq_gen")
-    @SequenceGenerator(name = "orq_gen", sequenceName = "orq_seq", allocationSize = 1)
+    @SequenceGenerator(name = "orq_gen", sequenceName = "orq_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne

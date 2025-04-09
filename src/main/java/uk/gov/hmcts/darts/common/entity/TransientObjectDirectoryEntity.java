@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "transient_object_directory")
@@ -24,7 +25,7 @@ public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity im
     @Id
     @Column(name = "tod_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tod_gen")
-    @SequenceGenerator(name = "tod_gen", sequenceName = "tod_seq", allocationSize = 1)
+    @SequenceGenerator(name = "tod_gen", sequenceName = "tod_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne

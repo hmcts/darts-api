@@ -13,6 +13,7 @@ import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = JudgeEntity.TABLE_NAME)
@@ -29,7 +30,7 @@ public class JudgeEntity extends CreatedModifiedBaseEntity
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "jud_gen")
-    @SequenceGenerator(name = "jud_gen", sequenceName = "jud_seq", allocationSize = 1)
+    @SequenceGenerator(name = "jud_gen", sequenceName = "jud_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = JUDGE_NAME)

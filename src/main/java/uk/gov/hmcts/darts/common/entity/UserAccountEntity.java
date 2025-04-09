@@ -20,6 +20,7 @@ import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
@@ -40,7 +41,7 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity
     @Id
     @Column(name = "usr_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usr_gen")
-    @SequenceGenerator(name = "usr_gen", sequenceName = "usr_seq", allocationSize = 1)
+    @SequenceGenerator(name = "usr_gen", sequenceName = "usr_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @NotAudited

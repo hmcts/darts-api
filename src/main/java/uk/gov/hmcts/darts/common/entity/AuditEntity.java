@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "audit")
@@ -22,7 +23,7 @@ public class AuditEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = "aud_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "aud_gen")
-    @SequenceGenerator(name = "aud_gen", sequenceName = "aud_seq", allocationSize = 1)
+    @SequenceGenerator(name = "aud_gen", sequenceName = "aud_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne

@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -24,7 +25,7 @@ public class ExternalObjectDirectoryProcessDetailEntity extends MandatoryCreated
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "epd_gen")
-    @SequenceGenerator(name = "epd_gen", sequenceName = "epd_seq", allocationSize = 1)
+    @SequenceGenerator(name = "epd_gen", sequenceName = "epd_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     @Column(name = "epd_id")
     private Integer id;
 

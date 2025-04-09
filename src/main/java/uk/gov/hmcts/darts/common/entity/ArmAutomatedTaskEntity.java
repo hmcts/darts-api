@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -29,7 +30,7 @@ public class ArmAutomatedTaskEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "aat_seq")
-    @SequenceGenerator(name = "aat_seq", sequenceName = "aat_seq", allocationSize = 1)
+    @SequenceGenerator(name = "aat_seq", sequenceName = "aat_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     @Column(name = "aat_id", nullable = false)
     private Integer id;
 

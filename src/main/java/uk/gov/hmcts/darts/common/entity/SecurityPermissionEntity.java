@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "security_permission")
@@ -20,7 +21,7 @@ public class SecurityPermissionEntity {
     @Id
     @Column(name = "per_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "per_gen")
-    @SequenceGenerator(name = "per_gen", sequenceName = "per_seq", allocationSize = 1)
+    @SequenceGenerator(name = "per_gen", sequenceName = "per_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "permission_name", nullable = false)

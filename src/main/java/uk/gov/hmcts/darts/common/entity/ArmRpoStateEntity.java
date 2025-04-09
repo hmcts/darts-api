@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "arm_rpo_state")
@@ -20,7 +21,7 @@ public class ArmRpoStateEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "are_seq")
-    @SequenceGenerator(name = "are_seq", sequenceName = "are_seq", allocationSize = 1)
+    @SequenceGenerator(name = "are_seq", sequenceName = "are_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     @Column(name = "are_id", nullable = false)
     private Integer id;
 

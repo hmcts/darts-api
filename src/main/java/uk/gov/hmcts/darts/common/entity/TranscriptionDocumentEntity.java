@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class TranscriptionDocumentEntity extends ModifiedBaseEntity
     @Id
     @Column(name = "trd_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trd_gen")
-    @SequenceGenerator(name = "trd_gen", sequenceName = "trd_seq", allocationSize = 1)
+    @SequenceGenerator(name = "trd_gen", sequenceName = "trd_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)

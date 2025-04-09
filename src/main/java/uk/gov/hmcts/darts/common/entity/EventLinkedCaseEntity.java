@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "event_linked_case")
@@ -23,7 +24,7 @@ public class EventLinkedCaseEntity {
     @Id
     @Column(name = "elc_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "elc_gen")
-    @SequenceGenerator(name = "elc_gen", sequenceName = "elc_seq", allocationSize = 1)
+    @SequenceGenerator(name = "elc_gen", sequenceName = "elc_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne

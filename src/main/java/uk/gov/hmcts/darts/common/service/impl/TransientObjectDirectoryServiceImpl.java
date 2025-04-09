@@ -29,9 +29,8 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
         transientObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(STORED.getId()));
         transientObjectDirectoryEntity.setExternalLocation(blobName);
         transientObjectDirectoryEntity.setTransferAttempts(null);
-        var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
-        transientObjectDirectoryEntity.setCreatedBy(systemUser);
-        transientObjectDirectoryEntity.setLastModifiedBy(systemUser);
+        transientObjectDirectoryEntity.setCreatedById(SystemUsersEnum.DEFAULT.getId());
+        transientObjectDirectoryEntity.setLastModifiedById(SystemUsersEnum.DEFAULT.getId());
 
         return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectoryEntity);
     }

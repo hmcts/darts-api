@@ -15,6 +15,7 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = AutomatedTaskEntity.TABLE_NAME)
@@ -38,7 +39,7 @@ public class AutomatedTaskEntity extends MandatoryCreatedModifiedBaseEntity {
     @Id
     @Column(name = AUTOMATED_TASK_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = TASK_GEN)
-    @SequenceGenerator(name = TASK_GEN, sequenceName = AUTOMATED_TASK_SEQ, allocationSize = 1)
+    @SequenceGenerator(name = TASK_GEN, sequenceName = AUTOMATED_TASK_SEQ, allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = TASK_NAME)

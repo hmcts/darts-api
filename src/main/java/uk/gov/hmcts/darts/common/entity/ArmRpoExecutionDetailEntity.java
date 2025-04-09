@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -25,7 +26,7 @@ public class ArmRpoExecutionDetailEntity extends MandatoryCreatedModifiedBaseEnt
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ard_seq")
-    @SequenceGenerator(name = "ard_seq", sequenceName = "ard_seq", allocationSize = 1)
+    @SequenceGenerator(name = "ard_seq", sequenceName = "ard_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     @Column(name = "ard_id", nullable = false)
     private Integer id;
 

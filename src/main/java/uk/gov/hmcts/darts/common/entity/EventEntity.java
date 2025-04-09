@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = "eve_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eve_gen")
-    @SequenceGenerator(name = "eve_gen", sequenceName = "eve_seq", allocationSize = 1)
+    @SequenceGenerator(name = "eve_gen", sequenceName = "eve_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "event_object_id", unique = true, length = 16)

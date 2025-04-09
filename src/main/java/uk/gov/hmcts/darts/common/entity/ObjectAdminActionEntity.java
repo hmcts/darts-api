@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -26,7 +27,7 @@ public class ObjectAdminActionEntity {
     @Id
     @Column(name = "oaa_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "oaa_gen")
-    @SequenceGenerator(name = "oaa_gen", sequenceName = "oaa_seq", allocationSize = 1)
+    @SequenceGenerator(name = "oaa_gen", sequenceName = "oaa_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne

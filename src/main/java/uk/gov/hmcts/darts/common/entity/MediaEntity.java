@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @Id
     @Column(name = "med_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "med_gen")
-    @SequenceGenerator(name = "med_gen", sequenceName = "med_seq", allocationSize = 1)
+    @SequenceGenerator(name = "med_gen", sequenceName = "med_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)

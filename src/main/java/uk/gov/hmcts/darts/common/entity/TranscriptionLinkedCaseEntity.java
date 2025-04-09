@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "transcription_linked_case")
@@ -25,7 +26,7 @@ public class TranscriptionLinkedCaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tlc_gen")
-    @SequenceGenerator(name = "tlc_gen", sequenceName = "tlc_seq", allocationSize = 1)
+    @SequenceGenerator(name = "tlc_gen", sequenceName = "tlc_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     @Column(name = "tlc_id")
     private Integer id;
 

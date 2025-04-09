@@ -33,7 +33,7 @@ public class ProsecutorEntity extends CreatedModifiedBaseEntity
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prn_gen")
-    @SequenceGenerator(name = "prn_gen", sequenceName = "prn_seq", allocationSize = 1)
+    @SequenceGenerator(name = "prn_gen", sequenceName = "prn_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(optional = false)

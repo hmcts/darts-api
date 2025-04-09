@@ -17,6 +17,7 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class TranscriptionWorkflowEntity {
     @Id
     @Column(name = "trw_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trw_gen")
-    @SequenceGenerator(name = "trw_gen", sequenceName = "trw_seq", allocationSize = 1)
+    @SequenceGenerator(name = "trw_gen", sequenceName = "trw_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(optional = false)

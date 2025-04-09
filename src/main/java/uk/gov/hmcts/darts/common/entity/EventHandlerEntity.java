@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "event_handler")
@@ -24,7 +25,7 @@ public class EventHandlerEntity extends CreatedBaseEntity {
     @Id
     @Column(name = "evh_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "evh_gen")
-    @SequenceGenerator(name = "evh_gen", sequenceName = "evh_seq", allocationSize = 1)
+    @SequenceGenerator(name = "evh_gen", sequenceName = "evh_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "event_type", nullable = false)

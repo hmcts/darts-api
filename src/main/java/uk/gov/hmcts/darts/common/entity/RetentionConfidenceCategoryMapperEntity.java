@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "retention_confidence_category_mapper")
@@ -27,7 +28,7 @@ public class RetentionConfidenceCategoryMapperEntity extends MandatoryCreatedMod
     @Id
     @Column(name = "rcc_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rcc_gen")
-    @SequenceGenerator(name = "rcc_gen", sequenceName = "rcc_seq", allocationSize = 1)
+    @SequenceGenerator(name = "rcc_gen", sequenceName = "rcc_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "ret_conf_score")

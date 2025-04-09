@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Immutable;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = "object_hidden_reason")
@@ -21,7 +22,7 @@ public class ObjectHiddenReasonEntity {
     @Id
     @Column(name = "ohr_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ohr_gen")
-    @SequenceGenerator(name = "ohr_gen", sequenceName = "ohr_seq", allocationSize = 1)
+    @SequenceGenerator(name = "ohr_gen", sequenceName = "ohr_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @Column(name = "ohr_reason")

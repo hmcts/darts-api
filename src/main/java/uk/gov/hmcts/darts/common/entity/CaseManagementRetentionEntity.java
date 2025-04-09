@@ -12,6 +12,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = CaseManagementRetentionEntity.TABLE_NAME)
@@ -24,7 +25,7 @@ public class CaseManagementRetentionEntity {
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cmr_gen")
-    @SequenceGenerator(name = "cmr_gen", sequenceName = "cmr_seq", allocationSize = 1)
+    @SequenceGenerator(name = "cmr_gen", sequenceName = "cmr_seq", allocationSize = DataUtil.DEFAULT_SEQUENCE_ALLOCATION_SIZE)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
