@@ -26,8 +26,6 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.common.util.MediaEntityTreeNodeImpl;
-import uk.gov.hmcts.darts.common.util.Tree;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DurationUtil;
@@ -196,28 +194,12 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         CourtroomEntity courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(addAudioMetadataRequest.getCourthouse(),
                                                                                               addAudioMetadataRequest.getCourtroom(),
                                                                                               userIdentity.getUserAccount());
-        List<MediaEntity> identicalMediaEntities = mediaRepository.findMediaByDetails(
+        return mediaRepository.findMediaByDetails(
             courtroomEntity,
             addAudioMetadataRequest.getChannel(),
             addAudioMetadataRequest.getFilename(),
             addAudioMetadataRequest.getStartedAt(),
             addAudioMetadataRequest.getEndedAt());
-
-        List<MediaEntity> currentDuplicates = identicalMediaEntities
-            .stream()
-            .filter(media -> Boolean.TRUE.equals(media.getIsCurrent()))
-            .toList();
-
-        //Return only is_current true items if there are any
-        if (!currentDuplicates.isEmpty()) {
-            return currentDuplicates;
-        }
-        // now lets get the lowest level media objects so that they can act as a basis for the antecedent
-        Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();
-        identicalMediaEntities.stream().forEach(entry ->
-                                                    tree.addNode(new MediaEntityTreeNodeImpl(entry))
-        );
-        return tree.getLowestLevelDescendants().stream().map(MediaEntityTreeNodeImpl::getEntity).toList();
     }
 
     @Override

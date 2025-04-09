@@ -49,6 +49,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -547,11 +548,18 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         MED1: MED1      2024-05-16 16:49:34.247 +0100 fals 81ef8524d69c7ae6605baf37e425b571 41017
         */
 
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(ZoneOffset.UTC);
+
         MediaEntity media1 = alignRequest.apply(new MediaTestData().someMinimal());
+        media1.setCreatedDateTime(OffsetDateTime.parse("2024-05-16 16:49:34.247", dateTimeFormatter));
         MediaEntity media2 = alignRequest.apply(new MediaTestData().someMinimal());
+        media2.setCreatedDateTime(OffsetDateTime.parse("2024-05-16 16:49:47.107", dateTimeFormatter));
         MediaEntity media3 = alignRequest.apply(new MediaTestData().someMinimal());
+        media3.setCreatedDateTime(OffsetDateTime.parse("2024-05-16 16:53:34.321", dateTimeFormatter));
         MediaEntity media4 = alignRequest.apply(new MediaTestData().someMinimal());
+        media4.setCreatedDateTime(OffsetDateTime.parse("2024-05-16 16:54:36.551", dateTimeFormatter));
         MediaEntity media5 = alignRequest.apply(new MediaTestData().someMinimal());
+        media5.setCreatedDateTime(OffsetDateTime.parse("2025-04-02 11:15:22.382", dateTimeFormatter));
 
         media1.setChronicleId(String.valueOf(media1.getId()));
         alignDataMediaEntity.accept(media1.getId(), media1, media2);
@@ -576,7 +584,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAll()
             .stream()
             .filter(media -> oldVersionChecksum.equals(media.getChecksum()) || addAudioMetadataRequest.getChecksum().equals(media.getChecksum()))
-            .sorted((o1, o2) -> o2.getId().compareTo(o1.getId()))
+            .sorted((o1, o2) -> o2.getCreatedDateTime().compareTo(o1.getCreatedDateTime()))
             .toList();
         assertThat(mediaEntities).hasSize(6);
         //There should only be one current media
@@ -586,6 +594,13 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         assertThat(mediaEntities.get(3).getIsCurrent()).isFalse();
         assertThat(mediaEntities.get(4).getIsCurrent()).isFalse();
         assertThat(mediaEntities.get(5).getIsCurrent()).isFalse();
+
+        assertThat(mediaEntities.get(0).getAntecedentId()).isEqualTo(String.valueOf(media5.getId()));
+        assertThat(mediaEntities.get(1).getAntecedentId()).isEqualTo(String.valueOf(media3.getId()));
+        assertThat(mediaEntities.get(2).getAntecedentId()).isEqualTo(String.valueOf(media2.getId()));
+        assertThat(mediaEntities.get(3).getAntecedentId()).isEqualTo(String.valueOf(media4.getId()));
+        assertThat(mediaEntities.get(4).getAntecedentId()).isEqualTo(String.valueOf(media1.getId()));
+        assertThat(mediaEntities.get(5).getAntecedentId()).isNull();
     }
 
     private AddAudioMetadataRequestWithStorageGUID createAddAudioRequest(OffsetDateTime startedAt,
