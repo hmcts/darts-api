@@ -548,7 +548,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         setupUserAccountAndSecurityGroup(swanseaCourthouse);
         String requestBody = """
             {
-             "courthouse": "SWANSEA",
               "courtroom": "1",
               "event_text_contains": "t5"
             }""";
