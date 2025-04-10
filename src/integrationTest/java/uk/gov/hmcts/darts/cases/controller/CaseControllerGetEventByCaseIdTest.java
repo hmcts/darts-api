@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.cases.controller;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -13,20 +15,26 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.test.common.PaginationTestSupport;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.util.stream.IntStream.rangeClosed;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_39_1933_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_DB_ID;
 
 @AutoConfigureMockMvc
 class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
@@ -183,6 +191,139 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
 
     }
 
+    @Nested
+    @DisplayName("Paginated casesGetEvents")
+    class CasesGetEventsPaginated {
+        private static final String SOME_CASE_NUMBER = "12321";
+        @Autowired
+        private PaginationTestSupport paginationTestSupport;
+
+        private List<EventEntity> eventEntityList1;
+        private List<EventEntity> eventEntityList2;
+        private List<EventEntity> eventEntityList3;
+        private List<EventEntity> eventEntityList4;
+        private List<EventEntity> eventEntityList5;
+
+        @BeforeEach
+        void beforeEach() {
+            CaseControllerGetEventByCaseIdTest.super.clearTestData();
+            OffsetDateTime baseTime = OffsetDateTime.parse("2020-01-01T12:00Z");
+            eventEntityList1 = createHearingWithEvents(baseTime, 2, SECTION_4_1981_DB_ID); //1,2
+            eventEntityList2 = createHearingWithEvents(baseTime.minusDays(1), 2, SECTION_4_1981_DB_ID);//4,5
+            eventEntityList3 = createHearingWithEvents(baseTime.plusHours(1), 2, SECTION_11_1981_DB_ID);//6,7
+            eventEntityList4 = createHearingWithEvents(baseTime.minusDays(2), 2, SECTION_11_1981_DB_ID);//8,9
+            eventEntityList5 = createHearingWithEvents(baseTime.plusHours(2), 2, SECTION_39_1933_DB_ID);//10,11
+        }
+
+        private List<EventEntity> createHearingWithEvents(OffsetDateTime date, int numberOfEvents, int handlerId) {
+            HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE,
+                SOME_COURTROOM,
+                date.toLocalDateTime()
+            );
+            CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+            dartsDatabase.save(courtCase);
+
+            List<EventEntity> eventEntityList = createEventsWithDefaults(numberOfEvents, date).stream()
+                .map(eve -> dartsDatabase.addHandlerToEvent(eve, handlerId))
+                .toList();
+
+            dartsDatabase.saveEventsForHearing(hearingEntity, eventEntityList);
+            return eventEntityList;
+        }
+
+        @Test
+        void casesGetEvents_usingPaginatedCrieria_WithNoOrder_shouldReturnPaginatedResultsUsingDefaultOrder_10Resultslimit3Page1() throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
+                .queryParam("page_number", "1")
+                .queryParam("page_size", "3");
+
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+            PaginatedList<Event> paginatedList = paginationTestSupport.getPaginatedList(mvcResult, Event.class);
+            paginationTestSupport.assertPaginationDetails(paginatedList, 1, 3, 4, 10);
+            assertThat(
+                paginatedList.getData()
+                    .stream().map(Event::getId)
+                    .toList())
+                .contains(
+                    eventEntityList5.get(1).getId(),
+                    eventEntityList5.get(0).getId(),
+                    eventEntityList3.get(1).getId());
+        }
+
+        @Test
+        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderHearingDate_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+            throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
+                .queryParam("page_number", "1")
+                .queryParam("page_size", "3")
+                .queryParam("sort_order", "ASC")
+                .queryParam("sort_by", "hearingDate");
+
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+            PaginatedList<Event> paginatedList = paginationTestSupport.getPaginatedList(mvcResult, Event.class);
+            paginationTestSupport.assertPaginationDetails(paginatedList, 1, 3, 4, 10);
+            assertThat(
+                paginatedList.getData()
+                    .stream().map(Event::getId)
+                    .toList())
+                .contains(
+                    eventEntityList4.get(0).getId(),
+                    eventEntityList4.get(1).getId(),
+                    eventEntityList2.get(1).getId());
+        }
+
+
+        @Test
+        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderTimestamp_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+            throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
+                .queryParam("page_number", "1")
+                .queryParam("page_size", "3")
+                .queryParam("sort_order", "DESC")
+                .queryParam("sort_by", "timestamp");
+
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+            PaginatedList<Event> paginatedList = paginationTestSupport.getPaginatedList(mvcResult, Event.class);
+            paginationTestSupport.assertPaginationDetails(paginatedList, 1, 3, 4, 10);
+            assertThat(
+                paginatedList.getData()
+                    .stream().map(Event::getId)
+                    .toList())
+                .contains(
+                    eventEntityList5.get(1).getId(),
+                    eventEntityList5.get(0).getId(),
+                    eventEntityList3.get(1).getId());
+        }
+
+        @Test
+        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderEventName_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+            throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
+                .queryParam("page_number", "1")
+                .queryParam("page_size", "3")
+                .queryParam("sort_order", "ASC,ASC")
+                .queryParam("sort_by", "eventName,timestamp");
+
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+            PaginatedList<Event> paginatedList = paginationTestSupport.getPaginatedList(mvcResult, Event.class);
+            paginationTestSupport.assertPaginationDetails(paginatedList, 1, 3, 4, 10);
+            assertThat(
+                paginatedList.getData()
+                    .stream().map(Event::getId)
+                    .toList())
+                .contains(
+                    eventEntityList4.get(0).getId(),
+                    eventEntityList4.get(1).getId(),
+                    eventEntityList3.get(0).getId());
+        }
+    }
+
     private Integer getCaseId(String caseNumber, String courthouse) {
 
         CourtCaseEntity courtCase = dartsDatabase.createCase(courthouse, caseNumber);
@@ -191,11 +332,16 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     }
 
     private List<EventEntity> createEventsWithDefaults(int quantity) {
+        return createEventsWithDefaults(quantity, SOME_DATE_TIME);
+    }
+
+    private List<EventEntity> createEventsWithDefaults(int quantity, OffsetDateTime timestampBase) {
         return rangeClosed(1, quantity)
             .mapToObj(index -> {
+                var timestamp = timestampBase.plusMinutes(index);
                 var event = dartsDatabase.getEventStub().createDefaultEvent();
-                event.setEventText("some-event-text-" + index);
-                event.setTimestamp(SOME_DATE_TIME);
+                event.setEventText("some-event-text-" + timestamp.toLocalDateTime());
+                event.setTimestamp(timestamp);
                 return event;
             }).toList();
     }
