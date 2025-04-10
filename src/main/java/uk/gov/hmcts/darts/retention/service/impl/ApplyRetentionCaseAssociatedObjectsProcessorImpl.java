@@ -29,7 +29,7 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
     public void processApplyRetentionToCaseAssociatedObjects(Integer batchSize) {
 
         var casesIds = findCasesNeedingRetentionAppliedToAssociatedObjects(batchSize);
-
+        log.info("Found {} cases needing retention applied to associated objects out of batch size {}", casesIds.size(), batchSize);
         for (var courtCaseId : casesIds) {
             Optional<CourtCaseEntity> courtCaseOpt = caseRepository.findById(courtCaseId);
             if (courtCaseOpt.isEmpty()) {

@@ -36,6 +36,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
         List<Integer> caseRetentionEntitiesIds =
             caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minus(pendingRetentionDuration),
                                                          Limit.of(batchSize));
+        log.info("Processing {} case retention entities out of a batch size {}", caseRetentionEntitiesIds.size(), batchSize);
         processList(caseRetentionEntitiesIds);
 
     }

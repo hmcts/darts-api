@@ -46,7 +46,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
             ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
             Limit.of(batchSize)
         );
-        log.debug("Marking {} inbound audio files to be deleted.", audioFileIdsToBeMarked.size());
+        log.info("Marking {} inbound audio files to be deleted out of a batch size {}", audioFileIdsToBeMarked.size(), batchSize);
 
         if (audioFileIdsToBeMarked.isEmpty()) {
             log.debug("No Inbound Audio files found that need to be marked for deletion.");

@@ -50,7 +50,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
         UserAccountEntity userAccount = userIdentity.getUserAccount();
         OffsetDateTime deletionThreshold = getDeletionThreshold();
         List<Integer> actionsToDelete = objectAdminActionRepository.findObjectAdminActionsIdsForManualDeletion(deletionThreshold, Limit.of(batchSize));
-
+        log.info("Found {} ObjectAdminActionEntities to delete out of batch size {}", actionsToDelete.size(), batchSize);
         for (Integer objectAdminActionId : actionsToDelete) {
             try {
                 objectAdminActionEntityProcessor.processObjectAdminActionEntity(userAccount, objectAdminActionId);
