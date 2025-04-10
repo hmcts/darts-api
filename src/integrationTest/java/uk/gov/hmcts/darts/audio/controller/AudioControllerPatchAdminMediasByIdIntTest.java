@@ -64,6 +64,11 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
         var mediaEntity3 = createAndSaveMediaEntity(userAccountEntity, "chronicleId", false, false);
         var mediaEntity4 = createAndSaveMediaEntity(userAccountEntity, "chronicleId2", true, false);
 
+        assertMediaIsCurrentStatus(mediaEntity1.getId(), false);
+        assertMediaIsCurrentStatus(mediaEntity2.getId(), true);
+        assertMediaIsCurrentStatus(mediaEntity3.getId(), false);
+        assertMediaIsCurrentStatus(mediaEntity4.getId(), true);
+
         // When
         mockMvc.perform(patch(ENDPOINT.resolve(String.valueOf(mediaEntity1.getId())))
                             .contentType(MediaType.APPLICATION_JSON)
@@ -237,10 +242,11 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
                 HEARING_START_AT.toLocalDateTime()
             );
             if (isCurrent) {
+                hearing.addMedia(mediaEntity);
                 mediaEntity.addHearing(hearing);
             }
+            dartsDatabase.getHearingRepository().saveAndFlush(hearing);
         });
-
         return databaseStub.getMediaRepository().saveAndFlush(mediaEntity);
     }
 
