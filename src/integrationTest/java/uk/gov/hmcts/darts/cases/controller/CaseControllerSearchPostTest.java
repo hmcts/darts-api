@@ -211,30 +211,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchPostEndpoint() throws Exception {
-        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse));
-        String requestBody = """
-            {
-              "courthouse": "SWANSEA",
-              "courtroom": "1",
-              "date_to": "2023-05-20"
-            }""";
-
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
-
-        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
-
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponse.json");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
     void caseSearch_multipleReturned_shouldBeOrderedByCaseId() throws Exception {
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse));
@@ -395,69 +371,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                   {
                     "date": "2023-05-22",
                     "courtroom": "1",
-                    "judges": [
-                      "AJUDGE"
-                    ]
-                  }
-                ],
-                "is_data_anonymised": false
-              }
-            ]
-            """;
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void courthouseAndCourtroomAndDateRangeWhenCourthouseDisplayNameDoesNotMatchCourthouseName() throws Exception {
-        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-
-        setupUserAndSecurityGroupForCourthouses(List.of(myCourthouseWithDifferentDisplayName));
-        String requestBody = """
-            {
-              "courthouse": "MYCOURTHOUSEDISPLAYNAME",
-              "courtroom": "COURTROOM7",
-              "date_from": "2023-05-19",
-              "date_to": "2023-05-20"
-            }""";
-
-
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
-
-        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
-
-        String expectedResponse = """
-            [
-              {
-                "case_number": "Case7",
-                "courthouse": "MyCourthouseDisplayName",
-                "defendants": [
-                  "aDefendant"
-                ],
-                "judges": [
-                  "AJUDGE"
-                ],
-                "hearings": [
-                  {
-                    "date": "2023-05-20",
-                    "courtroom": "COURTROOM7",
-                    "judges": [
-                      "AJUDGE"
-                    ]
-                  },
-                  {
-                    "date": "2023-05-21",
-                    "courtroom": "COURTROOM7",
-                    "judges": [
-                      "AJUDGE"
-                    ]
-                  },
-                  {
-                    "date": "2023-05-22",
-                    "courtroom": "COURTROOM7",
                     "judges": [
                       "AJUDGE"
                     ]
@@ -663,25 +576,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
             """;
         String actualResponse = response.getResponse().getContentAsString();
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void casesSearchPost_shouldReturn422_whenCourthouseIsLowercase() throws Exception {
-        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse));
-        String requestBody = """
-            {
-              "courthouse": "swansea",
-              "courtroom": "COURTROOM1",
-              "date_to": "2023-05-20"
-            }""";
-
-        MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isUnprocessableEntity());
     }
 
     private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse) {

@@ -105,10 +105,6 @@ public class AdvancedSearchRequestHelper {
 
         if (CollectionUtils.isNotEmpty(request.getCourthouseIds())) {
             courthousesToFilterOn = getCourthouseToFilter(courthouseIdList, courthouseIdsUserHasAccessTo);
-        } else if (StringUtils.isNotBlank(request.getCourthouse())) {
-            //FIXME: Remove this block once move to courthouse_ids has been merged (DMP-4912)
-            courthouseIdList = courthouseRepository.findAllIdByDisplayNameOrNameLike(request.getCourthouse());
-            courthousesToFilterOn = getCourthouseToFilter(courthouseIdList, courthouseIdsUserHasAccessTo);
         } else {
             courthousesToFilterOn = courthouseIdsUserHasAccessTo;
         }
