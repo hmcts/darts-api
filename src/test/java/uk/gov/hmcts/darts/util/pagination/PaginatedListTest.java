@@ -112,9 +112,9 @@ class PaginatedListTest {
             assertThat(exception.getError()).isEqualTo(CommonApiError.INTERNAL_SERVER_ERROR);
             assertThat(exception.getMessage())
                 .isEqualTo("Internal server error. Invalid class type provided for conversion: "
-                               + "uk.gov.hmcts.darts.util.pagination.PaginatedListTest$asClassTests$TestClass2. "
+                               + "uk.gov.hmcts.darts.util.pagination.PaginatedListTest$AsClassTests$TestClass2. "
                                + "Expected: "
-                               + "uk.gov.hmcts.darts.util.pagination.PaginatedListTest$asClassTests$TestClass1."
+                               + "uk.gov.hmcts.darts.util.pagination.PaginatedListTest$AsClassTests$TestClass1."
                 );
 
 
