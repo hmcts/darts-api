@@ -25,62 +25,62 @@ class PaginatedListTest {
 
 
     @Test
-    void positiveSetTotalItemsTypicalMultiplePagesOnLimit() {
+    void setTotalItems_TypicalMultiplePagesOnLimit() {
         PaginatedList<String> list = createValidObject();
         list.setTotalItems(100, 25);
-        assertThat(list.getTotalItems()).isEqualTo(100L);
-        assertThat(list.getTotalPages()).isEqualTo(4L);
+        assertThat(list.getTotalItems()).isEqualTo(100);
+        assertThat(list.getTotalPages()).isEqualTo(4);
     }
 
     @Test
-    void positiveSetTotalItemsTypicalMultiplePagesBelowLimit() {
+    void setTotalItems_TypicalMultiplePagesBelowLimit() {
         PaginatedList<String> list = createValidObject();
         list.setTotalItems(100, 24);
-        assertThat(list.getTotalItems()).isEqualTo(100L);
-        assertThat(list.getTotalPages()).isEqualTo(5L);
+        assertThat(list.getTotalItems()).isEqualTo(100);
+        assertThat(list.getTotalPages()).isEqualTo(5);
     }
 
     @Test
-    void positiveSetTotalItemsTypicalSinglePageOnLimit() {
+    void setTotalItems_TypicalSinglePageOnLimit() {
         PaginatedList<String> list = createValidObject();
         list.setTotalItems(25, 25);
-        assertThat(list.getTotalItems()).isEqualTo(25L);
-        assertThat(list.getTotalPages()).isEqualTo(1L);
+        assertThat(list.getTotalItems()).isEqualTo(25);
+        assertThat(list.getTotalPages()).isEqualTo(1);
     }
 
     @Test
-    void positiveSetTotalItemsTypicalSingleBelowLimit() {
+    void setTotalItems_TypicalSingleBelowLimit() {
         PaginatedList<String> list = createValidObject();
         list.setTotalItems(20, 25);
-        assertThat(list.getTotalItems()).isEqualTo(20L);
-        assertThat(list.getTotalPages()).isEqualTo(1L);
+        assertThat(list.getTotalItems()).isEqualTo(20);
+        assertThat(list.getTotalPages()).isEqualTo(1);
     }
 
     @Test
-    void positiveSetTotalItemsZeroTotalItems() {
+    void setTotalItems_ZeroTotalItems() {
         PaginatedList<String> list = createValidObject();
         list.setTotalItems(0, 25);
-        assertThat(list.getTotalItems()).isEqualTo(0L);
-        assertThat(list.getTotalPages()).isEqualTo(0L);
+        assertThat(list.getTotalItems()).isEqualTo(0);
+        assertThat(list.getTotalPages()).isEqualTo(0);
 
     }
 
     @Test
-    void positiveIsEmptyTrueEmptyList() {
+    void isEmpty_TrueEmptyList() {
         PaginatedList<String> list = createValidObject();
         list.setData(List.of());
         assertThat(list.isEmpty()).isTrue();
     }
 
     @Test
-    void positiveIsEmptyTrueNullList() {
+    void isEmpty_TrueNullList() {
         PaginatedList<String> list = createValidObject();
         list.setData(null);
         assertThat(list.isEmpty()).isTrue();
     }
 
     @Test
-    void positiveIsEmptyFalse() {
+    void isEmpty_False() {
         PaginatedList<String> list = createValidObject();
         list.setData(List.of("Any"));
         assertThat(list.isEmpty()).isFalse();
