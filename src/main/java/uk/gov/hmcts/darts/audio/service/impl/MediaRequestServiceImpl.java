@@ -170,7 +170,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return duplicateUserMediaRequests.isPresent();
     }
 
-    @Transactional
     @Override
     public MediaRequestEntity saveAudioRequest(AudioRequestDetails request, AudioRequestType audioRequestType) {
         MediaRequestEntity mediaRequest = saveAudioRequestToDb(
