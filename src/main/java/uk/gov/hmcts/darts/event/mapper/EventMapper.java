@@ -84,7 +84,7 @@ public class EventMapper {
         }
         return hearingEntities.stream()
             .sorted(Comparator.comparing(HearingEntity::getId))
-            .map(hearingEntity -> mapAdminGetEventResponseDetailsHearing(hearingEntity))
+            .map(this::mapAdminGetEventResponseDetailsHearing)
             .toList();
     }
 
@@ -111,7 +111,7 @@ public class EventMapper {
             return new ArrayList<>();
         }
         return cases.stream()
-            .map(caseEntity -> mapAdminGetEventResponseDetailsCasesCase(caseEntity))
+            .map(this::mapAdminGetEventResponseDetailsCasesCase)
             .toList();
     }
 
