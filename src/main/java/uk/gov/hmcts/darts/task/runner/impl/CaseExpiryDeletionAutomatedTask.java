@@ -59,7 +59,6 @@ public class CaseExpiryDeletionAutomatedTask
     }
 
     @Override
-    @Transactional
     public void runTask() {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
