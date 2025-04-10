@@ -245,8 +245,7 @@ class PaginationDtoTest {
         doReturn(pageable).when(paginationDto).toPagable(any(), any(), any());
 
         Page<Integer> page = mock(Page.class);
-        long totalElements = 100L;
-        when(page.getTotalElements()).thenReturn(totalElements);
+        when(page.getTotalElements()).thenReturn(100L);
         doReturn(page).when(pageFunction).apply(any());
         when(page.get()).thenReturn(List.of(123, 456, 789, 101_112).stream());
 
@@ -256,7 +255,7 @@ class PaginationDtoTest {
         assertThat(result).isNotNull();
         assertThat(result.getCurrentPage()).isEqualTo(2);
         assertThat(result.getPageSize()).isEqualTo(10);
-        assertThat(result.getTotalItems()).isEqualTo(totalElements);
+        assertThat(result.getTotalItems()).isEqualTo(100);
         assertThat(result.getTotalPages()).isEqualTo(10);
         assertThat(result.getData()).hasSize(4)
             .containsExactly("123", "456", "789", "101112");
