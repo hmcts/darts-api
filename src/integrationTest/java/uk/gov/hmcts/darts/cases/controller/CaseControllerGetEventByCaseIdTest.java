@@ -112,9 +112,9 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             [{"id":<event-id>,
             "hearing_id":<hearing-id>,
             "hearing_date":"2023-01-01",
-            "timestamp":"2023-01-01T12:00:00Z",
+            "timestamp":"2023-01-01T12:01:00Z",
             "name":"Section 11 of the Contempt of Court Act 1981",
-            "text":"some-event-text-1",
+            "text":"some-event-text-2023-01-01T12:01",
             "is_data_anonymised": false
             }]
             """;
@@ -162,19 +162,19 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                 "id": 2,
                 "hearing_id": 1,
                 "hearing_date": "2023-01-01",
-                "timestamp": "2023-01-02T12:00:00Z",
+                "timestamp": "2023-01-02T12:01:00Z",
                 "name": "Section 11 of the Contempt of Court Act 1981",
                 "is_data_anonymised": false,
-                "text": "some-event-text-1"
+                "text": "some-event-text-2023-01-01T12:01"
               },
               {
                 "id": 1,
                 "hearing_id": 1,
                 "hearing_date": "2023-01-01",
-                "timestamp": "2023-01-01T12:00:00Z",
+                "timestamp": "2023-01-01T12:01:00Z",
                 "name": "Section 11 of the Contempt of Court Act 1981",
                 "is_data_anonymised": false,
-                "text": "some-event-text-1"
+                "text": "some-event-text-2023-01-01T12:01"
               }
             ]
             """;
