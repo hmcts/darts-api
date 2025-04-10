@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -32,6 +33,8 @@ public class TestBase {
 
     @Autowired
     protected TransactionalUtil transactionalUtil;
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @Autowired
     @Qualifier("inMemoryCacheManager")

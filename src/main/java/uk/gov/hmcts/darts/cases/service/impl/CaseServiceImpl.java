@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -37,7 +38,9 @@ import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -50,9 +53,12 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
+import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -185,6 +191,23 @@ public class CaseServiceImpl implements CaseService {
         getCourtCaseById(caseId).validateIsExpired();
         List<EventEntity> eventEntities = eventRepository.findAllByCaseId(caseId);
         return EventMapper.mapToEvents(eventEntities);
+
+    }
+
+    @Transactional
+    @Override
+    public PaginatedList<Event> getEventsByCaseId(Integer caseId, PaginationDto<Event> paginationDto) {
+        getCourtCaseById(caseId).validateIsExpired();
+
+        return paginationDto.toPaginatedList(
+            pageable -> eventRepository.findAllByCaseIdPaginated(caseId, pageable),
+            EventMapper::mapToEvent,
+            List.of(HearingEntity_.HEARING_DATE, EventEntity_.TIMESTAMP),
+            List.of(Sort.Direction.DESC, Sort.Direction.DESC),
+            Map.of("hearingDate", "he.hearingDate",
+                   "timestamp", "ee.timestamp",
+                   "eventName", "et.eventName")
+        );
     }
 
     @Override

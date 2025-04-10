@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.testutils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +76,6 @@ public class IntegrationBase extends TestBase {
 
     @Autowired
     protected DartsDatabaseRetrieval dartsDataRetrieval;
-    @Autowired
-    protected ObjectMapper objectMapper;
     @Autowired
     private List<AutomatedOnDemandTask> automatedOnDemandTask;
     @Autowired

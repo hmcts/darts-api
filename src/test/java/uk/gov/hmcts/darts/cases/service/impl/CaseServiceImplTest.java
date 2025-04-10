@@ -11,6 +11,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
@@ -30,7 +33,9 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
@@ -47,6 +52,8 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
+import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -55,7 +62,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -73,7 +83,9 @@ import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createEventWith;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals",
+    "PMD.CouplingBetweenObjects"//Required to accutatly test the class
+})
 class CaseServiceImplTest {
 
     private static final String SWANSEA = "SWANSEA";
@@ -583,5 +595,57 @@ class CaseServiceImplTest {
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "2");
         CourtCaseEntity caseEntity = CommonTestDataUtil.createCase("Case0000009", courthouseEntity);
         return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.of(2023, Month.JULY, 20), true);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")//Caused by mockio this can never be incorrect
+    void getEventsByCaseIdPaginated_shouldPaginatedCorrectly_whenGivenTypicalData() {
+        final int caseId = 123;
+        CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
+        when(caseRepository.findById(caseId)).thenReturn(Optional.ofNullable(courtCaseEntity));
+
+        PaginatedList<Event> expectedResult = mock(PaginatedList.class);
+        PaginationDto<Event> paginationDto = mock(PaginationDto.class);
+
+        when(paginationDto.toPaginatedList(any(), any(), any(), any(), any()))
+            .thenReturn(expectedResult);
+
+        PaginatedList<Event> result = caseService.getEventsByCaseId(caseId, paginationDto);
+
+        ArgumentCaptor<Function<Pageable, Page<EventEntity>>> pageArgumentCapturor = ArgumentCaptor.forClass(Function.class);
+        ArgumentCaptor<Function<EventEntity, Event>> dataMapperArgumentCapturor = ArgumentCaptor.forClass(Function.class);
+
+        verify(paginationDto)
+            .toPaginatedList(
+                pageArgumentCapturor.capture(),
+                dataMapperArgumentCapturor.capture(),
+                eq(List.of(HearingEntity_.HEARING_DATE, EventEntity_.TIMESTAMP)),
+                eq(List.of(Sort.Direction.DESC, Sort.Direction.DESC)),
+                eq(Map.of("hearingDate", "he.hearingDate",
+                          "timestamp", "ee.timestamp",
+                          "eventName", "et.eventName"))
+            );
+        assertThat(pageArgumentCapturor.getValue()).isNotNull();
+
+        Pageable pageable = mock(Pageable.class);
+        Page<EventEntity> page = mock(Page.class);
+        when(eventRepository.findAllByCaseIdPaginated(caseId, pageable)).thenReturn(page);
+        assertThat(pageArgumentCapturor.getValue().apply(pageable))
+            .isEqualTo(page);
+        verify(eventRepository).findAllByCaseIdPaginated(caseId, pageable);
+        assertThat(dataMapperArgumentCapturor.getValue()).isNotNull();
+        assertThat(result).isEqualTo(expectedResult);
+        verify(caseRepository).findById(caseId);
+    }
+
+    @Test
+    void getEventsByCaseIdPaginated_whenCaseIsExpited_shouldThrowError() {
+        final int caseId = 123;
+        CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
+        courtCaseEntity.setDataAnonymised(true);
+        when(caseRepository.findById(caseId)).thenReturn(Optional.ofNullable(courtCaseEntity));
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> caseService.getEventsByCaseId(caseId, null));
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
     }
 }
