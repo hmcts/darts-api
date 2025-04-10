@@ -68,6 +68,42 @@ class CaseRepositoryIntTest extends IntegrationBase {
         assertThat(result.getFirst()).isEqualTo(matchingCase.getId());
     }
 
+    @Test
+    void findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_caseHasNoAssocaitedCaseRetentionEntity_shouldNotReturn() {
+        // given
+        caseStub.createAndSaveCourtCase(courtCase -> {
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(1);
+        });
+        // when
+        var result = caseRepository.findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(1000));
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_oneCaseHasMultipleRetentionObjects_shouldOnlyReturnIdOnce() {
+        // given
+        var matchingCase = caseStub.createAndSaveCourtCase(courtCase -> {
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(1);
+        });
+        CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+            matchingCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject1);
+
+        CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
+            matchingCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject2);
+
+        // when
+        var result = caseRepository.findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(1000));
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst()).isEqualTo(matchingCase.getId());
+    }
+
 
     @Test
     void findCasesIdsNeedingCaseDocumentGenerated_ReturnsMatchingCases() {

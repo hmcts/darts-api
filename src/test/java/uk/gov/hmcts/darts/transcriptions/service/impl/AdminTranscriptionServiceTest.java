@@ -380,6 +380,7 @@ class AdminTranscriptionServiceTest {
     private static TranscriptionSearchResult createTranscription(int seed) {
         return new TranscriptionSearchResult(
             seed,
+            seed + 9,
             "case-number-" + seed,
             seed + 10,
             LocalDate.parse("2020-01-01").plusDays(seed),

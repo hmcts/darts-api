@@ -153,6 +153,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     private TranscriptionSearchResponse toTranscriptionSearchResponse(TranscriptionSearchResult transcriptionSearchResult) {
         var transcriptionSearchResponse = new TranscriptionSearchResponse();
         transcriptionSearchResponse.setTranscriptionId(transcriptionSearchResult.id());
+        transcriptionSearchResponse.setCaseId(transcriptionSearchResult.caseId());
         transcriptionSearchResponse.setCaseNumber(transcriptionSearchResult.caseNumber());
         transcriptionSearchResponse.setCourthouseId(transcriptionSearchResult.courthouseId());
         transcriptionSearchResponse.setHearingDate(transcriptionSearchResult.hearingDate());

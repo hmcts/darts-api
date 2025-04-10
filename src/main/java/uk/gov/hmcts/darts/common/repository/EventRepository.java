@@ -171,10 +171,10 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         SELECT e.id
         FROM EventEntity e
         WHERE e.eventStatus = :statusNumber
-        AND e.courtroom.id not in (:courtroomIds)
+        AND e.courtroom.name not in (:courtroomNumbers)
         """
     )
-    List<Integer> findAllByEventStatusAndNotCourtrooms(Integer statusNumber, List<Integer> courtroomIds, Limit limit);
+    List<Integer> findAllByEventStatusAndNotCourtrooms(Integer statusNumber, List<String> courtroomNumbers, Limit limit);
 
     @Query(value = """
                         SELECT e3.id from EventEntity e3
@@ -189,6 +189,12 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
                          ORDER BY e3.createdDateTime ASC  
         """)
     List<Integer> findDuplicateEventIds(Integer eventId);
+
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM darts.hearing_event_ae WHERE eve_id IN (:eventEntitiesIdsToDelete)", nativeQuery = true)
+    void deleteAllAssociatedHearings(List<Integer> eventEntitiesIdsToDelete);
 
     interface EventIdAndHearingIds {
 

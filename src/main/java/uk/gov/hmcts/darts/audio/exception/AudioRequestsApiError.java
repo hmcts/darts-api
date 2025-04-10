@@ -23,7 +23,7 @@ public enum AudioRequestsApiError implements DartsApiError {
     ),
     MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT(
         AudioRequestsErrorCode.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AudioRequestsTitleErrors.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT.toString()
     ),
     TRANSFORMED_MEDIA_NOT_FOUND(
@@ -38,12 +38,12 @@ public enum AudioRequestsApiError implements DartsApiError {
     ),
     USER_IS_NOT_FOUND(
         AudioRequestsErrorCode.USER_NOT_FOUND.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AudioRequestsTitleErrors.USER_NOT_FOUND.toString()
     ),
     INVALID_REQUEST(
         AudioRequestsErrorCode.INVALID_REQUEST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AudioRequestsTitleErrors.INVALID_REQUEST.toString()
     );
 

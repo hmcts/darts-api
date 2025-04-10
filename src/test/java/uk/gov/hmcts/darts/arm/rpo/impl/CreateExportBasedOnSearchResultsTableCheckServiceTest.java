@@ -72,7 +72,7 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
     void checkCreateExportBasedOnSearchResultsInProgress_PollingStillInProgress() {
         // given
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusMinutes(10));
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(422, false, 2);
 
         // when
         boolean result = createExportBasedOnSearchResultsTableService.checkCreateExportBasedOnSearchResultsInProgress(userAccount, response,
@@ -89,7 +89,7 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
     void checkCreateExportBasedOnSearchResultsInProgress_PollingExceeded() {
         //given
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusHours(5));
-        CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
+        CreateExportBasedOnSearchResultsTableResponse response = createResponse(422, false, 2);
 
         // when
         StringBuilder errorMessage = new StringBuilder();

@@ -209,6 +209,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/HearingsSearchResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
         '401':
@@ -235,6 +241,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HearingsResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
         '401':
@@ -261,6 +273,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HearingsAudiosResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request Error
           content:

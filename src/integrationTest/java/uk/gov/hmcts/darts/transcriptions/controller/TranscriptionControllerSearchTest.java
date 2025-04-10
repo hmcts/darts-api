@@ -53,7 +53,7 @@ class TranscriptionControllerSearchTest extends IntegrationBase {
     }
 
     @Test
-    void adminTranscriptionsSearchPost_shouldReturnBadRequest_whenCourthouseDisplayNameIsLowercase() throws Exception {
+    void adminTranscriptionsSearchPost_shouldReturnUnprocessableEntity_whenCourthouseDisplayNameIsLowercase() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
 
         TranscriptionSearchRequest request = new TranscriptionSearchRequest();
@@ -63,7 +63,7 @@ class TranscriptionControllerSearchTest extends IntegrationBase {
                 post(ENDPOINT)
                     .content(objectMapper.writeValueAsString(request))
                     .contentType("application/json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andExpect(result -> {
                 String response = result.getResponse().getContentAsString();
                 Assertions.assertTrue(response.contains("Courthouse display name must be uppercase"));

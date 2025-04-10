@@ -352,7 +352,7 @@ class EventControllerPostEventMappingTest extends IntegrationBase {
     }
 
     @Test
-    void eventMappingsPostEndpointShouldReturn400ErrorWhenHandlerDoesNotExist() throws Exception {
+    void eventMappingsPostEndpointShouldReturn422ErrorWhenHandlerDoesNotExist() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT)
@@ -361,7 +361,7 @@ class EventControllerPostEventMappingTest extends IntegrationBase {
                 "tests/events/EventControllerPostEventMappingTest/createEventMappingUnknownHandlerPost.json"));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
     }
 }

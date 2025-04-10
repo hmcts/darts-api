@@ -21,19 +21,19 @@ public enum RetentionApiError implements DartsApiError {
         RetentionTitleErrors.RETENTION_DATE_TOO_EARLY.toString()
     ), INVALID_REQUEST(
         RetentionErrorCode.INVALID_REQUEST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         RetentionTitleErrors.INVALID_REQUEST.toString()
     ), CASE_NOT_FOUND(
         RetentionErrorCode.CASE_NOT_FOUND.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.NOT_FOUND,
         RetentionTitleErrors.CASE_NOT_FOUND.toString()
     ), CASE_NOT_CLOSED(
         RetentionErrorCode.CASE_NOT_CLOSED.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         RetentionTitleErrors.CASE_NOT_CLOSED.toString()
     ), NO_RETENTION_POLICIES_APPLIED(
         RetentionErrorCode.NO_RETENTION_POLICIES_APPLIED.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         RetentionTitleErrors.NO_RETENTION_POLICIES_APPLIED.toString()
     ), INTERNAL_SERVER_ERROR(
         RetentionErrorCode.INTERNAL_SERVER_ERROR.getValue(),
@@ -57,15 +57,15 @@ public enum RetentionApiError implements DartsApiError {
         RetentionTitleErrors.NON_UNIQUE_POLICY_DISPLAY_NAME.toString()
     ), DURATION_TOO_SHORT(
         RetentionErrorCode.DURATION_TOO_SHORT.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         RetentionTitleErrors.DURATION_TOO_SHORT.toString()
     ), POLICY_START_MUST_BE_FUTURE(
         RetentionErrorCode.POLICY_START_MUST_BE_FUTURE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         RetentionTitleErrors.POLICY_START_MUST_BE_FUTURE.toString()
     ), POLICY_START_DATE_MUST_BE_PAST(
         RetentionErrorCode.POLICY_START_DATE_MUST_BE_PAST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         RetentionTitleErrors.POLICY_START_DATE_MUST_BE_PAST.toString()
     ), NON_UNIQUE_FIXED_POLICY_KEY(
         RetentionErrorCode.NON_UNIQUE_FIXED_POLICY_KEY.getValue(),
@@ -81,7 +81,7 @@ public enum RetentionApiError implements DartsApiError {
         RetentionTitleErrors.LIVE_POLICIES_CANNOT_BE_EDITED.toString()
     ), TARGET_POLICY_HAS_PENDING_REVISION(
         RetentionErrorCode.TARGET_POLICY_HAS_PENDING_REVISION.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         RetentionTitleErrors.TARGET_POLICY_HAS_PENDING_REVISION.toString()
     ), CASE_RETENTION_PASSED(
         RetentionErrorCode.CASE_RETENTION_PASSED.getValue(),

@@ -39,7 +39,7 @@ public class AudioLinkingAutomatedTask
     private final EventRepository eventRepository;
     private final EventProcessor eventProcessor;
     private final AudioConfigurationProperties audioConfigurationProperties;
-    private List<Integer> handheldCourtroomIds;
+    private List<String> handheldCourtroomNumbers;
 
     protected AudioLinkingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                         AudioLinkingAutomatedTaskConfig automatedTaskConfigurationProperties,
@@ -51,7 +51,7 @@ public class AudioLinkingAutomatedTask
         this.eventRepository = eventRepository;
         this.eventProcessor = eventProcessor;
         this.audioConfigurationProperties = audioConfigurationProperties;
-        this.handheldCourtroomIds = audioConfigurationProperties.getHandheldAudioCourtroomNumbers().stream().map(Integer::parseInt).toList();
+        this.handheldCourtroomNumbers = audioConfigurationProperties.getHandheldAudioCourtroomNumbers().stream().toList();
 
     }
 
@@ -66,7 +66,7 @@ public class AudioLinkingAutomatedTask
         Integer batchSize = getAutomatedTaskBatchSize();
         List<Integer> eveIds = eventRepository.findAllByEventStatusAndNotCourtrooms(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
-            handheldCourtroomIds,
+            handheldCourtroomNumbers,
             Limit.of(batchSize));
 
         log.info("Found {} events to process out of a total batch size {}", eveIds.size(), batchSize);
