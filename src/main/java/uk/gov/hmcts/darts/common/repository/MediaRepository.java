@@ -64,10 +64,10 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
            FROM MediaEntity me
            WHERE
            me.courtroom = :courtroomEntity
-           AND me.channel= :channel
-           AND me.mediaFile= :mediaFile
-           AND me.start= :startedDateTime
-           AND me.end= :endDateTime
+           AND me.channel = :channel
+           AND me.mediaFile = :mediaFile
+           AND me.start = :startedDateTime
+           AND me.end = :endDateTime
            ORDER BY me.start
         """)
     List<MediaEntity> findMediaByDetails(CourtroomEntity courtroomEntity, Integer channel,
