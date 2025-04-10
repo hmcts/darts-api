@@ -56,40 +56,6 @@ paths:
         '401':
           description: Unauthorised Error
 
-  /audio-requests:
-    post:
-      tags:
-        - Audio Requests
-      summary: Users can request audio for a hearing and date/time periods
-      operationId: addAudioRequest
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AddAudioResponse'
-        '422':
-          description: Business Validation Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml' 
-        '400':
-          description: 'invalid input, object invalid'
-        '401':
-          description: Unauthorised Error
-        '404':
-          description: Hearing Not Found
-        '409':
-          description: audio request item already exists
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AudioRequestDetails'
-        description: Audio Request item to add
-
   /audio-requests/not-accessed-count:
     get:
       tags:
@@ -837,7 +803,6 @@ components:
         - requestor
         - start_time
         - end_time
-        - request_type
       properties:
         hearing_id:
           type: integer
@@ -853,8 +818,6 @@ components:
           type: string
           format: date-time
           example: '2023-05-31T12:00:00Z'
-        request_type:
-          $ref: '#/components/schemas/AudioRequestType'
 
     MediaRequestStatus:
       type: string

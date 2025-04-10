@@ -62,6 +62,7 @@ import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
@@ -110,6 +111,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final MediaRequestMapper mediaRequestMapper;
     private final AudioMediaPatchRequestValidator mediaRequestValidator;
     private final SystemUserHelper systemUserHelper;
+    private final LogApi logApi;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -154,14 +156,14 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails) {
+    public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType) {
 
         var duplicateUserMediaRequests = mediaRequestRepository.findDuplicateUserMediaRequests(
             hearingsService.getHearingByIdWithValidation(audioRequestDetails.getHearingId()),
             userAccountRepository.getReferenceById(audioRequestDetails.getRequestor()),
             audioRequestDetails.getStartTime(),
             audioRequestDetails.getEndTime(),
-            audioRequestDetails.getRequestType(),
+            audioRequestType,
             List.of(OPEN, PROCESSING)
         );
 
@@ -170,13 +172,13 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Transactional
     @Override
-    public MediaRequestEntity saveAudioRequest(AudioRequestDetails request) {
+    public MediaRequestEntity saveAudioRequest(AudioRequestDetails request, AudioRequestType audioRequestType) {
         MediaRequestEntity mediaRequest = saveAudioRequestToDb(
             hearingsService.getHearingByIdWithValidation(request.getHearingId()),
             userAccountRepository.getReferenceById(request.getRequestor()),
             request.getStartTime(),
             request.getEndTime(),
-            request.getRequestType()
+            audioRequestType
         );
         auditApi.record(REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
         return mediaRequest;
@@ -284,7 +286,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
         return response;
     }
-    
+
     private List<TransformedMediaDetails> getTransformedMediaDetails(Integer userId, Boolean expired) {
         List<TransformedMediaDetailsDto> transformedMediaDetailsDtoList = transformedMediaRepository.findTransformedMediaDetails(userId, expired);
         return transformedMediaMapper.mapToTransformedMediaDetails(transformedMediaDetailsDtoList);
@@ -497,6 +499,18 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
 
         return returnResponse;
+    }
+
+    @Override
+    public MediaRequestEntity addAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType) {
+        if (isUserDuplicateAudioRequest(audioRequestDetails, audioRequestType)) {
+            throw new DartsApiException(AudioRequestsApiError.DUPLICATE_MEDIA_REQUEST);
+        }
+
+        MediaRequestEntity audioRequest = saveAudioRequest(audioRequestDetails, audioRequestType);
+        scheduleMediaRequestPendingNotification(audioRequest);
+        logApi.atsProcessingUpdate(audioRequest);
+        return audioRequest;
     }
 
     private void auditOwnerChange(MediaPatchRequest request, MediaRequestEntity mediaRequestEntity) {
