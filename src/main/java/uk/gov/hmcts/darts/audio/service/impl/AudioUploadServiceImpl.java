@@ -26,8 +26,6 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.common.util.MediaEntityTreeNodeImpl;
-import uk.gov.hmcts.darts.common.util.Tree;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DurationUtil;
@@ -93,7 +91,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         List<MediaEntity> duplicatesToBeSuperseded = getLatestDuplicateMediaFiles(addAudioMetadataRequest);
 
         List<MediaEntity> duplicatesWithDifferentChecksum = filterForMediaWithMismatchingChecksum(duplicatesToBeSuperseded, incomingChecksum);
-
         if (isNotEmpty(duplicatesToBeSuperseded) && isEmpty(duplicatesWithDifferentChecksum)) {
             try {
                 dataManagementApi.deleteBlobDataFromInboundContainer(blodId);
@@ -197,19 +194,12 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         CourtroomEntity courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(addAudioMetadataRequest.getCourthouse(),
                                                                                               addAudioMetadataRequest.getCourtroom(),
                                                                                               userIdentity.getUserAccount());
-        List<MediaEntity> identicalMediaEntities = mediaRepository.findMediaByDetails(
+        return mediaRepository.findMediaByDetails(
             courtroomEntity,
             addAudioMetadataRequest.getChannel(),
             addAudioMetadataRequest.getFilename(),
             addAudioMetadataRequest.getStartedAt(),
             addAudioMetadataRequest.getEndedAt());
-
-        // now lets get the lowest level media objects so that they can act as a basis for the antecedent
-        Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();
-        identicalMediaEntities.stream().forEach(entry ->
-                                                    tree.addNode(new MediaEntityTreeNodeImpl(entry))
-        );
-        return tree.getLowestLevelDescendants().stream().map(MediaEntityTreeNodeImpl::getEntity).toList();
     }
 
     @Override

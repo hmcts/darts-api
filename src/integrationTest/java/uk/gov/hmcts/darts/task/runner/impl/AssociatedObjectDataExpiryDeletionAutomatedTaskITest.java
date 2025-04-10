@@ -41,7 +41,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
     private final AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
     private static final int AUTOMATION_USER_ID = -28;
 
-    //TranscriptionDocumentEntity
+    
     @Test
     void positiveTranscriptionDocumentEntityExpired() {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");

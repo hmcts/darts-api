@@ -91,7 +91,6 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
 
 
     @Override
-    @Transactional
     public void run() {
         super.run();
     }
@@ -103,16 +102,24 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
 
     @Override
     public void runTask() {
-        final UserAccountEntity userAccount = userIdentity.getUserAccount();
-        OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
-            .minus(getConfig().getBufferDuration());
+        new AssociatedObjectDataExpiryDeleter().delete();
+    }
 
-        Limit limit = Limit.of(getAutomatedTaskBatchSize());
+    private class AssociatedObjectDataExpiryDeleter {
 
-        deleteTranscriptionDocumentEntity(userAccount, maxRetentionDate, limit);
-        deleteMediaEntity(userAccount, maxRetentionDate, limit);
-        deleteAnnotationDocumentEntity(userAccount, maxRetentionDate, limit);
-        deleteCaseDocumentEntity(userAccount, maxRetentionDate, limit);
+        @Transactional
+        public void delete() {
+            final UserAccountEntity userAccount = userIdentity.getUserAccount();
+            OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
+                .minus(getConfig().getBufferDuration());
+
+            Limit limit = Limit.of(getAutomatedTaskBatchSize());
+
+            deleteTranscriptionDocumentEntity(userAccount, maxRetentionDate, limit);
+            deleteMediaEntity(userAccount, maxRetentionDate, limit);
+            deleteAnnotationDocumentEntity(userAccount, maxRetentionDate, limit);
+            deleteCaseDocumentEntity(userAccount, maxRetentionDate, limit);
+        }
     }
 
     void deleteTranscriptionDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
