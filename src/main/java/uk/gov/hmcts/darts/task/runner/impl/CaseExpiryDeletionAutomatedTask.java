@@ -58,7 +58,6 @@ public class CaseExpiryDeletionAutomatedTask
     }
 
     @Override
-    @Transactional
     public void runTask() {
         new CaseExpiryDeleter().delete();
     }
