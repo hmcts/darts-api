@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AnnotationStub;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
+import java.util.stream.Collectors;
+
 import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,7 +71,7 @@ class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
     }
 
     private AnnotationDocumentEntity createAnnotationDocumentForCases(CourtCaseEntity... courtCases) {
-        var hearingEntities = stream(courtCases).map(PersistableFactory.getHearingTestData()::createHearingFor).toList();
+        var hearingEntities = stream(courtCases).map(PersistableFactory.getHearingTestData()::createHearingFor).collect(Collectors.toSet());
         var annotationDocument = PersistableFactory.getAnnotationDocumentTestData().createAnnotationDocumentForHearings(hearingEntities);
         return dartsPersistence.save(annotationDocument);
     }

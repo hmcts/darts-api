@@ -17,7 +17,7 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
         SELECT ann
         FROM AnnotationEntity ann
          JOIN ann.annotationDocuments annDoc
-         JOIN ann.hearingList hearing
+         JOIN ann.hearings hearing
         WHERE hearing.id = :hearingId
         AND ann.deleted = false
         ORDER BY annDoc.uploadedDateTime DESC        
@@ -28,7 +28,7 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
         SELECT ann
         FROM AnnotationEntity ann
          JOIN ann.annotationDocuments annDoc
-         JOIN ann.hearingList hearing
+         JOIN ann.hearings hearing
         WHERE hearing.id = :hearingId
         AND ann.deleted = false
         AND ann.currentOwner = :userAccount
@@ -40,7 +40,7 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
         SELECT ann
         FROM AnnotationEntity ann
          JOIN ann.annotationDocuments annDoc
-         JOIN ann.hearingList hearing
+         JOIN ann.hearings hearing
         WHERE hearing.id in :hearingIds
         AND ann.deleted = false
         ORDER By hearing.hearingDate DESC        
@@ -51,7 +51,7 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
         SELECT ann
         FROM AnnotationEntity ann
          JOIN ann.annotationDocuments annDoc
-         JOIN ann.hearingList hearing
+         JOIN ann.hearings hearing
         WHERE hearing.id in :hearingIds
         AND ann.deleted = false
         AND ann.currentOwner = :userAccount

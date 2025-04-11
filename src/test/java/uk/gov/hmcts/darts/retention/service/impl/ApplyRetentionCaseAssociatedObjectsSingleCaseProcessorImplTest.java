@@ -37,6 +37,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -394,8 +395,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         // given
         var annotationA1 = CommonTestDataUtil.createAnnotationEntity(111);
         var annotationB1 = CommonTestDataUtil.createAnnotationEntity(222);
-        annotationA1.setHearingList(List.of(case1PerfectlyClosed.getHearings().getFirst()));
-        annotationB1.setHearingList(List.of(case1PerfectlyClosed.getHearings().getFirst(),
+        annotationA1.setHearings(Set.of(case1PerfectlyClosed.getHearings().getFirst()));
+        annotationB1.setHearings(Set.of(case1PerfectlyClosed.getHearings().getFirst(),
                                             case4NotPerfectlyClosed.getHearings().getFirst()));
 
         var annotationDocumentA1 = annotationA1.getAnnotationDocuments().getFirst();

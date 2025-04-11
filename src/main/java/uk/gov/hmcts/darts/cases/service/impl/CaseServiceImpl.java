@@ -212,7 +212,7 @@ public class CaseServiceImpl implements CaseService {
                         .toList());
 
             for (AnnotationEntity annotationEntity : annotationsEntities) {
-                for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
+                for (HearingEntity hearingEntity : annotationEntity.getHearings()) {
                     annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
                 }
             }
@@ -225,7 +225,7 @@ public class CaseServiceImpl implements CaseService {
                         .toList(), authorisationApi.getCurrentUser());
 
             for (AnnotationEntity annotationEntity : annotationsEntities) {
-                for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
+                for (HearingEntity hearingEntity : annotationEntity.getHearings()) {
                     annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
                 }
             }

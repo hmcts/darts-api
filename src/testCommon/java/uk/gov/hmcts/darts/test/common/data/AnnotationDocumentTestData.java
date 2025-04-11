@@ -6,6 +6,8 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationDocumentEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
@@ -23,15 +25,15 @@ public final class AnnotationDocumentTestData implements Persistable<TestAnnotat
         return someMinimal();
     }
 
-    public AnnotationDocumentEntity createAnnotationDocumentForHearings(List<HearingEntity> hearingEntities) {
+    public AnnotationDocumentEntity createAnnotationDocumentForHearings(Set<HearingEntity> hearingEntities) {
         var annotationDocumentEntityRetrieve = someMinimalBuilder();
         AnnotationDocumentEntity annotationDocument = annotationDocumentEntityRetrieve.build().getEntity();
-        annotationDocument.getAnnotation().setHearingList(hearingEntities);
+        annotationDocument.getAnnotation().setHearings(hearingEntities);
         return annotationDocument;
     }
 
     public AnnotationDocumentEntity createAnnotationDocumentForHearings(HearingEntity... hearingEntities) {
-        return createAnnotationDocumentForHearings(stream(hearingEntities).collect(toList()));
+        return createAnnotationDocumentForHearings(stream(hearingEntities).collect(Collectors.toSet()));
     }
 
     @Override
