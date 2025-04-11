@@ -25,23 +25,23 @@ class AsyncEventProcessorTest {
 
     @Test
     void processEvent_hasDuplicates() {
-        when(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(any()))
+        when(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(any(), any()))
             .thenReturn(true);
 
-        asyncEventProcessor.processEvent(1);
+        asyncEventProcessor.processEvent(1, 3);
 
-        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(1);
+        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(1, 3);
         verify(cleanupCurrentFlagEventProcessor, never()).processEvent(any());
     }
 
     @Test
     void processEvent_noDuplicates() {
-        when(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(any()))
+        when(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(any(), any()))
             .thenReturn(false);
 
-        asyncEventProcessor.processEvent(1);
+        asyncEventProcessor.processEvent(1, 3);
 
-        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(1);
+        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(1, 3);
         verify(cleanupCurrentFlagEventProcessor).processEvent(1);
     }
 }

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.event.service.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -48,7 +49,7 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
     }
 
     @Override
-    public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+    public EventEntity handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         DataUtil.preProcess(dartsEvent);
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
@@ -83,6 +84,7 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
                 hearingAndEvent.getHearingEntity().getCourtCase(),
                 dartsEvent.getRetentionPolicy());
         }
+        return hearingAndEvent.getEventEntity();
     }
 
 }

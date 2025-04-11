@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -33,11 +34,12 @@ public class SetReportingRestrictionEventHandler extends EventHandlerBase {
 
     @Transactional
     @Override
-    public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+    public EventEntity handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         DataUtil.preProcess(dartsEvent);
         CreatedHearingAndEvent createdHearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
         CourtCaseEntity courtCaseEntity = createdHearingAndEvent.getHearingEntity().getCourtCase();
         courtCaseEntity.setReportingRestrictions(eventHandler);
         caseRepository.saveAndFlush(courtCaseEntity);
+        return createdHearingAndEvent.getEventEntity();
     }
 }

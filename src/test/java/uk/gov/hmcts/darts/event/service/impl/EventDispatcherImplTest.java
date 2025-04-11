@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.event.service.impl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -64,10 +65,12 @@ class EventDispatcherImplTest {
         when(eventHandlerRepository.findByTypeAndSubType(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
 
         List<EventHandler> eventHandlers = new ArrayList<>();
-        MockEventHandler mockEventHandler = Mockito.mock(MockEventHandler.class);
+        MockEventHandler mockEventHandler = mock(MockEventHandler.class);
         when(mockEventHandler.isHandlerFor(any())).thenReturn(true);
         eventHandlers.add(mockEventHandler);
-
+        EventEntity eventEntity = mock(EventEntity.class);
+        when(eventEntity.getId()).thenReturn(321);
+        when(mockEventHandler.handle(any(), any())).thenReturn(eventEntity);
 
         DartsEvent event = new DartsEvent();
         event.setType("TestType");
@@ -80,15 +83,16 @@ class EventDispatcherImplTest {
 
         verify(mockEventHandler).handle(any(), any());
         verify(logApi, times(1)).eventReceived(event);
-        verify(asyncEventProcessor, times(1)).processEvent(123);
+        verify(asyncEventProcessor, times(1)).processEvent(123, 321);
     }
 
 
     private static final class MockEventHandler implements EventHandler {
 
         @Override
-        public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandlerEntity) {
+        public EventEntity handle(DartsEvent dartsEvent, EventHandlerEntity eventHandlerEntity) {
             // empty method
+            return mock(EventEntity.class);
         }
 
         @Override

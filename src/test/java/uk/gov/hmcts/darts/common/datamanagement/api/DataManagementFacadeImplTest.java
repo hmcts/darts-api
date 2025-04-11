@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.datamanagement.api;
 import com.azure.core.util.BinaryData;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -120,7 +122,7 @@ class DataManagementFacadeImplTest {
     @SneakyThrows
     @BeforeEach
     void setup() {
-
+        Files.createDirectories(Paths.get(SOME_TEMP_WORKSPACE));
         List<DatastoreContainerType> datastoreOrder = new ArrayList<>();
         datastoreOrder.add(DatastoreContainerType.UNSTRUCTURED);
         datastoreOrder.add(DatastoreContainerType.DETS);
@@ -168,7 +170,7 @@ class DataManagementFacadeImplTest {
         downloadResponseMetaData.close();
 
         FileStore.getFileStore().remove();
-
+        FileUtils.cleanDirectory(new File(SOME_TEMP_WORKSPACE));
         try (Stream<Path> files = Files.list(tempDirectory.toPath())) {
             assertEquals(0, files.count());
         }

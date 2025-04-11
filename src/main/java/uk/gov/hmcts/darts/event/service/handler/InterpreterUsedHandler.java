@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -32,12 +33,13 @@ public class InterpreterUsedHandler extends EventHandlerBase {
 
     @Override
     @Transactional
-    public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+    public EventEntity handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         DataUtil.preProcess(dartsEvent);
         var createdHearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
         var courtCase = createdHearingAndEvent.getHearingEntity().getCourtCase();
         courtCase.setInterpreterUsed(true);
         caseRepository.saveAndFlush(courtCase);
+        return createdHearingAndEvent.getEventEntity();
     }
 }

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.event.service.handler;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -33,11 +34,12 @@ public class DarStartHandler extends EventHandlerBase {
 
     @Override
     @Transactional
-    public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+    public EventEntity handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         DataUtil.preProcess(dartsEvent);
         CreatedHearingAndEvent hearingAndSaveEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);// saveEvent
         var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, START_RECORDING, hearingAndSaveEvent.getCourtroomId());
         eventPublisher.publishEvent(notifyEvent);
+        return hearingAndSaveEvent.getEventEntity();
     }
 
 }
