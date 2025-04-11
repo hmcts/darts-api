@@ -163,7 +163,7 @@ public class AuthorisationImpl implements Authorisation {
     @Override
     public void authoriseByAnnotationId(Integer annotationId, Set<SecurityRoleEnum> securityRoles) {
         var annotation = annotationRepository.findById(annotationId).orElseThrow(this::logAndThrowAnnotationNotFound);
-        var courthouses = annotation.getHearingList().stream()
+        var courthouses = annotation.getHearings().stream()
             .map(hea -> hea.getCourtroom().getCourthouse())
             .toList();
 

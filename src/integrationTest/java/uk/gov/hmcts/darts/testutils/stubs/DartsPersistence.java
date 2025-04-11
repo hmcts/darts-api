@@ -94,8 +94,11 @@ import uk.gov.hmcts.darts.test.common.data.builder.DbInsertable;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -202,8 +205,8 @@ public class DartsPersistence {
             annotationEntity.setCurrentOwner(save(annotationEntity.getCurrentOwner()));
             annotationEntity.setCreatedById(Optional.ofNullable(annotationEntity.getCreatedById()).orElse(0));
             annotationEntity.setLastModifiedById(Optional.ofNullable(annotationEntity.getLastModifiedById()).orElse(0));
-            if (annotationEntity.getHearingList() != null) {
-                annotationEntity.setHearingList(saveHearingEntity(annotationEntity.getHearingList()));
+            if (annotationEntity.getHearings() != null) {
+                annotationEntity.setHearings(saveHearingEntity(annotationEntity.getHearings(), new HashSet<>()));
             }
             return annotationRepository.save(annotationEntity);
         } else {
@@ -448,7 +451,7 @@ public class DartsPersistence {
 
         if (transcription.getId() == null) {
             if (transcription.getHearing() != null) {
-                transcription.setHearings(saveHearingEntity(transcription.getHearings()));
+                transcription.setHearings(saveHearingEntity(transcription.getHearings(), new ArrayList<>()));
             }
 
             if (transcription.getCourtroom() != null) {
@@ -781,12 +784,9 @@ public class DartsPersistence {
         return judgeEntityListReturn;
     }
 
-    private List<HearingEntity> saveHearingEntity(List<HearingEntity> hearingEntityList) {
-        List<HearingEntity> hearingEntityArrayListReturn = new ArrayList<>();
-
-        hearingEntityList.forEach(hearingEntity -> hearingEntityArrayListReturn.add(save(hearingEntity)));
-
-        return hearingEntityArrayListReturn;
+    private <T extends Collection<HearingEntity>> T saveHearingEntity(Collection<HearingEntity> hearingEntityList, T newCollection) {
+        hearingEntityList.forEach(hearingEntity -> newCollection.add(save(hearingEntity)));
+        return newCollection;
     }
 
     private void saveHearingList(List<HearingEntity> hearings) {
