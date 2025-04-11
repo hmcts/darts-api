@@ -85,6 +85,7 @@ module "postgresql_flexible" {
   pgsql_storage_mb     = var.pgsqlstoragemb
   auto_grow_enabled    = true
   common_tags          = var.common_tags
+  enable_read_only_group_access = true
   admin_user_object_id = var.jenkins_AAD_objectId
   enable_qpi           = true
   pgsql_databases = [
