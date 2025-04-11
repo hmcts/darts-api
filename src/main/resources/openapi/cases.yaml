@@ -925,10 +925,6 @@ components:
           type: string
           example: 1234
           maxLength: 32
-        courthouse:
-          type: string
-          example: Swansea
-          maxLength: 2000
         courthouse_ids:
           type: array
           items:

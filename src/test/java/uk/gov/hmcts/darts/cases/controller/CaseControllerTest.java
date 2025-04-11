@@ -21,7 +21,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +42,6 @@ class CaseControllerTest {
     void casesSearchPost_whenProvidedWithStandardData_dataShouldBeMapepdCorrectly() {
         AdvancedSearchRequest advancedSearchRequest = new AdvancedSearchRequest();
         advancedSearchRequest.setCaseNumber(" caseNumber ");
-        advancedSearchRequest.setCourthouse(" courthouse ");
         advancedSearchRequest.setCourtroom(" courtroom ");
         advancedSearchRequest.setJudgeName(" judgeName ");
         advancedSearchRequest.setDefendantName(" defendantName ");
@@ -51,7 +49,6 @@ class CaseControllerTest {
         advancedSearchRequest.dateTo(LocalDate.now().plusDays(1));
         advancedSearchRequest.setEventTextContains(" eventTextContains ");
 
-        doNothing().when(caseController).validateUppercase(any(), any());
         try (MockedStatic<RequestValidator> requestValidatorMock = Mockito.mockStatic(RequestValidator.class)) {
 
             List<AdvancedSearchResult> expected = List.of(mock(AdvancedSearchResult.class), mock(AdvancedSearchResult.class));
@@ -64,7 +61,6 @@ class CaseControllerTest {
             GetCasesSearchRequest request = requestArgumentCaptor.getValue();
 
             assertThat(request.getCaseNumber()).isEqualTo(" caseNumber ");
-            assertThat(request.getCourthouse()).isEqualTo("courthouse");
             assertThat(request.getCourtroom()).isEqualTo("courtroom");
             assertThat(request.getJudgeName()).isEqualTo("judgeName");
             assertThat(request.getDefendantName()).isEqualTo("defendantName");
@@ -73,7 +69,6 @@ class CaseControllerTest {
             assertThat(request.getEventTextContains()).isEqualTo("eventTextContains");
 
             requestValidatorMock.verify(() -> RequestValidator.validate(request));
-            verify(caseController).validateUppercase(" courthouse ", " courtroom ");
         }
     }
 
@@ -81,7 +76,6 @@ class CaseControllerTest {
     void casesSearchPost_whenProvidedWithDataThatHasNulls_dataShouldBeMapepdCorrectly() {
         AdvancedSearchRequest advancedSearchRequest = new AdvancedSearchRequest();
         advancedSearchRequest.setCaseNumber(null);
-        advancedSearchRequest.setCourthouse(null);
         advancedSearchRequest.setCourtroom(null);
         advancedSearchRequest.setJudgeName(null);
         advancedSearchRequest.setDefendantName(null);
@@ -89,7 +83,6 @@ class CaseControllerTest {
         advancedSearchRequest.dateTo(null);
         advancedSearchRequest.setEventTextContains(null);
 
-        doNothing().when(caseController).validateUppercase(any(), any());
         try (MockedStatic<RequestValidator> requestValidatorMock = Mockito.mockStatic(RequestValidator.class)) {
 
             List<AdvancedSearchResult> expected = List.of(mock(AdvancedSearchResult.class), mock(AdvancedSearchResult.class));
@@ -102,7 +95,6 @@ class CaseControllerTest {
             GetCasesSearchRequest request = requestArgumentCaptor.getValue();
 
             assertThat(request.getCaseNumber()).isNull();
-            assertThat(request.getCourthouse()).isNull();
             assertThat(request.getCourtroom()).isNull();
             assertThat(request.getJudgeName()).isNull();
             assertThat(request.getDefendantName()).isNull();
@@ -111,7 +103,6 @@ class CaseControllerTest {
             assertThat(request.getEventTextContains()).isNull();
 
             requestValidatorMock.verify(() -> RequestValidator.validate(request));
-            verify(caseController).validateUppercase(null, null);
         }
     }
 }

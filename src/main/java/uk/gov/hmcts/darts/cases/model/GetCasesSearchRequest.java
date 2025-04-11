@@ -15,7 +15,6 @@ import java.util.List;
 public class GetCasesSearchRequest {
 
     String caseNumber;
-    String courthouse;
     List<Integer> courthouseIds;
     String courtroom;
     String judgeName;

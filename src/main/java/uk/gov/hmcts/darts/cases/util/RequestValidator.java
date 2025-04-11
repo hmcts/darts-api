@@ -48,7 +48,7 @@ public class RequestValidator {
         totalPoints += specificDateProvided ? 1 : 0;
 
         //Do this at the end to ensure getPoints CRITERIA_TOO_BROAD gets chucked first
-        boolean courthouseProvided = getPoints(request.getCourthouse()) != 0 || CollectionUtils.isNotEmpty(request.getCourthouseIds());
+        boolean courthouseProvided = CollectionUtils.isNotEmpty(request.getCourthouseIds());
         boolean anyDateProvided = request.getDateFrom() != null || request.getDateTo() != null;
         totalPoints += anyDateProvided ? 1 : 0;
         totalPoints += courthouseProvided ? 1 : 0;
@@ -87,7 +87,6 @@ public class RequestValidator {
     private static void checkNoCriteriaProvided(GetCasesSearchRequest request) {
         if (BooleanUtils.and(new boolean[]{
             StringUtils.isBlank(request.getCaseNumber()),
-            StringUtils.isBlank(request.getCourthouse()),
             CollectionUtils.isEmpty(request.getCourthouseIds()),
             StringUtils.isBlank(request.getCourtroom()),
             StringUtils.isBlank(request.getJudgeName()),

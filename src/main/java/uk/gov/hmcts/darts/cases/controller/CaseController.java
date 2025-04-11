@@ -117,10 +117,8 @@ public class CaseController implements CasesApi {
     public ResponseEntity<List<AdvancedSearchResult>> casesSearchPost(
         AdvancedSearchRequest advancedSearchRequest
     ) {
-        validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom());
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber(advancedSearchRequest.getCaseNumber())
-            .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
             .courthouseIds(advancedSearchRequest.getCourthouseIds())
             .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
             .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
