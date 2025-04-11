@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.service;
 
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -13,4 +14,6 @@ public interface HearingCommonService {
 
     HearingEntity retrieveOrCreateHearingWithMedia(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                                    UserAccountEntity userAccount, MediaEntity mediaEntity);
+
+    boolean linkAudioToHearings(CourtCaseEntity courtCaseEntity, MediaEntity mediaEntity);
 }

@@ -10,4 +10,6 @@ public interface AudioUploadService {
     void deleteUploadedAudio(String guid);
 
     void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity mediaEntity);
+
+    void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity);
 }
