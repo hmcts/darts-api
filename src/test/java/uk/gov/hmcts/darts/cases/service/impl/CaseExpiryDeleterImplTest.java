@@ -49,7 +49,8 @@ class CaseExpiryDeleterImplTest {
             dataAnonymisationService,
             hearingsService,
             caseRepository,
-            userIdentity
+            userIdentity,
+            config
         );
     }
 
@@ -65,7 +66,7 @@ class CaseExpiryDeleterImplTest {
         when(caseRepository.findCaseIdsToBeAnonymised(any(), any()))
             .thenReturn(List.of(1, 2, 3));
 
-        caseExpiryDeleter.delete(config, 5);
+        caseExpiryDeleter.delete(5);
 
         verify(currentTimeHelper, times(1)).currentOffsetDateTime();
 

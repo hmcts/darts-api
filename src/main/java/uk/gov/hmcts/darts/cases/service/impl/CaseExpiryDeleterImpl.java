@@ -26,10 +26,10 @@ public class CaseExpiryDeleterImpl implements CaseExpiryDeleter {
     private final HearingsService hearingsService;
     private final CaseRepository caseRepository;
     private final UserIdentity userAccountService;
-
+    private final CaseExpiryDeletionAutomatedTaskConfig config;
 
     @Transactional
-    public void delete(CaseExpiryDeletionAutomatedTaskConfig config, Integer batchSize) {
+    public void delete(Integer batchSize) {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
             .minus(config.getBufferDuration());

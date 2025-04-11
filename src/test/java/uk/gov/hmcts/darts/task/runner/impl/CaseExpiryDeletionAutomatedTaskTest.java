@@ -62,7 +62,8 @@ class CaseExpiryDeletionAutomatedTaskTest {
             dataAnonymisationService,
             hearingsService,
             caseRepository,
-            userIdentity
+            userIdentity,
+            config
         );
         caseExpiryDeletionAutomatedTask = spy(new CaseExpiryDeletionAutomatedTask(
             automatedTaskRepository,
