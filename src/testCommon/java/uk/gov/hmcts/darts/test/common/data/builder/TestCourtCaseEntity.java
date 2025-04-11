@@ -20,6 +20,8 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
@@ -46,7 +48,7 @@ public class TestCourtCaseEntity extends CourtCaseEntity implements DbInsertable
         OffsetDateTime deletedTimestamp,
         List<HearingEntity> hearings,
         List<CaseRetentionEntity> caseRetentionEntities,
-        List<JudgeEntity> judges,
+        Collection<JudgeEntity> judges,
         List<MediaLinkedCaseEntity> mediaLinkedCaseList,
         Boolean dataAnonymised,
         Integer dataAnonymisedBy,
@@ -80,7 +82,7 @@ public class TestCourtCaseEntity extends CourtCaseEntity implements DbInsertable
         setDeletedTimestamp(deletedTimestamp);
         setHearings(hearings != null ? hearings : new ArrayList<>());
         setCaseRetentionEntities(caseRetentionEntities != null ? caseRetentionEntities : new ArrayList<>());
-        setJudges(judges != null ? judges : new ArrayList<>());
+        setJudges(judges != null ? new HashSet<>(judges) : new HashSet<>());
         setMediaLinkedCaseList(mediaLinkedCaseList != null ? mediaLinkedCaseList : new ArrayList<>());
         setDataAnonymised(dataAnonymised);
         setDataAnonymisedBy(dataAnonymisedBy);

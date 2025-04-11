@@ -5,7 +5,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationEntity;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;

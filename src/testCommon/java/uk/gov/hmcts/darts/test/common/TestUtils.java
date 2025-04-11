@@ -230,4 +230,11 @@ public final class TestUtils {
             return true;
         }
     }
+
+    public static <T> T getFirst(Collection<T> data) {
+        if (data == null || data.isEmpty()) {
+            return null;
+        }
+        return data.iterator().next();
+    }
 }

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         LocalDate hearingDate,
         LocalTime scheduledStartTime,
         Boolean hearingIsActual,
-        List<JudgeEntity> judges,
+        Collection<JudgeEntity> judges,
         List<MediaEntity> mediaList,
         List<TranscriptionEntity> transcriptions,
         List<MediaRequestEntity> mediaRequests,
@@ -53,7 +54,7 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         setHearingDate(hearingDate);
         setScheduledStartTime(scheduledStartTime);
         setHearingIsActual(hearingIsActual);
-        setJudges(judges != null ? judges : new ArrayList<>());
+        setJudges(judges != null ? new HashSet<>(judges) : new HashSet<>());
         setMediaList(mediaList != null ? mediaList : new ArrayList<>());
         setTranscriptions(transcriptions != null ? transcriptions : new ArrayList<>());
         setMediaRequests(mediaRequests != null ? mediaRequests : new ArrayList<>());

@@ -28,7 +28,9 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = CourtCaseEntity.TABLE_NAME)
@@ -125,7 +127,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @JoinTable(name = "case_judge_ae",
         joinColumns = {@JoinColumn(name = "cas_id")},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
-    private List<JudgeEntity> judges = new ArrayList<>();
+    private Set<JudgeEntity> judges = new HashSet<>();
 
     @OneToMany(mappedBy = MediaLinkedCaseEntity_.COURT_CASE)
     private List<MediaLinkedCaseEntity> mediaLinkedCaseList = new ArrayList<>();

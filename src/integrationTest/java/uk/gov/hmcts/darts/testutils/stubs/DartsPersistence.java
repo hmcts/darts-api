@@ -776,8 +776,8 @@ public class DartsPersistence {
         return mediaLinkedCaseEntityArrayList;
     }
 
-    private List<JudgeEntity> saveJudgeList(List<JudgeEntity> judges) {
-        List<JudgeEntity> judgeEntityListReturn = new ArrayList<>();
+    private Set<JudgeEntity> saveJudgeList(Collection<JudgeEntity> judges) {
+        Set<JudgeEntity> judgeEntityListReturn = new HashSet<>();
 
         judges.forEach(judge -> judgeEntityListReturn.add(save(judge)));
 

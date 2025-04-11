@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -67,7 +68,7 @@ class AdminHearingMapperTest {
         hearingEntity.setCourtCase(courtCaseEntity);
         CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
         hearingEntity.setCourtroom(courtroomEntity);
-        hearingEntity.setJudges(List.of(
+        hearingEntity.setJudges(Set.of(
             craeteJudges("judges1"),
             craeteJudges("judges2"),
             craeteJudges("judges3")
@@ -89,7 +90,7 @@ class AdminHearingMapperTest {
         assertThat(hearingsResponse.getHearingIsActual()).isTrue();
         assertThat(hearingsResponse.getCase()).isEqualTo(hearingsResponseCase);
         assertThat(hearingsResponse.getCourtroom()).isEqualTo(hearingsResponseCourtroom);
-        assertThat(hearingsResponse.getJudges()).hasSize(3).containsExactly("judges1", "judges2", "judges3");
+        assertThat(hearingsResponse.getJudges()).hasSize(3).containsExactlyInAnyOrder("judges1", "judges2", "judges3");
         assertThat(hearingsResponse.getCreatedAt()).isEqualTo(cratedDate);
         assertThat(hearingsResponse.getCreatedBy()).isEqualTo(3);
         assertThat(hearingsResponse.getLastModifiedAt()).isEqualTo(updatedDate);
@@ -124,7 +125,7 @@ class AdminHearingMapperTest {
             craeteDefenders("efenders2"),
             craeteDefenders("efenders3")
         ));
-        courtCaseEntity.setJudges(List.of(
+        courtCaseEntity.setJudges(Set.of(
             craeteJudges("judges1"),
             craeteJudges("judges2"),
             craeteJudges("judges3")
@@ -141,7 +142,7 @@ class AdminHearingMapperTest {
         assertThat(hearingsResponseCase.getDefendants()).hasSize(3).containsExactly("defendant1", "defendant2", "defendant3");
         assertThat(hearingsResponseCase.getProsecutors()).hasSize(3).containsExactly("prosecutors1", "prosecutors2", "prosecutors3");
         assertThat(hearingsResponseCase.getDefenders()).hasSize(3).containsExactly("efenders1", "efenders2", "efenders3");
-        assertThat(hearingsResponseCase.getJudges()).hasSize(3).containsExactly("judges1", "judges2", "judges3");
+        assertThat(hearingsResponseCase.getJudges()).hasSize(3).containsExactlyInAnyOrder("judges1", "judges2", "judges3");
     }
 
     @Test

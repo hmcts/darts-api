@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +62,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @JoinTable(name = "hearing_judge_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
-    private List<JudgeEntity> judges = new ArrayList<>();
+    private Set<JudgeEntity> judges = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "hearing_media_ae",
@@ -111,7 +112,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
         }
     }
 
-    public void addJudges(List<JudgeEntity> judges) {
+    public void addJudges(Collection<JudgeEntity> judges) {
         for (JudgeEntity judge : judges) {
             addJudge(judge, false);
         }
