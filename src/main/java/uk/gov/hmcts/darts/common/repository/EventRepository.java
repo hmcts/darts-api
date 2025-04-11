@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.common.repository;
 
 import jakarta.persistence.Column;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -37,6 +39,17 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
           ORDER BY he.hearingDate DESC, ee.timestamp DESC
         """)
     List<EventEntity> findAllByCaseId(Integer caseId);
+
+
+    @Query("""
+           SELECT ee
+           FROM EventEntity ee
+           JOIN ee.hearingEntities he
+           LEFT JOIN ee.eventType et        
+           WHERE he.courtCase.id = :caseId
+        """)
+    Page<EventEntity> findAllByCaseIdPaginated(Integer caseId, Pageable pageable);
+
 
     @Query("""
             SELECT EXISTS (
