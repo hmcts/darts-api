@@ -53,7 +53,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -117,7 +117,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -273,7 +273,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -326,7 +326,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -485,7 +485,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
@@ -530,7 +530,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '500':
@@ -1029,10 +1029,11 @@ components:
 
     MediaHideRequest:
       type: object
+      required:
+        - is_hidden
       properties:
         is_hidden:
           type: boolean
-          default: true
         admin_action:
           $ref: '#/components/schemas/AdminActionRequest'
 
