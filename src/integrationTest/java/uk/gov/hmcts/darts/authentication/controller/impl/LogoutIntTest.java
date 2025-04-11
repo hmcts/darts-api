@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
-import wiremock.org.eclipse.jetty.util.UrlEncoded;
 
 import java.net.URLEncoder;
 

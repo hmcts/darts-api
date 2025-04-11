@@ -15,8 +15,8 @@ import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
-import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +46,8 @@ class GetHearingResponseMapperTest {
         assertEquals(response.getHearingDate(), LocalDate.of(2023, 6, 20));
         assertEquals(response.getCaseNumber(), "TestCase");
         assertEquals(response.getCaseId(), 101);
-        assertEquals(response.getJudges(), List.of("Judge_1", "Judge_2"));
+        assertThat(response.getJudges())
+            .containsExactlyInAnyOrder("Judge_1", "Judge_2");
         assertEquals(response.getTranscriptionCount(), 1);
         assertEquals(0, response.getCaseReportingRestrictions().size());
     }

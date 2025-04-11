@@ -81,6 +81,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
         }
         hearings.add(hearingEntity);
     }
+
     /**
      * This method was added to simplify the switch from List to Set on HearingEntity in which existing code uses .getFirst()
      * This switch was needed to prevent data integirty issues when inserting/deleting values.
