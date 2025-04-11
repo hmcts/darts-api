@@ -53,13 +53,11 @@ class CaseExpiryDeletionAutomatedTaskTest {
     @Mock
     private HearingsService hearingsService;
 
-    private CaseExpiryDeleter caseExpiryDeleter;
-    
     private CaseExpiryDeletionAutomatedTask caseExpiryDeletionAutomatedTask;
 
     @BeforeEach
     void setUp() {
-        caseExpiryDeleter = new CaseExpiryDeleterImpl(
+        CaseExpiryDeleter caseExpiryDeleter = new CaseExpiryDeleterImpl(
             currentTimeHelper,
             dataAnonymisationService,
             hearingsService,
