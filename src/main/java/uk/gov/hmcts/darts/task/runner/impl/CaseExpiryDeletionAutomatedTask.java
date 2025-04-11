@@ -38,7 +38,7 @@ public class CaseExpiryDeletionAutomatedTask
 
     @Override
     public void runTask() {
-        caseExpiryDeleter.delete(getConfig(), getAutomatedTaskBatchSize());
+        caseExpiryDeleter.delete(getAutomatedTaskBatchSize());
     }
 
 }
