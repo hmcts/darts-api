@@ -113,8 +113,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                         if (!TRUE.equals(automatedTask.getTaskEnabled())) {
                             log.info("Task: {} is inactive but has been run manually", getTaskName());
                         }
-                        logApi.taskStarted(executionId.get(), this.getTaskName());
-                        log.info("Task: {} running with batch size: {}", getTaskName(), getAutomatedTaskBatchSize());
+                        logApi.taskStarted(executionId.get(), this.getTaskName(), getAutomatedTaskBatchSize());
                         lockService.getLockingTaskExecutor().executeWithLock(createLockableTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(SKIPPED);
