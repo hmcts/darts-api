@@ -4,6 +4,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
@@ -28,9 +29,9 @@ public interface MediaRequestService {
 
     MediaRequestEntity updateAudioRequestStatus(MediaRequestEntity mediaRequestEntity, MediaRequestStatus mediaRequestStatus);
 
-    boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails);
+    boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType);
 
-    MediaRequestEntity saveAudioRequest(AudioRequestDetails audioRequestDetails);
+    MediaRequestEntity saveAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType);
 
     void scheduleMediaRequestPendingNotification(MediaRequestEntity mediaRequest);
 
@@ -58,4 +59,5 @@ public interface MediaRequestService {
 
     MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request);
 
+    MediaRequestEntity addAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType);
 }

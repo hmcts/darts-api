@@ -204,13 +204,12 @@ class MediaRequestServiceImplTest {
         requestDetails.setRequestor(TEST_REQUESTER);
         requestDetails.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
-        requestDetails.setRequestType(DOWNLOAD);
 
         when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockMediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         doNothing().when(auditApi).record(any(), any(), any(CourtCaseEntity.class));
-        var request = mediaRequestService.saveAudioRequest(requestDetails);
+        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD);
 
         assertEquals(request.getId(), mockMediaRequestEntity.getId());
         verify(mockHearingService).getHearingByIdWithValidation(hearingId);
@@ -230,13 +229,12 @@ class MediaRequestServiceImplTest {
         requestDetails.setRequestor(TEST_REQUESTER);
         requestDetails.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
-        requestDetails.setRequestType(DOWNLOAD);
 
         when(mockHearingService.getHearingByIdWithValidation(hearingId))
             .thenThrow(new DartsApiException(HearingApiError.HEARING_NOT_FOUND));
 
         DartsApiException exception = assertThrows(DartsApiException.class,
-                                                   () -> mediaRequestService.saveAudioRequest(requestDetails));
+                                                   () -> mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD));
 
         assertEquals(HearingApiError.HEARING_NOT_FOUND, exception.getError());
         verify(mockMediaRequestRepository, never()).getReferenceById(any());
@@ -255,7 +253,6 @@ class MediaRequestServiceImplTest {
         requestDetails.setRequestor(TEST_REQUESTER);
         requestDetails.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
-        requestDetails.setRequestType(DOWNLOAD);
 
         when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
@@ -264,11 +261,11 @@ class MediaRequestServiceImplTest {
             mockUserAccountEntity,
             requestDetails.getStartTime(),
             requestDetails.getEndTime(),
-            requestDetails.getRequestType(),
+            DOWNLOAD,
             List.of(OPEN, PROCESSING)
         )).thenReturn(Optional.empty());
 
-        boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
+        boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails, DOWNLOAD);
 
         assertFalse(isDuplicateRequest);
     }
@@ -284,7 +281,6 @@ class MediaRequestServiceImplTest {
         requestDetails.setRequestor(TEST_REQUESTER);
         requestDetails.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
-        requestDetails.setRequestType(DOWNLOAD);
 
         when(mockHearingService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearingEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
@@ -293,11 +289,11 @@ class MediaRequestServiceImplTest {
             mockUserAccountEntity,
             requestDetails.getStartTime(),
             requestDetails.getEndTime(),
-            requestDetails.getRequestType(),
+            DOWNLOAD,
             List.of(OPEN, PROCESSING)
         )).thenReturn(Optional.of(mockMediaRequestEntity));
 
-        boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
+        boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails, DOWNLOAD);
 
         assertTrue(isDuplicateRequest);
     }

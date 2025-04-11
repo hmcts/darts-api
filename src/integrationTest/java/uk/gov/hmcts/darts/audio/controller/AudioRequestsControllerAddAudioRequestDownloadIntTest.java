@@ -197,7 +197,6 @@ class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationB
         when(mockUserIdentity.getUserAccount()).thenReturn(requestor);
 
         var audioRequestDetails = new AudioRequestDetails();
-        audioRequestDetails.setRequestType(audioRequestEntity.getRequestType());
         audioRequestDetails.setHearingId(audioRequestEntity.getHearing().getId());
         audioRequestDetails.setStartTime(audioRequestEntity.getStartTime());
         audioRequestDetails.setEndTime(audioRequestEntity.getEndTime());
@@ -216,7 +215,6 @@ class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationB
     private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity) {
         var audioRequestDetails = new AudioRequestDetails();
 
-        audioRequestDetails.setRequestType(AUDIO_REQUEST_TYPE_DOWNLOAD);
         audioRequestDetails.setHearingId(hearingEntity.getId());
         audioRequestDetails.setStartTime(START_TIME);
         audioRequestDetails.setEndTime(END_TIME);
