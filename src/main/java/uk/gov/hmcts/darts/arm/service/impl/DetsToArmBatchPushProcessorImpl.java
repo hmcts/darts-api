@@ -73,7 +73,8 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                                                                       EodHelper.armLocation(),
                                                                       taskBatchSize);
 
-        log.info("Found {} DETS pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
+        log.info("Found {} DETS pending entities to process from source '{}' out of batch size {}",
+                 eodsForTransfer.size(), eodSourceLocation.getDescription(), taskBatchSize);
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
             List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer,

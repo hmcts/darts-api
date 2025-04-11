@@ -78,6 +78,8 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
             log.info("{}: Batch Cleanup ARM Response Files - 0 rows returned, so stopping.", loggingPrefix);
             return;
         }
+        log.info("{}: Batch Cleanup ARM Response Files - {} manifest filenames found to process out of batch size {}",
+                 loggingPrefix, manifestFilenames.size(), batchsize);
         OffsetDateTime dateTimeForDeletion = getDateTimeForDeletion();
         List<ObjectRecordStatusEntity> statusToSearch = getStatusToSearch();
         if (CollectionUtils.isNotEmpty(manifestFilenames)) {

@@ -123,6 +123,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     }
 
     void deleteTranscriptionDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
+        log.info("Deleting transcription documents with retention date older than {} limited to batch size {}", maxRetentionDate, limit.max());
         transactionTemplate.executeWithoutResult(status -> deleteExternalObjectDirectoryEntity(
                                                      userAccount,
                                                      transcriptionDocumentRepository,
@@ -135,6 +136,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
 
 
     void deleteMediaEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
+        log.info("Deleting media with retention date older than {} limited to batch size {}", maxRetentionDate, limit.max());
         transactionTemplate.executeWithoutResult(status -> deleteExternalObjectDirectoryEntity(
                                                      userAccount,
                                                      mediaRepository,
@@ -146,6 +148,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     }
 
     void deleteAnnotationDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
+        log.info("Deleting annotation documents with retention date older than {} limited to batch size {}", maxRetentionDate, limit.max());
         transactionTemplate.executeWithoutResult(status -> deleteExternalObjectDirectoryEntity(
                                                      userAccount,
                                                      annotationDocumentRepository,
@@ -157,6 +160,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     }
 
     void deleteCaseDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
+        log.info("Deleting case documents with retention date older than {} limited to batch size {}", maxRetentionDate, limit.max());
         transactionTemplate.executeWithoutResult(status -> deleteExternalObjectDirectoryEntity(
                                                      userAccount,
                                                      caseDocumentRepository,

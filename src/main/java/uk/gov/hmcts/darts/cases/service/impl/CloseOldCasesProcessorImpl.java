@@ -57,7 +57,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         List<Integer> courtCaseEntityIdList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(years),
                                                                                   Limit.of(batchSize));
         int totalCasesToClose = courtCaseEntityIdList.size();
-        log.info("Found {} cases to close.", totalCasesToClose);
+        log.info("Found {} cases to close out of a batch size {}", totalCasesToClose, batchSize);
 
         UserAccountEntity userAccount = authorisationApi.getCurrentUser();
 

@@ -43,7 +43,7 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
             if (isNull(transcriptionsToBeClosed) || transcriptionsToBeClosed.isEmpty()) {
                 log.debug("No transcriptions to be closed off");
             } else {
-                log.info("Number of transcriptions to be closed off: {}", transcriptionsToBeClosed.size());
+                log.info("Number of transcriptions to be closed off: {} out of a batch size {}", transcriptionsToBeClosed.size(), batchSize);
                 for (Integer transcriptionToBeClosed : transcriptionsToBeClosed) {
                     transcriptionService.closeTranscription(transcriptionToBeClosed, AUTOMATICALLY_CLOSED_TRANSCRIPTION);
                 }
