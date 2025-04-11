@@ -5,7 +5,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationEntity;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
@@ -40,7 +40,7 @@ public final class AnnotationTestData implements Persistable<TestAnnotationEntit
             .createdById(0)
             .createdTimestamp(OffsetDateTime.now())
             .lastModifiedDateTime(OffsetDateTime.now())
-            .hearingList(new ArrayList<>());
+            .hearings(new HashSet<>());
         return retrieve;
     }
 }

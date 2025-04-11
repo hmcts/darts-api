@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.hearings.model.Annotation;
 import uk.gov.hmcts.darts.hearings.model.AnnotationDocument;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,14 +28,14 @@ public class GetAnnotationsResponseMapper {
         annotation.setAnnotationId(annotationEntity.getId());
         annotation.setAnnotationTs(annotationEntity.getTimestamp());
         annotation.setAnnotationText(annotationEntity.getText());
-        HearingEntity hearingEntity = findHearingInList(annotationEntity.getHearingList(), hearingId);
+        HearingEntity hearingEntity = findHearingInCollection(annotationEntity.getHearings(), hearingId);
         annotation.setHearingId(hearingEntity.getId());
         annotation.setHearingDate(hearingEntity.getHearingDate());
         annotation.setAnnotationDocuments(mapToAnnotationDocuments(annotationEntity.getAnnotationDocuments()));
         return annotation;
     }
 
-    private HearingEntity findHearingInList(List<HearingEntity> hearingEntities, Integer hearingId) {
+    private HearingEntity findHearingInCollection(Collection<HearingEntity> hearingEntities, Integer hearingId) {
         return hearingEntities
             .stream()
             .filter(hearing -> hearing.getId().equals(hearingId))

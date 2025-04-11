@@ -8,8 +8,10 @@ import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
 import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
@@ -139,14 +141,15 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getDefences().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getLastModifiedById())
         );
 
+        JudgeEntity judge = TestUtils.getFirst(cc.getJudges());
         assertAll(
             "Grouped assertions for Case Document judges",
-            () -> assertThat(doc.getJudges().getFirst().getId()).isNotNull().isEqualTo(cc.getJudges().getFirst().getId()),
-            () -> assertThat(doc.getJudges().getFirst().getName()).isNotNull().isEqualTo(cc.getJudges().getFirst().getName()),
-            () -> assertThat(doc.getJudges().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(cc.getJudges().getFirst().getCreatedDateTime()),
-            () -> assertThat(doc.getJudges().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getJudges().getFirst().getLastModifiedDateTime()),
-            () -> assertThat(doc.getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getJudges().getFirst().getCreatedById()),
-            () -> assertThat(doc.getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getJudges().getFirst().getLastModifiedById())
+            () -> assertThat(doc.getJudges().getFirst().getId()).isNotNull().isEqualTo(judge.getId()),
+            () -> assertThat(doc.getJudges().getFirst().getName()).isNotNull().isEqualTo(judge.getName()),
+            () -> assertThat(doc.getJudges().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(judge.getCreatedDateTime()),
+            () -> assertThat(doc.getJudges().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(judge.getLastModifiedDateTime()),
+            () -> assertThat(doc.getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(judge.getCreatedById()),
+            () -> assertThat(doc.getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(judge.getLastModifiedById())
         );
 
         assertAll(
@@ -253,6 +256,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getCaseRetentionEntities().getFirst().getCaseManagementRetention().getEventEntity().getEventType().isReportingRestriction())
         );
 
+        JudgeEntity ccFirstHearingFirstJudge = TestUtils.getFirst(cc.getHearings().getFirst().getJudges());
         assertAll(
             "Grouped assertions for Case Document hearings",
             () -> assertThat(doc.getHearings().getFirst().getId()).isNotNull().isEqualTo(cc.getHearings().getFirst().getId()),
@@ -268,17 +272,17 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getHearings().getFirst().getCourtroom().getCreatedDateTime()),
 
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getId()),
+                ccFirstHearingFirstJudge.getId()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getName()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getName()),
+                ccFirstHearingFirstJudge.getName()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getCreatedDateTime()),
+                ccFirstHearingFirstJudge.getCreatedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getLastModifiedDateTime()),
+                ccFirstHearingFirstJudge.getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getCreatedById()),
+                ccFirstHearingFirstJudge.getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getLastModifiedById())
+                ccFirstHearingFirstJudge.getLastModifiedById())
         );
 
         assertAll(

@@ -173,8 +173,8 @@ public class AnnotationArchiveRecordMapperImpl extends BaseArchiveRecordMapper i
 
     private String getHearingDate(AnnotationDocumentEntity annotationDocument) {
         String hearingDate = null;
-        if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearingList())) {
-            hearingDate = OffsetDateTime.of(annotationDocument.getAnnotation().getHearingList().getFirst().getHearingDate().atTime(0, 0, 0),
+        if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearings())) {
+            hearingDate = OffsetDateTime.of(annotationDocument.getAnnotation().getHearingEntity().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
@@ -182,8 +182,8 @@ public class AnnotationArchiveRecordMapperImpl extends BaseArchiveRecordMapper i
 
     private String getCaseNumbers(AnnotationDocumentEntity annotationDocument) {
         String cases = null;
-        if (nonNull(annotationDocument.getAnnotation().getHearingList())) {
-            List<String> caseNumbers = annotationDocument.getAnnotation().getHearingList()
+        if (nonNull(annotationDocument.getAnnotation().getHearings())) {
+            List<String> caseNumbers = annotationDocument.getAnnotation().getHearings()
                 .stream()
                 .map(HearingEntity::getCourtCase)
                 .map(CourtCaseEntity::getCaseNumber)
@@ -197,16 +197,16 @@ public class AnnotationArchiveRecordMapperImpl extends BaseArchiveRecordMapper i
 
     private static String getCourthouse(AnnotationDocumentEntity annotationDocument) {
         String courthouse = null;
-        if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearingList())) {
-            courthouse = annotationDocument.getAnnotation().getHearingList().getFirst().getCourtCase().getCourthouse().getDisplayName();
+        if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearings())) {
+            courthouse = annotationDocument.getAnnotation().getHearingEntity().getCourtCase().getCourthouse().getDisplayName();
         }
         return courthouse;
     }
 
     private static String getCourtroom(AnnotationDocumentEntity annotationDocument) {
         String courtroom = null;
-        if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearingList())) {
-            courtroom = annotationDocument.getAnnotation().getHearingList().getFirst().getCourtroom().getName();
+        if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearings())) {
+            courtroom = annotationDocument.getAnnotation().getHearingEntity().getCourtroom().getName();
         }
         return courtroom;
     }

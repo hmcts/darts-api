@@ -61,7 +61,7 @@ class HearingEntityToCaseHearingTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/HearingEntityToCaseHearingTest/testWithSingleHearing/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         var transcriptionId = hearings.getFirst().getTranscriptions().getFirst().getId();
         verify(transcriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
@@ -77,7 +77,7 @@ class HearingEntityToCaseHearingTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/HearingEntityToCaseHearingTest/testWithMultipleHearings/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt());
     }
