@@ -73,6 +73,7 @@ public class EventMapper {
         adminGetEventResponseDetail.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
         adminGetEventResponseDetail.setLastModifiedBy(eventEntity.getLastModifiedById());
         adminGetEventResponseDetail.setIsDataAnonymised(eventEntity.isDataAnonymised());
+        adminGetEventResponseDetail.setEventStatus(eventEntity.getEventStatus());
         return adminGetEventResponseDetail;
     }
 
