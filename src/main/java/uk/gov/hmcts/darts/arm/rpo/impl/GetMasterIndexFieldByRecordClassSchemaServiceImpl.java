@@ -42,7 +42,7 @@ public class GetMasterIndexFieldByRecordClassSchemaServiceImpl implements GetMas
                                                                                             Integer executionId,
                                                                                             ArmRpoStateEntity rpoStateEntity,
                                                                                             UserAccountEntity userAccount) {
-        log.debug("getMasterIndexFieldByRecordClassSchema called with executionId: {}, rpo state: {}", executionId, rpoStateEntity.getId());
+        log.info("getMasterIndexFieldByRecordClassSchema called with executionId: {}, rpo state: {}", executionId, rpoStateEntity.getId());
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, rpoStateEntity,
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -63,7 +63,7 @@ public class GetMasterIndexFieldByRecordClassSchemaServiceImpl implements GetMas
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - MasterIndexFieldByRecordClassSchemaResponse: {}", masterIndexFieldByRecordClassSchemaResponse);
+        log.info("ARM RPO Response - MasterIndexFieldByRecordClassSchemaResponse: {}", masterIndexFieldByRecordClassSchemaResponse);
         return processMasterIndexFieldByRecordClassSchemas(userAccount, masterIndexFieldByRecordClassSchemaResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 

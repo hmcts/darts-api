@@ -465,7 +465,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findByStatusAndIngestionDateTsWithPaging_ReturnsResults() throws Exception {
+    void findByStatusAndInputUploadProcessedTsWithPaging_ReturnsResults() throws Exception {
         // Given
         OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
         OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(20);
@@ -494,7 +494,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
 
         // When
-        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(
+        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
             status, startDateTime, endDateTime, pageable
         );
 

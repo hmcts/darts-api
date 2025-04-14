@@ -29,7 +29,7 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
 
     @Override
     public void getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        log.debug("getProfileEntitlements called with executionId: {}", executionId);
+        log.info("getProfileEntitlements called with executionId: {}", executionId);
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
                                                  ArmRpoHelper.getProfileEntitlementsRpoState(),
@@ -47,7 +47,7 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
                                                                  .toString(),
                                                              executionDetail, userAccount);
         }
-        log.debug("ARM RPO Response - ProfileEntitlementResponse: {}", profileEntitlementResponse);
+        log.info("ARM RPO Response - ProfileEntitlementResponse: {}", profileEntitlementResponse);
         processGetProfileEntitlementsResponse(userAccount, profileEntitlementResponse, exceptionMessageBuilder, executionDetail);
     }
 

@@ -35,7 +35,7 @@ public class GetProductionOutputFilesServiceImpl implements GetProductionOutputF
 
     @Override
     public List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        log.debug("getProductionOutputFiles called with executionId: {}", executionId);
+        log.info("getProductionOutputFiles called with executionId: {}", executionId);
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
                                                  ArmRpoHelper.getProductionOutputFilesRpoState(),
@@ -58,7 +58,7 @@ public class GetProductionOutputFilesServiceImpl implements GetProductionOutputF
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(e).toString(),
                                                              executionDetail, userAccount);
         }
-        log.debug("ARM RPO Response - ProductionOutputFilesResponse: {}", productionOutputFilesResponse);
+        log.info("ARM RPO Response - ProductionOutputFilesResponse: {}", productionOutputFilesResponse);
         return processProductionOutputFilesResponse(userAccount, productionOutputFilesResponse, exceptionMessageBuilder, executionDetail);
     }
 

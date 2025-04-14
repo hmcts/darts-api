@@ -643,13 +643,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status 
-            AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
+            AND eod.inputUploadProcessedTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
-    Page<ExternalObjectDirectoryEntity> findByStatusAndIngestionDateTsWithPaging(ObjectRecordStatusEntity status,
-                                                                                 OffsetDateTime rpoCsvStartTime,
-                                                                                 OffsetDateTime rpoCsvEndTime,
-                                                                                 Pageable pageable);
+    Page<ExternalObjectDirectoryEntity> findByStatusAndInputUploadProcessedTsWithPaging(ObjectRecordStatusEntity status,
+                                                                                        OffsetDateTime rpoCsvStartTime,
+                                                                                        OffsetDateTime rpoCsvEndTime,
+                                                                                        Pageable pageable);
 
     @Query("""
         SELECT eod FROM ExternalObjectDirectoryEntity eod
