@@ -16,8 +16,8 @@ import java.util.Collection;
 @Slf4j
 public class ExternalOutboundDataStoreDeleter extends AbstractExternalDataStoreDeleter<TransientObjectDirectoryEntity, TransientObjectDirectoryRepository> {
 
-    private final TransformedMediaRepository transformedMediaRepository;
-    private final DataManagementApi dataManagementApi;
+    protected final TransformedMediaRepository transformedMediaRepository;
+    protected final DataManagementApi dataManagementApi;
 
     public ExternalOutboundDataStoreDeleter(TransientObjectDirectoryRepository repository,
                                             TransformedMediaRepository transformedMediaRepository,

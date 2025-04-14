@@ -6,7 +6,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleterWithBuffer;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -24,7 +24,7 @@ class ExternalDataStoreDeleterAutomatedTaskTest {
     private ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
 
     @Mock
-    private ExternalOutboundDataStoreDeleter outboundDeleter;
+    private ExternalOutboundDataStoreDeleterWithBuffer outboundDeleter;
 
     @Mock
     private LogApi logApi;
