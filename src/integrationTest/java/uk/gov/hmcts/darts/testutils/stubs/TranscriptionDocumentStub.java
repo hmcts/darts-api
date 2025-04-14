@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -69,7 +70,6 @@ public class TranscriptionDocumentStub {
                                                                            boolean associatedWorkflow) {
         return generateTranscriptionEntities(count, hearingCount, caseCount, isManualTranscription, noCourtHouse, associatedWorkflow, false);
     }
-
     /**
      * generates test data. The following will be used for generation:-
      * Unique owner and requested by users for each transcription record
@@ -90,6 +90,33 @@ public class TranscriptionDocumentStub {
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     public List<TranscriptionDocumentEntity> generateTranscriptionEntities(int count,
                                                                            int hearingCount,
+                                                                           boolean isManualTranscription,
+                                                                           boolean noCourtHouse,
+                                                                           boolean associatedWorkflow,
+                                                                           boolean useSameCase) {
+        return generateTranscriptionEntities(count, hearingCount, 1, isManualTranscription, noCourtHouse, associatedWorkflow, useSameCase);
+    }
+
+    /**
+     * generates test data. The following will be used for generation:-
+     * Unique owner and requested by users for each transcription record
+     * Unique court house with unique name for each transcription record
+     * Unique case number with unique case number for each transcription record
+     * Unique hearing date starting with today with an incrementing day for each transcription record
+     * Unique requested date with an incrementing hour for each transcription record
+     *
+     * @param count                 The number of transcription objects that are to be generated
+     * @param hearingCount          The number of hearing against the transcription
+     * @param caseCount             The number of cases against the transcription
+     * @param isManualTranscription The manual transcription flag
+     * @param noCourtHouse          Ensure we do not have a court house against the transcription i.e. use hearing instead
+     * @param associatedWorkflow    Whether a workflow is generated against the transcription
+     * @param useSameCase           Whether to use the same case for all transcription records
+     * @return The list of generated media entities in chronological order
+     */
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    private List<TranscriptionDocumentEntity> generateTranscriptionEntities(int count,
+                                                                           int hearingCount,
                                                                            int caseCount,
                                                                            boolean isManualTranscription,
                                                                            boolean noCourtHouse,
@@ -109,7 +136,7 @@ public class TranscriptionDocumentStub {
 
         List<HearingEntity> hearingEntityList;
         List<CourtCaseEntity> caseEntityList = new ArrayList<>();
-        CourtCaseEntity caseEntity;
+        CourtCaseEntity caseEntity = null;
         for (int transriptionDocumentCount = 0; transriptionDocumentCount < count; transriptionDocumentCount++) {
 
             String username = TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(transriptionDocumentCount));
@@ -124,17 +151,10 @@ public class TranscriptionDocumentStub {
                 TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                     .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)), userAccountRepository.getReferenceById(0));
 
-            if (!useSameCase) {
-                caseEntityList.clear();
-            }
 
-            for (int i = 0; i < caseCount; i++) {
-                if (!useSameCase || caseEntityList.isEmpty()) {
-                    caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(
-                        StringUtils.right(TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(
-                            UUID.randomUUID() + "Case Number" + transriptionDocumentCount + i), 32), courtroomEntity.getCourthouse().getId());
-                    caseEntityList.add(caseEntity);
-                }
+            if (!useSameCase || caseEntity == null) {
+                caseEntityList = createCaseList(caseCount, transriptionDocumentCount, courtroomEntity.getCourthouse());
+                caseEntity = caseEntityList.getLast();
             }
 
             HearingEntity hearingEntity;
@@ -199,6 +219,17 @@ public class TranscriptionDocumentStub {
         }
 
         return retTransformerMediaLst;
+    }
+
+    private List<CourtCaseEntity> createCaseList(int caseCount, int suffix, CourthouseEntity courthouseEntity) {
+        List<CourtCaseEntity> caseEntityList = new ArrayList<>();
+        for (int i = 0; i < caseCount; i++) {
+            CourtCaseEntity caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(
+                StringUtils.right(TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(
+                    UUID.randomUUID() + "Case Number" + suffix + i), 32), courthouseEntity.getId());
+            caseEntityList.add(caseEntity);
+        }
+        return caseEntityList;
     }
 
     /**

@@ -361,7 +361,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
     @Test
     void searchForTranscriptionDocument_shouldExcludeIsCurrentFalse() throws Exception {
         List<TranscriptionDocumentEntity> transcriptionDocumentResults =
-            transcriptionDocumentStub.generateTranscriptionEntities(2, 1, 1, false, true, false, true);
+            transcriptionDocumentStub.generateTranscriptionEntities(2, 1, false, true, false, true);
 
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
