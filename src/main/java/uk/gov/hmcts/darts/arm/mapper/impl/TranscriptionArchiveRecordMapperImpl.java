@@ -300,6 +300,7 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
         return transcriptRquest;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private String getHearingDate(TranscriptionDocumentEntity transcriptionDocument) {
         String hearingDate = null;
         if (nonNull(transcriptionDocument.getTranscription().getHearingDate())) {
@@ -312,6 +313,7 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
         return hearingDate;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private static String getCourtroom(TranscriptionDocumentEntity transcriptionDocument) {
         String courtroom = null;
         if (nonNull(transcriptionDocument.getTranscription().getHearing())
@@ -323,6 +325,7 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
         return courtroom;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private static String getCourthouse(TranscriptionDocumentEntity transcriptionDocument) {
         String courthouse = null;
         if (nonNull(transcriptionDocument.getTranscription().getHearing())

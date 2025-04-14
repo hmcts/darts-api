@@ -24,6 +24,7 @@ public abstract class TranscriptionMapper<T extends TranscriptModel> {
         return response;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private T map(TranscriptionEntity transcriptionEntity) {
         T transcript = createNewTranscription();
         transcript.setTranscriptionId(transcriptionEntity.getId());
