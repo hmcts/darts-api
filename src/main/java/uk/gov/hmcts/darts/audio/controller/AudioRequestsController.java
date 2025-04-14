@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
-import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.List;
 
@@ -58,8 +57,6 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     private final AudioRequestResponseMapper audioRequestResponseMapper;
 
-    private final LogApi logApi;
-
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<AudioNonAccessedResponse> getNonAccessedCount(Integer userId) {
@@ -87,24 +84,9 @@ public class AudioRequestsController implements AudioRequestsApi {
         return ResponseEntity.ok().body(downloadResponseMetadata.getResource());
     }
 
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
-        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
-    public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
-        if (mediaRequestService.isUserDuplicateAudioRequest(audioRequestDetails)) {
-            throw new DartsApiException(AudioRequestsApiError.DUPLICATE_MEDIA_REQUEST);
-        }
-
-        AddAudioResponse addAudioResponse;
-        MediaRequestEntity audioRequest;
-
-        audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
-        addAudioResponse = audioRequestResponseMapper.mapToAddAudioResponse(audioRequest);
-        mediaRequestService.scheduleMediaRequestPendingNotification(audioRequest);
-        logApi.atsProcessingUpdate(audioRequest);
-        return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
+    private ResponseEntity<AddAudioResponse> addAudioRequestCommon(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType) {
+        MediaRequestEntity audioRequest = mediaRequestService.addAudioRequest(audioRequestDetails, audioRequestType);
+        return new ResponseEntity<>(audioRequestResponseMapper.mapToAddAudioResponse(audioRequest), HttpStatus.OK);
     }
 
     @Override
@@ -113,8 +95,7 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<AddAudioResponse> addAudioRequestPlayback(AudioRequestDetails audioRequestDetails) {
-        audioRequestDetails.setRequestType(AudioRequestType.PLAYBACK);
-        return addAudioRequest(audioRequestDetails);
+        return addAudioRequestCommon(audioRequestDetails, AudioRequestType.PLAYBACK);
     }
 
     @Override
@@ -123,8 +104,7 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {TRANSCRIBER},
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<AddAudioResponse> addAudioRequestDownload(AudioRequestDetails audioRequestDetails) {
-        audioRequestDetails.setRequestType(AudioRequestType.DOWNLOAD);
-        return addAudioRequest(audioRequestDetails);
+        return addAudioRequestCommon(audioRequestDetails, AudioRequestType.DOWNLOAD);
     }
 
     @SneakyThrows
