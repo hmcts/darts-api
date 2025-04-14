@@ -43,9 +43,9 @@ class AutomatedTaskLoggerServiceTest {
     void logsTaskStarted() {
         var taskExecutionId = UUID.randomUUID();
 
-        automatedTaskLoggerService.taskStarted(taskExecutionId, "some-started-task");
+        automatedTaskLoggerService.taskStarted(taskExecutionId, "some-started-task", 10);
 
-        assertThat(logCaptor.getInfoLogs()).containsExactly("Task started: run_id=" + taskExecutionId + ", task_name=some-started-task");
+        assertThat(logCaptor.getInfoLogs()).containsExactly("Task started: run_id=" + taskExecutionId + ", task_name=some-started-task, batch_size=10");
     }
 
     @Test

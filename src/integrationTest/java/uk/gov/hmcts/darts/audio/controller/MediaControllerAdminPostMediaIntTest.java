@@ -231,6 +231,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.SUPER_USER);
 
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
+        mediaHideRequest.setIsHidden(true);
 
         mockMvc.perform(post(ENDPOINT_URL.replace(
                 MEDIA_ID_SUBSTITUTION_KEY, Integer.valueOf(-12).toString()))
@@ -316,6 +317,38 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         String content = mvcResult.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
         assertEquals(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND.getType(), problemResponse.getType());
+    }
+
+    @Test
+    void postAdminHideMediaId_usingNullIsHidden_shouldBeRejected() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MediaEntity mediaEntity = mediaStub.createAndSaveMedia();
+        MediaHideRequest mediaHideRequest = new MediaHideRequest();
+        mediaHideRequest.setIsHidden(null);
+
+        // hide the media
+        MvcResult response = mockMvc.perform(post(ENDPOINT_URL.replace(
+                MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
+                                                 .header("Content-Type", "application/json")
+                                                 .content(objectMapper.writeValueAsString(mediaHideRequest)))
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+
+        String expectedResponse = """
+            {
+              "violations": [
+                {
+                  "field": "isHidden",
+                  "message": "must not be null"
+                }
+              ],
+              "type": "https://zalando.github.io/problem/constraint-violation",
+              "status": 400,
+              "title": "Constraint Violation"
+            }""";
+        String actualResponse = response.getResponse().getContentAsString();
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test

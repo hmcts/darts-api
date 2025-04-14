@@ -17,7 +17,7 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.EXTERNAL_DATASTORE_D
 
 @Slf4j
 @Component
-public class ExternalDataStoreDeleterAutomatedTask 
+public class ExternalDataStoreDeleterAutomatedTask
     extends AbstractLockableAutomatedTask<ExternalDataStoreDeleterAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
@@ -47,6 +47,7 @@ public class ExternalDataStoreDeleterAutomatedTask
     @Override
     protected void runTask() {
         Integer batchSize = getAutomatedTaskBatchSize();
+        log.info("Running External Data Store Deleter with batch size {}", batchSize);
         inboundDeleter.delete(batchSize);
         unstructuredDeleter.delete(batchSize);
         outboundDeleter.delete(batchSize);
