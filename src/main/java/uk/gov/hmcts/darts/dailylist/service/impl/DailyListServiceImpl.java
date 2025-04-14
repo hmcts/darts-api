@@ -105,7 +105,7 @@ public class DailyListServiceImpl implements DailyListService {
     public void runHouseKeeping(Integer batchSize) {
         if (housekeepingEnabled) {
             LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
-            log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);
+            log.info("Starting DailyList housekeeping, deleting anything before {} limited to batch size {}", dateToDeleteBefore, batchSize);
             List<DailyListEntity> deletedEntities = dailyListRepository.deleteByStartDateBefore(dateToDeleteBefore, Limit.of(batchSize));
             log.info("Finished DailyList housekeeping. Deleted {} rows.", deletedEntities.size());
         }

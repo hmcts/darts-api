@@ -91,7 +91,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         int maxContinuationBatchSize = armDataManagementConfiguration.getMaxContinuationBatchSize();
 
         try {
-            log.info("About to look for IU files starting with prefix: {}", prefix);
+            log.info("About to look for IU files starting with prefix: {} limited to batch size {}", prefix, batchSize);
             String continuationToken = null;
             // Iterate through the continuation token until no more data is found. First time round continuation token is null
             // which sets up the session and when there are no more results the result from listResponseBlobsUsingMarker will be null

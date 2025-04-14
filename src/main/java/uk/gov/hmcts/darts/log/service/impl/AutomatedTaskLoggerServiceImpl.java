@@ -13,8 +13,8 @@ import java.util.UUID;
 public class AutomatedTaskLoggerServiceImpl implements AutomatedTaskLoggerService {
 
     @Override
-    public void taskStarted(UUID taskExecutionId, String taskName) {
-        log.info("Task started: run_id={}, task_name={}", taskExecutionId, taskName);
+    public void taskStarted(UUID taskExecutionId, String taskName, Integer batchSize) {
+        log.info("Task started: run_id={}, task_name={}, batch_size={}", taskExecutionId, taskName, batchSize);
     }
 
     @Override

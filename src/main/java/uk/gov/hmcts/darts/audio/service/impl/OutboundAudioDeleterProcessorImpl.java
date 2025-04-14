@@ -53,6 +53,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         if (transformedMediaListIds.isEmpty()) {
             log.debug("No transformed media to be marked for deletion");
         } else {
+            log.info("Found {} transformed media to be marked for deletion out of batch size {}", transformedMediaListIds.size(), batchSize);
             Set<MediaRequestEntity> mediaRequests = new HashSet<>();
             for (Integer transformedMediaId : transformedMediaListIds) {
                 MediaRequestEntity mediaRequest = transformedMediaEntityProcessor.process(transformedMediaId, systemUser, deletedValues);
