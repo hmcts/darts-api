@@ -62,7 +62,8 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
         if (recordsMarkedForDeletion.isEmpty()) {
             log.debug("No records found to be marked for deletion");
         } else {
-            log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
+            log.debug("Identified records to be marked for deletion '{}' limited to batch size {}",
+                      StringUtils.join(recordsMarkedForDeletion, ","), batchSize);
             eodHelper.updateStatus(
                 EodHelper.markForDeletionStatus(),
                 userIdentity.getUserAccount(),

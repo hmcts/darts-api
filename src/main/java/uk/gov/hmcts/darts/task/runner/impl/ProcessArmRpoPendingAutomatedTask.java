@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
@@ -22,7 +23,8 @@ import java.time.Duration;
     value = "darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo",
     havingValue = "false"
 )
-public class ProcessArmRpoPendingAutomatedTask 
+@Slf4j
+public class ProcessArmRpoPendingAutomatedTask
     extends AbstractLockableAutomatedTask<ProcessArmRpoPendingAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
@@ -53,12 +55,14 @@ public class ProcessArmRpoPendingAutomatedTask
 
     @Override
     protected void runTask() {
+        Integer batchSize = this.getAutomatedTaskBatchSize();
+        log.info("Processing {} arm rpo pending records", batchSize);
         this.externalObjectDirectoryRepository.updateByStatusEqualsAndDataIngestionTsBefore(
             EodHelper.armRpoPendingStatus(),
             this.currentTimeHelper.currentOffsetDateTime().minus(this.armRpoDuration),
             EodHelper.storedStatus(),
             userIdentity.getUserAccount().getId(),
-            Limit.of(this.getAutomatedTaskBatchSize())
+            Limit.of(batchSize)
         );
     }
 }

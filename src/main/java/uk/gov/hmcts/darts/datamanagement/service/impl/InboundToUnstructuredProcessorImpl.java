@@ -60,6 +60,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         List<Integer> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
                                                                                           getStatus(STORED), getType(UNSTRUCTURED), 3,
                                                                                           Limit.of(batchSize));
+
+        log.info("Found {} records to process from Inbound to Unstructured out of batch size {}", inboundList.size(), batchSize);
         AtomicInteger count = new AtomicInteger(1);
 
         List<Callable<Void>> tasks = inboundList.stream()

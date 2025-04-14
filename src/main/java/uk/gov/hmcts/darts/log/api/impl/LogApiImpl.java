@@ -111,8 +111,8 @@ public class LogApiImpl implements LogApi {
     }
 
     @Override
-    public void taskStarted(UUID taskExecutionId, String taskName) {
-        automatedTaskLoggerService.taskStarted(taskExecutionId, taskName);
+    public void taskStarted(UUID taskExecutionId, String taskName, Integer batchSize) {
+        automatedTaskLoggerService.taskStarted(taskExecutionId, taskName, batchSize);
     }
 
     @Override

@@ -164,8 +164,6 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                     CSVRecord csvRecord = records.iterator().next();
                     counter++;
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
-                    // TODO - This is a temporary log message to help debug the issue with the CSV file
-                    log.info("ARM RPO CSV Client Identifier {}", csvEod);
                     if (StringUtils.isNotBlank(csvEod)) {
                         csvEodList.add(Integer.parseInt(csvEod));
                     }

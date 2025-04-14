@@ -55,7 +55,8 @@ public class InboundTranscriptionAnnotationDeleterProcessorImpl implements Inbou
         if (recordsMarkedForDeletion.isEmpty()) {
             log.info("No records found to be marked for deletion");
         } else {
-            log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
+            log.info("Identified records to be marked for deletion '{}' out of batch size {}",
+                     StringUtils.join(recordsMarkedForDeletion, ","), batchSize);
             UserAccountEntity user = userIdentity.getUserAccount();
             eodHelper.updateStatus(
                 EodHelper.markForDeletionStatus(),
