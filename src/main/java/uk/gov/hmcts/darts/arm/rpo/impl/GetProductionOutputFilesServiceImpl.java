@@ -70,7 +70,8 @@ public class GetProductionOutputFilesServiceImpl implements GetProductionOutputF
         List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles = productionOutputFilesResponse.getProductionExportFiles();
         if (CollectionUtils.isEmpty(productionExportFiles)
             || productionExportFiles.stream().anyMatch(Objects::isNull)) {
-            throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("No production export files were returned").toString(),
+            throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("No production export files were returned for search count ")
+                                                                 .append(executionDetail.getSearchItemCount()).toString(),
                                                              executionDetail, userAccount);
         }
 
