@@ -167,6 +167,8 @@ class EventsControllerTest extends IntegrationBase {
         Assertions.assertEquals(eventEntity.getCreatedById(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getLastModifiedAt());
         Assertions.assertEquals(eventEntity.getLastModifiedById(), responseResult.getLastModifiedBy());
+        Assertions.assertEquals(eventEntity.isDataAnonymised(), responseResult.getIsDataAnonymised());
+        Assertions.assertEquals(eventEntity.getEventStatus(), responseResult.getEventStatus());
 
         assertThat(responseResult.getHearings()).hasSize(1);
         AdminGetEventResponseDetailsHearingsHearingsInner hearingsInner = responseResult.getHearings().getFirst();
