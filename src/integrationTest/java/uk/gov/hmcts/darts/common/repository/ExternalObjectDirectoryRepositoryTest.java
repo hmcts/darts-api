@@ -382,7 +382,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllByStatusAndInputUploadProcessedTsBetweenAndLimit_ReturnsResults() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void findAllByStatusAndInputUploadProcessedTsBetweenAndLimit_ReturnsResults()
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
         OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
         OffsetDateTime pastCurrentDateTime = now.minusHours(30);

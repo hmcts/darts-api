@@ -656,10 +656,11 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         WHERE eod.status = :status
         AND eod.inputUploadProcessedTs BETWEEN :ingestionStartDateTime AND :ingestionEndDateTime
         """)
-    List<ExternalObjectDirectoryEntity> findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(@Param("status") ObjectRecordStatusEntity status,
-                                                                                                @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
-                                                                                                @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
-                                                                                                Limit limit);
+    List<ExternalObjectDirectoryEntity> findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
+        @Param("status") ObjectRecordStatusEntity status,
+        @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
+        @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
+        Limit limit);
 
     @Query("""
         SELECT eod.id FROM ExternalObjectDirectoryEntity eod
