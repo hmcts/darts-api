@@ -151,7 +151,7 @@ public class TranscriptionDocumentStub {
                     .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)), userAccountRepository.getReferenceById(0));
 
 
-            if (!useSameCase || caseEntity == null) {
+            if (caseCount > 0 && (!useSameCase || caseEntity == null)) {
                 caseEntityList = createCaseList(caseCount, transriptionDocumentCount, courtroomEntity.getCourthouse());
                 caseEntity = caseEntityList.getLast();
             }
