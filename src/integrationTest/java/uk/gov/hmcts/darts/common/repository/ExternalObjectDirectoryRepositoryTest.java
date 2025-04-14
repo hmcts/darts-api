@@ -397,18 +397,22 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
                 // within the time range
                 eod.setCreatedDateTime(ingestionStartDateTime);
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
             } else if (eod.getId() % 3 == 0) {
                 // before the time range
                 eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
             } else {
                 // after the time range
                 eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
             }
         });
         dartsPersistence.saveAll(externalObjectDirectoryEntities);
+
+        // Verify test data setup
+        List<ExternalObjectDirectoryEntity> allEntities = externalObjectDirectoryRepository.findAll();
+        assertEquals(20, allEntities.size(), "Test data setup failed: Expected 20 entities in the database");
 
         // when
         ingestionEndDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(24);
@@ -417,12 +421,11 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             Limit.of(20));
 
         // then
-        assertEquals(7, results.size());
+        assertEquals(7, results.size(), "Query returned unexpected number of results");
         results.forEach(eod -> {
-            assertTrue(eod.getDataIngestionTs().isAfter(ingestionStartDateTime));
-            assertTrue(eod.getDataIngestionTs().isBefore(ingestionEndDateTime));
+            assertTrue(eod.getInputUploadProcessedTs().isAfter(ingestionStartDateTime));
+            assertTrue(eod.getInputUploadProcessedTs().isBefore(ingestionEndDateTime));
         });
-
     }
 
     @Test
