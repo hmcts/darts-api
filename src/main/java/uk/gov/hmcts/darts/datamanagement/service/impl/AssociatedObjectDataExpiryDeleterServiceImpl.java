@@ -51,7 +51,7 @@ public class AssociatedObjectDataExpiryDeleterServiceImpl implements AssociatedO
     private final AuditApi auditApi;
 
     @Value("${darts.storage.arm.event-date-adjustment-years}")
-    private Integer eventDateAdjustmentYears;
+    Integer eventDateAdjustmentYears;
 
     public AssociatedObjectDataExpiryDeleterServiceImpl(UserIdentity userIdentity,
                                                         CurrentTimeHelper currentTimeHelper,

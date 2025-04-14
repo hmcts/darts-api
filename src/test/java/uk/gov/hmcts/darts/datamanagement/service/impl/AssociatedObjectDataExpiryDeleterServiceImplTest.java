@@ -104,6 +104,10 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
                 transactionCallback.doInTransaction(null);
                 return null;
             });
+
+        // Set the eventDateAdjustmentYears field
+        associatedObjectDataExpiryDeleterService.eventDateAdjustmentYears = 100;
+
     }
 
     @Test
@@ -141,7 +145,6 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
         verify(userIdentity).getUserAccount();
         verify(currentTimeHelper).currentOffsetDateTime();
     }
-
 
     @Test
     void positiveDeleteTranscriptionDocumentEntity() {
@@ -243,10 +246,6 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
 
         verify(auditApi)
             .record(AuditActivity.AUDIO_EXPIRED, userAccount, "123");
-    }
-
-    private Integer getNextId() {
-        return idAddition.getAndIncrement();
     }
 
     @Test
@@ -471,17 +470,6 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
         verifyNoInteractions(inboundDeleter, unstructuredDeleter, auditApi);
     }
 
-
-    private ExternalObjectDirectoryEntity createEodWithExternalLocationType(ExternalLocationTypeEnum externalLocationTypeEnum) {
-        ExternalLocationTypeEntity et = new ExternalLocationTypeEntity();
-        et.setId(externalLocationTypeEnum.getId());
-        ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
-        eod.setExternalLocationType(et);
-        eod.setEventDateTs(OffsetDateTime.now());
-        return eod;
-    }
-
-
     @Test
     void positiveShouldDeleteFilterTrue() {
         ExternalObjectDirectoryEntity inboundEod = createEodWithExternalLocationType(ExternalLocationTypeEnum.INBOUND);
@@ -526,7 +514,6 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
             .isFalse();
     }
 
-
     @Test
     void negativeShouldDeleteFilterFalseEventDateTsToRetainMissmatchTooOld() {
         ExternalObjectDirectoryEntity inboundEod = createEodWithExternalLocationType(ExternalLocationTypeEnum.INBOUND);
@@ -541,7 +528,6 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
             .isFalse();
     }
 
-
     @Test
     void negativeShouldDeleteFilterFalseEventDateTsToRetainMissmatchTooYoung() {
         ExternalObjectDirectoryEntity inboundEod = createEodWithExternalLocationType(ExternalLocationTypeEnum.INBOUND);
@@ -554,5 +540,18 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
 
         assertThat(associatedObjectDataExpiryDeleterService.shouldDeleteFilter(transcriptionDocumentEntity))
             .isFalse();
+    }
+
+    private ExternalObjectDirectoryEntity createEodWithExternalLocationType(ExternalLocationTypeEnum externalLocationTypeEnum) {
+        ExternalLocationTypeEntity et = new ExternalLocationTypeEntity();
+        et.setId(externalLocationTypeEnum.getId());
+        ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
+        eod.setExternalLocationType(et);
+        eod.setEventDateTs(OffsetDateTime.now());
+        return eod;
+    }
+
+    private Integer getNextId() {
+        return idAddition.getAndIncrement();
     }
 }

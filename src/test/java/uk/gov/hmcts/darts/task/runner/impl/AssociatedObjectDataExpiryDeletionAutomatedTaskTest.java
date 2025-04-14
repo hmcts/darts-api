@@ -27,7 +27,6 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -72,9 +71,6 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
     private TransactionTemplate transactionTemplate;
 
     private AssociatedObjectDataExpiryDeleterServiceImpl associatedObjectDataExpiryDeleter;
-
-    private final AtomicInteger idAddition = new AtomicInteger(123);
-
 
     private AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
 
