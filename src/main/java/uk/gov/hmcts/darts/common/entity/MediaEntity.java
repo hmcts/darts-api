@@ -24,11 +24,14 @@ import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Entity
@@ -119,14 +122,14 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @Column(name = "media_status")//leaving nullable for now
     private String mediaStatus;
 
-    @ManyToMany(mappedBy = HearingEntity_.MEDIA_LIST)
-    private List<HearingEntity> hearingList = new ArrayList<>();
+    @ManyToMany(mappedBy = HearingEntity_.MEDIAS)
+    @EqualsAndHashCode.Exclude
+    private Set<HearingEntity> hearings = new HashSet<>();
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
 
-    @OneToMany(mappedBy = ObjectAdminActionEntity_.MEDIA,
-        fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = ObjectAdminActionEntity_.MEDIA, fetch = FetchType.LAZY)
     private List<ObjectAdminActionEntity> objectAdminActions = new ArrayList<>();
 
     @Column(name = "ret_conf_score")
@@ -151,13 +154,13 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     private String storageId;
 
     public List<CourtCaseEntity> associatedCourtCases() {
-        var cases = hearingList.stream().map(HearingEntity::getCourtCase);
+        var cases = hearings.stream().map(HearingEntity::getCourtCase);
         return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
     }
 
     public void removeHearing(HearingEntity hearing) {
-        hearing.getMediaList().remove(this);
-        getHearingList().remove(this);
+        hearing.getMedias().remove(this);
+        getHearings().remove(this);
     }
 
     public void addHearing(HearingEntity hearing) {
@@ -192,4 +195,18 @@ public class MediaEntity extends CreatedModifiedBaseEntity
         return isCurrent != null && isCurrent;
     }
 
+    /**
+     * This method was added to simplify the switch from List to Set on HearingEntity in which existing code uses .getFirst()
+     * This switch was needed to prevent data integirty issues when inserting/deleting values.
+     * As when using a list spring will first delete all values on the mapping table. Then reinsert only the new ones.
+     * Where as using a Set it will only add the new values and remove the old ones.
+     * A tech debt ticket has be raised to refactor all the code that uses this method, to ensure it uses a many to many safe equivelent
+     *
+     * @return the first hearing entity found within the set
+     * @deprecated because this is not many to many safe. Implementation should account for multiple hearings
+     */
+    @Deprecated
+    public HearingEntity getHearing() {
+        return DataUtil.orderByCreatedByAndId(hearings).getFirst();
+    }
 }

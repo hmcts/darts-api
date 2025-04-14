@@ -64,7 +64,7 @@ public abstract class CourtCaseDocumentMapper {
 
     @Mappings({
         @Mapping(source = "events", target = "events"),
-        @Mapping(source = "mediaList", target = "medias"),
+        @Mapping(source = "medias", target = "medias"),
         @Mapping(target = "lastModifiedBy", source = "lastModifiedById"),
         @Mapping(target = "createdBy", source = "createdById")
     })

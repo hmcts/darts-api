@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -55,7 +56,7 @@ class GetHearingResponseMapperTest {
     @Test
     void getHearingResponseMapper_shouldNotIncludeNonCurrentTranscriptions() {
         HearingEntity hearing = CommonTestDataUtil.createHearing("TestCase", LocalTime.of(10, 0, 0));
-        hearing.getTranscriptions().getFirst().setIsCurrent(false);
+        TestUtils.getFirst(hearing.getTranscriptions()).setIsCurrent(false);
 
         GetHearingResponse response = getHearingResponseMapper.map(hearing);
         assertEquals(response.getTranscriptionCount(), 0);

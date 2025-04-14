@@ -306,7 +306,7 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
             hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         } else if (CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getHearings())) {
-            hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearings().getFirst().getHearingDate().atTime(0, 0, 0),
+            hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearing().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;

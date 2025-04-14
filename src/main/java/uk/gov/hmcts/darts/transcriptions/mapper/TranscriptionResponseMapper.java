@@ -208,7 +208,7 @@ public class TranscriptionResponseMapper {
             transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
         if (CollectionUtils.isNotEmpty(transcriptionEntity.getHearings())) {
-            HearingEntity hearing = transcriptionEntity.getHearings().getFirst();
+            HearingEntity hearing = transcriptionEntity.getHearing();
             transcriptionResponse.setHearingId(hearing.getId());
             transcriptionResponse.setHearingDate(hearing.getHearingDate());
         } else {

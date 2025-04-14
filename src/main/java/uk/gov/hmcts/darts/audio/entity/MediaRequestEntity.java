@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ import java.util.List;
 @Getter
 @Setter
 @AuditTable("media_request_aud")
-public class MediaRequestEntity extends CreatedModifiedBaseEntity {
+public class MediaRequestEntity extends CreatedModifiedBaseEntity implements HasIntegerId {
 
     public static final String ID_COLUMN_NAME = "mer_id";
     public static final String HEARING_ID_COLUMN_NAME = "hea_id";

@@ -10,12 +10,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.data.TemporalUnitOffset;
 import org.hibernate.LazyInitializationException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.zalando.problem.jackson.ProblemModule;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,9 +29,11 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import static java.lang.Character.isLetter;
@@ -231,10 +236,40 @@ public final class TestUtils {
         }
     }
 
-    public static <T> T getFirst(Collection<T> data) {
+    public static <T extends CreatedBy & HasIntegerId> T getFirst(Collection<T> data) {
         if (data == null || data.isEmpty()) {
             return null;
         }
-        return data.iterator().next();
+        return getOrderedByCreatedByAndId(data).getFirst();
+    }
+
+    public static <T extends CreatedBy & HasIntegerId> List<T> getOrderedByCreatedByAndId(Collection<T> data) {
+        List<T> sortedData = new ArrayList<>();
+        if (CollectionUtils.isEmpty(data)) {
+            return sortedData;
+        }
+        sortedData.addAll(
+            data.stream()
+                .filter(Objects::nonNull)
+                .filter(entity -> entity.getId() != null)
+                .filter(entity -> entity.getCreatedDateTime() != null)
+                .sorted((o1, o2) -> {
+                    int compare = o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime());
+                    if (compare == 0) {
+                        return Integer.compare(o1.getId(), o2.getId());
+                    }
+                    return compare;
+                })
+                .toList());
+        // Add entities without id or createdDateTime at the end
+        sortedData.addAll(
+            data.stream()
+                .filter(Objects::nonNull)
+                .filter(entity -> entity.getId() == null || entity.getCreatedDateTime() == null)
+                .toList());
+        if (sortedData.isEmpty() && !data.isEmpty()) {
+            return new ArrayList<>(data);
+        }
+        return sortedData;
     }
 }

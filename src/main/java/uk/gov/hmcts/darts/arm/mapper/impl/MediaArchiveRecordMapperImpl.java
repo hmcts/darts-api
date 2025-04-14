@@ -174,8 +174,8 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
 
     private String getHearingDate(MediaEntity media) {
         String hearingDate = null;
-        if (CollectionUtils.isNotEmpty(media.getHearingList())) {
-            hearingDate = OffsetDateTime.of(media.getHearingList().getFirst().getHearingDate().atTime(0, 0, 0),
+        if (CollectionUtils.isNotEmpty(media.getHearings())) {
+            hearingDate = OffsetDateTime.of(media.getHearing().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
@@ -183,8 +183,8 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
 
     private String getCaseNumbers(MediaEntity media) {
         String cases = null;
-        if (CollectionUtils.isNotEmpty(media.getHearingList())) {
-            List<String> caseNumbers = media.getHearingList()
+        if (CollectionUtils.isNotEmpty(media.getHearings())) {
+            List<String> caseNumbers = media.getHearings()
                 .stream()
                 .map(HearingEntity::getCourtCase)
                 .map(CourtCaseEntity::getCaseNumber)
@@ -196,8 +196,8 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
 
     private static String getCourthouse(MediaEntity media) {
         String courthouse = null;
-        if (CollectionUtils.isNotEmpty(media.getHearingList()) && nonNull(media.getHearingList().getFirst().getCourtroom())) {
-            courthouse = media.getHearingList().getFirst().getCourtroom().getCourthouse().getDisplayName();
+        if (CollectionUtils.isNotEmpty(media.getHearings()) && nonNull(media.getHearing().getCourtroom())) {
+            courthouse = media.getHearing().getCourtroom().getCourthouse().getDisplayName();
         } else if (nonNull(media.getCourtroom()) && nonNull(media.getCourtroom().getCourthouse())) {
             courthouse = media.getCourtroom().getCourthouse().getDisplayName();
         }
@@ -206,8 +206,8 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
 
     private static String getCourtroom(MediaEntity media) {
         String courtroom = null;
-        if (CollectionUtils.isNotEmpty(media.getHearingList()) && nonNull(media.getHearingList().getFirst().getCourtroom())) {
-            courtroom = media.getHearingList().getFirst().getCourtroom().getName();
+        if (CollectionUtils.isNotEmpty(media.getHearings()) && nonNull(media.getHearing().getCourtroom())) {
+            courtroom = media.getHearing().getCourtroom().getName();
         } else if (nonNull(media.getCourtroom())) {
             courtroom = media.getCourtroom().getName();
         }

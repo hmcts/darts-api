@@ -20,12 +20,16 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
@@ -38,7 +42,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @AuditTable("transcription_aud")
-public class TranscriptionEntity extends CreatedModifiedBaseEntity {
+public class TranscriptionEntity extends CreatedModifiedBaseEntity implements HasIntegerId {
 
     @Id
     @Column(name = "tra_id")
@@ -51,7 +55,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @JoinTable(name = "case_transcription_ae",
         joinColumns = {@JoinColumn(name = "tra_id")},
         inverseJoinColumns = {@JoinColumn(name = "cas_id")})
-    private List<CourtCaseEntity> courtCases = new ArrayList<>();
+    private Set<CourtCaseEntity> courtCases = new HashSet<>();
 
     @Audited(targetAuditMode = NOT_AUDITED)
     @ManyToOne
@@ -73,7 +77,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @JoinTable(name = "hearing_transcription_ae",
         joinColumns = {@JoinColumn(name = "tra_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})
-    private List<HearingEntity> hearings = new ArrayList<>();
+    private Set<HearingEntity> hearings = new HashSet<>();
 
     @NotAudited
     @ManyToOne
@@ -177,12 +181,12 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     }
 
     @SuppressWarnings("PMD.NullAssignment")//Required to set courtroom to null if no hearings
-    public void setHearings(List<HearingEntity> hearings) {
+    public void setHearings(Set<HearingEntity> hearings) {
         this.hearings = hearings;
         if (CollectionUtils.isEmpty(hearings)) {
             this.courtroom = null;
         } else {
-            this.courtroom = hearings.getFirst().getCourtroom();
+            this.courtroom = DataUtil.orderByCreatedByAndId(hearings).getFirst().getCourtroom();
         }
     }
 
@@ -203,7 +207,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
             return hearing.getCourtCase();
         }
         if (!CollectionUtils.isEmpty(courtCases)) {
-            return courtCases.getFirst();
+            return DataUtil.orderByCreatedByAndId(courtCases).getFirst();
         }
         return null;
     }
@@ -226,11 +230,22 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         return Optional.empty();
     }
 
+    /**
+     * This method was added to simplify the switch from List to Set on HearingEntity in which existing code uses .getFirst()
+     * This switch was needed to prevent data integirty issues when inserting/deleting values.
+     * As when using a list spring will first delete all values on the mapping table. Then reinsert only the new ones.
+     * Where as using a Set it will only add the new values and remove the old ones.
+     * A tech debt ticket has be raised to refactor all the code that uses this method, to ensure it uses a many to many safe equivelent
+     *
+     * @return the first hearing entity found within the set
+     * @deprecated because this is not many to many safe. Implementation should account for multiple hearings
+     */
+    @Deprecated
     public HearingEntity getHearing() {
         if (CollectionUtils.isEmpty(hearings)) {
             return null;
         }
-        return hearings.getFirst();
+        return DataUtil.orderByCreatedByAndId(hearings).getFirst();
     }
 
     /**

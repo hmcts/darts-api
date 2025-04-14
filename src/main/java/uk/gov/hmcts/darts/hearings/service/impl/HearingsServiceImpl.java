@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -129,7 +130,7 @@ public class HearingsServiceImpl implements HearingsService {
                 return false;
             })
             .forEach(media -> {
-                List<HearingEntity> hearingEntities = media.getHearingList();
+                Set<HearingEntity> hearingEntities = media.getHearings();
                 hearingEntities.forEach(media::removeHearing);
                 mediaRepository.save(media);
                 hearingRepository.saveAll(hearingEntities);

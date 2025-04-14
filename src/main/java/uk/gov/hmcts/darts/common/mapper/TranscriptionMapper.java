@@ -7,12 +7,14 @@ import uk.gov.hmcts.darts.common.model.TranscriptModel;
 import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 public abstract class TranscriptionMapper<T extends TranscriptModel> {
 
-    public List<T> mapResponse(List<TranscriptionEntity> transcriptionEntities) {
+    public List<T> mapResponse(Collection<TranscriptionEntity> transcriptionEntities) {
         List<T> response = new ArrayList<>();
         for (TranscriptionEntity transcriptionEntity : transcriptionEntities) {
             if (Boolean.TRUE.equals(transcriptionEntity.getIsCurrent())) {
@@ -25,13 +27,13 @@ public abstract class TranscriptionMapper<T extends TranscriptModel> {
     private T map(TranscriptionEntity transcriptionEntity) {
         T transcript = createNewTranscription();
         transcript.setTranscriptionId(transcriptionEntity.getId());
-        List<HearingEntity> hearings = transcriptionEntity.getHearings();
+        Set<HearingEntity> hearings = transcriptionEntity.getHearings();
         if (hearings.isEmpty()) {
             if (transcriptionEntity.getHearingDate() != null) {
                 transcript.setHearingDate(transcriptionEntity.getHearingDate());
             }
         } else {
-            HearingEntity hearing = hearings.getFirst();
+            HearingEntity hearing = transcriptionEntity.getHearing();
             transcript.setHearingId(hearing.getId());
             transcript.setHearingDate(hearing.getHearingDate());
         }

@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Slf4j
-public class CourtCaseEntity extends CreatedModifiedBaseEntity {
+public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasIntegerId {
 
     public static final String COURT_CASE = "courtCase";
     public static final String CASE_CLOSED_TS = "case_closed_ts";

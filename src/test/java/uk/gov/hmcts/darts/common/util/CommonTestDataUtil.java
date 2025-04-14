@@ -257,7 +257,7 @@ public class CommonTestDataUtil {
         hearing1.setHearingDate(date);
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
-        hearing1.setTranscriptions(createTranscriptionList(hearing1));
+        hearing1.setTranscriptions(createTranscriptions(hearing1));
         hearing1.addJudges(createJudges(2));
         return hearing1;
     }
@@ -269,7 +269,7 @@ public class CommonTestDataUtil {
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
-        mediaEntity.setHearingList(new ArrayList<>(List.of(hearing)));
+        mediaEntity.setHearings(new HashSet<>(List.of(hearing)));
         mediaEntity.setCourtroom(hearing.getCourtroom());
         mediaEntity.setId(getStringId("MEDIA_ID" + caseNumber));
         return mediaEntity;
@@ -280,40 +280,42 @@ public class CommonTestDataUtil {
         return createMedia(hearing);
     }
 
-    public MediaEntity createMedia(List<HearingEntity> hearings, int mediaId) {
-        var hearing = hearings.getFirst();
+    public MediaEntity createMedia(Set<HearingEntity> hearings, int mediaId) {
+        var hearing = hearings.stream()
+            .sorted((o1, o2) -> o2.getCreatedDateTime().compareTo(o1.getCreatedDateTime()))
+            .findFirst().get();
         MediaEntity mediaEntity = new MediaEntity();
         OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), UTC);
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
-        mediaEntity.setHearingList(hearings);
+        mediaEntity.setHearings(hearings);
         mediaEntity.setCourtroom(hearing.getCourtroom());
         mediaEntity.setId(mediaId);
         return mediaEntity;
     }
 
-    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
-        return createTranscriptionList(hearing, true, true, true, null);
+    public Set<TranscriptionEntity> createTranscriptions(HearingEntity hearing) {
+        return createTranscriptions(hearing, true, true, true, null);
     }
 
-    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus) {
-        return createTranscriptionList(hearing, generateStatus, true, false, null);
+    public Set<TranscriptionEntity> createTranscriptions(HearingEntity hearing, boolean generateStatus) {
+        return createTranscriptions(hearing, generateStatus, true, false, null);
     }
 
-    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
-        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, false, null);
+    public Set<TranscriptionEntity> createTranscriptions(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
+        return createTranscriptions(hearing, generateStatus, excludeWorkflow, false, null);
     }
 
-    public List<TranscriptionEntity> createTranscriptionList(
+    public Set<TranscriptionEntity> createTranscriptions(
         HearingEntity hearing,
         boolean generateStatus,
         boolean excludeWorkflow,
         boolean generateRequestor) {
-        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, generateRequestor, null);
+        return createTranscriptions(hearing, generateStatus, excludeWorkflow, generateRequestor, null);
     }
 
-    public List<TranscriptionEntity> createTranscriptionList(
+    public Set<TranscriptionEntity> createTranscriptions(
         HearingEntity hearing,
         boolean generateStatus,
         boolean excludeWorkflow,
@@ -357,7 +359,7 @@ public class CommonTestDataUtil {
             transcription.setTranscriptionStatus(transcriptionStatus);
         }
 
-        return List.of(transcription);
+        return Set.of(transcription);
     }
 
     private static List<TranscriptionDocumentEntity> createTranscriptionDocuments() {

@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RedisService;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -61,7 +62,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     @BeforeEach
     void setupData() {
         var hearing = dartsPersistence.save(hearingWithMedia());
-        mediaEntity = hearing.getMediaList().getFirst();
+        mediaEntity = TestUtils.getFirst(hearing.getMedias());
 
         dartsPersistence.save(PersistableFactory.getExternalObjectDirectoryTestData().eodStoredInUnstructuredLocationForMedia(mediaEntity));
 

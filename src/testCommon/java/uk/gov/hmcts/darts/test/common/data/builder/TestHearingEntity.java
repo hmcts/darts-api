@@ -17,11 +17,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
@@ -35,13 +32,13 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         LocalTime scheduledStartTime,
         Boolean hearingIsActual,
         Collection<JudgeEntity> judges,
-        List<MediaEntity> mediaList,
-        List<TranscriptionEntity> transcriptions,
-        List<MediaRequestEntity> mediaRequests,
+        Collection<MediaEntity> mediaList,
+        Collection<TranscriptionEntity> transcriptions,
+        Collection<MediaRequestEntity> mediaRequests,
         boolean isNew,
-        List<EventEntity> eventList,
+        Collection<EventEntity> eventList,
         CourtCaseEntity courtCase,
-        List<AnnotationEntity> annotations,
+        Collection<AnnotationEntity> annotations,
         OffsetDateTime createdDateTime,
         Integer createdById,
         OffsetDateTime lastModifiedDateTime,
@@ -55,13 +52,13 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         setScheduledStartTime(scheduledStartTime);
         setHearingIsActual(hearingIsActual);
         setJudges(judges != null ? new HashSet<>(judges) : new HashSet<>());
-        setMediaList(mediaList != null ? mediaList : new ArrayList<>());
-        setTranscriptions(transcriptions != null ? transcriptions : new ArrayList<>());
-        setMediaRequests(mediaRequests != null ? mediaRequests : new ArrayList<>());
+        setMedias(mediaList != null ? new HashSet<>(mediaList) : new HashSet<>());
+        setTranscriptions(transcriptions != null ? new HashSet<>(transcriptions) : new HashSet<>());
+        setMediaRequests(mediaRequests != null ? new HashSet<>(mediaRequests) : new HashSet<>());
         setNew(isNew);
-        setEvents(eventList != null ? Set.of(eventList.toArray(new EventEntity[0])) : new HashSet<>());
+        setEvents(eventList != null ? new HashSet<>(eventList) : new HashSet<>());
         setCourtCase(courtCase);
-        setAnnotations(annotations != null ? annotations : new ArrayList<>());
+        setAnnotations(annotations != null ? new HashSet<>(annotations) : new HashSet<>());
         setCreatedDateTime(createdDateTime);
         setCreatedById(createdById);
         setLastModifiedDateTime(lastModifiedDateTime);

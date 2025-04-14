@@ -29,9 +29,10 @@ import uk.gov.hmcts.darts.hearings.mapper.HearingTranscriptionMapper;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -162,8 +163,8 @@ class HearingsServiceImplTest {
     @Test
     void removeMediaLinkToHearing_shouldRemoveLinkToHearing_whenAllAssociatedCasesAreAnonymised() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
-        HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
-        hearingEntity.setMediaList(new ArrayList<>(List.of(mediaEntity)));
+        HearingEntity hearingEntity = mediaEntity.getHearing();
+        hearingEntity.setMedias(new HashSet<>(List.of(mediaEntity)));
 
         when(mediaRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(List.of(mediaEntity));
         when(mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(any())).thenReturn(true);
@@ -175,8 +176,8 @@ class HearingsServiceImplTest {
     @Test
     void removeMediaLinkToHearing_shouldNotRemoveLinkToHearing_whenAllAssociatedCasesAreNotAnonymised() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
-        HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
-        hearingEntity.setMediaList(List.of(mediaEntity));
+        HearingEntity hearingEntity = mediaEntity.getHearing();
+        hearingEntity.setMedias(Set.of(mediaEntity));
 
         when(mediaRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(List.of(mediaEntity));
         when(mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(any())).thenReturn(false);
@@ -188,7 +189,7 @@ class HearingsServiceImplTest {
     @Test
     void removeMediaLinkToHearing_shouldDoNothing_whenHearingsWithNoMediaExistsToUnlink() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
-        HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
+        HearingEntity hearingEntity = mediaEntity.getHearing();
 
         when(mediaRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(List.of(mediaEntity));
 

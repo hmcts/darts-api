@@ -187,7 +187,7 @@ public class DartsPersistence {
         hearing.setJudges(saveJudgeList(hearing.getJudges()));
         hearing.setCourtCase(save(hearing.getCourtCase()));
         hearing.setCourtroom(save(hearing.getCourtroom()));
-        saveMediaList(hearing.getMediaList());
+        saveMediaList(hearing.getMedias());
         hearing.setCreatedById(Optional.ofNullable(hearing.getCreatedById()).orElse(0));
         hearing.setLastModifiedById(Optional.ofNullable(hearing.getLastModifiedById()).orElse(0));
 
@@ -206,7 +206,7 @@ public class DartsPersistence {
             annotationEntity.setCreatedById(Optional.ofNullable(annotationEntity.getCreatedById()).orElse(0));
             annotationEntity.setLastModifiedById(Optional.ofNullable(annotationEntity.getLastModifiedById()).orElse(0));
             if (annotationEntity.getHearings() != null) {
-                annotationEntity.setHearings(saveHearingEntity(annotationEntity.getHearings(), new HashSet<>()));
+                annotationEntity.setHearings(saveHearingEntity(annotationEntity.getHearings()));
             }
             return annotationRepository.save(annotationEntity);
         } else {
@@ -451,7 +451,7 @@ public class DartsPersistence {
 
         if (transcription.getId() == null) {
             if (transcription.getHearing() != null) {
-                transcription.setHearings(saveHearingEntity(transcription.getHearings(), new ArrayList<>()));
+                transcription.setHearings(saveHearingEntity(transcription.getHearings()));
             }
 
             if (transcription.getCourtroom() != null) {
@@ -459,7 +459,7 @@ public class DartsPersistence {
             }
 
             if (transcription.getCourtCases() != null) {
-                List<CourtCaseEntity> listOfCases = new ArrayList<>();
+                Set<CourtCaseEntity> listOfCases = new HashSet<>();
                 for (CourtCaseEntity courtCase : transcription.getCourtCases()) {
                     listOfCases.add(save(courtCase));
                 }
@@ -747,7 +747,7 @@ public class DartsPersistence {
         externalObjectDirectoryEntities.forEach(this::save);
     }
 
-    private void saveMediaList(List<MediaEntity> mediaList) {
+    private void saveMediaList(Collection<MediaEntity> mediaList) {
         if (mediaList == null
             || TestUtils.isProxy(mediaList)
             || mediaList.isEmpty()) {
@@ -757,7 +757,7 @@ public class DartsPersistence {
             if (media.getId() == null) {
                 media = (MediaEntity) preCheckPersist(media);
                 save(media);
-                saveHearingList(media.getHearingList());
+                saveHearing(media.getHearings());
             }
         });
 
@@ -784,12 +784,13 @@ public class DartsPersistence {
         return judgeEntityListReturn;
     }
 
-    private <T extends Collection<HearingEntity>> T saveHearingEntity(Collection<HearingEntity> hearingEntityList, T newCollection) {
+    private Set<HearingEntity> saveHearingEntity(Collection<HearingEntity> hearingEntityList) {
+        Set<HearingEntity> newCollection = new HashSet<>();
         hearingEntityList.forEach(hearingEntity -> newCollection.add(save(hearingEntity)));
         return newCollection;
     }
 
-    private void saveHearingList(List<HearingEntity> hearings) {
+    private void saveHearing(Collection<HearingEntity> hearings) {
         hearings.forEach(media -> {
             if (media.getId() == null) {
                 save(media);

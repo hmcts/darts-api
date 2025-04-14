@@ -38,13 +38,14 @@ public class TranscriptionDownloader {
     public DownloadTranscriptResponse downloadTranscript(Integer transcriptionId) {
         var userAccountEntity = getUserAccount();
         var userIsSuperAdmin = this.userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        System.out.println("TMP: here 1");
         var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             // Only SUPER_ADMIN users are allowed to download hidden documents
             .filter(transcription -> userIsSuperAdmin
                 || transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcription.getId()).isEmpty()
             )
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
-
+        System.out.println("TMP: here 2");
         // if the document is hidden and now deleted, this will successfully fail and not return the document
         var latestTranscriptionDocument = transcriptionEntity.getTranscriptionDocumentEntities()
             .stream()

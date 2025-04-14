@@ -94,7 +94,7 @@ public class AuthorisationImpl implements Authorisation {
     public void authoriseByMediaId(Integer mediaId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final Set<CourthouseEntity> courthouses = mediaRepository.getReferenceById(mediaId)
-                .getHearingList()
+                .getHearings()
                 .stream()
                 .map(hearingEntity -> hearingEntity.getCourtroom().getCourthouse())
                 .collect(Collectors.toUnmodifiableSet());

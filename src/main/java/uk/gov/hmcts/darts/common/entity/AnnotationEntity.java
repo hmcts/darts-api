@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import java.util.Set;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class AnnotationEntity extends CreatedModifiedBaseEntity {
+public class AnnotationEntity extends CreatedModifiedBaseEntity implements HasIntegerId {
 
     @Id
     @Column(name = "ann_id")
