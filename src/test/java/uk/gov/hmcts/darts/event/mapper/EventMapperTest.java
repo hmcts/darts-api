@@ -142,6 +142,8 @@ class EventMapperTest {
         eventEntity2.setId(2);
         eventEntity2.setCreatedDateTime(now);
         eventEntity2.setIsCurrent(true);
+        eventEntity2.setDataAnonymised(true);
+        eventEntity2.setEventStatus(123);
 
         EventEntity eventEntity3 = setGenericEventDataForTest();
         eventEntity3.setId(3);
@@ -194,6 +196,7 @@ class EventMapperTest {
         assertEquals(eventEntity2.getLastModifiedDateTime(), currentVersion.getLastModifiedAt());
         assertEquals(eventEntity2.getLastModifiedById(), currentVersion.getLastModifiedBy());
         assertEquals(eventEntity2.isDataAnonymised(), currentVersion.getIsDataAnonymised());
+        assertEquals(eventEntity2.getEventStatus(), currentVersion.getEventStatus());
     }
 
     @Test
