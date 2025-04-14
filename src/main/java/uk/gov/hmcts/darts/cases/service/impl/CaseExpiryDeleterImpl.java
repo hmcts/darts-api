@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.task.config.CaseExpiryDeletionAutomatedTaskConfig;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -34,16 +35,17 @@ public class CaseExpiryDeleterImpl implements CaseExpiryDeleter {
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
             .minus(config.getBufferDuration());
 
-        caseRepository.findCaseIdsToBeAnonymised(maxRetentionDate, Limit.of(batchSize))
-            .forEach(courtCaseId -> {
-                try {
-                    log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
-                    dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId, false);
-                    hearingsService.removeMediaLinkToHearing(courtCaseId);
-                } catch (Exception e) {
-                    log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
-                }
-            });
+        List<Integer> caseIds = caseRepository.findCaseIdsToBeAnonymised(maxRetentionDate, Limit.of(batchSize));
+        log.info("Found {} cases to be anonymised out of a batch size {}", caseIds.size(), batchSize);
+        caseIds.forEach(courtCaseId -> {
+            try {
+                log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
+                dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId, false);
+                hearingsService.removeMediaLinkToHearing(courtCaseId);
+            } catch (Exception e) {
+                log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
+            }
+        });
     }
 
 }
