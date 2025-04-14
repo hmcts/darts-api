@@ -382,7 +382,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllByStatusAndDataIngestionTsBetweenAndLimit() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void findAllByStatusAndInputUploadProcessedTsBetweenAndLimit_ReturnsResults() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
         OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
         OffsetDateTime pastCurrentDateTime = now.minusHours(30);
@@ -411,7 +411,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         // when
         ingestionEndDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(24);
-        var results = externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
+        var results = externalObjectDirectoryRepository.findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
             EodHelper.armRpoPendingStatus(), ingestionStartDateTime, ingestionEndDateTime,
             Limit.of(20));
 
