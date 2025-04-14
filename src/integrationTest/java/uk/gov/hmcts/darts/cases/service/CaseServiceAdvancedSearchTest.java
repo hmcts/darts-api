@@ -30,7 +30,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -366,34 +365,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void getWithCourthouseNotExist() {
-        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
-
-        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse("jyguiyfgiytfuiytfuyrt")
-            .build();
-
-        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-
-        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertTrue(resultList.isEmpty());
-    }
-
-    @Test
-    void getWithCourthouse() {
-        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
-
-        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse(swanseaCourthouse.getCourthouseName())
-            .build();
-
-        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-
-        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertEquals(9, resultList.size());
-    }
-
-    @Test
     void getWithCourthouseIds() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
@@ -408,20 +379,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCourthouse/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
-    }
-
-    @Test
-    void getWithCourthouseWithoutAccess() {
-        //FIXME: Remove this test once move to courthouse_ids has been merged (DMP-4912)
-
-        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse(swanseaCourthouse.getCourthouseName())
-            .build();
-
-        setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
-
-        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertTrue(resultList.isEmpty());
     }
 
     @Test
