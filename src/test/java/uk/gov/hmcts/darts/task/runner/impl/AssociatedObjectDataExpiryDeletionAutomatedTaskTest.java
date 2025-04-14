@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Limit;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
@@ -70,13 +69,11 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
     @Mock
     private TransactionTemplate transactionTemplate;
 
-    private AssociatedObjectDataExpiryDeleterServiceImpl associatedObjectDataExpiryDeleter;
-
     private AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
 
     @BeforeEach
     void beforeEach() {
-        associatedObjectDataExpiryDeleter = spy(new AssociatedObjectDataExpiryDeleterServiceImpl(
+        AssociatedObjectDataExpiryDeleterServiceImpl associatedObjectDataExpiryDeleter = spy(new AssociatedObjectDataExpiryDeleterServiceImpl(
             userIdentity,
             currentTimeHelper,
             transcriptionDocumentRepository,
@@ -117,15 +114,10 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(time);
         doReturn(5).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .getAutomatedTaskBatchSize();
-        OffsetDateTime maxRetentionDate = time.minus(duration);
 
         associatedObjectDataExpiryDeletionAutomatedTask.runTask();
 
-        Limit limit = Limit.of(5);
-
-        verify(associatedObjectDataExpiryDeletionAutomatedTask)
-            .getAutomatedTaskBatchSize();
-
+        verify(associatedObjectDataExpiryDeletionAutomatedTask).getAutomatedTaskBatchSize();
         verify(userIdentity).getUserAccount();
         verify(currentTimeHelper).currentOffsetDateTime();
     }
