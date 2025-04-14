@@ -124,6 +124,10 @@ public class TranscriptionDocumentStub {
                 TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                     .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)), userAccountRepository.getReferenceById(0));
 
+            if (!useSameCase) {
+                caseEntityList.clear();
+            }
+
             for (int i = 0; i < caseCount; i++) {
                 if (!useSameCase || caseEntityList.isEmpty()) {
                     caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(
