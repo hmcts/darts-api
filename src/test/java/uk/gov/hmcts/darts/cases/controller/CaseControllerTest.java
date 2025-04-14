@@ -114,8 +114,7 @@ class CaseControllerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-//Caused by argument captor this can never be incorrect
+    @SuppressWarnings("unchecked")//Caused by argument captor this can never be incorrect
     void casesCaseIdEventsGet_hasPageNumber_shouldUsePaginatedRoute() {
         final int caseId = 123;
         final int pageNumber = 3;
