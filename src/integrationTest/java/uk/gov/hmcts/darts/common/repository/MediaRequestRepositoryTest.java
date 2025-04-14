@@ -34,10 +34,9 @@ class MediaRequestRepositoryTest extends PostgresIntegrationBase {
     void before() {
         HearingEntity hearing = dartsDatabase.hasSomeHearing();
 
-        requestDetails = new AudioRequestDetails(null, null, null, null, null);
+        requestDetails = new AudioRequestDetails(null, null, null, null);
         requestDetails.setHearingId(hearing.getId());
         requestDetails.setRequestor(0);
-        requestDetails.setRequestType(DOWNLOAD);
     }
 
     @Test
@@ -45,7 +44,7 @@ class MediaRequestRepositoryTest extends PostgresIntegrationBase {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
-        MediaRequestEntity request = mediaRequestService.saveAudioRequest(requestDetails);
+        MediaRequestEntity request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD);
         OffsetDateTime createdTime = request.getLastModifiedDateTime();
 
         mediaRequestService.getMediaRequestEntityById(request.getId());
