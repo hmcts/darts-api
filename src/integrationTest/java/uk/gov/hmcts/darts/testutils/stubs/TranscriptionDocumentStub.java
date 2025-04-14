@@ -70,6 +70,7 @@ public class TranscriptionDocumentStub {
                                                                            boolean associatedWorkflow) {
         return generateTranscriptionEntities(count, hearingCount, caseCount, isManualTranscription, noCourtHouse, associatedWorkflow, false);
     }
+
     /**
      * generates test data. The following will be used for generation:-
      * Unique owner and requested by users for each transcription record
@@ -80,14 +81,12 @@ public class TranscriptionDocumentStub {
      *
      * @param count                 The number of transcription objects that are to be generated
      * @param hearingCount          The number of hearing against the transcription
-     * @param caseCount             The number of cases against the transcription
      * @param isManualTranscription The manual transcription flag
      * @param noCourtHouse          Ensure we do not have a court house against the transcription i.e. use hearing instead
      * @param associatedWorkflow    Whether a workflow is generated against the transcription
      * @param useSameCase           Whether to use the same case for all transcription records
      * @return The list of generated media entities in chronological order
      */
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     public List<TranscriptionDocumentEntity> generateTranscriptionEntities(int count,
                                                                            int hearingCount,
                                                                            boolean isManualTranscription,
@@ -116,12 +115,12 @@ public class TranscriptionDocumentStub {
      */
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private List<TranscriptionDocumentEntity> generateTranscriptionEntities(int count,
-                                                                           int hearingCount,
-                                                                           int caseCount,
-                                                                           boolean isManualTranscription,
-                                                                           boolean noCourtHouse,
-                                                                           boolean associatedWorkflow,
-                                                                           boolean useSameCase) {
+                                                                            int hearingCount,
+                                                                            int caseCount,
+                                                                            boolean isManualTranscription,
+                                                                            boolean noCourtHouse,
+                                                                            boolean associatedWorkflow,
+                                                                            boolean useSameCase) {
 
         List<TranscriptionDocumentEntity> retTransformerMediaLst = new ArrayList<>();
         OffsetDateTime hoursBefore = now(UTC);
