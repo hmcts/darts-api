@@ -77,6 +77,33 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
+    void findTranscriptionMedia_shouldExcludeIsCurrentFlase(TestType testType) {
+        dataSetup(testType);
+        int nameMatchIndex = 0;
+        List<TranscriptionDocumentResult> transcriptionDocumentResults
+            = transcriptionDocumentRepository
+            .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
+                                        .getTranscription().getCourtCases().getFirst().getCaseNumber(), null, null, null, null, null, null, null);
+        if (TestType.MODENISED.equals(testType)) {
+            //Mod has two items due to joins that are not valid for legacy data
+            Assertions.assertEquals(2, transcriptionDocumentResults.size());
+        } else {
+            Assertions.assertEquals(1, transcriptionDocumentResults.size());
+        }
+
+        //Now set is current = flase should not return any data
+        TranscriptionEntity transcription = generatedDocumentEntities.get(nameMatchIndex)
+            .getTranscription();
+        transcription.setIsCurrent(false);
+        dartsDatabase.save(transcription);
+        transcriptionDocumentResults = transcriptionDocumentRepository
+            .findTranscriptionMedia(transcription.getCourtCases().getFirst().getCaseNumber(), null, null, null, null, null, null, null);
+
+        Assertions.assertEquals(0, transcriptionDocumentResults.size());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(TestType.class)
     void testFindTranscriptionDocumentWithoutAnyParameters(TestType testType) {
         dataSetup(testType);
         List<TranscriptionDocumentResult> transcriptionDocumentResults
