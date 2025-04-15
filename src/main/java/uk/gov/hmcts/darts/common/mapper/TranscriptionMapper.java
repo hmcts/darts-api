@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.mapper;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.model.TranscriptModel;
@@ -34,6 +35,9 @@ public abstract class TranscriptionMapper<T extends TranscriptModel> {
             HearingEntity hearing = hearings.getFirst();
             transcript.setHearingId(hearing.getId());
             transcript.setHearingDate(hearing.getHearingDate());
+        }
+        if (transcript instanceof Transcript caseTranscript) {
+            caseTranscript.setCourtroom(transcriptionEntity.getCourtroom().getName());
         }
         transcript.setType(transcriptionEntity.getTranscriptionType().getDescription());
         transcript.setRequestedOn(transcriptionEntity.getCreatedDateTime());

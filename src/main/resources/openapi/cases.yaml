@@ -837,6 +837,8 @@ components:
           type: string
           format: date
           example: 2022-05-20
+        courtroom:
+          type: string
         type:
           type: string
           example: "Sentencing remarks"
