@@ -20,13 +20,13 @@ public class EventMapper {
         List<EventEntity> latestEvents = GetEventsResponseMapper.filterNonLatestEvents(eventEntities);
 
         return emptyIfNull(latestEvents).stream()
-            .map(EventMapper::map)
+            .map(EventMapper::mapToEvent)
             .sorted((e1, e2) -> e2.getHearingDate().compareTo(e1.getHearingDate()))
             .collect(Collectors.toList());
     }
 
     @SuppressWarnings("java:S1874")//Required as we replaced getFirst with getHearingEntity(). A ticket will be raised clean this up across the app
-    private Event map(EventEntity eventEntity) {
+    public Event mapToEvent(EventEntity eventEntity) {
         HearingEntity hearingEntity = eventEntity.getHearingEntity();
 
         Event event = new Event();
