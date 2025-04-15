@@ -25,7 +25,7 @@ public class RemoveProductionServiceImpl implements RemoveProductionService {
 
     @Override
     public void removeProduction(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        log.debug("removeProduction called with executionId: {}", executionId);
+        log.info("removeProduction called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.removeProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -40,7 +40,7 @@ public class RemoveProductionServiceImpl implements RemoveProductionService {
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - removeProduction response: {}", removeProductionResponse);
+        log.info("ARM RPO Response - removeProduction response: {}", removeProductionResponse);
         armRpoUtil.handleResponseStatus(userAccount, removeProductionResponse, errorMessage, armRpoExecutionDetailEntity);
 
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);

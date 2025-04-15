@@ -643,23 +643,24 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status 
-            AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
+            AND eod.inputUploadProcessedTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
-    Page<ExternalObjectDirectoryEntity> findByStatusAndIngestionDateTsWithPaging(ObjectRecordStatusEntity status,
-                                                                                 OffsetDateTime rpoCsvStartTime,
-                                                                                 OffsetDateTime rpoCsvEndTime,
-                                                                                 Pageable pageable);
+    Page<ExternalObjectDirectoryEntity> findByStatusAndInputUploadProcessedTsWithPaging(ObjectRecordStatusEntity status,
+                                                                                        OffsetDateTime rpoCsvStartTime,
+                                                                                        OffsetDateTime rpoCsvEndTime,
+                                                                                        Pageable pageable);
 
     @Query("""
         SELECT eod FROM ExternalObjectDirectoryEntity eod
         WHERE eod.status = :status
-        AND eod.dataIngestionTs BETWEEN :ingestionStartDateTime AND :ingestionEndDateTime
+        AND eod.inputUploadProcessedTs BETWEEN :ingestionStartDateTime AND :ingestionEndDateTime
         """)
-    List<ExternalObjectDirectoryEntity> findAllByStatusAndDataIngestionTsBetweenAndLimit(@Param("status") ObjectRecordStatusEntity status,
-                                                                                         @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
-                                                                                         @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
-                                                                                         Limit limit);
+    List<ExternalObjectDirectoryEntity> findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
+        @Param("status") ObjectRecordStatusEntity status,
+        @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
+        @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
+        Limit limit);
 
     @Query("""
         SELECT eod.id FROM ExternalObjectDirectoryEntity eod

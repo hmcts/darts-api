@@ -30,7 +30,7 @@ public class GetExtendedProductionsByMatterServiceImpl implements GetExtendedPro
 
     @Override
     public boolean getExtendedProductionsByMatter(String bearerToken, Integer executionId, String uniqueProductionName, UserAccountEntity userAccount) {
-        log.debug("getExtendedProductionsByMatter called with executionId: {}, uniqueProductionName: {}", executionId, uniqueProductionName);
+        log.info("getExtendedProductionsByMatter called with executionId: {}, uniqueProductionName: {}", executionId, uniqueProductionName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedProductionsByMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -52,7 +52,7 @@ public class GetExtendedProductionsByMatterServiceImpl implements GetExtendedPro
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - ExtendedProductionsByMatterResponse: {}", extendedProductionsByMatterResponse);
+        log.info("ARM RPO Response - ExtendedProductionsByMatterResponse: {}", extendedProductionsByMatterResponse);
         return processExtendedProductionsByMatterResponse(uniqueProductionName, userAccount, extendedProductionsByMatterResponse, errorMessage,
                                                           armRpoExecutionDetailEntity);
     }

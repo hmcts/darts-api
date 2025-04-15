@@ -31,7 +31,7 @@ public class GetStorageAccountsServiceImpl implements GetStorageAccountsService 
 
     @Override
     public void getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        log.debug("getStorageAccounts called with executionId: {}", executionId);
+        log.info("getStorageAccounts called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getStorageAccountsRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -45,7 +45,7 @@ public class GetStorageAccountsServiceImpl implements GetStorageAccountsService 
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - StorageAccountResponse: {}", storageAccountResponse);
+        log.info("ARM RPO Response - StorageAccountResponse: {}", storageAccountResponse);
         processGetStorageAccountsResponse(userAccount, storageAccountResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 

@@ -83,9 +83,9 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     public void updateArmRpoStateAndStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStateEntity armRpoStateEntity,
                                            ArmRpoStatusEntity armRpoStatusEntity, UserAccountEntity userAccountEntity) {
         String previousState = nonNull(armRpoExecutionDetailEntity.getArmRpoState()) ? armRpoExecutionDetailEntity.getArmRpoState().getDescription() : null;
-        log.debug("Setting execution detail {} state from {} to {}", armRpoExecutionDetailEntity.getId(),
-                  previousState,
-                  armRpoStateEntity.getDescription());
+        log.info("Setting execution detail {} state from {} to {}", armRpoExecutionDetailEntity.getId(),
+                 previousState,
+                 armRpoStateEntity.getDescription());
         armRpoExecutionDetailEntity.setArmRpoState(armRpoStateEntity);
         updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoStatusEntity, userAccountEntity);
     }
@@ -94,9 +94,9 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     public void updateArmRpoStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStatusEntity armRpoStatusEntity,
                                    UserAccountEntity userAccountEntity) {
         String previousStatus = nonNull(armRpoExecutionDetailEntity.getArmRpoStatus()) ? armRpoExecutionDetailEntity.getArmRpoStatus().getDescription() : null;
-        log.debug("Setting execution detail {} status from {} to {}", armRpoExecutionDetailEntity.getId(),
-                  previousStatus,
-                  armRpoStatusEntity.getDescription());
+        log.info("Setting execution detail {} status from {} to {}", armRpoExecutionDetailEntity.getId(),
+                 previousStatus,
+                 armRpoStatusEntity.getDescription());
         armRpoExecutionDetailEntity.setArmRpoStatus(armRpoStatusEntity);
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccountEntity);
         saveArmRpoExecutionDetailEntity(armRpoExecutionDetailEntity);
@@ -123,7 +123,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
 
         do {
             pages
-                = externalObjectDirectoryRepository.findByStatusAndIngestionDateTsWithPaging(
+                = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
                 armRpoPending,
                 armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
                 armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()),
