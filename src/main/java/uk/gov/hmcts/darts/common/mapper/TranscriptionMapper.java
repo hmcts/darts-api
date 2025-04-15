@@ -36,7 +36,8 @@ public abstract class TranscriptionMapper<T extends TranscriptModel> {
             transcript.setHearingId(hearing.getId());
             transcript.setHearingDate(hearing.getHearingDate());
         }
-        if (transcript instanceof Transcript caseTranscript) {
+        if (transcript instanceof Transcript caseTranscript
+            && transcriptionEntity.getCourtroom() != null) {
             caseTranscript.setCourtroom(transcriptionEntity.getCourtroom().getName());
         }
         transcript.setType(transcriptionEntity.getTranscriptionType().getDescription());
