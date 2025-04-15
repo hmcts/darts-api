@@ -431,7 +431,7 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
     implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.4.0'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.0'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.1'
 
     //CVE-2023-44487
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
@@ -455,7 +455,7 @@ dependencies {
 
     implementation group: 'io.vavr', name: 'vavr', version: '0.10.6'
 
-    implementation group: 'com.google.guava', name: 'guava', version: '33.4.7-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '33.4.8-jre'
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
