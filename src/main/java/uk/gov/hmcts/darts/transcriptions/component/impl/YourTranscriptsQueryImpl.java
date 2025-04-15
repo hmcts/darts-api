@@ -54,7 +54,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.tru_id  as transcription_urgency_id,
                     tru.priority_order as transcription_urgency_priority_order,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts,
-                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
+                    (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
@@ -99,7 +99,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.tru_id  as transcription_urgency_id,
                     tru.priority_order as transcription_urgency_priority_order,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts,
-                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
+                    (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id

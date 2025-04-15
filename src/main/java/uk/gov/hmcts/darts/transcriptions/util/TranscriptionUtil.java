@@ -17,8 +17,8 @@ import java.util.Optional;
 @UtilityClass
 public class TranscriptionUtil {
 
-    /*
-    Returns the transcription comment that was added when the transcription was set to this status in the workflow.
+    /**
+     * Returns the transcription comment that was added when the transcription was set to this status in the workflow.
      */
     public String getTranscriptionCommentAtStatus(TranscriptionEntity transcriptionEntity, TranscriptionStatusEnum status) {
         Optional<TranscriptionWorkflowEntity> foundWorkflowEntityOpt = transcriptionEntity.getTranscriptionWorkflowEntities().stream()
