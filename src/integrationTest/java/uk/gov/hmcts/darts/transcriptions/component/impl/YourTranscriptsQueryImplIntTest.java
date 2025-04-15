@@ -92,5 +92,5 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
         assertThat(yourTranscriptsSummaries.getFirst().getRequestedTs().format(format)).isEqualTo(transcriptionDate.format(format));
     }
 
-    
+
 }
