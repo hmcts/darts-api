@@ -247,4 +247,47 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
         var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         assertThat(transcriberTranscriptions.getFirst().getRequestedTs().format(format)).isEqualTo(transcriptionDate.format(format));
     }
+
+    @Test
+    void getTranscriptRequests_ReturnsTranscriptionWithMultipleTranscriberWorkflows_WhenWorkflowReversedToApproved() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+        var approvedDate = OffsetDateTime.parse("2025-03-20T15:00:00Z");
+        var reRunApprovedDate = OffsetDateTime.parse("2025-03-20T17:00:00Z");
+        // Create a transcription with multiple workflows
+        // AWAITING_AUTH -> APPROVED -> WITH_TRANSCRIBER -> APPROVED
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
+            userAccountEntity, courtCaseEntity, hearingEntity, transcriptionDate, false
+        );
+        // Move workflow to APPROVED
+        var approvedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, approvedDate, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+        );
+        transcriptionEntity.setTranscriptionStatus(approvedWorkflow.getTranscriptionStatus());
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        // Move workflow to WITH_TRANSCRIBER
+        var withTranscriberWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, approvedDate, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+        );
+        transcriptionEntity.setTranscriptionStatus(withTranscriberWorkflow.getTranscriptionStatus());
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        // Rewind back to APPROVED
+        var approvedWorkflow2 = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, reRunApprovedDate,
+            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+        );
+        transcriptionEntity.setTranscriptionStatus(approvedWorkflow2.getTranscriptionStatus());
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        transcriptionEntity.getTranscriptionWorkflowEntities()
+            .addAll(List.of(approvedWorkflow, withTranscriberWorkflow, approvedWorkflow2));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriptRequests(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+        var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        assertThat(transcriberTranscriptions.getFirst().getApprovedTs().format(format)).isEqualTo(approvedDate.format(format));
+    }
 }
