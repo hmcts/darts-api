@@ -29,8 +29,4 @@ public interface TranscriptModel {
     String getStatus();
 
     void setStatus(String status);
-
-    void setCourtroom(String name);
-
-    String getCourtroom();
 }
