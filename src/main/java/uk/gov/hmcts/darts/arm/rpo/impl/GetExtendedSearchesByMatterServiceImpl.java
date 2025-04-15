@@ -32,7 +32,7 @@ public class GetExtendedSearchesByMatterServiceImpl implements GetExtendedSearch
 
     @Override
     public String getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        log.debug("getExtendedSearchesByMatter called with executionId: {}", executionId);
+        log.info("getExtendedSearchesByMatter called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedSearchesByMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -53,7 +53,7 @@ public class GetExtendedSearchesByMatterServiceImpl implements GetExtendedSearch
             log.error(errorMessage.append("Unable to get ARM RPO response {}").append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - ExtendedSearchesByMatterResponse: {}", extendedSearchesByMatterResponse);
+        log.info("ARM RPO Response - ExtendedSearchesByMatterResponse: {}", extendedSearchesByMatterResponse);
         return processExtendedSearchesByMatterResponse(executionId, userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 

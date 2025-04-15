@@ -119,7 +119,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity1.setDataIngestionTs(OffsetDateTime.now().minusHours(26));
+        externalObjectDirectoryEntity1.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(26));
         dartsDatabase.save(externalObjectDirectoryEntity1);
 
         var externalObjectDirectoryEntity2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -128,7 +128,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity2.setDataIngestionTs(OffsetDateTime.now().minusHours(6));
+        externalObjectDirectoryEntity2.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(6));
         dartsDatabase.save(externalObjectDirectoryEntity2);
 
         var externalObjectDirectoryEntity3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -137,7 +137,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity3.setDataIngestionTs(OffsetDateTime.now().minusHours(26));
+        externalObjectDirectoryEntity3.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(26));
         dartsDatabase.save(externalObjectDirectoryEntity3);
 
         var externalObjectDirectoryEntity4 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -146,7 +146,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity4.setDataIngestionTs(OffsetDateTime.now().minusHours(28));
+        externalObjectDirectoryEntity4.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(28));
         dartsDatabase.save(externalObjectDirectoryEntity4);
 
         log.info("eod 1: {}, eod 2: {}", externalObjectDirectoryEntity1.getId(), externalObjectDirectoryEntity2.getId());
@@ -193,7 +193,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity1.setDataIngestionTs(OffsetDateTime.now().minusHours(1));
+        externalObjectDirectoryEntity1.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(1));
         dartsDatabase.save(externalObjectDirectoryEntity1);
 
         var externalObjectDirectoryEntity2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -202,7 +202,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity2.setDataIngestionTs(OffsetDateTime.now().minusHours(100));
+        externalObjectDirectoryEntity2.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(100));
         dartsDatabase.save(externalObjectDirectoryEntity2);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
@@ -238,7 +238,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity.setDataIngestionTs(OffsetDateTime.now().minusHours(26));
+        externalObjectDirectoryEntity.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(26));
         dartsDatabase.save(externalObjectDirectoryEntity);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
@@ -266,7 +266,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity.setDataIngestionTs(OffsetDateTime.now().minusHours(26));
+        externalObjectDirectoryEntity.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(26));
         dartsDatabase.save(externalObjectDirectoryEntity);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
@@ -294,7 +294,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity.setDataIngestionTs(OffsetDateTime.now().minusHours(1));
+        externalObjectDirectoryEntity.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(1));
         dartsDatabase.save(externalObjectDirectoryEntity);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());

@@ -24,7 +24,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
 
     @Override
     public void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount) {
-        log.debug("saveBackgroundSearch called with executionId: {}, searchName: {}", executionId, searchName);
+        log.info("saveBackgroundSearch called with executionId: {}, searchName: {}", executionId, searchName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.saveBackgroundSearchRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -39,7 +39,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
             log.error(errorMessage.append("Unable to save background search").append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - SaveBackgroundSearchResponse: {}", saveBackgroundSearchResponse);
+        log.info("ARM RPO Response - SaveBackgroundSearchResponse: {}", saveBackgroundSearchResponse);
         armRpoUtil.handleResponseStatus(userAccount, saveBackgroundSearchResponse, errorMessage, armRpoExecutionDetailEntity);
 
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
@@ -51,5 +51,5 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
             .searchId(searchId)
             .build();
     }
-    
+
 }

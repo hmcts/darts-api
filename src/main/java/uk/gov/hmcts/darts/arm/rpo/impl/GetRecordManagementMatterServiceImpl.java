@@ -29,7 +29,7 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
 
     @Override
     public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        log.debug("getRecordManagementMatter called with executionId: {}", executionId);
+        log.info("getRecordManagementMatter called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getRecordManagementMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -43,7 +43,7 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - RecordManagementMatterResponse: {}", recordManagementMatterResponse);
+        log.info("ARM RPO Response - RecordManagementMatterResponse: {}", recordManagementMatterResponse);
         armRpoUtil.handleResponseStatus(userAccount, recordManagementMatterResponse, errorMessage, armRpoExecutionDetailEntity);
 
         if (isNull(recordManagementMatterResponse.getRecordManagementMatter())

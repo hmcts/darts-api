@@ -48,7 +48,7 @@ public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduc
         OffsetDateTime executionDateTime = armRpoExecutionDetailEntity.getCreatedDateTime();
 
         Limit limit = Limit.of(MAX_EOD_RECORDS);
-        var eods = externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
+        var eods = externalObjectDirectoryRepository.findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
             EodHelper.armRpoPendingStatus(),
             executionDateTime.minusHours(rpoCsvEndHour),
             executionDateTime.minusHours(rpoCsvStartHour),
