@@ -15,6 +15,8 @@ import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
+import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.util.List;
 
@@ -33,6 +35,8 @@ public interface CaseService {
     CourtCaseEntity getCourtCaseById(Integer caseId);
 
     List<Event> getEventsByCaseId(Integer caseId);
+
+    PaginatedList<Event> getEventsByCaseId(Integer caseId, PaginationDto<Event> paginationDto);
 
     List<Transcript> getTranscriptsByCaseId(Integer caseId);
 

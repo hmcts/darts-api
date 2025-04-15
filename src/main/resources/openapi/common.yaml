@@ -67,6 +67,22 @@ components:
     MarkedForDeletion:
       type: boolean
 
+    paginated_list_common:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+        total_items:
+          type: integer
+      required:
+        - current_page
+        - page_size
+        - total_pages
+        - total_items
     reporting_restrictions:
       type: array
       default: [ ]
