@@ -413,6 +413,7 @@ darts:
         async-timeout: 90M
       external-datastore-deleter:
         system-user-email: system_ExternalDataStoreDeleter@hmcts.net
+        transient-object-directory-delete-buffer: 90d
         lock:
           at-least-for: PT1M
           at-most-for: PT90M

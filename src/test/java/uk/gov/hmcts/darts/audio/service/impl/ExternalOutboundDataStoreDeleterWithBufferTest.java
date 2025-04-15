@@ -6,11 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
-import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleterWithBuffer;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -29,31 +30,39 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ExternalOutboundDataStoreDeleterImplTest {
+class ExternalOutboundDataStoreDeleterWithBufferTest {
+    private static final Duration BUFFER_DURATION = Duration.ofDays(90);
+
     @Mock
     private UserAccountRepository userAccountRepository;
     @Mock
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-    private ExternalOutboundDataStoreDeleter deleter;
+    private ExternalOutboundDataStoreDeleterWithBuffer deleter;
     private ObjectRecordStatusEntity markedForDeletionStatus;
     @Mock
     private DataManagementApi dataManagementApi;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
     private OffsetDateTime currentTime;
 
     @BeforeEach
     void setUp() {
-        this.deleter = new ExternalOutboundDataStoreDeleter(
+        this.deleter = new ExternalOutboundDataStoreDeleterWithBuffer(
             transientObjectDirectoryRepository,
             transformedMediaRepository,
-            dataManagementApi
+            dataManagementApi,
+            currentTimeHelper,
+            BUFFER_DURATION
         );
         currentTime = OffsetDateTime.now();
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentTime);
     }
 
     private void mockStatus() {
@@ -87,10 +96,11 @@ class ExternalOutboundDataStoreDeleterImplTest {
         return transformedMediaEntity;
     }
 
-    void assertEodAndTodAndTransformedMediaAreDeletedWithExprityOffset(Duration offSet) {
+    @Test
+    void deleteFromOutboundDataStore_whenMediaExpirtyIs91DaysAgo_shouldDeleteTransientObject() {
         mockStatus();
 
-        List<TransientObjectDirectoryEntity> outboundData = createOutboundData(currentTime.minus(offSet));
+        List<TransientObjectDirectoryEntity> outboundData = createOutboundData(currentTime.minus(Duration.ofDays(91)));
 
         try (EodHelperMocks eodHelperMocks = new EodHelperMocks()) {
 
@@ -114,12 +124,29 @@ class ExternalOutboundDataStoreDeleterImplTest {
     }
 
     @Test
-    void deleteFromOutboundDataStore_whenMediaExpirtyIs91DaysAgo_shouldDeleteTransientObject() {
-        assertEodAndTodAndTransformedMediaAreDeletedWithExprityOffset(Duration.ofDays(91));
-    }
+    void deleteFromOutboundDataStore_whenMediaExpirtyIs81DaysAgo_shouldNotDeleteTransientObjectButShouldDeleteEod() {
+        mockStatus();
 
-    @Test
-    void deleteFromOutboundDataStore_whenMediaExpirtyIs81DaysAgo_shouldDeleteTransientObject() {
-        assertEodAndTodAndTransformedMediaAreDeletedWithExprityOffset(Duration.ofDays(89));
+        List<TransientObjectDirectoryEntity> outboundData = createOutboundData(currentTime.minus(Duration.ofDays(81)));
+
+        try (EodHelperMocks eodHelperMocks = new EodHelperMocks()) {
+
+            when(transientObjectDirectoryRepository.findByStatus(any(), any())).thenReturn(outboundData);
+
+            Collection<TransientObjectDirectoryEntity> deletedItems = deleter.delete(100);
+
+            assertThat(deletedItems, containsInAnyOrder(
+                hasProperty("id", is(1)),
+                hasProperty("id", is(21))
+            ));
+            assertEquals(2, deletedItems.size());
+            verify(transientObjectDirectoryRepository)
+                .findByStatus(eodHelperMocks.getMarkForDeletionStatus(), Limit.of(100));
+
+            verify(transientObjectDirectoryRepository, never()).delete(outboundData.get(0));
+            verify(transientObjectDirectoryRepository, never()).delete(outboundData.get(1));
+            verify(transformedMediaRepository, never()).delete(outboundData.get(0).getTransformedMedia());
+            verify(transformedMediaRepository, never()).delete(outboundData.get(1).getTransformedMedia());
+        }
     }
 }
