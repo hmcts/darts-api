@@ -29,7 +29,7 @@ public class DownloadProductionServiceImpl implements DownloadProductionService 
     @Override
     public InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileId,
                                           UserAccountEntity userAccount) throws IOException {
-        log.debug("downloadProduction called with executionId: {}, productionExportFileId: {}", executionId, productionExportFileId);
+        log.info("downloadProduction called with executionId: {}, productionExportFileId: {}", executionId, productionExportFileId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.downloadProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -44,7 +44,7 @@ public class DownloadProductionServiceImpl implements DownloadProductionService 
                           .append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - downloadProduction response: {}", response);
+        log.info("ARM RPO Response - downloadProduction response: {}", response);
 
         // on any error occurring, return a download failure
         if (isNull(response) || !HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
@@ -54,7 +54,7 @@ public class DownloadProductionServiceImpl implements DownloadProductionService 
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
-        log.debug("Successfully downloaded ARM data for productionExportFileId: {}", productionExportFileId);
+        log.info("Successfully downloaded ARM data for productionExportFileId: {}", productionExportFileId);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return response.body().asInputStream();
     }
