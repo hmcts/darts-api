@@ -31,7 +31,7 @@ public class GetIndexesByMatterIdServiceImpl implements GetIndexesByMatterIdServ
 
     @Override
     public void getIndexesByMatterId(String bearerToken, Integer executionId, String matterId, UserAccountEntity userAccount) {
-        log.debug("getIndexesByMatterId called with executionId: {}, matterId: {}", executionId, matterId);
+        log.info("getIndexesByMatterId called with executionId: {}, matterId: {}", executionId, matterId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getIndexesByMatterIdRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -44,7 +44,7 @@ public class GetIndexesByMatterIdServiceImpl implements GetIndexesByMatterIdServ
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        log.debug("ARM RPO Response - IndexesByMatterIdResponse: {}", indexesByMatterIdResponse);
+        log.info("ARM RPO Response - IndexesByMatterIdResponse: {}", indexesByMatterIdResponse);
         processIndexesByMatterIdResponse(matterId, userAccount, indexesByMatterIdResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 

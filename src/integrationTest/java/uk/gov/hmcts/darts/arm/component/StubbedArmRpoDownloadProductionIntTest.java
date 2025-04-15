@@ -89,15 +89,15 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
             if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
                 // within the time range
                 eod.setCreatedDateTime(ingestionStartDateTime);
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
             } else if (eod.getId() % 3 == 0) {
                 // before the time range
                 eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
             } else {
                 // after the time range
                 eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
             }
         });
         dartsPersistence.saveAll(externalObjectDirectoryEntities);

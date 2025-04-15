@@ -36,7 +36,7 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
     @Override
     public String addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
 
-        log.debug("addAsyncSearch called with executionId: {}", executionId);
+        log.info("addAsyncSearch called with executionId: {}", executionId);
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
                                                  ArmRpoHelper.addAsyncSearchRpoState(),
@@ -72,7 +72,7 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(e).toString(),
                                                              executionDetail, userAccount);
         }
-        log.debug("ARM RPO Response - ArmAsyncSearchResponse: {}", armAsyncSearchResponse);
+        log.info("ARM RPO Response - ArmAsyncSearchResponse: {}", armAsyncSearchResponse);
         return processAddAsyncSearch(userAccount, armAsyncSearchResponse, exceptionMessageBuilder, executionDetail, searchName);
     }
 
