@@ -214,7 +214,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
         '401':
@@ -246,7 +246,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
         '401':
@@ -278,7 +278,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -547,36 +547,6 @@ components:
       enum:
         - "AUTHORISATION_100"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
-    transcripts:
-      type: array
-      items:
-        $ref: '#/components/schemas/transcript'
-    transcript:
-      type: object
-      properties:
-        transcription_id:
-          type: integer
-          example: 1
-        hearing_id:
-          type: integer
-          example: 2
-        hearing_date:
-          type: string
-          format: date
-          example: 2022-05-20
-        type:
-          type: string
-          example: "Sentencing remarks"
-        requested_on:
-          type: string
-          format: date-time
-          example: 2023-06-20T10:00:00Z
-        requested_by_name:
-          type: string
-          example: "Joe Bloggs"
-        status:
-          type: string
-          example: "Available"
     annotation:
       type: object
       properties:
