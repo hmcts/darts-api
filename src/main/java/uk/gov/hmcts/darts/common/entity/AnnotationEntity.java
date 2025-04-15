@@ -88,7 +88,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity implements HasIn
      * This switch was needed to prevent data integirty issues when inserting/deleting values.
      * As when using a list spring will first delete all values on the mapping table. Then reinsert only the new ones.
      * Where as using a Set it will only add the new values and remove the old ones.
-     * A tech debt ticket has be raised to refactor all the code that uses this method, to ensure it uses a many to many safe equivelent
+     * A tech debt ticket (DMP-4972) has be raised to refactor all the code that uses this method, to ensure it uses a many to many safe equivelent
      *
      * @return the first hearing entity found within the set
      * @deprecated because this is not many to many safe. Implementation should account for multiple hearings

@@ -172,7 +172,7 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
         return dateTime;
     }
 
-    @SuppressWarnings("java:S1874")//Ticket has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private String getHearingDate(MediaEntity media) {
         String hearingDate = null;
         if (CollectionUtils.isNotEmpty(media.getHearings())) {
@@ -195,7 +195,7 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
         return cases;
     }
 
-    @SuppressWarnings("java:S1874")//Ticket has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private static String getCourthouse(MediaEntity media) {
         String courthouse = null;
         if (CollectionUtils.isNotEmpty(media.getHearings()) && nonNull(media.getHearing().getCourtroom())) {
@@ -206,7 +206,7 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
         return courthouse;
     }
 
-    @SuppressWarnings("java:S1874")//Ticket has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private static String getCourtroom(MediaEntity media) {
         String courtroom = null;
         if (CollectionUtils.isNotEmpty(media.getHearings()) && nonNull(media.getHearing().getCourtroom())) {
