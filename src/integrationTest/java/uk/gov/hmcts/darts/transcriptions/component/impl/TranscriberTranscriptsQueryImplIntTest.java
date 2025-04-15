@@ -24,7 +24,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AW
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
-class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
+class TranscriberTranscriptsQueryImplIntTest extends IntegrationBase {
 
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
@@ -226,11 +226,17 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
         var requestedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
             transcriptionEntity, reRunRequestedDate, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED)
         );
+        transcriptionEntity.setTranscriptionStatus(requestedWorkflow.getTranscriptionStatus());
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
         // Move workflow to AWAITING_AUTHORISATION
         var awaitingAuthWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
             transcriptionEntity, reRunRequestedDate.plusSeconds(1),
             dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(AWAITING_AUTHORISATION)
         );
+        transcriptionEntity.setTranscriptionStatus(awaitingAuthWorkflow.getTranscriptionStatus());
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
         // Move workflow to APPROVED
         var approvedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
             transcriptionEntity, approvedDate, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
@@ -290,4 +296,5 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
         var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         assertThat(transcriberTranscriptions.getFirst().getApprovedTs().format(format)).isEqualTo(approvedDate.format(format));
     }
+
 }

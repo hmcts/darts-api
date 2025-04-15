@@ -171,7 +171,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     JOIN darts.security_group_user_account_ae gua ON usr.usr_id = gua.usr_id
                     JOIN darts.security_group grp ON gua.grp_id = grp.grp_id
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
-                    WHERE  usr.usr_id = :usr_id
+                    WHERE usr.usr_id = :usr_id
                     AND grp.rol_id = :rol_id
                     AND usr.is_active = true
                 )
