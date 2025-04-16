@@ -40,7 +40,6 @@ public class PaginationTestSupport {
     @SneakyThrows
     public <T> PaginatedList<T> getPaginatedList(MvcResult mvcResult, Class<T> clazz) {
         JavaType javaType = objectMapper.getTypeFactory().constructParametricType(PaginatedList.class, clazz);
-        PaginatedList<T> paginatedList = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), javaType);
-        return paginatedList;
+        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), javaType);
     }
 }

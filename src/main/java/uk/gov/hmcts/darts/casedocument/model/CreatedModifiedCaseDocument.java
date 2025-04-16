@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
-public abstract class CreatedModifiedCaseDocument {
+public class CreatedModifiedCaseDocument {
 
     private OffsetDateTime createdDateTime;
     private Integer createdBy;

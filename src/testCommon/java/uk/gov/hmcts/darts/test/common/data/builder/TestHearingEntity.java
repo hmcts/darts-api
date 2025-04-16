@@ -46,6 +46,7 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
         OffsetDateTime lastModifiedDateTime,
         Integer lastModifiedById
     ) {
+        super();
         // Set parent properties
         setId(id);
         setCourtroom(courtroom);
@@ -78,10 +79,7 @@ public class TestHearingEntity extends HearingEntity implements DbInsertable<Hea
     }
 
     public static class TestHearingEntityBuilderRetrieve implements BuilderHolder<TestHearingEntity, TestHearingEntity.TestHearingEntityBuilder> {
-        public TestHearingEntityBuilderRetrieve() {
-        }
-
-        private TestHearingEntity.TestHearingEntityBuilder builder = TestHearingEntity.builder();
+       private final TestHearingEntity.TestHearingEntityBuilder builder = TestHearingEntity.builder();
 
         @Override
         public TestHearingEntity build() {

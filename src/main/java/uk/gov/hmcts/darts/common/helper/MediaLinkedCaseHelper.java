@@ -25,14 +25,14 @@ public class MediaLinkedCaseHelper {
     private final HearingRepository hearingRepository;
 
     public void linkMediaToCase(MediaEntity mediaEntity, CourtCaseEntity courtCase, MediaLinkedCaseSourceType sourceType, UserAccountEntity createdBy) {
-        if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
+        if (mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
+            log.debug("med_id {} and cas_id {} already linked, nothing to do",
+                      mediaEntity.getId(), courtCase.getId());
+        } else {
             MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity(mediaEntity, courtCase, createdBy, sourceType);
             mediaLinkedCaseEntity = mediaLinkedCaseRepository.saveAndFlush(mediaLinkedCaseEntity);
             log.debug("cas_id {} and med_id {} were not linked, Created new link via mlc_id {}",
                       courtCase.getId(), mediaEntity.getId(), mediaLinkedCaseEntity.getId());
-        } else {
-            log.debug("med_id {} and cas_id {} already linked, nothing to do",
-                      mediaEntity.getId(), courtCase.getId());
         }
     }
 

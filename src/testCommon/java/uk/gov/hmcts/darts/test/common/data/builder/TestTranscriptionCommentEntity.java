@@ -28,6 +28,7 @@ public class TestTranscriptionCommentEntity extends TranscriptionCommentEntity i
         OffsetDateTime lastModifiedDateTime,
         Integer lastModifiedById
     ) {
+        super();
         // Set parent properties
         setId(id);
         setTranscriptionWorkflow(transcriptionWorkflow);
@@ -58,7 +59,7 @@ public class TestTranscriptionCommentEntity extends TranscriptionCommentEntity i
     public static class TestTranscriptionCommentEntityBuilderRetrieve
         implements BuilderHolder<TestTranscriptionCommentEntity, TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder> {
 
-        private TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder builder = TestTranscriptionCommentEntity.builder();
+        private final TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder builder = TestTranscriptionCommentEntity.builder();
 
         @Override
         public TestTranscriptionCommentEntity build() {

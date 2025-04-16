@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService {
 
     private final HearingCommonService hearingCommonService;

@@ -34,6 +34,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
                            String retConfReason, OffsetDateTime createdDateTime,
                            Integer createdById, OffsetDateTime lastModifiedDateTime,
                            Integer lastModifiedById) {
+        super();
         setId(id);
         setCourtroom(courtroom);
         setLegacyObjectId(legacyObjectId);
@@ -81,10 +82,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
     }
 
     public static class TestMediaBuilderRetrieve implements BuilderHolder<TestMediaEntity, TestMediaEntityBuilder> {
-        public TestMediaBuilderRetrieve() {
-        }
-
-        private TestMediaEntity.TestMediaEntityBuilder builder = TestMediaEntity.builder();
+        private final TestMediaEntity.TestMediaEntityBuilder builder = TestMediaEntity.builder();
 
         @Override
         public TestMediaEntity build() {

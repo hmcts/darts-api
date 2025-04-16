@@ -22,6 +22,7 @@ public class HibernateEventListenerRegistryConfiguration {
     }
 
     @PostConstruct
+    @SuppressWarnings("PMD.CloseResource")
     public void eventListenerRegistry() {
         var serviceRegistry = entityManagerFactory
             .unwrap(SessionFactoryImpl.class)
@@ -35,5 +36,6 @@ public class HibernateEventListenerRegistryConfiguration {
         listenerRegistry.setListeners(
             POST_UPDATE,
             new DartsEnversPostUpdateEventListener(enversService, new AuditExecutor()));
+
     }
 }

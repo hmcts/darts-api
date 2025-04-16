@@ -91,7 +91,7 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
 
     private void populateArmAutomatedTaskEntity() {
         ArmAutomatedTaskEntity taskEntity = dartsPersistence.getArmAutomatedTaskRepository()
-            .findByAutomatedTask_taskName(ARM_RPO_REPLAY_TASK_NAME.getTaskName()).orElseThrow();
+            .findByAutomatedTaskTaskName(ARM_RPO_REPLAY_TASK_NAME.getTaskName()).orElseThrow();
         taskEntity.setArmReplayStartTs(startTs);
         taskEntity.setArmReplayEndTs(endTs);
         armAutomatedTaskEntity = dartsPersistence.getArmAutomatedTaskRepository().saveAndFlush(taskEntity);

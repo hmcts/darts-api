@@ -23,6 +23,7 @@ public class TestAnnotationDocumentEntity extends AnnotationDocumentEntity imple
                                         boolean isHidden, OffsetDateTime retainUntilTs, RetentionConfidenceScoreEnum retConfScore,
                                         String retConfReason, AnnotationEntity annotation,
                                         OffsetDateTime lastModifiedTimestamp, Integer lastModifiedById) {
+        super();
         setId(id);
         setFileName(fileName);
         setFileType(fileType);
@@ -57,10 +58,8 @@ public class TestAnnotationDocumentEntity extends AnnotationDocumentEntity imple
 
     public static class TestAnnotationDocumentEntityRetrieve implements
         BuilderHolder<TestAnnotationDocumentEntity, TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder> {
-        public TestAnnotationDocumentEntityRetrieve() {
-        }
 
-        private TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder builder = TestAnnotationDocumentEntity.builder();
+        private final TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder builder = TestAnnotationDocumentEntity.builder();
 
         @Override
         public TestAnnotationDocumentEntity build() {

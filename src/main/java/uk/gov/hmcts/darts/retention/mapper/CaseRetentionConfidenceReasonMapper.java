@@ -19,8 +19,6 @@ public class CaseRetentionConfidenceReasonMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    private DateTimeFormatter dateTimeFormatter;
-
     public CaseRetentionConfidenceReason mapToCaseRetentionConfidenceReason(OffsetDateTime offsetDateTime, List<CourtCaseEntity> courtCases) {
         return CaseRetentionConfidenceReason.builder()
             .retentionConfidenceAppliedTimestamp(formatDateTime(offsetDateTime))
@@ -28,6 +26,7 @@ public class CaseRetentionConfidenceReasonMapper {
             .build();
     }
 
+    @SuppressWarnings("PMD.NullAssignment")
     private List<CaseRetentionConfidenceReason.RetentionCase> buildRetentionCases(List<CourtCaseEntity> courtCases) {
         List<CaseRetentionConfidenceReason.RetentionCase> retentionCases = new ArrayList<>();
         for (CourtCaseEntity courtCase : courtCases) {
@@ -40,13 +39,12 @@ public class CaseRetentionConfidenceReasonMapper {
     }
 
     private CaseRetentionConfidenceReason.RetentionCase buildRetentionCase(CourtCaseEntity courtCase) {
-        var retentionCase = CaseRetentionConfidenceReason.RetentionCase.builder()
+        return CaseRetentionConfidenceReason.RetentionCase.builder()
             .courthouse(courtCase.getCourthouse().getCourthouseName())
             .caseNumber(courtCase.getCaseNumber())
             .retentionConfidenceUpdatedTimestamp(formatDateTime(courtCase.getRetConfUpdatedTs()))
             .retentionConfidenceReason(getCaseRetentionConfidenceReason(courtCase))
             .build();
-        return retentionCase;
     }
 
     private static String getCaseRetentionConfidenceReason(CourtCaseEntity courtCase) {
@@ -58,7 +56,7 @@ public class CaseRetentionConfidenceReasonMapper {
     }
 
     private String formatDateTime(OffsetDateTime offsetDateTime) {
-        dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         String dateTime = null;
         if (nonNull(offsetDateTime)) {
             dateTime = offsetDateTime.format(dateTimeFormatter);

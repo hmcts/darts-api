@@ -32,14 +32,18 @@ public class TranscriptionDocumentHideOrShowValidator implements Validator<IdReq
     private boolean manualDeletionEnabled;
 
     @Override
-    @SuppressWarnings("java:S5411")
+    @SuppressWarnings({
+        "java:S5411",
+        "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
+        "PMD.CognitiveComplexity"//TODO - refactor to reduce complexity when this is next edited
+    })
     public void validate(IdRequest<TranscriptionDocumentHideRequest> request) {
         transcriptionDocumentIdValidator.validate(request.getId());
 
         if (request.getPayload().getIsHidden() && request.getPayload().getAdminAction() == null) {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE);
         } else if (request.getPayload().getIsHidden()) {
-            List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByTranscriptionDocument_Id(request.getId());
+            List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByTranscriptionDocumentId(request.getId());
             if (!objectAdminActionEntityList.isEmpty()) {
                 throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_ALREADY_HIDDEN);
             }

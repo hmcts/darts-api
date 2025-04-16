@@ -33,23 +33,28 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.UnnecessaryAnnotationValueElement"})
+    @SuppressWarnings({
+        "PMD.CyclomaticComplexity",
+        "PMD.UnnecessaryAnnotationValueElement",
+        "PMD.NPathComplexity"//TODO - refactor to reduce complexity when this class is next edited
+    })
     public void validate(CourthousePatch patch, Integer id) {
         patch.setCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToNull(patch.getCourthouseName())));
         var courthouseEntity = repository.findById(id)
             .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
 
-        if (nonNull(patch.getCourthouseName())) {
-            if (!patch.getCourthouseName().equals(courthouseEntity.getCourthouseName()) && caseRepository.existsByCourthouse(courthouseEntity)) {
-                throw new DartsApiException(COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING);
-            }
+        if (nonNull(patch.getCourthouseName())
+            && !patch.getCourthouseName().equals(courthouseEntity.getCourthouseName())
+            && caseRepository.existsByCourthouse(courthouseEntity)) {
+            throw new DartsApiException(COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING);
         }
 
-        if (nonNull(patch.getCourthouseName())) {
-            if (repository.existsByCourthouseNameAndIdNot(patch.getCourthouseName(), id)) {
-                throw new DartsApiException(COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
-            }
+
+        if (nonNull(patch.getCourthouseName())
+            && repository.existsByCourthouseNameAndIdNot(patch.getCourthouseName(), id)) {
+            throw new DartsApiException(COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
         }
+
 
         if (nonNull(patch.getDisplayName()) && repository.existsByDisplayNameIgnoreCaseAndIdNot(patch.getDisplayName(), id)) {
             throw new DartsApiException(COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);

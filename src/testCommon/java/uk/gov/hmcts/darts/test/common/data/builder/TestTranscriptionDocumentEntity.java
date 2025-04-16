@@ -33,6 +33,7 @@ public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity
                                            List<ObjectAdminActionEntity> adminActions,
                                            Integer createdById, OffsetDateTime lastModifiedDateTime,
                                            Integer lastModifiedById) {
+        super();
         setId(id);
         setTranscription(transcription);
         setClipId(clipId);
@@ -72,7 +73,7 @@ public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity
     public static class TranscriptionDocumentEntityBuilderRetrieve
         implements BuilderHolder<TestTranscriptionDocumentEntity, TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder> {
 
-        private TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder builder = TestTranscriptionDocumentEntity.builder();
+        private final TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder builder = TestTranscriptionDocumentEntity.builder();
 
         @Override
         public TestTranscriptionDocumentEntity build() {

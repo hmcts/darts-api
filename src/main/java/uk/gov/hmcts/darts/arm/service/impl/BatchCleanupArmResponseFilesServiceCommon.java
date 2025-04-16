@@ -36,6 +36,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupArmResponseFilesService {
 
     protected final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -152,6 +153,10 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
 
     }
 
+    @SuppressWarnings({
+        "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
+        "PMD.CyclomaticComplexity"//TODO - refactor to reduce complexity when this is next edited
+    })
     private void deleteResponseFiles(UserAccountEntity userAccount, InputUploadAndAssociatedFilenames inputUploadAndAssociates,
                                      List<ExternalObjectDirectoryEntity> eodEntriesWithManifestFilename) {
         List<EodIdAndAssociatedFilenames> eodIdAndAssociatedFilenamesList = inputUploadAndAssociates.getEodIdAndAssociatedFilenamesList();

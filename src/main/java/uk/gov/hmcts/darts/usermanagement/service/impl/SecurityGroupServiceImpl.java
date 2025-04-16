@@ -43,6 +43,10 @@ import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SE
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class SecurityGroupServiceImpl implements SecurityGroupService {
 
     private final SecurityGroupRepository securityGroupRepository;
@@ -85,7 +89,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         //check the roleType is allowed
         SecurityRoleEnum requestedSecurityRole = SecurityRoleEnum.valueOfId(securityGroupRequest.getSecurityRoleId());
         if (!securityRolesAllowedToBeCreatedInGroup.contains(requestedSecurityRole)) {
-            List<String> listOfAllowedRoleNames = securityRolesAllowedToBeCreatedInGroup.stream().map(role -> role.name()).toList();
+            List<String> listOfAllowedRoleNames = securityRolesAllowedToBeCreatedInGroup.stream()
+                .map(SecurityRoleEnum::name)
+                .toList();
             String errorMessage = MessageFormat.format("A group with a role of type {0} has been requested, but only roles of type {1} are allowed.",
                                                        requestedSecurityRole.name(), listOfAllowedRoleNames);
             throw new DartsApiException(SECURITY_GROUP_NOT_ALLOWED, errorMessage);

@@ -33,7 +33,12 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
     private boolean manualDeletionEnabled;
 
     @Override
-    @SuppressWarnings("java:S5411")
+    @SuppressWarnings({
+        "java:S5411",
+        "PMD.CyclomaticComplexity"//TODO - refactor to reduce complexity when this is next edited
+
+    })
+
     public void validate(IdRequest<MediaHideRequest> request) {
         mediaIdValidator.validate(request.getId());
 
@@ -42,7 +47,7 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
         if (request.getPayload().getIsHidden() && adminActionRequest == null) {
             throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE);
         } else if (request.getPayload().getIsHidden()) {
-            List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(request.getId());
+            List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMediaId(request.getId());
             if (!objectAdminActionEntityList.isEmpty()) {
                 throw new DartsApiException(AudioApiError.MEDIA_ALREADY_HIDDEN);
             }

@@ -46,6 +46,7 @@ import static uk.gov.hmcts.darts.usermanagement.auditing.UserAccountUpdateAuditA
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class UserManagementServiceImpl implements UserManagementService {
 
     private final UserAccountMapper userAccountMapper;
@@ -141,7 +142,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     public List<UserWithIdAndTimestamps> getUsers(String emailAddress, List<Integer> userIds) {
         return userManagementQuery.getUsers(emailAddress, userIds).stream()
-            .map(userAccountEntity -> toUserWithIdAndTimestamps(userAccountEntity))
+            .map(this::toUserWithIdAndTimestamps)
             .toList();
     }
 

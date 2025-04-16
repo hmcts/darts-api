@@ -4,6 +4,7 @@ import java.util.Set;
 
 import static java.util.Objects.nonNull;
 
+@FunctionalInterface
 public interface AuditActivityProvider {
 
     Set<AuditActivity> getAuditActivities();

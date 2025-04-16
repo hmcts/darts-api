@@ -112,7 +112,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         ObjectRecordStatusEntity armRpoPending = EodHelper.armRpoPendingStatus();
         StringBuilder errorMessage = new StringBuilder(92).append("Failure during ARM RPO CSV Reconciliation: ");
 
-        ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTask_taskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
             .orElseThrow(() -> new ArmRpoException(errorMessage.append("Automated task ProcessE2EArmRpoPending not found.").toString()));
 
         List<Integer> csvEodList = getEodsListFromCsvFiles(csvFiles, errorMessage);
@@ -172,11 +172,11 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             } catch (IOException e) {
                 log.info("File not found only read {} rows for file {}", counter, csvFile.getName());
                 log.error(errorMessage.append("Unable to find CSV file for Reconciliation ").toString(), e);
-                throw new ArmRpoException(errorMessage.toString());
+                throw new ArmRpoException(errorMessage.toString(), e);
             } catch (Exception e) {
                 log.info("Only read {} rows for file {}", counter, csvFile.getName());
                 log.error(errorMessage.toString(), e.getMessage());
-                throw new ArmRpoException(errorMessage.toString());
+                throw new ArmRpoException(errorMessage.toString(), e);
             }
         }
         return csvEodList;

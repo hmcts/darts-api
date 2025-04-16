@@ -28,6 +28,7 @@ public class PaginationDto<T> {
     List<String> sortBy;
     List<Sort.Direction> sortDirection;
 
+    @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     public static List<Sort.Direction> toSortDirection(List<String> sortOrder) {
         if (sortOrder == null) {
             return null;
@@ -39,6 +40,7 @@ public class PaginationDto<T> {
             .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     public static List<String> toSortBy(List<String> sortBy) {
         if (sortBy == null) {
             return null;

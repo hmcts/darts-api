@@ -54,6 +54,7 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
         return false;
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     protected abstract void deleteFromDataStore(String externalLocation) throws Exception;
 
     protected abstract Collection<T> findItemsToDelete(int batchSize);

@@ -21,6 +21,7 @@ public final class DataUtil {
         return Optional.ofNullable(value).map(String::toUpperCase).orElse(null);
     }
 
+    @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     public static List<String> trim(List<String> list) {
         if (isNull(list)) {
             return null;

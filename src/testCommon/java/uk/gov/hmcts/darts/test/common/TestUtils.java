@@ -86,10 +86,11 @@ public final class TestUtils {
         String xmlContent = "";
 
         try (BufferedReader reader = Files.newBufferedReader(Path.of(annotationsFile))) {
-            String line;
+            String line = reader.readLine();
             StringBuilder content = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
+            while (line != null) {
                 content.append(line);
+                line = reader.readLine();
             }
             xmlContent = content.toString();
         } catch (Exception e) {

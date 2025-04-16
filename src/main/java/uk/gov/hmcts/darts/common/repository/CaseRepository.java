@@ -12,7 +12,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@SuppressWarnings("PMD.MethodNamingConventions")
+@SuppressWarnings({
+    "PMD.MethodNamingConventions",
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 @Repository
 public interface CaseRepository
     extends JpaRepository<CourtCaseEntity, Integer>, JpaSpecificationExecutor<CourtCaseEntity> {
@@ -103,7 +106,7 @@ public interface CaseRepository
                                                                          OffsetDateTime caseDocumentCreatedAfterTimestamp,
                                                                          Limit limit);
 
-    @Query(value = """
+    @Query("""
         select cc.id from CourtCaseEntity cc
         join CaseRetentionEntity cr
         on cr.courtCase.id = cc.id and cr.currentState = 'COMPLETE'

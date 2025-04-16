@@ -36,6 +36,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public class ArmServiceImpl implements ArmService {
 
     private static final String FILE_PATH_DELIMITER = "/";

@@ -49,7 +49,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              AND t.isCurrent = true        
           ORDER BY tmd.id DESC
         """)
-    @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement
+    @SuppressWarnings({"java:S107", "PMD.UseObjectForClearerAPI"})//Required for JPA
     List<TranscriptionDocumentResult> findTranscriptionMedia(String caseNumber,
                                                              String courtHouseDisplayName,
                                                              LocalDate hearingDate,

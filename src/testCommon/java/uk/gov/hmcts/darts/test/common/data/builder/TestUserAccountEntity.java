@@ -40,6 +40,7 @@ public class TestUserAccountEntity extends UserAccountEntity implements DbInsert
         OffsetDateTime lastModifiedDateTime,
         Integer lastModifiedById
     ) {
+        super();
         setId(id);
         setDmObjectId(dmObjectId);
         setUserName(userName);
@@ -78,7 +79,7 @@ public class TestUserAccountEntity extends UserAccountEntity implements DbInsert
     public static class TestUserAccountEntityBuilderRetrieve
         implements BuilderHolder<TestUserAccountEntity, TestUserAccountEntity.TestUserAccountEntityBuilder> {
 
-        private TestUserAccountEntity.TestUserAccountEntityBuilder builder = TestUserAccountEntity.builder();
+        private final TestUserAccountEntity.TestUserAccountEntityBuilder builder = TestUserAccountEntity.builder();
 
         @Override
         public TestUserAccountEntity build() {

@@ -68,7 +68,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
             );
         } catch (Exception e) {
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(ArmRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST).append(e).toString(),
-                                                             armRpoExecutionDetailEntity, userAccount);
+                                                             armRpoExecutionDetailEntity, userAccount, e);
         }
         BaseRpoResponse baseRpoResponse;
         try {
@@ -104,11 +104,12 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
         } catch (JsonProcessingException ex) {
             log.warn("Unable to parse feign response: {}", feignResponse, ex);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(),
-                                                             armRpoExecutionDetailEntity, userAccount);
+                                                             armRpoExecutionDetailEntity, userAccount, ex);
         }
         return baseRpoResponse;
     }
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     private boolean processCreateExportBasedOnSearchResultsTableResponse(UserAccountEntity userAccount,
                                                                          BaseRpoResponse baseRpoResponse,
                                                                          StringBuilder errorMessage,
@@ -143,7 +144,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
         } catch (IllegalArgumentException e) {
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("ARM RPO API baseRpoResponse status is invalid - ")
                                                                  .append(baseRpoResponse).toString(),
-                                                             armRpoExecutionDetailEntity, userAccount);
+                                                             armRpoExecutionDetailEntity, userAccount, e);
         }
         armRpoExecutionDetailEntity.setProductionName(uniqueProductionName);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);

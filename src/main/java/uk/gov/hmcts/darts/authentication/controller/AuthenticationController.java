@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public interface AuthenticationController {
 
     @GetMapping("/login-or-refresh")

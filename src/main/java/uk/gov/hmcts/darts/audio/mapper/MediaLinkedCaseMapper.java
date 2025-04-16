@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
     uses = {CourthouseMapper.class},
     unmappedSourcePolicy = ReportingPolicy.IGNORE,
     unmappedTargetPolicy = ReportingPolicy.ERROR)
+@FunctionalInterface
 public interface MediaLinkedCaseMapper {
 
 

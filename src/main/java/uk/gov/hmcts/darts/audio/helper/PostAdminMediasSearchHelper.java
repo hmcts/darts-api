@@ -35,6 +35,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public class PostAdminMediasSearchHelper {
 
     @PersistenceContext
@@ -150,7 +151,7 @@ public class PostAdminMediasSearchHelper {
     @SuppressWarnings("unchecked")
     private Join<MediaEntity, CourtroomEntity> getCourtroomJoin(Root<MediaEntity> mediaRoot) {
         Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream()
-            .filter(join -> join.getAttribute().getName().equals(MediaEntity_.COURTROOM)).findAny();
+            .filter(join -> MediaEntity_.COURTROOM.equals(join.getAttribute().getName())).findAny();
 
         return foundJoin.map(join -> (Join<MediaEntity, CourtroomEntity>) join)
             .orElseGet(() -> mediaRoot.join(MediaEntity_.COURTROOM, JoinType.INNER));
@@ -159,7 +160,7 @@ public class PostAdminMediasSearchHelper {
     @SuppressWarnings("unchecked")
     private Join<MediaEntity, HearingEntity> getHearingJoin(Root<MediaEntity> mediaRoot) {
         Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream()
-            .filter(join -> join.getAttribute().getName().equals(MediaEntity_.HEARING_LIST)).findAny();
+            .filter(join -> MediaEntity_.HEARING_LIST.equals(join.getAttribute().getName())).findAny();
 
         return foundJoin.map(join -> (Join<MediaEntity, HearingEntity>) join)
             .orElseGet(() -> mediaRoot.join(MediaEntity_.HEARING_LIST, JoinType.INNER));

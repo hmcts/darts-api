@@ -23,10 +23,11 @@ public class TranscriptionApproveMarkForDeletionValidator implements Validator<I
     private final TranscriptionDocumentIdValidator transcriptionDocumentIdValidator;
 
     @Override
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     public void validate(Integer transcriptionDocumentId) {
         transcriptionDocumentIdValidator.validate(transcriptionDocumentId);
 
-        var objectAdminActionEntityList = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentId);
+        var objectAdminActionEntityList = objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentId);
         if (objectAdminActionEntityList.isEmpty()) {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
         }

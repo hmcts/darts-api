@@ -26,7 +26,6 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -43,6 +42,11 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited
+    "PMD.GodClass"//TODO - refactor to reduce class size when this class is next edited
+})
 public class DataManagementFacadeImpl implements DataManagementFacade {
 
     private final List<BlobContainerDownloadable> supportedDownloadableContainers;
@@ -162,7 +166,8 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
      */
     private DownloadResponseMetaData getDataFromStorage(List<ExternalObjectDirectoryEntity> storedEodEntities) throws FileNotDownloadedException {
         List<DatastoreContainerType> storageOrder = storageOrderHelper.getStorageOrder();
-        StringBuilder logBuilder = new StringBuilder("Starting to search for files with ")
+        StringBuilder logBuilder = new StringBuilder(134)
+            .append("Starting to search for files with ")
             .append(storedEodEntities.size())
             .append(" eodEntities\n");
 
@@ -204,6 +209,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         throw new FileNotDownloadedException(logBuilder.toString());
     }
 
+    @SuppressWarnings("PMD.CloseResource")//TODO - ensure resource is closed after use to prevent memory leaks
     void processUnstructuredData(
         DatastoreContainerType datastoreContainerType,
         DownloadResponseMetaData downloadResponseMetaData,
@@ -237,7 +243,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         File targetFile,
         boolean deleteFileOnCompletion) {
 
-        try (InputStream inputStream = new FileInputStream(targetFile)) {
+        try (InputStream inputStream = Files.newInputStream(targetFile.toPath())) {
             unstructuredDataHelper.createUnstructuredDataFromEod(
                 eodEntityToDelete,
                 eodEntityToUpload,

@@ -94,8 +94,8 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            return inputStream.read(b, off, len);
+        public int read(byte[] bytes, int off, int len) throws IOException {
+            return inputStream.read(bytes, off, len);
         }
 
         /**

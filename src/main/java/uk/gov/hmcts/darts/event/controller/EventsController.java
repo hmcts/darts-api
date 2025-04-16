@@ -57,7 +57,11 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 @RequiredArgsConstructor
 @RestController
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
-@SuppressWarnings({"checkstyle.LineLengthCheck", "PMD.TooManyMethods"})
+@SuppressWarnings({
+    "checkstyle.LineLengthCheck",
+    "PMD.TooManyMethods",
+    "PMD.CouplingBetweenObjects"//TODO - refactor to reduce coupling when this class is next edited
+})
 public class EventsController implements EventApi {
 
     private final CourtLogsService courtLogsService;

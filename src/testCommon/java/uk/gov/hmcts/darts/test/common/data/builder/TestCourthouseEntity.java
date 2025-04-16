@@ -35,6 +35,7 @@ public class TestCourthouseEntity extends CourthouseEntity implements DbInsertab
                                 OffsetDateTime createdDateTime,
                                 Integer lastModifiedById,
                                 OffsetDateTime lastModifiedDateTime) {
+        super();
         setId(id);
         setCode(code);
         setCourthouseName(courthouseName);

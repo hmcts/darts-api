@@ -24,6 +24,7 @@ public class TestAnnotationEntity extends AnnotationEntity implements DbInsertab
                                 List<AnnotationDocumentEntity> annotationDocuments, List<HearingEntity> hearingList,
                                 OffsetDateTime createdTimestamp,
                                 OffsetDateTime lastModifiedDateTime, Integer lastModifiedById, Integer createdById) {
+        super();
         setId(id);
         setText(text);
         setTimestamp(timestamp);
@@ -53,10 +54,7 @@ public class TestAnnotationEntity extends AnnotationEntity implements DbInsertab
     }
 
     public static class TestAnnotationEntityRetrieve implements BuilderHolder<TestAnnotationEntity, TestAnnotationEntity.TestAnnotationEntityBuilder> {
-        public TestAnnotationEntityRetrieve() {
-        }
-
-        private TestAnnotationEntity.TestAnnotationEntityBuilder builder = TestAnnotationEntity.builder();
+        private final TestAnnotationEntity.TestAnnotationEntityBuilder builder = TestAnnotationEntity.builder();
 
         @Override
         public TestAnnotationEntity build() {

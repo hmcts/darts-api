@@ -53,7 +53,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
 
     @Test
     void validate_shouldThrowException_whenNoObjectAdminActionFound() {
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID))
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID))
             .thenReturn(Collections.emptyList());
 
         DartsApiException exception = assertThrows(DartsApiException.class,
@@ -63,7 +63,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
 
     @Test
     void validate_shouldThrowException_whenMultipleObjectAdminActionsFound() {
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID))
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID))
             .thenReturn(List.of(new ObjectAdminActionEntity(), new ObjectAdminActionEntity()));
 
         DartsApiException exception = assertThrows(DartsApiException.class,
@@ -75,7 +75,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
     void validate_shouldThrowException_whenAlreadyMarkedForManualDeletion() {
         ObjectAdminActionEntity entity = new ObjectAdminActionEntity();
         entity.setMarkedForManualDeletion(true);
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID))
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID))
             .thenReturn(List.of(entity));
 
         DartsApiException exception = assertThrows(DartsApiException.class,
@@ -87,7 +87,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
     void validate_shouldThrowException_whenHiddenReasonNotFound() {
         ObjectAdminActionEntity entity = new ObjectAdminActionEntity();
         entity.setObjectHiddenReason(new ObjectHiddenReasonEntity());
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID))
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID))
             .thenReturn(List.of(entity));
         when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.empty());
 
@@ -102,7 +102,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
         ObjectHiddenReasonEntity hiddenReason = new ObjectHiddenReasonEntity();
         hiddenReason.setMarkedForDeletion(false);
         entity.setObjectHiddenReason(hiddenReason);
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID))
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID))
             .thenReturn(List.of(entity));
         when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.of(hiddenReason));
 
@@ -120,7 +120,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
         UserAccountEntity user = new UserAccountEntity();
         user.setId(1);
         entity.setHiddenBy(user);
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID))
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID))
             .thenReturn(List.of(entity));
         when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.of(hiddenReason));
         when(userIdentity.getUserAccount()).thenReturn(user);
@@ -141,7 +141,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
         entity.setHiddenBy(hiddenByUser);
         UserAccountEntity currentUser = new UserAccountEntity();
         currentUser.setId(2);
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID))
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID))
             .thenReturn(List.of(entity));
         when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.of(hiddenReason));
         when(userIdentity.getUserAccount()).thenReturn(currentUser);
@@ -149,7 +149,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
         assertDoesNotThrow(() -> validator.validate(TRANSCRIPTION_DOCUMENT_ID));
 
         verify(objectAdminActionRepository, times(1))
-            .findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID);
+            .findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID);
         verify(objectHiddenReasonRepository, times(1))
             .findById(any());
         verify(userIdentity, times(1))
@@ -161,7 +161,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
     void validate_shouldNotThrowException_whenObjectHiddenReasonIsNull() {
         ObjectAdminActionEntity entity = new ObjectAdminActionEntity();
         entity.setObjectHiddenReason(null);
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID))
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(TRANSCRIPTION_DOCUMENT_ID))
             .thenReturn(List.of(entity));
 
         assertDoesNotThrow(() -> validator.validate(TRANSCRIPTION_DOCUMENT_ID));
