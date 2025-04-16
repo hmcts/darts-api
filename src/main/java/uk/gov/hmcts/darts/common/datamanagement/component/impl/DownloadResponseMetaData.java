@@ -17,9 +17,6 @@ import java.io.OutputStream;
 public abstract class DownloadResponseMetaData implements Closeable {
     protected OutputStream outputStream;
 
-
-    public abstract Resource getResource()  throws IOException;
-
     @Getter
     @Setter
     private ExternalObjectDirectoryEntity eodEntity;
@@ -27,6 +24,8 @@ public abstract class DownloadResponseMetaData implements Closeable {
     @Getter
     @Setter
     private DatastoreContainerType containerTypeUsedToDownload;
+
+    public abstract Resource getResource()  throws IOException;
 
     public abstract OutputStream getOutputStream(StorageConfiguration configuration) throws IOException;
 

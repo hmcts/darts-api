@@ -114,7 +114,12 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @RequiredArgsConstructor
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({
+    "PMD.ExcessiveImports",
+    "PMD.GodClass",
+    "PMD.CouplingBetweenObjects",
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
     public static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
@@ -266,23 +271,25 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private TranscriptionStatusEntity moveTranscriptionRequestedToAwaitingAuthorisation(TranscriptionEntity transcriptionEntity,
                                                                                         TranscriptionStatusEntity transcriptionStatusEntity) {
-
-        if (transcriptionEntity.getIsManualTranscription()) {
-
-            transcriptionStatusEntity = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
-            transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
-
-            transcriptionEntity.getTranscriptionWorkflowEntities().add(
-                saveTranscriptionWorkflow(
-                    getUserAccount(),
-                    transcriptionEntity,
-                    transcriptionStatusEntity,
-                    null
-                ));
-
-            transcriptionNotifications.notifyApprovers(transcriptionEntity);
+        if (!transcriptionEntity.getIsManualTranscription()) {
+            return transcriptionStatusEntity;
         }
-        return transcriptionStatusEntity;
+
+
+        TranscriptionStatusEntity awaitingAuthTranscriptionStatusEntity = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
+        transcriptionEntity.setTranscriptionStatus(awaitingAuthTranscriptionStatusEntity);
+
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(
+            saveTranscriptionWorkflow(
+                getUserAccount(),
+                transcriptionEntity,
+                awaitingAuthTranscriptionStatusEntity,
+                null
+            ));
+
+        transcriptionNotifications.notifyApprovers(transcriptionEntity);
+
+        return awaitingAuthTranscriptionStatusEntity;
     }
 
 
@@ -535,7 +542,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         if (nonNull(isCurrent) && TRUE.equals(isCurrent)) {
             List<TranscriptionWorkflowEntity> workflow =
-                !transcriptionWorkflows.isEmpty() ? List.of(transcriptionWorkflows.getFirst()) : Collections.emptyList();
+                transcriptionWorkflows.isEmpty() ? Collections.emptyList() : List.of(transcriptionWorkflows.getFirst());
             return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(workflow, Collections.emptyList());
         }
 

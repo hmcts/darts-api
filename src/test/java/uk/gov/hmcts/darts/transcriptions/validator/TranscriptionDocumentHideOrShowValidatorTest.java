@@ -92,7 +92,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         ObjectHiddenReasonEntity hiddenReasonEntity = new ObjectHiddenReasonEntity();
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of());
 
         IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
@@ -130,7 +130,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
 
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of(objectAdminActionEntity));
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of(objectAdminActionEntity));
 
         IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
@@ -155,7 +155,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         adminActionResponse.setReasonId(reasonId);
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of());
 
         IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
@@ -184,7 +184,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         when(reasonEntity.isMarkedForDeletion()).thenReturn(true);
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(reasonEntity));
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of());
 
         IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
@@ -213,7 +213,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         when(reasonEntity.isMarkedForDeletion()).thenReturn(true);
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(reasonEntity));
-        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
+        when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of());
 
         IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);

@@ -69,6 +69,11 @@ import static uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil.getReques
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited
+    "PMD.GodClass"//TODO - refactor to reduce class size when this class is next edited
+})
 public class TranscriptionResponseMapper {
 
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;

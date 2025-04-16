@@ -37,7 +37,7 @@ class ArmAutomatedTaskRepositoryTest extends PostgresIntegrationBase {
         armAutomatedTaskRepository.save(armAutomatedTask2);
 
         // When we try to find an arm task that's related to a specific automated task
-        var foundArmAutomatedTask1 = armAutomatedTaskRepository.findByAutomatedTask_taskName(automatedTask1.getTaskName())
+        var foundArmAutomatedTask1 = armAutomatedTaskRepository.findByAutomatedTaskTaskName(automatedTask1.getTaskName())
             .orElseThrow();
 
         // Then
@@ -47,7 +47,7 @@ class ArmAutomatedTaskRepositoryTest extends PostgresIntegrationBase {
     @Test
     void findByAutomatedTaskTaskName_shouldReturnEmptyOptional_whenItDoesNotExist() {
         // When we try to find an arm task that is related to a task that does not exist
-        var foundArmAutomatedTask1 = armAutomatedTaskRepository.findByAutomatedTask_taskName("some non existent task name");
+        var foundArmAutomatedTask1 = armAutomatedTaskRepository.findByAutomatedTaskTaskName("some non existent task name");
 
         // Then
         assertTrue(foundArmAutomatedTask1.isEmpty());

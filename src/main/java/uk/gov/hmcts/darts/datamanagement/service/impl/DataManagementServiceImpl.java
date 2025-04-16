@@ -47,7 +47,11 @@ import static org.springframework.http.HttpStatus.valueOf;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings("checkstyle:SummaryJavadoc")
+@SuppressWarnings({
+    "checkstyle:SummaryJavadoc",
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class DataManagementServiceImpl implements DataManagementService {
 
     public static final String BLOB_DOES_NOT_EXIST_IN_CONTAINER = "Blob {} does not exist in {} container";
@@ -152,6 +156,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")//TODO - refactor to use object for clearer API when this class is next edited
     public void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation) {
         try {
             String sourceContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(sourceContainerName);
@@ -212,6 +217,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")//TODO - refactor to avoid deeply nested if statements when this class is next edited
     public String getChecksum(String containerName, String blobId) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);

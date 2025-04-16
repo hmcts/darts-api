@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@SuppressWarnings("PMD.DoNotUseThreads")//Required for async processing
 public final class AsyncUtil {
     private AsyncUtil() {
 
@@ -37,6 +38,7 @@ public final class AsyncUtil {
         invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
 
+    @SuppressWarnings("PMD.UnnecessaryCast")//Required for correct mapping
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
         log.info("Starting {} tasks with {} threads", tasks.size(), threads);
@@ -44,11 +46,10 @@ public final class AsyncUtil {
         //Add authentication to each task as auth is thread local
         List<Callable<Void>> tasksWithAuth = tasks.stream()
             .map(voidCallable -> {
-                Callable<Void> wrappedCallable = () -> {
+                return (Callable<Void>) () -> {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     return voidCallable.call();
                 };
-                return wrappedCallable;
             })
             .toList();
 

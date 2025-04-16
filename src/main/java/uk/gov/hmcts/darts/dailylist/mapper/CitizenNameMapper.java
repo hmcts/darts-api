@@ -25,8 +25,8 @@ public class CitizenNameMapper {
 
         return DataUtil.trim(
             nameSegments.stream()
-                .map(s -> DataUtil.trim(s))
-                .filter(s -> StringUtils.isNotBlank(s))
+                .map(DataUtil::trim)
+                .filter(StringUtils::isNotBlank)
                 .collect(Collectors.joining(NAME_DELIMITER)));
     }
 }

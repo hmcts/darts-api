@@ -63,6 +63,11 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited
+    "PMD.GodClass"//TODO - refactor to reduce class size when this class is next edited
+})
 class DailyListUpdater {
     public static final String DL_TIME_NOT_BEFORE = "NOT BEFORE ";
     public static final String DL_TIME_SITTING_AT = "SITTING AT ";
@@ -146,10 +151,7 @@ class DailyListUpdater {
             log.debug("Daily list with id {} has JSON no need to fetch XML", dailyListEntity.getId());
             return true;
         }
-        if (!validateXmlElseUpdate(dailyListEntity)) {
-            return false;
-        }
-        return mapXmlToJson(dailyListEntity);
+        return !validateXmlElseUpdate(dailyListEntity) || mapXmlToJson(dailyListEntity);
     }
 
     /**

@@ -45,7 +45,7 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
                                                                  .append(e)
                                                                  .toString(),
-                                                             executionDetail, userAccount);
+                                                             executionDetail, userAccount, e);
         }
         log.info("ARM RPO Response - ProfileEntitlementResponse: {}", profileEntitlementResponse);
         processGetProfileEntitlementsResponse(userAccount, profileEntitlementResponse, exceptionMessageBuilder, executionDetail);
@@ -68,12 +68,12 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
             .findFirst()
             .orElseThrow(() -> armRpoUtil.handleFailureAndCreateException(
                 exceptionMessageBuilder.append("No matching entitlements '").append(configuredEntitlement).append("' were returned").toString(),
-                executionDetail, userAccount));
+                executionDetail, userAccount, null));
 
         String entitlementId = profileEntitlement.getEntitlementId();
         if (StringUtils.isEmpty(entitlementId)) {
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("The obtained entitlement id was empty").toString(),
-                                                             executionDetail, userAccount);
+                                                             executionDetail, userAccount, null);
         }
 
         executionDetail.setEntitlementId(entitlementId);

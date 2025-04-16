@@ -185,7 +185,7 @@ class ArmRpoServiceImplTest {
         Page<ExternalObjectDirectoryEntity> pagedEods = new PageImpl<>(externalObjectDirectoryEntities);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
-        when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
+        when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
         when(externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(any(), any(), any(), any()))
             .thenReturn(pagedEods);
@@ -213,7 +213,7 @@ class ArmRpoServiceImplTest {
         createExternalObjectDirectoryEntity(1);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
-        when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
+        when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
         File file = new File("Tests/arm/rpo/noFile.csv");
         List<File> csvFiles = Collections.singletonList(file);

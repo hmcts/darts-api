@@ -36,7 +36,11 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
     BasicCaseDocumentConversions.class,
     CaseObjectsCaseDocumentMapper.class
 })
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public abstract class CourtCaseDocumentMapper {
 
     @Mappings({

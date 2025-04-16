@@ -5,18 +5,19 @@ import uk.gov.hmcts.darts.audit.api.AuditActivityProvider;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.retentions.model.AdminPatchRetentionRequest;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.EDIT_RETENTION_POLICY;
 
-public class RetentionPolicyUpdateAuditActivityProvider implements AuditActivityProvider {
-    
+public final class RetentionPolicyUpdateAuditActivityProvider implements AuditActivityProvider {
+
+
+    private final Set<AuditActivity> updates = EnumSet.noneOf(AuditActivity.class);
+
     public static RetentionPolicyUpdateAuditActivityProvider auditActivitiesFor(RetentionPolicyTypeEntity entity, AdminPatchRetentionRequest patch) {
         return new RetentionPolicyUpdateAuditActivityProvider(entity, patch);
     }
-
-    private final Set<AuditActivity> updates = new HashSet<>();
 
     private RetentionPolicyUpdateAuditActivityProvider(RetentionPolicyTypeEntity courthouseEntity, AdminPatchRetentionRequest courthousePatch) {
         if (isBasicDetailsUpdated(courthousePatch, courthouseEntity)) {

@@ -77,7 +77,10 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             String productionName;
             boolean createExportBasedOnSearchResultsTable;
             String uniqueProductionName;
-            if (!skipSteps(armRpoExecutionDetailEntity)) {
+            if (skipSteps(armRpoExecutionDetailEntity)) {
+                createExportBasedOnSearchResultsTable = true;
+                uniqueProductionName = armRpoExecutionDetailEntity.getProductionName();
+            } else {
                 // step to call ARM RPO API to get the extended searches by matter
                 productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
 
@@ -92,9 +95,6 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 // step to call ARM RPO API to create export based on search results table
                 createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(
                     bearerToken, executionId, headerColumns, uniqueProductionName, pollDuration, userAccount);
-            } else {
-                createExportBasedOnSearchResultsTable = true;
-                uniqueProductionName = armRpoExecutionDetailEntity.getProductionName();
             }
             if (createExportBasedOnSearchResultsTable) {
                 processProductions(bearerToken, executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity,

@@ -30,6 +30,7 @@ public class CaseExpiryDeleterImpl implements CaseExpiryDeleter {
     private final CaseExpiryDeletionAutomatedTaskConfig config;
 
     @Transactional
+    @Override
     public void delete(Integer batchSize) {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()

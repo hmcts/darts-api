@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -54,7 +55,10 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings({"PMD.ExceptionAsFlowControl"})
+@SuppressWarnings({
+    "PMD.ExceptionAsFlowControl",
+    "PMD.CouplingBetweenObjects"//TODO - refactor to reduce coupling when this class is next edited
+})
 public class AudioTransformationServiceImpl implements AudioTransformationService {
     public static final int MAX_LOOPS = 200;//Arbitrary high number, just a glass ceiling which we wouldn't expect the loop to reach unless there is a problem.
     private final MediaRequestService mediaRequestService;
@@ -102,8 +106,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         List<Integer> mediaRequestIdsProcessed = new ArrayList<>();
         OffsetDateTime cutoffTime = currentTimeHelper.currentOffsetDateTime().plusMinutes(config.getLoopCutoffMinutes());
         while (currentTimeHelper.currentOffsetDateTime().isBefore(cutoffTime)) {
-            if (counter++ > MAX_LOOPS) {
-                throw new RuntimeException("ATS potentially stuck in a loop.");
+            if (counter > MAX_LOOPS) {
+                throw new DartsException("ATS potentially stuck in a loop.");
             }
             Optional<MediaRequestEntity> mediaRequestOpt = mediaRequestService.retrieveMediaRequestForProcessing(mediaRequestIdsProcessed);
 
@@ -115,6 +119,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 log.info("No more open requests found for ATS to process.");
                 return;
             }
+            counter++;
         }
     }
 

@@ -955,7 +955,7 @@ class AdminMediaServiceImplTest {
                 .thenReturn(Optional.of(objectHiddenReasonEntity));
 
             ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
-            when(objectAdminActionRepository.findByMedia_Id(1))
+            when(objectAdminActionRepository.findByMediaId(1))
                 .thenReturn(Collections.singletonList(objectAdminActionEntity));
 
             MediaHideRequest mediaHideRequest = new MediaHideRequest();

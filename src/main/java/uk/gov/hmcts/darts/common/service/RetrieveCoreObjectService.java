@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.LocalDateTime;
 
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public interface RetrieveCoreObjectService {
 
     /**

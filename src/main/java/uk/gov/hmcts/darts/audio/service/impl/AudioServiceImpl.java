@@ -59,7 +59,10 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
+    @SuppressWarnings({
+        "PMD.ExceptionAsFlowControl",
+        "PMD.DoNotUseThreads"//TODO - refactor to avoid using Thread.sleep() when this is next edited
+    })
     public BinaryData encode(Integer mediaId) {
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));

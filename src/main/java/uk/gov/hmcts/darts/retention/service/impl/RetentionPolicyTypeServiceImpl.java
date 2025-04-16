@@ -39,6 +39,7 @@ import static uk.gov.hmcts.darts.retention.exception.RetentionApiError.RETENTION
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeService {
 
     private final RetentionPolicyTypeMapper retentionPolicyTypeMapper;

@@ -64,7 +64,10 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({
+    "PMD.TooManyMethods",
+    "PMD.CouplingBetweenObjects"//TODO - refactor to reduce coupling when this class is next edited
+})
 public class CaseServiceImpl implements CaseService {
 
     public static final int MAX_RESULTS = 500;

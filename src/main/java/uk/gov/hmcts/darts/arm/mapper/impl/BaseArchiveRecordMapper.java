@@ -27,6 +27,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Slf4j
 class BaseArchiveRecordMapper {
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     protected void processStringMetadataProperties(RecordMetadata metadata, String key, String value) {
         switch (key) {
             case BF_001_KEY -> metadata.setBf001(value);

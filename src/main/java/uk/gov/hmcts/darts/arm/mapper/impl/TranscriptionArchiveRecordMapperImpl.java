@@ -55,7 +55,11 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
+@SuppressWarnings({
+    "PMD.GodClass",
+    "PMD.CyclomaticComplexity",
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMapper implements TranscriptionArchiveRecordMapper {
 
     private static final String CASE_LIST_DELIMITER = "|";
@@ -262,6 +266,7 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
         return comments;
     }
 
+    @SuppressWarnings("PMD.LawOfDemeter")
     private boolean isTranscriptionCommentRequested(TranscriptionCommentEntity transcriptionComment) {
         boolean isTranscriptionCommentRequested = false;
         if (nonNull(transcriptionComment.getTranscriptionWorkflow())

@@ -39,7 +39,7 @@ public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduc
         StringBuilder errorMessage = new StringBuilder(93).append("Unable to downloadProduction from ARM RPO");
 
         ArmAutomatedTaskEntity armAutomatedTaskEntity =
-            armAutomatedTaskRepository.findByAutomatedTask_taskName(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME.getTaskName())
+            armAutomatedTaskRepository.findByAutomatedTaskTaskName(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME.getTaskName())
                 .orElseThrow(() -> new ArmRpoException(errorMessage.append(" - Unable to find ARM automated task").toString()));
         int rpoCsvStartHour = armAutomatedTaskEntity.getRpoCsvStartHour();
         int rpoCsvEndHour = armAutomatedTaskEntity.getRpoCsvEndHour();

@@ -46,7 +46,10 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.TooManyMethods"})
+@SuppressWarnings({
+    "PMD.TooManyMethods",
+    "PMD.CouplingBetweenObjects"//TODO - refactor to reduce coupling when this class is next edited
+})
 @Slf4j
 public class CasesMapper {
 

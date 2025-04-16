@@ -21,9 +21,10 @@ public class IndexesByMatterIdResponse extends BaseRpoResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @Data
     @NoArgsConstructor
-    @EqualsAndHashCode()
+    @EqualsAndHashCode
     public static class Index {
-        private IndexDetails index;
+        @JsonProperty("index")
+        private IndexDetails indexDetails;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

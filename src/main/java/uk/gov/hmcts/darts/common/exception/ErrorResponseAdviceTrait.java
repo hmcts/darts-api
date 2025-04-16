@@ -15,6 +15,7 @@ import org.zalando.problem.spring.web.advice.AdviceTrait;
  * Temporary workaround until <a href="https://github.com/zalando/problem-spring-web">problem-spring-web</a> is extended with support for {@link org.springframework.web.ErrorResponse}.
  * For now scope is restricted to {@link org.springframework.web.servlet.resource.NoResourceFoundException}, but additional exceptions can be added as needed.
  */
+@SuppressWarnings("PMD.ImplicitFunctionalInterface")//False positive
 public interface ErrorResponseAdviceTrait extends AdviceTrait {
 
     @ExceptionHandler({

@@ -28,11 +28,6 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     }
 
     @Override
-    public void run() {
-        super.run();
-    }
-
-    @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return AutomatedTaskName.ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME;
     }

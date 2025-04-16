@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ArmAutomatedTaskRepository extends JpaRepository<ArmAutomatedTaskEntity, Integer> {
 
-    Optional<ArmAutomatedTaskEntity> findByAutomatedTask_taskName(String taskName);
+    Optional<ArmAutomatedTaskEntity> findByAutomatedTaskTaskName(String taskName);
 
 }

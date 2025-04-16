@@ -90,7 +90,10 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     }
 
     @Override
-    @SuppressWarnings({"PMD.CognitiveComplexity"})
+    @SuppressWarnings({
+        "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity"//TODO - refactor to reduce complexity when this is next edited
+    })
     public List<AudioFileInfo> processAudioForPlaybacks(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
                                                         OffsetDateTime mediaRequestStartTime,
                                                         OffsetDateTime mediaRequestEndTime)

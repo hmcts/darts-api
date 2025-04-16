@@ -27,6 +27,7 @@ public class DownloadProductionServiceImpl implements DownloadProductionService 
     private final ArmRpoDownloadProduction armRpoDownloadProduction;
 
     @Override
+    @SuppressWarnings("PMD.CloseResource")//TODO - ensure resource is closed after use to prevent memory leaks
     public InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileId,
                                           UserAccountEntity userAccount) throws IOException {
         log.info("downloadProduction called with executionId: {}, productionExportFileId: {}", executionId, productionExportFileId);

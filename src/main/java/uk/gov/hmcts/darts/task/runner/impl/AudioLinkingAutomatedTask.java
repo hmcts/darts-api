@@ -39,7 +39,7 @@ public class AudioLinkingAutomatedTask
     private final EventRepository eventRepository;
     private final EventProcessor eventProcessor;
     private final AudioConfigurationProperties audioConfigurationProperties;
-    private List<String> handheldCourtroomNumbers;
+    private final List<String> handheldCourtroomNumbers;
 
     protected AudioLinkingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                         AudioLinkingAutomatedTaskConfig automatedTaskConfigurationProperties,

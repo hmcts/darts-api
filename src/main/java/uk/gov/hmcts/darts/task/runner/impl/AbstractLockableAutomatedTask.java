@@ -98,6 +98,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     }
 
     @Override
+    @SuppressWarnings("PMD.CognitiveComplexity")//TODO - refactor to reduce complexity when this is next edited
     public void run(boolean isManualRun) {
         this.isManualRun = isManualRun;
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
@@ -170,9 +171,9 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
 
     public Duration getLockAtLeastFor() {
         return Optional.ofNullable(automatedTaskConfigurationProperties.getLock())
-            .map(lock -> lock.getAtLeastFor())
-            .filter(duration -> duration.isPositive())
-            .orElseGet(() -> lockService.getLockAtLeastFor());
+            .map(AbstractAutomatedTaskConfig.Lock::getAtLeastFor)
+            .filter(Duration::isPositive)
+            .orElseGet(lockService::getLockAtLeastFor);
     }
 
     protected void handleException(Exception exception) {
@@ -258,6 +259,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
     public abstract AutomatedTaskName getAutomatedTaskName();
 
 
+    @SuppressWarnings("PMD.DoNotUseThreads")//Required for async processing
     class LockedTask implements Runnable {
         @Override
         public void run() {
