@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
 
 import java.time.OffsetDateTime;
@@ -24,7 +26,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
 import static uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData.TEST_EXTERNAL_OBJECT_DIRECTORY_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,9 +44,11 @@ class ArmRetentionEventDateProcessorImplTest {
 
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
+    private EodHelperMocks eodHelperMocks;
 
     @BeforeEach
     void setupData() {
+        eodHelperMocks = new EodHelperMocks();
 
         MediaEntity media = new MediaEntity();
         media.setId(123);
@@ -63,11 +66,19 @@ class ArmRetentionEventDateProcessorImplTest {
 
     }
 
+    @AfterEach
+    void tearDown() {
+        eodHelperMocks.close();
+    }
+
     @Test
     void calculateEventDates() {
         // given
         List<Integer> eods = List.of(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000))).thenReturn(eods);
+        when(
+            externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
+                eodHelperMocks.getArmLocation(), true, Limit.of(10_000))).thenReturn(
+            eods);
 
         externalObjectDirectoryEntity.setEventDateTs(MEDIA_RETENTION_DATE_TIME);
 
@@ -75,7 +86,8 @@ class ArmRetentionEventDateProcessorImplTest {
         armRetentionEventDateProcessor.calculateEventDates(10_000);
 
         // then
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000));
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(
+            eodHelperMocks.getArmLocation(), true, Limit.of(10_000));
         verify(armRetentionEventDateCalculator).calculateRetentionEventDate(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
 
         verifyNoMoreInteractions(
@@ -88,13 +100,16 @@ class ArmRetentionEventDateProcessorImplTest {
     void calculateEventDates_NoRowsToProcess() {
         // given
         List<Integer> eods = new ArrayList<>();
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000))).thenReturn(eods);
+        when(
+            externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
+                eodHelperMocks.getArmLocation(), true, Limit.of(10_000))).thenReturn(eods);
 
         // when
         armRetentionEventDateProcessor.calculateEventDates(10_000);
 
         // then
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000));
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(
+            eodHelperMocks.getArmLocation(), true, Limit.of(10_000));
 
         verifyNoMoreInteractions(
             externalObjectDirectoryRepository,

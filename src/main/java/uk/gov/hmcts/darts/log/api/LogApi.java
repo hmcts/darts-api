@@ -43,7 +43,7 @@ public interface LogApi {
 
     void failedNotification(NotificationEntity notification, String templateId, NotificationClientException ex);
 
-    void taskStarted(UUID taskExecutionId, String taskName);
+    void taskStarted(UUID taskExecutionId, String taskName, Integer batchSize);
 
     void taskCompleted(UUID taskExecutionId, String taskName);
 

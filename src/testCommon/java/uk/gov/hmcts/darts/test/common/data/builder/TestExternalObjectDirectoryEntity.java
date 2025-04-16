@@ -43,6 +43,7 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
         setTransferAttempts(transferAttempts);
         setVerificationAttempts(verificationAttempts);
         setDataIngestionTs(dataIngestionTs);
+        setInputUploadProcessedTs(dataIngestionTs);
         setManifestFile(manifestFile);
         setEventDateTs(eventDateTs);
         setErrorCode(errorCode);

@@ -53,7 +53,7 @@ import static org.assertj.core.api.BDDAssertions.within;
 
 @DisplayName("CaseExpiryDeletionAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
+class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     private static final Pattern UUID_REGEX = Pattern.compile(TestUtils.UUID_REGEX);
     private static final int AUTOMATION_USER_ID = -27;

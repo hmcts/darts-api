@@ -271,11 +271,11 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().is4xxClientError())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         // assert a partial failure
-        assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(422, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class
@@ -328,10 +328,10 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().is4xxClientError())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
-        assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(422, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class
@@ -432,10 +432,10 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().is4xxClientError())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
-        assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(422, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class

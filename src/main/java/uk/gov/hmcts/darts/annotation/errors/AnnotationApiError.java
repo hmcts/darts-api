@@ -43,12 +43,12 @@ public enum AnnotationApiError implements DartsApiError {
     ),
     BAD_REQUEST_DOC_TYPE(
         AnnotationErrorCode.BAD_REQUEST_DOC_TYPE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AnnotationTitleErrors.BAD_REQUEST_DOC_TYPE.toString()
     ),
     BAD_REQUEST_CONTENT_TYPE(
         AnnotationErrorCode.BAD_REQUEST_CONTENT_TYPE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AnnotationTitleErrors.BAD_REQUEST_CONTENT_TYPE.toString()
     ),
     ANNOTATION_NOT_FOUND(
@@ -64,7 +64,7 @@ public enum AnnotationApiError implements DartsApiError {
 
     BAD_REQUEST_FILE_SIZE(
         AnnotationErrorCode.BAD_REQUEST_FILE_SIZE.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AnnotationTitleErrors.BAD_REQUEST_FILE_SIZE.toString()
     );
 

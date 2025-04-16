@@ -13,23 +13,23 @@ public enum CaseApiError implements DartsApiError {
 
     TOO_MANY_RESULTS(
         CaseErrorCode.TOO_MANY_RESULTS.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CaseTitleErrors.TOO_MANY_RESULTS.toString()
 
     ),
     NO_CRITERIA_SPECIFIED(
         CaseErrorCode.NO_CRITERIA_SPECIFIED.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CaseTitleErrors.NO_CRITERIA_SPECIFIED.toString()
     ),
     CRITERIA_TOO_BROAD(
         CaseErrorCode.CRITERIA_TOO_BROAD.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CaseTitleErrors.CRITERIA_TOO_BROAD.toString()
     ),
     INVALID_REQUEST(
         CaseErrorCode.INVALID_REQUEST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CaseTitleErrors.INVALID_REQUEST.toString()
     ),
     CASE_NOT_FOUND(
@@ -44,7 +44,7 @@ public enum CaseApiError implements DartsApiError {
     ),
     PATCH_CRITERIA_NOT_MET(
         CaseErrorCode.PATCH_CRITERIA_NOT_MET.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         CaseTitleErrors.PATCH_CRITERIA_NOT_MET.toString()
     ),
     HEARINGS_NOT_ACTUAL(

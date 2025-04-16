@@ -62,7 +62,7 @@ class RequestValidatorTest {
     @Test
     void raiseNotEnoughCriteriaException() {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse("swansea")
+            .courthouseIds(List.of(1))
             .build();
 
         var exception = assertThrows(
@@ -78,7 +78,6 @@ class RequestValidatorTest {
     @Test
     void raiseNotEnoughCriteriaException2() {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouse("swansea")
             .courtroom("1")
             .caseNumber("1")
             .build();
@@ -141,7 +140,6 @@ class RequestValidatorTest {
     static Stream<Arguments> shortFieldTestProvider() {
         return Stream.of(
             Arguments.of("caseNumber", (Consumer<GetCasesSearchRequest>) (request) -> request.setCaseNumber("1")),
-            Arguments.of("courtHouse", (Consumer<GetCasesSearchRequest>) (request) -> request.setCourthouse("1")),
             Arguments.of("courtRoom", (Consumer<GetCasesSearchRequest>) (request) -> request.setCourtroom("1")),
             Arguments.of("judgeName", (Consumer<GetCasesSearchRequest>) (request) -> request.setJudgeName("1")),
             Arguments.of("defendantName", (Consumer<GetCasesSearchRequest>) (request) -> request.setDefendantName("1"))
@@ -170,7 +168,6 @@ class RequestValidatorTest {
     private GetCasesSearchRequest getPopulatedGetCasesSearchRequest() {
         return GetCasesSearchRequest.builder()
             .caseNumber("1234")
-            .courthouse("1234")
             .courtroom("1234")
             .judgeName("1234")
             .defendantName("1234")

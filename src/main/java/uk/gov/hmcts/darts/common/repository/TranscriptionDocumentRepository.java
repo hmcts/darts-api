@@ -46,6 +46,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (t.createdDateTime >= :requestedAtFrom)) AND
              (:owner IS NULL OR (wfa.userFullName ILIKE CONCAT('%', cast(:owner as text), '%'))) AND
              ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR t.createdDateTime <= :requestedAtTo)
+             AND t.isCurrent = true        
           ORDER BY tmd.id DESC
         """)
     @SuppressWarnings("java:S107")//We need more then 7 parameters for this select statement

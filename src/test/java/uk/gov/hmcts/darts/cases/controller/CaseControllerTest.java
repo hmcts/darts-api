@@ -9,21 +9,27 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
+import uk.gov.hmcts.darts.cases.model.CasesCaseIdEventsGet200Response;
+import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +49,6 @@ class CaseControllerTest {
     void casesSearchPost_whenProvidedWithStandardData_dataShouldBeMapepdCorrectly() {
         AdvancedSearchRequest advancedSearchRequest = new AdvancedSearchRequest();
         advancedSearchRequest.setCaseNumber(" caseNumber ");
-        advancedSearchRequest.setCourthouse(" courthouse ");
         advancedSearchRequest.setCourtroom(" courtroom ");
         advancedSearchRequest.setJudgeName(" judgeName ");
         advancedSearchRequest.setDefendantName(" defendantName ");
@@ -51,7 +56,6 @@ class CaseControllerTest {
         advancedSearchRequest.dateTo(LocalDate.now().plusDays(1));
         advancedSearchRequest.setEventTextContains(" eventTextContains ");
 
-        doNothing().when(caseController).validateUppercase(any(), any());
         try (MockedStatic<RequestValidator> requestValidatorMock = Mockito.mockStatic(RequestValidator.class)) {
 
             List<AdvancedSearchResult> expected = List.of(mock(AdvancedSearchResult.class), mock(AdvancedSearchResult.class));
@@ -64,7 +68,6 @@ class CaseControllerTest {
             GetCasesSearchRequest request = requestArgumentCaptor.getValue();
 
             assertThat(request.getCaseNumber()).isEqualTo(" caseNumber ");
-            assertThat(request.getCourthouse()).isEqualTo("courthouse");
             assertThat(request.getCourtroom()).isEqualTo("courtroom");
             assertThat(request.getJudgeName()).isEqualTo("judgeName");
             assertThat(request.getDefendantName()).isEqualTo("defendantName");
@@ -73,7 +76,6 @@ class CaseControllerTest {
             assertThat(request.getEventTextContains()).isEqualTo("eventTextContains");
 
             requestValidatorMock.verify(() -> RequestValidator.validate(request));
-            verify(caseController).validateUppercase(" courthouse ", " courtroom ");
         }
     }
 
@@ -81,7 +83,6 @@ class CaseControllerTest {
     void casesSearchPost_whenProvidedWithDataThatHasNulls_dataShouldBeMapepdCorrectly() {
         AdvancedSearchRequest advancedSearchRequest = new AdvancedSearchRequest();
         advancedSearchRequest.setCaseNumber(null);
-        advancedSearchRequest.setCourthouse(null);
         advancedSearchRequest.setCourtroom(null);
         advancedSearchRequest.setJudgeName(null);
         advancedSearchRequest.setDefendantName(null);
@@ -89,7 +90,6 @@ class CaseControllerTest {
         advancedSearchRequest.dateTo(null);
         advancedSearchRequest.setEventTextContains(null);
 
-        doNothing().when(caseController).validateUppercase(any(), any());
         try (MockedStatic<RequestValidator> requestValidatorMock = Mockito.mockStatic(RequestValidator.class)) {
 
             List<AdvancedSearchResult> expected = List.of(mock(AdvancedSearchResult.class), mock(AdvancedSearchResult.class));
@@ -102,7 +102,6 @@ class CaseControllerTest {
             GetCasesSearchRequest request = requestArgumentCaptor.getValue();
 
             assertThat(request.getCaseNumber()).isNull();
-            assertThat(request.getCourthouse()).isNull();
             assertThat(request.getCourtroom()).isNull();
             assertThat(request.getJudgeName()).isNull();
             assertThat(request.getDefendantName()).isNull();
@@ -111,7 +110,49 @@ class CaseControllerTest {
             assertThat(request.getEventTextContains()).isNull();
 
             requestValidatorMock.verify(() -> RequestValidator.validate(request));
-            verify(caseController).validateUppercase(null, null);
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")//Caused by argument captor this can never be incorrect
+    void casesCaseIdEventsGet_hasPageNumber_shouldUsePaginatedRoute() {
+        final int caseId = 123;
+        final int pageNumber = 3;
+        final int pageSize = 20;
+        final List<String> sortBy = List.of("ABC,DEF");
+        final List<String> sortOrder = List.of("ASC", "DESC");
+
+        CaseController.CasesCaseIdEventsGet200PaginatedResponse response = mock(CaseController.CasesCaseIdEventsGet200PaginatedResponse.class);
+        doReturn(response).when(response).asClass(CaseController.CasesCaseIdEventsGet200PaginatedResponse.class);
+
+        doReturn(response).when(caseService).getEventsByCaseId(any(), any());
+
+        ResponseEntity<CasesCaseIdEventsGet200Response> responseEntity = caseController
+            .casesCaseIdEventsGet(caseId, sortBy, sortOrder, pageNumber, pageSize);
+
+        assertThat(responseEntity.getBody()).isEqualTo(response);
+        ArgumentCaptor<PaginationDto<Event>> argumentCaptor = ArgumentCaptor.forClass(PaginationDto.class);
+        verify(caseService).getEventsByCaseId(eq(caseId), argumentCaptor.capture());
+        PaginationDto<Event> paginationDto = argumentCaptor.getValue();
+        assertThat(paginationDto).isNotNull();
+        assertThat(paginationDto.getPageNumber()).isEqualTo(pageNumber);
+        assertThat(paginationDto.getPageSize()).isEqualTo(pageSize);
+        assertThat(paginationDto.getSortBy()).isEqualTo(PaginationDto.toSortBy(sortBy));
+        assertThat(paginationDto.getSortDirection()).isEqualTo(PaginationDto.toSortDirection(sortOrder));
+        verifyNoMoreInteractions(caseService);
+    }
+
+    @Test
+    void casesCaseIdEventsGet_doesNotHasPageNumber_shouldUseNonPaginatedRoute() {
+        final int caseId = 123;
+        List<Event> responseObj = List.of(mock(Event.class), mock(Event.class), mock(Event.class));
+        doReturn(responseObj).when(caseService).getEventsByCaseId(any());
+
+        ResponseEntity<CasesCaseIdEventsGet200Response> responseEntity = caseController.casesCaseIdEventsGet(caseId, null, null, null, null);
+
+        assertThat(responseEntity.getBody())
+            .isEqualTo(new CaseController.CasesCaseIdEventsGet200PaginatedResponseList(responseObj));
+        verify(caseService).getEventsByCaseId(caseId);
+        verifyNoMoreInteractions(caseService);
     }
 }

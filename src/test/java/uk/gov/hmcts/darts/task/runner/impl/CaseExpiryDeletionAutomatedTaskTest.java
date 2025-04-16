@@ -1,13 +1,14 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.service.CaseExpiryDeleter;
+import uk.gov.hmcts.darts.cases.service.impl.CaseExpiryDeleterImpl;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -25,6 +26,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,10 +53,26 @@ class CaseExpiryDeletionAutomatedTaskTest {
     @Mock
     private HearingsService hearingsService;
 
-
-    @InjectMocks
-    @Spy
     private CaseExpiryDeletionAutomatedTask caseExpiryDeletionAutomatedTask;
+
+    @BeforeEach
+    void setUp() {
+        CaseExpiryDeleter caseExpiryDeleter = new CaseExpiryDeleterImpl(
+            currentTimeHelper,
+            dataAnonymisationService,
+            hearingsService,
+            caseRepository,
+            userIdentity,
+            config
+        );
+        caseExpiryDeletionAutomatedTask = spy(new CaseExpiryDeletionAutomatedTask(
+            automatedTaskRepository,
+            config,
+            logApi,
+            lockService,
+            caseExpiryDeleter
+        ));
+    }
 
     @Test
     void runTask() {
@@ -68,13 +86,11 @@ class CaseExpiryDeletionAutomatedTaskTest {
         when(caseRepository.findCaseIdsToBeAnonymised(any(), any()))
             .thenReturn(List.of(1, 2, 3));
 
-        doReturn(5).when(caseExpiryDeletionAutomatedTask)
-            .getAutomatedTaskBatchSize();
+        doReturn(5).when(caseExpiryDeletionAutomatedTask).getAutomatedTaskBatchSize();
 
         caseExpiryDeletionAutomatedTask.runTask();
 
-        verify(currentTimeHelper, times(1))
-            .currentOffsetDateTime();
+        verify(currentTimeHelper, times(1)).currentOffsetDateTime();
 
         verify(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 1, false);
         verify(hearingsService).removeMediaLinkToHearing(1);

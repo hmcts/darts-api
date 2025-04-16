@@ -49,7 +49,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
                                                          String uniqueProductionName, Duration pollDuration,
                                                          UserAccountEntity userAccount) {
 
-        log.debug("createExportBasedOnSearchResultsTable called with executionId: {}, uniqueProductionName: {}", executionId, uniqueProductionName);
+        log.info("createExportBasedOnSearchResultsTable called with executionId: {}, uniqueProductionName: {}", executionId, uniqueProductionName);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         if (isNull(armRpoExecutionDetailEntity.getPollingCreatedAt())) {
             armRpoExecutionDetailEntity.setPollingCreatedAt(currentTimeHelper.currentOffsetDateTime());
@@ -77,7 +77,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
             baseRpoResponse = processCreateExportBasedOnSearchResultsTableResponseFeignException(userAccount, feignException, errorMessage,
                                                                                                  armRpoExecutionDetailEntity);
         }
-        log.debug("ARM RPO Response - CreateExportBasedOnSearchResultsTable response: {}", baseRpoResponse);
+        log.info("ARM RPO Response - CreateExportBasedOnSearchResultsTable response: {}", baseRpoResponse);
         return processCreateExportBasedOnSearchResultsTableResponse(userAccount, baseRpoResponse, errorMessage,
                                                                     armRpoExecutionDetailEntity, pollDuration, uniqueProductionName);
     }

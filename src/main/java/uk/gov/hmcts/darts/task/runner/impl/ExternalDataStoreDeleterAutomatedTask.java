@@ -3,9 +3,9 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleterWithBuffer;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
@@ -17,13 +17,13 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.EXTERNAL_DATASTORE_D
 
 @Slf4j
 @Component
-public class ExternalDataStoreDeleterAutomatedTask 
+public class ExternalDataStoreDeleterAutomatedTask
     extends AbstractLockableAutomatedTask<ExternalDataStoreDeleterAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final ExternalInboundDataStoreDeleter inboundDeleter;
     private final ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
-    private final ExternalOutboundDataStoreDeleter outboundDeleter;
+    private final ExternalOutboundDataStoreDeleterWithBuffer outboundDeleter;
 
 
     @Autowired
@@ -31,7 +31,7 @@ public class ExternalDataStoreDeleterAutomatedTask
                                                  ExternalDataStoreDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                  ExternalInboundDataStoreDeleter inboundDeleter,
                                                  ExternalUnstructuredDataStoreDeleter unstructuredDeleter,
-                                                 ExternalOutboundDataStoreDeleter outboundDeleter,
+                                                 ExternalOutboundDataStoreDeleterWithBuffer outboundDeleter,
                                                  LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.inboundDeleter = inboundDeleter;
@@ -47,6 +47,7 @@ public class ExternalDataStoreDeleterAutomatedTask
     @Override
     protected void runTask() {
         Integer batchSize = getAutomatedTaskBatchSize();
+        log.info("Running External Data Store Deleter with batch size {}", batchSize);
         inboundDeleter.delete(batchSize);
         unstructuredDeleter.delete(batchSize);
         outboundDeleter.delete(batchSize);

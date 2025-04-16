@@ -74,6 +74,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventsResponse'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request- Invalid XML Document
           content:
@@ -197,6 +203,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventsResponse'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request- Invalid XML Document
           content:
@@ -285,6 +297,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventMapping'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Bad Request- Invalid XML Document
           content:
@@ -494,6 +512,12 @@ paths:
                 items:
                   $ref: '#/components/schemas/AdminSearchEventResponseResult'
 
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml' 
         '400':
           description: Too many results
           content:
@@ -899,6 +923,8 @@ components:
           type: string
         is_data_anonymised:
           type: boolean
+        event_status:
+          type: integer
         event_ts:
           type: string
           format: date-time

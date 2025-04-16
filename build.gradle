@@ -1,6 +1,6 @@
 buildscript {
     dependencies {
-        classpath("org.flywaydb:flyway-database-postgresql:11.4.1")
+        classpath("org.flywaydb:flyway-database-postgresql:11.7.1")
     }
 }
 
@@ -12,12 +12,12 @@ plugins {
     id 'idea'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.springframework.boot' version '3.4.4'
-    id 'org.owasp.dependencycheck' version '12.1.0'
+    id 'org.owasp.dependencycheck' version '12.1.1'
     id 'com.github.ben-manes.versions' version '0.52.0'
-    id 'org.sonarqube' version '6.0.1.5171'
+    id 'org.sonarqube' version '6.1.0.5360'
     id "io.freefair.lombok" version "8.13.1"
     id "org.openapi.generator" version "7.12.0"
-    id "org.flywaydb.flyway" version "11.4.0"
+    id "org.flywaydb.flyway" version "11.7.1"
     id 'maven-publish'
     id("com.dorongold.task-tree") version "4.0.1"
 }
@@ -385,7 +385,7 @@ repositories {
 
 ext {
     log4JVersion = "2.24.3"
-    tomcatEmbedVersion = "11.0.5"
+    tomcatEmbedVersion = "11.0.6"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -408,7 +408,7 @@ dependencies {
 
     implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.4.2'
 
-    implementation group: 'commons-io', name: 'commons-io', version: '2.18.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.19.0'
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
     implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.0'
@@ -431,7 +431,7 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
     implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.4.0'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.0'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.1'
 
     //CVE-2023-44487
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
@@ -441,8 +441,8 @@ dependencies {
     implementation 'com.azure:azure-storage-blob'
 
     implementation group: 'io.rest-assured', name: 'rest-assured'
-    implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.4.1'
-    implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.4.1'
+    implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.7.1'
+    implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.7.1'
     implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.9'
 
     //database
@@ -455,12 +455,12 @@ dependencies {
 
     implementation group: 'io.vavr', name: 'vavr', version: '0.10.6'
 
-    implementation group: 'com.google.guava', name: 'guava', version: '33.4.6-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '33.4.8-jre'
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
     implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.4'
-    implementation 'org.hibernate.orm:hibernate-ant:6.6.12.Final'
+    implementation 'org.hibernate.orm:hibernate-ant:6.6.13.Final'
     implementation 'org.hibernate:hibernate-spatial:6.6.5.Final'
 
     // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
@@ -469,7 +469,7 @@ dependencies {
 
 
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-    annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.12.Final')
+    annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.13.Final')
     annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
     // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
@@ -485,7 +485,7 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.2.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
     testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.4'
     testImplementation 'org.springframework.security:spring-security-test:6.4.4'
 
@@ -505,7 +505,7 @@ dependencies {
 dependencyManagement {
     dependencies {
         // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-        dependencySet(group: 'io.netty', version: '4.1.119.Final') {
+        dependencySet(group: 'io.netty', version: '4.2.0.Final') {
             entry 'netty-buffer'
             entry 'netty-codec'
             entry 'netty-codec-dns'

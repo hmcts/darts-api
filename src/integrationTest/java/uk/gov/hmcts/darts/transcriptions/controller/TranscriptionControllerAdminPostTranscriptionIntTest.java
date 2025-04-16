@@ -340,7 +340,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
                                                   .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest))
                                                   .header("Content-Type", "application/json"))
 
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
@@ -384,7 +384,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
                                                   .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest))
                                                   .header("Content-Type", "application/json"))
 
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
@@ -479,7 +479,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
                 "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
                                                    .header("Content-Type", "application/json")
                                                    .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnprocessableEntity())
             .andReturn();
 
         String content = showResult.getResponse().getContentAsString();

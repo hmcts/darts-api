@@ -73,6 +73,7 @@ public class EventMapper {
         adminGetEventResponseDetail.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
         adminGetEventResponseDetail.setLastModifiedBy(eventEntity.getLastModifiedById());
         adminGetEventResponseDetail.setIsDataAnonymised(eventEntity.isDataAnonymised());
+        adminGetEventResponseDetail.setEventStatus(eventEntity.getEventStatus());
         return adminGetEventResponseDetail;
     }
 
@@ -83,7 +84,7 @@ public class EventMapper {
         }
         return hearingEntities.stream()
             .sorted(Comparator.comparing(HearingEntity::getId))
-            .map(hearingEntity -> mapAdminGetEventResponseDetailsHearing(hearingEntity))
+            .map(this::mapAdminGetEventResponseDetailsHearing)
             .toList();
     }
 
@@ -110,7 +111,7 @@ public class EventMapper {
             return new ArrayList<>();
         }
         return cases.stream()
-            .map(caseEntity -> mapAdminGetEventResponseDetailsCasesCase(caseEntity))
+            .map(this::mapAdminGetEventResponseDetailsCasesCase)
             .toList();
     }
 

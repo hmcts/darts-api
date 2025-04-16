@@ -49,7 +49,8 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
             log.debug("No Unstructured Audio files found that need to be marked for deletion.");
             return;
         }
-        log.debug("Marking the following Unstructured ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
+        log.info("Marking the following Unstructured ExternalObjectDirectory.Id's for deletion:- '{}' for batch size {}",
+                 audioFileIdsToBeMarked, batchSize);
 
         UserAccountEntity user = userIdentity.getUserAccount();
 

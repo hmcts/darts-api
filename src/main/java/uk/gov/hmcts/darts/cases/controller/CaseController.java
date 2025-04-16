@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
+import uk.gov.hmcts.darts.cases.model.CasesCaseIdEventsGet200Response;
 import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
@@ -34,8 +35,11 @@ import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DataUtil;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
+import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -117,10 +121,8 @@ public class CaseController implements CasesApi {
     public ResponseEntity<List<AdvancedSearchResult>> casesSearchPost(
         AdvancedSearchRequest advancedSearchRequest
     ) {
-        validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom());
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber(advancedSearchRequest.getCaseNumber())
-            .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
             .courthouseIds(advancedSearchRequest.getCourthouseIds())
             .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
             .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
@@ -149,9 +151,38 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = CASE_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
-    public ResponseEntity<List<Event>> casesCaseIdEventsGet(Integer caseId) {
+    public ResponseEntity<CasesCaseIdEventsGet200Response> casesCaseIdEventsGet(
+        Integer caseId,
+        List<String> sortBy,
+        List<String> sortOrder,
+        Integer pageNumber,
+        Integer pageSize
+    ) {
+        PaginationDto<Event> paginationDto = new PaginationDto<>(
+            CasesCaseIdEventsGet200PaginatedResponse::new,
+            pageNumber,
+            pageSize,
+            PaginationDto.toSortBy(sortBy),
+            PaginationDto.toSortDirection(sortOrder)
+        );
 
-        return new ResponseEntity<>(caseService.getEventsByCaseId(caseId), HttpStatus.OK);
+        if (paginationDto.shouldPaginate()) {
+            return new ResponseEntity<>(
+                caseService.getEventsByCaseId(caseId, paginationDto)
+                    .asClass(CasesCaseIdEventsGet200PaginatedResponse.class), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new CasesCaseIdEventsGet200PaginatedResponseList(caseService.getEventsByCaseId(caseId)), HttpStatus.OK);
+    }
+
+    public static class CasesCaseIdEventsGet200PaginatedResponse extends PaginatedList<Event>
+        implements CasesCaseIdEventsGet200Response {
+    }
+
+    public static class CasesCaseIdEventsGet200PaginatedResponseList extends ArrayList<Event>
+        implements CasesCaseIdEventsGet200Response {
+        public CasesCaseIdEventsGet200PaginatedResponseList(List<Event> events) {
+            super(events);
+        }
     }
 
     @Override
@@ -211,5 +242,4 @@ public class CaseController implements CasesApi {
             throw new DartsApiException(CaseApiError.INVALID_REQUEST, "Courthouse and courtroom must be uppercase.");
         }
     }
-
 }

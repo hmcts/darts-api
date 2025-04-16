@@ -80,7 +80,7 @@ class StubbedArmRpoDownloadProductionImplTest {
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt()))
             .thenReturn(createArmRpoExecutionDetailEntity());
-        when(externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
+        when(externalObjectDirectoryRepository.findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
             any(), any(), any(), any()))
             .thenReturn(Collections.emptyList());
 
@@ -103,7 +103,7 @@ class StubbedArmRpoDownloadProductionImplTest {
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
 
         ExternalObjectDirectoryEntity eod = createExternalObjectDirectoryEntity();
-        when(externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
+        when(externalObjectDirectoryRepository.findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
             any(), any(), any(), any()))
             .thenReturn(Collections.singletonList(eod));
 

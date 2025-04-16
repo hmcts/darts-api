@@ -358,6 +358,42 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                                getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId(), transcriptionDocumentResults));
     }
 
+    @Test
+    void searchForTranscriptionDocument_shouldExcludeIsCurrentFalse() throws Exception {
+        List<TranscriptionDocumentEntity> transcriptionDocumentResults =
+            transcriptionDocumentStub.generateTranscriptionEntities(2, 1, false, true, false, true);
+
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity1 = transcriptionDocumentResults.get(0);
+        TranscriptionEntity transcription1 = transcriptionDocumentEntity1.getTranscription();
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity2 = transcriptionDocumentResults.get(1);
+        TranscriptionEntity transcription2 = transcriptionDocumentEntity2.getTranscription();
+        transcription2.setIsCurrent(false);
+
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcription2);
+
+
+        SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
+        request.setCaseNumber(transcription1.getHearing().getCourtCase().getCaseNumber());
+
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_DOCUMENT_SEARCH)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        SearchTranscriptionDocumentResponse[] transformedMediaResponses
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
+        assertEquals(1, transformedMediaResponses.length);
+
+        assertResponseEquality(transformedMediaResponses[0],
+                               getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId(), transcriptionDocumentResults));
+    }
+
 
     @Test
     void testSearchForTranscriptionDocument_multipleResultsReturned_shouldBeOrderedByTranscriptId() throws Exception {
