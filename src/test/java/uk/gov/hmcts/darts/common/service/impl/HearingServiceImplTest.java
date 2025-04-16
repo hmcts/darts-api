@@ -155,7 +155,7 @@ class HearingServiceImplTest {
             .thenReturn(Optional.empty());
 
         assertThat(hearingService.linkAudioToHearings(courtCase, media)).isFalse();
-        assertThat(hearing.getMediaList()).isEmpty();
+        assertThat(hearing.getMedias()).isEmpty();
         verify(hearingRepository, never()).saveAndFlush(any());
         verify(hearingRepository).findHearing(
             courtCase,
@@ -178,7 +178,7 @@ class HearingServiceImplTest {
 
         assertThat(hearingService.linkAudioToHearings(courtCase, media)).isTrue();
 
-        assertThat(hearing.getMediaList())
+        assertThat(hearing.getMedias())
             .hasSize(1)
             .contains(media);
         assertThat(hearing.getHearingIsActual()).isTrue();
