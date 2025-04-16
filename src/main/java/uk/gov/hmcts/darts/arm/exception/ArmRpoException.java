@@ -5,7 +5,11 @@ import uk.gov.hmcts.darts.common.exception.DartsException;
 public class ArmRpoException extends DartsException {
 
     public ArmRpoException(String message) {
-        super(message);
+        this(message, null);
+    }
+
+    public ArmRpoException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

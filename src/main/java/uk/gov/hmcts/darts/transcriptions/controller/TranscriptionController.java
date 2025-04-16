@@ -71,6 +71,10 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 @RequiredArgsConstructor
 @Slf4j
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class TranscriptionController implements TranscriptionApi {
 
     private final TranscriptionService transcriptionService;

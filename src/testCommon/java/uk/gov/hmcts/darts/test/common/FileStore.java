@@ -13,11 +13,12 @@ import java.util.List;
  * A thread local class that holds file references for the thread and allows them to be cleaned up.
  */
 @Slf4j
-public class FileStore extends ThreadLocal<List<String>> {
+public final class FileStore extends ThreadLocal<List<String>> {
 
     private static FileStore fileCreatedForThread = new FileStore();
 
     private FileStore() {
+        super();
     }
 
     public static FileStore getFileStore() {
@@ -62,7 +63,7 @@ public class FileStore extends ThreadLocal<List<String>> {
     private void store(String fileStr) {
         List<String> files = get();
         if (files == null) {
-            ArrayList<String> list = new ArrayList<>();
+            List<String> list = new ArrayList<>();
             list.add(fileStr);
             set(list);
         } else {

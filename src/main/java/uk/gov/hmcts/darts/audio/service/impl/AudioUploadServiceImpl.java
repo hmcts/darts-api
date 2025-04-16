@@ -44,6 +44,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class AudioUploadServiceImpl implements AudioUploadService {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -222,7 +223,8 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
     }
 
-    void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
+    @Override
+    public void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
         List<HearingEntity> hearingList = mediaEntity.getHearingList();
         for (HearingEntity hearing : hearingList) {
             mediaEntity.removeHearing(hearing);

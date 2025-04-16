@@ -20,6 +20,7 @@ public class TestArmRpoExecutionDetailEntity extends ArmRpoExecutionDetailEntity
                                            String searchId, String productionId, String sortingField, Integer searchItemCount,
                                            Integer createdById, Integer lastModifiedById,
                                            OffsetDateTime createdDateTime, OffsetDateTime lastModifiedDateTime) {
+        super();
         setId(id);
         setArmRpoState(armRpoState);
         setArmRpoStatus(armRpoStatus);
@@ -51,7 +52,7 @@ public class TestArmRpoExecutionDetailEntity extends ArmRpoExecutionDetailEntity
     public static class TestArmRpoExecutionDetailEntityBuilderRetrieve
         implements BuilderHolder<TestArmRpoExecutionDetailEntity, TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilder> {
 
-        private TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilder builder = TestArmRpoExecutionDetailEntity.builder();
+        private final TestArmRpoExecutionDetailEntity.TestArmRpoExecutionDetailEntityBuilder builder = TestArmRpoExecutionDetailEntity.builder();
 
         @Override
         public TestArmRpoExecutionDetailEntity build() {

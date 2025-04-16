@@ -106,7 +106,7 @@ public final class ExternalObjectDirectoryTestData implements
 
         builder.getBuilder()
             .media(PersistableFactory.getMediaTestData().someMinimal())
-            .status(ObjectRecordStatusTestData.statusOf(STORED))
+            .status(statusOf(STORED))
             .externalLocationType(locationTypeOf(UNSTRUCTURED))
             .externalLocation(UUID.randomUUID().toString())
             .verificationAttempts(0)

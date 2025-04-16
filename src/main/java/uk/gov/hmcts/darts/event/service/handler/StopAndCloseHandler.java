@@ -45,6 +45,7 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
 
 @Service
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class StopAndCloseHandler extends EventHandlerBase {
 
     private final DarNotifyServiceImpl darNotifyService;
@@ -142,8 +143,9 @@ public class StopAndCloseHandler extends EventHandlerBase {
             courtCase.setClosed(TRUE);
             courtCase.setCaseClosedTimestamp(dartsEvent.getDateTime());
             courtCase.setLastModifiedBy(authorisationApi.getCurrentUser());
-            courtCase = retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, RetentionConfidenceCategoryEnum.CASE_CLOSED);
-            caseRepository.saveAndFlush(courtCase);
+            caseRepository.saveAndFlush(
+                retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, RetentionConfidenceCategoryEnum.CASE_CLOSED)
+            );
         }
     }
 

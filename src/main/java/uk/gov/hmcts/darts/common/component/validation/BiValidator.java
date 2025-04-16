@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 /**
  * A generic validation interface.
  */
+@FunctionalInterface
 public interface BiValidator<T, U> {
 
     /**

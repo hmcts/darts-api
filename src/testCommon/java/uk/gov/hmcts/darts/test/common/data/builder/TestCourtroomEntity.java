@@ -21,6 +21,7 @@ public class TestCourtroomEntity extends CourtroomEntity implements DbInsertable
                                CourthouseEntity courthouse,
                                Integer createdById,
                                OffsetDateTime createdDateTime) {
+        super();
         setId(id);
         setName(name);
         setCourthouse(courthouse);

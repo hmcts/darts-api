@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     SoftDeleteRepository<MediaEntity, Integer> {
 
@@ -74,7 +74,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
                                          String mediaFile, OffsetDateTime startedDateTime,
                                          OffsetDateTime endDateTime);
 
-    @Query(value = """
+    @Query("""
         SELECT me
             FROM MediaEntity me
             JOIN me.hearingList hearing
@@ -90,7 +90,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     @Query(value = "SELECT me.* FROM darts.media me WHERE me.med_id = :mediaId", nativeQuery = true)
     Optional<MediaEntity> findByIdIncludeDeleted(Integer mediaId);
 
-    @Query(value = """
+    @Query("""
            select me
              from MediaEntity me
              where me.start <= :maxStartTime and me.end >= :minEndTime
@@ -115,15 +115,6 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
            WHERE me.chronicleId = :chronicleId
         """)
     Integer getVersionCount(String chronicleId);
-
-    @Modifying
-    @Query("""
-           UPDATE MediaEntity me
-           set me.isCurrent = false
-           WHERE me.chronicleId = :chronicleId
-           AND me.id != :excludeMediaId
-        """)
-    void setAllAssociatedMediaToIsCurrentFalseExcludingMediaId(String chronicleId, Integer excludeMediaId);
 
     List<MediaEntity> findAllByChronicleId(String chronicleId);
 

@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface GetMasterIndexFieldByRecordClassSchemaService {
 
     List<MasterIndexFieldByRecordClassSchema> getMasterIndexFieldByRecordClassSchema(String bearerToken, Integer executionId, ArmRpoStateEntity rpoStateEntity,

@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.common.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.time.LocalDate;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@SuppressWarnings("PMD.TooManyMethods")//Repository class so low complexity in this case
 public interface HearingRepository extends JpaRepository<HearingEntity, Integer> {
 
     @Query("""
@@ -67,6 +70,15 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         """
     )
     Optional<HearingEntity> findHearing(String courthouseName, String courtroom, String caseNumber, LocalDate date);
+
+    @Query("""
+        SELECT h FROM HearingEntity h    
+        WHERE h.courtCase = :courtCaseEntity
+        AND h.courtroom = :courtroom 
+         AND h.hearingDate = :date
+        """
+    )
+    Optional<HearingEntity> findHearing(CourtCaseEntity courtCaseEntity, CourtroomEntity courtroom, LocalDate date);
 
     @Query("""
             select exists

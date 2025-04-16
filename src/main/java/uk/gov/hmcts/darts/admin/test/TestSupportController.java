@@ -56,7 +56,12 @@ import static org.springframework.http.HttpStatus.OK;
 @Slf4j
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "darts.testing-support-endpoints", name = "enabled", havingValue = "true")
-@SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement", "PMD.TestClassWithoutTestCases"})
+@SuppressWarnings({
+    "PMD.UnnecessaryAnnotationValueElement",
+    "PMD.TestClassWithoutTestCases",
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class TestSupportController {
 
     private static final String FUNCTIONAL_TEST_KEY = "FUNC-";

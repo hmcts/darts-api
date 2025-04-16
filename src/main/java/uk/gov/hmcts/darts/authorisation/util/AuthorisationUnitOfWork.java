@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -53,7 +53,7 @@ public class AuthorisationUnitOfWork {
             if (auth.getContextId() == contextIdEnum) {
                 objectList.forEach(idType -> {
                     try {
-                        auth.checkAuthorisation(() -> Optional.of(gatherIdFunction.apply(idType)), new HashSet<>(Arrays.asList(rolesToValidate)));
+                        auth.checkAuthorisation(() -> Optional.of(gatherIdFunction.apply(idType)), EnumSet.copyOf(Arrays.asList(rolesToValidate)));
                     } catch (DartsApiException ex) {
 
                         // if the client wants to handle the ids being missing themselves then

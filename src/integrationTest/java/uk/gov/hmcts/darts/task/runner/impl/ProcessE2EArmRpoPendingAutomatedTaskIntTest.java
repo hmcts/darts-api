@@ -187,7 +187,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         indexDetails.setIndexId(INDEX_ID);
 
         var index = new IndexesByMatterIdResponse.Index();
-        index.setIndex(indexDetails);
+        index.setIndexDetails(indexDetails);
 
         var response = new IndexesByMatterIdResponse();
         response.setIndexes(Collections.singletonList(index));

@@ -105,6 +105,7 @@ public class ArmApiServiceImpl implements ArmApiService {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")//TODO - refactor to avoid deeply nested if statements when this class is next edited
     public String getArmBearerToken() {
         log.debug("Get ARM Bearer Token with Username: {}, Password: {}", armApiConfigurationProperties.getArmUsername(),
                   armApiConfigurationProperties.getArmPassword());

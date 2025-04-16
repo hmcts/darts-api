@@ -24,18 +24,20 @@ public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validato
 
     @Override
     public void validate(IdRequest<UserPatch> userPatch) {
-        if (userPatch.getPayload().getActive() != null && !userPatch.getPayload().getActive()) {
-            Optional<SecurityGroupEntity> securityGroupEntityLst = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-            Set<UserAccountEntity> accountEntities = securityGroupEntityLst.orElseThrow().getUsers();
+        if (!(userPatch.getPayload().getActive() != null && !userPatch.getPayload().getActive())) {
+            return;
+        }
+        Optional<SecurityGroupEntity> securityGroupEntityLst = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
+        Set<UserAccountEntity> accountEntities = securityGroupEntityLst.orElseThrow().getUsers();
 
-            // if the super admin group has only 1 user and its the user we are deactivating fail
-            if (accountEntities.size() == 1) {
-                Iterator<UserAccountEntity> entity = accountEntities.iterator();
-                UserAccountEntity userAccountEntity = entity.next();
-                if (userAccountEntity.getId().equals(userPatch.getId())) {
-                    throw new DartsApiException(AuthorisationError.UNABLE_TO_DEACTIVATE_USER);
-                }
-            }
+        // if the super admin group has only 1 user and its the user we are deactivating fail
+        if (accountEntities.size() != 1) {
+            return;
+        }
+        Iterator<UserAccountEntity> entity = accountEntities.iterator();
+        UserAccountEntity userAccountEntity = entity.next();
+        if (userAccountEntity.getId().equals(userPatch.getId())) {
+            throw new DartsApiException(AuthorisationError.UNABLE_TO_DEACTIVATE_USER);
         }
     }
 }

@@ -43,7 +43,7 @@ class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
         IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
         IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
         indexDetails.setIndexId("indexId");
-        index.setIndex(indexDetails);
+        index.setIndexDetails(indexDetails);
         response.setIndexes(List.of(index));
 
         when(armRpoClient.getIndexesByMatterId(any(), any())).thenReturn(response);

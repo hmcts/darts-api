@@ -21,18 +21,20 @@ public class UserActivateValidator implements Validator<IdRequest<UserPatch>> {
 
     @Override
     public void validate(IdRequest<UserPatch> request) {
+        if (!(request.getPayload() != null && Boolean.TRUE.equals(request.getPayload().getActive()))) {
+            return;
+        }
 
-        if (request.getPayload() != null && Boolean.TRUE.equals(request.getPayload().getActive())) {
-            Optional<UserAccountEntity> fndUser = userAccountRepository.findById(request.getId());
+        Optional<UserAccountEntity> fndUser = userAccountRepository.findById(request.getId());
 
-            if (fndUser.isPresent() && !fndUser.get().isActive()) {
-                UserAccountEntity userAccountEntity = fndUser.get();
-                String emailAddress = userAccountEntity.getEmailAddress();
+        if (!(fndUser.isPresent() && !fndUser.get().isActive())) {
+            return;
+        }
+        UserAccountEntity userAccountEntity = fndUser.get();
+        String emailAddress = userAccountEntity.getEmailAddress();
 
-                if (StringUtils.isBlank(emailAddress)) {
-                    throw new DartsApiException(UserManagementError.USER_ACTIVATION_EMAIL_VIOLATION);
-                }
-            }
+        if (StringUtils.isBlank(emailAddress)) {
+            throw new DartsApiException(UserManagementError.USER_ACTIVATION_EMAIL_VIOLATION);
         }
     }
 }

@@ -56,14 +56,14 @@ public class GetIndexesByMatterIdServiceImpl implements GetIndexesByMatterIdServ
         List<IndexesByMatterIdResponse.Index> indexes = indexesByMatterIdResponse.getIndexes();
         if (CollectionUtils.isEmpty(indexes)
             || isNull(indexes.getFirst())
-            || isNull(indexes.getFirst().getIndex())
-            || StringUtils.isBlank(indexes.getFirst().getIndex().getIndexId())) {
+            || isNull(indexes.getFirst().getIndexDetails())
+            || StringUtils.isBlank(indexes.getFirst().getIndexDetails().getIndexId())) {
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("Unable to find any indexes by matter ID in response").toString(),
                                                              armRpoExecutionDetailEntity,
                                                              userAccount);
         }
 
-        String indexId = indexes.getFirst().getIndex().getIndexId();
+        String indexId = indexes.getFirst().getIndexDetails().getIndexId();
         if (indexes.size() > 1) {
             log.warn("More than one index found in response for matterId: {}. Using first index id: {} from response: {}",
                      matterId, indexId, indexesByMatterIdResponse);

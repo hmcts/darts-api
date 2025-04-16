@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
     uses = {ObjectActionMapper.class, CourthouseMapper.class, CourtroomMapper.class, MediaLinkedCaseMapper.class},
     unmappedSourcePolicy = ReportingPolicy.IGNORE,
     unmappedTargetPolicy = ReportingPolicy.ERROR)
+@FunctionalInterface
 public interface AdminMediaMapper {
 
     @Mappings({

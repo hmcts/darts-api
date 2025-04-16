@@ -1,10 +1,10 @@
 package uk.gov.hmcts.darts.audio.deleter;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface ExternalDataStoreDeleter<T> {
 
-    List<T> delete(Integer batchSize);
+    Collection<T> delete(Integer batchSize);
 
     boolean delete(T entityToBeDeleted);
 }

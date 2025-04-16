@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
  *
  * @see uk.gov.hmcts.darts.task.service.impl.ManualTaskService
  */
+@FunctionalInterface
 public interface AutoloadingManualTask {
     AbstractLockableAutomatedTask getAbstractLockableAutomatedTask();
 }

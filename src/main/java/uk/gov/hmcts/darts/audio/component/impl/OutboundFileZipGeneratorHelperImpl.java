@@ -43,7 +43,6 @@ import static java.util.Locale.UK;
 
 @Slf4j
 @Service
-@SuppressWarnings("PMD.ExcessiveImports")
 public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGeneratorHelper {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG)

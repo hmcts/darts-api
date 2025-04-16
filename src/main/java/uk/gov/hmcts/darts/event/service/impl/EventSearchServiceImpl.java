@@ -52,6 +52,7 @@ public class EventSearchServiceImpl implements EventSearchService {
             .toList();
     }
 
+    @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     private static List<Integer> getNonEmptyOrNull(List<Integer> integerList) {
         if (CollectionUtils.isEmpty(integerList)) {
             return null;

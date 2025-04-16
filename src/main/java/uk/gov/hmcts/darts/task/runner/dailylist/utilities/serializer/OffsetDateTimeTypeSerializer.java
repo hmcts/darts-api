@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
-@SuppressWarnings("PMD.LawOfDemeter")
 public class OffsetDateTimeTypeSerializer extends JsonSerializer<OffsetDateTime> {
     @Override
     public void serialize(OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

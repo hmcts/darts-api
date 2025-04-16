@@ -5,9 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundExternalObjectDirectoryDeletedFinder;
+import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
@@ -15,8 +14,13 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -24,13 +28,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalOutboundDataStoreDeleterImplTest {
-
     @Mock
     private UserAccountRepository userAccountRepository;
     @Mock
@@ -38,20 +41,19 @@ class ExternalOutboundDataStoreDeleterImplTest {
     private ExternalOutboundDataStoreDeleter deleter;
     private ObjectRecordStatusEntity markedForDeletionStatus;
     @Mock
-    private OutboundExternalObjectDirectoryDeletedFinder finder;
-    @Mock
-    private OutboundDataStoreDeleter outboundDataStoreDeleter;
+    private DataManagementApi dataManagementApi;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
+    private OffsetDateTime currentTime;
 
     @BeforeEach
     void setUp() {
         this.deleter = new ExternalOutboundDataStoreDeleter(
             transientObjectDirectoryRepository,
-            finder,
-            outboundDataStoreDeleter,
-            transformedMediaRepository
+            transformedMediaRepository,
+            dataManagementApi
         );
+        currentTime = OffsetDateTime.now();
     }
 
     private void mockStatus() {
@@ -59,18 +61,18 @@ class ExternalOutboundDataStoreDeleterImplTest {
         markedForDeletionStatus.setId(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
     }
 
-    private List<TransientObjectDirectoryEntity> createOutboundData() {
+    private List<TransientObjectDirectoryEntity> createOutboundData(OffsetDateTime expirtyTs) {
         TransientObjectDirectoryEntity outboundAudio = new TransientObjectDirectoryEntity();
         outboundAudio.setStatus(markedForDeletionStatus);
         int id1 = 1;
         outboundAudio.setId(id1);
-        outboundAudio.setTransformedMedia(createTransformedMedia(id1));
+        outboundAudio.setTransformedMedia(createTransformedMedia(id1, expirtyTs));
 
         TransientObjectDirectoryEntity outboundAudio2 = new TransientObjectDirectoryEntity();
         outboundAudio2.setStatus(markedForDeletionStatus);
         int id2 = 21;
         outboundAudio2.setId(id2);
-        outboundAudio2.setTransformedMedia(createTransformedMedia(id2));
+        outboundAudio2.setTransformedMedia(createTransformedMedia(id2, expirtyTs));
 
         List<TransientObjectDirectoryEntity> outboundList = new ArrayList<>();
         outboundList.add(outboundAudio);
@@ -78,28 +80,46 @@ class ExternalOutboundDataStoreDeleterImplTest {
         return outboundList;
     }
 
-    private TransformedMediaEntity createTransformedMedia(int id) {
+    private TransformedMediaEntity createTransformedMedia(int id, OffsetDateTime expirtyTs) {
         TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
         transformedMediaEntity.setId(id);
+        transformedMediaEntity.setExpiryTime(expirtyTs);
         return transformedMediaEntity;
     }
 
-    @Test
-    void deleteFromOutboundDataStore() {
+    void assertEodAndTodAndTransformedMediaAreDeletedWithExprityOffset(Duration offSet) {
         mockStatus();
 
-        List<TransientObjectDirectoryEntity> outboundData = createOutboundData();
+        List<TransientObjectDirectoryEntity> outboundData = createOutboundData(currentTime.minus(offSet));
 
-        when(finder.findMarkedForDeletion(100)).thenReturn(outboundData);
+        try (EodHelperMocks eodHelperMocks = new EodHelperMocks()) {
 
-        List<TransientObjectDirectoryEntity> deletedItems = deleter.delete(100);
+            when(transientObjectDirectoryRepository.findByStatus(any(), any())).thenReturn(outboundData);
 
-        assertThat(deletedItems, containsInAnyOrder(
-            hasProperty("id", is(1)),
-            hasProperty("id", is(21))
-        ));
-        assertEquals(2, deletedItems.size());
-        verify(finder, times(1)).findMarkedForDeletion(100);
+            Collection<TransientObjectDirectoryEntity> deletedItems = deleter.delete(100);
+
+            assertThat(deletedItems, containsInAnyOrder(
+                hasProperty("id", is(1)),
+                hasProperty("id", is(21))
+            ));
+            assertEquals(2, deletedItems.size());
+            verify(transientObjectDirectoryRepository)
+                .findByStatus(eodHelperMocks.getMarkForDeletionStatus(), Limit.of(100));
+
+            verify(transientObjectDirectoryRepository).delete(outboundData.get(0));
+            verify(transientObjectDirectoryRepository).delete(outboundData.get(1));
+            verify(transformedMediaRepository).delete(outboundData.get(0).getTransformedMedia());
+            verify(transformedMediaRepository).delete(outboundData.get(1).getTransformedMedia());
+        }
     }
 
+    @Test
+    void deleteFromOutboundDataStore_whenMediaExpirtyIs91DaysAgo_shouldDeleteTransientObject() {
+        assertEodAndTodAndTransformedMediaAreDeletedWithExprityOffset(Duration.ofDays(91));
+    }
+
+    @Test
+    void deleteFromOutboundDataStore_whenMediaExpirtyIs81DaysAgo_shouldDeleteTransientObject() {
+        assertEodAndTodAndTransformedMediaAreDeletedWithExprityOffset(Duration.ofDays(89));
+    }
 }

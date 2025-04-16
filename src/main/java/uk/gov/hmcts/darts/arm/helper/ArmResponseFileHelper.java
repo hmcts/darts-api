@@ -28,6 +28,7 @@ public class ArmResponseFileHelper {
     private final ArmDataManagementApi armDataManagementApi;
     private final ArmResponseUploadFileMapper uploadFileMapper;
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")//TODO - refactor to avoid instantiating objects in loops when this is next edited
     public List<InputUploadAndAssociatedFilenames> getCorrespondingArmFilesForManifestFilename(String manifestFilePrefix, String manifestFileName)
         throws UnableToReadArmFileException {
 

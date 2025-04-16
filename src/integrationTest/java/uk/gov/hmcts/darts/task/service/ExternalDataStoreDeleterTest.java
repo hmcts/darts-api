@@ -10,18 +10,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsExternalObjectDirectoryDeletedFinder;
-import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundExternalObjectDirectoryDeletedFinder;
-import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundExternalObjectDirectoryDeletedFinder;
-import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.UnstructuredDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.UnstructuredExternalObjectDirectoryDeletedFinder;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDetsDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -33,6 +25,8 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.dets.api.DetsDataManagementApi;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
@@ -76,29 +70,13 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private DataManagementAzureClientFactory dataManagementFactory;
 
     @Autowired
-    private InboundExternalObjectDirectoryDeletedFinder inboundExternalObjectDirectoryDeletedFinder;
-
+    private DataManagementApi dataManagementApi;
     @Autowired
-    private UnstructuredExternalObjectDirectoryDeletedFinder unstructuredExternalObjectDirectoryDeletedFinder;
-
-    @Autowired
-    private OutboundExternalObjectDirectoryDeletedFinder outboundExternalObjectDirectoryDeletedFinder;
-    @Autowired
-    private DetsExternalObjectDirectoryDeletedFinder detsExternalObjectDirectoryDeletedFinder;
-    @Autowired
-    private InboundDataStoreDeleter inboundDataStoreDeleter;
-
-    @Autowired
-    private UnstructuredDataStoreDeleter unstructuredDataStoreDeleter;
-
-    @Autowired
-    private OutboundDataStoreDeleter outboundDataStoreDeleter;
-
-    @Autowired
-    private DetsDataStoreDeleter detsDataStoreDeleter;
+    private DetsDataManagementApi detsDataManagementApi;
 
     @MockitoBean
     private DetsApiService detsApiService;
+
 
     private UserAccountEntity requestor;
     private HearingEntity hearing;
@@ -120,32 +98,24 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
         externalInboundDataStoreDeleter = new ExternalInboundDataStoreDeleter(
             dartsDatabase.getExternalObjectDirectoryRepository(),
-            inboundExternalObjectDirectoryDeletedFinder,
-            inboundDataStoreDeleter,
-            transformedMediaRepository
+            dataManagementApi
         );
 
         externalUnstructuredDataStoreDeleter = new ExternalUnstructuredDataStoreDeleter(
             dartsDatabase.getExternalObjectDirectoryRepository(),
-            unstructuredExternalObjectDirectoryDeletedFinder,
-            unstructuredDataStoreDeleter,
-            transformedMediaRepository
+            dataManagementApi
         );
 
         externalOutboundDataStoreDeleter = new ExternalOutboundDataStoreDeleter(
             dartsDatabase.getTransientObjectDirectoryRepository(),
-            outboundExternalObjectDirectoryDeletedFinder,
-            outboundDataStoreDeleter,
-            transformedMediaRepository
+            transformedMediaRepository,
+            dataManagementApi
         );
 
         externalDetsDataStoreDeleter = new ExternalDetsDataStoreDeleter(
             dartsDatabase.getExternalObjectDirectoryRepository(),
-            detsExternalObjectDirectoryDeletedFinder,
-            detsDataStoreDeleter,
-            transformedMediaRepository
+            detsDataManagementApi
         );
-
     }
 
     @SneakyThrows

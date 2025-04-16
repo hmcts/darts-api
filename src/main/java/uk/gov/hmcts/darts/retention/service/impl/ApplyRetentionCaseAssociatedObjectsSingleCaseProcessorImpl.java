@@ -42,6 +42,11 @@ import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CA
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited
+    "PMD.GodClass"//TODO - refactor to reduce class size when this class is next edited
+})
 public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implements ApplyRetentionCaseAssociatedObjectsSingleCaseProcessor {
 
     private final CaseRetentionRepository caseRetentionRepository;
@@ -267,7 +272,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
                 retentionConfidenceReasonJson = objectMapper.writeValueAsString(caseRetentionConfidenceReason);
             }
         } catch (JsonProcessingException e) {
-            throw new DartsException(errorMessage + " with reason " + caseRetentionConfidenceReason);
+            throw new DartsException(errorMessage + " with reason " + caseRetentionConfidenceReason, e);
         }
         return retentionConfidenceReasonJson;
     }
@@ -281,7 +286,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     }
 
     private List<CourtCaseEntity> filterCasesNotPerfectlyClosed(List<CourtCaseEntity> cases) {
-        return cases.stream().filter(courtCase -> !(CASE_PERFECTLY_CLOSED.equals(courtCase.getRetConfScore()))).toList();
+        return cases.stream().filter(courtCase -> !CASE_PERFECTLY_CLOSED.equals(courtCase.getRetConfScore())).toList();
     }
 
     private OffsetDateTime findLongestRetentionDate(List<CourtCaseEntity> cases) {

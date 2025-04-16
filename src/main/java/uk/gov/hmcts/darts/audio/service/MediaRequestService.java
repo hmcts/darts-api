@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import java.util.List;
 import java.util.Optional;
 
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public interface MediaRequestService {
 
     Optional<MediaRequestEntity> retrieveMediaRequestForProcessing(List<Integer> mediaRequestIdsToIgnore);

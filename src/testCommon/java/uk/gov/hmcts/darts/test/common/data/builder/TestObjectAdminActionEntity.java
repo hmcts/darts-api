@@ -33,6 +33,7 @@ public class TestObjectAdminActionEntity extends ObjectAdminActionEntity impleme
                                        OffsetDateTime markedForManualDelDateTime,
                                        String ticketReference,
                                        String comments) {
+        super();
         setId(id);
         setAnnotationDocument(annotationDocument);
         setCaseDocument(caseDocument);

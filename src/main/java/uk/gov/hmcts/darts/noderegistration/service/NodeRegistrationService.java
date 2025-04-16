@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.noderegistration.service;
 
 
+@FunctionalInterface
 public interface NodeRegistrationService {
 
     @SuppressWarnings({"PMD.UseObjectForClearerAPI"})

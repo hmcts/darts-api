@@ -431,6 +431,36 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
         assertEquals(COURTROOM_NAME, hearingEntities.get().getCourtroom().getName());
     }
 
+    @Test
+    void findHearing_usingCourtCaseAndCourtRoomObjects_ReturnsHearing() {
+        CourthouseEntity courthouse = someMinimalCourthouse();
+        courthouse.setCourthouseName("Test Courthouse");
+
+        CourtroomEntity courtroom = someMinimalCourtRoom();
+        courtroom.setName("Test Courtroom");
+        courtroom.setCourthouse(courthouse);
+
+        HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
+        dartsPersistence.saveAll(hearingForCase);
+
+        String courthouseName = hearingForCase.getCourtroom().getCourthouse().getCourthouseName();
+        String courtroomName = hearingForCase.getCourtroom().getName();
+
+        log.info("Courthouse name: {}", courthouseName);
+        log.info("Courtroom name: {}", courtroomName);
+
+        // when
+        Optional<HearingEntity> hearingEntities = hearingRepository.findHearing(
+            hearingForCase.getCourtCase(),
+            hearingForCase.getCourtroom(),
+            hearingForCase.getHearingDate()
+        );
+
+        // then
+        assertThat(hearingEntities).isPresent();
+        assertThat(hearingEntities.get().getId()).isEqualTo(hearingForCase.getId());
+    }
+
     private HearingEntity setupHearingForCase(CourthouseEntity courthouseEntity, CourtroomEntity courtroomEntity) {
         var case1 = PersistableFactory.getCourtCaseTestData().createCaseAt(courthouseEntity);
         case1.setCaseNumber("Case0000001");

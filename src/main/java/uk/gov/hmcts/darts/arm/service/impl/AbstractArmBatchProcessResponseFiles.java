@@ -63,7 +63,12 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
-@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({
+    "PMD.GodClass",
+    "PMD.CyclomaticComplexity",
+    "PMD.CouplingBetweenObjects",
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 @RequiredArgsConstructor
 public abstract class AbstractArmBatchProcessResponseFiles implements ArmResponseFilesProcessor {
 
@@ -132,6 +137,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         runTasksAsync(tasks, asyncTaskConfig);
     }
 
+
+    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
     void runTasksAsync(List<Callable<Void>> tasks, AsyncTaskConfig asyncTaskConfig) {
         try {
             AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
@@ -287,6 +294,10 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
+    @SuppressWarnings({
+        "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
+        "PMD.CognitiveComplexity"//TODO - refactor to reduce complexity when this is next edited
+    })
     protected void processBatchResponseFiles(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
                                              ArmBatchResponses armBatchResponses,
                                              UserAccountEntity userAccount) {
@@ -883,6 +894,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     protected abstract String getManifestFilePrefix();
 
+    @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")//Not all subclasses need to implement this method
     protected void preProcessResponseFilesActions(int armEodId) {
         // in the DARTS to ARM flow no pre-processing actions are needed
     }

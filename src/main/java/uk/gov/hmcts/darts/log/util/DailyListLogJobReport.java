@@ -13,6 +13,7 @@ import java.util.Map;
 @Getter
 @Setter
 @EqualsAndHashCode
+@SuppressWarnings("PMD.UseEnumCollections")//TODO - Refactor to use EnumMap
 public class DailyListLogJobReport {
     private Map<JobStatusType, Integer> mapOfJobResultCount = new HashMap<>();
 

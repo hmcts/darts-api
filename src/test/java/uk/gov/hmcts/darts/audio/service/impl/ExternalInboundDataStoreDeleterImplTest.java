@@ -1,14 +1,14 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundExternalObjectDirectoryDeletedFinder;
+import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -16,8 +16,11 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,25 +45,31 @@ class ExternalInboundDataStoreDeleterImplTest {
     private ObjectRecordStatusEntity markedForDeletionStatus;
 
     @Mock
-    private InboundExternalObjectDirectoryDeletedFinder finder;
-    @Mock
-    private InboundDataStoreDeleter inboundDataStoreDeleter;
+    private DataManagementApi dataManagementApi;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
+    private EodHelperMocks eodHelperMocks;
 
     @BeforeEach
     public void setUp() {
+        eodHelperMocks = new EodHelperMocks();
         mockStatus();
         List<ExternalObjectDirectoryEntity> inboundData = createInboundData();
-        when(finder.findMarkedForDeletion(100)).thenReturn(inboundData);
+        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(
+            eodHelperMocks.getInboundLocation(),
+            eodHelperMocks.getMarkForDeletionStatus(),
+            Limit.of(100)))
+            .thenReturn(inboundData);
 
         this.deleter = new ExternalInboundDataStoreDeleter(
             externalObjectDirectoryRepository,
-            finder,
-            inboundDataStoreDeleter,
-            transformedMediaRepository
+            dataManagementApi
         );
+    }
 
+    @AfterEach
+    public void afterEach() {
+        eodHelperMocks.close();
     }
 
     private void mockStatus() {
@@ -71,7 +79,7 @@ class ExternalInboundDataStoreDeleterImplTest {
 
     @Test
     void deleteFromInboundDatastore() {
-        List<ExternalObjectDirectoryEntity> deletedItems = deleter.delete(100);
+        Collection<ExternalObjectDirectoryEntity> deletedItems = deleter.delete(100);
 
         assertThat(
             deletedItems,
@@ -85,15 +93,21 @@ class ExternalInboundDataStoreDeleterImplTest {
             )
         );
         assertEquals(2, deletedItems.size());
-        verify(finder, times(1)).findMarkedForDeletion(100);
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(
+            eodHelperMocks.getInboundLocation(),
+            eodHelperMocks.getMarkForDeletionStatus(),
+            Limit.of(100));
     }
 
     @Test
     void deleteFromInboundDatastoreShouldNotThrowAzureDeleteBlobException() throws AzureDeleteBlobException {
-        doThrow(AzureDeleteBlobException.class).when(inboundDataStoreDeleter).delete(any(String.class));
+        doThrow(AzureDeleteBlobException.class).when(dataManagementApi).deleteBlobDataFromInboundContainer(any(String.class));
 
         assertDoesNotThrow(() -> deleter.delete(100));
-        verify(finder, times(1)).findMarkedForDeletion(100);
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(
+            eodHelperMocks.getInboundLocation(),
+            eodHelperMocks.getMarkForDeletionStatus(),
+            Limit.of(100));
     }
 
     private List<ExternalObjectDirectoryEntity> createInboundData() {
