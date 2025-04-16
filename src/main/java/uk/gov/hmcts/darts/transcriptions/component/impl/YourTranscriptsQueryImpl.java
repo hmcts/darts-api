@@ -215,7 +215,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as transcription_urgency_description,
                     tru.tru_id  as transcription_urgency_id,
                     tru.priority_order as transcription_urgency_priority_order,
-                    trw.workflow_ts as requested_ts
+                    (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts
                 FROM darts.transcription tra
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
                 JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
