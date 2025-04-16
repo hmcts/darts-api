@@ -32,12 +32,12 @@ public class CreatedBaseEntity implements CreatedBy {
     protected transient boolean skipUserAudit;
 
     @Override
-    public final void setCreatedBy(UserAccountEntity userAccount) {
+    public void setCreatedBy(UserAccountEntity userAccount) {
         setCreatedById(userAccount == null ? null : userAccount.getId());
     }
 
     @Override
-    public final void setCreatedById(Integer id) {
+    public void setCreatedById(Integer id) {
         this.createdById = id;
         //Mark skip user audit as true to prevent audit listener from overriding the createdBy and createdDateTime
         this.skipUserAudit = true;
