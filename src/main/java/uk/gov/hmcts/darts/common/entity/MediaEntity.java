@@ -106,6 +106,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     private boolean isDeleted;
 
     @Column(name = "is_current")
+    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")//This is by design
     private Boolean isCurrent;
 
     @ManyToOne(fetch = FetchType.LAZY)

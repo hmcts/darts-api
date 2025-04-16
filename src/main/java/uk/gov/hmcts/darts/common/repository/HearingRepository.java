@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@SuppressWarnings("PMD.TooManyMethods")//Repository class so low complexity in this case
 public interface HearingRepository extends JpaRepository<HearingEntity, Integer> {
 
     @Query("""

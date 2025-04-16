@@ -352,7 +352,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         mediaEntities.stream()
             .filter(MediaEntity::isCurrent) //No need to process is_current = false. These are already delinked
             .filter(mediaEntity -> !id.equals(mediaEntity.getId())) //No need to process the media entity we are updating
-            .forEach(mediaEntity -> audioUploadService.deleteMediaLinkingAndSetCurrentFalse(mediaEntity));
+            .forEach(audioUploadService::deleteMediaLinkingAndSetCurrentFalse);
 
         mediaEntityToUpdate.setIsCurrent(true);
         mediaRepository.save(mediaEntityToUpdate);
