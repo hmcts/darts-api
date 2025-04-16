@@ -43,7 +43,11 @@ import static java.lang.Character.toUpperCase;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.CognitiveComplexity"})
+@SuppressWarnings({
+    "PMD.TestClassWithoutTestCases",
+    "PMD.CognitiveComplexity",
+    "PMD.GodClass"
+})
 @Slf4j
 public final class TestUtils {
 
