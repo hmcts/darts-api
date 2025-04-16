@@ -46,6 +46,7 @@ import uk.gov.hmcts.darts.audio.model.GetAdminMediasMarkedForDeletionMediaItem;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
 import uk.gov.hmcts.darts.audio.model.PatchAdminMediasByIdRequest;
+import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -53,6 +54,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -63,6 +65,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.common.service.HearingCommonService;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
@@ -84,6 +87,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("PMD.CouplingBetweenObjects")
@@ -95,6 +99,10 @@ class AdminMediaServiceImplTest {
 
     @Mock
     private MediaRepository mediaRepository;
+    @Mock
+    private AudioUploadService audioUploadService;
+    @Mock
+    private HearingCommonService hearingCommonService;
     @Mock
     private ObjectAdminActionRepository objectAdminActionRepository;
     @Mock
@@ -899,25 +907,63 @@ class AdminMediaServiceImplTest {
             PatchAdminMediasByIdRequest request = new PatchAdminMediasByIdRequest(true);
             MediaEntity media = mock(MediaEntity.class);
             doReturn(media).when(mediaRequestService).getMediaEntityById(123);
-            when(media.getIsCurrent()).thenReturn(true);
+            when(media.isCurrent()).thenReturn(true);
             DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.patchMediasById(123, request));
             assertThat(exception.getError()).isEqualTo(AudioApiError.MEDIA_ALREADY_CURRENT);
         }
 
         @Test
         void shouldUpdateMediaIsCurrent_whenMediaIsNotCurrent() {
-            PatchAdminMediasByIdRequest request = new PatchAdminMediasByIdRequest(true);
-            MediaEntity media = mock(MediaEntity.class);
+            final String chronicleId = "someChronicleId";
+            MediaEntity media = new MediaEntity();
+            media.setIsCurrent(false);
+            media.setChronicleId(chronicleId);
+            media.setId(123);
             doReturn(media).when(mediaRequestService).getMediaEntityById(123);
-            when(media.getIsCurrent()).thenReturn(false);
-            when(media.getChronicleId()).thenReturn("chronicleId123");
-            when(media.getId()).thenReturn(123);
 
+            CourtCaseEntity courtCase1 = new CourtCaseEntity();
+            CourtCaseEntity courtCase2 = new CourtCaseEntity();
+            MediaLinkedCaseEntity mediaLinkedCaseEntity1 = new MediaLinkedCaseEntity();
+            mediaLinkedCaseEntity1.setCourtCase(courtCase1);
+            MediaLinkedCaseEntity mediaLinkedCaseEntity2 = new MediaLinkedCaseEntity();
+            mediaLinkedCaseEntity2.setCourtCase(courtCase2);
+
+            media.setMediaLinkedCaseList(List.of(mediaLinkedCaseEntity1, mediaLinkedCaseEntity2));
+
+
+            MediaEntity oldMedia1IsCurrent = new MediaEntity();
+            oldMedia1IsCurrent.setIsCurrent(true);
+            oldMedia1IsCurrent.setId(1);
+
+            MediaEntity oldMedia2IsCurrent = new MediaEntity();
+            oldMedia2IsCurrent.setIsCurrent(true);
+            oldMedia2IsCurrent.setId(2);
+
+            //Should not call deleteMediaLinkingAndSetCurrentFalse as not current
+            MediaEntity oldMedia3IsNotCurrent = new MediaEntity();
+            oldMedia3IsNotCurrent.setIsCurrent(false);
+            oldMedia3IsNotCurrent.setId(3);
+
+            List<MediaEntity> mediaEntities = new ArrayList<>();
+            mediaEntities.add(oldMedia1IsCurrent);
+            mediaEntities.add(oldMedia2IsCurrent);
+            mediaEntities.add(oldMedia3IsNotCurrent);
+            mediaEntities.add(media);
+            when(mediaRepository.findAllByChronicleId(chronicleId)).thenReturn(mediaEntities);
+
+            PatchAdminMediasByIdRequest request = new PatchAdminMediasByIdRequest(true);
             mediaRequestService.patchMediasById(123, request);
 
-            verify(media).setIsCurrent(true);
+            verify(mediaRepository).findAllByChronicleId(chronicleId);
+            verify(audioUploadService).deleteMediaLinkingAndSetCurrentFalse(oldMedia1IsCurrent);
+            verify(audioUploadService).deleteMediaLinkingAndSetCurrentFalse(oldMedia2IsCurrent);
+
+            verify(hearingCommonService).linkAudioToHearings(courtCase1, media);
+            verify(hearingCommonService).linkAudioToHearings(courtCase2, media);
             verify(mediaRepository).save(media);
-            verify(mediaRepository).setAllAssociatedMediaToIsCurrentFalseExcludingMediaId("chronicleId123", 123);
+
+            assertThat(media.isCurrent()).isEqualTo(true);
+            verifyNoMoreInteractions(audioUploadService, hearingCommonService);
         }
     }
 
