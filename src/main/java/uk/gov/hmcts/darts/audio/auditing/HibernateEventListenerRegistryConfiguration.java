@@ -22,19 +22,20 @@ public class HibernateEventListenerRegistryConfiguration {
     }
 
     @PostConstruct
+    @SuppressWarnings("PMD.CloseResource")
     public void eventListenerRegistry() {
-        try (var serviceRegistry = entityManagerFactory
+        var serviceRegistry = entityManagerFactory
             .unwrap(SessionFactoryImpl.class)
-            .getServiceRegistry()) {
+            .getServiceRegistry();
 
-            var enversService = serviceRegistry.getService(EnversService.class);
-            var listenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
+        var enversService = serviceRegistry.getService(EnversService.class);
+        var listenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
 
-            assert listenerRegistry != null;
+        assert listenerRegistry != null;
 
-            listenerRegistry.setListeners(
-                POST_UPDATE,
-                new DartsEnversPostUpdateEventListener(enversService, new AuditExecutor()));
-        }
+        listenerRegistry.setListeners(
+            POST_UPDATE,
+            new DartsEnversPostUpdateEventListener(enversService, new AuditExecutor()));
+
     }
 }
