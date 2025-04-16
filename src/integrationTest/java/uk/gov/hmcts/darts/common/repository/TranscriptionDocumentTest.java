@@ -84,7 +84,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository
             .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
-                                        .getTranscription().getCourtCases().getFirst().getCaseNumber(), null, null, null, null, null, null, null);
+                                        .getTranscription().getCourtCase().getCaseNumber(), null, null, null, null, null, null, null);
         if (TestType.MODENISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -98,7 +98,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         transcription.setIsCurrent(false);
         dartsDatabase.save(transcription);
         transcriptionDocumentResults = transcriptionDocumentRepository
-            .findTranscriptionMedia(transcription.getCourtCases().getFirst().getCaseNumber(), null, null, null, null, null, null, null);
+            .findTranscriptionMedia(transcription.getCourtCase().getCaseNumber(), null, null, null, null, null, null, null);
 
         Assertions.assertEquals(0, transcriptionDocumentResults.size());
     }
