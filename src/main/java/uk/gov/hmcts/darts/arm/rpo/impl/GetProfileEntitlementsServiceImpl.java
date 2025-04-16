@@ -68,12 +68,12 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
             .findFirst()
             .orElseThrow(() -> armRpoUtil.handleFailureAndCreateException(
                 exceptionMessageBuilder.append("No matching entitlements '").append(configuredEntitlement).append("' were returned").toString(),
-                executionDetail, userAccount, null));
+                executionDetail, userAccount));
 
         String entitlementId = profileEntitlement.getEntitlementId();
         if (StringUtils.isEmpty(entitlementId)) {
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("The obtained entitlement id was empty").toString(),
-                                                             executionDetail, userAccount, null);
+                                                             executionDetail, userAccount);
         }
 
         executionDetail.setEntitlementId(entitlementId);
