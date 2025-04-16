@@ -264,7 +264,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         }
     }
 
-    @SuppressWarnings("PMD.LawOfDemeter")
     private List<AudioFileInfo> generateFilesForRequestType(MediaRequestEntity mediaRequestEntity,
                                                             Map<MediaEntity, Path> downloadedMedias)
         throws ExecutionException, InterruptedException, IOException {

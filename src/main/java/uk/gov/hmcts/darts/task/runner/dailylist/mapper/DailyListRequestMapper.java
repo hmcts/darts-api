@@ -41,7 +41,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @SuppressWarnings({
     "PMD.AvoidDuplicateLiterals",
     "PMD.OverloadMethodsDeclarationOrder",
-    "PMD.ExcessiveImports",
     "PMD.TooManyMethods",
     "PMD.ReturnEmptyCollectionRatherThanNull"})
 public interface DailyListRequestMapper {

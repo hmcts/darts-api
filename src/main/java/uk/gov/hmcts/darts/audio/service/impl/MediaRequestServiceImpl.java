@@ -93,8 +93,7 @@ import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTe
 @SuppressWarnings({
     "PMD.CouplingBetweenObjects",
     "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited
-    "PMD.GodClass",//TODO - refactor to reduce class size when this class is next edited
-    "PMD.ExcessiveImports"
+    "PMD.GodClass"//TODO - refactor to reduce class size when this class is next edited
 })
 public class MediaRequestServiceImpl implements MediaRequestService {
 

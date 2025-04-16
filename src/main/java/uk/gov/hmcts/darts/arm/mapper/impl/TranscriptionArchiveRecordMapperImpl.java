@@ -266,7 +266,6 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
         return comments;
     }
 
-    @SuppressWarnings("PMD.LawOfDemeter")
     private boolean isTranscriptionCommentRequested(TranscriptionCommentEntity transcriptionComment) {
         boolean isTranscriptionCommentRequested = false;
         if (nonNull(transcriptionComment.getTranscriptionWorkflow())

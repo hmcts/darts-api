@@ -49,11 +49,7 @@
         <exclude name="DataClass"/>
         <exclude name="TooManyFields"/>
         <exclude name="LawOfDemeter"/>
-    </rule>
-    <rule ref="category/java/design.xml/ExcessiveImports">
-        <properties>
-            <property name="minimum" value="75"/><!-- should be reduced -->
-        </properties>
+        <exclude name="ExcessiveImports"/>
     </rule>
     <rule ref="category/java/design.xml/SignatureDeclareThrowsException">
         <properties>

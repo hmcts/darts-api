@@ -115,7 +115,6 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @Service
 @Slf4j
 @SuppressWarnings({
-    "PMD.ExcessiveImports",
     "PMD.GodClass",
     "PMD.CouplingBetweenObjects",
     "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
