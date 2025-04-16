@@ -118,7 +118,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
             .andReturn();
 
         TranscriptionDocumentEntity documentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentEntity.getId()).get();
-        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentEntity.getId());
+        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentEntity.getId());
 
         TranscriptionDocumentHideResponse transcriptionResponse
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), TranscriptionDocumentHideResponse.class);
@@ -261,7 +261,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         TranscriptionDocumentEntity documentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentEntity.getId()).get();
 
         // ensure no object admin actions exist
-        assertTrue(objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentEntity.getId()).isEmpty());
+        assertTrue(objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentEntity.getId()).isEmpty());
 
         // assert that the action data that existed before deletion is returned
         assertEquals(documentEntity.getId(), transcriptionResponse.getId());

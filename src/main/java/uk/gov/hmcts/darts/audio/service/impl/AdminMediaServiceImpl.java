@@ -69,6 +69,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class AdminMediaServiceImpl implements AdminMediaService {
 
     private final SearchMediaValidator searchMediaValidator;
@@ -178,7 +182,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             AdminActionRequest adminActionRequest = mediaHideRequest.getAdminAction();
             applyAdminActionComponent.applyAdminActionToAllVersions(targetedMedia,
                                                                     mapToAdminActionProperties(adminActionRequest));
-            ObjectAdminActionEntity adminActionForTargetedMedia = objectAdminActionRepository.findByMedia_Id(targetedMedia.getId())
+            ObjectAdminActionEntity adminActionForTargetedMedia = objectAdminActionRepository.findByMediaId(targetedMedia.getId())
                 .getFirst();
             return GetAdminMediaResponseMapper.mapHideOrShowResponse(targetedMedia, adminActionForTargetedMedia);
         } else {
@@ -302,7 +306,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
         List<MediaEntity> currentMediaVersions = mediaVersions.stream()
             .filter(mediaEntity -> mediaEntity.getIsCurrent() != null)
-            .filter(media -> media.getIsCurrent())
+            .filter(MediaEntity::getIsCurrent)
             .sorted(Comparator.comparing(CreatedBaseEntity::getCreatedDateTime))
             .collect(Collectors.toCollection(ArrayList::new));
 
@@ -311,11 +315,10 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .sorted(Comparator.comparing(CreatedBaseEntity::getCreatedDateTime).reversed())
             .collect(Collectors.toCollection(ArrayList::new));
 
-        MediaEntity currentVersion;
+        MediaEntity currentVersion = null;
         if (currentMediaVersions.size() == 1) {
             currentVersion = currentMediaVersions.getLast();
         } else if (currentMediaVersions.isEmpty()) {
-            currentVersion = null;
             log.info("Media with id {} has no current versions", id);
         } else {
             log.warn("Media with id {} has {} current versions we only expect one", id, currentMediaVersions.size());

@@ -56,7 +56,7 @@ class MediaApproveMarkForDeletionValidatorTest {
         Integer mediaId = 200;
         var objectAdminAction1 = ObjectAdminActionTestData.minimalObjectAdminAction();
         var objectAdminAction2 = ObjectAdminActionTestData.minimalObjectAdminAction();
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction1, objectAdminAction2));
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminAction1, objectAdminAction2));
 
 
         // when
@@ -73,7 +73,7 @@ class MediaApproveMarkForDeletionValidatorTest {
         Integer mediaId = 200;
         var objectAdminAction = ObjectAdminActionTestData.minimalObjectAdminAction();
         objectAdminAction.setMarkedForManualDeletion(true);
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminAction));
 
 
         // when
@@ -91,7 +91,7 @@ class MediaApproveMarkForDeletionValidatorTest {
         var objectAdminAction = ObjectAdminActionTestData.minimalObjectAdminAction();
         objectAdminAction.setMarkedForManualDeletion(false);
         objectAdminAction.setObjectHiddenReason(null);
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminAction));
 
         // when
         DartsApiException exception = assertThrows(DartsApiException.class,
@@ -114,7 +114,7 @@ class MediaApproveMarkForDeletionValidatorTest {
         var hiddenReason = ObjectHiddenReasonTestData.otherDelete();
         objectAdminAction.setObjectHiddenReason(hiddenReason);
 
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminAction));
         when(objectHiddenReasonRepository.findById(hiddenReason.getId())).thenReturn(Optional.of(hiddenReason));
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
@@ -142,7 +142,7 @@ class MediaApproveMarkForDeletionValidatorTest {
         var authorisedByUserAccount = UserAccountTestData.minimalUserAccount();
         authorisedByUserAccount.setId(345);
 
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminAction));
         when(objectHiddenReasonRepository.findById(hiddenReason.getId())).thenReturn(Optional.of(hiddenReason));
         when(userIdentity.getUserAccount()).thenReturn(authorisedByUserAccount);
 

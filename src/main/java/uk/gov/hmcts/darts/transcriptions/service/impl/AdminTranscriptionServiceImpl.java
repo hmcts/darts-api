@@ -53,6 +53,7 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_TRANSCRIPTION;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class AdminTranscriptionServiceImpl implements AdminTranscriptionService {
 
     private final TranscriptionSearchQuery transcriptionSearchQuery;
@@ -218,7 +219,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
                 response = transcriptionMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
             } else {
-                List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentId);
+                List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentId);
 
                 response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), null);
 
@@ -250,7 +251,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         TranscriptionDocumentEntity transcriptionDocumentEntity = getTranscriptionDocumentEntity(transcriptionDocumentId);
 
         ObjectAdminActionEntity objectAdminActionEntity = objectAdminActionRepository
-            .findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(transcriptionDocumentId)
+            .findByTranscriptionDocumentIdAndObjectHiddenReasonIsNotNullAndObjectHiddenReasonMarkedForDeletionTrue(transcriptionDocumentId)
             .orElseThrow(() -> new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED));
 
         UserAccountEntity userAccount = userIdentity.getUserAccount();

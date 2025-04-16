@@ -137,7 +137,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                                                   UserAccountEntity userAccount) {
             courtCase.setClosed(TRUE);
             courtCase.setCaseClosedTimestamp(caseClosedDate);
-            courtCase = retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, retentionConfidenceCategory);
+            retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, retentionConfidenceCategory);
             caseService.saveCase(courtCase);
             log.info("Closed court case id {}", courtCase.getId());
 

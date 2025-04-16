@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
-@SuppressWarnings("PMD.LawOfDemeter")
 public class OffsetDateTimeTypeDeserializer extends JsonDeserializer<OffsetDateTime> {
     public static OffsetDateTime getLOffsetDate(String offsetDate) {
         return OffsetDateTime.parse(offsetDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME);

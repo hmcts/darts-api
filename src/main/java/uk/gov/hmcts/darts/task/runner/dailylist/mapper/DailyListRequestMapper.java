@@ -38,7 +38,11 @@ import java.util.List;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
-@SuppressWarnings({"PMD.OverloadMethodsDeclarationOrder", "PMD.ExcessiveImports", "PMD.TooManyMethods", "PMD.ReturnEmptyCollectionRatherThanNull"})
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.OverloadMethodsDeclarationOrder",
+    "PMD.TooManyMethods",
+    "PMD.ReturnEmptyCollectionRatherThanNull"})
 public interface DailyListRequestMapper {
 
     @Mappings({

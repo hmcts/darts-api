@@ -38,6 +38,7 @@ import static java.util.Objects.nonNull;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class AuthorisationServiceImpl implements AuthorisationService {
 
     private final CourthouseRepository courthouseRepository;

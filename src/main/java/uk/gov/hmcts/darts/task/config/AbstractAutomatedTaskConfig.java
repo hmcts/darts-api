@@ -20,6 +20,7 @@ public class AbstractAutomatedTaskConfig {
     @Getter
     @Setter
     @Validated
+    @SuppressWarnings("PMD.ShortClassName")
     public static class Lock {
         @NotNull
         private Duration atLeastFor = Duration.ofMinutes(300);

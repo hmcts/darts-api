@@ -41,6 +41,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public class DataStoreToArmHelper {
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
@@ -277,10 +278,10 @@ public class DataStoreToArmHelper {
         if (batchItem.getArmEod() != null) {
             logApi.armPushFailed(batchItem.getArmEod().getId());
             batchItem.undoManifestFileChange();
-            if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
-                updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
-            } else {
+            if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
                 updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmManifestFileStatus(), userAccount);
+            } else {
+                updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
             }
         }
     }

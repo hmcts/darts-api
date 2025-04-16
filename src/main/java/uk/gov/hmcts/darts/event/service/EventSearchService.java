@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface EventSearchService {
     List<AdminSearchEventResponseResult> searchForEvents(AdminEventSearch adminEventSearch);
 }

@@ -25,6 +25,7 @@ public class ProcessDailyListOnDemandTask implements AutomatedOnDemandTask {
     private AutomatedTaskStatus lastOutcome = AutomatedTaskStatus.NOT_STARTED;
     private final AutomatedTasksApi automatedTasksApi;
 
+    @SuppressWarnings("PMD.UnusedAssignment")//Required to keep accurate track of process
     private void processDailyList(Runnable runnable) {
         LockingTaskExecutor executor = automatedTasksApi.getLockingTaskExecutor();
         executor.executeWithLock((Runnable)() -> {

@@ -32,11 +32,6 @@ public class ArmRpoReplayAutomatedTask extends AbstractLockableAutomatedTask<Arm
     }
 
     @Override
-    public void run(boolean isManualRun) {
-        super.run(isManualRun);
-    }
-
-    @Override
     protected void runTask() {
         armRpoReplayService.replayArmRpo(getAutomatedTaskBatchSize());
     }

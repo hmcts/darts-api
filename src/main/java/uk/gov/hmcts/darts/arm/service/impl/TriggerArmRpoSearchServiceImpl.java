@@ -90,6 +90,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
     }
 
     // Added method to fix sonar complaint
+    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
     void sleep(Duration threadSleepDuration) {
         try {
             Thread.sleep(threadSleepDuration);

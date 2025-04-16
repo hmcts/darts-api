@@ -35,10 +35,18 @@ public class ArmRpoUtil {
     public ArmRpoException handleFailureAndCreateException(String message,
                                                            ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
                                                            UserAccountEntity userAccount) {
-        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
-        return new ArmRpoException(message);
+        return handleFailureAndCreateException(message, armRpoExecutionDetailEntity, userAccount, null);
     }
 
+    public ArmRpoException handleFailureAndCreateException(String message,
+                                                           ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
+                                                           UserAccountEntity userAccount,
+                                                           Throwable cause) {
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
+        return new ArmRpoException(message, cause);
+    }
+
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     public void handleResponseStatus(UserAccountEntity userAccount, BaseRpoResponse baseRpoResponse, StringBuilder errorMessage,
                                      ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         if (isNull(baseRpoResponse)
@@ -56,7 +64,7 @@ public class ArmRpoUtil {
             }
         } catch (IllegalArgumentException e) {
             log.error(errorMessage.append("ARM RPO API response status is invalid - ").append(baseRpoResponse).toString(), e);
-            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount, e);
         }
     }
 }

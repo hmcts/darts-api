@@ -51,6 +51,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 @RequiredArgsConstructor
 @Slf4j
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public class AudioRequestsController implements AudioRequestsApi {
 
     private final MediaRequestService mediaRequestService;
@@ -79,6 +80,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
         securityRoles = {TRANSCRIBER},
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
+    @SuppressWarnings("PMD.CloseResource")//TODO - ensure resource is closed after use to prevent memory leaks
     public ResponseEntity<Resource> download(Integer transformedMediaId) {
         DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.download(transformedMediaId);
         return ResponseEntity.ok().body(downloadResponseMetadata.getResource());

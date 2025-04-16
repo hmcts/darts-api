@@ -100,7 +100,10 @@ public final class HearingTestData
         return hearing;
     }
 
-    public HearingEntity hearingWith(String caseNumber, String courthouseName, String courtroomName, String hearingDatetime) {
+    public HearingEntity hearingWith(String caseNumber,
+                                     String courthouseName,
+                                     String courtroomName,
+                                     String hearingDatetime) {
         var courtroom =
             createCourtRoomWithNameAtCourthouse(
                 createCourthouseWithName(courthouseName),

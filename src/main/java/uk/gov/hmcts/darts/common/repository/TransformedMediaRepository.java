@@ -65,7 +65,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         """)
     List<Integer> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime, Limit limit);
 
-    @Query(value = """
+    @Query("""
         SELECT tm
             FROM TransformedMediaEntity tm
             JOIN tm.mediaRequest media
@@ -86,6 +86,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
            ORDER BY tm.id DESC
         """)
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")//Required for JPA
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,
                                                       String courtHouseDisplayName,

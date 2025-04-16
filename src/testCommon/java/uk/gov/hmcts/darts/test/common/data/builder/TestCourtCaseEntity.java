@@ -61,6 +61,7 @@ public class TestCourtCaseEntity extends CourtCaseEntity implements DbInsertable
         OffsetDateTime lastModifiedDateTime,
         Integer lastModifiedById
     ) {
+        super();
         setId(id);
         setReportingRestrictions(reportingRestrictions);
         setLegacyCaseObjectId(legacyCaseObjectId);

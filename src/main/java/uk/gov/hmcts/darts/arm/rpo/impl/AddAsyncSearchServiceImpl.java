@@ -49,7 +49,7 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
         );
 
         final StringBuilder exceptionMessageBuilder = new StringBuilder(99).append("ARM addAsyncSearch: ");
-        ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTask_taskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
             .orElseThrow(() -> armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("Automated task not found: ")
                                                                               .append(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
                                                                               .toString(),

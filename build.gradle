@@ -215,12 +215,11 @@ tasks.register('smoke', Test) {
 }
 
 checkstyle {
-    maxWarnings = 0
     checkstyleMain.exclude '**/uk/gov/hmcts/darts/task/runner/dailylist/**'
 }
 
 pmd {
-    toolVersion = "7.11.0"
+    toolVersion = "7.12.0"
     reportsDir = file("$project.buildDir/reports/pmd")
     // https://github.com/pmd/pmd/issues/876
     ruleSets = []
@@ -229,8 +228,6 @@ pmd {
 
 pmdMain {
     ruleSetFiles = files("config/pmd/main-ruleset.xml")
-    //Ensures we don't passively increase pmd errors but we should aim to reduce this
-    maxFailures = 311
     excludes = [
             '**/uk/gov/hmcts/darts/task/runner/dailylist/**',
     ]
@@ -238,8 +235,6 @@ pmdMain {
 
 pmdTestCommon {
     ruleSetFiles = files("config/pmd/test-ruleset.xml")
-    //Ensures we don't passively increase pmd errors but we should aim to reduce this
-    maxFailures = 73
 }
 pmdTest {
     ruleSetFiles = files("config/pmd/test-ruleset.xml")

@@ -4,84 +4,75 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
-  <description>HMCTS PMD rule set</description>
+    <description>HMCTS PMD rule set</description>
+    <exclude-pattern>.*/generated.*</exclude-pattern>
+    <exclude-pattern>.*/uk/gov/hmcts/darts/task/runner/dailylist/.*</exclude-pattern>
 
-  <rule ref="category/java/bestpractices.xml">
-    <exclude name="GuardLogStatement"/>
-    <exclude name="UnitTestContainsTooManyAsserts"/>
-    <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
-    <exclude name="UnitTestShouldIncludeAssert"/>
-  </rule>
-  <rule ref="category/java/codestyle.xml">
-    <exclude name="AtLeastOneConstructor"/>
-    <exclude name="LocalVariableCouldBeFinal"/>
-    <exclude name="LongVariable"/>
-    <exclude name="MethodArgumentCouldBeFinal"/>
-    <exclude name="OnlyOneReturn"/>
-    <exclude name="TooManyStaticImports"/>
-    <exclude name="CommentDefaultAccessModifier"/>
-    <exclude name="LinguisticNaming"/>
-    <exclude name="UseExplicitTypes"/>
-  </rule>
-  <rule ref="category/java/codestyle.xml/ClassNamingConventions">
-    <properties>
-      <!-- same as any other class -->
-      <property name="utilityClassPattern" value="[A-Z][a-zA-Z]+"/>
-    </properties>
-  </rule>
-  <rule ref="category/java/codestyle.xml/MethodNamingConventions">
-    <properties>
-      <property name="junit4TestPattern" value="[a-z][a-zA-Z0-9_]+"/>
-    </properties>
-  </rule>
-  <rule ref="category/java/codestyle.xml/ShortVariable">
-    <properties>
-      <property name="minimum" value="2"/>
-    </properties>
-  </rule>
-  <rule ref="category/java/design.xml">
-    <exclude name="AvoidCatchingGenericException"/>
-<!--    <exclude name="AvoidThrowingRawExceptionTypes"/>-->
-    <exclude name="UseUtilityClass"/>
-    <exclude name="LoosePackageCoupling"/>
-    <exclude name="DataClass"/>
-    <exclude name="TooManyFields"/>
-  </rule>
-  <rule ref="category/java/design.xml/ExcessiveImports">
-    <properties>
-      <property name="minimum" value="35"/><!-- should be reduced -->
-    </properties>
-  </rule>
-  <rule ref="category/java/design.xml/LawOfDemeter">
-    <properties>
-      <property name="violationSuppressRegex" value="(.*method chain calls.*|.*object not created locally.*)"/>
-      <property name="trustRadius" value="2"/>
-    </properties>
-  </rule>
-  <rule ref="category/java/design.xml/SignatureDeclareThrowsException">
-    <properties>
-      <property name="IgnoreJUnitCompletely" value="true"/>
-    </properties>
-  </rule>
-  <rule ref="category/java/documentation.xml">
-    <exclude name="CommentRequired"/>
-    <exclude name="CommentSize"/>
-    <exclude name="UncommentedEmptyMethodBody"/>
-  </rule>
-  <rule ref="category/java/errorprone.xml">
-    <exclude name="NonSerializableClass"/>
-    <exclude name="MissingSerialVersionUID"/>
-  </rule>
-  <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
-    <properties>
-      <property name="ignoreMagicNumbers" value="-1,0,1"/>
-    </properties>
-  </rule>
-  <rule ref="category/java/multithreading.xml">
-    <exclude name="UseConcurrentHashMap"/>
-  </rule>
-  <rule ref="category/java/performance.xml"/>
-  <rule ref="category/java/security.xml"/>
-  <exclude-pattern>.*/generated.*</exclude-pattern>
-  <exclude-pattern>.*/uk/gov/hmcts/darts/task/runner/dailylist/govtalk/.*</exclude-pattern>
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="GuardLogStatement"/>
+        <exclude name="UnitTestContainsTooManyAsserts"/>
+        <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
+        <exclude name="UnitTestShouldIncludeAssert"/>
+    </rule>
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="LongVariable"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="TooManyStaticImports"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="LinguisticNaming"/>
+        <exclude name="UseExplicitTypes"/>
+    </rule>
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions">
+        <properties>
+            <!-- same as any other class -->
+            <property name="utilityClassPattern" value="[A-Z][a-zA-Z]+"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/MethodNamingConventions">
+        <properties>
+            <property name="junit4TestPattern" value="[a-z][a-zA-Z0-9_]+"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/ShortVariable">
+        <properties>
+            <property name="minimum" value="2"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml">
+        <exclude name="AvoidCatchingGenericException"/>
+        <!--    <exclude name="AvoidThrowingRawExceptionTypes"/>-->
+        <exclude name="UseUtilityClass"/>
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="DataClass"/>
+        <exclude name="TooManyFields"/>
+        <exclude name="LawOfDemeter"/>
+        <exclude name="ExcessiveImports"/>
+    </rule>
+    <rule ref="category/java/design.xml/SignatureDeclareThrowsException">
+        <properties>
+            <property name="IgnoreJUnitCompletely" value="true"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/documentation.xml">
+        <exclude name="CommentRequired"/>
+        <exclude name="CommentSize"/>
+        <exclude name="UncommentedEmptyMethodBody"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="NonSerializableClass"/>
+        <exclude name="MissingSerialVersionUID"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
+        <properties>
+            <property name="ignoreMagicNumbers" value="-1,0,1"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="UseConcurrentHashMap"/>
+    </rule>
+    <rule ref="category/java/performance.xml"/>
+    <rule ref="category/java/security.xml"/>
 </ruleset>

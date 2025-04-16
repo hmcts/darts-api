@@ -44,6 +44,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class AudioUploadServiceImpl implements AudioUploadService {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;

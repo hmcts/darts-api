@@ -26,6 +26,10 @@ public class ModifiedBaseEntity implements LastModifiedBy {
     @Column(name = "last_modified_by")
     private Integer lastModifiedById;
 
+    @Transient
+    @JsonIgnore
+    private transient boolean skipUserAudit;
+
     @Override
     public void setLastModifiedDateTime(OffsetDateTime lastModifiedTimestamp) {
         this.lastModifiedTimestamp = lastModifiedTimestamp;
@@ -47,8 +51,4 @@ public class ModifiedBaseEntity implements LastModifiedBy {
         //Mark skip user audit as true to prevent audit listener from overriding the lastModifiedBy and lastModifiedDateTime
         this.skipUserAudit = true;
     }
-
-    @Transient
-    @JsonIgnore
-    private transient boolean skipUserAudit = false;
 }

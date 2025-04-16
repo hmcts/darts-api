@@ -68,6 +68,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 @RequiredArgsConstructor
 @Slf4j
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class AudioController implements AudioApi {
 
     private final AudioService audioService;

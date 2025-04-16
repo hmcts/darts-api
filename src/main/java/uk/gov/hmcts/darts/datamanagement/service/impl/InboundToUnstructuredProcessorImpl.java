@@ -55,6 +55,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
 
     @Override
+    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
     public void processInboundToUnstructured(int batchSize) {
         log.debug("Processing Inbound data store");
         List<Integer> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),

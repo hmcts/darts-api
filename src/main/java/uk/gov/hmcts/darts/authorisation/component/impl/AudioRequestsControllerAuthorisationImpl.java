@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.authorisation.component.ControllerAuthorisation;
 import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -20,6 +20,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.DOWNLOAD_HEAR
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.AvoidReassigningParameters"})
 class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisation
     implements ControllerAuthorisation {
 
@@ -37,7 +38,6 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
     }
 
     @Override
-    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> requestTypeParamOptional = getEntityParamOptional(request, REQUEST_TYPE);
         if (requestTypeParamOptional.isPresent()) {
@@ -48,7 +48,6 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
     }
 
     @Override
-    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
     public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
         Optional<String> optionalId = idToAuthorise.get();
         if (optionalId.isPresent()) {
@@ -59,17 +58,15 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
     }
 
     @Override
-    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
     public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
         String requestType = jsonNode.path(REQUEST_TYPE).textValue();
         roles = setDownloadRequestSecurityRoles(roles, requestType);
         authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
     }
 
-    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
     private static Set<SecurityRoleEnum> setDownloadRequestSecurityRoles(Set<SecurityRoleEnum> roles, String requestType) {
         if (DOWNLOAD_REQUEST_TYPE.equals(requestType)) {
-            roles = new HashSet<>();
+            roles = EnumSet.noneOf(SecurityRoleEnum.class);
             roles.add(SecurityRoleEnum.TRANSCRIBER);
         }
         return roles;

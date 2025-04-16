@@ -49,6 +49,7 @@ import java.util.Map;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Profile("!intTest || tokenSecurityTest")
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class SecurityConfig {
 
     private final AuthStrategySelector locator;

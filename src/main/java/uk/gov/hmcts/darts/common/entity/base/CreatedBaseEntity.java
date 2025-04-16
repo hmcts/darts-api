@@ -27,6 +27,10 @@ public class CreatedBaseEntity implements CreatedBy {
     @Column(name = "created_by")
     private Integer createdById;
 
+    @Transient
+    @JsonIgnore
+    protected transient boolean skipUserAudit;
+
     @Override
     public void setCreatedBy(UserAccountEntity userAccount) {
         setCreatedById(userAccount == null ? null : userAccount.getId());
@@ -38,8 +42,4 @@ public class CreatedBaseEntity implements CreatedBy {
         //Mark skip user audit as true to prevent audit listener from overriding the createdBy and createdDateTime
         this.skipUserAudit = true;
     }
-
-    @Transient
-    @JsonIgnore
-    protected transient boolean skipUserAudit = false;
 }

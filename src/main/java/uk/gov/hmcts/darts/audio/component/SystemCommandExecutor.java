@@ -4,8 +4,7 @@ import org.apache.commons.exec.CommandLine;
 
 import java.util.concurrent.ExecutionException;
 
+@FunctionalInterface
 public interface SystemCommandExecutor {
-
     Boolean execute(CommandLine command) throws ExecutionException, InterruptedException;
-
 }

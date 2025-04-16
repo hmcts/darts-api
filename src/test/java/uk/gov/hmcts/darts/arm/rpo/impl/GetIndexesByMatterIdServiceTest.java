@@ -77,7 +77,7 @@ class GetIndexesByMatterIdServiceTest {
         IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
         IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
         indexDetails.setIndexId("indexId");
-        index.setIndex(indexDetails);
+        index.setIndexDetails(indexDetails);
         response.setIndexes(List.of(index));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
@@ -193,12 +193,12 @@ class GetIndexesByMatterIdServiceTest {
         IndexesByMatterIdResponse.Index index1 = new IndexesByMatterIdResponse.Index();
         IndexesByMatterIdResponse.IndexDetails indexDetails1 = new IndexesByMatterIdResponse.IndexDetails();
         indexDetails1.setIndexId("indexId");
-        index1.setIndex(indexDetails1);
+        index1.setIndexDetails(indexDetails1);
 
         IndexesByMatterIdResponse.Index index2 = new IndexesByMatterIdResponse.Index();
         IndexesByMatterIdResponse.IndexDetails indexDetails2 = new IndexesByMatterIdResponse.IndexDetails();
         indexDetails2.setIndexId("indexId 2");
-        index2.setIndex(indexDetails2);
+        index2.setIndexDetails(indexDetails2);
 
         response.setIndexes(List.of(index1, index2));
 
@@ -228,7 +228,7 @@ class GetIndexesByMatterIdServiceTest {
         IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
         IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
         indexDetails.setIndexId(null);
-        index.setIndex(indexDetails);
+        index.setIndexDetails(indexDetails);
         response.setIndexes(List.of(index));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
@@ -257,7 +257,7 @@ class GetIndexesByMatterIdServiceTest {
         response.setIsError(false);
 
         IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
-        index.setIndex(null);
+        index.setIndexDetails(null);
         response.setIndexes(List.of(index));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);

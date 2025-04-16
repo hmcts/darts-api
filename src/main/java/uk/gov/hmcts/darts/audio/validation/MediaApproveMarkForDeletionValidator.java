@@ -23,9 +23,10 @@ public class MediaApproveMarkForDeletionValidator implements Validator<Integer> 
     private final UserIdentity userIdentity;
 
     @Override
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     public void validate(Integer mediaId) {
         mediaIdValidator.validate(mediaId);
-        var objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
+        var objectAdminActionEntityList = objectAdminActionRepository.findByMediaId(mediaId);
         if (objectAdminActionEntityList.isEmpty()) {
             throw new DartsApiException(AudioApiError.ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND);
         } else if (objectAdminActionEntityList.size() > 1) {

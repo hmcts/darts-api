@@ -24,6 +24,7 @@ public class TestTranscriptionWorkflowEntity extends TranscriptionWorkflowEntity
         OffsetDateTime workflowTimestamp,
         List<TranscriptionCommentEntity> transcriptionComments
     ) {
+        super();
         // Set parent properties
         setId(id);
         setTranscription(transcription);
@@ -47,7 +48,7 @@ public class TestTranscriptionWorkflowEntity extends TranscriptionWorkflowEntity
     public static class TestTranscriptionWorkflowEntityBuilderRetrieve
         implements BuilderHolder<TestTranscriptionWorkflowEntity, TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder> {
 
-        private TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder builder = TestTranscriptionWorkflowEntity.builder();
+        private final TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder builder = TestTranscriptionWorkflowEntity.builder();
 
         @Override
         public TestTranscriptionWorkflowEntity build() {

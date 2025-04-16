@@ -26,10 +26,10 @@ public class AudioMediaPatchRequestValidator implements Validator<IdRequest<Medi
             throw new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND);
         }
 
-        if (patchRequest.getPayload() != null && patchRequest.getPayload().getOwnerId() != null) {
-            if (!userAccountRepository.findById(patchRequest.getPayload().getOwnerId()).isPresent()) {
-                throw new DartsApiException(AudioRequestsApiError.USER_IS_NOT_FOUND);
-            }
+        if (patchRequest.getPayload() != null
+            && patchRequest.getPayload().getOwnerId() != null
+            && !userAccountRepository.findById(patchRequest.getPayload().getOwnerId()).isPresent()) {
+            throw new DartsApiException(AudioRequestsApiError.USER_IS_NOT_FOUND);
         }
     }
 }

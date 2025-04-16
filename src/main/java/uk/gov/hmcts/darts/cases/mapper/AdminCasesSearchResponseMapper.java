@@ -46,6 +46,7 @@ public class AdminCasesSearchResponseMapper {
         return responseCourthouse;
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")//TODO - refactor to avoid instantiating objects in loops when this is next edited
     private List<CourtroomResponseObject> createCourtroomList(List<HearingEntity> hearings) {
         List<CourtroomEntity> courtroomEntityList = hearings.stream().map(HearingEntity::getCourtroom).distinct().toList();
         List<CourtroomResponseObject> responseList = new ArrayList<>();

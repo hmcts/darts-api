@@ -5,6 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @FeignClient(name = "bank-holidays-api", url = "${darts.bank-holidays.api.baseurl}")
+@FunctionalInterface
 public interface BankHolidaysApi {
 
     @GetMapping(path = "/bank-holidays.json")

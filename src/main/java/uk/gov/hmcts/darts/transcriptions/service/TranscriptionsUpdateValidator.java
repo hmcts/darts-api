@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 
 import java.util.Optional;
 
+@FunctionalInterface
 public interface TranscriptionsUpdateValidator {
     boolean validate(Optional<TranscriptionEntity> entity, UpdateTranscriptionsItem updateTranscriptionsItem);
 }

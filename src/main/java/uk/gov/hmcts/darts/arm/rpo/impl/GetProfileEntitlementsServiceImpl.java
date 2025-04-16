@@ -45,7 +45,7 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
                                                                  .append(e)
                                                                  .toString(),
-                                                             executionDetail, userAccount);
+                                                             executionDetail, userAccount, e);
         }
         log.info("ARM RPO Response - ProfileEntitlementResponse: {}", profileEntitlementResponse);
         processGetProfileEntitlementsResponse(userAccount, profileEntitlementResponse, exceptionMessageBuilder, executionDetail);

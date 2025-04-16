@@ -106,7 +106,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
             .andReturn();
 
         MediaEntity documentEntity = mediaRepository.findById(mediaEntity.getId()).get();
-        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByMedia_Id(mediaEntity.getId());
+        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByMediaId(mediaEntity.getId());
 
         MediaHideResponse mediaResponse
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), MediaHideResponse.class);
@@ -218,7 +218,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         MediaEntity documentEntity = mediaRepository.findById(mediaEntity.getId()).get();
 
         // ensure no object admin actions exist
-        assertTrue(objectAdminActionRepository.findByTranscriptionDocument_Id(mediaEntity.getId()).isEmpty());
+        assertTrue(objectAdminActionRepository.findByTranscriptionDocumentId(mediaEntity.getId()).isEmpty());
 
         // assert that the action data that existed before deletion is returned
         assertEquals(documentEntity.getId(), mediaHideResponse.getId());
