@@ -10,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -56,10 +58,16 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
             .findFirst()
             .orElseThrow();
 
+
         var mediaEntity1 = createAndSaveMediaEntity(userAccountEntity, "chronicleId", false, false);
         var mediaEntity2 = createAndSaveMediaEntity(userAccountEntity, "chronicleId", true, false);
         var mediaEntity3 = createAndSaveMediaEntity(userAccountEntity, "chronicleId", false, false);
         var mediaEntity4 = createAndSaveMediaEntity(userAccountEntity, "chronicleId2", true, false);
+
+        assertMediaIsCurrentStatus(mediaEntity1.getId(), false);
+        assertMediaIsCurrentStatus(mediaEntity2.getId(), true);
+        assertMediaIsCurrentStatus(mediaEntity3.getId(), false);
+        assertMediaIsCurrentStatus(mediaEntity4.getId(), true);
 
         // When
         mockMvc.perform(patch(ENDPOINT.resolve(String.valueOf(mediaEntity1.getId())))
@@ -216,8 +224,30 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
         mediaEntity.setLastModifiedBy(userAccountEntity);
         mediaEntity.setIsCurrent(isCurrent);
 
-        return databaseStub.getMediaRepository()
-            .saveAndFlush(mediaEntity);
+        CourtCaseEntity courtCaseEntity = databaseStub.createCase(
+            COURTHOUSE_NAME,
+            CASE_NUMBER
+        );
+        databaseStub.createMediaLinkedCase(
+            mediaEntity,
+            courtCaseEntity
+        );
+
+
+        transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearing = databaseStub.createHearing(
+                COURTHOUSE_NAME,
+                COURTROOM_NAME,
+                CASE_NUMBER,
+                HEARING_START_AT.toLocalDateTime()
+            );
+            if (isCurrent) {
+                hearing.addMedia(mediaEntity);
+                mediaEntity.addHearing(hearing);
+            }
+            dartsDatabase.getHearingRepository().saveAndFlush(hearing);
+        });
+        return databaseStub.getMediaRepository().saveAndFlush(mediaEntity);
     }
 
 
@@ -226,7 +256,14 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     private void assertMediaIsCurrentStatus(int mediaId, boolean isCurrent) {
-        MediaEntity media = databaseStub.getMediaRepository().findById(mediaId).orElseThrow();
-        assertThat(media.getIsCurrent()).isEqualTo(isCurrent);
+        transactionalUtil.executeInTransaction(() -> {
+            MediaEntity media = databaseStub.getMediaRepository().findById(mediaId).orElseThrow();
+            assertThat(media.getIsCurrent()).isEqualTo(isCurrent);
+            if (isCurrent) {
+                assertThat(media.getHearingList()).isNotEmpty();
+            } else {
+                assertThat(media.getHearingList()).isEmpty();
+            }
+        });
     }
 }
