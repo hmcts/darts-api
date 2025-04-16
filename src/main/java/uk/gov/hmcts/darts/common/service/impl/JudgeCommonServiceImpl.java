@@ -22,7 +22,7 @@ public class JudgeCommonServiceImpl implements JudgeCommonService {
     @Override
     @Transactional
     public JudgeEntity retrieveOrCreateJudge(String judgeName, UserAccountEntity userAccount) {
-        if (StringUtils.isEmpty(judgeName)) {
+        if (StringUtils.isBlank(judgeName)) {
             throw new IllegalArgumentException("Judge name cannot be null or empty");
         }
         String trimmedJudgeName = judgeName.trim();

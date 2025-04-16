@@ -151,7 +151,7 @@ class DailyListUpdater {
             log.debug("Daily list with id {} has JSON no need to fetch XML", dailyListEntity.getId());
             return true;
         }
-        return !validateXmlElseUpdate(dailyListEntity) || mapXmlToJson(dailyListEntity);
+        return validateXmlElseUpdate(dailyListEntity) && mapXmlToJson(dailyListEntity);
     }
 
     /**
