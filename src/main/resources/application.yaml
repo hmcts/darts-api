@@ -17,6 +17,10 @@ springdoc:
   packagesToScan: uk.gov.hmcts.darts
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 30MB
   lifecycle:
     timeout-per-shutdown-phase: ${GRACEFUL_SHUTDOWN_TIMEOUT:30s}
   config:
