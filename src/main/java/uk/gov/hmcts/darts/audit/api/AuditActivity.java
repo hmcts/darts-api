@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.ExcessivePublicCount")//Required for enum
 public enum AuditActivity {
 
     MOVE_COURTROOM(1),

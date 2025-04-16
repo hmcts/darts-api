@@ -120,7 +120,7 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), TranscriptionDocumentHideResponse.class);
 
         TranscriptionDocumentEntity documentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentEntity.getId()).get();
-        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentEntity.getId());
+        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentEntity.getId());
 
         // ensure that the database data is contained in the response
         assertEquals(documentEntity.getId(), transcriptionResponse.getId());

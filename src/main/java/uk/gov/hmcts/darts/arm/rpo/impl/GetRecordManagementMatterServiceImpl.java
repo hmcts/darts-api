@@ -41,7 +41,7 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
             recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
-            throw armRpoUtil.handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
+            throw armRpoUtil.handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount, e);
         }
         log.info("ARM RPO Response - RecordManagementMatterResponse: {}", recordManagementMatterResponse);
         armRpoUtil.handleResponseStatus(userAccount, recordManagementMatterResponse, errorMessage, armRpoExecutionDetailEntity);

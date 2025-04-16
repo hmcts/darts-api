@@ -18,6 +18,7 @@ public class AuthorisedUserPermissionsValidator implements Validator<UserPatch> 
     private final UserIdentity userIdentity;
 
     @Override
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     public void validate(UserPatch userPatch) {
         Set<SecurityRoleEnum> superUserRole = Set.of(SecurityRoleEnum.SUPER_USER);
         Set<SecurityRoleEnum> superAdminRole = Set.of(SecurityRoleEnum.SUPER_ADMIN);

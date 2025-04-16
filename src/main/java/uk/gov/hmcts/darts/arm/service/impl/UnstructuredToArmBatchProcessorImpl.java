@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -44,7 +45,12 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
 
     @Override
-    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
+    @SuppressWarnings({
+        "PMD.AvoidInstantiatingObjectsInLoops",
+        "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity",
+        "PMD.DoNotUseThreads"//TODO - refactor to avoid using Thread.sleep() when this is next edited
+    })
     public void processUnstructuredToArm(int taskBatchSize) {
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
@@ -92,6 +98,11 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
+    @SuppressWarnings({
+        "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
+        "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
+        "PMD.AvoidInstantiatingObjectsInLoops"//TODO - refactor to avoid instantiating objects in loops when this is next edited
+    })
     private void createAndSendBatchFile(List<ExternalObjectDirectoryEntity> eodsForBatch, UserAccountEntity userAccount) {
         String archiveRecordsFileName = unstructuredToArmHelper.getArchiveRecordsFileName(armDataManagementConfiguration.getManifestFilePrefix());
         var batchItems = new ArmBatchItems();
@@ -155,7 +166,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         } else {
             log.error("Unable to find matching external object directory {} for manifest {}", armEod.getId(), archiveRecordsFileName);
             unstructuredToArmHelper.updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
-            throw new RuntimeException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
+            throw new DartsException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }
     }
 

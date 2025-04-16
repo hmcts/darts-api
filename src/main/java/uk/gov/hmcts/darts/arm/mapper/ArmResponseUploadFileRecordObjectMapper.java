@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileReco
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecordObject;
 
 @Mapper(componentModel = "spring")
+@FunctionalInterface
 public interface ArmResponseUploadFileRecordObjectMapper {
 
     @Mapping(target = "input", ignore = true)

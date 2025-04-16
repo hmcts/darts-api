@@ -60,7 +60,7 @@ class StubbedArmRpoDownloadProductionImplTest {
     @Test
     void downloadProduction_shouldThrowException_whenAutomatedTaskNotFound() {
         // given
-        when(armAutomatedTaskRepository.findByAutomatedTask_taskName(anyString()))
+        when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(anyString()))
             .thenReturn(Optional.empty());
 
         // when
@@ -75,7 +75,7 @@ class StubbedArmRpoDownloadProductionImplTest {
     void downloadProduction_shouldThrowException_whenNoEodsFound() {
         // given
         ArmAutomatedTaskEntity taskEntity = createArmAutomatedTaskEntity();
-        when(armAutomatedTaskRepository.findByAutomatedTask_taskName(anyString()))
+        when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(anyString()))
             .thenReturn(Optional.of(taskEntity));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt()))
@@ -97,7 +97,7 @@ class StubbedArmRpoDownloadProductionImplTest {
     void downloadProduction_shouldReturnResponse_whenEodsFound() {
         // given
         ArmAutomatedTaskEntity taskEntity = createArmAutomatedTaskEntity();
-        when(armAutomatedTaskRepository.findByAutomatedTask_taskName(anyString())).thenReturn(Optional.of(taskEntity));
+        when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(anyString())).thenReturn(Optional.of(taskEntity));
 
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = createArmRpoExecutionDetailEntity();
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);

@@ -30,6 +30,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public class GetAdminMediaResponseMapper {
 
     private final CourtroomMapper courtroomMapper;
@@ -153,7 +154,7 @@ public class GetAdminMediaResponseMapper {
         response.setCourtroom(courtroomMapper.toApiModel(mediaEntity.getCourtroom()));
         response.setCourthouse(courthouseMapper.toApiModel(
             Optional.ofNullable(mediaEntity.getCourtroom())
-                .map(courtroomEntity -> courtroomEntity.getCourthouse())
+                .map(CourtroomEntity::getCourthouse)
                 .orElse(null)));
         response.setStartAt(mediaEntity.getStart());
         response.setEndAt(mediaEntity.getEnd());

@@ -51,6 +51,10 @@ import static uk.gov.hmcts.darts.courthouse.service.CourthouseUpdateAuditActivit
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class CourthouseServiceImpl implements CourthouseService {
 
     private final CourthouseRepository courthouseRepository;

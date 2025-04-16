@@ -31,12 +31,14 @@ import static java.util.Objects.nonNull;
 
 @Slf4j
 @Component
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessResponseFiles {
 
     private final DetsDataManagementConfiguration configuration;
 
     protected final ObjectStateRecordRepository objectStateRecordRepository;
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")//TODO - refactor to reduce excessive parameter list when this class is next edited
     public DetsToArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                   ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService,
                                                   ArmDataManagementConfiguration armDataManagementConfiguration,

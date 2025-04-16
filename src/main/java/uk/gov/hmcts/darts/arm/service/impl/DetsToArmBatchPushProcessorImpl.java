@@ -48,6 +48,10 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({
+    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
+    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+})
 public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProcessor {
     private final ArchiveRecordService archiveRecordService;
     private final DataStoreToArmHelper dataStoreToArmHelper;
@@ -64,6 +68,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
 
     @Override
+    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
     public void processDetsToArm(int taskBatchSize) {
         log.info("Started running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.detsLocation();
@@ -143,6 +148,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         return returnList;
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")//TODO - refactor to avoid instantiating objects in loops when this is next edited
     private void createAndSendBatchFile(List<ExternalObjectDirectoryEntity> eodsForBatch, UserAccountEntity userAccount) {
         String archiveRecordsFileName = dataStoreToArmHelper.getArchiveRecordsFileName(detsToArmProcessorConfiguration.getManifestFilePrefix());
 

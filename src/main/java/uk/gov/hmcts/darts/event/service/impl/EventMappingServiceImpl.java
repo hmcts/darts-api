@@ -49,6 +49,7 @@ public class EventMappingServiceImpl implements EventMappingService {
     private final AuditApi auditApi;
 
     @Override
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     public EventMapping postEventMapping(EventMapping eventMapping, Boolean isRevision) {
         List<EventHandlerEntity> activeMappings = getActiveMappingsForTypeAndSubtype(eventMapping.getType(), eventMapping.getSubType());
         if (isRevision && !doesActiveEventMappingExist(activeMappings)) {

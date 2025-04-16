@@ -6,19 +6,21 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_COURTHOUSE;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_COURTHOUSE_GROUP;
 
-public class CourthouseUpdateAuditActivityProvider implements AuditActivityProvider {
+public final class CourthouseUpdateAuditActivityProvider implements AuditActivityProvider {
+
+
+    private final Set<AuditActivity> updates = EnumSet.noneOf(AuditActivity.class);
+
     public static CourthouseUpdateAuditActivityProvider auditActivitiesFor(CourthousePatch patch, CourthouseEntity prePatched) {
         return new CourthouseUpdateAuditActivityProvider(prePatched, patch);
     }
-
-    private final Set<AuditActivity> updates = new HashSet<>();
 
     private CourthouseUpdateAuditActivityProvider(CourthouseEntity courthouseEntity, CourthousePatch courthousePatch) {
         if (isBasicDetailsUpdated(courthousePatch, courthouseEntity)) {

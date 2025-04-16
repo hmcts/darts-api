@@ -17,6 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 
     @Query("""
@@ -189,7 +190,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     )
     List<Integer> findAllByEventStatusAndNotCourtrooms(Integer statusNumber, List<String> courtroomNumbers, Limit limit);
 
-    @Query(value = """
+    @Query("""
                         SELECT e3.id from EventEntity e3
                         JOIN (                        
                             SELECT e.eventId as eventId, e.messageId as messageId, e.eventText as eventText

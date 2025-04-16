@@ -262,32 +262,37 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
     @Override
     public Integer getTranscriptionsCountForCourthouses(List<Integer> courthouseIds, Integer transcriptionStatusId, int userId) {
         // only the latest "APPROVED" OR "WITH_TRANSCRIBER" transcription_workflow for a given transcription
-        String workflowSubQuery = """
-                SELECT trw.tra_id, MAX(trw.workflow_ts) as workflow_ts
-                FROM darts.transcription_workflow trw
-                WHERE trw.trs_id = :trs_id
-            """;
+        StringBuilder workflowSubQuery = new StringBuilder(174)
+            .append(
+                """
+                        SELECT trw.tra_id, MAX(trw.workflow_ts) as workflow_ts
+                        FROM darts.transcription_workflow trw
+                        WHERE trw.trs_id = :trs_id
+                    """);
         if (transcriptionStatusId.equals(WITH_TRANSCRIBER.getId())) {
-            workflowSubQuery += " AND trw.workflow_actor = " + userId;
+            workflowSubQuery.append(" AND trw.workflow_actor = ").append(userId);
         }
-        workflowSubQuery += " GROUP BY tra_id";
+        workflowSubQuery.append(" GROUP BY tra_id");
 
-        String sql = """
-            SELECT count(*)
-            FROM darts.transcription transcription
-            JOIN darts.case_transcription_ae case_transcription ON transcription.tra_id = case_transcription.tra_id
-            JOIN darts.court_case court_case ON case_transcription.cas_id = court_case.cas_id
-            JOIN darts.courthouse courthouse ON courthouse.cth_id=court_case.cth_id
-            JOIN (""";
-        sql += workflowSubQuery;
-        sql += """
-            ) trw ON trw.tra_id = transcription.tra_id
-            WHERE court_case.cth_id IN (:cth_ids)
-            AND transcription.trs_id=:trs_id
-            """;
+        StringBuilder sql = new StringBuilder(433)
+            .append(
+                """
+                    SELECT count(*)
+                    FROM darts.transcription transcription
+                    JOIN darts.case_transcription_ae case_transcription ON transcription.tra_id = case_transcription.tra_id
+                    JOIN darts.court_case court_case ON case_transcription.cas_id = court_case.cas_id
+                    JOIN darts.courthouse courthouse ON courthouse.cth_id=court_case.cth_id
+                    JOIN (""")
+            .append(workflowSubQuery)
+            .append(
+                """
+                    ) trw ON trw.tra_id = transcription.tra_id
+                    WHERE court_case.cth_id IN (:cth_ids)
+                    AND transcription.trs_id=:trs_id
+                    """);
 
         return jdbcTemplate.queryForObject(
-            sql,
+            sql.toString(),
             new MapSqlParameterSource("cth_ids", courthouseIds)
                 .addValue("trs_id", transcriptionStatusId),
             Integer.class

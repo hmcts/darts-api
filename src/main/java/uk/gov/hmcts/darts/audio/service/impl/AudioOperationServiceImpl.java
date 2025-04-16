@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public class AudioOperationServiceImpl implements AudioOperationService {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
@@ -40,9 +41,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         for (final AudioFileInfo audioFileInfo : audioFileInfos) {
             command.append(" -i ").append(audioFileInfo.getPath().toString());
         }
-
-        command.append(" -b:a 32k")
-            .append(" -filter_complex ");
+        command.append(" -b:a 32k -filter_complex ");
 
         int concatNumberOfSegments = audioFileInfos.size();
         StringBuilder inputFileAudioStreams = new StringBuilder();

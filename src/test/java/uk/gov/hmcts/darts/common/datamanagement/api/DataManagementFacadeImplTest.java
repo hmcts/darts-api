@@ -45,7 +45,6 @@ import uk.gov.hmcts.darts.test.common.FileStore;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -763,7 +762,7 @@ class DataManagementFacadeImplTest {
         assertThat(targetFile).exists();
         dmFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, true);
 
-        verify(unstructuredDataHelper).createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(FileInputStream.class));
+        verify(unstructuredDataHelper).createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(InputStream.class));
         assertThat(targetFile).doesNotExist();
     }
 
@@ -781,7 +780,7 @@ class DataManagementFacadeImplTest {
         assertThat(targetFile).exists();
         dmFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, false);
 
-        verify(unstructuredDataHelper).createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(FileInputStream.class));
+        verify(unstructuredDataHelper).createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(InputStream.class));
         assertThat(targetFile).exists();
     }
 

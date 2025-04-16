@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
@@ -21,7 +22,7 @@ public class JudgeCommonServiceImpl implements JudgeCommonService {
     @Override
     @Transactional
     public JudgeEntity retrieveOrCreateJudge(String judgeName, UserAccountEntity userAccount) {
-        if (judgeName == null || judgeName.trim().isEmpty()) {
+        if (StringUtils.isBlank(judgeName)) {
             throw new IllegalArgumentException("Judge name cannot be null or empty");
         }
         String trimmedJudgeName = judgeName.trim();

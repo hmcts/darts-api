@@ -48,6 +48,7 @@ public class RemoveAdminActionComponent {
     }
 
     @Transactional
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")//TODO - refactor to avoid instantiating objects in loops when this is next edited
     public List<MediaEntity> removeAdminActionFrom(@NonNull List<MediaEntity> mediaVersions) {
         Set<String> uniqueChronicleIds = mediaVersions.stream()
             .map(MediaEntity::getChronicleId)

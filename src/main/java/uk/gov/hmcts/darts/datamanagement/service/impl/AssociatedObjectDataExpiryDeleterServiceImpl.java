@@ -35,6 +35,7 @@ import java.util.function.Function;
 
 @Service
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class AssociatedObjectDataExpiryDeleterServiceImpl implements AssociatedObjectDataExpiryDeleterService {
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
@@ -53,6 +54,7 @@ public class AssociatedObjectDataExpiryDeleterServiceImpl implements AssociatedO
     @Value("${darts.storage.arm.event-date-adjustment-years}")
     Integer eventDateAdjustmentYears;
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")//TODO - refactor to reduce excessive parameter list when this class is next edited
     public AssociatedObjectDataExpiryDeleterServiceImpl(UserIdentity userIdentity,
                                                         CurrentTimeHelper currentTimeHelper,
                                                         TranscriptionDocumentRepository transcriptionDocumentRepository,
@@ -81,6 +83,7 @@ public class AssociatedObjectDataExpiryDeleterServiceImpl implements AssociatedO
     }
 
     @Transactional
+    @Override
     public void delete(Integer batchSize) {
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
@@ -189,7 +192,7 @@ public class AssociatedObjectDataExpiryDeleterServiceImpl implements AssociatedO
                      entity.getClass().getSimpleName(),
                      entity.getId(),
                      Optional.ofNullable(armExternalObjectDirectoryEntity.getEventDateTs())
-                         .map(offsetDateTime -> offsetDateTime.toLocalDate())
+                         .map(OffsetDateTime::toLocalDate)
                          .orElse(null),
                      eventDateAdjustmentYears,
                      entity.getRetainUntilTs().toLocalDate()

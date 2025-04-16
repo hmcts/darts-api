@@ -22,6 +22,7 @@ public class AzureCopyUtil {
     private static final String COPY_COMMAND = "copy";
     private final DataManagementConfiguration config;
 
+    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
     public void copy(String source, String destination) {
         try {
             List<String> command = buildCommand(source, destination);

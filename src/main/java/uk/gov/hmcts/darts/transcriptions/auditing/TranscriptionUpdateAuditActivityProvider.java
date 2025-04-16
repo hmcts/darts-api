@@ -5,19 +5,19 @@ import uk.gov.hmcts.darts.audit.api.AuditActivityProvider;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
 
-public class TranscriptionUpdateAuditActivityProvider implements AuditActivityProvider {
+public final class TranscriptionUpdateAuditActivityProvider implements AuditActivityProvider {
+
+    private final Set<AuditActivity> auditActivities = EnumSet.noneOf(AuditActivity.class);
 
     public static TranscriptionUpdateAuditActivityProvider auditActivitiesFor(TranscriptionEntity entity, UpdateTranscriptionRequest patch) {
         return new TranscriptionUpdateAuditActivityProvider(entity, patch);
     }
-
-    private final Set<AuditActivity> auditActivities = new HashSet<>();
 
     private TranscriptionUpdateAuditActivityProvider() {
     }

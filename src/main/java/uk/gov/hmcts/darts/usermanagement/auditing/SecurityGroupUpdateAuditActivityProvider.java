@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -17,9 +18,9 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_COURTHOUSE_GROUP
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_GROUP;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USERS_GROUP;
 
-public class SecurityGroupUpdateAuditActivityProvider implements AuditActivityProvider {
+public final class SecurityGroupUpdateAuditActivityProvider implements AuditActivityProvider {
 
-    private final Set<AuditActivity> auditActivities = new HashSet<>();
+    private final Set<AuditActivity> auditActivities = EnumSet.noneOf(AuditActivity.class);
 
     public static SecurityGroupUpdateAuditActivityProvider auditActivitiesFor(SecurityGroupEntity entity, SecurityGroupPatch patch) {
         return new SecurityGroupUpdateAuditActivityProvider(entity, patch);
@@ -44,7 +45,7 @@ public class SecurityGroupUpdateAuditActivityProvider implements AuditActivityPr
 
     private boolean courthousesInGroupAreUpdated(SecurityGroupEntity entity, SecurityGroupPatch patch) {
         Set<Integer> patchValues = patch.getCourthouseIds() == null ? new HashSet<>() : new HashSet<>(patch.getCourthouseIds());
-        var prePatchValues = entity.getCourthouseEntities().stream().map((CourthouseEntity::getId)).collect(toSet());
+        var prePatchValues = entity.getCourthouseEntities().stream().map(CourthouseEntity::getId).collect(toSet());
 
         return notNullAndDifferent(prePatchValues, patchValues);
     }

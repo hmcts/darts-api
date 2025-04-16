@@ -15,10 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEntity, Integer> {
     List<CaseRetentionEntity> findAllByCourtCase(CourtCaseEntity courtCase);
 
-    List<CaseRetentionEntity> findByCourtCase_Id(Integer courtCaseId);
+    List<CaseRetentionEntity> findByCourtCaseId(Integer courtCaseId);
 
     Optional<CaseRetentionEntity> findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(CourtCaseEntity courtCase, String currentState);
 

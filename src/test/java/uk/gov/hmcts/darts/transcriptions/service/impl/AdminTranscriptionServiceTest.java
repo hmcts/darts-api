@@ -353,7 +353,7 @@ class AdminTranscriptionServiceTest {
 
         when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
         when(objectAdminActionRepository
-                 .findByTranscriptionDocument_Id(hideOrShowTranscriptionDocument)).thenReturn(List.of(objectAdminActionEntity, objectAdminActionEntity1));
+                 .findByTranscriptionDocumentId(hideOrShowTranscriptionDocument)).thenReturn(List.of(objectAdminActionEntity, objectAdminActionEntity1));
 
         TranscriptionDocumentHideResponse expectedResponse = new TranscriptionDocumentHideResponse();
 
@@ -408,7 +408,7 @@ class AdminTranscriptionServiceTest {
 
             when(transcriptionDocumentRepository.findById(documentId)).thenReturn(Optional.of(documentEntity));
             when(objectAdminActionRepository
-                     .findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(documentId))
+                     .findByTranscriptionDocumentIdAndObjectHiddenReasonIsNotNullAndObjectHiddenReasonMarkedForDeletionTrue(documentId))
                 .thenReturn(Optional.of(objectAdminActionEntity));
             when(userIdentity.getUserAccount()).thenReturn(userAccount);
             when(transcriptionResponseMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity))
@@ -454,7 +454,7 @@ class AdminTranscriptionServiceTest {
 
             when(transcriptionDocumentRepository.findById(documentId)).thenReturn(Optional.of(documentEntity));
             when(objectAdminActionRepository
-                     .findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(documentId))
+                     .findByTranscriptionDocumentIdAndObjectHiddenReasonIsNotNullAndObjectHiddenReasonMarkedForDeletionTrue(documentId))
                 .thenReturn(Optional.empty());
 
             // When

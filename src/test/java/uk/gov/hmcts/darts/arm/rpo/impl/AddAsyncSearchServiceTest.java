@@ -287,7 +287,7 @@ class AddAsyncSearchServiceTest {
         armAutomatedTaskEntity.setRpoCsvStartHour(RPO_CSV_START_HOUR);
         armAutomatedTaskEntity.setRpoCsvEndHour(RPO_CSV_END_HOUR);
 
-        when(armAutomatedTaskRepository.findByAutomatedTask_taskName(any()))
+        when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(armAutomatedTaskEntity));
 
         return armAutomatedTaskEntity;

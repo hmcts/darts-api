@@ -176,6 +176,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         }
     }
 
+    @SuppressWarnings("PMD.NullAssignment")//Required to set courtroom to null if no hearings
     public void setHearings(List<HearingEntity> hearings) {
         this.hearings = hearings;
         if (CollectionUtils.isEmpty(hearings)) {
@@ -245,8 +246,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
         allCourtCases.addAll(this.courtCases);
 
-        var uniqueCases = io.vavr.collection.List.ofAll(allCourtCases).distinctBy(CourtCaseEntity::getId).toJavaList();
-        return uniqueCases;
+        return io.vavr.collection.List.ofAll(allCourtCases).distinctBy(CourtCaseEntity::getId).toJavaList();
     }
 
     public Optional<TranscriptionWorkflowEntity> getLatestTranscriptionWorkflow() {

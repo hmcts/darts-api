@@ -57,6 +57,7 @@ public class MediaLinkedCaseEntity extends CreatedBaseEntity {
     @Column(name = "source")
     private MediaLinkedCaseSourceType source;
 
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")//Method is final and can not be overridable
     public MediaLinkedCaseEntity(MediaEntity mediaEntity, CourtCaseEntity courtCase, UserAccountEntity createdBy, MediaLinkedCaseSourceType sourceType) {
         super();
         this.media = mediaEntity;

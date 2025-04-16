@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,8 +16,8 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.REACTIVATE_USER;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USER;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USERS_GROUP;
 
-public class UserAccountUpdateAuditActivityProvider implements AuditActivityProvider {
-    private final Set<AuditActivity> auditActivities = new HashSet<>();
+public final class UserAccountUpdateAuditActivityProvider implements AuditActivityProvider {
+    private final Set<AuditActivity> auditActivities = EnumSet.noneOf(AuditActivity.class);
 
     public static UserAccountUpdateAuditActivityProvider auditActivitiesFor(UserAccountEntity entity, UserPatch patch) {
         return new UserAccountUpdateAuditActivityProvider(entity, patch);

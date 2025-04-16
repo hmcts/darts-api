@@ -90,7 +90,7 @@ class MediaHideOrShowValidatorTest {
         ObjectHiddenReasonEntity hiddenReasonEntity = new ObjectHiddenReasonEntity();
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of());
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -127,7 +127,7 @@ class MediaHideOrShowValidatorTest {
 
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
 
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminActionEntity));
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminActionEntity));
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -152,7 +152,7 @@ class MediaHideOrShowValidatorTest {
         adminActionResponse.setReasonId(reasonId);
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of());
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -181,7 +181,7 @@ class MediaHideOrShowValidatorTest {
         hiddenReasonEntity.setMarkedForDeletion(true);
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of());
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -207,7 +207,7 @@ class MediaHideOrShowValidatorTest {
         hiddenReasonEntity.setMarkedForDeletion(true);
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
+        when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of());
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);

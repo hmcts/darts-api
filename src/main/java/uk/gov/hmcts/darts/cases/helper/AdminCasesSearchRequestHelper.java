@@ -139,8 +139,9 @@ public class AdminCasesSearchRequestHelper {
 
     @SuppressWarnings("unchecked")
     private Join<CourtCaseEntity, HearingEntity> joinHearing(Root<CourtCaseEntity> caseRoot) {
-        Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            CourtCaseEntity_.HEARINGS)).findAny();
+        Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream()
+            .filter(join -> CourtCaseEntity_.HEARINGS.equals(join.getAttribute().getName()))
+            .findAny();
         return foundJoin.map(join -> (Join<CourtCaseEntity, HearingEntity>) join)
             .orElseGet(() -> caseRoot.join(CourtCaseEntity_.HEARINGS, JoinType.INNER));
     }

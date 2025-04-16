@@ -100,6 +100,11 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
     @Override
     @Transactional
+    @SuppressWarnings({
+        "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
+        "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
+        "PMD.NPathComplexity"//TODO - refactor to reduce complexity when this class is next edited
+    })
     public DetailedAutomatedTask updateAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch) {
         var automatedTask = getAutomatedTaskEntityById(taskId);
 
@@ -158,7 +163,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             });
         }
 
-        if (armAutomatedTaskEntityConsumer.size() > 0) {
+        if (!armAutomatedTaskEntityConsumer.isEmpty()) {
             ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTask.getArmAutomatedTaskEntity();
             if (armAutomatedTaskEntity == null) {
                 throw new DartsApiException(INCORRECT_AUTOMATED_TASK_TYPE,

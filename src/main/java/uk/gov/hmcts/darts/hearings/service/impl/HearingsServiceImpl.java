@@ -36,6 +36,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class HearingsServiceImpl implements HearingsService {
 
     private final GetHearingResponseMapper getHearingResponseMapper;

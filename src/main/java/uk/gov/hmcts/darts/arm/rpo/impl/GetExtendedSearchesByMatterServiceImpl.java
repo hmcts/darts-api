@@ -57,6 +57,7 @@ public class GetExtendedSearchesByMatterServiceImpl implements GetExtendedSearch
         return processExtendedSearchesByMatterResponse(executionId, userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
     }
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     private String processExtendedSearchesByMatterResponse(Integer executionId, UserAccountEntity userAccount,
                                                            ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse,
                                                            StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {

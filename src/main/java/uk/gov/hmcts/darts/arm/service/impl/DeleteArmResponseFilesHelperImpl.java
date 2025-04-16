@@ -97,6 +97,7 @@ class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
     }
 
     @Override
+    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     public void deleteResponseBlobs(ArmResponseBatchData armResponseBatchData) {
         List<String> responseBlobsToBeDeleted = getResponseBlobsToBeDeleted(armResponseBatchData);
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectory(armResponseBatchData.getExternalObjectDirectoryId());

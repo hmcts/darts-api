@@ -35,6 +35,7 @@ public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInse
         OffsetDateTime lastModifiedDateTime,
         Integer lastModifiedById
     ) {
+        super();
         // Set parent properties
         setId(id);
         setCourtCase(courtCase);
@@ -69,7 +70,7 @@ public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInse
     public static class TestCaseDocumentEntityBuilderRetrieve
         implements BuilderHolder<TestCaseDocumentEntity, TestCaseDocumentEntity.TestCaseDocumentEntityBuilder> {
 
-        private TestCaseDocumentEntity.TestCaseDocumentEntityBuilder builder = TestCaseDocumentEntity.builder();
+        private final TestCaseDocumentEntity.TestCaseDocumentEntityBuilder builder = TestCaseDocumentEntity.builder();
 
         @Override
         public TestCaseDocumentEntity build() {

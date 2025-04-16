@@ -107,7 +107,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     private Boolean forceResponseCleanup;
 
     @Column(name = "is_dets", nullable = false)
-    private boolean isDets = false;
+    private boolean isDets;
 
     @Override
     public int getStatusId() {

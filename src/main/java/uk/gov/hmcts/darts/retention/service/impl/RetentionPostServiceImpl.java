@@ -43,6 +43,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
 public class RetentionPostServiceImpl implements RetentionPostService {
 
     private static final List<SecurityRoleEnum> JUDGE_AND_SUPER_ADMIN_USER_ROLES = List.of(JUDICIARY, SUPER_ADMIN, SUPER_USER);

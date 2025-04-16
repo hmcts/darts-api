@@ -6,9 +6,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.Optional;
 
+@FunctionalInterface
 public interface AuditService {
-
     void recordAudit(AuditActivity activity, UserAccountEntity userAccountEntity, Optional<CourtCaseEntity> courtCase,
                      Optional<String> additionalData);
-
 }

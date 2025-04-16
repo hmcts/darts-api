@@ -15,10 +15,11 @@ import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
 
 @Mapper(componentModel = "spring")
+@FunctionalInterface
 public interface DailyListPostRequestMapper {
 
-    ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-    ObjectMapper objectMapper = objectMapperConfig.objectMapper();
+    ObjectMapperConfig OBJECT_MAPPER_CONFIG = new ObjectMapperConfig();
+    ObjectMapper OBJECT_MAPPER = OBJECT_MAPPER_CONFIG.objectMapper();
 
     @Mappings({
         @Mapping(source = "xmlDocument", target = "dailyListXml"),
@@ -33,7 +34,7 @@ public interface DailyListPostRequestMapper {
             return null;
         }
         try {
-            return objectMapper.readValue(jsonString, DailyListJsonObject.class);
+            return OBJECT_MAPPER.readValue(jsonString, DailyListJsonObject.class);
         } catch (JsonProcessingException ex) {
             throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
         }

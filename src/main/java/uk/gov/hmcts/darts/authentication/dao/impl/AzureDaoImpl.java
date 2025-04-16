@@ -56,13 +56,10 @@ public class AzureDaoImpl implements AzureDao {
             }
 
             ObjectMapper mapper = new ObjectMapper();
-            OAuthProviderRawResponse tokenResponse = mapper.readValue(
+            return mapper.readValue(
                 parsedResponse,
                 OAuthProviderRawResponse.class
             );
-
-            return tokenResponse;
-
         } catch (IOException e) {
             throw new AzureDaoException("Failed to fetch Azure AD Access Token", e);
         }
@@ -93,13 +90,10 @@ public class AzureDaoImpl implements AzureDao {
             }
 
             ObjectMapper mapper = new ObjectMapper();
-            OAuthProviderRawResponse tokenResponse = mapper.readValue(
+            return mapper.readValue(
                 parsedResponse,
                 OAuthProviderRawResponse.class
             );
-
-            return tokenResponse;
-
         } catch (IOException e) {
             throw new AzureDaoException("Failed to fetch Azure AD Access Token", e);
         }

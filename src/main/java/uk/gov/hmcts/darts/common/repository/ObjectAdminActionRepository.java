@@ -12,9 +12,9 @@ import java.util.Optional;
 
 @Repository
 public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminActionEntity, Integer> {
-    List<ObjectAdminActionEntity> findByTranscriptionDocument_Id(Integer transcriptionDocumentId);
+    List<ObjectAdminActionEntity> findByTranscriptionDocumentId(Integer transcriptionDocumentId);
 
-    List<ObjectAdminActionEntity> findByMedia_Id(Integer mediaId);
+    List<ObjectAdminActionEntity> findByMediaId(Integer mediaId);
 
     List<ObjectAdminActionEntity> findByMediaIdAndMarkedForManualDeletionTrue(Integer mediaId);
 
@@ -28,7 +28,7 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
         """)
     List<ObjectAdminActionEntity> findAllMediaActionsWithAnyDeletionReason();
 
-    Optional<ObjectAdminActionEntity> findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(
+    Optional<ObjectAdminActionEntity> findByTranscriptionDocumentIdAndObjectHiddenReasonIsNotNullAndObjectHiddenReasonMarkedForDeletionTrue(
         Integer transcriptionDocumentId);
 
     @Query("""
