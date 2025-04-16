@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
     uses = ObjectActionMapper.class,
     unmappedSourcePolicy = ReportingPolicy.IGNORE,
     unmappedTargetPolicy = ReportingPolicy.ERROR)
+@FunctionalInterface
 public interface CourtroomMapper {
 
     @Mappings({

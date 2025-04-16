@@ -17,7 +17,7 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
     MediaEntity,
     TestMediaEntity.TestMediaEntityBuilder> {
 
-    private static final OffsetDateTime NOW = OffsetDateTime.now();
+    private static final OffsetDateTime NOW = now();
 
     public static final byte[] MEDIA_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
 
@@ -57,6 +57,7 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
 
     /**
      * Create a "minimal" media entity.
+     *
      * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
@@ -81,6 +82,7 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
 
     /**
      * Create a media with specified properties.
+     *
      * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
@@ -91,6 +93,7 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
 
     /**
      * Create a media with specified properties.
+     *
      * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
@@ -112,6 +115,7 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
 
     /**
      * Create a media with specified properties.
+     *
      * @deprecated Tests should be refactored to use the entity creation methods provided by the {@link Persistable} interface.
      */
     @Deprecated
@@ -132,6 +136,7 @@ public final class MediaTestData implements Persistable<TestMediaEntity.TestMedi
 
     /**
      * Get the checksum of the test data.
+     *
      * @deprecated As all usages are limited to other deprecated methods.
      */
     @Deprecated

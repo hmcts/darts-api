@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.component;
 
-public interface AudioMessageDigest {
+import java.security.MessageDigest;
 
-    java.security.MessageDigest getMessageDigest();
+@FunctionalInterface
+public interface AudioMessageDigest {
+    MessageDigest getMessageDigest();
 }

@@ -21,6 +21,7 @@ public class TestMediaRequestEntity extends MediaRequestEntity implements DbInse
                                   MediaRequestStatus status, AudioRequestType requestType, Integer attempts, OffsetDateTime startTime,
                                   OffsetDateTime endTime, Integer createdById, Integer lastModifiedById,
                                   OffsetDateTime createdAt, OffsetDateTime lastModifiedAt) {
+        super();
         setId(id);
         setHearing(hearing);
         setCurrentOwner(currentOwner);

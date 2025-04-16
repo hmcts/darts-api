@@ -4,8 +4,7 @@ import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQuery
 
 import java.util.List;
 
+@FunctionalInterface
 public interface AudioRequestBeingProcessedFromArchiveQuery {
-
     List<AudioRequestBeingProcessedFromArchiveQueryResult> getResults(Integer mediaRequestId);
-
 }

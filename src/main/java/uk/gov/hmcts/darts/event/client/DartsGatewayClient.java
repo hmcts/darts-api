@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 
 @FeignClient(name = "darts-gateway-client",
     url = "${darts.gateway.url}")
+@FunctionalInterface
 public interface DartsGatewayClient {
 
     @PostMapping(value = "${darts.gateway.events-dar-notify-path}",

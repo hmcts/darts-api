@@ -29,6 +29,7 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
                                              OffsetDateTime eventDateTs, String errorCode, boolean responseCleaned, Long osrUuid,
                                              boolean updateRetention, OffsetDateTime createdDateTime,
                                              Integer createdById, OffsetDateTime lastModifiedDateTime, Integer lastModifiedById) {
+        super();
         setId(id);
         setMedia(media);
         setTranscriptionDocumentEntity(transcriptionDocumentEntity);
@@ -72,7 +73,7 @@ public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEn
         implements BuilderHolder<TestExternalObjectDirectoryEntity,
         TestExternalObjectDirectoryEntityBuilder> {
 
-        private TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder builder = TestExternalObjectDirectoryEntity.builder();
+        private final TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder builder = TestExternalObjectDirectoryEntity.builder();
 
         @Override
         public TestExternalObjectDirectoryEntity build() {

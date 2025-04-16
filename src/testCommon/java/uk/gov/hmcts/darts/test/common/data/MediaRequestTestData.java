@@ -24,24 +24,15 @@ public final class MediaRequestTestData implements Persistable<TestMediaRequestE
 
     private final HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
-    private final UserAccountEntity currentOwner = UserAccountTestData.minimalUserAccount();
+    private final UserAccountEntity currentOwner = minimalUserAccount();
 
-    private final UserAccountEntity requestor = UserAccountTestData.minimalUserAccount();
-
-    private final Integer attempts = 0;
-
-    private final OffsetDateTime startTime = YESTERDAY;
-
-    private final OffsetDateTime endTime = YESTERDAY.plusHours(1);
-
-    private final OffsetDateTime createdAt = NOW;
-
-    private final OffsetDateTime lastModifiedAt = NOW;
+    private final UserAccountEntity requestor = minimalUserAccount();
 
     MediaRequestTestData() {
         // This constructor is intentionally empty. Nothing special is needed here.
     }
 
+    @Override
     public MediaRequestEntity someMinimal() {
         return someMinimalBuilder().build().getEntity();
     }
@@ -107,9 +98,10 @@ public final class MediaRequestTestData implements Persistable<TestMediaRequestE
     public TestMediaRequestEntity.TestMediaBuilderRetrieve someMinimalBuilderHolder() {
         TestMediaRequestEntity.TestMediaBuilderRetrieve builder = new TestMediaRequestEntity.TestMediaBuilderRetrieve();
         builder.getBuilder().hearing(hearing).currentOwner(currentOwner).requestor(requestor)
-            .attempts(attempts).startTime(startTime)
-            .endTime(endTime).createdById(0).lastModifiedById(0).createdAt(createdAt)
-            .lastModifiedAt(lastModifiedAt)
+            .attempts(0).startTime(YESTERDAY)
+            .endTime(YESTERDAY.plusHours(1)).createdById(0).lastModifiedById(0)
+            .createdAt(NOW)
+            .lastModifiedAt(NOW)
             .status(MediaRequestStatus.PROCESSING)
             .requestType(AudioRequestType.PLAYBACK);
         return builder;

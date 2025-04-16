@@ -46,6 +46,7 @@ public class TestTranscriptionEntity extends TranscriptionEntity implements DbIn
                                    Integer createdById,
                                    OffsetDateTime lastModifiedDateTime,
                                    Integer lastModifiedById) {
+        super();
         setId(id);
         setCourtCases(courtCases);
         setTranscriptionType(transcriptionType);
