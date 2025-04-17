@@ -132,9 +132,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
                 dartsDatabase.save(event);
             }
         });
-        List<EventEntity> events = eventRepository.findAll().stream()
-            .filter(event -> event.getIsCurrent())
-            .toList();
+        List<EventEntity> events = eventRepository.findAll().stream().toList();
 
         Assertions.assertFalse(eventStub.isOnlyOneOfTheEventIdSetToCurrent(events));
     }
