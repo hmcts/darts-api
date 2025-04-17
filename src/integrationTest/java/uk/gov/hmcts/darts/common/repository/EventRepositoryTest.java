@@ -68,7 +68,6 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         List<Integer> eventIdsToBeProcessed2 = eventIdMap.keySet().stream()
             .filter(eventId -> eventId != 0)
             .skip(1)
-            .limit(1)
             .toList();
 
         EventRepository.EventIdAndHearingIds eventPkidSecond =
