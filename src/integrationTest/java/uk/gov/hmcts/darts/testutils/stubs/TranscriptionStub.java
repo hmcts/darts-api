@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -77,6 +78,7 @@ public class TranscriptionStub {
     private final TranscriptionStubComposable transcriptionStubComposable;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
     private final UserAccountRepository userAccountRepository;
+    private final TransactionalUtil transactionalUtil;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -539,10 +541,10 @@ public class TranscriptionStub {
         return transcriptionEntity;
     }
 
-    public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
-                                                               ObjectRecordStatusEnum status,
-                                                               ExternalLocationTypeEnum location,
-                                                               String eodExternalLocation) {
+    public TranscriptionDocumentEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
+                                                                       ObjectRecordStatusEnum status,
+                                                                       ExternalLocationTypeEnum location,
+                                                                       String eodExternalLocation) {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 10;
@@ -566,25 +568,23 @@ public class TranscriptionStub {
 
     @Transactional
     @SuppressWarnings({"PMD.ExcessiveParameterList", "PMD.UseObjectForClearerAPI"})
-    public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
-                                                               String fileName,
-                                                               String fileType,
-                                                               int fileSize,
-                                                               UserAccountEntity testUser,
-                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                               String externalLocation,
-                                                               String checksum,
-                                                               RetentionConfidenceScoreEnum confScore,
-                                                               String confReason
+    public TranscriptionDocumentEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
+                                                                       String fileName,
+                                                                       String fileType,
+                                                                       int fileSize,
+                                                                       UserAccountEntity testUser,
+                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                       String externalLocation,
+                                                                       String checksum,
+                                                                       RetentionConfidenceScoreEnum confScore,
+                                                                       String confReason
     ) {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(transcriptionEntity, fileName,
                                                                                                     fileType, fileSize, testUser,
                                                                                                     checksum, confScore, confReason);
-        dartsDatabaseSaveStub.save(transcriptionDocumentEntity);
-        transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
-        dartsDatabaseSaveStub.save(transcriptionEntity);
+        transcriptionDocumentEntity = transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
@@ -596,10 +596,10 @@ public class TranscriptionStub {
         externalObjectDirectoryEntity.setCreatedBy(testUser);
         externalObjectDirectoryEntity.setLastModifiedBy(testUser);
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
-        externalObjectDirectoryEntity = dartsDatabaseSaveStub.save(externalObjectDirectoryEntity);
-
-        transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
-        return dartsDatabaseSaveStub.save(transcriptionEntity);
+        dartsDatabaseSaveStub.save(externalObjectDirectoryEntity);
+        transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
+        transcriptionRepository.save(transcriptionEntity);
+        return transcriptionDocumentEntity;
     }
 
     private String getChecksum() {

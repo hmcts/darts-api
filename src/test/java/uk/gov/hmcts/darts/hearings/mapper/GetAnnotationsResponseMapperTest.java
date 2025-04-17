@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,7 +27,7 @@ class GetAnnotationsResponseMapperTest {
 
         HearingEntity hearing = CommonTestDataUtil.createHearing("1001", LocalDate.of(2020, 10, 10));
 
-        annotationEntity1.setHearingList(List.of(hearing));
+        annotationEntity1.setHearings(Set.of(hearing));
         annotationEntity1.setTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         annotationEntity1.setText("annotationText");
         AnnotationDocumentEntity annotationDoc1a = createAnnotationDocumentEntity(11);
@@ -39,7 +40,7 @@ class GetAnnotationsResponseMapperTest {
         annotationEntity2.setId(1002);
         annotationEntity2.setCurrentOwner(userAccount);
 
-        annotationEntity2.setHearingList(List.of(hearing));
+        annotationEntity2.setHearings(Set.of(hearing));
         annotationEntity2.setTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         annotationEntity2.setText("annotationText");
         AnnotationDocumentEntity annotationDoc2a = createAnnotationDocumentEntity(21);

@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
@@ -29,7 +31,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
                            String chronicleId, String antecedentId, boolean isHidden,
                            boolean isDeleted, Boolean isCurrent, UserAccountEntity deletedBy,
                            OffsetDateTime deletedTimestamp, String mediaStatus,
-                           List<HearingEntity> hearingList, OffsetDateTime retainUntilTs,
+                           Collection<HearingEntity> hearingList, OffsetDateTime retainUntilTs,
                            List<ObjectAdminActionEntity> objectAdminActions, RetentionConfidenceScoreEnum retConfScore,
                            String retConfReason, OffsetDateTime createdDateTime,
                            Integer createdById, OffsetDateTime lastModifiedDateTime,
@@ -59,7 +61,7 @@ public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEn
         setDeletedBy(deletedBy);
         setDeletedTimestamp(deletedTimestamp);
         setMediaStatus(mediaStatus);
-        setHearingList(hearingList != null ? hearingList : new ArrayList<>());
+        setHearings(hearingList != null ? new HashSet<>(hearingList) : new HashSet<>());
         setRetainUntilTs(retainUntilTs);
         setObjectAdminActions(objectAdminActions != null ? objectAdminActions : new ArrayList<>());
         setRetConfScore(retConfScore);

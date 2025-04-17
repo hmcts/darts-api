@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionEntity;
 
-import java.util.Arrays;
+import java.util.Set;
 
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
@@ -63,14 +63,14 @@ public final class TranscriptionTestData
     public TranscriptionEntity someTranscriptionForHearing(HearingEntity hearingEntity) {
         var transcription = minimalTranscription();
         transcription.addHearing(hearingEntity);
-        transcription.setCourtCases(Arrays.asList(hearingEntity.getCourtCase()));
+        transcription.setCourtCases(Set.of(hearingEntity.getCourtCase()));
         return transcription;
     }
 
     public TranscriptionEntity someApprovedTranscriptionForHearing(HearingEntity hearingEntity) {
         var transcription = minimalApprovedTranscription();
         transcription.addHearing(hearingEntity);
-        transcription.setCourtCases(Arrays.asList(hearingEntity.getCourtCase()));
+        transcription.setCourtCases(Set.of(hearingEntity.getCourtCase()));
         return transcription;
     }
 

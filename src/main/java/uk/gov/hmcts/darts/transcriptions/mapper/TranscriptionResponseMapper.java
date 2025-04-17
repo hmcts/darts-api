@@ -161,6 +161,7 @@ public class TranscriptionResponseMapper {
         return Comparator.comparing(workflow -> ObjectUtils.defaultIfNull(workflow.getWorkflowTs(), OffsetDateTime.MIN));
     }
 
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     public GetTranscriptionByIdResponse mapToTranscriptionResponse(TranscriptionEntity transcriptionEntity) {
         CourtCaseEntity courtCase = transcriptionEntity.getCourtCase();
         if (isNull(courtCase)) {
@@ -208,7 +209,7 @@ public class TranscriptionResponseMapper {
             transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
         if (CollectionUtils.isNotEmpty(transcriptionEntity.getHearings())) {
-            HearingEntity hearing = transcriptionEntity.getHearings().getFirst();
+            HearingEntity hearing = transcriptionEntity.getHearing();
             transcriptionResponse.setHearingId(hearing.getId());
             transcriptionResponse.setHearingDate(hearing.getHearingDate());
         } else {
@@ -292,6 +293,7 @@ public class TranscriptionResponseMapper {
         return reportingRestriction;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     public GetTranscriptionDetailAdminResponse mapTransactionEntityToTransactionDetails(TranscriptionEntity transcriptionEntity) {
         GetTranscriptionDetailAdminResponse details = new GetTranscriptionDetailAdminResponse();
 
@@ -459,6 +461,7 @@ public class TranscriptionResponseMapper {
         return adminActionResponse;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     public AdminMarkedForDeletionResponseItem mapTranscriptionDocumentMarkedForDeletion(TranscriptionDocumentEntity transcriptionDocumentEntity) {
         TranscriptionEntity transcription = transcriptionDocumentEntity.getTranscription();
         HearingEntity hearingEntity = transcription.getHearing();

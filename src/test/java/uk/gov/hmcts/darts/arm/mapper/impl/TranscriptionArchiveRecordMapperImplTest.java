@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
 
 import java.time.OffsetDateTime;
-import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -95,7 +95,7 @@ class TranscriptionArchiveRecordMapperImplTest {
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCourthouse(courthouse);
         TranscriptionEntity transcriptionEntity2 = new TranscriptionEntity();
-        transcriptionEntity2.setCourtCases(List.of(courtCase));
+        transcriptionEntity2.setCourtCases(Set.of(courtCase));
         TranscriptionDocumentEntity transcriptionDocumentEntity2 = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity2.setTranscription(transcriptionEntity2);
         ExternalObjectDirectoryEntity externalObjectDirectory2 = new ExternalObjectDirectoryEntity();

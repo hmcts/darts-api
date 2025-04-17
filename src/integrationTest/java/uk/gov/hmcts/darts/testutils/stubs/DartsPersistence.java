@@ -94,8 +94,11 @@ import uk.gov.hmcts.darts.test.common.data.builder.DbInsertable;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -184,7 +187,7 @@ public class DartsPersistence {
         hearing.setJudges(saveJudgeList(hearing.getJudges()));
         hearing.setCourtCase(save(hearing.getCourtCase()));
         hearing.setCourtroom(save(hearing.getCourtroom()));
-        saveMediaList(hearing.getMediaList());
+        saveMediaList(hearing.getMedias());
         hearing.setCreatedById(Optional.ofNullable(hearing.getCreatedById()).orElse(0));
         hearing.setLastModifiedById(Optional.ofNullable(hearing.getLastModifiedById()).orElse(0));
 
@@ -202,8 +205,8 @@ public class DartsPersistence {
             annotationEntity.setCurrentOwner(save(annotationEntity.getCurrentOwner()));
             annotationEntity.setCreatedById(Optional.ofNullable(annotationEntity.getCreatedById()).orElse(0));
             annotationEntity.setLastModifiedById(Optional.ofNullable(annotationEntity.getLastModifiedById()).orElse(0));
-            if (annotationEntity.getHearingList() != null) {
-                annotationEntity.setHearingList(saveHearingEntity(annotationEntity.getHearingList()));
+            if (annotationEntity.getHearings() != null) {
+                annotationEntity.setHearings(saveHearingEntity(annotationEntity.getHearings()));
             }
             return annotationRepository.save(annotationEntity);
         } else {
@@ -456,7 +459,7 @@ public class DartsPersistence {
             }
 
             if (transcription.getCourtCases() != null) {
-                List<CourtCaseEntity> listOfCases = new ArrayList<>();
+                Set<CourtCaseEntity> listOfCases = new HashSet<>();
                 for (CourtCaseEntity courtCase : transcription.getCourtCases()) {
                     listOfCases.add(save(courtCase));
                 }
@@ -744,7 +747,7 @@ public class DartsPersistence {
         externalObjectDirectoryEntities.forEach(this::save);
     }
 
-    private void saveMediaList(List<MediaEntity> mediaList) {
+    private void saveMediaList(Collection<MediaEntity> mediaList) {
         if (mediaList == null
             || TestUtils.isProxy(mediaList)
             || mediaList.isEmpty()) {
@@ -754,7 +757,7 @@ public class DartsPersistence {
             if (media.getId() == null) {
                 media = (MediaEntity) preCheckPersist(media);
                 save(media);
-                saveHearingList(media.getHearingList());
+                saveHearing(media.getHearings());
             }
         });
 
@@ -773,23 +776,21 @@ public class DartsPersistence {
         return mediaLinkedCaseEntityArrayList;
     }
 
-    private List<JudgeEntity> saveJudgeList(List<JudgeEntity> judges) {
-        List<JudgeEntity> judgeEntityListReturn = new ArrayList<>();
+    private Set<JudgeEntity> saveJudgeList(Collection<JudgeEntity> judges) {
+        Set<JudgeEntity> judgeEntityListReturn = new HashSet<>();
 
         judges.forEach(judge -> judgeEntityListReturn.add(save(judge)));
 
         return judgeEntityListReturn;
     }
 
-    private List<HearingEntity> saveHearingEntity(List<HearingEntity> hearingEntityList) {
-        List<HearingEntity> hearingEntityArrayListReturn = new ArrayList<>();
-
-        hearingEntityList.forEach(hearingEntity -> hearingEntityArrayListReturn.add(save(hearingEntity)));
-
-        return hearingEntityArrayListReturn;
+    private Set<HearingEntity> saveHearingEntity(Collection<HearingEntity> hearingEntityList) {
+        Set<HearingEntity> newCollection = new HashSet<>();
+        hearingEntityList.forEach(hearingEntity -> newCollection.add(save(hearingEntity)));
+        return newCollection;
     }
 
-    private void saveHearingList(List<HearingEntity> hearings) {
+    private void saveHearing(Collection<HearingEntity> hearings) {
         hearings.forEach(media -> {
             if (media.getId() == null) {
                 save(media);

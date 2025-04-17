@@ -112,10 +112,11 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
+        TranscriptionDocumentEntity transcriptionDocumentEntity = dartsDatabase.getTranscriptionStub()
+            .updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
-            transcription.getTranscriptionDocumentEntities().getFirst().getId(),
+            transcriptionDocumentEntity.getId(),
             dartsDatabase.getObjectRecordStatusEntity(STORED),
             dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
         );
@@ -137,10 +138,11 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
+        TranscriptionDocumentEntity transcriptionDocumentEntity = dartsDatabase.getTranscriptionStub()
+            .updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID().toString());
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
-            transcription.getTranscriptionDocumentEntities().getFirst().getId(),
+            transcriptionDocumentEntity.getId(),
             dartsDatabase.getObjectRecordStatusEntity(FAILURE),
             dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
         );

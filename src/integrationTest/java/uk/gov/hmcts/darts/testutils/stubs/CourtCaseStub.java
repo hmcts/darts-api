@@ -1,18 +1,25 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
+import org.jeasy.random.DefaultExclusionPolicy;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.api.ExclusionPolicy;
+import org.jeasy.random.api.RandomizerContext;
 import org.jeasy.random.randomizers.range.IntegerRangeRandomizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Consumer;
@@ -105,11 +112,34 @@ public class CourtCaseStub {
         }
     }
 
+    /**
+     * Creates a CourtCaseEntity with random values. Passes the created case to the client for further customisations before saving
+     *
+     * @deprecated use new PersistableFactory builders
+     */
+    @Deprecated
     public CourtCaseEntity createCourtCaseAndAssociatedEntitiesWithRandomValues() {
         EasyRandomParameters parameters = new EasyRandomParameters()
             .randomize(Integer.class, new IntegerRangeRandomizer(1, 100))
             .collectionSizeRange(1, 1)
+            .excludeType(aClass -> aClass.equals(MediaLinkedCaseEntity.class))
             .overrideDefaultInitialization(true);
+
+        parameters.setExclusionPolicy(new ExclusionPolicy() {
+            final DefaultExclusionPolicy defaultExclusionPolicy = new DefaultExclusionPolicy();
+
+            @Override
+            public boolean shouldBeExcluded(Field field, RandomizerContext context) {
+                return (context.getCurrentObject().getClass().equals(ObjectAdminActionEntity.class)
+                    && field.getType().equals(MediaEntity.class))
+                    || defaultExclusionPolicy.shouldBeExcluded(field, context);
+            }
+
+            @Override
+            public boolean shouldBeExcluded(Class<?> type, RandomizerContext context) {
+                return defaultExclusionPolicy.shouldBeExcluded(type, context);
+            }
+        });
 
         EasyRandom generator = new EasyRandom(parameters);
         return generator.nextObject(CourtCaseEntity.class);

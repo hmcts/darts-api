@@ -17,6 +17,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -81,7 +82,7 @@ public final class AdminHearingMapper {
     }
 
 
-    public static <R, P> List<R> asList(List<P> data, Function<P, R> mapperFunction) {
+    public static <R, P> List<R> asList(Collection<P> data, Function<P, R> mapperFunction) {
         if (data == null) {
             return new ArrayList<>();
         }

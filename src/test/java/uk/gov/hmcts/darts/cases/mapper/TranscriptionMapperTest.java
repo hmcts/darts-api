@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 
@@ -17,6 +18,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -33,7 +35,7 @@ class TranscriptionMapperTest {
     @Test
     void happyPath() {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, true, true);
+        Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, true, true);
 
         List<Transcript> transcripts = caseTranscriptionMapper.getTranscriptList(caseTranscriptionMapper.mapResponse(transcriptionList));
         Transcript transcript = transcripts.getFirst();
@@ -78,9 +80,9 @@ class TranscriptionMapperTest {
     @Test
     void happyPathDoNotIncludeTranscriptionsIsCurrentFalse() {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
+        Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1);
 
-        transcriptionList.getFirst().setIsCurrent(false);
+        TestUtils.getFirst(transcriptionList).setIsCurrent(false);
 
         List<Transcript> transcripts = caseTranscriptionMapper.getTranscriptList(caseTranscriptionMapper.mapResponse(transcriptionList));
         assertEquals(0, transcripts.size());

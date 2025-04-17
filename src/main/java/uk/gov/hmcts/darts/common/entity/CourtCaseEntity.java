@@ -25,10 +25,13 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = CourtCaseEntity.TABLE_NAME)
@@ -36,7 +39,7 @@ import java.util.List;
 @Getter
 @Setter
 @Slf4j
-public class CourtCaseEntity extends CreatedModifiedBaseEntity {
+public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasIntegerId {
 
     public static final String COURT_CASE = "courtCase";
     public static final String CASE_CLOSED_TS = "case_closed_ts";
@@ -125,7 +128,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @JoinTable(name = "case_judge_ae",
         joinColumns = {@JoinColumn(name = "cas_id")},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
-    private List<JudgeEntity> judges = new ArrayList<>();
+    private Set<JudgeEntity> judges = new HashSet<>();
 
     @OneToMany(mappedBy = MediaLinkedCaseEntity_.COURT_CASE)
     private List<MediaLinkedCaseEntity> mediaLinkedCaseList = new ArrayList<>();

@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
@@ -29,6 +30,7 @@ import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -266,7 +268,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
-        hearing.setMediaList(null);
+        hearing.setMedias(null);
         dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
@@ -300,8 +302,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-        OffsetDateTime startTime = hearing.getMediaList().getFirst().getStart().truncatedTo(ChronoUnit.SECONDS);
-        OffsetDateTime endTime = hearing.getMediaList().getFirst().getEnd().truncatedTo(ChronoUnit.SECONDS);
+        MediaEntity mediaEntity = TestUtils.getFirst(hearing.getMedias());
+        OffsetDateTime startTime = mediaEntity.getStart().truncatedTo(ChronoUnit.SECONDS);
+        OffsetDateTime endTime = mediaEntity.getEnd().truncatedTo(ChronoUnit.SECONDS);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
@@ -330,8 +333,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-        OffsetDateTime startTime = hearing.getMediaList().getFirst().getStart().plusMinutes(5);
-        OffsetDateTime endTime = hearing.getMediaList().getFirst().getEnd().minusMinutes(15);
+        MediaEntity mediaEntity = TestUtils.getFirst(hearing.getMedias());
+        OffsetDateTime startTime = mediaEntity.getStart().plusMinutes(5);
+        OffsetDateTime endTime = mediaEntity.getEnd().minusMinutes(15);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
