@@ -188,16 +188,36 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                                                       UserAccountEntity userAccount,
                                                       CaseRetentionStatus caseRetentionStatus,
                                                       RetentionConfidenceCategoryEnum retentionConfidenceCategory) {
+        return createNewCaseRetention(
+            BooleanUtils.isTrue(postRetentionRequest.getIsPermanentRetention()) ? RetentionPolicyEnum.PERMANENT : RetentionPolicyEnum.MANUAL,
+            postRetentionRequest.getComments(),
+            courtCase,
+            newRetentionDate,
+            userAccount,
+            caseRetentionStatus,
+            retentionConfidenceCategory
+        );
+    }
+
+    @Override
+    public CaseRetentionEntity createNewCaseRetention(RetentionPolicyEnum retentionPolicyEnum,
+                                                      String comments,
+                                                      CourtCaseEntity courtCase,
+                                                      LocalDate newRetentionDate,
+                                                      UserAccountEntity userAccount,
+                                                      CaseRetentionStatus caseRetentionStatus,
+                                                      RetentionConfidenceCategoryEnum retentionConfidenceCategory) {
+
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
         caseRetention.setLastModifiedBy(userAccount);
         caseRetention.setCreatedBy(userAccount);
         caseRetention.setSubmittedBy(userAccount);
-        caseRetention.setComments(postRetentionRequest.getComments());
+        caseRetention.setComments(comments);
         caseRetention.setRetainUntil(newRetentionDate.atTime(OffsetTime.of(0, 0, 0, 0, ZoneOffset.UTC)));
         caseRetention.setCurrentState(String.valueOf(caseRetentionStatus));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
-        caseRetention.setRetentionPolicyType(getRetentionPolicy(postRetentionRequest.getIsPermanentRetention()));
+        caseRetention.setRetentionPolicyType(getRetentionPolicy(retentionPolicyEnum));
         caseRetention.setConfidenceCategory(retentionConfidenceCategory);
 
         caseRetentionRepository.saveAndFlush(caseRetention);
@@ -209,14 +229,8 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         return caseRetention;
     }
 
-    private RetentionPolicyTypeEntity getRetentionPolicy(Boolean isPermanent) {
-
-        String policyKey;
-        if (BooleanUtils.isTrue(isPermanent)) {
-            policyKey = RetentionPolicyEnum.PERMANENT.getPolicyKey();
-        } else {
-            policyKey = RetentionPolicyEnum.MANUAL.getPolicyKey();
-        }
+    private RetentionPolicyTypeEntity getRetentionPolicy(RetentionPolicyEnum retentionPolicyEnum) {
+        String policyKey = retentionPolicyEnum.getPolicyKey();
 
         List<RetentionPolicyTypeEntity> retentionPolicyList = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
             policyKey,

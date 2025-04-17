@@ -92,7 +92,7 @@ class CloseOldCasesProcessorImplTest {
         when(caseService.getCourtCaseById(1)).thenReturn(courtCase);
 
         CaseRetentionEntity caseRetention = createRetentionEntity(courtCase, userAccountEntity);
-        when(retentionApi.createRetention(any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
+        when(retentionApi.createRetention(any(),any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
         assertFalse(courtCase.getClosed());
 
         when(retentionApi.updateCourtCaseConfidenceAttributesForRetention(any(), eq(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED)))

@@ -6,14 +6,15 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
-import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 
 import java.time.LocalDate;
 
 public interface RetentionApi {
     LocalDate applyPolicyStringToDate(LocalDate dateToAppend, String policyString, RetentionPolicyTypeEntity retentionPolicyType);
 
-    CaseRetentionEntity createRetention(PostRetentionRequest postRetentionRequest,
+    CaseRetentionEntity createRetention(RetentionPolicyEnum retentionPolicyEnum,
+                                        String comments,
                                         CourtCaseEntity courtCase,
                                         LocalDate newRetentionDate,
                                         UserAccountEntity userAccount,

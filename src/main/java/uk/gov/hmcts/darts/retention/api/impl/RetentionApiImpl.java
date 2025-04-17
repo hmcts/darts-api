@@ -9,10 +9,10 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
-import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 
 import java.time.LocalDate;
 
@@ -30,13 +30,15 @@ public class RetentionApiImpl implements RetentionApi {
     }
 
     @Override
-    public CaseRetentionEntity createRetention(PostRetentionRequest postRetentionRequest,
+    public CaseRetentionEntity createRetention(RetentionPolicyEnum retentionPolicyEnum,
+                                               String comments,
                                                CourtCaseEntity courtCase,
                                                LocalDate newRetentionDate,
                                                UserAccountEntity userAccount,
                                                CaseRetentionStatus caseRetentionStatus,
                                                RetentionConfidenceCategoryEnum retentionConfidenceCategory) {
-        return retentionPostService.createNewCaseRetention(postRetentionRequest,
+        return retentionPostService.createNewCaseRetention(retentionPolicyEnum,
+                                                           comments,
                                                            courtCase,
                                                            newRetentionDate,
                                                            userAccount,
