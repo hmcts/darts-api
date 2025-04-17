@@ -171,7 +171,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tru.description             as transcription_urgency_description,
                     tru.tru_id                  as transcription_urgency_id,
                     tru.priority_order          as transcription_urgency_priority_order,
-                    requested_trw.workflow_ts   as requested_ts,
+                    (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts,
                     complete_trw.workflow_ts    as state_change_ts,
                     tra.is_manual_transcription as is_manual,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
