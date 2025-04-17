@@ -192,6 +192,19 @@ public class UserAccountStub {
     }
 
     @Transactional
+    public UserAccountEntity createApproverUser(CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-1).get();
+        securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
+
+        var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().clear();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = dartsDatabaseSaveStub.save(testUser);
+        return testUser;
+    }
+
+    @Transactional
     public UserAccountEntity createJudgeUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-3);
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);

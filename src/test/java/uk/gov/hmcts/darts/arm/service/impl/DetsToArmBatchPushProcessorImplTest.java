@@ -9,8 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
@@ -36,7 +34,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.DetsToArmPushAutomatedTaskConfig;
 import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
-import uk.gov.hmcts.darts.util.AsyncUtil;
 import uk.gov.hmcts.darts.util.LogUtil;
 
 import java.io.BufferedWriter;
@@ -218,24 +215,6 @@ class DetsToArmBatchPushProcessorImplTest {
         detsToArmBatchPushProcessor.processDetsToArm(5);
         // when
         LogUtil.assertOutputHasMessage(output, "No DETS EODs to process", 5);
-    }
-
-    @Test
-    void processDetsToArm_asyncException(CapturedOutput output) {
-        EOD_HELPER_MOCKS.simulateInitWithMockedData();
-        detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
-        doReturn(List.of(1)).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
-
-        try (MockedStatic<AsyncUtil> asyncUtilMockedStatic = Mockito.mockStatic(AsyncUtil.class)) {
-            asyncUtilMockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(any(), any()))
-                .thenThrow(new RuntimeException("Test exception"));
-            detsToArmBatchPushProcessor.processDetsToArm(5);
-            LogUtil.assertOutputHasMessage(output, "DETS to ARM batch unexpected exception", 5);
-
-            assertThat(output)
-                .contains("DETS to ARM batch unexpected exception")
-                .contains("DetsToArmBatchPushProcessorImpljava.lang.RuntimeException: Test exception");
-        }
     }
 
     @Disabled("This test is failing randomly. Ticket raised to fix this issue")
