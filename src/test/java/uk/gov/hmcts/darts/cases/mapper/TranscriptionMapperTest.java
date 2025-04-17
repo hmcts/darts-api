@@ -51,6 +51,7 @@ class TranscriptionMapperTest {
     @Test
     void happyPathLegacy() {
         TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.setCourtroom(CommonTestDataUtil.createCourtroom("some-Courtroom"));
         transcription.addCase(CommonTestDataUtil.createCase("theCase"));
         TranscriptionTypeEntity transcriptionType = new TranscriptionTypeEntity();
         transcriptionType.setId(1);
@@ -75,6 +76,7 @@ class TranscriptionMapperTest {
         assertEquals(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC), transcript.getRequestedOn());
         assertEquals("someLegacyRequestor", transcript.getRequestedByName());
         assertEquals("APPROVED", transcript.getStatus());
+        assertEquals("SOME-COURTROOM", transcript.getCourtroom());
     }
 
     @Test

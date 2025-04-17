@@ -152,7 +152,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'cases.yaml#/components/schemas/transcripts'
+                $ref: '#/components/schemas/transcripts'
         '401':
           description: Unauthorised Error
         '403':
