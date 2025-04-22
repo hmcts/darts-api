@@ -105,7 +105,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tru.description                  as transcription_urgency_description,
                     tru.tru_id                       as transcription_urgency_id,
                     tru.priority_order               as transcription_urgency_priority_order,
-                    requested_trw.requested_ts        as requested_ts,
+                    requested_trw.workflow_ts        as requested_ts,
                     with_transcriber_trw.workflow_ts as state_change_ts,
                     tra.is_manual_transcription      as is_manual,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
@@ -128,12 +128,8 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
-                JOIN  (
-                    SELECT trw.tra_id, MIN(trw.workflow_ts) as requested_ts
-                    FROM darts.transcription_workflow trw
-                    WHERE trw.trs_id = 1
-                    GROUP BY tra_id
-                ) requested_trw ON requested_trw.tra_id = tra.tra_id
+                JOIN darts.transcription_workflow requested_trw ON tra.tra_id = requested_trw.tra_id
+                    AND requested_trw.trs_id = 1
                 -- Only the latest "WITH_TRANSCRIBER" transcription_workflow for a given transcription
                 JOIN (
                     SELECT trw.tra_id, MAX(trw.workflow_ts) as workflow_ts
@@ -143,7 +139,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     GROUP BY tra_id
                 ) with_transcriber_trw ON with_transcriber_trw.tra_id = tra.tra_id
                 WHERE tra.trs_id = 5
-                AND requested_trw.requested_ts >= :date_limit
+                AND requested_trw.workflow_ts >= :date_limit
                 -- exclude ones with hidden docs - just in case there are any
                 AND (
                     EXISTS (
@@ -175,7 +171,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tru.description             as transcription_urgency_description,
                     tru.tru_id                  as transcription_urgency_id,
                     tru.priority_order          as transcription_urgency_priority_order,
-                    requested_trw.requested_ts  as requested_ts,
+                    (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts,
                     complete_trw.workflow_ts    as state_change_ts,
                     tra.is_manual_transcription as is_manual,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
@@ -198,12 +194,8 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
-                JOIN  (
-                    SELECT trw.tra_id, MIN(trw.workflow_ts) as requested_ts
-                    FROM darts.transcription_workflow trw
-                    WHERE trw.trs_id = 1
-                    GROUP BY tra_id
-                ) requested_trw ON requested_trw.tra_id = tra.tra_id
+                JOIN darts.transcription_workflow requested_trw ON tra.tra_id = requested_trw.tra_id
+                    AND requested_trw.trs_id = 1
                 JOIN darts.transcription_workflow complete_trw ON tra.tra_id = complete_trw.tra_id
                     AND complete_trw.trs_id = 6
                     AND complete_trw.workflow_actor = :usr_id
