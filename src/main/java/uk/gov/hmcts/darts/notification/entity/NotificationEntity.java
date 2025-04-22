@@ -31,17 +31,17 @@ import static jakarta.persistence.CascadeType.PERSIST;
 @EqualsAndHashCode(callSuper = true)
 public class NotificationEntity extends CreatedModifiedBaseEntity {
 
-    public static final String ID = "not_id";
+    public static final String NOT_ID = "not_id";
     public static final String EVENT_ID = "notification_event";
     public static final String CASE_ID = "cas_id";
     public static final String EMAIL_ADDRESS = "email_address";
-    public static final String STATUS = "notification_status";
-    public static final String ATTEMPTS = "send_attempts";
+    public static final String NOTIFICATION_STATUS = "notification_status";
+    public static final String SEND_ATTEMPTS = "send_attempts";
     public static final String TEMPLATE_VALUES = "template_values";
     public static final String TABLE_NAME = "notification";
 
     @Id
-    @Column(name = ID)
+    @Column(name = NOT_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "not_gen")
     @SequenceGenerator(name = "not_gen", sequenceName = "not_seq", allocationSize = 1)
     private Integer id;
@@ -56,11 +56,11 @@ public class NotificationEntity extends CreatedModifiedBaseEntity {
     @Column(name = EMAIL_ADDRESS)
     private String emailAddress;
 
-    @Column(name = STATUS)
+    @Column(name = NOTIFICATION_STATUS)
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
-    @Column(name = ATTEMPTS)
+    @Column(name = SEND_ATTEMPTS)
     private Integer attempts;
 
     @Column(name = TEMPLATE_VALUES)
