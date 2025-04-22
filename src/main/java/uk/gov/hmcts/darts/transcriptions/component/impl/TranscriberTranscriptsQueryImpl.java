@@ -143,7 +143,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     GROUP BY tra_id
                 ) with_transcriber_trw ON with_transcriber_trw.tra_id = tra.tra_id
                 WHERE tra.trs_id = 5
-                AND requested_trw.workflow_ts >= :date_limit
+                AND requested_trw.requested_ts >= :date_limit
                 -- exclude ones with hidden docs - just in case there are any
                 AND (
                     EXISTS (
