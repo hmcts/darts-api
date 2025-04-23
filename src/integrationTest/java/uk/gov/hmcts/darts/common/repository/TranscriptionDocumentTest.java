@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
@@ -66,7 +67,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository
             .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
-                                        .getTranscription().getCourtCases().getFirst().getCaseNumber(), null, null, null, null, null, null, null);
+                                        .getTranscription().getCourtCase().getCaseNumber(), null, null, null, null, null, null, null);
         if (TestType.MODENISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -83,7 +84,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository
             .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
-                                        .getTranscription().getCourtCases().getFirst().getCaseNumber(), null, null, null, null, null, null, null);
+                                        .getTranscription().getCourtCase().getCaseNumber(), null, null, null, null, null, null, null);
         if (TestType.MODENISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -97,7 +98,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         transcription.setIsCurrent(false);
         dartsDatabase.save(transcription);
         transcriptionDocumentResults = transcriptionDocumentRepository
-            .findTranscriptionMedia(transcription.getCourtCases().getFirst().getCaseNumber(), null, null, null, null, null, null, null);
+            .findTranscriptionMedia(transcription.getCourtCase().getCaseNumber(), null, null, null, null, null, null, null);
 
         Assertions.assertEquals(0, transcriptionDocumentResults.size());
     }
@@ -151,10 +152,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex)
-                                                                               .getTranscription().getCourtCases().getFirst()),
+                                                                               .getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -170,10 +172,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -188,11 +191,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
 
     }
 
@@ -209,12 +213,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex)
-                                                                               .getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -230,16 +234,18 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities.getFirst()
-                                                                               .getTranscription().getCourtCases().getFirst()),
+                                                                               .getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst()
-                                                                               .getTranscription().getCourtCases().get(1)),
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.getFirst()
+                                                                                   .getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1)
-                                                                               .getTranscription().getCourtCases().getFirst()),
+                                                                               .getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1)
-                                                                               .getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(1)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -257,17 +263,19 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities
-                                                                               .getFirst().getTranscription().getCourtCases().getFirst()),
+                                                                               .getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities
-                                                                               .getFirst().getTranscription().getCourtCases().get(1)),
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.getFirst()
+                                                                                   .getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(1),
                                                                            generatedDocumentEntities
-                                                                               .get(1).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities
-                                                                               .get(1).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(1)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -285,17 +293,19 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities
-                                                                               .getFirst().getTranscription().getCourtCases().getFirst()),
+                                                                               .getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities
-                                                                               .getFirst().getTranscription().getCourtCases().get(1)),
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.getFirst()
+                                                                                   .getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(1),
                                                                            generatedDocumentEntities
-                                                                               .get(1).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities
-                                                                               .get(1).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(1)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -312,11 +322,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     private LocalDate getHearingDate(TestType testType, TranscriptionEntity transcription) {
@@ -364,10 +375,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -384,10 +396,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -405,10 +418,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -425,10 +439,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -447,10 +462,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -462,15 +478,18 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             null, null, null, null,
             null, null, null, TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix());
         Assertions.assertEquals(4, transcriptionDocumentResults.size());
+
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().getFirst()),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().get(1)),
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.getFirst().getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().getFirst()),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(1).getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -489,10 +508,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -510,10 +530,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -533,10 +554,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -553,10 +575,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -574,10 +597,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
                                                                            generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().getFirst()),
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           generatedDocumentEntities
-                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(nameMatchIndex)
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -590,13 +614,15 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(), null, null, null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().getFirst()),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().get(1)),
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.getFirst().getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().getFirst()),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(1).getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -613,9 +639,11 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().getFirst()),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.getFirst()
+                                                                                   .getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -629,9 +657,10 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             null, generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(), null, null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().getFirst()),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(1).getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -647,13 +676,15 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                          .getTranscription().getCreatedDateTime(), null, null);
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().getFirst()),
+                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           generatedDocumentEntities.getFirst().getTranscription().getCourtCases().get(1)),
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.getFirst().getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().getFirst()),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
+                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                               generatedDocumentEntities.get(1).getTranscription().getCourtCases()).get(1)))));
     }
 
     @ParameterizedTest(name = "{0}")

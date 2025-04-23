@@ -577,9 +577,9 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertThat(transcriptionDocumentResultsLegacy.get(1).getTranscription().getHearingDate()).isNotEqualTo(hearingDate);
 
 
-        assertThat(transcriptionDocumentResultsMod.getFirst().getTranscription().getHearings().getFirst().getHearingDate()).isEqualTo(hearingDate);
+        assertThat(transcriptionDocumentResultsMod.getFirst().getTranscription().getHearing().getHearingDate()).isEqualTo(hearingDate);
         assertThat(transcriptionDocumentResultsMod.getFirst().getTranscription().getHearingDate()).isNull();
-        assertThat(transcriptionDocumentResultsMod.get(1).getTranscription().getHearings().getFirst().getHearingDate()).isNotEqualTo(hearingDate);
+        assertThat(transcriptionDocumentResultsMod.get(1).getTranscription().getHearing().getHearingDate()).isNotEqualTo(hearingDate);
         assertThat(transcriptionDocumentResultsMod.get(1).getTranscription().getHearingDate()).isNull();
 
         superAdminUserStub.givenUserIsAuthorised(userIdentity);

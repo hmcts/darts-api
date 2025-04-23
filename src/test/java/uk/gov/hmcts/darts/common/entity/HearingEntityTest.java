@@ -3,8 +3,9 @@ package uk.gov.hmcts.darts.common.entity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,14 +14,14 @@ class HearingEntityTest {
     @Test
     void positiveContainsMedia() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMediaList(List.of(createMedia(1), createMedia(2), createMedia(3)));
+        hearing.setMedias(Set.of(createMedia(1), createMedia(2), createMedia(3)));
         Assertions.assertTrue(hearing.containsMedia(createMedia(1)));
     }
 
     @Test
     void negativeContainsHearing() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMediaList(List.of(createMedia(1), createMedia(2), createMedia(3)));
+        hearing.setMedias(Set.of(createMedia(1), createMedia(2), createMedia(3)));
         Assertions.assertFalse(hearing.containsMedia(createMedia(4)));
 
     }
@@ -28,23 +29,24 @@ class HearingEntityTest {
     @Test
     void addMedia() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMediaList(new ArrayList<>(List.of(createMedia(1), createMedia(2), createMedia(3))));
+        hearing.setMedias(new HashSet<>(List.of(createMedia(1), createMedia(2), createMedia(3))));
 
-        assertThat(hearing.getMediaList()).hasSize(3);
-        List<MediaEntity> mediaEntities = hearing.getMediaList();
-        assertThat(mediaEntities.getFirst().getId()).isEqualTo(1);
-        assertThat(mediaEntities.get(1).getId()).isEqualTo(2);
-        assertThat(mediaEntities.get(2).getId()).isEqualTo(3);
+        assertThat(hearing.getMedias()).hasSize(3);
+        assertThat(hearing.getMedias()
+                       .stream()
+                       .map(mediaEntity -> mediaEntity.getId())
+                       .toList())
+            .containsExactlyInAnyOrder(1, 2, 3);
 
         MediaEntity media = createMedia(4);
         hearing.addMedia(media);
-        assertThat(hearing.getMediaList()).hasSize(4);
+        assertThat(hearing.getMedias()).hasSize(4);
 
-        mediaEntities = hearing.getMediaList();
-        assertThat(mediaEntities.getFirst().getId()).isEqualTo(1);
-        assertThat(mediaEntities.get(1).getId()).isEqualTo(2);
-        assertThat(mediaEntities.get(2).getId()).isEqualTo(3);
-        assertThat(mediaEntities.get(3).getId()).isEqualTo(4);
+        assertThat(hearing.getMedias()
+                       .stream()
+                       .map(mediaEntity -> mediaEntity.getId())
+                       .toList())
+            .containsExactlyInAnyOrder(1, 2, 3, 4);
     }
 
     private MediaEntity createMedia(int id) {

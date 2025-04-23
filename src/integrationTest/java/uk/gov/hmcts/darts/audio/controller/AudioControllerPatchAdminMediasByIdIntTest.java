@@ -260,9 +260,9 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
             MediaEntity media = databaseStub.getMediaRepository().findById(mediaId).orElseThrow();
             assertThat(media.getIsCurrent()).isEqualTo(isCurrent);
             if (isCurrent) {
-                assertThat(media.getHearingList()).isNotEmpty();
+                assertThat(media.getHearings()).isNotEmpty();
             } else {
-                assertThat(media.getHearingList()).isEmpty();
+                assertThat(media.getHearings()).isEmpty();
             }
         });
     }

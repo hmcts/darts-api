@@ -295,6 +295,11 @@ public class ExternalObjectDirectoryStub {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
 
+    /**
+     * Creates an ExternalObjectDirectoryEntity with random values.
+     * @deprecated use new PersistableFactory builders
+     */
+    @Deprecated
     public ExternalObjectDirectoryEntity createEodWithRandomValues() {
         EasyRandomParameters parameters = new EasyRandomParameters()
             .randomize(Integer.class, new IntegerRangeRandomizer(1, 100))

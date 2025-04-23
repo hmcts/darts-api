@@ -21,7 +21,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
@@ -142,7 +142,7 @@ class AnnotationGetTest extends IntegrationBase {
             .currentOwner(userAccount)
             .createdById(0)
             .lastModifiedById(0)
-            .hearingList(new ArrayList<>(List.of(PersistableFactory.getHearingTestData().someMinimalHearing())));
+            .hearings(new HashSet<>(List.of(PersistableFactory.getHearingTestData().someMinimalHearing())));
 
         return dartsPersistence.save(annotation.build().getEntity());
     }

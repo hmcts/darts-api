@@ -329,7 +329,7 @@ class DataAnonymisationServiceImplTest {
 
         TranscriptionEntity transcriptionEntity1 = mock(TranscriptionEntity.class);
         TranscriptionEntity transcriptionEntity2 = mock(TranscriptionEntity.class);
-        hearingEntity.setTranscriptions(List.of(transcriptionEntity1, transcriptionEntity2));
+        hearingEntity.setTranscriptions(Set.of(transcriptionEntity1, transcriptionEntity2));
 
         EventEntity entityEntity1 = mock(EventEntity.class);
         EventEntity entityEntity2 = mock(EventEntity.class);
@@ -410,15 +410,15 @@ class DataAnonymisationServiceImplTest {
         MediaRequestEntity hearing1MediaRequestEntity1 = new MediaRequestEntity();
         MediaRequestEntity hearing1MediaRequestEntity2 = new MediaRequestEntity();
         MediaRequestEntity hearing1MediaRequestEntity3 = new MediaRequestEntity();
-        hearingEntity1.setMediaRequests(List.of(hearing1MediaRequestEntity1, hearing1MediaRequestEntity2, hearing1MediaRequestEntity3));
+        hearingEntity1.setMediaRequests(Set.of(hearing1MediaRequestEntity1, hearing1MediaRequestEntity2, hearing1MediaRequestEntity3));
 
         MediaRequestEntity hearing2MediaRequestEntity1 = new MediaRequestEntity();
         MediaRequestEntity hearing2MediaRequestEntity2 = new MediaRequestEntity();
         MediaRequestEntity hearing2MediaRequestEntity3 = new MediaRequestEntity();
-        hearingEntity2.setMediaRequests(List.of(hearing2MediaRequestEntity1, hearing2MediaRequestEntity2, hearing2MediaRequestEntity3));
+        hearingEntity2.setMediaRequests(Set.of(hearing2MediaRequestEntity1, hearing2MediaRequestEntity2, hearing2MediaRequestEntity3));
 
         MediaRequestEntity hearing3MediaRequestEntity1 = new MediaRequestEntity();
-        hearingEntity3.setMediaRequests(List.of(hearing3MediaRequestEntity1, hearing1MediaRequestEntity1, hearing2MediaRequestEntity2));
+        hearingEntity3.setMediaRequests(Set.of(hearing3MediaRequestEntity1, hearing1MediaRequestEntity1, hearing2MediaRequestEntity2));
 
         doNothing().when(dataAnonymisationService).expiredMediaRequest(any(), any());
         doNothing().when(dataAnonymisationService).deleteTransformedMediaEntity(any());

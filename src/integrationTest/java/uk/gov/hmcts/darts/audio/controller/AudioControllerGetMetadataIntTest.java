@@ -108,42 +108,48 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         String expectedJson = """
             [
                 {
-                  "id": 4,
+                  "id": %s,
                   "media_start_timestamp": "2023-01-01T12:08:00Z",
                   "media_end_timestamp": "2023-01-01T13:08:00Z",
                   "is_archived": false,
                   "is_available": false
                 },
                 {
-                  "id": 5,
+                  "id": %s,
                   "media_start_timestamp": "2023-01-01T12:05:00Z",
                   "media_end_timestamp": "2023-01-01T13:06:00Z",
                   "is_archived": false,
                   "is_available": false
                 },
                 {
-                  "id": 2,
+                  "id": %s,
                   "media_start_timestamp": "2023-01-01T12:05:00Z",
                   "media_end_timestamp": "2023-01-01T13:05:00Z",
                   "is_archived": false,
                   "is_available": true
                 },
                 {
-                  "id": 3,
+                  "id": %s,
                   "media_start_timestamp": "2023-01-01T12:01:00Z",
                   "media_end_timestamp": "2023-01-01T13:01:00Z",
                   "is_archived": false,
                   "is_available": false
                 },
                 {
-                  "id": 1,
+                  "id": %s,
                   "media_start_timestamp": "2023-01-01T12:00:00Z",
                   "media_end_timestamp": "2023-01-01T13:00:00Z",
                   "is_archived": false,
                   "is_available": true
                 }
               ]
-            """.formatted(mediaChannel1.getId());
+            """.formatted(
+                mediaChannel4.getId(),
+                mediaChannel5.getId(),
+                mediaChannel2.getId(),
+                mediaChannel3.getId(),
+                mediaChannel1.getId()
+        );
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);
     }
 

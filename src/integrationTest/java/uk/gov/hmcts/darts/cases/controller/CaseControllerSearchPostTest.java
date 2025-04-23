@@ -232,7 +232,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseMultiple.json");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test

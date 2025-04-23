@@ -3,13 +3,18 @@ package uk.gov.hmcts.darts.casedocument.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
 import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
@@ -32,8 +37,6 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
     @Autowired
     CourtCaseStub courtCaseStub;
     @Autowired
-    UserIdentity userIdentity;
-    @Autowired
     CourtCaseDocumentMapper mapper;
 
     @Test
@@ -45,15 +48,10 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         when(eodRepository.findByTranscriptionDocumentEntity(any())).thenReturn(List.of(transcriptionDocumentEodEntity));
         ExternalObjectDirectoryEntity annotationDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByAnnotationDocumentEntity(any())).thenReturn(List.of(annotationDocumentEodEntity));
-        dartsDatabase.getCaseDocumentStub().createCaseDocumentWithRandomValues();
         ExternalObjectDirectoryEntity caseDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByCaseDocument(any())).thenReturn(List.of(caseDocumentEodEntity));
 
         CourtCaseEntity cc = courtCaseStub.createCourtCaseAndAssociatedEntitiesWithRandomValues();
-
-        givenBearerTokenExists("darts.global.user@hmcts.net");
-        cc.setLastModifiedBy(userIdentity.getUserAccount());
-        cc.setCreatedBy(userIdentity.getUserAccount());
 
         // when
         CourtCaseDocument doc = mapper.mapToCaseDocument(cc);
@@ -62,9 +60,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         assertAll(
             "Grouped assertions for Case Document top level properties",
             () -> assertThat(doc.getCaseId()).isNotNull().isEqualTo(cc.getId()),
-            () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
+            () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(cc.getCreatedById()),
             () -> assertThat(doc.getCreatedDateTime()).isNotNull().isCloseToUtcNow(within(1, SECONDS)),
-            () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
+            () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(cc.getLastModifiedById()),
             () -> assertThat(doc.getLastModifiedDateTime()).isNotNull().isCloseToUtcNow(within(1, SECONDS)),
             () -> assertThat(doc.getLegacyCaseObjectId()).isNotNull().isEqualTo(cc.getLegacyCaseObjectId()),
             () -> assertThat(doc.getCaseNumber()).isNotNull().isEqualTo(cc.getCaseNumber()),
@@ -139,14 +137,15 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getDefences().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getLastModifiedById())
         );
 
+        JudgeEntity judge = TestUtils.getFirst(cc.getJudges());
         assertAll(
             "Grouped assertions for Case Document judges",
-            () -> assertThat(doc.getJudges().getFirst().getId()).isNotNull().isEqualTo(cc.getJudges().getFirst().getId()),
-            () -> assertThat(doc.getJudges().getFirst().getName()).isNotNull().isEqualTo(cc.getJudges().getFirst().getName()),
-            () -> assertThat(doc.getJudges().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(cc.getJudges().getFirst().getCreatedDateTime()),
-            () -> assertThat(doc.getJudges().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getJudges().getFirst().getLastModifiedDateTime()),
-            () -> assertThat(doc.getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(cc.getJudges().getFirst().getCreatedById()),
-            () -> assertThat(doc.getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getJudges().getFirst().getLastModifiedById())
+            () -> assertThat(doc.getJudges().getFirst().getId()).isNotNull().isEqualTo(judge.getId()),
+            () -> assertThat(doc.getJudges().getFirst().getName()).isNotNull().isEqualTo(judge.getName()),
+            () -> assertThat(doc.getJudges().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(judge.getCreatedDateTime()),
+            () -> assertThat(doc.getJudges().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(judge.getLastModifiedDateTime()),
+            () -> assertThat(doc.getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(judge.getCreatedById()),
+            () -> assertThat(doc.getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(judge.getLastModifiedById())
         );
 
         assertAll(
@@ -253,6 +252,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getCaseRetentionEntities().getFirst().getCaseManagementRetention().getEventEntity().getEventType().isReportingRestriction())
         );
 
+        JudgeEntity ccFirstHearingFirstJudge = TestUtils.getFirst(cc.getHearings().getFirst().getJudges());
         assertAll(
             "Grouped assertions for Case Document hearings",
             () -> assertThat(doc.getHearings().getFirst().getId()).isNotNull().isEqualTo(cc.getHearings().getFirst().getId()),
@@ -268,135 +268,137 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getHearings().getFirst().getCourtroom().getCreatedDateTime()),
 
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getId()),
+                ccFirstHearingFirstJudge.getId()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getName()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getName()),
+                ccFirstHearingFirstJudge.getName()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getCreatedDateTime()),
+                ccFirstHearingFirstJudge.getCreatedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getLastModifiedDateTime()),
+                ccFirstHearingFirstJudge.getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getCreatedById()),
+                ccFirstHearingFirstJudge.getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getJudges().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getJudges().getFirst().getLastModifiedById())
+                ccFirstHearingFirstJudge.getLastModifiedById())
         );
 
+        MediaRequestEntity ccFirstHearingFirstMediaRequest = TestUtils.getFirst(cc.getHearings().getFirst().getMediaRequests());
         assertAll(
             "Grouped assertions for Case Document hearings media requests",
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getId()),
+                ccFirstHearingFirstMediaRequest.getId()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getCurrentOwner()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getCurrentOwner().getId()),
+                ccFirstHearingFirstMediaRequest.getCurrentOwner().getId()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getRequestor()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getRequestor().getId()),
+                ccFirstHearingFirstMediaRequest.getRequestor().getId()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getStatus()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getStatus()),
+                ccFirstHearingFirstMediaRequest.getStatus()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getRequestType()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getRequestType()),
+                ccFirstHearingFirstMediaRequest.getRequestType()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getAttempts()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getAttempts()),
+                ccFirstHearingFirstMediaRequest.getAttempts()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getStartTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getStartTime()),
+                ccFirstHearingFirstMediaRequest.getStartTime()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getEndTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getEndTime()),
+                ccFirstHearingFirstMediaRequest.getEndTime()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getCreatedDateTime()),
+                ccFirstHearingFirstMediaRequest.getCreatedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedDateTime()),
+                ccFirstHearingFirstMediaRequest.getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getCreatedById()),
+                ccFirstHearingFirstMediaRequest.getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaRequests().getFirst().getLastModifiedById())
+                ccFirstHearingFirstMediaRequest.getLastModifiedById())
         );
 
 
+        MediaEntity ccFirstHearingFirstMedia = TestUtils.getFirst(cc.getHearings().getFirst().getMedias());
         assertAll(
             "Grouped assertions for Case Document hearings medias",
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getId()),
+                ccFirstHearingFirstMedia.getId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getCreatedDateTime()),
+                ccFirstHearingFirstMedia.getCreatedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getLastModifiedDateTime()),
+                ccFirstHearingFirstMedia.getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getCreatedById()),
+                ccFirstHearingFirstMedia.getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getLastModifiedById()),
+                ccFirstHearingFirstMedia.getLastModifiedById()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getLegacyObjectId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getLegacyObjectId()),
+                ccFirstHearingFirstMedia.getLegacyObjectId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getChannel()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getChannel()),
+                ccFirstHearingFirstMedia.getChannel()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getTotalChannels()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getTotalChannels()),
+                ccFirstHearingFirstMedia.getTotalChannels()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getStart()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getStart()),
+                ccFirstHearingFirstMedia.getStart()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getEnd()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getEnd()),
+                ccFirstHearingFirstMedia.getEnd()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getLegacyVersionLabel()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getLegacyVersionLabel()),
+                ccFirstHearingFirstMedia.getLegacyVersionLabel()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getMediaFile()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getMediaFile()),
+                ccFirstHearingFirstMedia.getMediaFile()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getMediaFormat()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getMediaFormat()),
+                ccFirstHearingFirstMedia.getMediaFormat()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getChecksum()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getChecksum()),
+                ccFirstHearingFirstMedia.getChecksum()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getFileSize()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getFileSize()),
+                ccFirstHearingFirstMedia.getFileSize()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getMediaType()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getMediaType()),
+                ccFirstHearingFirstMedia.getMediaType()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getContentObjectId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getContentObjectId()),
+                ccFirstHearingFirstMedia.getContentObjectId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getClipId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getClipId()),
+                ccFirstHearingFirstMedia.getClipId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getChronicleId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getChronicleId()),
+                ccFirstHearingFirstMedia.getChronicleId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getAntecedentId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getAntecedentId()),
+                ccFirstHearingFirstMedia.getAntecedentId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().isHidden()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().isHidden()),
+                ccFirstHearingFirstMedia.isHidden()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().isDeleted()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().isDeleted()),
+                ccFirstHearingFirstMedia.isDeleted()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getDeletedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getDeletedBy().getId()),
+                ccFirstHearingFirstMedia.getDeletedBy().getId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getDeletedTimestamp()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getDeletedTimestamp()),
+                ccFirstHearingFirstMedia.getDeletedTimestamp()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getMediaStatus()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getMediaStatus()),
+                ccFirstHearingFirstMedia.getMediaStatus()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getRetainUntilTs()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getRetainUntilTs()),
+                ccFirstHearingFirstMedia.getRetainUntilTs()),
 
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getId()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getAnnotationDocument()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getAnnotationDocument().getId()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getAnnotationDocument().getId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getCaseDocument()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getCaseDocument().getId()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getCaseDocument().getId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getMedia()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getMedia().getId()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getMedia().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getTranscriptionDocument()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getTranscriptionDocument().getId()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getTranscriptionDocument().getId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getHiddenBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getHiddenBy().getId()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getHiddenBy().getId()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getHiddenDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getHiddenDateTime()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getHiddenDateTime()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().isMarkedForManualDeletion()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().isMarkedForManualDeletion()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().isMarkedForManualDeletion()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getMarkedForManualDelBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getMarkedForManualDelBy().getId()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getMarkedForManualDelBy().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getMarkedForManualDelDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getMarkedForManualDelDateTime()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getMarkedForManualDelDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getTicketReference()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getTicketReference()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getTicketReference()),
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getComments()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getComments()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getComments()),
             () -> assertThat(
                 doc.getHearings().getFirst().getMedias().getFirst().getAdminActionReasons().getFirst().getObjectHiddenReason()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getMediaList().getFirst().getObjectAdminActions().getFirst().getObjectHiddenReason()),
+                ccFirstHearingFirstMedia.getObjectAdminActions().getFirst().getObjectHiddenReason()),
 
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getExternalObjectDirectories().getFirst().getId()).isNotNull().isEqualTo(
                 mediaEodEntity.getId()),
@@ -462,133 +464,134 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 mediaEodEntity.getLastModifiedDateTime())
         );
 
+        TranscriptionEntity ccFirstHearingFirstTranscription = TestUtils.getFirst(cc.getHearings().getFirst().getTranscriptions());
         assertAll(
             "Grouped assertions for Case Document hearings transcriptions",
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getId()),
+                ccFirstHearingFirstTranscription.getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getCreatedDateTime()),
+                ccFirstHearingFirstTranscription.getCreatedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedDateTime()),
+                ccFirstHearingFirstTranscription.getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getCreatedById()),
+                ccFirstHearingFirstTranscription.getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getLastModifiedById()),
+                ccFirstHearingFirstTranscription.getLastModifiedById()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getLegacyObjectId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getLegacyObjectId()),
+                ccFirstHearingFirstTranscription.getLegacyObjectId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionType()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionType()),
+                ccFirstHearingFirstTranscription.getTranscriptionType()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionUrgency()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionUrgency()),
+                ccFirstHearingFirstTranscription.getTranscriptionUrgency()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionStatus()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionStatus()),
+                ccFirstHearingFirstTranscription.getTranscriptionStatus()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getHearingDate()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getHearingDate()),
+                ccFirstHearingFirstTranscription.getHearingDate()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getLegacyVersionLabel()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getLegacyVersionLabel()),
+                ccFirstHearingFirstTranscription.getLegacyVersionLabel()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getStartTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getStartTime()),
+                ccFirstHearingFirstTranscription.getStartTime()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getEndTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getEndTime()),
+                ccFirstHearingFirstTranscription.getEndTime()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getIsManualTranscription()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getIsManualTranscription()),
+                ccFirstHearingFirstTranscription.getIsManualTranscription()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getHideRequestFromRequestor()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getHideRequestFromRequestor()),
+                ccFirstHearingFirstTranscription.getHideRequestFromRequestor()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getDeleted()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().isDeleted()),
+                ccFirstHearingFirstTranscription.isDeleted()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getChronicleId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getChronicleId()),
+                ccFirstHearingFirstTranscription.getChronicleId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getAntecedentId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getAntecedentId()),
+                ccFirstHearingFirstTranscription.getAntecedentId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getDeletedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getDeletedBy().getId()),
+                ccFirstHearingFirstTranscription.getDeletedBy().getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getDeletedTimestamp()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getDeletedTimestamp()),
+                ccFirstHearingFirstTranscription.getDeletedTimestamp()),
 
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getLastModifiedById()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getLastModifiedById()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getLastModifiedTimestamp()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getLastModifiedTimestamp()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getLastModifiedTimestamp()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getClipId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getClipId()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getClipId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getFileName()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getFileName()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getFileName()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getFileSize()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getFileSize()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getFileSize()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getFileType()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getFileType()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getFileType()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getUploadedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getUploadedBy().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getUploadedBy().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getUploadedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getUploadedDateTime()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getUploadedDateTime()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getChecksum()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getChecksum()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getChecksum()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getContentObjectId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getContentObjectId()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getContentObjectId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().isHidden()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().isHidden()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().isHidden()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getRetainUntilTs()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getRetainUntilTs()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getRetainUntilTs()),
 
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getAnnotationDocument()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
                     0).getAnnotationDocument().getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getCaseDocument()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
                     0).getCaseDocument().getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getMedia()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getMedia().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getMedia().getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getTranscriptionDocument()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
                     0).getTranscriptionDocument().getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getHiddenBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getHiddenBy().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getHiddenBy().getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getHiddenDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getHiddenDateTime()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getHiddenDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).isMarkedForManualDeletion()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
                     0).isMarkedForManualDeletion()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getMarkedForManualDelBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
                     0).getMarkedForManualDelBy().getId()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getMarkedForManualDelDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().get(
                     0).getMarkedForManualDelDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getTicketReference()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getTicketReference()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getTicketReference()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getComments()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getComments()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getComments()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getAdminActions().get(
                 0).getObjectHiddenReason()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getObjectHiddenReason()),
+                ccFirstHearingFirstTranscription.getTranscriptionDocumentEntities().getFirst().getAdminActions().getFirst().getObjectHiddenReason()),
 
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionDocuments().getFirst().getExternalObjectDirectories().get(
@@ -658,94 +661,95 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                     0).getLastModifiedDateTime()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getLastModifiedDateTime()),
 
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflows().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflowEntities().getFirst().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionWorkflowEntities().getFirst().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflows().getFirst().getTranscriptionStatus()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflowEntities().getFirst().getTranscriptionStatus()),
+                ccFirstHearingFirstTranscription.getTranscriptionWorkflowEntities().getFirst().getTranscriptionStatus()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflows().getFirst().getWorkflowActor()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflowEntities().getFirst().getWorkflowActor().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionWorkflowEntities().getFirst().getWorkflowActor().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflows().getFirst().getWorkflowTimestamp()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflowEntities().getFirst().getWorkflowTimestamp()),
+                ccFirstHearingFirstTranscription.getTranscriptionWorkflowEntities().getFirst().getWorkflowTimestamp()),
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflows().getFirst().getTranscriptionComments().get(
                 0).getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionWorkflowEntities().getFirst().getTranscriptionComments().getFirst().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionWorkflowEntities().getFirst().getTranscriptionComments().getFirst().getId()),
 
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionComments().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionCommentEntities().getFirst().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionCommentEntities().getFirst().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionComments().getFirst().getTranscriptionWorkflow()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionCommentEntities().getFirst().getTranscriptionWorkflow().getId()),
+                ccFirstHearingFirstTranscription.getTranscriptionCommentEntities().getFirst().getTranscriptionWorkflow().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionComments().getFirst().getLegacyTranscriptionObjectId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionCommentEntities().getFirst().getLegacyTranscriptionObjectId()),
+                ccFirstHearingFirstTranscription.getTranscriptionCommentEntities().getFirst().getLegacyTranscriptionObjectId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionComments().getFirst().getComment()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionCommentEntities().getFirst().getComment()),
+                ccFirstHearingFirstTranscription.getTranscriptionCommentEntities().getFirst().getComment()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionComments().getFirst().getCommentTimestamp()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionCommentEntities().getFirst().getCommentTimestamp()),
+                ccFirstHearingFirstTranscription.getTranscriptionCommentEntities().getFirst().getCommentTimestamp()),
             () -> assertThat(
                 doc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionComments().getFirst().getAuthorUserId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getTranscriptions().getFirst().getTranscriptionCommentEntities().getFirst().getAuthorUserId())
+                ccFirstHearingFirstTranscription.getTranscriptionCommentEntities().getFirst().getAuthorUserId())
         );
 
+        AnnotationEntity ccFirstHearingFirstAnnotation = TestUtils.getFirst(cc.getHearings().getFirst().getAnnotations());
         assertAll(
             "Grouped assertions for Case Document hearings annotations",
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getId()),
+                ccFirstHearingFirstAnnotation.getId()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getCreatedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getCreatedDateTime()),
+                ccFirstHearingFirstAnnotation.getCreatedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedDateTime()),
+                ccFirstHearingFirstAnnotation.getLastModifiedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getCreatedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getCreatedById()),
+                ccFirstHearingFirstAnnotation.getCreatedById()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getLastModifiedById()),
+                ccFirstHearingFirstAnnotation.getLastModifiedById()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getLegacyObjectId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getLegacyObjectId()),
+                ccFirstHearingFirstAnnotation.getLegacyObjectId()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getLegacyVersionLabel()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getLegacyVersionLabel()),
+                ccFirstHearingFirstAnnotation.getLegacyVersionLabel()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getDeletedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getDeletedBy().getId()),
+                ccFirstHearingFirstAnnotation.getDeletedBy().getId()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().isDeleted()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().isDeleted()),
+                ccFirstHearingFirstAnnotation.isDeleted()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getDeletedTimestamp()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getDeletedTimestamp()),
+                ccFirstHearingFirstAnnotation.getDeletedTimestamp()),
 
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getId()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedById()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getLastModifiedById()),
             () -> assertThat(
                 doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedTimestamp()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getLastModifiedTimestamp()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getLastModifiedTimestamp()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getClipId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getClipId()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getClipId()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getFileName()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getFileName()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getFileName()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getFileSize()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getFileSize()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getFileSize()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getFileType()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getFileType()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getFileType()),
             () -> assertThat(
                 doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getUploadedBy()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getUploadedBy().getId()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getUploadedBy().getId()),
             () -> assertThat(
                 doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getUploadedDateTime()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getUploadedDateTime()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getUploadedDateTime()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getChecksum()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getChecksum()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getChecksum()),
             () -> assertThat(
                 doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getContentObjectId()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getContentObjectId()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getContentObjectId()),
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().isHidden()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().isHidden()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().isHidden()),
             () -> assertThat(
                 doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getRetainUntilTs()).isNotNull().isEqualTo(
-                cc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getRetainUntilTs()),
+                ccFirstHearingFirstAnnotation.getAnnotationDocuments().getFirst().getRetainUntilTs()),
 
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getAnnotationDocuments().getFirst().getExternalObjectDirectories().get(
                 0).getId()).isNotNull().isEqualTo(annotationDocumentEodEntity.getId()),

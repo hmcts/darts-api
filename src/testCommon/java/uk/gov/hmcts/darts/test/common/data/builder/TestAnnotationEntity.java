@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
@@ -21,7 +23,7 @@ public class TestAnnotationEntity extends AnnotationEntity implements DbInsertab
     public TestAnnotationEntity(Integer id, String text, OffsetDateTime timestamp, String legacyObjectId,
                                 String legacyVersionLabel, UserAccountEntity currentOwner, boolean deleted,
                                 UserAccountEntity deletedBy, OffsetDateTime deletedTimestamp,
-                                List<AnnotationDocumentEntity> annotationDocuments, List<HearingEntity> hearingList,
+                                List<AnnotationDocumentEntity> annotationDocuments, Collection<HearingEntity> hearings,
                                 OffsetDateTime createdTimestamp,
                                 OffsetDateTime lastModifiedDateTime, Integer lastModifiedById, Integer createdById) {
         super();
@@ -35,7 +37,7 @@ public class TestAnnotationEntity extends AnnotationEntity implements DbInsertab
         setDeletedBy(deletedBy);
         setDeletedTimestamp(deletedTimestamp);
         setAnnotationDocuments(annotationDocuments != null ? annotationDocuments : new ArrayList<>());
-        setHearingList(hearingList);
+        setHearings(new HashSet<>(hearings));
         setCreatedDateTime(createdTimestamp);
         setCreatedById(lastModifiedById);
         setLastModifiedDateTime(lastModifiedDateTime);

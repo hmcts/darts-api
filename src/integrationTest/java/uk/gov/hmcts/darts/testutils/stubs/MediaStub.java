@@ -134,6 +134,6 @@ public class MediaStub {
     @Transactional
     public Integer getHearingId(Integer id) {
         Optional<MediaEntity> mediaEntity = mediaRepository.findById(id);
-        return mediaEntity.get().getHearingList().getFirst().getId();
+        return mediaEntity.get().getHearing().getId();
     }
 }

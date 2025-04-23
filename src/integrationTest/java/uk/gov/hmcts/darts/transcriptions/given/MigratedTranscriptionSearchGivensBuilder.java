@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static java.util.stream.IntStream.range;
@@ -82,7 +82,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         var courtroom = someMinimalCourtRoom();
         dartsDatabase.save(courtroom.getCourthouse());
         dartsDatabase.save(courtroom);
-        transcription.setHearings(new ArrayList<>());
+        transcription.setHearings(new HashSet<>());
         transcription.setCourtroom(courtroom);
         transcription.setIsCurrent(true);
         dartsDatabase.save(transcription.getCourtCase());
@@ -95,7 +95,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         var courtroom = someMinimalCourtRoom();
         dartsDatabase.save(courtroom.getCourthouse());
         dartsDatabase.save(courtroom);
-        transcription.setHearings(new ArrayList<>());
+        transcription.setHearings(new HashSet<>());
         transcription.setCourtroom(courtroom);
         dartsDatabase.save(transcription.getCourtCase());
         transcription.setIsCurrent(true);

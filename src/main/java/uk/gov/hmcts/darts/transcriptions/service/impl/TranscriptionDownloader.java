@@ -44,7 +44,6 @@ public class TranscriptionDownloader {
                 || transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcription.getId()).isEmpty()
             )
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
-
         // if the document is hidden and now deleted, this will successfully fail and not return the document
         var latestTranscriptionDocument = transcriptionEntity.getTranscriptionDocumentEntities()
             .stream()

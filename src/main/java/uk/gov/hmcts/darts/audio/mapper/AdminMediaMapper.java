@@ -42,7 +42,7 @@ public interface AdminMediaMapper {
         @Mapping(target = "lastModifiedById", source = "lastModifiedById"),
         @Mapping(target = "courthouse", source = "courtroom.courthouse"),
         @Mapping(target = "courtroom", source = "courtroom"),
-        @Mapping(target = "hearings", source = "hearingList"),
+        @Mapping(target = "hearings", source = "hearings"),
         @Mapping(target = "cases", source = "mediaLinkedCaseList"),
         @Mapping(target = "isCurrent", source = "isCurrent")
     })

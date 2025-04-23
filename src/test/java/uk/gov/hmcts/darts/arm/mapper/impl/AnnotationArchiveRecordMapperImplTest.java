@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -54,7 +55,7 @@ class AnnotationArchiveRecordMapperImplTest {
 
         HearingEntity hearing = CommonTestDataUtil.createHearing("1001", LocalDate.of(2020, 10, 10));
 
-        annotationEntity.setHearingList(List.of(hearing));
+        annotationEntity.setHearings(Set.of(hearing));
         annotationEntity.setTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         annotationEntity.setText("annotationText");
         annotationDocument = createAnnotationDocumentEntity(11);

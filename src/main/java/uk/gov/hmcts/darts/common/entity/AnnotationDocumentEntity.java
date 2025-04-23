@@ -109,7 +109,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity
 
 
     public List<CourtCaseEntity> associatedCourtCases() {
-        var cases = annotation.getHearingList().stream().map(HearingEntity::getCourtCase);
+        var cases = annotation.getHearings().stream().map(HearingEntity::getCourtCase);
         return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
     }
 }

@@ -17,8 +17,8 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
-import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -209,7 +209,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
                 var transcriptionDocument = minimalTranscriptionDocument();
                 var transcription = transcriptionDocument.getTranscription();
                 transcription.setIsManualTranscription(true);
-                transcription.setCourtCases(asList(courtCaseEntity));
+                transcription.setCourtCases(Set.of(courtCaseEntity));
                 transcriptionDocument.setHidden(i % 2 == 0);
                 dartsDatabase.save(transcription);
             });

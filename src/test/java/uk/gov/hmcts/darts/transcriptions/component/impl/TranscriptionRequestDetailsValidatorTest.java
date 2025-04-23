@@ -22,8 +22,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -71,10 +70,10 @@ class TranscriptionRequestDetailsValidatorTest {
     @ParameterizedTest
     @NullSource
     @EmptySource
-    void validateShouldThrowExceptionWhenProvidedHearingHasNoAudio(List<MediaEntity> mediaEntityList) {
+    void validateShouldThrowExceptionWhenProvidedHearingHasNoAudio(Set<MediaEntity> mediaEntityList) {
         // Given
         var hearingEntity = new HearingEntity();
-        hearingEntity.setMediaList(mediaEntityList);
+        hearingEntity.setMedias(mediaEntityList);
 
         Mockito.when(hearingsServiceMock.getHearingByIdWithValidation(DUMMY_HEARING_ID))
             .thenReturn(hearingEntity);
@@ -142,7 +141,7 @@ class TranscriptionRequestDetailsValidatorTest {
     void validateShouldSucceedWhenRequestHasHearingIdAndValidDates() {
         // Given
         var hearingEntity = new HearingEntity();
-        hearingEntity.setMediaList(createMediaList());
+        hearingEntity.setMedias(createMedias());
         Mockito.when(hearingsServiceMock.getHearingByIdWithValidation(DUMMY_HEARING_ID))
             .thenReturn(hearingEntity);
 
@@ -154,8 +153,8 @@ class TranscriptionRequestDetailsValidatorTest {
         assertDoesNotThrow(() -> validator.validate(requestDetails));
     }
 
-    private List<MediaEntity> createMediaList() {
-        return Arrays.asList(
+    private Set<MediaEntity> createMedias() {
+        return Set.of(
             createMediaEntity(MEDIA_1_START_TIME, MEDIA_1_END_TIME),
             createMediaEntity(MEDIA_2_START_TIME, MEDIA_2_END_TIME)
         );

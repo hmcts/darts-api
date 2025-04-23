@@ -47,7 +47,7 @@ public class AnnotationStubComposable {
 
         // this is so that annotation becomes managed by JPA and its hearing list is loaded
         var managedAnnotation = annotationRepository.findById(annotation.getId()).get();
-        managedAnnotation.getHearingList().size();
+        managedAnnotation.getHearings().size();
 
         UserAccountEntity testUser = userAccountStubComposable.getIntegrationTestUserAccountEntity();
 

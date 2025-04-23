@@ -20,7 +20,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     @Query("""
            SELECT me
            FROM HearingEntity he
-           JOIN he.mediaList me
+           JOIN he.medias me
            WHERE he.id = :hearingId
            ORDER BY me.start
         """)
@@ -29,7 +29,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     @Query("""
            SELECT me
            FROM HearingEntity he
-           JOIN he.mediaList me
+           JOIN he.medias me
            WHERE he.id = :hearingId
            AND me.isCurrent = true
            ORDER BY me.start
@@ -40,7 +40,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
            SELECT me
            FROM CourtCaseEntity ca
            JOIN ca.hearings he
-           JOIN he.mediaList me
+           JOIN he.medias me
            WHERE ca.id = :caseId
            ORDER BY me.start
         """)
@@ -49,7 +49,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     @Query("""
            SELECT me
            FROM HearingEntity he
-           JOIN he.mediaList me
+           JOIN he.medias me
            WHERE he.id = :hearingId
            AND me.channel = :channel
            AND me.isHidden = false
@@ -77,7 +77,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     @Query("""
         SELECT me
             FROM MediaEntity me
-            JOIN me.hearingList hearing
+            JOIN me.hearings hearing
         WHERE
             (:hearingIds IS NULL OR (:hearingIds IS NOT NULL AND hearing.id in (:hearingIds)))
             AND (cast(:endAt as TIMESTAMP) IS NULL OR (me.end <= :endAt))
@@ -122,7 +122,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     @Query("""
         SELECT distinct media
         FROM MediaEntity media
-        JOIN media.hearingList hearing
+        JOIN media.hearings hearing
         WHERE hearing.courtCase.id = :caseId
         """)
     List<MediaEntity> findByCaseIdWithMediaList(Integer caseId);

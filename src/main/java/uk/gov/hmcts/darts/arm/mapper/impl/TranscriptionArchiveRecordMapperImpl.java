@@ -300,18 +300,20 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
         return transcriptRquest;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private String getHearingDate(TranscriptionDocumentEntity transcriptionDocument) {
         String hearingDate = null;
         if (nonNull(transcriptionDocument.getTranscription().getHearingDate())) {
             hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         } else if (CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getHearings())) {
-            hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearings().getFirst().getHearingDate().atTime(0, 0, 0),
+            hearingDate = OffsetDateTime.of(transcriptionDocument.getTranscription().getHearing().getHearingDate().atTime(0, 0, 0),
                                             ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private static String getCourtroom(TranscriptionDocumentEntity transcriptionDocument) {
         String courtroom = null;
         if (nonNull(transcriptionDocument.getTranscription().getHearing())
@@ -323,6 +325,7 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
         return courtroom;
     }
 
+    @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne
     private static String getCourthouse(TranscriptionDocumentEntity transcriptionDocument) {
         String courthouse = null;
         if (nonNull(transcriptionDocument.getTranscription().getHearing())

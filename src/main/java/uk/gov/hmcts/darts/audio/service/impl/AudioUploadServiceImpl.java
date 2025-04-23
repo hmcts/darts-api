@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -225,7 +226,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @Override
     public void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
-        List<HearingEntity> hearingList = mediaEntity.getHearingList();
+        Set<HearingEntity> hearingList = mediaEntity.getHearings();
         for (HearingEntity hearing : hearingList) {
             mediaEntity.removeHearing(hearing);
         }

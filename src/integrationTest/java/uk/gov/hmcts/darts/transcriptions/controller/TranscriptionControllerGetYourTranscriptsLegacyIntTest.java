@@ -25,8 +25,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
 /**
  * Integration test for the TranscriptionController class, specifically for the "Get Your Transcripts" endpoint for legacy data.
@@ -55,7 +57,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenReverted() throws Exception {
+    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenRevertedToRequested() throws Exception {
         var transcriptionEntity = PersistableFactory.getTranscriptionTestData().minimalTranscription();
 
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionEntity);
@@ -83,6 +85,38 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")))
             .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts").doesNotExist());
+
+    }
+
+    @Test
+    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenRevertedBackToApproved() throws Exception {
+        var transcriptionEntity = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-23T14:00:00Z"), APPROVED, transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-23T15:00:00Z"), WITH_TRANSCRIBER, transcriptionEntity);
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-23T16:00:00Z"), APPROVED, transcriptionEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header("user_id", testUser.getId());
+        var courtCase = transcriptionEntity.getCourtCase();
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(1)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Approved")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts", is("2025-03-23T14:00:00Z")));
 
     }
 
