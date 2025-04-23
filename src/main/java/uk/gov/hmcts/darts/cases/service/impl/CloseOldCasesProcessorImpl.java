@@ -24,7 +24,6 @@ import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
-import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -142,13 +141,9 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             log.info("Closed court case id {}", courtCase.getId());
 
             LocalDate retentionDate = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.DEFAULT);
-
-            PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
-            postRetentionRequest.setComments(CLOSE_CASE_RETENTION_COMMENT);
-            postRetentionRequest.setRetentionDate(retentionDate);
-
-            CaseRetentionEntity retentionEntity = retentionApi.createRetention(postRetentionRequest, courtCase, retentionDate, userAccount,
-                                                                               CaseRetentionStatus.PENDING, retentionConfidenceCategory);
+            CaseRetentionEntity retentionEntity = retentionApi.createRetention(
+                RetentionPolicyEnum.DEFAULT, CLOSE_CASE_RETENTION_COMMENT, courtCase, retentionDate, userAccount,
+                CaseRetentionStatus.PENDING, retentionConfidenceCategory);
             caseRetentionRepository.save(retentionEntity);
             log.info("Set retention date {} and confidence category {} for case id {}", retentionDate, retentionConfidenceCategory,
                      courtCase.getId());
