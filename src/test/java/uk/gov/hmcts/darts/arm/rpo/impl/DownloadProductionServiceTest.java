@@ -91,7 +91,7 @@ class DownloadProductionServiceTest {
                                                          eq(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
