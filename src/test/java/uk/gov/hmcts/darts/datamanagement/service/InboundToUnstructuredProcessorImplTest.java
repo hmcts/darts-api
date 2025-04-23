@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.util.AsyncUtil;
 import java.time.Duration;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
@@ -89,6 +90,10 @@ class InboundToUnstructuredProcessorImplTest {
 
             // when
             inboundToUnstructuredProcessor.processInboundToUnstructured(100);
+
+        } catch (Exception e) {
+            // then
+            assertEquals("Mocked InterruptedException", e.getMessage());
         }
     }
 }

@@ -82,7 +82,6 @@ public class TransformedMediaHelper {
         return blobName;
     }
 
-    @Transactional
     public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequest, String filename,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                Long fileSize) {

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class UnableToReadArmFileException extends Exception {
-    String armFilename;
+    private String armFilename;
 
     public UnableToReadArmFileException(String armFilename, Throwable cause) {
         super(cause);
