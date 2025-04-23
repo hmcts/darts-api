@@ -204,7 +204,7 @@ public class CaseServiceImpl implements CaseService {
 
         return paginationDto.toPaginatedList(
             pageable -> eventRepository.findAllByCaseIdPaginated(caseId, pageable),
-            EventMapper::mapToEvent,
+            event -> event,
             List.of(HearingEntity_.HEARING_DATE, EventEntity_.TIMESTAMP),
             List.of(Sort.Direction.DESC, Sort.Direction.DESC),
             Map.of("hearingDate", "he.hearingDate",

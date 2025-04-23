@@ -628,7 +628,7 @@ class CaseServiceImplTest {
         assertThat(pageArgumentCapturor.getValue()).isNotNull();
 
         Pageable pageable = mock(Pageable.class);
-        Page<EventEntity> page = mock(Page.class);
+        Page<Event> page = mock(Page.class);
         when(eventRepository.findAllByCaseIdPaginated(caseId, pageable)).thenReturn(page);
         assertThat(pageArgumentCapturor.getValue().apply(pageable))
             .isEqualTo(page);
