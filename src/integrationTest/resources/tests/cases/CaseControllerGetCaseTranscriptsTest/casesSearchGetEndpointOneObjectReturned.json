@@ -8,6 +8,7 @@
     "type": "Sentencing remarks",
     "requested_on": "2023-06-20T10:00:00Z",
     "requested_by_name": "integrationtest.user@example.comFullName",
-    "status": "Approved"
+    "status": "Approved",
+    "courtroom": "SOME-COURTROOM"
   }
 ]
