@@ -25,7 +25,7 @@ import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,19 +61,19 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @JoinTable(name = "hearing_judge_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
-    private List<JudgeEntity> judges = new ArrayList<>();
+    private Set<JudgeEntity> judges = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "hearing_media_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
-    private List<MediaEntity> mediaList = new ArrayList<>();
+    private Set<MediaEntity> medias = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARINGS)
-    private List<TranscriptionEntity> transcriptions = new ArrayList<>();
+    private Set<TranscriptionEntity> transcriptions = new HashSet<>();
 
     @OneToMany(mappedBy = MediaRequestEntity_.HEARING)
-    private List<MediaRequestEntity> mediaRequests = new ArrayList<>();
+    private Set<MediaRequestEntity> mediaRequests = new HashSet<>();
 
     @Transient
     private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
@@ -92,11 +92,11 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @JoinTable(name = "hearing_annotation_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "ann_id")})
-    private List<AnnotationEntity> annotations = new ArrayList<>();
+    private Set<AnnotationEntity> annotations = new HashSet<>();
 
     public void addMedia(MediaEntity mediaEntity) {
         if (!containsMedia(mediaEntity)) {
-            mediaList.add(mediaEntity);
+            medias.add(mediaEntity);
         }
     }
 
@@ -111,7 +111,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
         }
     }
 
-    public void addJudges(List<JudgeEntity> judges) {
+    public void addJudges(Collection<JudgeEntity> judges) {
         for (JudgeEntity judge : judges) {
             addJudge(judge, false);
         }
@@ -126,6 +126,6 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     }
 
     public boolean containsMedia(MediaEntity mediaEntity) {
-        return mediaEntity.getId() != null && mediaList.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
+        return mediaEntity.getId() != null && medias.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
     }
 }

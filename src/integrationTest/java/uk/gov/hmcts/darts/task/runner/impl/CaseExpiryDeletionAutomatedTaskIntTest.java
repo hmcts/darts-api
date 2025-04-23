@@ -42,11 +42,13 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.within;
@@ -158,7 +160,7 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
         createMediaForHearing(courtCase1.getHearings().get(0));
         // Link same media to second case
-        linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
+        linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMedias(), courtCase2.getHearings().getFirst(), courtCase2);
 
         caseExpiryDeletionAutomatedTask.preRunTask();
         caseExpiryDeletionAutomatedTask.runTask();
@@ -182,10 +184,10 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
         //Create a second hearing for case 1 to ensure it can handle multiple hearings
         transactionalUtil.executeInTransaction(() -> {
             HearingEntity hearing = createHearing(courtCase1);
-            linkExistingMediaToHearing(hearing.getMediaList(), hearing, courtCase1);
+            linkExistingMediaToHearing(hearing.getMedias(), hearing, courtCase1);
         });
         // Link same media to second case
-        linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
+        linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMedias(), courtCase2.getHearings().getFirst(), courtCase2);
 
         caseExpiryDeletionAutomatedTask.preRunTask();
         caseExpiryDeletionAutomatedTask.runTask();
@@ -443,17 +445,17 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
                                                                                  OffsetDateTime.parse("2024-01-01T00:00:00Z"),
                                                                                  1,
                                                                                  "MP2");
-        hearingEntity.setMediaList(new ArrayList<>(List.of(mediaEntity)));
+        hearingEntity.setMedias(new HashSet<>(List.of(mediaEntity)));
         mediaLinkedCaseStub.createCaseLinkedMedia(mediaEntity, hearingEntity.getCourtCase());
         dartsDatabase.getHearingRepository().save(hearingEntity);
     }
 
-    private void linkExistingMediaToHearing(List<MediaEntity> mediaList, HearingEntity hearingEntity, CourtCaseEntity courtCase) {
+    private void linkExistingMediaToHearing(Collection<MediaEntity> mediaList, HearingEntity hearingEntity, CourtCaseEntity courtCase) {
         transactionalUtil.executeInTransaction(() -> {
-            hearingEntity.setMediaList(mediaList);
+            hearingEntity.setMedias(mediaList.stream().collect(Collectors.toSet()));
             dartsDatabase.getHearingRepository().save(hearingEntity);
 
-            mediaLinkedCaseStub.createCaseLinkedMedia(mediaList.get(0), courtCase);
+            mediaLinkedCaseStub.createCaseLinkedMedia(TestUtils.getFirst(mediaList), courtCase);
         });
     }
 

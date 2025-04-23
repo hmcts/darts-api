@@ -1,6 +1,6 @@
 buildscript {
     dependencies {
-        classpath("org.flywaydb:flyway-database-postgresql:11.7.1")
+        classpath("org.flywaydb:flyway-database-postgresql:11.7.2")
     }
 }
 
@@ -17,7 +17,7 @@ plugins {
     id 'org.sonarqube' version '6.1.0.5360'
     id "io.freefair.lombok" version "8.13.1"
     id "org.openapi.generator" version "7.12.0"
-    id "org.flywaydb.flyway" version "11.7.1"
+    id "org.flywaydb.flyway" version "11.7.2"
     id 'maven-publish'
     id("com.dorongold.task-tree") version "4.0.1"
 }
@@ -399,12 +399,12 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-    implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.5'
+    implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.6'
 
-    implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.4.2'
+    implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.4.3'
 
     implementation group: 'commons-io', name: 'commons-io', version: '2.19.0'
-    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.apache.commons:commons-collections4:4.5.0'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
     implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.0'
 
@@ -436,8 +436,8 @@ dependencies {
     implementation 'com.azure:azure-storage-blob'
 
     implementation group: 'io.rest-assured', name: 'rest-assured'
-    implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.7.1'
-    implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.7.1'
+    implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.7.2'
+    implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.7.2'
     implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.9'
 
     //database
@@ -454,7 +454,7 @@ dependencies {
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
-    implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.4'
+    implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.5'
     implementation 'org.hibernate.orm:hibernate-ant:6.6.13.Final'
     implementation 'org.hibernate:hibernate-spatial:6.6.5.Final'
 
@@ -481,15 +481,15 @@ dependencies {
     }
     testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.2.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
-    testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.4'
-    testImplementation 'org.springframework.security:spring-security-test:6.4.4'
+    testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.5'
+    testImplementation 'org.springframework.security:spring-security-test:6.4.5'
 
     // https://mvnrepository.com/artifact/org.awaitility/awaitility
     testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.3.0'
 
     // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
     testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
-    testImplementation 'io.github.hakky54:logcaptor:2.10.2'
+    testImplementation 'io.github.hakky54:logcaptor:2.11.0'
     testImplementation 'org.testcontainers:testcontainers:1.20.6'
 
     testImplementation group: 'org.jeasy', name: 'easy-random-core', version: '5.0.0'
@@ -522,7 +522,7 @@ dependencyManagement {
             entry 'netty-transport-native-unix-common'
         }
         //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-        dependencySet(group: 'io.projectreactor.netty', version: '1.2.4') {
+        dependencySet(group: 'io.projectreactor.netty', version: '1.2.5') {
             entry 'reactor-netty-http'
             entry 'reactor-netty-core'
         }

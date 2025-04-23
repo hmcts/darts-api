@@ -11,12 +11,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
-import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +47,8 @@ class GetHearingResponseMapperTest {
         assertEquals(response.getHearingDate(), LocalDate.of(2023, 6, 20));
         assertEquals(response.getCaseNumber(), "TestCase");
         assertEquals(response.getCaseId(), 101);
-        assertEquals(response.getJudges(), List.of("Judge_1", "Judge_2"));
+        assertThat(response.getJudges())
+            .containsExactlyInAnyOrder("Judge_1", "Judge_2");
         assertEquals(response.getTranscriptionCount(), 1);
         assertEquals(0, response.getCaseReportingRestrictions().size());
     }
@@ -54,7 +56,7 @@ class GetHearingResponseMapperTest {
     @Test
     void getHearingResponseMapper_shouldNotIncludeNonCurrentTranscriptions() {
         HearingEntity hearing = CommonTestDataUtil.createHearing("TestCase", LocalTime.of(10, 0, 0));
-        hearing.getTranscriptions().getFirst().setIsCurrent(false);
+        TestUtils.getFirst(hearing.getTranscriptions()).setIsCurrent(false);
 
         GetHearingResponse response = getHearingResponseMapper.map(hearing);
         assertEquals(response.getTranscriptionCount(), 0);

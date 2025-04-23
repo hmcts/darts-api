@@ -61,6 +61,7 @@ import uk.gov.hmcts.darts.common.validation.IdRequest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -158,7 +159,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         List<MediaEntity> mediaList = mediaRepository.findMediaByDetails(hearingIds, startAt, endAt);
 
         mediaList.forEach(mediaEntity -> {
-            List<HearingEntity> hearingEntityList = getApplicableMediaHearings(mediaEntity, hearingIds);
+            Collection<HearingEntity> hearingEntityList = getApplicableMediaHearings(mediaEntity, hearingIds);
 
             hearingEntityList.forEach(hearing -> {
                 responseMediaItemList.add(GetAdminMediaResponseMapper.createResponseItem(mediaEntity, hearing));
@@ -250,11 +251,11 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     }
 
 
-    private List<HearingEntity> getApplicableMediaHearings(MediaEntity mediaEntity, List<Integer> hearingsToMatchOn) {
-        List<HearingEntity> hearingEntityList = CollectionUtils.isEmpty(hearingsToMatchOn) ? mediaEntity.getHearingList() : new ArrayList<>();
+    private Collection<HearingEntity> getApplicableMediaHearings(MediaEntity mediaEntity, List<Integer> hearingsToMatchOn) {
+        Collection<HearingEntity> hearingEntityList = CollectionUtils.isEmpty(hearingsToMatchOn) ? mediaEntity.getHearings() : new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(hearingsToMatchOn)) {
-            for (HearingEntity hearingEntity : mediaEntity.getHearingList()) {
+            for (HearingEntity hearingEntity : mediaEntity.getHearings()) {
                 if (hearingsToMatchOn.contains(hearingEntity.getId())) {
                     hearingEntityList.add(hearingEntity);
                 }

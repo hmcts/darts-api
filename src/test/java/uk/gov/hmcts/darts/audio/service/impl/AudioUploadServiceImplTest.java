@@ -182,9 +182,9 @@ class AudioUploadServiceImplTest {
         )).thenReturn(hearing3);
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
-        assertEquals(1, hearing1.getMediaList().size());
-        assertEquals(1, hearing2.getMediaList().size());
-        assertEquals(1, hearing3.getMediaList().size());
+        assertEquals(1, hearing1.getMedias().size());
+        assertEquals(1, hearing2.getMedias().size());
+        assertEquals(1, hearing3.getMedias().size());
     }
 
     @Test
@@ -221,9 +221,9 @@ class AudioUploadServiceImplTest {
         )).thenReturn(hearing3);
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
-        assertEquals(1, hearing1.getMediaList().size());
-        assertEquals(1, hearing2.getMediaList().size());
-        assertEquals(1, hearing3.getMediaList().size());
+        assertEquals(1, hearing1.getMedias().size());
+        assertEquals(1, hearing2.getMedias().size());
+        assertEquals(1, hearing3.getMedias().size());
         assertTrue(hearing2.getHearingIsActual());
     }
 
@@ -449,8 +449,8 @@ class AudioUploadServiceImplTest {
 
         audioService.addAudio(blobId, addAudioMetadataRequest);
         verify(hearingRepository, times(2)).saveAndFlush(any());
-        assertEquals(1, hearing1.getMediaList().size());
-        assertEquals(1, hearing2.getMediaList().size());
+        assertEquals(1, hearing1.getMedias().size());
+        assertEquals(1, hearing2.getMedias().size());
     }
 
     @Test

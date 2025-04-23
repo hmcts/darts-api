@@ -158,17 +158,17 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
                                                                                        .getResponse().getContentAsString(), GetAdminMediaResponseItem[].class);
 
                 String expectedJsonBefore = getExpectedJson(mediaEntityBefore.getId(),
-                                                            mediaEntityBefore.getHearingList().getFirst().getCourtroom().getCourthouse().getId(),
-                                                            mediaEntityBefore.getHearingList().getFirst().getCourtroom().getId(),
-                                                            mediaEntityBefore.getHearingList().getFirst().getCourtCase().getId(),
-                                                            mediaEntityBefore.getHearingList().getFirst().getId(), mediaEntityBefore.getStart(),
+                                                            mediaEntityBefore.getHearing().getCourtroom().getCourthouse().getId(),
+                                                            mediaEntityBefore.getHearing().getCourtroom().getId(),
+                                                            mediaEntityBefore.getHearing().getCourtCase().getId(),
+                                                            mediaEntityBefore.getHearing().getId(), mediaEntityBefore.getStart(),
                                                             mediaEntityBefore.getEnd());
 
                 String expectedJsonNow = getExpectedJson(mediaEntityNow.getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtroom().getCourthouse().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtroom().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtCase().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getId(), mediaEntityNow.getStart(),
+                                                         mediaEntityNow.getHearing().getCourtroom().getCourthouse().getId(),
+                                                         mediaEntityNow.getHearing().getCourtroom().getId(),
+                                                         mediaEntityNow.getHearing().getCourtCase().getId(),
+                                                         mediaEntityNow.getHearing().getId(), mediaEntityNow.getStart(),
                                                          mediaEntityNow.getEnd());
 
                 JSONAssert.assertEquals(expectedJsonBefore, objectMapper.writeValueAsString(responseItems[0]), JSONCompareMode.NON_EXTENSIBLE);
@@ -203,17 +203,17 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
                 MediaEntity mediaEntityAfter = dartsDatabase.getMediaRepository().findById(mediaEntityAfterBefore.getId()).get();
 
                 String expectedJsonNow = getExpectedJson(mediaEntityNow.getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtroom().getCourthouse().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtroom().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtCase().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getId(), mediaEntityNow.getStart(),
+                                                         mediaEntityNow.getHearing().getCourtroom().getCourthouse().getId(),
+                                                         mediaEntityNow.getHearing().getCourtroom().getId(),
+                                                         mediaEntityNow.getHearing().getCourtCase().getId(),
+                                                         mediaEntityNow.getHearing().getId(), mediaEntityNow.getStart(),
                                                          mediaEntityNow.getEnd());
 
                 String expectedJsonAfter = getExpectedJson(mediaEntityAfter.getId(),
-                                                           mediaEntityAfter.getHearingList().getFirst().getCourtroom().getCourthouse().getId(),
-                                                           mediaEntityAfter.getHearingList().getFirst().getCourtroom().getId(),
-                                                           mediaEntityAfter.getHearingList().getFirst().getCourtCase().getId(),
-                                                           mediaEntityAfter.getHearingList().getFirst().getId(), mediaEntityAfter.getStart(),
+                                                           mediaEntityAfter.getHearing().getCourtroom().getCourthouse().getId(),
+                                                           mediaEntityAfter.getHearing().getCourtroom().getId(),
+                                                           mediaEntityAfter.getHearing().getCourtCase().getId(),
+                                                           mediaEntityAfter.getHearing().getId(), mediaEntityAfter.getStart(),
                                                            mediaEntityAfter.getEnd());
                 GetAdminMediaResponseItem[] responseItems = objectMapper.readValue(mvcResult.getResponse()
                                                                                        .getContentAsString(), GetAdminMediaResponseItem[].class);
@@ -251,24 +251,24 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
                 MediaEntity mediaEntityAfter = dartsDatabase.getMediaRepository().findById(preMediaEntityAfter.getId()).get();
 
                 String expectedJsonBefore = getExpectedJson(mediaEntityBefore.getId(),
-                                                            mediaEntityBefore.getHearingList().getFirst().getCourtroom().getCourthouse().getId(),
-                                                            mediaEntityBefore.getHearingList().getFirst().getCourtroom().getId(),
-                                                            mediaEntityBefore.getHearingList().getFirst().getCourtCase().getId(),
-                                                            mediaEntityBefore.getHearingList().getFirst().getId(),
+                                                            mediaEntityBefore.getHearing().getCourtroom().getCourthouse().getId(),
+                                                            mediaEntityBefore.getHearing().getCourtroom().getId(),
+                                                            mediaEntityBefore.getHearing().getCourtCase().getId(),
+                                                            mediaEntityBefore.getHearing().getId(),
                                                             mediaEntityBefore.getStart(), mediaEntityBefore.getEnd());
 
                 String expectedJsonNow = getExpectedJson(mediaEntityNow.getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtroom().getCourthouse().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtroom().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getCourtCase().getId(),
-                                                         mediaEntityNow.getHearingList().getFirst().getId(), mediaEntityNow.getStart(),
+                                                         mediaEntityNow.getHearing().getCourtroom().getCourthouse().getId(),
+                                                         mediaEntityNow.getHearing().getCourtroom().getId(),
+                                                         mediaEntityNow.getHearing().getCourtCase().getId(),
+                                                         mediaEntityNow.getHearing().getId(), mediaEntityNow.getStart(),
                                                          mediaEntityNow.getEnd());
 
                 String expectedJsonAfter = getExpectedJson(mediaEntityAfter.getId(),
-                                                           mediaEntityAfter.getHearingList().getFirst().getCourtroom().getCourthouse().getId(),
-                                                           mediaEntityAfter.getHearingList().getFirst().getCourtroom().getId(),
-                                                           mediaEntityAfter.getHearingList().getFirst().getCourtCase().getId(),
-                                                           mediaEntityAfter.getHearingList().getFirst().getId(), mediaEntityAfter.getStart(),
+                                                           mediaEntityAfter.getHearing().getCourtroom().getCourthouse().getId(),
+                                                           mediaEntityAfter.getHearing().getCourtroom().getId(),
+                                                           mediaEntityAfter.getHearing().getCourtCase().getId(),
+                                                           mediaEntityAfter.getHearing().getId(), mediaEntityAfter.getStart(),
                                                            mediaEntityAfter.getEnd());
                 GetAdminMediaResponseItem[] responseItems = objectMapper.readValue(mvcResult
                                                                                        .getResponse().getContentAsString(), GetAdminMediaResponseItem[].class);
@@ -304,10 +304,10 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
 
                 String actualJson = mvcResult.getResponse().getContentAsString();
                 String expectedJsonNow = getExpectedJsonRoot(mediaEntityNow.getId(),
-                                                             mediaEntityNow.getHearingList().getFirst().getCourtroom().getCourthouse().getId(),
-                                                             mediaEntityNow.getHearingList().getFirst().getCourtroom().getId(),
-                                                             mediaEntityNow.getHearingList().getFirst().getCourtCase().getId(),
-                                                             mediaEntityNow.getHearingList().getFirst().getId(), mediaEntityNow.getStart(),
+                                                             mediaEntityNow.getHearing().getCourtroom().getCourthouse().getId(),
+                                                             mediaEntityNow.getHearing().getCourtroom().getId(),
+                                                             mediaEntityNow.getHearing().getCourtCase().getId(),
+                                                             mediaEntityNow.getHearing().getId(), mediaEntityNow.getStart(),
                                                              mediaEntityNow.getEnd());
 
 

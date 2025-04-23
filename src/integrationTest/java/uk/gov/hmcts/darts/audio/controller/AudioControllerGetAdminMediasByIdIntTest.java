@@ -22,9 +22,8 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
@@ -339,7 +338,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .orElseThrow();
 
         // Create media and link it to hearing
-        var mediaEntity = createAndSaveMediaEntity(List.of(hearingEntity1, hearingEntity2, hearingEntity3), userAccountEntity, false);
+        var mediaEntity = createAndSaveMediaEntity(Set.of(hearingEntity1, hearingEntity2, hearingEntity3), userAccountEntity, false);
 
         // Create media linked case with court case
         databaseStub.createMediaLinkedCase(mediaEntity, hearingEntity1.getCourtCase());
@@ -368,7 +367,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .orElseThrow();
 
         // Create media without hearing
-        var mediaEntity = createAndSaveMediaEntity(new ArrayList<>(), userAccountEntity, false);
+        var mediaEntity = createAndSaveMediaEntity(new HashSet<>(), userAccountEntity, false);
 
         // Create media linked case without court case
         databaseStub.createMediaLinkedCase(
@@ -389,10 +388,10 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     private MediaEntity createAndSaveMediaEntity(HearingEntity hearingEntity, UserAccountEntity userAccountEntity, boolean isDeleted) {
-        return createAndSaveMediaEntity(List.of(hearingEntity), userAccountEntity, isDeleted);
+        return createAndSaveMediaEntity(Set.of(hearingEntity), userAccountEntity, isDeleted);
     }
 
-    private MediaEntity createAndSaveMediaEntity(List<HearingEntity> hearingEntities, UserAccountEntity userAccountEntity, boolean isDeleted) {
+    private MediaEntity createAndSaveMediaEntity(Set<HearingEntity> hearingEntities, UserAccountEntity userAccountEntity, boolean isDeleted) {
         MediaEntity mediaEntity = databaseStub.createMediaEntity(COURTHOUSE_NAME,
                                                                  COURTROOM_NAME,
                                                                  MEDIA_START_AT,
@@ -412,9 +411,9 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         mediaEntity.setLastModifiedBy(userAccountEntity);
         mediaEntity.setIsCurrent(true);
 
-        mediaEntity.setHearingList(hearingEntities);
+        mediaEntity.setHearings(hearingEntities);
         for (HearingEntity hearingEntity : hearingEntities) {
-            hearingEntity.setMediaList(Collections.singletonList(mediaEntity));
+            hearingEntity.setMedias(Set.of(mediaEntity));
             databaseStub.getHearingRepository().save(hearingEntity);
         }
 
@@ -423,7 +422,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     private MediaEntity createAndSaveMediaEntityWithHiddenAndDeletedAndCurrentSetFalse(HearingEntity hearingEntity, UserAccountEntity userAccountEntity) {
-        var mediaEntity = createAndSaveMediaEntity(List.of(hearingEntity), userAccountEntity, false);
+        var mediaEntity = createAndSaveMediaEntity(Set.of(hearingEntity), userAccountEntity, false);
 
         mediaEntity.setHidden(false);
         mediaEntity.setIsCurrent(false);

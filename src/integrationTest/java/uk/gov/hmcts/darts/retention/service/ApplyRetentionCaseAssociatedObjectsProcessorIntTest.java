@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -168,6 +170,10 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
 
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        caseRepository.save(caseA);
+        caseRepository.save(caseB);
+        caseRepository.save(caseC);
     }
 
     @Test
@@ -326,22 +332,29 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         var hear2 = caseA.getHearings().get(1);
         var hear3 = caseB.getHearings().getFirst();
 
-        var tr1 = transcriptionStub.createTranscription(hear1);
-        tr1.addHearing(hear3);
-        transcriptionRepository.save(tr1);
-        var tr2 = transcriptionStub.createTranscription(hear1);
-        tr2.addHearing(hear2);
-        transcriptionRepository.save(tr2);
+        var tr1 = transactionalUtil.executeInTransaction(() -> {
+            TranscriptionEntity transcription = transcriptionStub.createTranscription(hear1);
+            transcription.addHearing(hear3);
+            transcription = transcriptionRepository.save(transcription);
+            transcription.getTranscriptionDocumentEntities().size();//Load the documents
+            return transcription;
+        });
 
-        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID().toString());
-        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID().toString());
-        transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND, UUID.randomUUID().toString());
 
-        var trDoc1 = tr1.getTranscriptionDocumentEntities().getFirst();
+        var tr2 = transactionalUtil.executeInTransaction(() -> {
+            TranscriptionEntity transcription = transcriptionStub.createTranscription(hear1);
+            transcription.addHearing(hear2);
+            transcription = transcriptionRepository.save(transcription);
+            transcription.getTranscriptionDocumentEntities().size();//Load the documents
+            return transcription;
+        });
+
+        TranscriptionDocumentEntity trDoc1 = transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID().toString());
+        TranscriptionDocumentEntity trDoc2 = transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID().toString());
+        TranscriptionDocumentEntity trDoc3 = transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND, UUID.randomUUID().toString());
+
         eodStub.createAndSaveExternalObjectDirectory(trDoc1.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        var trDoc2 = tr1.getTranscriptionDocumentEntities().get(1);
         eodStub.createAndSaveExternalObjectDirectory(trDoc2.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        var trDoc3 = tr2.getTranscriptionDocumentEntities().getFirst();
         eodStub.createAndSaveExternalObjectDirectory(trDoc3.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
 
         // when

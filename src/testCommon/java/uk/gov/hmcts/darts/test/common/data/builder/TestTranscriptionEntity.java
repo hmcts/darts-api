@@ -19,6 +19,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,11 +28,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TestTranscriptionEntity extends TranscriptionEntity implements DbInsertable<TranscriptionEntity> {
     @lombok.Builder
-    public TestTranscriptionEntity(Integer id, List<CourtCaseEntity> courtCases,
+    public TestTranscriptionEntity(Integer id, Collection<CourtCaseEntity> courtCases,
                                    TranscriptionTypeEntity transcriptionType,
                                    CourtroomEntity courtroom,
                                    TranscriptionUrgencyEntity transcriptionUrgency,
-                                   List<HearingEntity> hearings,
+                                   Collection<HearingEntity> hearings,
                                    TranscriptionStatusEntity transcriptionStatus,
                                    String legacyObjectId, UserAccountEntity requestedBy,
                                    LocalDate hearingDate, OffsetDateTime startTime,
@@ -48,11 +50,11 @@ public class TestTranscriptionEntity extends TranscriptionEntity implements DbIn
                                    Integer lastModifiedById) {
         super();
         setId(id);
-        setCourtCases(courtCases);
+        setCourtCases(courtCases != null ? new HashSet<>(courtCases) : new HashSet<>());
         setTranscriptionType(transcriptionType);
         setCourtroom(courtroom);
         setTranscriptionUrgency(transcriptionUrgency);
-        setHearings(hearings != null ? hearings : new ArrayList<>());
+        setHearings(hearings != null ? new HashSet<>(hearings) : new HashSet<>());
         setTranscriptionStatus(transcriptionStatus);
         setLegacyObjectId(legacyObjectId);
         setRequestedBy(requestedBy);

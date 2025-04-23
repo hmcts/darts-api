@@ -80,7 +80,7 @@ class AudioAsyncServiceImplTest {
 
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(0)).saveAndFlush(any());
-        assertEquals(0, hearing.getMediaList().size());
+        assertEquals(0, hearing.getMedias().size());
     }
 
     @Test
@@ -104,7 +104,7 @@ class AudioAsyncServiceImplTest {
 
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
+        assertEquals(1, hearing.getMedias().size());
         verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
     }
 
@@ -130,7 +130,7 @@ class AudioAsyncServiceImplTest {
 
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
+        assertEquals(1, hearing.getMedias().size());
         verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
     }
 
@@ -160,7 +160,7 @@ class AudioAsyncServiceImplTest {
 
         // then
         verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
+        assertEquals(1, hearing.getMedias().size());
         verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
     }
 
@@ -183,7 +183,7 @@ class AudioAsyncServiceImplTest {
 
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
+        assertEquals(1, hearing.getMedias().size());
         assertTrue(hearing.getHearingIsActual());
     }
 
@@ -210,7 +210,7 @@ class AudioAsyncServiceImplTest {
 
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
+        assertEquals(1, hearing.getMedias().size());
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {

@@ -27,9 +27,9 @@ class PostAdminMediaSearchResponseMapperTest {
     @Test
     void multipleEntities() throws IOException {
         MediaEntity media = CommonTestDataUtil.createMedia("caseNumber1");
-        MediaEntity media2 = CommonTestDataUtil.createMedia(media.getHearingList().getFirst());
+        MediaEntity media2 = CommonTestDataUtil.createMedia(media.getHearing());
         media2.setStart(media2.getStart().plusMinutes(1));
-        MediaEntity media3 = CommonTestDataUtil.createMedia(media.getHearingList().getFirst());
+        MediaEntity media3 = CommonTestDataUtil.createMedia(media.getHearing());
         media3.setStart(media3.getStart().plusMinutes(2));
         List<PostAdminMediasSearchResponseItem> responseItemList = PostAdminMediaSearchResponseMapper.createResponseItemList(List.of(media, media2, media3));
 

@@ -190,10 +190,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
-        final ObjectRecordStatusEntity storedStatus = dartsDatabase.getObjectRecordStatusEntity(
-            STORED);
-        final ExternalLocationTypeEntity unstructuredLocation = dartsDatabase.getExternalLocationTypeEntity(
-            UNSTRUCTURED);
+        final ObjectRecordStatusEntity storedStatus = dartsDatabase.getObjectRecordStatusEntity(STORED);
+        final ExternalLocationTypeEntity unstructuredLocation = dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED);
         final String externalLocation = UUID.randomUUID().toString();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
         final String confidenceReason = "reason";
@@ -221,7 +219,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             checksum,
             confidenceScore,
             confidenceReason
-        );
+        ).getTranscription();
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
@@ -285,7 +283,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             checksum,
             confidenceScore,
             confidenceReason
-        );
+        ).getTranscription();
 
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);

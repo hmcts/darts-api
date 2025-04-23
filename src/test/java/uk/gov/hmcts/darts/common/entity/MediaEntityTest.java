@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,10 +107,10 @@ class MediaEntityTest {
     void addHearing_shouldAddHearing_whenMediaDoesNotContainHearing() {
         MediaEntity media = new MediaEntity();
         HearingEntity hearing = mock(HearingEntity.class);
-        assertThat(media.getHearingList()).isEmpty();
+        assertThat(media.getHearings()).isEmpty();
 
         media.addHearing(hearing);
-        assertThat(media.getHearingList())
+        assertThat(media.getHearings())
             .hasSize(1)
             .contains(hearing);
     }
@@ -118,12 +119,12 @@ class MediaEntityTest {
     void addHearing_shouldNotAddHearing_whenMediaAlreadyContainsHearing() {
         MediaEntity media = new MediaEntity();
         HearingEntity hearing = mock(HearingEntity.class);
-        media.setHearingList(List.of(hearing));
-        assertThat(media.getHearingList())
+        media.setHearings(Set.of(hearing));
+        assertThat(media.getHearings())
             .hasSize(1)
             .contains(hearing);
         media.addHearing(hearing);
-        assertThat(media.getHearingList())
+        assertThat(media.getHearings())
             .hasSize(1)
             .contains(hearing);
         verify(hearing, never()).addMedia(any());

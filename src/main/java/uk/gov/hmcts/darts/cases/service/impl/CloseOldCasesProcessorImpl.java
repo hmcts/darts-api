@@ -115,7 +115,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 //look for the last audio and use its recorded date
                 List<MediaEntity> mediaList = new ArrayList<>();
                 for (HearingEntity hearingEntity : courtCase.getHearings()) {
-                    mediaList.addAll(hearingEntity.getMediaList());
+                    mediaList.addAll(hearingEntity.getMedias());
                 }
                 if (mediaList.isEmpty()) {
                     //look for the last hearing date and use that

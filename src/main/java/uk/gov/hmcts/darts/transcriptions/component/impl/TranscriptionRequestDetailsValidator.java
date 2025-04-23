@@ -53,7 +53,7 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
     }
 
     private void checkAudioFileExistsAndTimesValid(TranscriptionRequestDetails transcriptionRequestDetails, HearingEntity hearing) {
-        if (isEmpty(hearing.getMediaList())) {
+        if (isEmpty(hearing.getMedias())) {
             log.error(
                 "Transcription could not be requested. No audio found for hearing id {}",
                 transcriptionRequestDetails.getHearingId()
