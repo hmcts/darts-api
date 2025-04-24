@@ -93,6 +93,7 @@ import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.builder.DbInsertable;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -890,5 +891,14 @@ public class DartsPersistence {
             return entity;
         }
         return repository.findById(entity.getId()).orElseThrow();
+
+    }
+
+    @Transactional
+    public void overrideLastModifiedBy(MediaRequestEntity mediaRequestEntity, OffsetDateTime lastModifiedDate) {
+        entityManager.createNativeQuery("UPDATE media_request SET last_modified_ts = :lastModifiedDate WHERE mer_id = :id")
+            .setParameter("lastModifiedDate", lastModifiedDate)
+            .setParameter("id", mediaRequestEntity.getId())
+            .executeUpdate();
     }
 }

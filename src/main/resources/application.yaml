@@ -337,6 +337,12 @@ darts:
       common-config:
         thread-pool-size: 5
         system-user-email: ${SYSTEM_USER_EMAIL:}
+      media-request-clean-up:
+        system-user-email: system_MediaRequestCleanUpAutomated@hmcts.net
+        max-stuck-duration: 24H
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT30M
       apply-retention:
         system-user-email: system_ApplyRetention@hmcts.net
         lock:
