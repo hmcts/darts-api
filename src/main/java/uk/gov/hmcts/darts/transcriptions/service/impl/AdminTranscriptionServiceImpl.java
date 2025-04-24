@@ -46,10 +46,12 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -129,7 +131,8 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             requestedAtFrom,
             requestedAtTo,
             searchTranscriptionDocumentRequest.getIsManualTranscription(),
-            searchTranscriptionDocumentRequest.getOwner()
+            searchTranscriptionDocumentRequest.getOwner(),
+            !userIdentity.userHasGlobalAccess(Set.of(SUPER_USER)) //Super user can not view hidden
         );
 
         return transcriptionMapper.mapSearchTranscriptionDocumentResults(results);
