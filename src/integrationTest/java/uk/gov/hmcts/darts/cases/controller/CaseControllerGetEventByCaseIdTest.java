@@ -378,7 +378,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                 .queryParam("page_number", "1")
                 .queryParam("page_size", "3")
                 .queryParam("sort_order", "ASC,ASC")
-                .queryParam("sort_by", "event,timestamp");
+                .queryParam("sort_by", "eventName,timestamp");
 
             MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 

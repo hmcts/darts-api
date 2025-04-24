@@ -296,7 +296,7 @@ paths:
                 - "eventId"
                 - "hearingDate"
                 - "timestamp"
-                - "event"
+                - "eventName"
                 - "courtroom"
                 - "text"
         - in: query
