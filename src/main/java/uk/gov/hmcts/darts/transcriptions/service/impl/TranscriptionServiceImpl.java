@@ -294,7 +294,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
     void validateUpdateTranscription(TranscriptionEntity transcription,
-                                             UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection, boolean isAdmin) {
+                                             UpdateTranscriptionRequest updateTranscription, boolean allowSelfApprovalOrRejection, boolean isAdmin) {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
         UserAccountEntity transcriptionUser = userAccountRepository.getReferenceById(transcription.getCreatedById());
