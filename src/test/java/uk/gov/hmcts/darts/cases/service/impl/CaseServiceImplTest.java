@@ -623,7 +623,7 @@ class CaseServiceImplTest {
                 eq(Map.of("eventId", "ee.id",
                           "hearingDate", "he.hearingDate",
                           "timestamp", "ee.timestamp",
-                          "event", "et.eventName",
+                          "eventName", "et.eventName",
                           "courtroom", "ee.courtroom",
                           "text", "ee.eventText"))
             );
