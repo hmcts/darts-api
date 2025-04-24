@@ -15,7 +15,8 @@ import java.time.OffsetDateTime;
 
 @Slf4j
 @Component
-public class MediaRequestCleanUpAutomatedTask extends AbstractLockableAutomatedTask<MediaRequestCleanUpAutomatedTaskConfig>
+public class MediaRequestCleanUpAutomatedTask
+    extends AbstractLockableAutomatedTask<MediaRequestCleanUpAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final CurrentTimeHelper currentTimeHelper;

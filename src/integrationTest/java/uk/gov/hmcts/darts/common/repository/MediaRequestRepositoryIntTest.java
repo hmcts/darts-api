@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
-import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
 
 class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
 
