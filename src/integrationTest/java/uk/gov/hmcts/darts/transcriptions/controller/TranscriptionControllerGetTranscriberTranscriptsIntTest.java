@@ -33,8 +33,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     private static final String ASSIGNED_QUERY_PARAM = "assigned";
     private static final String PLACEHOLDER_URGENCY_ID = "$URGENCY";
     private static final String TODAYS_DATE = "$TODAYS_DATE";
-    private static final String MINUS_89_DAYS = "$MINUS_89_DAYS";
-    private static final String MINUS_90_DAYS = "$MINUS_90_DAYS";
+    private static final String MINUS_30_DAYS = "$MINUS_30_DAYS";
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,14 +45,12 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     private UserAccountRepository userAccountRepository;
 
     String todaysDate;
-    String dateMinus89Days;
-    String dateMinus90Days;
+    String dateMinus30Days;
 
     @BeforeEach
     void beforeAll() {
         todaysDate = todaysDateMinusDaysFormattedForSql(0);
-        dateMinus89Days = todaysDateMinusDaysFormattedForSql(89);
-        dateMinus90Days = todaysDateMinusDaysFormattedForSql(90);
+        dateMinus30Days = todaysDateMinusDaysFormattedForSql(30);
         setupDataWithUrgency();
     }
 
@@ -150,7 +147,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
-        String expectedStateChangeTs = convertSqlDateTimeToLocalDateTime(dateMinus89Days);
+        String expectedStateChangeTs = convertSqlDateTimeToLocalDateTime(dateMinus30Days);
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
@@ -216,7 +213,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
-        String expectedStateChangeTs = convertSqlDateTimeToLocalDateTime(dateMinus89Days);
+        String expectedStateChangeTs = convertSqlDateTimeToLocalDateTime(dateMinus30Days);
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
@@ -257,7 +254,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             )
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
-        String expectedStateChangeTs = convertSqlDateTimeToLocalDateTime(dateMinus89Days);
+        String expectedStateChangeTs = convertSqlDateTimeToLocalDateTime(dateMinus30Days);
         String expectedStateChangeTodayTs = convertSqlDateTimeToLocalDateTime(todaysDate);
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -382,18 +379,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                     VALUES (44, 41, 5, -410, '2023-11-23 16:30:00.0+00');
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (45, 41, 3, -410, '$MINUS_89_DAYS');
-                
-                    -- Add transcript request to test transcriptions do not show after 90 days
-                    INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
-                    created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
-                    is_manual_transcription, hide_request_from_requestor, is_current)
-                    VALUES (602, NULL, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
-                    '2023-11-23 16:26:20.451054+00', -410, -410, $URGENCY, 3, NULL, true, false, true);
-                    INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (602,-1);
-                    INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (602,-1);
-                    INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (100, 602, 1, -410, '$MINUS_90_DAYS');
+                    VALUES (45, 41, 3, -410, '$MINUS_30_DAYS');
                 
                     -- Your work > To do: With Transcriber
                     INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
@@ -404,30 +390,13 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                     INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (81,-1);
                     INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (81,-1);
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (81, 81, 1, -410, '$MINUS_89_DAYS');
+                    VALUES (81, 81, 1, -410, '$MINUS_30_DAYS');
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (82, 81, 2, -410, '$MINUS_89_DAYS');
+                    VALUES (82, 81, 2, -410, '$MINUS_30_DAYS');
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (101, 81, 3, -410, '$MINUS_89_DAYS');
+                    VALUES (101, 81, 3, -410, '$MINUS_30_DAYS');
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (102, 81, 5, -410, '$MINUS_89_DAYS');
-                
-                    -- Add additional Your work transcription to test transcriptions do not show after 90 days
-                    INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
-                    created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
-                    is_manual_transcription, hide_request_from_requestor, is_current)
-                    VALUES (601, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2024-07-01 09:30:00+00', '2024-07-01 17:45:14.938855+00',
-                    '2024-07-01 17:45:51.1549+00', -410, -410, $URGENCY, 5, NULL, true, false, true);
-                    INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (601,-1);
-                    INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (601,-1);
-                    INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (103, 601, 1, -410, '$MINUS_90_DAYS');
-                    INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (104, 601, 2, -410, '$MINUS_90_DAYS');
-                    INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (105, 601, 3, -410, '$MINUS_90_DAYS');
-                    INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (106, 601, 5, -410, '$MINUS_90_DAYS');
+                    VALUES (102, 81, 5, -410, '$MINUS_30_DAYS');
                 
                     -- This transcription would be hidden from Your work > Completed today (transcriber-view?assigned=true)
                     INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
@@ -484,7 +453,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                     VALUES (244, 150, 5, -410, '2023-11-23 16:30:00.0+00');
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (245, 150, 3, -410, '$MINUS_89_DAYS');
+                    VALUES (245, 150, 3, -410, '$MINUS_30_DAYS');
                 
                     INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                     created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
@@ -494,18 +463,17 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                     INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (151,-1);
                     INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (151,-1);
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (246, 151, 1, -410, '$MINUS_89_DAYS');
+                    VALUES (246, 151, 1, -410, '$MINUS_30_DAYS');
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (247, 151, 2, -410, '$MINUS_89_DAYS');
+                    VALUES (247, 151, 2, -410, '$MINUS_30_DAYS');
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (248, 151, 3, -410, '$MINUS_89_DAYS');
+                    VALUES (248, 151, 3, -410, '$MINUS_30_DAYS');
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                    VALUES (249, 151, 5, -410, '$MINUS_89_DAYS');
+                    VALUES (249, 151, 5, -410, '$MINUS_30_DAYS');
                 
                 """.replace(PLACEHOLDER_URGENCY_ID, generatedUrgency ? "1" : "NULL")
                 .replace(TODAYS_DATE, todaysDate)
-                .replace(MINUS_89_DAYS, dateMinus89Days)
-                .replace(MINUS_90_DAYS, dateMinus90Days)
+                .replace(MINUS_30_DAYS, dateMinus30Days)
         );
     }
 

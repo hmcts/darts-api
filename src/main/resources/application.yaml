@@ -328,7 +328,6 @@ darts:
       - "application/msword"
     max-created-by-duration: 30d
     search:
-      date-limit: 90d
       max-result-size: 500
   portal:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
