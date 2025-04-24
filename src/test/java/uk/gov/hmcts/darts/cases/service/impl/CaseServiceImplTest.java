@@ -400,7 +400,6 @@ class CaseServiceImplTest {
         );
 
         List<EventEntity> events = Lists.newArrayList(createEventWith("eventName", "event", hearing, hearingDate));
-
         when(eventRepository.findAllByCaseId(courtCaseEntity.getId())).thenReturn(events);
         when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
         List<Event> result = caseService.getEventsByCaseId(courtCaseEntity.getId());
@@ -621,9 +620,12 @@ class CaseServiceImplTest {
                 dataMapperArgumentCapturor.capture(),
                 eq(List.of(HearingEntity_.HEARING_DATE, EventEntity_.TIMESTAMP)),
                 eq(List.of(Sort.Direction.DESC, Sort.Direction.DESC)),
-                eq(Map.of("hearingDate", "he.hearingDate",
-                          "timestamp", "ee.timestamp",
-                          "eventName", "et.eventName"))
+                eq(Map.of("eventId", "ee.id",
+                          "hearingDate", "he.hearingDate",
+                          "time", "ee.timestamp",
+                          "event", "et.eventName",
+                          "courtroom", "ee.courtroom",
+                          "text", "ee.eventText"))
             );
         assertThat(pageArgumentCapturor.getValue()).isNotNull();
 

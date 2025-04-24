@@ -293,9 +293,12 @@ paths:
             items:
               type: string
               enum:
+                - "eventId"
                 - "hearingDate"
-                - "timestamp"
-                - "eventName"
+                - "time"
+                - "event"
+                - "courtroom"
+                - "text"
         - in: query
           name: sort_order
           schema:
@@ -820,6 +823,9 @@ components:
         text:
           type: string
           example: "Record:New Case"
+        courtroom:
+          type: string
+          example: "1"
     transcripts:
       type: array
       items:

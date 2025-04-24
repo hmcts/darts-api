@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.PaginationTestSupport;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 
@@ -251,6 +252,50 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                     eventEntityList5.get(1).getId(),
                     eventEntityList5.get(0).getId(),
                     eventEntityList3.get(1).getId());
+
+            JSONAssert.assertEquals(
+                """
+                    {
+                      "current_page": 1,
+                      "total_pages": 4,
+                      "page_size": 3,
+                      "total_items": 10,
+                      "data": [
+                        {
+                          "id": 11,
+                          "hearing_id": 3,
+                          "hearing_date": "2020-01-01",
+                          "timestamp": "2020-01-01T14:02:00Z",
+                          "name": "Section 39 of the Children and Young Persons Act 1933",
+                          "is_data_anonymised": false,
+                          "text": "some-event-text-2020-01-01T14:02",
+                          "courtroom": "TESTCOURTROOM"
+                        },
+                        {
+                          "id": 10,
+                          "hearing_id": 3,
+                          "hearing_date": "2020-01-01",
+                          "timestamp": "2020-01-01T14:01:00Z",
+                          "name": "Section 39 of the Children and Young Persons Act 1933",
+                          "is_data_anonymised": false,
+                          "text": "some-event-text-2020-01-01T14:01",
+                          "courtroom": "TESTCOURTROOM"
+                        },
+                        {
+                          "id": 7,
+                          "hearing_id": 3,
+                          "hearing_date": "2020-01-01",
+                          "timestamp": "2020-01-01T13:02:00Z",
+                          "name": "Section 11 of the Contempt of Court Act 1981",
+                          "is_data_anonymised": false,
+                          "text": "some-event-text-2020-01-01T13:02",
+                          "courtroom": "TESTCOURTROOM"
+                        }
+                      ]
+                    }
+                    """,
+                TestUtils.writeAsString(paginatedList),
+                JSONCompareMode.STRICT);
         }
 
         @Test
@@ -307,7 +352,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                 .queryParam("page_number", "1")
                 .queryParam("page_size", "3")
                 .queryParam("sort_order", "DESC")
-                .queryParam("sort_by", "timestamp");
+                .queryParam("sort_by", "time");
 
             MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
@@ -330,7 +375,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                 .queryParam("page_number", "1")
                 .queryParam("page_size", "3")
                 .queryParam("sort_order", "ASC,ASC")
-                .queryParam("sort_by", "eventName,timestamp");
+                .queryParam("sort_by", "event,time");
 
             MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
