@@ -622,7 +622,7 @@ class CaseServiceImplTest {
                 eq(List.of(Sort.Direction.DESC, Sort.Direction.DESC)),
                 eq(Map.of("eventId", "ee.id",
                           "hearingDate", "he.hearingDate",
-                          "time", "ee.timestamp",
+                          "timestamp", "ee.timestamp",
                           "event", "et.eventName",
                           "courtroom", "ee.courtroom",
                           "text", "ee.eventText"))

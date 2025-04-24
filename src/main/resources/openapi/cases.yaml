@@ -295,7 +295,7 @@ paths:
               enum:
                 - "eventId"
                 - "hearingDate"
-                - "time"
+                - "timestamp"
                 - "event"
                 - "courtroom"
                 - "text"
