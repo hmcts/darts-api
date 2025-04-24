@@ -1,6 +1,6 @@
 # ARG must be before all "FROM"s
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-ARG APP_INSIGHTS_AGENT_VERSION=3.7.1
+ARG APP_INSIGHTS_AGENT_VERSION=3.7.2
 
 FROM openjdk:21-jdk-slim-bullseye AS build-env
 WORKDIR /usr/local/bin
