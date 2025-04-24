@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -37,6 +39,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
@@ -46,6 +49,8 @@ import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
+import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -57,9 +62,11 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -77,7 +84,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings({"PMD.LawOfDemeter", "PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.LawOfDemeter", "PMD.CouplingBetweenObjects"})
 class TranscriptionServiceImplTest {
 
     private static final String TEST_COMMENT = "Test comment";
@@ -131,6 +138,10 @@ class TranscriptionServiceImplTest {
     private TranscriptionStatusEntity awaitingAuthorisationTranscriptionStatus;
     private UserAccountEntity testUser;
 
+    @Mock
+    private UserAccountRepository mockUserAccountRepository;
+    @Mock
+    private WorkflowValidator mockWorkflowValidator;
     @Mock
     private TranscriptionEntity mockTranscription;
     @Mock
@@ -690,6 +701,108 @@ class TranscriptionServiceImplTest {
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
         verify(mockTranscriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = TranscriptionStatusEnum.class,
+        mode = EnumSource.Mode.INCLUDE, names = {"REJECTED", "APPROVED"})
+    void validateUpdateTranscription_shouldThrowException_whenRequesterIsSameAsApprover_andStatusIsApprovedOrRejected_andAllowSelfApprovalOrRejectionIsFalse(
+        TranscriptionStatusEnum status) {
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
+        updateTranscription.setTranscriptionStatusId(status.getId());
+
+        UserAccountEntity currentUserAccount = new UserAccountEntity();
+        currentUserAccount.setId(3);
+        when(mockUserIdentity.getUserAccount()).thenReturn(currentUserAccount);
+
+        UserAccountEntity createdByUserAccount = new UserAccountEntity();
+        createdByUserAccount.setId(3);
+        when(mockUserAccountRepository.getReferenceById(3)).thenReturn(createdByUserAccount);
+        transcription.setCreatedBy(createdByUserAccount);
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () ->
+            transcriptionService.validateUpdateTranscription(
+                transcription,
+                updateTranscription, false, false
+            ));
+
+        assertThat(exception.getError()).isEqualTo(TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = TranscriptionStatusEnum.class,
+        mode = EnumSource.Mode.INCLUDE, names = {"REJECTED", "APPROVED"})
+    void validateUpdateTranscription_shouldNotThrowException_whenRequesterIsSameAsApprover_andStatusIsApprovedOrRejected_andAllowSelfApprovalOrRejectionIsTrue(
+        TranscriptionStatusEnum status) {
+        TranscriptionTypeEntity transcriptionTypeEntity = new TranscriptionTypeEntity();
+        transcriptionTypeEntity.setId(1);
+
+        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+        transcriptionStatus.setId(2);
+
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.setIsManualTranscription(true);
+        transcription.setTranscriptionType(transcriptionTypeEntity);
+        transcription.setTranscriptionStatus(transcriptionStatus);
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
+        updateTranscription.setTranscriptionStatusId(status.getId());
+        updateTranscription.setWorkflowComment("some comment");
+
+        UserAccountEntity createdByUserAccount = new UserAccountEntity();
+        createdByUserAccount.setId(3);
+        when(mockUserAccountRepository.getReferenceById(3)).thenReturn(createdByUserAccount);
+        transcription.setCreatedBy(createdByUserAccount);
+
+        when(mockWorkflowValidator.validateChangeToWorkflowStatus(anyBoolean(), any(), any(), any(), anyBoolean()))
+            .thenReturn(true);
+
+        assertDoesNotThrow(
+            () ->
+                transcriptionService.validateUpdateTranscription(
+                    transcription,
+                    updateTranscription, true, false
+                ));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = TranscriptionStatusEnum.class,
+        mode = EnumSource.Mode.EXCLUDE, names = {"REJECTED", "APPROVED"})
+    void validateUpdateTranscription_shouldNotThrowException_whenRequesterIsSameAsApprover_andStatusIsNotApprovedOrRejected_andAllowSelfApprovalOrRejectionIsFalse(
+        TranscriptionStatusEnum status) {
+        TranscriptionTypeEntity transcriptionTypeEntity = new TranscriptionTypeEntity();
+        transcriptionTypeEntity.setId(1);
+
+        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+        transcriptionStatus.setId(2);
+
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.setIsManualTranscription(true);
+        transcription.setTranscriptionType(transcriptionTypeEntity);
+        transcription.setTranscriptionStatus(transcriptionStatus);
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
+        updateTranscription.setTranscriptionStatusId(status.getId());
+        updateTranscription.setWorkflowComment("some comment");
+
+        UserAccountEntity createdByUserAccount = new UserAccountEntity();
+        createdByUserAccount.setId(3);
+        when(mockUserAccountRepository.getReferenceById(3)).thenReturn(createdByUserAccount);
+        transcription.setCreatedBy(createdByUserAccount);
+
+        when(mockWorkflowValidator.validateChangeToWorkflowStatus(anyBoolean(), any(), any(), any(), anyBoolean()))
+            .thenReturn(true);
+
+        UserAccountEntity currentUserAccount = new UserAccountEntity();
+        currentUserAccount.setId(3);
+        when(mockUserIdentity.getUserAccount()).thenReturn(currentUserAccount);
+
+
+        assertDoesNotThrow(
+            () ->
+                transcriptionService.validateUpdateTranscription(
+                    transcription,
+                    updateTranscription, false, false
+                ));
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,
