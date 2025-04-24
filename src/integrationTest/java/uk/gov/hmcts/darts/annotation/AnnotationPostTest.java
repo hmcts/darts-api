@@ -129,7 +129,7 @@ class AnnotationPostTest extends IntegrationBase {
     }
 
     private MockMultipartFile someAnnotationPostBodyFor(HearingEntity hearingEntity) throws JsonProcessingException {
-        var annotation = new Annotation(hearingEntity.getId());
+        var annotation = new Annotation(hearingEntity.getId(),null);
         annotation.setComment("some comment");
 
         return new MockMultipartFile(
@@ -141,7 +141,7 @@ class AnnotationPostTest extends IntegrationBase {
     }
 
     private MockMultipartFile someAnnotationPostBodyNullHearingId() throws JsonProcessingException {
-        var annotation = new Annotation(null);
+        var annotation = new Annotation(null,null);
         return new MockMultipartFile(
             "annotation",
             null,

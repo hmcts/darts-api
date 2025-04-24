@@ -174,7 +174,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         List<Integer> rolledBackTranscriptionsList = new ArrayList<>();
 
         if (userPatch.getEmailAddress() != null && !userPatch.getEmailAddress().equals(userAccountEntity.getEmailAddress())) {
-            userEmailValidator.validate(new User(userPatch.getFullName(), userPatch.getEmailAddress()));
+            userEmailValidator.validate(new User(userPatch.getFullName(), userPatch.getEmailAddress(), null, null, null));
             userAccountEntity.setEmailAddress(userPatch.getEmailAddress());
         }
 

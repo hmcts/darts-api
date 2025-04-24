@@ -254,7 +254,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         }
 
         @Test
-        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderHearingDate_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderHearingDateAsc_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
             throws Exception {
             MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
                 .queryParam("page_number", "1")
@@ -274,6 +274,29 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                     eventEntityList4.get(0).getId(),
                     eventEntityList4.get(1).getId(),
                     eventEntityList2.get(1).getId());
+        }
+
+        @Test
+        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderHearingDateDesc_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+            throws Exception {
+            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
+                .queryParam("page_number", "1")
+                .queryParam("page_size", "3")
+                .queryParam("sort_order", "DESC")
+                .queryParam("sort_by", "hearingDate");
+
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+            PaginatedList<Event> paginatedList = paginationTestSupport.getPaginatedList(mvcResult, Event.class);
+            paginationTestSupport.assertPaginationDetails(paginatedList, 1, 3, 4, 10);
+            assertThat(
+                paginatedList.getData()
+                    .stream().map(Event::getId)
+                    .toList())
+                .contains(
+                    eventEntityList5.get(1).getId(),
+                    eventEntityList5.get(0).getId(),
+                    eventEntityList3.get(1).getId());
         }
 
 

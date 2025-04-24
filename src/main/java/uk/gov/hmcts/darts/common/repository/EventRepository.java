@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.EventSearchResult;
 
@@ -42,13 +43,21 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 
 
     @Query("""
-           SELECT ee
+           SELECT new uk.gov.hmcts.darts.cases.model.Event(
+                  ee.id,
+                  he.id,
+                  he.hearingDate,
+                  ee.timestamp,
+                  ee.eventType.eventName,
+                  ee.isDataAnonymised,
+                  ee.eventText
+           )
            FROM EventEntity ee
            JOIN ee.hearingEntities he
            LEFT JOIN ee.eventType et        
            WHERE he.courtCase.id = :caseId
         """)
-    Page<EventEntity> findAllByCaseIdPaginated(Integer caseId, Pageable pageable);
+    Page<Event> findAllByCaseIdPaginated(Integer caseId, Pageable pageable);
 
 
     @Query("""
