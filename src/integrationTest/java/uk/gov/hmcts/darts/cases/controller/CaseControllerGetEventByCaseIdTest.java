@@ -116,7 +116,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             "timestamp":"2023-01-01T12:01:00Z",
             "name":"Section 11 of the Contempt of Court Act 1981",
             "text":"some-event-text-2023-01-01T12:01",
-            "is_data_anonymised": false
+            "is_data_anonymised": false,
+            "courtroom":"TESTCOURTROOM"
             }]
             """;
 
@@ -166,7 +167,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                 "timestamp": "2023-01-02T12:01:00Z",
                 "name": "Section 11 of the Contempt of Court Act 1981",
                 "is_data_anonymised": false,
-                "text": "some-event-text-2023-01-01T12:01"
+                "text": "some-event-text-2023-01-01T12:01",
+                "courtroom":"TESTCOURTROOM"
               },
               {
                 "id": 1,
@@ -175,7 +177,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                 "timestamp": "2023-01-01T12:01:00Z",
                 "name": "Section 11 of the Contempt of Court Act 1981",
                 "is_data_anonymised": false,
-                "text": "some-event-text-2023-01-01T12:01"
+                "text": "some-event-text-2023-01-01T12:01",
+                "courtroom":"TESTCOURTROOM"
               }
             ]
             """;
