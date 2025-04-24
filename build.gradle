@@ -474,7 +474,7 @@ dependencies {
     // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
     implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.5'
 
-    testImplementation 'org.testcontainers:postgresql:1.20.6'
+    testImplementation 'org.testcontainers:postgresql:1.21.0'
     testImplementation 'com.h2database:h2:2.3.232'
     testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
@@ -493,7 +493,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
     testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
     testImplementation 'io.github.hakky54:logcaptor:2.11.0'
-    testImplementation 'org.testcontainers:testcontainers:1.20.6'
+    testImplementation 'org.testcontainers:testcontainers:1.21.0'
 
     testImplementation group: 'org.jeasy', name: 'easy-random-core', version: '5.0.0'
 
