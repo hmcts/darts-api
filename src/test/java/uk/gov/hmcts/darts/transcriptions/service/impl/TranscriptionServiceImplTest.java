@@ -768,8 +768,7 @@ class TranscriptionServiceImplTest {
     @ParameterizedTest
     @EnumSource(value = TranscriptionStatusEnum.class,
         mode = EnumSource.Mode.EXCLUDE, names = {"REJECTED", "APPROVED"})
-    @SuppressWarnings("LineLength")
-    void validateUpdateTranscription_shouldNotThrowException_whenRequesterIsSameAsApprover_andStatusIsNotApprovedOrRejected_andAllowSelfApprovalOrRejectionIsFalse(
+    void validateUpdateTranscription_shouldNotThrowError_whenRequesterIsSameAsApproverAndStatusIsNotApprovedOrRejected_andAllowSelfApprovalOrRejectionIsFalse(
         TranscriptionStatusEnum status) {
         TranscriptionTypeEntity transcriptionTypeEntity = new TranscriptionTypeEntity();
         transcriptionTypeEntity.setId(1);

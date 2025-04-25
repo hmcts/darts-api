@@ -45,6 +45,11 @@ public enum AudioRequestsApiError implements DartsApiError {
         AudioRequestsErrorCode.INVALID_REQUEST.getValue(),
         HttpStatus.UNPROCESSABLE_ENTITY,
         AudioRequestsTitleErrors.INVALID_REQUEST.toString()
+    ),
+    MAX_HAND_HELD_AUDIO_FILES_EXCEED(
+        AudioRequestsErrorCode.MAX_HAND_HELD_AUDIO_FILES_EXCEED.getValue(),
+        HttpStatus.PAYLOAD_TOO_LARGE,
+        AudioRequestsTitleErrors.MAX_HAND_HELD_AUDIO_FILES_EXCEED.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO_REQUESTS";

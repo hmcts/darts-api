@@ -85,10 +85,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public List<MediaEntity> getMediaByHearingId(Integer hearingId) {
-        List<MediaEntity> mediaEntityList = mediaRepository.findAllCurrentMediaByHearingId(hearingId);
-        return mediaEntityList.stream()
-            .filter(m -> !m.isHidden())
-            .toList();
+        return mediaRepository.findAllCurrentMediaByHearingId(hearingId, false);
     }
 
     @Override
@@ -151,7 +148,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
                 mediaEntitiesForHearing,
-                mediaRequestEntity
+                mediaRequestEntity.getStartTime(),
+                mediaRequestEntity.getEndTime()
             );
 
             if (filteredMediaEntities.isEmpty()) {
@@ -224,16 +222,18 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         }
     }
 
-    List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
-                                                                                     MediaRequestEntity mediaRequestEntity) {
+    @Override
+    public List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
+                                                                                            OffsetDateTime startTime,
+                                                                                            OffsetDateTime endTime) {
         return mediaEntitiesForRequest.stream()
             .filter(media -> nonNull(media.getStart()))
             .filter(media -> nonNull(media.getEnd()))
             // Filter out media where the media start and media end times are the same and not less than a second apart as trim works against seconds
             .filter(media -> !media.getStart().truncatedTo(ChronoUnit.SECONDS).isEqual(media.getEnd().truncatedTo(ChronoUnit.SECONDS)))
             .filter(media -> media.getStart().isBefore(media.getEnd()))
-            .filter(media -> mediaRequestEntity.getStartTime().isBefore(media.getEnd()))
-            .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
+            .filter(media -> startTime.isBefore(media.getEnd()))
+            .filter(media -> media.getStart().isBefore(endTime))
             .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
             .toList();
     }

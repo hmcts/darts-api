@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.util.List;
@@ -30,9 +31,7 @@ public interface MediaRequestService {
 
     MediaRequestEntity updateAudioRequestStatus(MediaRequestEntity mediaRequestEntity, MediaRequestStatus mediaRequestStatus);
 
-    boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType);
-
-    MediaRequestEntity saveAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType);
+    boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType, HearingEntity hearing);
 
     void scheduleMediaRequestPendingNotification(MediaRequestEntity mediaRequest);
 

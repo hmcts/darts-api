@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.service.impl.MediaRequestServiceImpl;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -42,7 +43,7 @@ class MediaRequestServiceTest extends IntegrationBase {
     private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
 
     @Autowired
-    private MediaRequestService mediaRequestService;
+    private MediaRequestServiceImpl mediaRequestService;
 
     @Autowired
     private MediaRequestRepository requestRepository;
@@ -72,7 +73,7 @@ class MediaRequestServiceTest extends IntegrationBase {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
-        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD);
+        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD, hearing);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
@@ -92,7 +93,7 @@ class MediaRequestServiceTest extends IntegrationBase {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
 
-        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD);
+        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD, hearing);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
@@ -114,7 +115,7 @@ class MediaRequestServiceTest extends IntegrationBase {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-25T23:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T01:30:00Z"));
 
-        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD);
+        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD, hearing);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
@@ -135,7 +136,7 @@ class MediaRequestServiceTest extends IntegrationBase {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-10-29T02:15:00Z"));
 
-        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD);
+        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD, hearing);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
@@ -165,7 +166,7 @@ class MediaRequestServiceTest extends IntegrationBase {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
-        mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD);
+        mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD, hearing);
 
         Optional<MediaRequestEntity> mediaRequest = mediaRequestService.getOldestMediaRequestByStatus(OPEN);
 
@@ -211,11 +212,11 @@ class MediaRequestServiceTest extends IntegrationBase {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-25T23:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T01:30:00Z"));
 
-        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD);
+        var request = mediaRequestService.saveAudioRequest(requestDetails, DOWNLOAD, hearing);
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
 
-        var isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails, DOWNLOAD);
+        var isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails, DOWNLOAD, hearing);
         assertTrue(isDuplicateRequest);
     }
 
@@ -225,7 +226,7 @@ class MediaRequestServiceTest extends IntegrationBase {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-26T12:00:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T12:30:00Z"));
 
-        var isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails, DOWNLOAD);
+        var isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails, DOWNLOAD, hearing);
         assertFalse(isDuplicateRequest);
     }
 
