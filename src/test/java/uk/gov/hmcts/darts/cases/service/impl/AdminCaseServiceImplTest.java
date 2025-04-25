@@ -47,11 +47,11 @@ class AdminCaseServiceImplTest {
     @Test
     void getAudiosByCaseId_ShouldReturnPaginatedListWithSingleItem() {
         // given
-        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal();
         courtCaseEntity.setId(222);
 
         MediaEntity mediaEntity = PersistableFactory.getMediaTestData().someMinimal();
-        mediaEntity.setId(123);
+        mediaEntity.setId(111);
 
         MediaLinkedCaseEntity mediaLinkedCase = new MediaLinkedCaseEntity();
         mediaLinkedCase.setCourtCase(courtCaseEntity);
@@ -76,6 +76,8 @@ class AdminCaseServiceImplTest {
 
         // then
         assertThat(results.getTotalItems()).isEqualTo(1);
+        assertThat(results.getData()).hasSize(1);
+        assertThat(results.getData().get(0).getId()).isEqualTo(mediaEntity.getId());
     }
 
     @Test
@@ -125,13 +127,16 @@ class AdminCaseServiceImplTest {
             PaginationDto.toSortDirection(List.of("ASC", "ASC", "ASC", "ASC", "ASC")
             ));
 
-
         // when
         PaginatedList<AdminCaseAudioResponseItem> result = adminCaseService.getAudiosByCaseId(caseId, paginationDto);
 
         // then
         assertThat(result.getTotalItems()).isEqualTo(3);
         assertThat(result.getData()).hasSize(3);
+        assertThat(result.getData().getFirst().getId()).isEqualTo(media1.getId());
+        assertThat(result.getData().get(1).getId()).isEqualTo(media2.getId());
+        assertThat(result.getData().get(2).getId()).isEqualTo(media3.getId());
+
         verify(caseService).getCourtCaseById(caseId);
         verify(mediaRepository).findByCaseIdAndIsCurrentTruePageable(eq(caseId), any(Pageable.class));
     }

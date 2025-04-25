@@ -34,7 +34,7 @@ public class AdminCaseServiceImpl implements AdminCaseService {
             List.of("audioId", "courtroom", "startTime", "endTime", "channel"),
             List.of(Sort.Direction.ASC, Sort.Direction.ASC, Sort.Direction.ASC, Sort.Direction.ASC, Sort.Direction.ASC),
             Map.of("audioId", "med.id",
-                   "courtroom", "cr.name",
+                   "courtroom", "med.courtroom.name",
                    "startTime", "med.start",
                    "endTime", "med.end",
                    "channel", "med.channel")
