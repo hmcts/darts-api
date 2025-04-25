@@ -58,7 +58,7 @@ public enum EventError implements DartsApiError {
     ),
     EVENT_ALREADY_CURRENT(
         EventErrorCode.EVENT_ALREADY_CURRENT.getValue(),
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.CONFLICT,
         EventTitleErrors.EVENT_ALREADY_CURRENT.toString()
     );
 

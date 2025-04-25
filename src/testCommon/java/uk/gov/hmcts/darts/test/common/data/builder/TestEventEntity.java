@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
@@ -56,7 +57,7 @@ public class TestEventEntity extends EventEntity implements DbInsertable<EventEn
         setLogEntry(isLogEntry);
         setChronicleId(chronicleId);
         setAntecedentId(antecedentId);
-        setHearingEntities(nonNull(hearingEntities) ? Set.of(hearingEntities.toArray(new HearingEntity[0])) : Set.of());
+        setHearingEntities(nonNull(hearingEntities) ? new HashSet<>(hearingEntities) : new HashSet<>());
         setEventStatus(eventStatus);
         setIsCurrent(isCurrent);
         setDataAnonymised(isDataAnonymised);
