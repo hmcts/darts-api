@@ -1127,17 +1127,6 @@ public class DartsDatabaseStub {
         );
     }
 
-    @Transactional
-    public EventLinkedCaseEntity createEventLinkedCase(
-        EventEntity eventEntity,
-        CourtCaseEntity courtCase
-    ) {
-        var eventLinkedCaseEntity = new EventLinkedCaseEntity();
-        eventLinkedCaseEntity.setEvent(eventEntity);
-        eventLinkedCaseEntity.setCourtCase(courtCase);
-        return eventLinkedCaseRepository.save(eventLinkedCaseEntity);
-    }
-
     // migrated data - case number and courthouse name are provided
     @Transactional
     public MediaLinkedCaseEntity createMediaLinkedCase(
@@ -1152,6 +1141,17 @@ public class DartsDatabaseStub {
             courthouseName,
             MediaLinkedCaseSourceType.LEGACY
         );
+    }
+
+    @Transactional
+    public EventLinkedCaseEntity createEventLinkedCase(
+        EventEntity eventEntity,
+        CourtCaseEntity courtCase
+    ) {
+        var eventLinkedCaseEntity = new EventLinkedCaseEntity();
+        eventLinkedCaseEntity.setEvent(eventEntity);
+        eventLinkedCaseEntity.setCourtCase(courtCase);
+        return eventLinkedCaseRepository.save(eventLinkedCaseEntity);
     }
 
     @Transactional

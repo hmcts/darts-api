@@ -3,8 +3,6 @@ package uk.gov.hmcts.darts.event.controller;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -55,11 +53,6 @@ class EventsControllerPatchAdminEventByIdIntTest extends IntegrationBase {
     void shouldUpdateEventToIsCurrentTrue_whenPayloadHasThisSetToTrue_andResetAllOtherAssociatedEventIsCurrentToFalse() throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
-
-        var userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
-            .findFirst()
-            .orElseThrow();
-
 
         var eventEntity1 = createAndSaveEventEntity(1234, false);
         var eventEntity2 = createAndSaveEventEntity(1234, true);
@@ -116,10 +109,6 @@ class EventsControllerPatchAdminEventByIdIntTest extends IntegrationBase {
     void shouldReturn409_whenEventIsAlreadyCurrent() throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_ADMIN);
-
-        var userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
-            .findFirst()
-            .orElseThrow();
 
         var eventEntity = createAndSaveEventEntity(123, true);
 
