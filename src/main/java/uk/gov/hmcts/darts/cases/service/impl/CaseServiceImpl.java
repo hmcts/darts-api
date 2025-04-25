@@ -207,9 +207,12 @@ public class CaseServiceImpl implements CaseService {
             event -> event,
             List.of(HearingEntity_.HEARING_DATE, EventEntity_.TIMESTAMP),
             List.of(Sort.Direction.DESC, Sort.Direction.DESC),
-            Map.of("hearingDate", "he.hearingDate",
+            Map.of("eventId", "ee.id",
+                   "hearingDate", "he.hearingDate",
                    "timestamp", "ee.timestamp",
-                   "eventName", "et.eventName")
+                   "eventName", "et.eventName",
+                   "courtroom", "ee.courtroom",
+                   "text", "ee.eventText")
         );
     }
 
