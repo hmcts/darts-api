@@ -480,7 +480,16 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
                    "endTime", "med.end",
                    "channel", "med.channel"));
 
+        // then
         assertEquals(3, adminCaseAudioResponseItemPaginatedList.getTotalItems());
 
+        var results = adminCaseAudioResponseItemPaginatedList.getData();
+        assertThat(results)
+            .extracting(AdminCaseAudioResponseItem::getId)
+            .containsExactly(media3.getId(), media2.getId(), media1.getId());
+
+        assertThat(results)
+            .extracting(AdminCaseAudioResponseItem::getChannel)
+            .containsExactly(3, 2, 1);
     }
 }
