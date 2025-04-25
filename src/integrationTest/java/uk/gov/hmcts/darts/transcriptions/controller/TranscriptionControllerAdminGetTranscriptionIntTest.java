@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -39,14 +41,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -331,6 +336,173 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                                                          OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().isBadRequest())
             .andReturn();
+    }
+
+
+    @Test
+    void documentSearch_superUser_shouldSeeNotHiddenDocuments() throws Exception {
+        List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub.generateTranscriptionEntities(4, 1, false, true, false,
+                                                                                                                                 true);
+
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        when(userIdentity.userHasGlobalAccess(Set.of(SecurityRoleEnum.SUPER_ADMIN))).thenReturn(false);
+        transcriptionDocumentResults.getFirst().setHidden(true);
+        transcriptionDocumentResults.getLast().setHidden(true);
+        dartsDatabase.save(transcriptionDocumentResults.getFirst());
+        dartsDatabase.save(transcriptionDocumentResults.getLast());
+
+        SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
+        request.setCaseNumber(transcriptionDocumentResults.getFirst().getTranscription().getHearing().getCourtCase().getCaseNumber());
+
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_DOCUMENT_SEARCH)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        JSONAssert.assertEquals(
+            """
+                [
+                   {
+                     "transcription_document_id": 3,
+                     "transcription_id": 3,
+                     "courthouse": {
+                       "display_name": "COURT NAME:1POST COURTHOUSE"
+                     },
+                     "hearing": {
+                       "hearing_date": "%DATE_3%"
+                     },
+                     "is_manual_transcription": false,
+                     "is_hidden": false,
+                     "case": {
+                       "id": 1,
+                       "case_number": "%CASE_NUMBER%"
+                     }
+                   },
+                   {
+                     "transcription_document_id": 2,
+                     "transcription_id": 2,
+                     "courthouse": {
+                       "display_name": "COURT NAME:1POST COURTHOUSE"
+                     },
+                     "hearing": {
+                       "hearing_date": "%DATE_2%"
+                     },
+                     "is_manual_transcription": false,
+                     "is_hidden": false,
+                     "case": {
+                       "id": 1,
+                       "case_number": "%CASE_NUMBER%"
+                     }
+                   }
+                 ]
+                """
+                .replace("%CASE_NUMBER%", request.getCaseNumber())
+                .replace("%DATE_2%", OffsetDateTime.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .replace("%DATE_3%", OffsetDateTime.now().plusDays(8).format(DateTimeFormatter.ISO_LOCAL_DATE)),
+            mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void documentSearch_SuperAdmin_shouldSeeHiddenDocuments() throws Exception {
+        List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub.generateTranscriptionEntities(4, 1, false, true, false,
+                                                                                                                                 true);
+
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        when(userIdentity.userHasGlobalAccess(Set.of(SecurityRoleEnum.SUPER_ADMIN))).thenReturn(true);
+        transcriptionDocumentResults.getFirst().setHidden(true);
+        transcriptionDocumentResults.getLast().setHidden(true);
+        dartsDatabase.save(transcriptionDocumentResults.getFirst());
+        dartsDatabase.save(transcriptionDocumentResults.getLast());
+
+        SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
+        request.setCaseNumber(transcriptionDocumentResults.getFirst().getTranscription().getHearing().getCourtCase().getCaseNumber());
+
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_DOCUMENT_SEARCH)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        JSONAssert.assertEquals(
+            """
+                [
+                    {
+                      "transcription_document_id": 4,
+                      "transcription_id": 4,
+                      "courthouse": {
+                        "display_name": "COURT NAME:1POST COURTHOUSE"
+                      },
+                      "hearing": {
+                        "hearing_date": "%DATE_4%"
+                      },
+                      "is_manual_transcription": false,
+                      "is_hidden": true,
+                      "case": {
+                        "id": 1,
+                        "case_number": "%CASE_NUMBER%"
+                      }
+                    },
+                    {
+                      "transcription_document_id": 3,
+                      "transcription_id": 3,
+                      "courthouse": {
+                        "display_name": "COURT NAME:1POST COURTHOUSE"
+                      },
+                      "hearing": {
+                        "hearing_date": "%DATE_3%"
+                      },
+                      "is_manual_transcription": false,
+                      "is_hidden": false,
+                      "case": {
+                        "id": 1,
+                        "case_number": "%CASE_NUMBER%"
+                      }
+                    },
+                    {
+                      "transcription_document_id": 2,
+                      "transcription_id": 2,
+                      "courthouse": {
+                        "display_name": "COURT NAME:1POST COURTHOUSE"
+                      },
+                      "hearing": {
+                        "hearing_date": "%DATE_2%"
+                      },
+                      "is_manual_transcription": false,
+                      "is_hidden": false,
+                      "case": {
+                        "id": 1,
+                        "case_number": "%CASE_NUMBER%"
+                      }
+                    },
+                    {
+                      "transcription_document_id": 1,
+                      "transcription_id": 1,
+                      "courthouse": {
+                        "display_name": "COURT NAME:1POST COURTHOUSE"
+                      },
+                      "hearing": {
+                        "hearing_date": "%DATE_1%"
+                      },
+                      "is_manual_transcription": false,
+                      "is_hidden": true,
+                      "case": {
+                        "id": 1,
+                        "case_number": "%CASE_NUMBER%"
+                      }
+                    }
+                  ]
+                """
+                .replace("%CASE_NUMBER%", request.getCaseNumber())
+                .replace("%DATE_1%", OffsetDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .replace("%DATE_2%", OffsetDateTime.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .replace("%DATE_3%", OffsetDateTime.now().plusDays(8).format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .replace("%DATE_4%", OffsetDateTime.now().plusDays(12).format(DateTimeFormatter.ISO_LOCAL_DATE)),
+            mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test

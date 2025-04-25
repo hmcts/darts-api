@@ -46,7 +46,8 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (t.createdDateTime >= :requestedAtFrom)) AND
              (:owner IS NULL OR (wfa.userFullName ILIKE CONCAT('%', cast(:owner as text), '%'))) AND
              ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR t.createdDateTime <= :requestedAtTo)
-             AND t.isCurrent = true        
+             AND t.isCurrent = true
+             AND (tmd.isHidden = false OR tmd.isHidden = :allowHidden)
           ORDER BY tmd.id DESC
         """)
     @SuppressWarnings({"java:S107", "PMD.UseObjectForClearerAPI"})//Required for JPA
@@ -57,7 +58,8 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
                                                              OffsetDateTime requestedAtFrom,
                                                              OffsetDateTime requestedAtTo,
                                                              Boolean isManualTranscription,
-                                                             String owner);
+                                                             String owner,
+                                                             boolean allowHidden);
 
 
     @Query("""
