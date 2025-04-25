@@ -135,7 +135,7 @@ class AdminHearingServiceTest {
         MediaEntity mediaEntity3 = createMediaEntity(3L, baseTime.plusMinutes(2), baseTime.plusMinutes(4), "file3", 3, 3);
 
 
-        doReturn(List.of(mediaEntity, mediaEntity2, mediaEntity3)).when(mediaRepository).findAllCurrentMediaByHearingId(123,true);
+        doReturn(List.of(mediaEntity, mediaEntity2, mediaEntity3)).when(mediaRepository).findAllCurrentMediaByHearingId(123, true);
         List<HearingsAudiosResponseInner> result = adminHearingsService.getHearingAudios(123);
 
         assertThat(result).hasSize(3);
@@ -145,7 +145,7 @@ class AdminHearingServiceTest {
         assertHearingsAudiosResponseInner(result.get(2), 3L, baseTime.plusMinutes(2), baseTime.plusMinutes(4), "file3", 3, 3);
 
         verify(hearingsService).validateHearingExistsElseError(123);
-        verify(mediaRepository).findAllCurrentMediaByHearingId(123,true);
+        verify(mediaRepository).findAllCurrentMediaByHearingId(123, true);
     }
 
     private void assertHearingsAudiosResponseInner(HearingsAudiosResponseInner hearingsAudiosResponseInner,
