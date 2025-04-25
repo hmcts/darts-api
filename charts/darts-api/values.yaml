@@ -101,7 +101,6 @@ java:
         - name: ArmStorageAccountName
           alias: ARM_STORAGE_ACCOUNT_NAME
   environment:
-    NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: http://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
