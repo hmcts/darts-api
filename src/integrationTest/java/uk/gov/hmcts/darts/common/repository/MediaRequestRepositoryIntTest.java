@@ -28,29 +28,29 @@ class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void cleanupStuckRequests_shouldOnlyUpdateProcessingStatusThatWereLastModifiedAfterTheDateProvided() {
 
-        MediaRequestEntity mediaRequest1ShouldUpdateMoreThen24HOld = PersistableFactory.getMediaRequestTestData().someMinimal();
+        MediaRequestEntity mediaRequest1ShouldUpdateMoreThan24HOld = PersistableFactory.getMediaRequestTestData().someMinimal();
         MediaRequestEntity mediaRequest2ShouldUpdateMoreThen24HOld = PersistableFactory.getMediaRequestTestData().someMinimal();
         MediaRequestEntity mediaRequest3ShouldNotUpdateLessThen24HOld = PersistableFactory.getMediaRequestTestData().someMinimal();
         MediaRequestEntity mediaRequest4ShouldNotUpdateMoreThen24HOldButNotFailedStatus = PersistableFactory.getMediaRequestTestData().someMinimal();
 
-        mediaRequest1ShouldUpdateMoreThen24HOld.setStatus(PROCESSING);
+        mediaRequest1ShouldUpdateMoreThan24HOld.setStatus(PROCESSING);
         mediaRequest2ShouldUpdateMoreThen24HOld.setStatus(PROCESSING);
         mediaRequest3ShouldNotUpdateLessThen24HOld.setStatus(PROCESSING);
         mediaRequest4ShouldNotUpdateMoreThen24HOldButNotFailedStatus.setStatus(COMPLETED);
 
-        dartsPersistence.save(mediaRequest1ShouldUpdateMoreThen24HOld);
+        dartsPersistence.save(mediaRequest1ShouldUpdateMoreThan24HOld);
         dartsPersistence.save(mediaRequest2ShouldUpdateMoreThen24HOld);
         dartsPersistence.save(mediaRequest3ShouldNotUpdateLessThen24HOld);
         dartsPersistence.save(mediaRequest4ShouldNotUpdateMoreThen24HOldButNotFailedStatus);
 
-        dartsPersistence.overrideLastModifiedBy(mediaRequest1ShouldUpdateMoreThen24HOld, OffsetDateTime.now().minusHours(25));
+        dartsPersistence.overrideLastModifiedBy(mediaRequest1ShouldUpdateMoreThan24HOld, OffsetDateTime.now().minusHours(25));
         dartsPersistence.overrideLastModifiedBy(mediaRequest2ShouldUpdateMoreThen24HOld, OffsetDateTime.now().minusHours(25));
         dartsPersistence.overrideLastModifiedBy(mediaRequest3ShouldNotUpdateLessThen24HOld, OffsetDateTime.now().minusHours(23));
         dartsPersistence.overrideLastModifiedBy(mediaRequest4ShouldNotUpdateMoreThen24HOldButNotFailedStatus, OffsetDateTime.now().minusHours(25));
 
         mediaRequestRepository.cleanupStuckRequests(OffsetDateTime.now().minusDays(1));
 
-        assertThat(dartsDatabase.getMediaRequestRepository().findById(mediaRequest1ShouldUpdateMoreThen24HOld.getId()).orElseThrow()
+        assertThat(dartsDatabase.getMediaRequestRepository().findById(mediaRequest1ShouldUpdateMoreThan24HOld.getId()).orElseThrow()
                        .getStatus()).isEqualTo(FAILED);
         assertThat(dartsDatabase.getMediaRequestRepository().findById(mediaRequest2ShouldUpdateMoreThen24HOld.getId()).orElseThrow()
                        .getStatus()).isEqualTo(FAILED);
