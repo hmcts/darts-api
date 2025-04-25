@@ -345,7 +345,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                                                                                                                                  true);
 
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
-        when(userIdentity.userHasGlobalAccess(Set.of(SecurityRoleEnum.SUPER_USER))).thenReturn(true);
+        when(userIdentity.userHasGlobalAccess(Set.of(SecurityRoleEnum.SUPER_ADMIN))).thenReturn(false);
         transcriptionDocumentResults.getFirst().setHidden(true);
         transcriptionDocumentResults.getLast().setHidden(true);
         dartsDatabase.save(transcriptionDocumentResults.getFirst());
@@ -406,12 +406,12 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
     }
 
     @Test
-    void documentSearch_notSuperUser_shouldSeeHiddenDocuments() throws Exception {
+    void documentSearch_SuperAdmin_shouldSeeHiddenDocuments() throws Exception {
         List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub.generateTranscriptionEntities(4, 1, false, true, false,
                                                                                                                                  true);
 
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
-        when(userIdentity.userHasGlobalAccess(Set.of(SecurityRoleEnum.SUPER_USER))).thenReturn(false);
+        when(userIdentity.userHasGlobalAccess(Set.of(SecurityRoleEnum.SUPER_ADMIN))).thenReturn(true);
         transcriptionDocumentResults.getFirst().setHidden(true);
         transcriptionDocumentResults.getLast().setHidden(true);
         dartsDatabase.save(transcriptionDocumentResults.getFirst());

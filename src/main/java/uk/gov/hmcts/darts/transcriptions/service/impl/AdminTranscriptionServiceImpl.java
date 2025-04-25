@@ -51,6 +51,7 @@ import java.util.Set;
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
 @Service
@@ -132,7 +133,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             requestedAtTo,
             searchTranscriptionDocumentRequest.getIsManualTranscription(),
             searchTranscriptionDocumentRequest.getOwner(),
-            !userIdentity.userHasGlobalAccess(Set.of(SUPER_USER)) //Super user can not view hidden
+            userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN)) //Only Super admin can not view hidden
         );
 
         return transcriptionMapper.mapSearchTranscriptionDocumentResults(results);
