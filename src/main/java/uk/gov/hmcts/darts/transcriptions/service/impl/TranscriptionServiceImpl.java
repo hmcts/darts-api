@@ -293,13 +293,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
 
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
-    private void validateUpdateTranscription(TranscriptionEntity transcription,
-                                             UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection, boolean isAdmin) {
+    void validateUpdateTranscription(TranscriptionEntity transcription,
+                                             UpdateTranscriptionRequest updateTranscription, boolean allowSelfApprovalOrRejection, boolean isAdmin) {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
-
         UserAccountEntity transcriptionUser = userAccountRepository.getReferenceById(transcription.getCreatedById());
-        if (!allowSelfApprovalOrRejection && getUserAccount().getUserFullName().equals(transcriptionUser.getUserFullName())
+        if (!allowSelfApprovalOrRejection && getUserAccount().getId().equals(transcriptionUser.getId())
             && (desiredTargetTranscriptionStatus.equals(REJECTED) || desiredTargetTranscriptionStatus.equals(APPROVED))) {
             throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
         }
