@@ -475,7 +475,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
             List.of("audioId", "courtroom", "startTime", "endTime", "channel"),
             List.of(Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC),
             Map.of("audioId", "med.id",
-                   "courtroom", "cr.name",
+                   "courtroom", "med.courtroom.name",
                    "startTime", "med.start",
                    "endTime", "med.end",
                    "channel", "med.channel"));
