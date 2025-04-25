@@ -2,16 +2,34 @@ package uk.gov.hmcts.darts.cases.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import uk.gov.hmcts.darts.cases.controller.CaseController;
+import uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
+import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.util.List;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 class AdminCaseServiceImplTest {
 
     @Mock
@@ -19,30 +37,119 @@ class AdminCaseServiceImplTest {
     @Mock
     private MediaRepository mediaRepository;
 
-    private final int mediaId = 123;
-    private MediaEntity mediaEntity;
-
     private AdminCaseServiceImpl adminCaseService;
 
     @BeforeEach
     void setUp() {
         adminCaseService = new AdminCaseServiceImpl(caseService, mediaRepository);
-
-        mediaEntity = PersistableFactory.getMediaTestData().someMinimal();
-        mediaEntity.setId(mediaId);
     }
 
     @Test
-    void getAudiosByCaseId_WithPagination() {
+    void getAudiosByCaseId_ShouldReturnPaginatedListWithSingleItem() {
+        // given
         CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setId(222);
+
+        MediaEntity mediaEntity = PersistableFactory.getMediaTestData().someMinimal();
+        mediaEntity.setId(123);
 
         MediaLinkedCaseEntity mediaLinkedCase = new MediaLinkedCaseEntity();
         mediaLinkedCase.setCourtCase(courtCaseEntity);
 
         mediaEntity.setMediaLinkedCaseList(List.of(mediaLinkedCase));
-        //doNothing().when(caseService).getCourtCaseById(courtCaseEntity.getId());
-        //when(mediaRepository.findByCaseIdAndIsCurrentTrue(222)).thenReturn(List.of(mediaEntity));
+
+        PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
+            CaseController.AdminCaseIdAudioGetPaginatedResponse::new,
+            1,
+            5,
+            PaginationDto.toSortBy(List.of("audioId", "courtroom", "startTime", "endTime", "channel")),
+            PaginationDto.toSortDirection(List.of("ASC", "ASC", "ASC", "ASC", "ASC"))
+        );
+
+        Page<AdminCaseAudioResponseItem> mediaPage = new PageImpl<>(
+            mapToAdminCaseAudioResponseItems(List.of(mediaEntity)));
+        when(caseService.getCourtCaseById(courtCaseEntity.getId())).thenReturn(courtCaseEntity);
+        when(mediaRepository.findByCaseIdAndIsCurrentTruePageable(eq(courtCaseEntity.getId()), any(Pageable.class))).thenReturn(mediaPage);
+
+
+        // when
+        var results = adminCaseService.getAudiosByCaseId(courtCaseEntity.getId(), paginationDto);
+
+        // then
+        assertThat(results.getTotalItems()).isEqualTo(1);
+    }
+
+    @Test
+    void getAudiosByCaseId_ShouldReturnPaginatedListWithMultipleItems() {
+        // given
+        Integer caseId = 123;
+        PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
+            CaseController.AdminCaseIdAudioGetPaginatedResponse::new,
+            1,
+            3,
+            PaginationDto.toSortBy(List.of("audioId", "courtroom", "startTime", "endTime", "channel")),
+            PaginationDto.toSortDirection(List.of("ASC", "ASC", "ASC", "ASC", "ASC")
+            ));
+
+        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setId(caseId);
+
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        hearing1.setId(1);
+        hearing1.setCourtCase(courtCaseEntity);
+
+        MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
+        media1.setId(111);
+        media1.setChannel(1);
+        media1.setCourtroom(hearing1.getCourtroom());
+        media1.setIsCurrent(true);
+
+        MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
+        media2.setId(222);
+        media2.setChannel(2);
+        media2.setCourtroom(hearing1.getCourtroom());
+        media2.setIsCurrent(true);
+
+        MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
+        media3.setId(333);
+        media3.setChannel(3);
+        media3.setCourtroom(hearing1.getCourtroom());
+        media3.setIsCurrent(true);
+
+        hearing1.addMedia(media1);
+        hearing1.addMedia(media2);
+        hearing1.addMedia(media3);
+
+        Page<AdminCaseAudioResponseItem> mediaPage = new PageImpl<>(
+            mapToAdminCaseAudioResponseItems(List.of(media1, media2, media3)));
+
+        when(caseService.getCourtCaseById(caseId)).thenReturn(courtCaseEntity);
+        when(mediaRepository.findByCaseIdAndIsCurrentTruePageable(eq(caseId), any(Pageable.class))).thenReturn(mediaPage);
+
+        // when
+        PaginatedList<AdminCaseAudioResponseItem> result = adminCaseService.getAudiosByCaseId(caseId, paginationDto);
+
+        // then
+        assertThat(result.getTotalItems()).isEqualTo(3);
+        assertThat(result.getData()).hasSize(3);
+        verify(caseService).getCourtCaseById(caseId);
+        verify(mediaRepository).findByCaseIdAndIsCurrentTruePageable(eq(caseId), any(Pageable.class));
+    }
+
+    private List<AdminCaseAudioResponseItem> mapToAdminCaseAudioResponseItems(List<MediaEntity> mediaEntities) {
+        return emptyIfNull(mediaEntities).stream()
+            .map(this::mapToAdminCaseAudioResponseItem)
+            .toList();
+    }
+
+    private AdminCaseAudioResponseItem mapToAdminCaseAudioResponseItem(MediaEntity mediaEntity) {
+        AdminCaseAudioResponseItem adminCaseAudioResponseItem = new AdminCaseAudioResponseItem();
+        adminCaseAudioResponseItem.setId(mediaEntity.getId());
+        adminCaseAudioResponseItem.channel(mediaEntity.getChannel());
+        adminCaseAudioResponseItem.setStartAt(mediaEntity.getStart());
+        adminCaseAudioResponseItem.setEndAt(mediaEntity.getEnd());
+        adminCaseAudioResponseItem.setCourtroom(mediaEntity.getCourtroom().getName());
+        return adminCaseAudioResponseItem;
 
     }
 }
