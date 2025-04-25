@@ -48,4 +48,24 @@ class EventEntityTest {
         assertThat(eventEntity.getLinkedCases()).containsExactly(caseEntity1, caseEntity2);
     }
 
+    @Test
+    void isCurrent_whenNull_shouldReturnFalse() {
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setIsCurrent(null);
+        assertThat(eventEntity.isCurrent()).isFalse();
+    }
+
+    @Test
+    void isCurrent_whenFalse_shouldReturnFalse() {
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setIsCurrent(false);
+        assertThat(eventEntity.isCurrent()).isFalse();
+    }
+
+    @Test
+    void isCurrent_whenTrue_shouldReturnTrue() {
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setIsCurrent(true);
+        assertThat(eventEntity.isCurrent()).isTrue();
+    }
 }

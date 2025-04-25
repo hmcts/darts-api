@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -13,9 +14,12 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.CaseCommonService;
 import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
 import uk.gov.hmcts.darts.common.service.HearingCommonService;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 @RequiredArgsConstructor
 @Service
@@ -80,38 +84,67 @@ public class HearingCommonServiceImpl implements HearingCommonService {
      * @return true if the media was successfully linked, false otherwise
      */
     @Override
-    public boolean linkAudioToHearings(
+    public boolean linkAudioToHearings(CourtCaseEntity courtCaseEntity, MediaEntity mediaEntity) {
+        return linkEntityToHearing(
+            "media",
+            mediaEntity,
+            courtCaseEntity,
+            mediaEntity.getCourtroom(),
+            mediaEntity.getStart().toLocalDate(),
+            HearingEntity::addMedia
+        );
+    }
+
+    @Override
+    public boolean linkEventToHearings(CourtCaseEntity courtCaseEntity, EventEntity eventEntity) {
+        return linkEntityToHearing(
+            "event",
+            eventEntity,
+            courtCaseEntity,
+            eventEntity.getCourtroom(),
+            eventEntity.getTimestamp().toLocalDate(),
+            HearingEntity::addEvent
+        );
+    }
+
+    <T extends HasIntegerId> boolean linkEntityToHearing(
+        String type,
+        T entity,
         CourtCaseEntity courtCaseEntity,
-        MediaEntity mediaEntity) {
+        CourtroomEntity courtroom,
+        LocalDate hearingDate,
+        BiConsumer<HearingEntity, T> linker
+    ) {
         if (courtCaseEntity == null) {
-            log.info("Can not link hearing to media {} as CourtCaseEntity is null", mediaEntity.getId());
+            log.info("Can not link hearing to {} {} as CourtCaseEntity is null", type, entity.getId());
             return false;
         }
 
         Optional<HearingEntity> hearingEntityOptional = hearingRepository
             .findHearing(
                 courtCaseEntity,
-                mediaEntity.getCourtroom(),
-                mediaEntity.getStart().toLocalDate()
+                courtroom,
+                hearingDate
             );
 
         if (hearingEntityOptional.isEmpty()) {
-            log.info("Can not link hearing to media {} as no hearings could be found for cas_id {}, ctr_id {}, and Date {}",
+            log.info("Can not link hearing to {} {} as no hearings could be found for cas_id {}, ctr_id {}, and Date {}",
+                     type,
                      courtCaseEntity.getId(),
-                     mediaEntity.getCourtroom().getId(),
-                     mediaEntity.getStart().toLocalDate()
+                     courtroom.getId(),
+                     hearingDate
             );
             return false;
         }
         HearingEntity hearing = hearingEntityOptional.get();
-        log.debug("Linking media {} to hearing {}",
-                  mediaEntity.getId(),
+        log.debug("Linking {} {} to hearing {}",
+                  type,
+                  entity.getId(),
                   hearing.getId()
         );
-        hearing.addMedia(mediaEntity);
+        linker.accept(hearing, entity);
         hearing.setHearingIsActual(true);
         hearingRepository.saveAndFlush(hearing);
         return true;
     }
-
 }
