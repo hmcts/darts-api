@@ -10,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
@@ -81,6 +84,14 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
         assertMediaIsCurrentStatus(mediaEntity2.getId(), false);
         assertMediaIsCurrentStatus(mediaEntity3.getId(), false);
         assertMediaIsCurrentStatus(mediaEntity4.getId(), true);//Should be true as different chronicleId
+
+        List<AuditEntity> auditEntityList = dartsDatabase.getAuditRepository().findAll();
+
+        assertThat(auditEntityList).hasSize(1);
+        AuditEntity auditEntity = auditEntityList.get(0);
+        assertThat(auditEntity.getAuditActivity().getId()).isEqualTo(AuditActivity.CURRENT_MEDIA_VERSION_UPDATED.getId());
+        assertThat(auditEntity.getAdditionalData()).isEqualTo("med_id: 1 was made current replacing med_id: [2]");
+
     }
 
     @Test
