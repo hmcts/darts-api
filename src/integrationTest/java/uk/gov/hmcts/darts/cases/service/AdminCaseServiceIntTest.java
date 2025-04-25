@@ -35,9 +35,6 @@ class AdminCaseServiceIntTest extends PostgresIntegrationBase {
 
         courtCaseEntity1 = hearingEntity1.getCourtCase();
 
-        var minimalHearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
-        var hearingEntity2 = dartsDatabase.save(minimalHearing2);
-
         var media1 = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearingEntity1.getCourtroom(),
@@ -90,6 +87,9 @@ class AdminCaseServiceIntTest extends PostgresIntegrationBase {
         hearingEntity1.addMedia(currentMediaEntity4);
         hearingEntity1.addMedia(mediaEntityNotCurrent1);
         dartsDatabase.save(hearingEntity1);
+
+        var minimalHearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        var hearingEntity2 = dartsDatabase.save(minimalHearing2);
 
         var media6 = dartsPersistence.save(
             getMediaTestData().createMediaWith(
