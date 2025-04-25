@@ -82,13 +82,6 @@ class AdminCaseServiceImplTest {
     void getAudiosByCaseId_ShouldReturnPaginatedListWithMultipleItems() {
         // given
         Integer caseId = 123;
-        PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
-            CaseController.AdminCaseIdAudioGetPaginatedResponse::new,
-            1,
-            3,
-            PaginationDto.toSortBy(List.of("audioId", "courtroom", "startTime", "endTime", "channel")),
-            PaginationDto.toSortDirection(List.of("ASC", "ASC", "ASC", "ASC", "ASC")
-            ));
 
         CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setId(caseId);
@@ -124,6 +117,14 @@ class AdminCaseServiceImplTest {
 
         when(caseService.getCourtCaseById(caseId)).thenReturn(courtCaseEntity);
         when(mediaRepository.findByCaseIdAndIsCurrentTruePageable(eq(caseId), any(Pageable.class))).thenReturn(mediaPage);
+        PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
+            CaseController.AdminCaseIdAudioGetPaginatedResponse::new,
+            1,
+            3,
+            PaginationDto.toSortBy(List.of("audioId", "courtroom", "startTime", "endTime", "channel")),
+            PaginationDto.toSortDirection(List.of("ASC", "ASC", "ASC", "ASC", "ASC")
+            ));
+
 
         // when
         PaginatedList<AdminCaseAudioResponseItem> result = adminCaseService.getAudiosByCaseId(caseId, paginationDto);
