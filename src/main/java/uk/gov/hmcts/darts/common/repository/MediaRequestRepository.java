@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.stereotype.Repository;
@@ -36,7 +37,7 @@ public interface MediaRequestRepository extends
           ORDER BY mr2.last_modified_ts ASC
           LIMIT 1
           )
-         
+        
         RETURNING *
         """, nativeQuery = true)
     MediaRequestEntity updateAndRetrieveMediaRequestToProcessing(int userModifiedId, List<Integer> mediaRequestIdsToIgnore);
@@ -65,4 +66,14 @@ public interface MediaRequestRepository extends
                                                                 AudioRequestType requestType, List<MediaRequestStatus> requestStatuses);
 
 
+    @Modifying
+    @Query("""
+        UPDATE MediaRequestEntity  mr
+        SET mr.status = MediaRequestStatus.FAILED
+        WHERE mr.status = MediaRequestStatus.PROCESSING
+        AND mr.lastModifiedDateTime < :maxStuckTime
+        """
+    )
+    @Transactional
+    void cleanupStuckRequests(OffsetDateTime maxStuckTime);
 }

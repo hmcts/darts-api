@@ -30,6 +30,7 @@ class EventLoggerServiceImplTest {
     public static void setupLogCaptor() {
         logCaptor = LogCaptor.forClass(EventLoggerServiceImpl.class);
         logCaptor.setLogLevelToInfo();
+        logCaptor.clearLogs();
     }
 
     @AfterEach
