@@ -71,7 +71,6 @@ class AdminCaseServiceImplTest {
         when(caseService.getCourtCaseById(courtCaseEntity.getId())).thenReturn(courtCaseEntity);
         when(mediaRepository.findByCaseIdAndIsCurrentTruePageable(eq(courtCaseEntity.getId()), any(Pageable.class))).thenReturn(mediaPage);
 
-
         // when
         var results = adminCaseService.getAudiosByCaseId(courtCaseEntity.getId(), paginationDto);
 
