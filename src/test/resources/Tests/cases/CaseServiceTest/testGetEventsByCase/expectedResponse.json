@@ -6,6 +6,7 @@
     "timestamp": "2024-07-01T12:00:00Z",
     "name": "eventName",
     "text": "event",
-    "is_data_anonymised": false
+    "is_data_anonymised": false,
+    "courtroom": "1",
   }
 ]
