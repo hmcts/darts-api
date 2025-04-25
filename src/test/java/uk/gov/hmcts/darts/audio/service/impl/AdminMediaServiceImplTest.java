@@ -49,6 +49,9 @@ import uk.gov.hmcts.darts.audio.model.PatchAdminMediasByIdRequest;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -96,7 +99,10 @@ class AdminMediaServiceImplTest {
     @InjectMocks
     @Spy
     private AdminMediaServiceImpl mediaRequestService;
-
+    @Mock
+    private AuditApi auditApi;
+    @Mock
+    private UserIdentity userIdentity;
     @Mock
     private MediaRepository mediaRepository;
     @Mock
@@ -900,6 +906,7 @@ class AdminMediaServiceImplTest {
             PatchAdminMediasByIdRequest request = new PatchAdminMediasByIdRequest(isCurrent);
             DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.patchMediasById(1, request));
             assertThat(exception.getError()).isEqualTo(CommonApiError.INVALID_REQUEST);
+            verifyNoInteractions(auditApi);
         }
 
         @Test
@@ -910,10 +917,14 @@ class AdminMediaServiceImplTest {
             when(media.isCurrent()).thenReturn(true);
             DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.patchMediasById(123, request));
             assertThat(exception.getError()).isEqualTo(AudioApiError.MEDIA_ALREADY_CURRENT);
+            verifyNoInteractions(auditApi);
         }
 
         @Test
         void shouldUpdateMediaIsCurrent_whenMediaIsNotCurrent() {
+            UserAccountEntity currentUser = new UserAccountEntity();
+            when(userIdentity.getUserAccount()).thenReturn(currentUser);
+
             final String chronicleId = "someChronicleId";
             MediaEntity media = new MediaEntity();
             media.setIsCurrent(false);
@@ -964,6 +975,13 @@ class AdminMediaServiceImplTest {
 
             assertThat(media.isCurrent()).isEqualTo(true);
             verifyNoMoreInteractions(audioUploadService, hearingCommonService);
+
+            verify(auditApi)
+                .record(
+                    AuditActivity.CURRENT_MEDIA_VERSION_UPDATED,
+                    currentUser,
+                    "med_id: 123 was made current replacing med_id: [1, 2]"
+                );
         }
     }
 
