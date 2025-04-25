@@ -40,7 +40,7 @@ spring:
             authorization-grant-type: authorization_code
             response-type: code
             response-mode: form_post
-            prompt: login
+            prompt:
             issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI:https://hmctsstgextid.b2clogin.com}/${AAD_B2C_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0/
             claims: emails
             provider: external-azure-ad-provider
@@ -328,7 +328,6 @@ darts:
       - "application/msword"
     max-created-by-duration: 30d
     search:
-      date-limit: 90d
       max-result-size: 500
   portal:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}

@@ -69,6 +69,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CURRENT_MEDIA_VERSION_UPDATED;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -350,10 +352,11 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         }
         List<MediaEntity> mediaEntities = mediaRepository.findAllByChronicleId(mediaEntityToUpdate.getChronicleId());
 
-        mediaEntities.stream()
+        List<MediaEntity> currentMediaEntities = mediaEntities.stream()
             .filter(MediaEntity::isCurrent) //No need to process is_current = false. These are already delinked
             .filter(mediaEntity -> !id.equals(mediaEntity.getId())) //No need to process the media entity we are updating
-            .forEach(audioUploadService::deleteMediaLinkingAndSetCurrentFalse);
+            .peek(audioUploadService::deleteMediaLinkingAndSetCurrentFalse)
+            .toList();
 
         mediaEntityToUpdate.setIsCurrent(true);
         mediaRepository.save(mediaEntityToUpdate);
@@ -362,6 +365,13 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             .forEach(mediaLinkedCaseEntity -> hearingCommonService.linkAudioToHearings(
                 mediaLinkedCaseEntity.getCourtCase(),
                 mediaEntityToUpdate
+            ));
+        auditApi.record(
+            CURRENT_MEDIA_VERSION_UPDATED,
+            userIdentity.getUserAccount(),
+            String.format("med_id: %s was made current replacing med_id: %s",
+                          String.valueOf(id),
+                          currentMediaEntities.stream().map(MediaEntity::getId).collect(Collectors.toList())
             ));
     }
 

@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.PaginationTestSupport;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 
@@ -115,7 +116,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             "timestamp":"2023-01-01T12:01:00Z",
             "name":"Section 11 of the Contempt of Court Act 1981",
             "text":"some-event-text-2023-01-01T12:01",
-            "is_data_anonymised": false
+            "is_data_anonymised": false,
+            "courtroom":"TESTCOURTROOM"
             }]
             """;
 
@@ -165,7 +167,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                 "timestamp": "2023-01-02T12:01:00Z",
                 "name": "Section 11 of the Contempt of Court Act 1981",
                 "is_data_anonymised": false,
-                "text": "some-event-text-2023-01-01T12:01"
+                "text": "some-event-text-2023-01-01T12:01",
+                "courtroom":"TESTCOURTROOM"
               },
               {
                 "id": 1,
@@ -174,7 +177,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                 "timestamp": "2023-01-01T12:01:00Z",
                 "name": "Section 11 of the Contempt of Court Act 1981",
                 "is_data_anonymised": false,
-                "text": "some-event-text-2023-01-01T12:01"
+                "text": "some-event-text-2023-01-01T12:01",
+                "courtroom":"TESTCOURTROOM"
               }
             ]
             """;
@@ -251,6 +255,50 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                     eventEntityList5.get(1).getId(),
                     eventEntityList5.get(0).getId(),
                     eventEntityList3.get(1).getId());
+
+            JSONAssert.assertEquals(
+                """
+                    {
+                      "current_page": 1,
+                      "total_pages": 4,
+                      "page_size": 3,
+                      "total_items": 10,
+                      "data": [
+                        {
+                          "id": 11,
+                          "hearing_id": 3,
+                          "hearing_date": "2020-01-01",
+                          "timestamp": "2020-01-01T14:02:00Z",
+                          "name": "Section 39 of the Children and Young Persons Act 1933",
+                          "is_data_anonymised": false,
+                          "text": "some-event-text-2020-01-01T14:02",
+                          "courtroom": "TESTCOURTROOM"
+                        },
+                        {
+                          "id": 10,
+                          "hearing_id": 3,
+                          "hearing_date": "2020-01-01",
+                          "timestamp": "2020-01-01T14:01:00Z",
+                          "name": "Section 39 of the Children and Young Persons Act 1933",
+                          "is_data_anonymised": false,
+                          "text": "some-event-text-2020-01-01T14:01",
+                          "courtroom": "TESTCOURTROOM"
+                        },
+                        {
+                          "id": 7,
+                          "hearing_id": 3,
+                          "hearing_date": "2020-01-01",
+                          "timestamp": "2020-01-01T13:02:00Z",
+                          "name": "Section 11 of the Contempt of Court Act 1981",
+                          "is_data_anonymised": false,
+                          "text": "some-event-text-2020-01-01T13:02",
+                          "courtroom": "TESTCOURTROOM"
+                        }
+                      ]
+                    }
+                    """,
+                TestUtils.writeAsString(paginatedList),
+                JSONCompareMode.STRICT);
         }
 
         @Test

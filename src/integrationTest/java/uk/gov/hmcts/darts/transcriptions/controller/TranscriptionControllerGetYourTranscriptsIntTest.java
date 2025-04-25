@@ -224,27 +224,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    void getYourTranscriptsApproverOver90DaysShouldNotReturn() throws Exception {
-        var courtCase = authorisationStub.getCourtCaseEntity();
-        dartsDatabase.getTranscriptionStub()
-            .createAndSaveAwaitingAuthorisationTranscription(
-                systemUser,
-                courtCase,
-                authorisationStub.getHearingEntity(), MINUS_90_DAYS
-            );
-
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
-            .header(
-                "user_id",
-                testUser.getId()
-            );
-
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
-    }
-
-    @Test
     void getYourTranscriptsRequesterShouldNotReturnHidden() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         var hearing = authorisationStub.getHearingEntity();

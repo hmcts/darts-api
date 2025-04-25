@@ -38,6 +38,7 @@ public class EventMapper {
         event.setName(eventEntity.getEventType().getEventName());
         event.setText(eventEntity.getEventText());
         event.isDataAnonymised(eventEntity.isDataAnonymised());
+        event.courtroom(eventEntity.getCourtroom().getName());
 
         return event;
     }
