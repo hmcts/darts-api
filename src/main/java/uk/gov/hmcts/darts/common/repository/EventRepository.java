@@ -50,7 +50,8 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
                   ee.timestamp,
                   ee.eventType.eventName,
                   ee.isDataAnonymised,
-                  ee.eventText
+                  ee.eventText,
+                  ee.courtroom.name
            )
            FROM EventEntity ee
            JOIN ee.hearingEntities he

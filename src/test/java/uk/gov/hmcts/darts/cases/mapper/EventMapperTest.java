@@ -25,6 +25,7 @@ class EventMapperTest {
         OffsetDateTime hearingDate = OffsetDateTime.parse("2024-07-01T12:00Z");
         HearingEntity hearing = CommonTestDataUtil.createHearing("case1", hearingDate.toLocalDate());
         EventEntity eventEntity = createEventWith("eventName", "event text", hearing, hearingDate);
+        eventEntity.setCourtroom(CommonTestDataUtil.createCourtroom("some-courtroom"));
         if (isAnonymised) {
             eventEntity.setDataAnonymised(true);
         }
@@ -38,7 +39,7 @@ class EventMapperTest {
         assertEquals("event text", event.getText());
         assertEquals(hearingDate, event.getTimestamp());
         assertEquals(isAnonymised, event.getIsDataAnonymised());
-
+        assertEquals("SOME-COURTROOM", event.getCourtroom());
     }
 
     @Test
