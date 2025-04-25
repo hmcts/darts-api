@@ -132,7 +132,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             requestedAtTo,
             searchTranscriptionDocumentRequest.getIsManualTranscription(),
             searchTranscriptionDocumentRequest.getOwner(),
-            userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN)) //Only Super admin can not view hidden
+            userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN)) //Only Super admin can view hidden items
         );
 
         return transcriptionMapper.mapSearchTranscriptionDocumentResults(results);
