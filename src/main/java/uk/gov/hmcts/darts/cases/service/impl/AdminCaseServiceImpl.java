@@ -32,7 +32,7 @@ public class AdminCaseServiceImpl implements AdminCaseService {
             pageable -> mediaRepository.findByCaseIdAndIsCurrentTruePageable(caseId, pageable),
             t -> t,
             List.of("audioId", "courtroom", "startTime", "endTime", "channel"),
-            List.of(Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC),
+            List.of(Sort.Direction.ASC, Sort.Direction.ASC, Sort.Direction.ASC, Sort.Direction.ASC, Sort.Direction.ASC),
             Map.of("audioId", "med.id",
                    "courtroom", "cr.name",
                    "startTime", "med.start",
