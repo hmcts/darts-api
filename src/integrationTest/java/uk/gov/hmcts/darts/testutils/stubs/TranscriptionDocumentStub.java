@@ -113,7 +113,10 @@ public class TranscriptionDocumentStub {
      * @param useSameCase           Whether to use the same case for all transcription records
      * @return The list of generated media entities in chronological order
      */
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    @SuppressWarnings({
+        "PMD.AvoidInstantiatingObjectsInLoops",
+        "PMD.NcssCount"
+    })
     private List<TranscriptionDocumentEntity> generateTranscriptionEntities(int count,
                                                                             int hearingCount,
                                                                             int caseCount,
@@ -130,12 +133,25 @@ public class TranscriptionDocumentStub {
 
         int fileSize = 1;
         UserAccountEntity owner;
-        CourtroomEntity courtroomEntity;
+        CourtroomEntity courtroomEntity = null;
         TranscriptionDocumentEntity transcriptionDocumentEntity;
 
         List<HearingEntity> hearingEntityList;
         List<CourtCaseEntity> caseEntityList = new ArrayList<>();
-        CourtCaseEntity caseEntity = null;
+        CourtCaseEntity caseEntity;
+
+
+        if (useSameCase) {
+            courtroomEntity = courtroomStub.createCourtroomUnlessExists(
+                TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString("1"),
+                TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
+                    .getQueryString(UUID.randomUUID() + "1"), userAccountRepository.getReferenceById(0));
+            caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(
+                StringUtils.right(TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(
+                    UUID.randomUUID() + "Case Number"), 32), courtroomEntity.getId());
+            caseEntityList.add(caseEntity);
+        }
+
         for (int transriptionDocumentCount = 0; transriptionDocumentCount < count; transriptionDocumentCount++) {
 
             String username = TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(transriptionDocumentCount));
@@ -144,17 +160,16 @@ public class TranscriptionDocumentStub {
             hearingEntityList = new ArrayList<>();
 
             // add the cases to the transcription
-
-            courtroomEntity = courtroomStub.createCourtroomUnlessExists(
-                TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(Integer.toString(transriptionDocumentCount)),
-                TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
-                    .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)), userAccountRepository.getReferenceById(0));
-
-
-            if (caseCount > 0 && (!useSameCase || caseEntity == null)) {
-                caseEntityList = createCaseList(caseCount, transriptionDocumentCount, courtroomEntity.getCourthouse());
-                caseEntity = caseEntityList.getLast();
+            if (!useSameCase) {
+                courtroomEntity = courtroomStub.createCourtroomUnlessExists(
+                    TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(Integer.toString(transriptionDocumentCount)),
+                    TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
+                        .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)), userAccountRepository.getReferenceById(0));
+                if (caseCount > 0) {
+                    caseEntityList = createCaseList(caseCount, transriptionDocumentCount, courtroomEntity.getCourthouse());
+                }
             }
+
 
             HearingEntity hearingEntity;
             for (int i = 0; i < hearingCount; i++) {
