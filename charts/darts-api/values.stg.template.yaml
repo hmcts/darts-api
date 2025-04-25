@@ -8,7 +8,6 @@ java:
   ingressHost: ${SERVICE_FQDN}
   environment:
     MANUAL_DELETION_ENABLED: true
-    EVENT_OBFUSCATION_ENABLED: true
     CASE_EXPIRY_DELETION_ENABLED: true
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: http://darts-gateway.staging.platform.hmcts.net
