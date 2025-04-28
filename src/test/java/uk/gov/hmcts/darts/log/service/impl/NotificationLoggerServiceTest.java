@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class NotificationLoggerServiceTest {
 
-    private static final Integer NOTIFICATION_ID = 2222;
+    private static final Long NOTIFICATION_ID = 2222L;
     private static final Integer CASE_ID = 1111;
 
     private static final String EVENT_ID = "event_id";

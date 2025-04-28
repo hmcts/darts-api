@@ -130,9 +130,9 @@ class AdminHearingServiceTest {
     @Test
     void getHearingAudios_shouldReturnCorrectlyMappedData() {
         OffsetDateTime baseTime = OffsetDateTime.now();
-        MediaEntity mediaEntity = createMediaEntity(1, baseTime, baseTime.plusMinutes(1), "file1", 1, 2);
-        MediaEntity mediaEntity2 = createMediaEntity(2, baseTime.plusMinutes(1), baseTime.plusMinutes(3), "file2", 2, 2);
-        MediaEntity mediaEntity3 = createMediaEntity(3, baseTime.plusMinutes(2), baseTime.plusMinutes(4), "file3", 3, 3);
+        MediaEntity mediaEntity = createMediaEntity(1L, baseTime, baseTime.plusMinutes(1), "file1", 1, 2);
+        MediaEntity mediaEntity2 = createMediaEntity(2L, baseTime.plusMinutes(1), baseTime.plusMinutes(3), "file2", 2, 2);
+        MediaEntity mediaEntity3 = createMediaEntity(3L, baseTime.plusMinutes(2), baseTime.plusMinutes(4), "file3", 3, 3);
 
 
         doReturn(List.of(mediaEntity, mediaEntity2, mediaEntity3)).when(mediaRepository).findAllCurrentMediaByHearingId(123);
@@ -159,7 +159,7 @@ class AdminHearingServiceTest {
         assertThat(hearingsAudiosResponseInner.getTotalChannels()).isEqualTo(totalChannels);
     }
 
-    private MediaEntity createMediaEntity(Integer id, OffsetDateTime start, OffsetDateTime end, String mediaFile, Integer channel, Integer totalChannels) {
+    private MediaEntity createMediaEntity(Long id, OffsetDateTime start, OffsetDateTime end, String mediaFile, Integer channel, Integer totalChannels) {
         MediaEntity mediaEntity = new MediaEntity();
         mediaEntity.setId(id);
         mediaEntity.setStart(start);

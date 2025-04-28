@@ -364,10 +364,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     void updateStatus(ObjectRecordStatusEntity newStatus, Integer userAccount, List<Long> idsToUpdate, OffsetDateTime timestamp);
 
 
-    default List<Integer> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    default List<Long> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                               ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                               Integer maxTransferAttempts, Limit limit) {
-        List<Integer> results = new ArrayList<>();//Ensures no duplicates
+        List<Long> results = new ArrayList<>();//Ensures no duplicates
         results.addAll(findEodsForTransferOnlyMedia(status.getId(), type.getId(), notExistsStatus.getId(),
                                                     notExistsType.getId(), maxTransferAttempts, limit.max()));
         if (results.size() < limit.max()) {
@@ -398,7 +398,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
              FETCH FIRST :limit ROWS ONLY;
             """
     )
-    List<Integer> findEodsForTransferOnlyMedia(Integer status, Integer type,
+    List<Long> findEodsForTransferOnlyMedia(Integer status, Integer type,
                                                Integer notExistsStatus, Integer notExistsType,
                                                Integer maxTransferAttempts, Integer limit);
 
@@ -417,7 +417,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             order by eod.lastModifiedDateTime
             """
     )
-    List<Integer> findEodsForTransferExcludingMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    List<Long> findEodsForTransferExcludingMedia(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                     ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                                     Integer maxTransferAttempts, Limit limit);
 

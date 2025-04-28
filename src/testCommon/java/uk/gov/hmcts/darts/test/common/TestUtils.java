@@ -263,10 +263,12 @@ public final class TestUtils {
     public static <T extends CreatedBy & HasIntegerId> List<T> getOrderedByCreatedByAndIdInt(Collection<T> data) {
         return getOrderedByCreatedByAndId(data, (o1, o2) -> Integer.compare(o1.getId(), o2.getId()));
     }
+
     public static <T extends CreatedBy & HasLongId> List<T> getOrderedByCreatedByAndIdLong(Collection<T> data) {
         return getOrderedByCreatedByAndId(data, (o1, o2) -> Long.compare(o1.getId(), o2.getId()));
 
     }
+
     public static <T extends CreatedBy & HasId<?>> List<T> getOrderedByCreatedByAndId(Collection<T> data,
                                                                                       BiFunction<T, T, Integer> compareFunction) {
         List<T> sortedData = new ArrayList<>();

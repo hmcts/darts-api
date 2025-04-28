@@ -228,7 +228,7 @@ public class AnnotationArchiveRecordMapperImpl extends BaseArchiveRecordMapper i
 
     private Long mapToLong(String key, AnnotationDocumentEntity annotationDocument) {
         return switch (key) {
-            case OBJECT_ID_KEY -> annotationDocument.getId().longValue();
+            case OBJECT_ID_KEY -> annotationDocument.getId();
             case PARENT_ID_KEY -> annotationDocument.getAnnotation().getId().longValue();
             default -> null;
         };

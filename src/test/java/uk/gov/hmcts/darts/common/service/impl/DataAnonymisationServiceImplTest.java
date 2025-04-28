@@ -118,7 +118,7 @@ class DataAnonymisationServiceImplTest {
         setupOffsetDateTime();
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
-        eventEntity.setId(123);
+        eventEntity.setId(123L);
 
         UserAccountEntity userAccount = new UserAccountEntity();
         when(eventService.allAssociatedCasesAnonymised(eventEntity)).thenReturn(true);
@@ -487,24 +487,24 @@ class DataAnonymisationServiceImplTest {
         EventEntity event3 = mock(EventEntity.class);
 
 
-        doReturn(event1).when(eventService).getEventByEveId(1);
-        doReturn(event2).when(eventService).getEventByEveId(2);
-        doReturn(event3).when(eventService).getEventByEveId(3);
-        doReturn(event1).when(eventService).getEventByEveId(4);
+        doReturn(event1).when(eventService).getEventByEveId(1L);
+        doReturn(event2).when(eventService).getEventByEveId(2L);
+        doReturn(event3).when(eventService).getEventByEveId(3L);
+        doReturn(event1).when(eventService).getEventByEveId(4L);
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
         doNothing().when(dataAnonymisationService).registerDataAnonymisation(any(), any(EventEntity.class), anyBoolean());
 
-        dataAnonymisationService.anonymiseEventByIds(userAccount, List.of(1, 2, 3, 4), isManuallyRequested);
+        dataAnonymisationService.anonymiseEventByIds(userAccount, List.of(1L, 2L, 3L, 4L), isManuallyRequested);
 
 
         verify(dataAnonymisationService).anonymiseEventEntity(userAccount, event1, false, isManuallyRequested);
         verify(dataAnonymisationService).anonymiseEventEntity(userAccount, event2, false, isManuallyRequested);
         verify(dataAnonymisationService).anonymiseEventEntity(userAccount, event3, false, isManuallyRequested);
 
-        verify(eventService).getEventByEveId(1);
-        verify(eventService).getEventByEveId(2);
-        verify(eventService).getEventByEveId(3);
-        verify(eventService).getEventByEveId(4);
+        verify(eventService).getEventByEveId(1L);
+        verify(eventService).getEventByEveId(2L);
+        verify(eventService).getEventByEveId(3L);
+        verify(eventService).getEventByEveId(4L);
 
         verify(eventService).saveEvent(event1);
         verify(eventService).saveEvent(event2);

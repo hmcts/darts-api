@@ -67,7 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
@@ -196,7 +196,7 @@ class TranscriptionServiceImplTest {
         approvers.add(approver2);
 
         lenient().when(authorisationApi.getUsersWithRoleAtCourthouse(eq(SecurityRoleEnum.APPROVER), any())).thenReturn(approvers);
-        lenient().when(mockTranscriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+        lenient().when(mockTranscriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong()))
             .thenReturn(Collections.emptyList());
     }
 
@@ -601,11 +601,11 @@ class TranscriptionServiceImplTest {
     @Test
     void testGetAllCaseTranscriptionDocuments() {
         TranscriptionDocumentEntity transcriptionDoc1 = new TranscriptionDocumentEntity();
-        transcriptionDoc1.setId(1);
+        transcriptionDoc1.setId(1L);
         TranscriptionDocumentEntity transcriptionDoc2 = new TranscriptionDocumentEntity();
-        transcriptionDoc2.setId(2);
+        transcriptionDoc2.setId(2L);
         TranscriptionDocumentEntity transcriptionDoc3 = new TranscriptionDocumentEntity();
-        transcriptionDoc3.setId(3);
+        transcriptionDoc3.setId(3L);
 
         when(mockTranscriptionRepository.findByCaseIdManualOrLegacy(CASE_ID, true)).thenReturn(List.of(mockTranscription, mockTranscription2));
         when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(List.of(transcriptionDoc1, transcriptionDoc2));
@@ -620,7 +620,7 @@ class TranscriptionServiceImplTest {
     void testRollbackUserTransactions() {
         UserAccountEntity entity = new UserAccountEntity();
 
-        Integer transcriptionId = 1000;
+        Long transcriptionId = 1000L;
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.setId(transcriptionId);
 
@@ -656,7 +656,7 @@ class TranscriptionServiceImplTest {
 
     @Test
     void getTranscriptionMapsCurrentTranscriptionWithDocument() {
-        var transcriptionId = 1;
+        var transcriptionId = 1L;
         var transcription = new TranscriptionEntity();
         transcription.setIsCurrent(true);
         var transcriptionDocument = new TranscriptionDocumentEntity();
@@ -671,7 +671,7 @@ class TranscriptionServiceImplTest {
     @Test
     void getTranscriptionMapsCurrentTranscriptionWithHiddenDocumentIfUserIsSuperAdmin() {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(true);
-        var transcriptionId = 1;
+        var transcriptionId = 1L;
         var transcription = new TranscriptionEntity();
         transcription.setIsCurrent(true);
         var transcriptionDocument = new TranscriptionDocumentEntity();
@@ -686,7 +686,7 @@ class TranscriptionServiceImplTest {
 
     @Test
     void getTranscriptionThrowsNotFoundExceptionIfTranscriptionDocumentHiddenAndUserIsNotSuperAdmin() {
-        var transcriptionId = 1;
+        var transcriptionId = 1L;
         var transcription = new TranscriptionEntity();
         transcription.setIsCurrent(true);
         transcription.setId(transcriptionId);
@@ -694,7 +694,7 @@ class TranscriptionServiceImplTest {
         transcriptionDocument.setHidden(true);
         transcription.setTranscriptionDocumentEntities(List.of(transcriptionDocument));
         when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
-        when(mockTranscriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+        when(mockTranscriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong()))
             .thenReturn(List.of(new TranscriptionDocumentEntity()));
 
         assertThatThrownBy(() -> transcriptionService.getTranscription(transcriptionId))
@@ -768,6 +768,7 @@ class TranscriptionServiceImplTest {
     @ParameterizedTest
     @EnumSource(value = TranscriptionStatusEnum.class,
         mode = EnumSource.Mode.EXCLUDE, names = {"REJECTED", "APPROVED"})
+    @SuppressWarnings("LineLength")
     void validateUpdateTranscription_shouldNotThrowException_whenRequesterIsSameAsApprover_andStatusIsNotApprovedOrRejected_andAllowSelfApprovalOrRejectionIsFalse(
         TranscriptionStatusEnum status) {
         TranscriptionTypeEntity transcriptionTypeEntity = new TranscriptionTypeEntity();

@@ -16,7 +16,7 @@ import java.time.ZoneOffset;
 public class ExternalObjectDirectoryTestData {
 
 
-    public static final int TEST_EXTERNAL_OBJECT_DIRECTORY_ID = 123;
+    public static final long TEST_EXTERNAL_OBJECT_DIRECTORY_ID = 123;
     public static final String TEST_CHECKSUM = "wysXTgRikGN6nMB8AJ0JrQ==";
     public static final OffsetDateTime CREATED_DATE_TIME = OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC);
     public static final OffsetDateTime LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 6, 20, 11, 0, 0, 0, ZoneOffset.UTC);

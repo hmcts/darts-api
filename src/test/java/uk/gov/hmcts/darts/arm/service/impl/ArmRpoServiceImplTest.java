@@ -178,8 +178,8 @@ class ArmRpoServiceImplTest {
     void reconcileArmRpoCsvData_Success() {
         // given
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = createExternalObjectDirectoryEntity(1);
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = createExternalObjectDirectoryEntity(2);
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = createExternalObjectDirectoryEntity(1L);
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = createExternalObjectDirectoryEntity(2L);
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity1);
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity2);
         Page<ExternalObjectDirectoryEntity> pagedEods = new PageImpl<>(externalObjectDirectoryEntities);
@@ -210,7 +210,7 @@ class ArmRpoServiceImplTest {
     @Test
     void reconcileArmRpoCsvData_NoCsvFoundError() {
         // given
-        createExternalObjectDirectoryEntity(1);
+        createExternalObjectDirectoryEntity(1L);
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
         when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
@@ -227,7 +227,7 @@ class ArmRpoServiceImplTest {
             "Unable to find CSV file for Reconciliation "));
     }
 
-    private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(Integer id) {
+    private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(Long id) {
         ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
         entity.setId(id);
         return entity;

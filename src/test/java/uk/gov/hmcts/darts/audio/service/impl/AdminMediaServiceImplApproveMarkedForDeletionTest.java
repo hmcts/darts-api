@@ -78,8 +78,8 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
     @Test
     void adminApproveMediaMarkedForDeletion_shouldMarkMediaForDeletion_whenUsingTypicalData() {
         // given
-        Integer mediaId1 = 1;
-        Integer mediaId2 = 2;
+        Long mediaId1 = 1L;
+        Long mediaId2 = 2L;
         MediaEntity mediaEntity1 = new MediaEntity();
         mediaEntity1.setId(mediaId1);
         mediaEntity1.setChronicleId("123");
@@ -133,7 +133,7 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
     @Test
     void testAdminApproveMediaMarkedForDeletionMediaNotFound() {
         // given
-        Integer mediaId = 1;
+        Long mediaId = 1L;
 
         when(mediaRepository.findByIdIncludeDeleted(mediaId)).thenReturn(Optional.empty());
 

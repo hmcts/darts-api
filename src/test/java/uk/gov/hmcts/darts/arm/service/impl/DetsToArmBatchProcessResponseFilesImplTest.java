@@ -116,7 +116,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         invalidLineFileFilenameProcessor = new InvalidLineFileFilenameProcessor(invalidLineFileFilename);
 
         externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        externalObjectDirectoryEntity.setId(1);
+        externalObjectDirectoryEntity.setId(1L);
         externalObjectDirectoryEntity.setStatus(EodHelper.armProcessingResponseFilesStatus());
         externalObjectDirectoryEntity.setVerificationAttempts(1);
         objectStateRecordEntity = new ObjectStateRecordEntity();

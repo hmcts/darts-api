@@ -26,7 +26,7 @@ class TranscriptionDocumentIdValidatorTest {
 
     @Test
     void successfullyGetId() {
-        Integer documentId = 200;
+        Long documentId = 200L;
         TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
         when(transcriptionDocumentRepository.findById(documentId)).thenReturn(Optional.of(documentEntity));
 
@@ -35,7 +35,7 @@ class TranscriptionDocumentIdValidatorTest {
 
     @Test
     void failureGettingId() {
-        Integer documentId = 200;
+        Long documentId = 200L;
         when(transcriptionDocumentRepository.findById(documentId)).thenReturn(Optional.empty());
 
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class, () -> transcriptionDocumentIdValidator.validate(documentId));

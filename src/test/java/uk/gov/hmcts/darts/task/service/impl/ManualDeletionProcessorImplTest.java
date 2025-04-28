@@ -55,8 +55,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ManualDeletionProcessorImplTest {
 
-    public static final int MEDIA_ID = 100;
-    public static final int TRANSCRIPTION_ID = 200;
+    public static final long MEDIA_ID = 100;
+    public static final long TRANSCRIPTION_ID = 200;
 
     @Mock
     private ObjectAdminActionRepository objectAdminActionRepository;

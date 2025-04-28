@@ -63,7 +63,7 @@ class TranscriptionArchiveRecordMapperImplPropertyTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .id(0)
+                .id(0L)
                 .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
                                                  .someMinimalBuilder().retConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
                                                  .build())
@@ -83,7 +83,7 @@ class TranscriptionArchiveRecordMapperImplPropertyTest {
             // Given
             TestExternalObjectDirectoryEntity externalObjectDirectoryEntity = PersistableFactory.getExternalObjectDirectoryTestData()
                 .someMinimalBuilder()
-                .id(0)
+                .id(0L)
                 .transcriptionDocumentEntity(PersistableFactory.getTranscriptionDocument()
                                                  .someMinimalBuilder().retConfScore(null)
                                                  .build())

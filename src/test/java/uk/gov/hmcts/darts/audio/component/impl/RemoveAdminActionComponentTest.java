@@ -55,7 +55,7 @@ class RemoveAdminActionComponentTest {
         void shouldUnHideTargetedMediaAndRemoveAdminAction_whenTargetedMediaIsHiddenAndHasNoChronicleId() {
             // Given
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId(null)
                 .isHidden(true)
                 .build()
@@ -91,7 +91,7 @@ class RemoveAdminActionComponentTest {
         void shouldUnHideAndSetAdminActionForAllVersions_whenTargetedMediaIsHiddenAndHasOtherVersions() {
             // Given
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId("1000")
                 .isHidden(true)
                 .build()
@@ -104,7 +104,7 @@ class RemoveAdminActionComponentTest {
             targetedMedia.setObjectAdminAction(adminActionForTargetedMedia);
 
             MediaEntity otherVersion = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(2)
+                .id(2L)
                 .chronicleId("1000")
                 .isHidden(true)
                 .build()
@@ -158,7 +158,7 @@ class RemoveAdminActionComponentTest {
         void shouldUnHideTargetedMediaAndRemoveAdminAction_whenTargetedMediaIsHiddenAndHasExistingAdminActionAndHasNoChronicleId() {
             // Given
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId(null)
                 .isHidden(true)
                 .build()
@@ -194,7 +194,7 @@ class RemoveAdminActionComponentTest {
         void shouldUnHideTargetedMedia_whenTargetedMediaIsHiddenAndHasNoExistingAdminAction() {
             // Given
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId("1000")
                 .isHidden(true)
                 .build()
@@ -223,7 +223,7 @@ class RemoveAdminActionComponentTest {
         void shouldUnHideTargetedMedia_whenTargetedMediaIsNotHiddenAndHasExistingAdminAction() {
             // Given
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId("1000")
                 .isHidden(false)
                 .build()
@@ -259,7 +259,7 @@ class RemoveAdminActionComponentTest {
         void shouldNotUnHideTargetedMedia_whenTargetedMediaIsNotHiddenAndHasNoExistingAdminAction() {
             // Given
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId("1000")
                 .isHidden(false)
                 .build()
@@ -286,12 +286,12 @@ class RemoveAdminActionComponentTest {
             MediaTestData mediaTestData = PersistableFactory.getMediaTestData();
 
             MediaEntity media1 = mediaTestData.someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId("1000")
                 .build()
                 .getEntity();
             MediaEntity media2 = mediaTestData.someMinimalBuilder()
-                .id(2)
+                .id(2L)
                 .chronicleId("2000")
                 .build()
                 .getEntity();

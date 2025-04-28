@@ -336,10 +336,10 @@ class MediaRequestServiceImplTest {
 
         when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
             .thenReturn(List.of(
-                new AudioRequestBeingProcessedFromArchiveQueryResult(181),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(182),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(183),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(184)
+                new AudioRequestBeingProcessedFromArchiveQueryResult(181L),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(182L),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(183L),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(184L)
             ));
 
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
@@ -425,7 +425,7 @@ class MediaRequestServiceImplTest {
     @Test
     void downloadShouldReturnExpectedData() {
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
+        mediaEntity.setId(1L);
         mediaEntity.setStart(START_TIME);
         mediaEntity.setEnd(END_TIME);
         mediaEntity.setChannel(1);
@@ -556,7 +556,7 @@ class MediaRequestServiceImplTest {
     @Test
     void playbackShouldReturnExpectedData() throws IOException {
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
+        mediaEntity.setId(1L);
         mediaEntity.setStart(START_TIME);
         mediaEntity.setEnd(END_TIME);
         mediaEntity.setChannel(1);

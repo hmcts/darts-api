@@ -47,12 +47,11 @@ class MediaHideOrShowValidatorTest {
 
     @Test
     void successfullyShow() {
-        Integer mediaId = 200;
+        long mediaId = 200;
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
         mediaHideRequest.setIsHidden(false);
 
-        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
-            IdRequest<>(mediaHideRequest, mediaId);
+        IdRequest<MediaHideRequest, Long> mediaHideRequestIdRequest = new IdRequest<>(mediaHideRequest, mediaId);
 
         mediaHideOrShowValidator.validate(mediaHideRequestIdRequest);
 
@@ -61,13 +60,12 @@ class MediaHideOrShowValidatorTest {
 
     @Test
     void failShowWithAdminActionRequest() {
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
         mediaHideRequest.setIsHidden(false);
         mediaHideRequest.setAdminAction(new AdminActionRequest());
 
-        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
-            IdRequest<>(mediaHideRequest, mediaId);
+        IdRequest<MediaHideRequest, Long> mediaHideRequestIdRequest = new IdRequest<>(mediaHideRequest, mediaId);
 
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class,
                                                               () -> mediaHideOrShowValidator.validate(mediaHideRequestIdRequest));
@@ -78,7 +76,7 @@ class MediaHideOrShowValidatorTest {
 
     @Test
     void successfullyHideWithActionRequest() {
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
         mediaHideRequest.setIsHidden(true);
 
@@ -92,8 +90,7 @@ class MediaHideOrShowValidatorTest {
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
         when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of());
 
-        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
-            IdRequest<>(mediaHideRequest, mediaId);
+        IdRequest<MediaHideRequest, Long> mediaHideRequestIdRequest = new IdRequest<>(mediaHideRequest, mediaId);
 
         mediaHideOrShowValidator.validate(mediaHideRequestIdRequest);
 
@@ -102,12 +99,11 @@ class MediaHideOrShowValidatorTest {
 
     @Test
     void failsWhenHideWithoutActionRequest() {
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
         mediaHideRequest.setIsHidden(true);
 
-        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
-            IdRequest<>(mediaHideRequest, mediaId);
+        IdRequest<MediaHideRequest, Long> mediaHideRequestIdRequest = new IdRequest<>(mediaHideRequest, mediaId);
 
         DartsApiException exception =
             Assertions.assertThrows(DartsApiException.class, () -> mediaHideOrShowValidator.validate(mediaHideRequestIdRequest));
@@ -118,7 +114,7 @@ class MediaHideOrShowValidatorTest {
 
     @Test
     void failWhenHideWithActionRequestWithDbAction() {
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         AdminActionRequest adminActionResponse = new AdminActionRequest();
 
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
@@ -129,8 +125,7 @@ class MediaHideOrShowValidatorTest {
 
         when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminActionEntity));
 
-        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
-            IdRequest<>(mediaHideRequest, mediaId);
+        IdRequest<MediaHideRequest, Long> mediaHideRequestIdRequest = new IdRequest<>(mediaHideRequest, mediaId);
 
         DartsApiException exception =
             Assertions.assertThrows(DartsApiException.class, () -> mediaHideOrShowValidator.validate(mediaHideRequestIdRequest));
@@ -141,7 +136,7 @@ class MediaHideOrShowValidatorTest {
 
     @Test
     void failWhenHideWithActionRequestAndWithoutCorrectReason() {
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         AdminActionRequest adminActionResponse = new AdminActionRequest();
 
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
@@ -154,8 +149,7 @@ class MediaHideOrShowValidatorTest {
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
         when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of());
 
-        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
-            IdRequest<>(mediaHideRequest, mediaId);
+        IdRequest<MediaHideRequest, Long> mediaHideRequestIdRequest = new IdRequest<>(mediaHideRequest, mediaId);
 
         DartsApiException exception
             = Assertions.assertThrows(DartsApiException.class, () -> mediaHideOrShowValidator.validate(mediaHideRequestIdRequest));
@@ -168,7 +162,7 @@ class MediaHideOrShowValidatorTest {
     @Test
     void successfullyHideWithMarkedForDeletionActionRequestAndFlagEnabled() {
         setManualDeletionEnabled(true);
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
         mediaHideRequest.setIsHidden(true);
 
@@ -183,8 +177,7 @@ class MediaHideOrShowValidatorTest {
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
         when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of());
 
-        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
-            IdRequest<>(mediaHideRequest, mediaId);
+        IdRequest<MediaHideRequest, Long> mediaHideRequestIdRequest = new IdRequest<>(mediaHideRequest, mediaId);
 
         mediaHideOrShowValidator.validate(mediaHideRequestIdRequest);
 
@@ -194,7 +187,7 @@ class MediaHideOrShowValidatorTest {
     @Test
     void unsuccessfullyHideWithMarkedForDeletionActionRequestAndFlagDisabled() {
         setManualDeletionEnabled(false);
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         MediaHideRequest mediaHideRequest = new MediaHideRequest();
         mediaHideRequest.setIsHidden(true);
 
@@ -209,8 +202,7 @@ class MediaHideOrShowValidatorTest {
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
         when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of());
 
-        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
-            IdRequest<>(mediaHideRequest, mediaId);
+        IdRequest<MediaHideRequest, Long> mediaHideRequestIdRequest = new IdRequest<>(mediaHideRequest, mediaId);
 
         DartsApiException exception
             = Assertions.assertThrows(DartsApiException.class, () -> mediaHideOrShowValidator.validate(mediaHideRequestIdRequest));

@@ -143,7 +143,7 @@ class AnnotationDataManagementTest {
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryEntity() {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        externalObjectDirectoryEntity.setId(1);
+        externalObjectDirectoryEntity.setId(1L);
         externalObjectDirectoryEntity.setAnnotationDocumentEntity(new AnnotationDocumentEntity());
         return externalObjectDirectoryEntity;
     }

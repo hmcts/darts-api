@@ -51,7 +51,7 @@ class ArmRetentionEventDateProcessorImplTest {
         eodHelperMocks = new EodHelperMocks();
 
         MediaEntity media = new MediaEntity();
-        media.setId(123);
+        media.setId(123L);
         media.setRetainUntilTs(MEDIA_RETENTION_DATE_TIME);
 
         armRetentionEventDateProcessor = new ArmRetentionEventDateProcessorImpl(
@@ -74,7 +74,7 @@ class ArmRetentionEventDateProcessorImplTest {
     @Test
     void calculateEventDates() {
         // given
-        List<Integer> eods = List.of(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
+        List<Long> eods = List.of(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
         when(
             externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
                 eodHelperMocks.getArmLocation(), true, Limit.of(10_000))).thenReturn(
@@ -99,7 +99,7 @@ class ArmRetentionEventDateProcessorImplTest {
     @Test
     void calculateEventDates_NoRowsToProcess() {
         // given
-        List<Integer> eods = new ArrayList<>();
+        List<Long> eods = new ArrayList<>();
         when(
             externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
                 eodHelperMocks.getArmLocation(), true, Limit.of(10_000))).thenReturn(eods);

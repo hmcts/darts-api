@@ -47,7 +47,7 @@ class EventMapperTest {
     void mapsEventToAdminSearchEventResponseResult() {
         // When
         EventEntity eventEntity = spy(setGenericEventDataForTest());
-        eventEntity.setId(2);
+        eventEntity.setId(2L);
         eventEntity.setCreatedDateTime(OffsetDateTime.now());
         eventEntity.setIsCurrent(true);
 
@@ -112,7 +112,7 @@ class EventMapperTest {
         // When
         OffsetDateTime now = OffsetDateTime.now();
         EventEntity eventEntity1 = setGenericEventDataForTest();
-        eventEntity1.setId(1);
+        eventEntity1.setId(1L);
         eventEntity1.setCreatedDateTime(now.minusDays(1));
         eventEntity1.setIsCurrent(true);
 
@@ -134,24 +134,24 @@ class EventMapperTest {
         // When
         OffsetDateTime now = OffsetDateTime.now();
         EventEntity eventEntity1 = setGenericEventDataForTest();
-        eventEntity1.setId(1);
+        eventEntity1.setId(1L);
         eventEntity1.setCreatedDateTime(now.minusDays(1));
         eventEntity1.setIsCurrent(true);
 
         EventEntity eventEntity2 = setGenericEventDataForTest();
-        eventEntity2.setId(2);
+        eventEntity2.setId(2L);
         eventEntity2.setCreatedDateTime(now);
         eventEntity2.setIsCurrent(true);
         eventEntity2.setDataAnonymised(true);
         eventEntity2.setEventStatus(123);
 
         EventEntity eventEntity3 = setGenericEventDataForTest();
-        eventEntity3.setId(3);
+        eventEntity3.setId(3L);
         eventEntity3.setCreatedDateTime(now.minusDays(2));
         eventEntity3.setIsCurrent(true);
 
         EventEntity eventEntity4 = setGenericEventDataForTest();
-        eventEntity4.setId(4);
+        eventEntity4.setId(4L);
         eventEntity4.setCreatedDateTime(now);
         eventEntity4.setIsCurrent(false);
 
@@ -204,7 +204,7 @@ class EventMapperTest {
         // When
         OffsetDateTime now = OffsetDateTime.now();
         EventEntity eventEntity1 = setGenericEventDataForTest();
-        eventEntity1.setId(1);
+        eventEntity1.setId(1L);
         eventEntity1.setCreatedDateTime(now.minusDays(1));
         eventEntity1.setIsCurrent(false);
 

@@ -58,13 +58,13 @@ class AnnotationArchiveRecordMapperImplTest {
         annotationEntity.setHearings(Set.of(hearing));
         annotationEntity.setTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         annotationEntity.setText("annotationText");
-        annotationDocument = createAnnotationDocumentEntity(11);
+        annotationDocument = createAnnotationDocumentEntity(11L);
         annotationDocument.setAnnotation(annotationEntity);
         annotationEntity.setAnnotationDocuments(List.of(annotationDocument));
 
         externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setAnnotationDocumentEntity(annotationDocument);
-        externalObjectDirectory.setId(1);
+        externalObjectDirectory.setId(1L);
 
         annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
     }
@@ -221,7 +221,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertNull(metadata.getBf020());
     }
 
-    private AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {
+    private AnnotationDocumentEntity createAnnotationDocumentEntity(Long id) {
         AnnotationDocumentEntity annotationDoc = new AnnotationDocumentEntity();
         annotationDoc.setId(id);
         annotationDoc.setFileName("filename" + id);
@@ -229,7 +229,7 @@ class AnnotationArchiveRecordMapperImplTest {
         UserAccountEntity userAccount = CommonTestDataUtil.createUserAccount("user" + id);
         userAccount.setUserFullName("userFullName" + id);
         annotationDoc.setUploadedBy(userAccount);
-        annotationDoc.setUploadedDateTime(OffsetDateTime.of(2020, 10, 10, 10, id, 0, 0, ZoneOffset.UTC));
+        annotationDoc.setUploadedDateTime(OffsetDateTime.of(2020, 10, 10, 10, id.intValue(), 0, 0, ZoneOffset.UTC));
         return annotationDoc;
     }
 

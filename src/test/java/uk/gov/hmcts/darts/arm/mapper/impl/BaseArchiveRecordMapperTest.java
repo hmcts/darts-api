@@ -90,26 +90,26 @@ class BaseArchiveRecordMapperTest {
     }
 
     private void setIntProperties() {
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_001", 1);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_002", 2);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_003", 3);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_004", 4);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_005", 5);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_006", 6);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_007", 7);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_008", 8);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_009", 9);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_010", 10);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_011", 11);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_012", 12);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_013", 13);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_014", 14);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_015", 15);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_016", 16);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_017", 17);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_018", 18);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_019", 19);
-        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_020", 20);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_001", 1L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_002", 2L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_003", 3L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_004", 4L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_005", 5L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_006", 6L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_007", 7L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_008", 8L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_009", 9L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_010", 10L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_011", 11L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_012", 12L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_013", 13L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_014", 14L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_015", 15L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_016", 16L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_017", 17L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_018", 18L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_019", 19L);
+        baseArchiveRecordMapper.processIntMetadataProperties(metadata, "bf_020", 20L);
     }
 
     private void assertStringProperties() {

@@ -381,7 +381,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
+        mediaEntity.setId(1L);
         mediaEntity.setContentObjectId("2");
         mediaEntity.setClipId("clip-id");
         // execute the code
@@ -410,7 +410,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
+        mediaEntity.setId(1L);
         mediaEntity.setContentObjectId("2");
         mediaEntity.setClipId("clip-id");
 
@@ -448,7 +448,7 @@ class DataManagementFacadeImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(1);
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
+        mediaEntity.setId(1L);
         mediaEntity.setContentObjectId("2");
         mediaEntity.setClipId("clip-id");
         mediaEntity.setCreatedBy(userAccount);
@@ -529,10 +529,10 @@ class DataManagementFacadeImplTest {
 
     private static @NotNull TranscriptionDocumentEntity createTranscriptionDocumentEntity(UserAccountEntity userAccount) {
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
-        transcriptionEntity.setId(1);
+        transcriptionEntity.setId(1L);
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
-        transcriptionDocumentEntity.setId(1);
+        transcriptionDocumentEntity.setId(1L);
         transcriptionDocumentEntity.setContentObjectId("2");
         transcriptionDocumentEntity.setClipId("clip-id");
         transcriptionDocumentEntity.setUploadedBy(userAccount);
@@ -573,7 +573,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setId(1);
+        transcription.setId(1L);
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcription);
         transcriptionDocumentEntity.setContentObjectId("2");

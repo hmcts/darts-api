@@ -30,9 +30,9 @@ class GetAnnotationsResponseMapperTest {
         annotationEntity1.setHearings(Set.of(hearing));
         annotationEntity1.setTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         annotationEntity1.setText("annotationText");
-        AnnotationDocumentEntity annotationDoc1a = createAnnotationDocumentEntity(11);
-        AnnotationDocumentEntity annotationDoc1b = createAnnotationDocumentEntity(12);
-        AnnotationDocumentEntity annotationDoc1c = createAnnotationDocumentEntity(13);
+        AnnotationDocumentEntity annotationDoc1a = createAnnotationDocumentEntity(11L);
+        AnnotationDocumentEntity annotationDoc1b = createAnnotationDocumentEntity(12L);
+        AnnotationDocumentEntity annotationDoc1c = createAnnotationDocumentEntity(13L);
 
         annotationEntity1.setAnnotationDocuments(List.of(annotationDoc1a, annotationDoc1b, annotationDoc1c));
 
@@ -43,9 +43,9 @@ class GetAnnotationsResponseMapperTest {
         annotationEntity2.setHearings(Set.of(hearing));
         annotationEntity2.setTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         annotationEntity2.setText("annotationText");
-        AnnotationDocumentEntity annotationDoc2a = createAnnotationDocumentEntity(21);
-        AnnotationDocumentEntity annotationDoc2b = createAnnotationDocumentEntity(22);
-        AnnotationDocumentEntity annotationDoc2c = createAnnotationDocumentEntity(23);
+        AnnotationDocumentEntity annotationDoc2a = createAnnotationDocumentEntity(21L);
+        AnnotationDocumentEntity annotationDoc2b = createAnnotationDocumentEntity(22L);
+        AnnotationDocumentEntity annotationDoc2c = createAnnotationDocumentEntity(23L);
 
         annotationEntity2.setAnnotationDocuments(List.of(annotationDoc2a, annotationDoc2b, annotationDoc2c));
 
@@ -81,7 +81,7 @@ class GetAnnotationsResponseMapperTest {
         assertEquals(OffsetDateTime.of(2020, 10, 10, 10, 21, 0, 0, ZoneOffset.UTC), annotation2.getAnnotationDocuments().getFirst().getUploadedTs());
     }
 
-    private AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {
+    private AnnotationDocumentEntity createAnnotationDocumentEntity(Long id) {
         AnnotationDocumentEntity annotationDoc = new AnnotationDocumentEntity();
         annotationDoc.setId(id);
         annotationDoc.setFileName("filename" + id);
@@ -89,7 +89,7 @@ class GetAnnotationsResponseMapperTest {
         UserAccountEntity userAccount = CommonTestDataUtil.createUserAccount("user" + id);
         userAccount.setUserFullName("userFullName" + id);
         annotationDoc.setUploadedBy(userAccount);
-        annotationDoc.setUploadedDateTime(OffsetDateTime.of(2020, 10, 10, 10, id, 0, 0, ZoneOffset.UTC));
+        annotationDoc.setUploadedDateTime(OffsetDateTime.of(2020, 10, 10, 10, id.intValue(), 0, 0, ZoneOffset.UTC));
         return annotationDoc;
     }
 

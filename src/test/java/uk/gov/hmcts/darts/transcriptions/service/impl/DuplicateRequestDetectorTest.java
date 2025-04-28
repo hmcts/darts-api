@@ -198,7 +198,7 @@ class DuplicateRequestDetectorTest {
         return requestDetails;
     }
 
-    private TranscriptionEntity someTranscriptionThatMatches(TranscriptionRequestDetails requestDetails, int id) {
+    private TranscriptionEntity someTranscriptionThatMatches(TranscriptionRequestDetails requestDetails, long id) {
         var transcription = new TranscriptionEntity();
         transcription.setId(id);
         transcription.setStartTime(requestDetails.getStartDateTime());

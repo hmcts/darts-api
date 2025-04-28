@@ -40,7 +40,7 @@ class MediaApproveMarkForDeletionValidatorTest {
     @Test
     void validateMediaWhereMediaNotMarkedForDeletion() {
         // given
-        Integer mediaId = 200;
+        Long mediaId = 200L;
 
         // when
         DartsApiException exception = assertThrows(DartsApiException.class,
@@ -53,7 +53,7 @@ class MediaApproveMarkForDeletionValidatorTest {
     @Test
     void validateMediaWhereObjectAdminActionHasTooManyResults() {
         // given
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         var objectAdminAction1 = ObjectAdminActionTestData.minimalObjectAdminAction();
         var objectAdminAction2 = ObjectAdminActionTestData.minimalObjectAdminAction();
         when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminAction1, objectAdminAction2));
@@ -70,7 +70,7 @@ class MediaApproveMarkForDeletionValidatorTest {
     @Test
     void validateMediaWhereObjectAdminActionIsAlreadyAuthorised() {
         // given
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         var objectAdminAction = ObjectAdminActionTestData.minimalObjectAdminAction();
         objectAdminAction.setMarkedForManualDeletion(true);
         when(objectAdminActionRepository.findByMediaId(mediaId)).thenReturn(List.of(objectAdminAction));
@@ -87,7 +87,7 @@ class MediaApproveMarkForDeletionValidatorTest {
     @Test
     void validateMediaWhereObjectAdminActionHasNullHiddenReason() {
         // given
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         var objectAdminAction = ObjectAdminActionTestData.minimalObjectAdminAction();
         objectAdminAction.setMarkedForManualDeletion(false);
         objectAdminAction.setObjectHiddenReason(null);
@@ -104,7 +104,7 @@ class MediaApproveMarkForDeletionValidatorTest {
     @Test
     void validateMediaWhereObjectAdminActionApprovedBySameUserAsHidden() {
         // given
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         var userAccount = UserAccountTestData.minimalUserAccount();
         userAccount.setId(123);
         var objectAdminAction = ObjectAdminActionTestData.minimalObjectAdminAction();
@@ -129,7 +129,7 @@ class MediaApproveMarkForDeletionValidatorTest {
     @Test
     void validateMediaSuccess() {
         // given
-        Integer mediaId = 200;
+        Long mediaId = 200L;
         var hiddenByUserAccount = UserAccountTestData.minimalUserAccount();
         hiddenByUserAccount.setId(123);
         var objectAdminAction = ObjectAdminActionTestData.minimalObjectAdminAction();

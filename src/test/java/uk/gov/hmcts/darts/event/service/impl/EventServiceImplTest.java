@@ -53,20 +53,20 @@ class EventServiceImplTest {
     @Test
     void positiveGetEventEntityById() {
         EventEntity event = mock(EventEntity.class);
-        when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-        assertThat(eventService.getEventByEveId(1)).isEqualTo(event);
-        verify(eventRepository, times(1)).findById(1);
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        assertThat(eventService.getEventByEveId(1L)).isEqualTo(event);
+        verify(eventRepository, times(1)).findById(1L);
     }
 
 
     @Test
     void positiveGetEventEntityByIdNotFound() {
-        when(eventRepository.findById(1)).thenReturn(Optional.empty());
+        when(eventRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventService.getEventByEveId(1))
+        assertThatThrownBy(() -> eventService.getEventByEveId(1L))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
-        verify(eventRepository, times(1)).findById(1);
+        verify(eventRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -122,15 +122,15 @@ class EventServiceImplTest {
     @Test
     void adminGetVersionsByEventId_shouldReturnEvent() {
         List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
-        doReturn(eventEntities).when(eventService).getRelatedEvents(123);
+        doReturn(eventEntities).when(eventService).getRelatedEvents(123L);
 
         AdminGetVersionsByEventIdResponseResult responseDetails = mock(AdminGetVersionsByEventIdResponseResult.class);
         when(eventMapper.mapToAdminGetEventVersionsResponseForId(any())).thenReturn(responseDetails);
 
 
-        assertThat(eventService.adminGetVersionsByEventId(123)).isEqualTo(responseDetails);
+        assertThat(eventService.adminGetVersionsByEventId(123L)).isEqualTo(responseDetails);
 
-        verify(eventService).getRelatedEvents(123);
+        verify(eventService).getRelatedEvents(123L);
         verify(eventMapper)
             .mapToAdminGetEventVersionsResponseForId(eventEntities);
     }
@@ -139,11 +139,11 @@ class EventServiceImplTest {
     void getRelatedEvents_eventIdIsZero() {
         EventEntity event = mock(EventEntity.class);
         when(event.getEventId()).thenReturn(0);
-        doReturn(event).when(eventService).getEventByEveId(123);
+        doReturn(event).when(eventService).getEventByEveId(123L);
 
-        assertThat(eventService.getRelatedEvents(123)).isEqualTo(List.of(event));
+        assertThat(eventService.getRelatedEvents(123L)).isEqualTo(List.of(event));
         verifyNoInteractions(eventRepository);
-        verify(eventService).getEventByEveId(123);
+        verify(eventService).getEventByEveId(123L);
     }
 
     @Test
@@ -155,16 +155,16 @@ class EventServiceImplTest {
 
         EventEntity event = mock(EventEntity.class);
         when(event.getEventLinkedCaseEntities()).thenReturn(List.of(eventLinkedCaseEntity));
-        when(event.getId()).thenReturn(123);
+        when(event.getId()).thenReturn(123L);
         when(event.getEventId()).thenReturn(321);
-        doReturn(event).when(eventService).getEventByEveId(123);
+        doReturn(event).when(eventService).getEventByEveId(123L);
 
         List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
-        when(eventRepository.findAllByRelatedEvents(123, 321, List.of(1))).thenReturn(eventEntities);
+        when(eventRepository.findAllByRelatedEvents(123L, 321, List.of(1))).thenReturn(eventEntities);
 
-        assertThat(eventService.getRelatedEvents(123)).isEqualTo(eventEntities);
-        verify(eventRepository).findAllByRelatedEvents(123, 321, List.of(1));
-        verify(eventService).getEventByEveId(123);
+        assertThat(eventService.getRelatedEvents(123L)).isEqualTo(eventEntities);
+        verify(eventRepository).findAllByRelatedEvents(123L, 321, List.of(1));
+        verify(eventService).getEventByEveId(123L);
     }
 
     @Test
@@ -185,16 +185,16 @@ class EventServiceImplTest {
 
         EventEntity event = mock(EventEntity.class);
         when(event.getEventLinkedCaseEntities()).thenReturn(List.of(eventLinkedCaseEntity1, eventLinkedCaseEntity2, eventLinkedCaseEntity3));
-        when(event.getId()).thenReturn(123);
+        when(event.getId()).thenReturn(123L);
         when(event.getEventId()).thenReturn(321);
-        doReturn(event).when(eventService).getEventByEveId(123);
+        doReturn(event).when(eventService).getEventByEveId(123L);
 
         List<EventEntity> eventEntities = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
-        when(eventRepository.findAllByRelatedEvents(123, 321, List.of(1, 2, 3))).thenReturn(
+        when(eventRepository.findAllByRelatedEvents(123L, 321, List.of(1, 2, 3))).thenReturn(
             eventEntities);
 
-        assertThat(eventService.getRelatedEvents(123)).isEqualTo(eventEntities);
-        verify(eventRepository).findAllByRelatedEvents(123, 321, List.of(1, 2, 3));
-        verify(eventService).getEventByEveId(123);
+        assertThat(eventService.getRelatedEvents(123L)).isEqualTo(eventEntities);
+        verify(eventRepository).findAllByRelatedEvents(123L, 321, List.of(1, 2, 3));
+        verify(eventService).getEventByEveId(123L);
     }
 }

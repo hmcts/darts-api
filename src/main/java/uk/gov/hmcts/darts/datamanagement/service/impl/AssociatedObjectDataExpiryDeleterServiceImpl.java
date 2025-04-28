@@ -24,8 +24,6 @@ import uk.gov.hmcts.darts.datamanagement.service.AssociatedObjectDataExpiryDelet
 import uk.gov.hmcts.darts.task.config.AssociatedObjectDataExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasId;
-import uk.gov.hmcts.darts.task.runner.HasIntegerId;
-import uk.gov.hmcts.darts.task.runner.HasLongId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;

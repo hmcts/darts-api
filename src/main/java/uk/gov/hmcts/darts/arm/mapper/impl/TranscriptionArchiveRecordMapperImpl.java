@@ -341,8 +341,8 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
 
     private Long mapToLong(String key, TranscriptionDocumentEntity transcriptionDocument) {
         return switch (key) {
-            case OBJECT_ID_KEY -> Long.valueOf(transcriptionDocument.getId());
-            case PARENT_ID_KEY -> Long.valueOf(transcriptionDocument.getTranscription().getId());
+            case OBJECT_ID_KEY -> transcriptionDocument.getId();
+            case PARENT_ID_KEY -> transcriptionDocument.getTranscription().getId();
             default -> null;
         };
     }

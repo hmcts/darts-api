@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
@@ -59,7 +58,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
     public void processInboundToUnstructured(int batchSize) {
         log.debug("Processing Inbound data store");
-        List<Integer> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
+        List<Long> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
                                                                                           getStatus(STORED), getType(UNSTRUCTURED), 3,
                                                                                           Limit.of(batchSize));
 
@@ -70,7 +69,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             .map(inboundObjectId -> (Callable<Void>) () -> {
                 log.debug("Processing Inbound to Unstructured record {} of {} with EOD id {}",
                           count.getAndIncrement(), inboundList.size(), inboundObjectId);
-                processInboundToUnstructured(inboundObjectId);
+                processSingleInboundToUnstructured(inboundObjectId);
                 return null;
             }).toList();
         try {
@@ -83,7 +82,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         }
     }
 
-    private void processInboundToUnstructured(Long inboundObjectId) {
+    private void processSingleInboundToUnstructured(Long inboundObjectId) {
         try {
             singleElementProcessor.processSingleElement(inboundObjectId);
         } catch (Exception exception) {

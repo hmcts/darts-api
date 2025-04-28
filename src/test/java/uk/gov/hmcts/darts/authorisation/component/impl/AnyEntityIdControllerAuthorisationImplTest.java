@@ -129,9 +129,9 @@ class AnyEntityIdControllerAuthorisationImplTest {
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(jsonNode, roles));
 
         verify(authorisation).authoriseByHearingId(2, roles);
-        verify(authorisation).authoriseByMediaId(3, roles);
+        verify(authorisation).authoriseByMediaId(3L, roles);
         verify(authorisation).authoriseByMediaRequestId(4, roles);
-        verify(authorisation).authoriseByTranscriptionId(5, roles);
+        verify(authorisation).authoriseByTranscriptionId(5L, roles);
         verify(authorisation).authoriseByTransformedMediaId(6, roles);
         verify(authorisation).authoriseByAnnotationId(7, roles);
     }

@@ -205,7 +205,7 @@ public class CaseArchiveRecordMapperImpl extends BaseArchiveRecordMapper impleme
 
     private Long mapToLong(String key, CaseDocumentEntity caseDocument) {
         return switch (key) {
-            case OBJECT_ID_KEY -> Long.valueOf(caseDocument.getId());
+            case OBJECT_ID_KEY -> caseDocument.getId();
             case PARENT_ID_KEY -> Long.valueOf(caseDocument.getCourtCase().getId());
             default -> null;
         };
