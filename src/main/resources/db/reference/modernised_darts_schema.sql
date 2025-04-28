@@ -349,7 +349,15 @@
 --v72.5 add storage_id to media, transcription_document, daily_list,annotation_document, object_retrieval_queue
 --v72_6 add osr_uuid to daily_list
 --    amend external_location to be character varying from uuid, in daily_list, external_object_directory & transient_object_directory  
-
+--v72_7 removing caching from sequences
+--    amend INT to BIGINT for mlc_id & elc_id
+--v72_8 amend INT to BIGINT for 
+--         eve_id ( data_anonymisation,event,event_linked_case,hearing_event_ae )
+--         med_id ( external_object_directory, hearing_media_ae, media, media_linked_case,object_admin_action,object_retrieval_queue )
+--         eod_id ( external_object_directory, extobjdir_process_detail )
+--         epd_id ( extobjdir_process_detail )
+--         aud_id ( audit )
+--         not_id ( notification )
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -570,7 +578,7 @@ COMMENT ON COLUMN arm_rpo_status.aru_id
 IS 'primary key of arm_rpo_status';
 
 CREATE TABLE audit
-(aud_id                      INTEGER                       NOT NULL
+(aud_id                      BIGINT                        NOT NULL
 ,cas_id                      INTEGER                       
 ,aua_id                      INTEGER                       NOT NULL
 ,usr_id                      INTEGER                       NOT NULL
@@ -813,7 +821,7 @@ IS 'foreign key to courthouse';
 
 CREATE TABLE data_anonymisation
 (dan_id                      INTEGER                       NOT NULL
-,eve_id                      INTEGER                                  -- only one of these must be populated, unenforced FK
+,eve_id                      BIGINT                                  -- only one of these must be populated, unenforced FK
 ,trc_id                      INTEGER                                  -- only one of these must be populated, unenforced FK
 ,is_manual_request           BOOLEAN
 ,requested_by                INTEGER                       NOT NULL
@@ -923,7 +931,7 @@ IS 'foreign key from court_case';
 
 
 CREATE TABLE event
-(eve_id                      INTEGER                       NOT NULL
+(eve_id                      BIGINT                        NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
 ,evh_id                      INTEGER                       NOT NULL  --  based on the content of dm_sysobject.object_name 
 ,event_object_id             CHARACTER VARYING(16)                   -- legacy id of this event
@@ -1006,8 +1014,8 @@ COMMENT ON COLUMN event_handler.handler
 IS 'to indicate if the event pertains to reporting restrictions, both application of, and lifting, in order to provide timeline of RR as applied to a case';
 
 CREATE TABLE event_linked_case
-(elc_id                      INTEGER                       NOT NULL
-,eve_id                      INTEGER                       NOT NULL     -- unenforced FK to event
+(elc_id                      BIGINT                        NOT NULL
+,eve_id                      BIGINT                        NOT NULL     -- unenforced FK to event
 ,cas_id                      INTEGER                                    -- unenforced and optional FK
 ,courthouse_name             CHARACTER VARYING         
 ,case_number                 CHARACTER VARYING         
@@ -1017,10 +1025,10 @@ COMMENT ON TABLE event_linked_case
 IS 'content is to be populated via migration';
 
 CREATE TABLE external_object_directory
-(eod_id                      INTEGER                       NOT NULL
+(eod_id                      BIGINT                        NOT NULL
 ,ado_id                      INTEGER                                 -- FK to annotation_document
 ,cad_id                      INTEGER                                 -- FK to case_document
-,med_id                      INTEGER                                 -- FK to media
+,med_id                      BIGINT                                  -- FK to media
 ,trd_id                      INTEGER                                 -- FK to transcription_document
 ,ors_id                      INTEGER                       NOT NULL  -- FK to object_record_status
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
@@ -1065,8 +1073,8 @@ COMMENT ON COLUMN external_object_directory.ado_id
 IS 'foreign key from annotation_document';
 
 CREATE TABLE extobjdir_process_detail
-(epd_id                       INTEGER                       NOT NULL
-,eod_id                       INTEGER                       NOT NULL          UNIQUE
+(epd_id                       BIGINT                        NOT NULL
+,eod_id                       BIGINT                        NOT NULL          UNIQUE
 ,event_date_ts                TIMESTAMP WITH TIME ZONE
 ,update_retention             BOOLEAN                       NOT NULL
 ,input_upload_filename        CHARACTER VARYING
@@ -1169,7 +1177,7 @@ IS 'foreign key from annotation, part of composite natural key and PK';
 
 CREATE TABLE hearing_event_ae
 (hea_id                      INTEGER                       NOT NULL
-,eve_id                      INTEGER                       NOT NULL
+,eve_id                      BIGINT                        NOT NULL
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN hearing_event_ae.hea_id
@@ -1191,7 +1199,7 @@ IS 'foreign key from judge, part of composite natural key and PK';
 
 CREATE TABLE hearing_media_ae
 (hea_id                      INTEGER                       NOT NULL
-,med_id                      INTEGER                       NOT NULL
+,med_id                      BIGINT                        NOT NULL
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN hearing_media_ae.hea_id
@@ -1224,7 +1232,7 @@ COMMENT ON COLUMN judge.jud_id
 IS 'primary key of judge';
 
 CREATE TABLE media
-(med_id                      INTEGER                       NOT NULL
+(med_id                      BIGINT                        NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
 ,media_object_id             CHARACTER VARYING(16)                  -- legacy id of this media
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy id of the content record associated with the external media
@@ -1285,8 +1293,8 @@ COMMENT ON COLUMN media.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_media';
 
 CREATE TABLE media_linked_case
-(mlc_id                      INTEGER                       NOT NULL
-,med_id                      INTEGER                       NOT NULL     -- unenforced FK to media
+(mlc_id                      BIGINT                        NOT NULL
+,med_id                      BIGINT                        NOT NULL     -- unenforced FK to media
 ,cas_id                      INTEGER                                    -- unenforced and optional FK
 ,courthouse_name             CHARACTER VARYING
 ,case_number                 CHARACTER VARYING
@@ -1358,7 +1366,7 @@ COMMENT ON COLUMN node_register.ctr_id
 IS 'foreign key from moj_courtroom, legacy stored courthouse and courtroon un-normalised';
 
 CREATE TABLE notification
-(not_id                      INTEGER                       NOT NULL
+(not_id                      BIGINT                        NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,notification_event          CHARACTER VARYING             NOT NULL
 ,notification_status         CHARACTER VARYING             NOT NULL
@@ -1396,7 +1404,7 @@ CREATE TABLE object_admin_action
 (oaa_id                      INTEGER                       NOT NULL           
 ,ado_id                      INTEGER
 ,cad_id                      INTEGER
-,med_id                      INTEGER
+,med_id                      BIGINT
 ,trd_id                      INTEGER
 ,ohr_id                      INTEGER  
 ,hidden_by                   INTEGER
@@ -1430,7 +1438,7 @@ IS 'used to record acceptable statuses found in [external/transient]_object_dire
 
 CREATE TABLE object_retrieval_queue
 (orq_id                      INTEGER                       NOT NULL
-,med_id                      INTEGER
+,med_id                      BIGINT 
 ,trd_id                      INTEGER
 ,parent_object_id            CHARACTER VARYING
 ,content_object_id           CHARACTER VARYING
@@ -1951,52 +1959,52 @@ ALTER TABLE user_account            ADD PRIMARY KEY USING INDEX user_account_pk;
 
 
 -- defaults for postgres sequences, datatype->bigint, increment->1, nocycle is default, owned by none
-CREATE SEQUENCE ann_seq CACHE 20;
-CREATE SEQUENCE ado_seq CACHE 20;
-CREATE SEQUENCE aat_seq CACHE 20;
-CREATE SEQUENCE ard_seq CACHE 20;
-CREATE SEQUENCE are_seq CACHE 20;
-CREATE SEQUENCE aru_seq CACHE 20;
-CREATE SEQUENCE aud_seq CACHE 20;
-CREATE SEQUENCE aua_seq CACHE 20 RESTART WITH 8;
-CREATE SEQUENCE aut_seq CACHE 20;
-CREATE SEQUENCE cad_seq CACHE 20;
-CREATE SEQUENCE cas_seq CACHE 20;
+CREATE SEQUENCE ann_seq CACHE 1;
+CREATE SEQUENCE ado_seq CACHE 1;
+CREATE SEQUENCE aat_seq CACHE 1;
+CREATE SEQUENCE ard_seq CACHE 1;
+CREATE SEQUENCE are_seq CACHE 1;
+CREATE SEQUENCE aru_seq CACHE 1;
+CREATE SEQUENCE aud_seq CACHE 1;
+CREATE SEQUENCE aua_seq CACHE 1 RESTART WITH 8;
+CREATE SEQUENCE aut_seq CACHE 1;
+CREATE SEQUENCE cad_seq CACHE 1;
+CREATE SEQUENCE cas_seq CACHE 1;
 CREATE SEQUENCE cth_seq CACHE 1;
-CREATE SEQUENCE ctr_seq CACHE 20;
-CREATE SEQUENCE dal_seq CACHE 20;
-CREATE SEQUENCE dan_seq CACHE 20;
-CREATE SEQUENCE dfc_seq CACHE 20;
-CREATE SEQUENCE dfd_seq CACHE 20;
-CREATE SEQUENCE eve_seq CACHE 20;
-CREATE SEQUENCE evh_seq CACHE 20;
-CREATE SEQUENCE eod_seq CACHE 20;
-CREATE SEQUENCE epd_seq CACHE 20;
-CREATE SEQUENCE elt_seq CACHE 20;
-CREATE SEQUENCE elc_seq CACHE 20;
-CREATE SEQUENCE esa_seq CACHE 20;
-CREATE SEQUENCE jud_seq CACHE 20;
-CREATE SEQUENCE hea_seq CACHE 20;
-CREATE SEQUENCE med_seq CACHE 20;
-CREATE SEQUENCE mlc_seq CACHE 20;
-CREATE SEQUENCE mer_seq CACHE 20;
+CREATE SEQUENCE ctr_seq CACHE 1;
+CREATE SEQUENCE dal_seq CACHE 1;
+CREATE SEQUENCE dan_seq CACHE 1;
+CREATE SEQUENCE dfc_seq CACHE 1;
+CREATE SEQUENCE dfd_seq CACHE 1;
+CREATE SEQUENCE eve_seq CACHE 1;
+CREATE SEQUENCE evh_seq CACHE 1;
+CREATE SEQUENCE eod_seq CACHE 1;
+CREATE SEQUENCE epd_seq CACHE 1;
+CREATE SEQUENCE elt_seq CACHE 1;
+CREATE SEQUENCE elc_seq CACHE 1;
+CREATE SEQUENCE esa_seq CACHE 1;
+CREATE SEQUENCE jud_seq CACHE 1;
+CREATE SEQUENCE hea_seq CACHE 1;
+CREATE SEQUENCE med_seq CACHE 1;
+CREATE SEQUENCE mlc_seq CACHE 1;
+CREATE SEQUENCE mer_seq CACHE 1;
 CREATE SEQUENCE nod_seq CACHE 1 START WITH 50000;   -- sequence for node_register.node_id
-CREATE SEQUENCE not_seq CACHE 20;
-CREATE SEQUENCE oaa_seq CACHE 20;
-CREATE SEQUENCE ohr_seq CACHE 20;
+CREATE SEQUENCE not_seq CACHE 1;
+CREATE SEQUENCE oaa_seq CACHE 1;
+CREATE SEQUENCE ohr_seq CACHE 1;
 CREATE SEQUENCE ors_seq CACHE 1;
-CREATE SEQUENCE orq_seq CACHE 20;
-CREATE SEQUENCE prn_seq CACHE 20;
-CREATE SEQUENCE reg_seq CACHE 20;
-CREATE SEQUENCE rep_seq CACHE 20;
-CREATE SEQUENCE tod_seq CACHE 20;
-CREATE SEQUENCE tra_seq CACHE 20;
-CREATE SEQUENCE trc_seq CACHE 20;
-CREATE SEQUENCE trd_seq CACHE 20;
-CREATE SEQUENCE tlc_seq CACHE 20;
-CREATE SEQUENCE trw_seq CACHE 20;
+CREATE SEQUENCE orq_seq CACHE 1;
+CREATE SEQUENCE prn_seq CACHE 1;
+CREATE SEQUENCE reg_seq CACHE 1;
+CREATE SEQUENCE rep_seq CACHE 1;
+CREATE SEQUENCE tod_seq CACHE 1;
+CREATE SEQUENCE tra_seq CACHE 1;
+CREATE SEQUENCE trc_seq CACHE 1;
+CREATE SEQUENCE trd_seq CACHE 1;
+CREATE SEQUENCE tlc_seq CACHE 1;
+CREATE SEQUENCE trw_seq CACHE 1;
 CREATE SEQUENCE trm_seq CACHE 1;
-CREATE SEQUENCE usr_seq CACHE 20;
+CREATE SEQUENCE usr_seq CACHE 1;
 
 
 -- foreign keys
