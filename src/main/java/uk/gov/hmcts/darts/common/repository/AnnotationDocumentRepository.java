@@ -9,8 +9,8 @@ import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 import java.util.List;
 
 @Repository
-public interface AnnotationDocumentRepository extends JpaRepository<AnnotationDocumentEntity, Integer>,
-    SoftDeleteRepository<AnnotationDocumentEntity, Integer> {
+public interface AnnotationDocumentRepository extends JpaRepository<AnnotationDocumentEntity, Long>,
+    SoftDeleteRepository<AnnotationDocumentEntity, Long> {
 
 
     @Query("""

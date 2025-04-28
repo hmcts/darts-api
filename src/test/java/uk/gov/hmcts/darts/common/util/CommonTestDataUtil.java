@@ -89,7 +89,7 @@ public class CommonTestDataUtil {
         return createEventWith(1, 1, eventText, hearingEntity, eventHandlerEntity, eventTimestamp, null, true);
     }
 
-    public static EventEntity createEventWith(int id, Integer eventId, String eventText, HearingEntity hearingEntity,
+    public static EventEntity createEventWith(long id, Integer eventId, String eventText, HearingEntity hearingEntity,
                                               EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp, OffsetDateTime createdDateTime,
                                               boolean isCurrent) {
 
@@ -122,7 +122,7 @@ public class CommonTestDataUtil {
 
     public CourtroomEntity createCourtroom(CourthouseEntity courthouse, String name) {
         CourtroomEntity courtroom = new CourtroomEntity();
-        courtroom.setId(getStringId(courthouse.getCourthouseName() + name));
+        courtroom.setId(getStringIdInt(courthouse.getCourthouseName() + name));
         courtroom.setCourthouse(courthouse);
         courtroom.setName(name);
         return courtroom;
@@ -134,7 +134,12 @@ public class CommonTestDataUtil {
     }
 
     //gets an ID that is unique-ish to that string. The same string will always produce the same ID.
-    private int getStringId(String input) {
+    private long getStringIdLong(String input) {
+        return getStringIdInt(input);
+    }
+
+    //gets an ID that is unique-ish to that string. The same string will always produce the same ID.
+    private Integer getStringIdInt(String input) {
         int sum = 0;
         char[] ch = input.toCharArray();
         for (char c : ch) {
@@ -271,7 +276,7 @@ public class CommonTestDataUtil {
         mediaEntity.setChannel(1);
         mediaEntity.setHearings(new HashSet<>(List.of(hearing)));
         mediaEntity.setCourtroom(hearing.getCourtroom());
-        mediaEntity.setId(getStringId("MEDIA_ID" + caseNumber));
+        mediaEntity.setId(getStringIdLong("MEDIA_ID" + caseNumber));
         return mediaEntity;
     }
 
@@ -280,7 +285,7 @@ public class CommonTestDataUtil {
         return createMedia(hearing);
     }
 
-    public MediaEntity createMedia(Set<HearingEntity> hearings, int mediaId) {
+    public MediaEntity createMedia(Set<HearingEntity> hearings, long mediaId) {
         var hearing = hearings.stream()
             .sorted((o1, o2) -> o2.getCreatedDateTime().compareTo(o1.getCreatedDateTime()))
             .findFirst().get();
@@ -335,7 +340,7 @@ public class CommonTestDataUtil {
 
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, UTC));
         transcription.setLegacyObjectId("legacyObjectId");
-        transcription.setId(1);
+        transcription.setId(1L);
         if (generateRequestor) {
             transcription.setRequestedBy(createUserAccountWithId());
         }
@@ -587,12 +592,12 @@ public class CommonTestDataUtil {
     public static List<AnnotationDocumentEntity> createAnnotationDocumentEntityList() {
         List<AnnotationDocumentEntity> annotationDocumentEntityList =
             new ArrayList<>();
-        annotationDocumentEntityList.add(createAnnotationDocumentEntity(1));
-        annotationDocumentEntityList.add(createAnnotationDocumentEntity(2));
+        annotationDocumentEntityList.add(createAnnotationDocumentEntity(1L));
+        annotationDocumentEntityList.add(createAnnotationDocumentEntity(2L));
         return annotationDocumentEntityList;
     }
 
-    public static AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {
+    public static AnnotationDocumentEntity createAnnotationDocumentEntity(Long id) {
         AnnotationDocumentEntity annotationDocumentEntity =
             new AnnotationDocumentEntity();
         annotationDocumentEntity.setId(id);

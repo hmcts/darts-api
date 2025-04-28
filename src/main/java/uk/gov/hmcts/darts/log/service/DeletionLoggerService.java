@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.log.service;
 
 public interface DeletionLoggerService {
 
-    void mediaDeleted(Integer mediaId);
+    void mediaDeleted(Long mediaId);
 
-    void transcriptionDeleted(Integer transcriptionId);
+    void transcriptionDeleted(Long transcriptionId);
 }

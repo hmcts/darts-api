@@ -21,10 +21,10 @@ public interface AdminTranscriptionService {
 
     List<GetTranscriptionDetailAdminResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom);
 
-    GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument);
+    GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Long transcriptionDocument);
 
-    TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
+    TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Long transcriptionDocumentId,
                                                                           TranscriptionDocumentHideRequest transcriptionDocumentHideRequest);
 
-    AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Integer transcriptionDocumentId);
+    AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Long transcriptionDocumentId);
 }

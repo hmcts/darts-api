@@ -68,7 +68,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     }
 
     @Override
-    protected void preProcessResponseFilesActions(int armEodId) {
+    protected void preProcessResponseFilesActions(long armEodId) {
         super.preProcessResponseFilesActions(armEodId);
         getObjectStateRecord(armEodId)
             .ifPresent(this::updateOsrResponseReceivedAttributes);
@@ -132,7 +132,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     }
 
 
-    private Optional<ObjectStateRecordEntity> getObjectStateRecord(int armEod) {
+    private Optional<ObjectStateRecordEntity> getObjectStateRecord(long armEod) {
         Optional<ObjectStateRecordEntity> osrOptional = objectStateRecordRepository.findByArmEodId(armEod);
         if (osrOptional.isEmpty()) {
             log.error("Object State Record not found for Arm EOD {}", armEod);

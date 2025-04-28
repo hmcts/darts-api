@@ -548,7 +548,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
 
-    private void assertTransientObjectDirectoryStateChanged(Integer id) {
+    private void assertTransientObjectDirectoryStateChanged(Long id) {
 
         TransientObjectDirectoryEntity transientObjectDirectory = dartsDatabase.getTransientObjectDirectoryRepository().findById(id).get();
 
@@ -563,7 +563,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         assertEquals(userAccount.getId(), transientObjectDirectory.getTransformedMedia().getLastModifiedById());
     }
 
-    private void assertTransientObjectDirectoryStateNotChanged(Integer id) {
+    private void assertTransientObjectDirectoryStateNotChanged(Long id) {
 
         TransientObjectDirectoryEntity transientObjectDirectory = dartsDatabase.getTransientObjectDirectoryRepository().findById(id).get();
 

@@ -171,13 +171,13 @@ class AnnotationUploadTest {
 
     private AnnotationDocumentEntity someAnnotationDocument() {
         AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
-        annotationDocumentEntity.setId(1);
+        annotationDocumentEntity.setId(1L);
         return annotationDocumentEntity;
     }
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryEntity() {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        externalObjectDirectoryEntity.setId(1);
+        externalObjectDirectoryEntity.setId(1L);
         return externalObjectDirectoryEntity;
     }
 

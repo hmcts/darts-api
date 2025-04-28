@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ArmLoggerServiceImplTest {
 
     private static LogCaptor logCaptor;
-    private static final Integer EOD_ID = 1;
+    private static final Long EOD_ID = 1L;
     private static final Integer EXECUTION_ID = 2;
     private ArmLoggerServiceImpl armLoggerService;
 
@@ -113,7 +113,7 @@ class ArmLoggerServiceImplTest {
     void logArmMissingResponse_24Hours() {
 
         Duration duration = Duration.ofHours(24);
-        armLoggerService.logArmMissingResponse(duration, 123);
+        armLoggerService.logArmMissingResponse(duration, 123L);
 
         var logEntry = String.format("No response files produced by ARM within %s for EOD %s",
                                      "1 day", 123);
@@ -149,7 +149,7 @@ class ArmLoggerServiceImplTest {
     void logArmMissingResponse_36Hours() {
 
         Duration duration = Duration.ofHours(36);
-        armLoggerService.logArmMissingResponse(duration, 321);
+        armLoggerService.logArmMissingResponse(duration, 321L);
 
         var logEntry = String.format("No response files produced by ARM within %s for EOD %s",
                                      "1 day 12 hours", 321);

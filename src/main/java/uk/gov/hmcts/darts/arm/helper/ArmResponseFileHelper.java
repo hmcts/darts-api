@@ -50,7 +50,7 @@ public class ArmResponseFileHelper {
 
                 List<String> relatedArmResponseFilenamesForIuFile = getRelatedArmResponseFilenamesForIuFile(inputUploadFile);
                 for (String associatedFilename : relatedArmResponseFilenamesForIuFile) {
-                    Integer eodIdFromArmFile = getEodIdFromArmFile(associatedFilename);
+                    Long eodIdFromArmFile = getEodIdFromArmFile(associatedFilename);
                     inputUploadAndAssociatedFilenames.addAssociatedFile(eodIdFromArmFile, associatedFilename);
                 }
                 responseList.add(inputUploadAndAssociatedFilenames);
@@ -67,7 +67,7 @@ public class ArmResponseFileHelper {
         return armDataManagementApi.listResponseBlobs(iuHashcode);
     }
 
-    public Integer getEodIdFromArmFile(String armFilename) throws UnableToReadArmFileException {
+    public Long getEodIdFromArmFile(String armFilename) throws UnableToReadArmFileException {
         BinaryData blobData = armDataManagementApi.getBlobData(armFilename);
         if (blobData == null) {
             log.error("Blob data is null for {}.", armFilename);
@@ -76,7 +76,7 @@ public class ArmResponseFileHelper {
         try {
             ArmResponseUploadFileRecordObject armResponseFile = uploadFileMapper.map(blobData.toString());
             String eodIdStr = armResponseFile.getInput().getRelationId();
-            return Integer.parseInt(eodIdStr);
+            return Long.parseLong(eodIdStr);
         } catch (JsonProcessingException e) {
             log.error("Unable to retrieve EodId from arm file {}", armFilename);
             throw new UnableToReadArmFileException(armFilename, e);

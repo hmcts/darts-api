@@ -126,12 +126,12 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         assertAllEventsAreCurrent(eventIdMap);
     }
 
-    private void assertOnlyOneCurrentPerEventId(Map<Integer, List<EventEntity>> eventIdMap, Integer... eveIdsToExclude) {
+    private void assertOnlyOneCurrentPerEventId(Map<Integer, List<EventEntity>> eventIdMap, Long... eveIdsToExclude) {
         eventIdMap.keySet()
             .forEach(eventId -> assertOnlyOneCurrentPerEventId(eventId, eveIdsToExclude));
     }
 
-    private void assertOnlyOneCurrentPerEventId(Integer eventId, Integer... eveIdsToExclude) {
+    private void assertOnlyOneCurrentPerEventId(Integer eventId, Long... eveIdsToExclude) {
         if (eventId == 0) {
             return;
         }
@@ -139,8 +139,8 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         assertOnlyOneCurrentPerEventId(eventEntities, eveIdsToExclude);
     }
 
-    private void assertOnlyOneCurrentPerEventId(List<EventEntity> eventEntities, Integer... eveIdsToExclude) {
-        List<Integer> eventIdsToExclude = List.of(eveIdsToExclude);
+    private void assertOnlyOneCurrentPerEventId(List<EventEntity> eventEntities, Long... eveIdsToExclude) {
+        List<Long> eventIdsToExclude = List.of(eveIdsToExclude);
         assertThat(eventEntities).hasSizeGreaterThanOrEqualTo(3);
         OffsetDateTime maxCreatedDateTime = eventEntities
             .stream()

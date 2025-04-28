@@ -63,7 +63,7 @@ public final class TranscriptionDocumentTestData
         TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
             new TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
 
-        builder.getBuilder().id(1)
+        builder.getBuilder().id(1L)
             .fileName("dummyFileName.txt")
             .fileType("text/plain").fileSize(1024)
             .uploadedDateTime(OffsetDateTime.now())
@@ -84,7 +84,7 @@ public final class TranscriptionDocumentTestData
 
         TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve
             transcriptionEntityBuilderRetrieve = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder();
-        transcriptionEntityBuilderRetrieve.getBuilder().id(1)
+        transcriptionEntityBuilderRetrieve.getBuilder().id(1L)
             .isManualTranscription(true).courtroom(courtroomEntity);
 
         ObjectAdminActionEntity adminActionEntity = ObjectAdminActionTestData.minimalObjectAdminAction();

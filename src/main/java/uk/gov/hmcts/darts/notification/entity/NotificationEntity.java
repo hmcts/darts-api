@@ -44,7 +44,7 @@ public class NotificationEntity extends CreatedModifiedBaseEntity {
     @Column(name = NOT_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "not_gen")
     @SequenceGenerator(name = "not_gen", sequenceName = "not_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @Column(name = EVENT_ID)
     private String eventId;

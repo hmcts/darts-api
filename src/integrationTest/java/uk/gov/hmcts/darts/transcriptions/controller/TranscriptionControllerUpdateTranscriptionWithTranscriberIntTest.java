@@ -59,7 +59,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
 
-    private Integer transcriptionId;
+    private Long transcriptionId;
     private Integer testUserId;
 
     @BeforeEach

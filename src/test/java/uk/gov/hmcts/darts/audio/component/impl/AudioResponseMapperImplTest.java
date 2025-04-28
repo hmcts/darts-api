@@ -27,7 +27,7 @@ class AudioResponseMapperImplTest {
     @Test
     void mapToAudioMetadataShouldMapToExpectedStructure() {
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
+        mediaEntity.setId(1L);
         mediaEntity.setStart(START_TIME);
         mediaEntity.setEnd(END_TIME);
 

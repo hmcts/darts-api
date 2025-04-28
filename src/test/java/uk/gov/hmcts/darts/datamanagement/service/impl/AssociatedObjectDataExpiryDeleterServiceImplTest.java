@@ -34,7 +34,7 @@ import uk.gov.hmcts.darts.task.config.AssociatedObjectDataExpiryDeletionAutomate
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,7 +77,7 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
     @Mock
     private TransactionTemplate transactionTemplate;
 
-    private final AtomicInteger idAddition = new AtomicInteger(123);
+    private final AtomicLong idAddition = new AtomicLong(123);
 
     private AssociatedObjectDataExpiryDeleterServiceImpl associatedObjectDataExpiryDeleterService;
 
@@ -551,7 +551,7 @@ class AssociatedObjectDataExpiryDeleterServiceImplTest {
         return eod;
     }
 
-    private Integer getNextId() {
+    private Long getNextId() {
         return idAddition.getAndIncrement();
     }
 }

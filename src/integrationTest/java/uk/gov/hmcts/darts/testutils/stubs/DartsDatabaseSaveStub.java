@@ -37,7 +37,7 @@ public class DartsDatabaseSaveStub {
             Method getIdInstanceMethod;
             try {
                 getIdInstanceMethod = getIdMethod(entity.getClass());
-                Integer id = (Integer) getIdInstanceMethod.invoke(entity);
+                Object id = getIdInstanceMethod.invoke(entity);
                 if (id == null) {
                     this.entityManager.persist(entity);
                     return entity;

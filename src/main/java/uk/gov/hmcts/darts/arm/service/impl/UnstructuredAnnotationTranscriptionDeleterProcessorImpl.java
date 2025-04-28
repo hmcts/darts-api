@@ -34,12 +34,12 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
     int hoursInArm;
 
     @Override
-    public List<Integer> markForDeletion(int batchSize) {
+    public List<Long> markForDeletion(int batchSize) {
         return markForDeletion(weeksInUnstructured, hoursInArm, batchSize);
     }
 
     @Override
-    public List<Integer> markForDeletion(int weeksBeforeCurrentDateInUnstructured, int hoursBeforeCurrentDateInArm, int batchSize) {
+    public List<Long> markForDeletion(int weeksBeforeCurrentDateInUnstructured, int hoursBeforeCurrentDateInArm, int batchSize) {
 
         OffsetDateTime lastModifiedBeforeCurrentDateForUnstructured = currentTimeHelper.currentOffsetDateTime()
             .minusWeeks(
@@ -48,7 +48,7 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
         OffsetDateTime lastModifiedBeforeCurrentDateForArm = currentTimeHelper.currentOffsetDateTime()
             .minusHours(hoursBeforeCurrentDateInArm);
 
-        List<Integer> recordsMarkedForDeletion
+        List<Long> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(),
                                                   EodHelper.storedStatus(),

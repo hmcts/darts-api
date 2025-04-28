@@ -66,13 +66,13 @@ class MediaIdControllerAuthorisationImpl extends BaseControllerAuthorisation
 
     @Override
     public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
-        authorisation.authoriseByMediaId(jsonNode.path(MEDIA_ID_PARAM).intValue(), roles);
+        authorisation.authoriseByMediaId(jsonNode.path(MEDIA_ID_PARAM).longValue(), roles);
     }
 
     void checkAuthorisationByMediaId(Optional<String> mediaIdParamOptional, Set<SecurityRoleEnum> roles) {
         if (mediaIdParamOptional.isPresent()) {
             try {
-                Integer mediaId = Integer.valueOf(mediaIdParamOptional.get());
+                Long mediaId = Long.valueOf(mediaIdParamOptional.get());
                 authorisation.authoriseByMediaId(mediaId, roles);
             } catch (NumberFormatException ex) {
                 log.error("Unable to parse media_id for checkAuthorisation", ex);

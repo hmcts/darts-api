@@ -21,7 +21,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class TranscriptionDocumentHideOrShowValidator implements Validator<IdRequest<TranscriptionDocumentHideRequest>> {
+public class TranscriptionDocumentHideOrShowValidator implements Validator<IdRequest<TranscriptionDocumentHideRequest, Long>> {
 
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final TranscriptionDocumentIdValidator transcriptionDocumentIdValidator;
@@ -37,7 +37,7 @@ public class TranscriptionDocumentHideOrShowValidator implements Validator<IdReq
         "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
         "PMD.CognitiveComplexity"//TODO - refactor to reduce complexity when this is next edited
     })
-    public void validate(IdRequest<TranscriptionDocumentHideRequest> request) {
+    public void validate(IdRequest<TranscriptionDocumentHideRequest, Long> request) {
         transcriptionDocumentIdValidator.validate(request.getId());
 
         if (request.getPayload().getIsHidden() && request.getPayload().getAdminAction() == null) {

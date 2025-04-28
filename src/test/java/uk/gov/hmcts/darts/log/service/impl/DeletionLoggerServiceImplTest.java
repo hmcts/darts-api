@@ -41,7 +41,7 @@ class DeletionLoggerServiceImplTest {
 
     @Test
     void testMediaDeleted() {
-        var mediaId = 123;
+        var mediaId = 123L;
         deletionLoggerService.mediaDeleted(mediaId);
 
         List<String> logs = logCaptor.getInfoLogs();
@@ -51,7 +51,7 @@ class DeletionLoggerServiceImplTest {
 
     @Test
     void testTranscriptionDeleted() {
-        var transcriptionId = 123;
+        var transcriptionId = 123L;
         deletionLoggerService.transcriptionDeleted(transcriptionId);
 
         List<String> logs = logCaptor.getInfoLogs();

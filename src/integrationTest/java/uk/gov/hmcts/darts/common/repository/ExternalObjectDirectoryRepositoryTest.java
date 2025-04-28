@@ -56,7 +56,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // exercise the logic
-        List<Integer> results = externalObjectDirectoryRepository
+        List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
@@ -80,7 +80,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // excerise the logic
-        List<Integer> results = externalObjectDirectoryRepository
+        List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(), EodHelper.storedStatus(),
                                                   EodHelper.inboundLocation(), EodHelper.armLocation(),
                                                   getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
@@ -103,7 +103,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // exercise the logic
-        List<Integer> results = externalObjectDirectoryRepository
+        List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
@@ -125,7 +125,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         generateDataWithAnnotationForUnstructured(setupArmHoursBeforeCurrentTime, setupUnstructuredWeeksBeforeCurrentTime);
 
         // exercise the logic
-        List<Integer> results = externalObjectDirectoryRepository
+        List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.unstructuredLocation(), EodHelper.armLocation(),
@@ -148,7 +148,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         generateDataWithAnnotationForUnstructured(setupArmHoursBeforeCurrentTime, setupUnstructuredWeeksBeforeCurrentTime);
 
         // exercise the logic
-        List<Integer> results = externalObjectDirectoryRepository
+        List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.unstructuredLocation(), EodHelper.armLocation(),
@@ -171,7 +171,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         int hourDurationBeyondHours = 24; // which no records are
 
         // exercise the logic
-        List<Integer> results = externalObjectDirectoryRepository
+        List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
@@ -243,8 +243,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                    "All results should have either INBOUND or UNSTRUCTURED location type");
     }
 
-    private void assertExpectedResults(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
-        List<Integer> matchesEntity = new ArrayList<>(
+    private void assertExpectedResults(List<Long> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
+        List<Long> matchesEntity = new ArrayList<>(
             actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
 
         assertEquals(resultCount, matchesEntity.size());

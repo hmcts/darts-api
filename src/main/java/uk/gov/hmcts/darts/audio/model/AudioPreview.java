@@ -18,7 +18,7 @@ import java.io.Serializable;
 @EqualsAndHashCode()
 @Getter
 public class AudioPreview implements Serializable {
-    private Integer mediaId;
+    private Long mediaId;
 
     private AudioPreviewStatus status;
 

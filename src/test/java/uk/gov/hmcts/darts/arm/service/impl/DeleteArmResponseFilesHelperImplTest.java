@@ -125,8 +125,8 @@ class DeleteArmResponseFilesHelperImplTest {
     void deleteResponseBlobs_shouldUpdateEodWhenResponsesAreDeleted() {
         // given
         ArmResponseBatchData batchData = mock(ArmResponseBatchData.class);
-        when(batchData.getExternalObjectDirectoryId()).thenReturn(1);
-        when(externalObjectDirectoryService.eagerLoadExternalObjectDirectory(1)).thenReturn(Optional.of(eod));
+        when(batchData.getExternalObjectDirectoryId()).thenReturn(1L);
+        when(externalObjectDirectoryService.eagerLoadExternalObjectDirectory(1L)).thenReturn(Optional.of(eod));
 
         eod.setStatus(EodHelper.armResponseChecksumVerificationFailedStatus());
 
@@ -145,7 +145,7 @@ class DeleteArmResponseFilesHelperImplTest {
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity() {
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
-        eod.setId(1);
+        eod.setId(1L);
         return eod;
     }
 }

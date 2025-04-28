@@ -38,7 +38,7 @@ public class CachingAudioPreviewEncoder {
     }
 
     @Async
-    public void encodeAndCachePreviewFor(Integer mediaId) {
+    public void encodeAndCachePreviewFor(Long mediaId) {
         AudioPreview audioPreview = getPreviewFor(mediaId);
         try {
             log.info("Encoding media with ID {}", mediaId);
@@ -54,7 +54,7 @@ public class CachingAudioPreviewEncoder {
         cache(mediaId, audioPreview);
     }
 
-    public void cache(Integer key, AudioPreview audioPreview) {
+    public void cache(Long key, AudioPreview audioPreview) {
         binaryDataRedisService.writeToRedis(folder, key.toString(), audioPreview);
         Long ttl = ttlInMinutes;
         if (audioPreview.getStatus().equals(FAILED)) {
@@ -63,7 +63,7 @@ public class CachingAudioPreviewEncoder {
         binaryDataRedisService.setTtl(folder, key.toString(), ttl, TimeUnit.MINUTES);
     }
 
-    public AudioPreview getPreviewFor(Integer key) {
+    public AudioPreview getPreviewFor(Long key) {
         return binaryDataRedisService.readFromRedis(folder,  key.toString());
     }
 

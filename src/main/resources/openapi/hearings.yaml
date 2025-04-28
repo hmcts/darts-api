@@ -359,6 +359,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           example: 1
         timestamp:
           type: string
@@ -403,6 +404,7 @@ components:
         properties:
           id:
             type: integer
+            format: int64
             example: 1
           start_at:
             type: string
@@ -557,6 +559,7 @@ components:
         transcription_id:
           type: integer
           example: 1
+          format: int64
         hearing_id:
           type: integer
           example: 2
@@ -606,6 +609,7 @@ components:
       properties:
         annotation_document_id:
           type: integer
+          format: int64
           example: 1
         file_name:
           type: string

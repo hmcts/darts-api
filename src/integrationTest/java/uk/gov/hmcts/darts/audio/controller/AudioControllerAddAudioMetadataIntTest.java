@@ -299,9 +299,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
 
         guid = UUID.randomUUID().toString();
-        Integer newMedia = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_2, originalMedia.getId().toString(), originalMedia.getId().toString());
+        Long newMedia = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_2, originalMedia.getId().toString(), originalMedia.getId().toString());
         guid = UUID.randomUUID().toString();
-        Integer newMedia2 = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_3, newMedia.toString(), originalMedia.getId().toString());
+        Long newMedia2 = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_3, newMedia.toString(), originalMedia.getId().toString());
         assertNotEquals(newMedia, newMedia2);
         Optional<MediaEntity> newMediaEntity = dartsDatabase.getMediaRepository().findById(newMedia);
         assertEquals(false, newMediaEntity.get().getIsCurrent());
@@ -526,7 +526,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             media.setIsCurrent(false);
             return dartsDatabase.save(media);
         };
-        final TriConsumer<Integer, MediaEntity, MediaEntity> alignDataMediaEntity = (chronicleId, previousMedia, newMediaEntity) -> {
+        final TriConsumer<Long, MediaEntity, MediaEntity> alignDataMediaEntity = (chronicleId, previousMedia, newMediaEntity) -> {
             newMediaEntity.setChronicleId(String.valueOf(chronicleId));
             newMediaEntity.setAntecedentId(String.valueOf(previousMedia.getId()));
         };
@@ -680,7 +680,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     }
 
     @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
-    private Integer uploadAnotherAudioWithSize(Path audioBinaryPayload, String expectedAntecedantId, String expectedChronicleId) throws Exception {
+    private Long uploadAnotherAudioWithSize(Path audioBinaryPayload, String expectedAntecedantId, String expectedChronicleId) throws Exception {
         makeAddAudioCall(audioBinaryPayload)
             .andExpect(status().isOk());
 

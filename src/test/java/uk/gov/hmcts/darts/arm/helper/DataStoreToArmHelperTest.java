@@ -84,7 +84,7 @@ class DataStoreToArmHelperTest {
             ARM,
             ARM_INGESTION,
             UUID.randomUUID().toString());
-        externalObjectDirectoryEntity.setId(345);
+        externalObjectDirectoryEntity.setId(345L);
         externalObjectDirectoryEntity.setStatus(EodHelper.armIngestionStatus());
         externalObjectDirectoryEntity.setOsrUuid(1234L);
         externalObjectDirectoryEntity.getStatus().setDescription(ARM_INGESTION.name());
@@ -102,11 +102,11 @@ class DataStoreToArmHelperTest {
         ExternalLocationTypeEntity armLocation = EodHelper.armLocation();
 
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(anyList(), any(), anyInt(), any(Pageable.class)))
-            .thenReturn(List.of(123));
+            .thenReturn(List.of(123L));
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         // when
-        List<Integer> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
+        List<Long> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
 
         // then
         assertNotNull(result);

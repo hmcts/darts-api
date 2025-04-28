@@ -201,6 +201,7 @@ paths:
           name: transcription_id
           schema:
             type: integer
+            format: int64
           description: "transcription_id is the internal id of the transcription."
           required: true
       operationId: getTranscription
@@ -258,6 +259,7 @@ paths:
           name: transcription_id
           schema:
             type: integer
+            format: int64
           required: true
       requestBody:
         required: true
@@ -360,6 +362,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: OK
@@ -439,6 +442,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       requestBody:
         content:
           multipart/form-data:
@@ -650,6 +654,7 @@ paths:
           name: transcription_id
           schema:
             type: integer
+            format: int64
           required: true
       requestBody:
         required: true
@@ -833,6 +838,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
             description: Return only workflow items that relate to the provided transcription id
       responses:
         '200':
@@ -932,6 +938,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: OK
@@ -968,6 +975,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -1017,6 +1025,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: OK
@@ -1086,7 +1095,7 @@ components:
           type: integer
           example: 1234
           minimum: 1
-          maximum: 2147483647
+          format: int64
         case_number:
           type: string
           example: C123
@@ -1123,6 +1132,7 @@ components:
         transcription_id:
           type: integer
           example: 1234
+          format: int64
         case_id:
           type: integer
           description: 'The case id'
@@ -1229,6 +1239,7 @@ components:
         transcription_id:
           type: integer
           example: "1001"
+          format: int64
         hide_request_from_requestor:
           type: boolean
           example: true
@@ -1240,6 +1251,7 @@ components:
       properties:
         transcription_id:
           type: integer
+          format: int64
     GetYourTranscriptsResponse:
       type: object
       properties:
@@ -1358,6 +1370,7 @@ components:
       properties:
         transcription_id:
           type: integer
+          format: int64
         transcription_status_id:
           type: integer
     UpdateTranscription404ErrorCode:
@@ -1398,6 +1411,7 @@ components:
       properties:
         transcription_document_id:
           type: integer
+          format: int64
         transcription_workflow_id:
           type: integer
     AttachTranscript400ErrorCode:
@@ -1477,6 +1491,7 @@ components:
         transcription_id:
           type: integer
           example: 12345
+          format: int64
           description: The transcription_id of the transcription request.
         case_id:
           type: integer
@@ -1610,6 +1625,7 @@ components:
       properties:
         transcription_id:
           type: integer
+          format: int64
         case_number:
           type: string
         courthouse_id:
@@ -1664,9 +1680,11 @@ components:
       properties:
         transcription_document_id:
           type: integer
+          format: int64
           description: 'The transcription document id'
         transcription_id:
           type: integer
+          format: int64
           description: 'The transcription id'
         case:
           type: object
@@ -1702,9 +1720,11 @@ components:
       properties:
         transcription_document_id:
           type: integer
+          format: int64
           description: 'The transcription document id'
         transcription_id:
           type: integer
+          format: int64
           description: 'The transcription id'
         file_type:
           type: string
@@ -1808,6 +1828,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           description: 'The transcription document id'
         is_hidden:
           type: boolean
@@ -1820,6 +1841,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           description: 'The transcription document id'
         is_hidden:
           type: boolean
@@ -1866,6 +1888,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           description: 'The transcription document id'
 
     CaseResponseDetails:
@@ -1909,6 +1932,7 @@ components:
       properties:
         transcription_document_id:
           type: integer
+          format: int64
           description: 'The transcription document id'
         transcription:
           $ref: '#/components/schemas/TranscriptionResponseDetails'

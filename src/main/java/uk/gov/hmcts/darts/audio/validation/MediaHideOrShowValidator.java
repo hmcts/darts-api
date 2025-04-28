@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRequest>> {
+public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRequest, Long>> {
 
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final MediaIdValidator mediaIdValidator;
@@ -39,7 +39,7 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
 
     })
 
-    public void validate(IdRequest<MediaHideRequest> request) {
+    public void validate(IdRequest<MediaHideRequest, Long> request) {
         mediaIdValidator.validate(request.getId());
 
         AdminActionRequest adminActionRequest = request.getPayload().getAdminAction();

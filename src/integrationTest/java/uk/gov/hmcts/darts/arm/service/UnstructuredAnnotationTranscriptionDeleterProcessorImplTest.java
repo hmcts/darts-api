@@ -49,7 +49,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
 
         // exercise the logic
-        List<Integer> updatedResults
+        List<Long> updatedResults
             = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm, 1000);
 
         // assert the logic
@@ -71,7 +71,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
 
         // exercise the logic
-        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(1000);
+        List<Long> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(1000);
 
         // assert the logic
         assertExpectedResults(updatedResults,
@@ -93,7 +93,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
             = generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
 
         // exercise the logic
-        List<Integer> updatedResults
+        List<Long> updatedResults
             = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm + 1,
                                                                             1000);
 
@@ -151,9 +151,9 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
     }
 
 
-    private void assertExternalObjectDirectoryUpdate(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
+    private void assertExternalObjectDirectoryUpdate(List<Long> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
         // find matching pn expected results
-        List<Integer> matchesEntity = new ArrayList<>(
+        List<Long> matchesEntity = new ArrayList<>(
             actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
 
         Assertions.assertEquals(resultCount, matchesEntity.size());
@@ -162,8 +162,8 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
     }
 
 
-    private void assertExpectedResults(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
-        List<Integer> matchesEntity = new ArrayList<>(
+    private void assertExpectedResults(List<Long> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
+        List<Long> matchesEntity = new ArrayList<>(
             actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
 
         Assertions.assertEquals(resultCount, matchesEntity.size());

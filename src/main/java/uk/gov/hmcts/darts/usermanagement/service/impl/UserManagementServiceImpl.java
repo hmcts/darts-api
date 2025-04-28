@@ -164,14 +164,14 @@ public class UserManagementServiceImpl implements UserManagementService {
             String.format("User id %d not found", userId));
     }
 
-    private List<Integer> updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
-        List<Integer> rolledBackTranscriptions = updateEntity(userPatch, userEntity);
+    private List<Long> updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
+        List<Long> rolledBackTranscriptions = updateEntity(userPatch, userEntity);
         userAccountRepository.save(userEntity);
         return rolledBackTranscriptions;
     }
 
-    private List<Integer> updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
-        List<Integer> rolledBackTranscriptionsList = new ArrayList<>();
+    private List<Long> updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
+        List<Long> rolledBackTranscriptionsList = new ArrayList<>();
 
         if (userPatch.getEmailAddress() != null && !userPatch.getEmailAddress().equals(userAccountEntity.getEmailAddress())) {
             userEmailValidator.validate(new User(userPatch.getFullName(), userPatch.getEmailAddress(), null, null, null));

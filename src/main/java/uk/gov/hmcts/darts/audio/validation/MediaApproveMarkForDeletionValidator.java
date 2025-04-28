@@ -15,7 +15,7 @@ import static java.util.Objects.isNull;
 
 @Component
 @RequiredArgsConstructor
-public class MediaApproveMarkForDeletionValidator implements Validator<Integer> {
+public class MediaApproveMarkForDeletionValidator implements Validator<Long> {
 
     private final MediaIdValidator mediaIdValidator;
     private final ObjectAdminActionRepository objectAdminActionRepository;
@@ -24,7 +24,7 @@ public class MediaApproveMarkForDeletionValidator implements Validator<Integer> 
 
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
-    public void validate(Integer mediaId) {
+    public void validate(Long mediaId) {
         mediaIdValidator.validate(mediaId);
         var objectAdminActionEntityList = objectAdminActionRepository.findByMediaId(mediaId);
         if (objectAdminActionEntityList.isEmpty()) {

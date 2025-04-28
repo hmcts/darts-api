@@ -5,9 +5,9 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 public class MediaIdMatcher implements ArgumentMatcher<MediaEntity> {
 
-    private final Integer id;
+    private final Long id;
 
-    public MediaIdMatcher(Integer id) {
+    public MediaIdMatcher(Long id) {
         this.id = id;
 
     }

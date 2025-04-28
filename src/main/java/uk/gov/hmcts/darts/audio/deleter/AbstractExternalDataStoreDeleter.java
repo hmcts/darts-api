@@ -11,7 +11,7 @@ import java.util.Collection;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory,
-    R extends JpaRepository<T, Integer>>
+    R extends JpaRepository<T, Long>>
     implements ExternalDataStoreDeleter<T> {
 
     @Getter
@@ -36,7 +36,7 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
 
     protected boolean deleteFromDataStore(T entityToBeDeleted) {
         String externalLocation = entityToBeDeleted.getLocation();
-        Integer entityId = entityToBeDeleted.getId();
+        Long entityId = entityToBeDeleted.getId();
         int statusId = entityToBeDeleted.getStatusId();
         log.info(
             "Deleting storage data with externalLocation={} for entityId={} and statusId={}",

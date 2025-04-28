@@ -51,9 +51,9 @@ class CachingAudioPreviewEncoderTest {
     void cachesPreviewOnSuccessfulEncoding() {
         AudioPreview cachedAudioPreview = someAudioPreview();
         when(binaryDataRedisService.readFromRedis(FOLDER, "1")).thenReturn(cachedAudioPreview);
-        when(audioService.encode(1)).thenReturn(someBinaryData());
+        when(audioService.encode(1L)).thenReturn(someBinaryData());
 
-        cachingAudioPreviewEncoder.encodeAndCachePreviewFor(1);
+        cachingAudioPreviewEncoder.encodeAndCachePreviewFor(1L);
 
         verify(binaryDataRedisService, times(1))
             .writeToRedis(eq(FOLDER), eq("1"), previewCaptor.capture());
@@ -68,9 +68,9 @@ class CachingAudioPreviewEncoderTest {
     void cachesPreviewOnFailedEncoding() {
         AudioPreview cachedAudioPreview = someAudioPreview();
         when(binaryDataRedisService.readFromRedis(FOLDER, "1")).thenReturn(cachedAudioPreview);
-        when(audioService.encode(1)).thenThrow(new RuntimeException());
+        when(audioService.encode(1L)).thenThrow(new RuntimeException());
 
-        cachingAudioPreviewEncoder.encodeAndCachePreviewFor(1);
+        cachingAudioPreviewEncoder.encodeAndCachePreviewFor(1L);
 
         verify(binaryDataRedisService, times(1))
             .writeToRedis(eq(FOLDER), eq("1"), previewCaptor.capture());

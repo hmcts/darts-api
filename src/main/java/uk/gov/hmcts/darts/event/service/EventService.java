@@ -8,11 +8,11 @@ import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
 import java.util.Set;
 
 public interface EventService {
-    AdminGetEventById200Response adminGetEventById(Integer eventId);
+    AdminGetEventById200Response adminGetEventById(Long eveId);
 
-    AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Integer eventId);
+    AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Long eveId);
 
-    EventEntity getEventByEveId(Integer eveId);
+    EventEntity getEventByEveId(Long eveId);
 
     EventEntity saveEvent(EventEntity eventEntity);
 

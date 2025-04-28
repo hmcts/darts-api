@@ -14,14 +14,14 @@ import uk.gov.hmcts.darts.common.validation.IdRequest;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AudioMediaPatchRequestValidator implements Validator<IdRequest<MediaPatchRequest>> {
+public class AudioMediaPatchRequestValidator implements Validator<IdRequest<MediaPatchRequest, Integer>> {
     private final UserAccountRepository userAccountRepository;
 
     private final MediaRequestRepository mediaRequestRepository;
 
     @Override
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
-    public void validate(IdRequest<MediaPatchRequest> patchRequest) {
+    public void validate(IdRequest<MediaPatchRequest, Integer> patchRequest) {
         if (patchRequest.getId() == null || !mediaRequestRepository.findById(patchRequest.getId()).isPresent()) {
             throw new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND);
         }

@@ -27,7 +27,7 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
     private final TranscriptionStatusRepository transcriptionStatusRepository;
 
     @Override
-    public List<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Integer> transcriptionIds) {
+    public List<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Long> transcriptionIds) {
 
         Optional<TranscriptionStatusEntity> transcriptionStatusEntity = transcriptionStatusRepository.findById(TranscriptionStatusEnum.APPROVED.getId());
         return transcriptionRepository.searchTranscriptionsFilteringOn(
@@ -44,7 +44,7 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
     }
 
     @Override
-    public List<Integer> findTranscriptionsIdsCurrentlyOwnedBy(String owner) {
+    public List<Long> findTranscriptionsIdsCurrentlyOwnedBy(String owner) {
         return transcriptionWorkflowRepository.findWorkflowOwnedBy(owner).stream()
             .map(TranscriptionIdsAndLatestWorkflowTs::transcriptionId).toList();
     }

@@ -50,23 +50,23 @@ public interface LogApi {
 
     void taskFailed(UUID taskExecutionId, String taskName);
 
-    void armPushSuccessful(Integer eodId);
+    void armPushSuccessful(Long eodId);
 
-    void armPushFailed(Integer eodId);
+    void armPushFailed(Long eodId);
 
-    void archiveToArmSuccessful(Integer eodId);
+    void archiveToArmSuccessful(Long eodId);
 
-    void archiveToArmFailed(Integer eodId);
+    void archiveToArmFailed(Long eodId);
 
     void caseDeletedDueToExpiry(Integer caseId, String caseNumber);
 
     void manualObfuscation(EventEntity eventEntity);
 
-    void mediaDeleted(Integer mediaId);
+    void mediaDeleted(Long mediaId);
 
-    void transcriptionDeleted(Integer transcriptionId);
+    void transcriptionDeleted(Long transcriptionId);
 
-    void logArmMissingResponse(Duration armMissingResponseDuration, Integer id);
+    void logArmMissingResponse(Duration armMissingResponseDuration, Long id);
 
     void armRpoSearchSuccessful(Integer executionId);
 
@@ -77,5 +77,5 @@ public interface LogApi {
     void armRpoPollingFailed(Integer executionId);
 
     void addAudioSmallFileWithLongDuration(String courthouse, String courtroom, OffsetDateTime startDate, OffsetDateTime finishDate,
-                                           Integer medId, Long fileSize);
+                                           Long medId, Long fileSize);
 }

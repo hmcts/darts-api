@@ -17,7 +17,7 @@ public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInse
 
     @lombok.Builder
     public TestCaseDocumentEntity(
-        Integer id,
+        Long id,
         CourtCaseEntity courtCase,
         String fileName,
         String fileType,

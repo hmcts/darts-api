@@ -143,7 +143,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         List<TranscriptionStatusEntity> excludedStatuses = List.of(transcriptionApproved.getTranscriptionStatus());
 
         // when
-        List<Integer> result = transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+        List<Long> result = transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
             excludedStatuses, createdDateTime, Limit.of(10)
         );
 
@@ -161,7 +161,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         List<TranscriptionStatusEntity> excludedStatuses = List.of(transcriptionApproved.getTranscriptionStatus());
 
         // when
-        List<Integer> result = transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+        List<Long> result = transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
             excludedStatuses, createdDateTime, Limit.of(10)
         );
 

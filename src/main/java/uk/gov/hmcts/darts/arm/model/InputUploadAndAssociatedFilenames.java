@@ -14,7 +14,7 @@ public class InputUploadAndAssociatedFilenames {
     String inputUploadFilename;
     List<EodIdAndAssociatedFilenames> eodIdAndAssociatedFilenamesList = new ArrayList<>();
 
-    public void addAssociatedFile(Integer eodId, String filename) {
+    public void addAssociatedFile(Long eodId, String filename) {
         for (EodIdAndAssociatedFilenames eodIdAndAssociatedFilenames : eodIdAndAssociatedFilenamesList) {
             if (eodId.equals(eodIdAndAssociatedFilenames.getEodId())) {
                 eodIdAndAssociatedFilenames.addAssociatedFile(filename);

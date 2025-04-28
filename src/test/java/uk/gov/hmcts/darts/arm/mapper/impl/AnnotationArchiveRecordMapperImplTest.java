@@ -58,13 +58,13 @@ class AnnotationArchiveRecordMapperImplTest {
         annotationEntity.setHearings(Set.of(hearing));
         annotationEntity.setTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         annotationEntity.setText("annotationText");
-        annotationDocument = createAnnotationDocumentEntity(11);
+        annotationDocument = createAnnotationDocumentEntity(11L);
         annotationDocument.setAnnotation(annotationEntity);
         annotationEntity.setAnnotationDocuments(List.of(annotationDocument));
 
         externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setAnnotationDocumentEntity(annotationDocument);
-        externalObjectDirectory.setId(1);
+        externalObjectDirectory.setId(1L);
 
         annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
     }
@@ -152,6 +152,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertMetadataAllFields(result.getAnnotationCreateArchiveRecordOperation().getRecordMetadata());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required due to object type comparison
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Annotation", metadata.getBf001());
         assertEquals("1001", metadata.getBf002());
@@ -165,7 +166,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
         assertNull(metadata.getBf011());
         assertEquals(annotationDocument.getId(), metadata.getBf012());
-        assertEquals(annotationEntity.getId(), metadata.getBf013());
+        assertEquals(annotationEntity.getId().longValue(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertEquals(String.valueOf(annotationDocument.getUploadedBy().getId()), metadata.getBf016());
@@ -175,6 +176,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertEquals("1", metadata.getBf020());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required due to object type comparison
     private void assertMetadataAllFields(RecordMetadata metadata) {
         assertEquals("Annotation", metadata.getBf001());
         assertEquals("1001", metadata.getBf002());
@@ -188,7 +190,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
         assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf011());
         assertEquals(annotationDocument.getId(), metadata.getBf012());
-        assertEquals(annotationEntity.getId(), metadata.getBf013());
+        assertEquals(annotationEntity.getId().longValue(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertEquals(String.valueOf(annotationDocument.getUploadedBy().getId()), metadata.getBf016());
@@ -221,7 +223,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertNull(metadata.getBf020());
     }
 
-    private AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {
+    private AnnotationDocumentEntity createAnnotationDocumentEntity(Long id) {
         AnnotationDocumentEntity annotationDoc = new AnnotationDocumentEntity();
         annotationDoc.setId(id);
         annotationDoc.setFileName("filename" + id);
@@ -229,7 +231,7 @@ class AnnotationArchiveRecordMapperImplTest {
         UserAccountEntity userAccount = CommonTestDataUtil.createUserAccount("user" + id);
         userAccount.setUserFullName("userFullName" + id);
         annotationDoc.setUploadedBy(userAccount);
-        annotationDoc.setUploadedDateTime(OffsetDateTime.of(2020, 10, 10, 10, id, 0, 0, ZoneOffset.UTC));
+        annotationDoc.setUploadedDateTime(OffsetDateTime.of(2020, 10, 10, 10, id.intValue(), 0, 0, ZoneOffset.UTC));
         return annotationDoc;
     }
 

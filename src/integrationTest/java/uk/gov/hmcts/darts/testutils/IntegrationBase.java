@@ -157,4 +157,10 @@ public class IntegrationBase extends TestBase {
         }
         return true;
     }
+
+    public boolean objectStringEquals(Object id, Object actual) {
+        String idString = id.toString();
+        String actualString = actual.toString();
+        return idString.equals(actualString);
+    }
 }

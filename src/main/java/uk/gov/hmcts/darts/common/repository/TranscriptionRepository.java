@@ -15,7 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-public interface TranscriptionRepository extends RevisionRepository<TranscriptionEntity, Integer, Long>, JpaRepository<TranscriptionEntity, Integer> {
+public interface TranscriptionRepository extends RevisionRepository<TranscriptionEntity, Long, Long>, JpaRepository<TranscriptionEntity, Long> {
 
     // transcriptions with is_current=false are filtered out downstream
     @Query(value = """
@@ -63,7 +63,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
            WHERE te.transcriptionStatus NOT IN (:transcriptionStatuses)
            and te.createdDateTime <= :createdDateTime
         """)
-    List<Integer> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+    List<Long> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
         List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime, Limit limit);
 
     // native query to bypass @SQLRestriction on TranscriptionDocumentEntity in NOT EXISTS sub-query
@@ -112,7 +112,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         List<TranscriptionStatusEntity> ignoreStatuses
     );
 
-    List<TranscriptionEntity> findByIdIn(List<Integer> transcriptionIds);
+    List<TranscriptionEntity> findByIdIn(List<Long> transcriptionIds);
 
     @Query("""
          SELECT new uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult(
@@ -147,7 +147,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         """)
     @SuppressWarnings("java:S107")// Suppressing "Methods should not have too many parameters" as this is a search method as such requires many parameters
     List<TranscriptionSearchResult> searchTranscriptionsFilteringOn(
-        List<Integer> ids,
+        List<Long> ids,
         String caseNumber,
         String courthouseDisplayNamePattern,
         LocalDate hearingDate,

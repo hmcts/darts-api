@@ -24,13 +24,13 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
     @Override
     @Transactional
     public boolean findAndRemoveDuplicateEvent(Integer eventId) {
-        List<Integer> eventEntitiesIds = eventRepository.findDuplicateEventIds(eventId);
+        List<Long> eventEntitiesIds = eventRepository.findDuplicateEventIds(eventId);
         if (eventEntitiesIds.isEmpty() || eventEntitiesIds.size() == 1) {
             //No need to continue if there are no duplicates
             return false;
         }
         // Keep the first event and delete all future ones
-        List<Integer> eventEntitiesIdsToDelete = eventEntitiesIds.subList(1, eventEntitiesIds.size());
+        List<Long> eventEntitiesIdsToDelete = eventEntitiesIds.subList(1, eventEntitiesIds.size());
 
         List<Integer> caseManagementIdsToBeDeleted = caseManagementRetentionRepository.getIdsForEvents(eventEntitiesIdsToDelete);
         caseRetentionRepository.deleteAllByCaseManagementIdsIn(caseManagementIdsToBeDeleted);

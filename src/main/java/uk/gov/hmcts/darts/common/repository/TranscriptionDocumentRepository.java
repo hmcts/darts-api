@@ -12,8 +12,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-public interface TranscriptionDocumentRepository extends JpaRepository<TranscriptionDocumentEntity, Integer>,
-    SoftDeleteRepository<TranscriptionDocumentEntity, Integer> {
+public interface TranscriptionDocumentRepository extends JpaRepository<TranscriptionDocumentEntity, Long>,
+    SoftDeleteRepository<TranscriptionDocumentEntity, Long> {
 
 
     @Query("""
@@ -73,5 +73,5 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
 
     // native query to bypass @SQLRestriction
     @Query(value = "SELECT trd.* FROM darts.transcription_document trd WHERE trd.tra_id = :trdId AND trd.is_hidden = true", nativeQuery = true)
-    List<TranscriptionDocumentEntity> findByTranscriptionIdAndHiddenTrueIncludeDeleted(Integer trdId);
+    List<TranscriptionDocumentEntity> findByTranscriptionIdAndHiddenTrueIncludeDeleted(Long trdId);
 }

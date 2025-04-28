@@ -361,7 +361,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     private void logResponsesFound(ArmResponseBatchData armResponseBatchData) {
 
-        int eodId = armResponseBatchData.getExternalObjectDirectoryId();
+        long eodId = armResponseBatchData.getExternalObjectDirectoryId();
         List<InvalidLineFileFilenameProcessor> invalidLineFileFilenameProcessors = armResponseBatchData.getInvalidLineFileFilenameProcessors();
         CreateRecordFilenameProcessor createRecordFilenameProcessor = armResponseBatchData.getCreateRecordFilenameProcessor();
         UploadFileFilenameProcessor uploadFileFilenameProcessor = armResponseBatchData.getUploadFileFilenameProcessor();
@@ -589,7 +589,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                          ArmResponseBatchData armResponseBatchData,
                                          UserAccountEntity userAccount) {
 
-        int externalObjectDirectoryId = armResponseBatchData.getExternalObjectDirectoryId();
+        long externalObjectDirectoryId = armResponseBatchData.getExternalObjectDirectoryId();
         UploadFileFilenameProcessor uploadFileFilenameProcessor = armResponseBatchData.getUploadFileFilenameProcessor();
         ArmResponseUploadFileRecord armResponseUploadFileRecord = armResponseBatchData.getArmResponseUploadFileRecord();
         CreateRecordFilenameProcessor createRecordFilenameProcessor = armResponseBatchData.getCreateRecordFilenameProcessor();
@@ -622,7 +622,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private void processNoEodFoundFromSuccessResponses(int externalObjectDirectoryId, UploadFileFilenameProcessor uploadFileFilenameProcessor,
+    private void processNoEodFoundFromSuccessResponses(long externalObjectDirectoryId, UploadFileFilenameProcessor uploadFileFilenameProcessor,
                                                        ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                                        CreateRecordFilenameProcessor createRecordFilenameProcessor) {
         log.warn("Unable to find external object directory with ID {} for ARM batch responses with CR file {}, UF file {}",
@@ -773,7 +773,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private void processInvalidLineFile(int externalObjectDirectoryId, InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
+    private void processInvalidLineFile(long externalObjectDirectoryId, InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
                                         ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
                                         CreateRecordFilenameProcessor createRecordFilenameProcessor,
                                         UploadFileFilenameProcessor uploadFileFilenameProcessor,
@@ -833,7 +833,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
 
-    protected ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
+    protected ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Long eodId) {
         ExternalObjectDirectoryEntity externalObjectDirectory = null;
         try {
             Optional<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityOptional =
@@ -895,7 +895,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected abstract String getManifestFilePrefix();
 
     @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")//Not all subclasses need to implement this method
-    protected void preProcessResponseFilesActions(int armEodId) {
+    protected void preProcessResponseFilesActions(long armEodId) {
         // in the DARTS to ARM flow no pre-processing actions are needed
     }
 

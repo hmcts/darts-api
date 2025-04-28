@@ -55,7 +55,7 @@ public class DataStoreToArmHelper {
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
 
-    public List<Integer> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
+    public List<Long> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                    ExternalLocationTypeEntity armLocation, int maxResultSize) {
 
         List<ObjectRecordStatusEntity> statusEntityList = List.of(
@@ -69,7 +69,7 @@ public class DataStoreToArmHelper {
             Pageable.ofSize(maxResultSize)
         );
 
-        List<Integer> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
+        List<Long> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
 
         int remainingBatchSizeEods = maxResultSize - failedArmExternalObjectDirectoryEntities.size();
         if (remainingBatchSizeEods > 0) {
@@ -159,10 +159,10 @@ public class DataStoreToArmHelper {
     }
 
     public String generateRawFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        final Integer entityId = externalObjectDirectoryEntity.getId();
+        final Long entityId = externalObjectDirectoryEntity.getId();
         final Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
 
-        Integer documentId = 0;
+        Long documentId = 0L;
         if (nonNull(externalObjectDirectoryEntity.getMedia())) {
             documentId = externalObjectDirectoryEntity.getMedia().getId();
         } else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {

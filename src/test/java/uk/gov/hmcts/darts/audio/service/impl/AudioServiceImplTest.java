@@ -98,11 +98,11 @@ class AudioServiceImplTest {
 
     @Test
     void whenAudioMetadataListContainsMediaIdsReturnedByQuery_thenIsArchivedWillBeTrue() {
-        int mediaId = 1;
+        long mediaId = 1;
         AudioMetadata audioMetadata = new AudioMetadata();
         audioMetadata.setId(mediaId);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
-        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2);
+        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2L);
         List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
 
         when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);
@@ -114,11 +114,11 @@ class AudioServiceImplTest {
 
     @Test
     void isArchivedFeatureIsTemporarilyDisabledAndSetToAlwaysReturnsFalse() {
-        int mediaId = 1;
+        long mediaId = 1;
         AudioMetadata audioMetadata = new AudioMetadata();
         audioMetadata.setId(mediaId);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
-        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2);
+        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2L);
         List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
 
         when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);
@@ -130,7 +130,7 @@ class AudioServiceImplTest {
 
     @Test
     void whenAudioMetadataListOmitsMediaIdsReturnedByQuery_thenIsArchivedWillBeFalse() {
-        int mediaId = 1;
+        long mediaId = 1;
         AudioMetadata audioMetadata = new AudioMetadata();
         audioMetadata.setId(mediaId);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
@@ -143,14 +143,14 @@ class AudioServiceImplTest {
     @Test
     void whenAudioMetadataListContainsMediaIdsStoredInUnstructured_thenIsAvailableWillBeTrue() {
         AudioMetadata audioMetadata1 = new AudioMetadata();
-        audioMetadata1.setId(1);
+        audioMetadata1.setId(1L);
         AudioMetadata audioMetadata2 = new AudioMetadata();
-        audioMetadata2.setId(2);
+        audioMetadata2.setId(2L);
         AudioMetadata audioMetadata3 = new AudioMetadata();
-        audioMetadata3.setId(3);
+        audioMetadata3.setId(3L);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata1, audioMetadata2, audioMetadata3);
 
-        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any(), any())).thenReturn(List.of(1, 3));
+        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any(), any())).thenReturn(List.of(1L, 3L));
         eodHelperMocks = new EodHelperMocks();
         eodHelperMocks.simulateInitWithMockedData();
         audioService.setIsAvailable(audioMetadataList);
@@ -159,7 +159,7 @@ class AudioServiceImplTest {
         assertEquals(false, audioMetadataList.get(1).getIsAvailable());
         assertEquals(true, audioMetadataList.get(2).getIsAvailable());
         verify(externalObjectDirectoryRepository).findMediaIdsByInMediaIdStatusAndType(
-            List.of(1, 2, 3),
+            List.of(1L, 2L, 3L),
             eodHelperMocks.getStoredStatus(),
             eodHelperMocks.getUnstructuredLocation(), eodHelperMocks.getDetsLocation());
     }

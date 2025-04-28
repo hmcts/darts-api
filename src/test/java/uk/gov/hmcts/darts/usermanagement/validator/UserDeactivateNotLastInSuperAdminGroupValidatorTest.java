@@ -43,7 +43,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
         UserPatch patch = new UserPatch();
         patch.setActive(false);
-        IdRequest<UserPatch> request = new IdRequest<>(patch, userId);
+        IdRequest<UserPatch, Integer> request = new IdRequest<>(patch, userId);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class, () -> userDeactivateNotLastSuperAdminValidator.validate(request));
         Assertions.assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getTitle(), ex.getMessage());
@@ -65,7 +65,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
         UserPatch patch = new UserPatch();
         patch.setActive(false);
-        IdRequest<UserPatch> request = new IdRequest<>(patch, userId);
+        IdRequest<UserPatch, Integer> request = new IdRequest<>(patch, userId);
 
         userDeactivateNotLastSuperAdminValidator.validate(request);
     }
@@ -86,7 +86,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
         UserPatch patch = new UserPatch();
         patch.setActive(true);
-        IdRequest<UserPatch> request = new IdRequest<>(patch, userId);
+        IdRequest<UserPatch, Integer> request = new IdRequest<>(patch, userId);
 
         userDeactivateNotLastSuperAdminValidator.validate(request);
     }

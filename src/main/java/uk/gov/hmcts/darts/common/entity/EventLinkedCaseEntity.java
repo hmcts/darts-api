@@ -24,7 +24,7 @@ public class EventLinkedCaseEntity {
     @Column(name = "elc_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "elc_gen")
     @SequenceGenerator(name = "elc_gen", sequenceName = "elc_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "eve_id")
@@ -49,7 +49,7 @@ public class EventLinkedCaseEntity {
     private String caseNumber;
 
     @EqualsAndHashCode.Include(replaces = "event")
-    public Integer getEventId() {
+    public Long getEveId() {
         return event != null ? event.getId() : null;
     }
 

@@ -147,7 +147,7 @@ class DetsToArmBatchPushProcessorImplTest {
                 ExternalLocationTypeEnum.ARM,
                 ObjectRecordStatusEnum.ARM_INGESTION,
                 UUID.randomUUID().toString());
-        externalObjectDirectoryEntityArm.setId(345);
+        externalObjectDirectoryEntityArm.setId(345L);
         externalObjectDirectoryEntityArm.setStatus(EodHelper.armIngestionStatus());
         objectStateRecordEntity = createMaxObjectStateRecordEntity(888L,
                                                                    externalObjectDirectoryEntityDets.getId(),
@@ -185,8 +185,8 @@ class DetsToArmBatchPushProcessorImplTest {
         when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), eq(200)))
-            .thenReturn(List.of(123));
-        when(externalObjectDirectoryRepository.findAllById(List.of(123))).thenReturn(List.of(externalObjectDirectoryEntityDets));
+            .thenReturn(List.of(123L));
+        when(externalObjectDirectoryRepository.findAllById(List.of(123L))).thenReturn(List.of(externalObjectDirectoryEntityDets));
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
         //Before this method was made async EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true); was used to enforce the ELT to match
         //This is no longer possible as mockito static mocks don't work well with threads. By setting ELt to ARM it simulates this behavior
@@ -236,7 +236,7 @@ class DetsToArmBatchPushProcessorImplTest {
     void getObjectStateRecordEntity_shouldThrowError_whenOsrIsNull() {
         ExternalObjectDirectoryEntity externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setOsrUuid(null);
-        externalObjectDirectory.setId(123);
+        externalObjectDirectory.setId(123L);
         DartsException exception =
             assertThrows(DartsException.class, () -> detsToArmBatchPushProcessor.getObjectStateRecordEntity(externalObjectDirectory));
 
@@ -244,7 +244,7 @@ class DetsToArmBatchPushProcessorImplTest {
             .isEqualTo("Unable to find ObjectStateRecordEntity for ARM EOD ID: 123 as OSR UUID is null");
     }
 
-    private ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
+    private ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, long detsEodId, long armEodId) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);
         objectStateRecordEntity.setEodId(detsEodId);

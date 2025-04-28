@@ -97,11 +97,11 @@ public class DatabaseDateSetter {
         throw new UnsupportedOperationException("No id method found for entity");
     }
 
-    public <T extends CreatedModifiedBaseEntity> Integer
+    public <T extends CreatedModifiedBaseEntity> Object
     getIdValue(T entity) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         String id = getId(entity);
         Method methodId = getMethodForId(entity, "get" + id);
-        return (Integer) methodId.invoke(entity);
+        return methodId.invoke(entity);
     }
 
     private <T extends CreatedModifiedBaseEntity> String getTable(T entity) {

@@ -439,8 +439,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         // given
         Set<TranscriptionEntity> transcriptionsA1 = CommonTestDataUtil.createTranscriptions(case1PerfectlyClosed.getHearings().getFirst());
         Set<TranscriptionEntity> transcriptionsB1 = CommonTestDataUtil.createTranscriptions(case4NotPerfectlyClosed.getHearings().getFirst());
-        var transcriptionA1 = TestUtils.getFirst(transcriptionsA1);
-        var transcriptionB1 = TestUtils.getFirst(transcriptionsB1);
+        var transcriptionA1 = TestUtils.getFirstLong(transcriptionsA1);
+        var transcriptionB1 = TestUtils.getFirstLong(transcriptionsB1);
         transcriptionB1.setHearings(Set.of(case1PerfectlyClosed.getHearings().getFirst(),
                                            case4NotPerfectlyClosed.getHearings().getFirst()));
 

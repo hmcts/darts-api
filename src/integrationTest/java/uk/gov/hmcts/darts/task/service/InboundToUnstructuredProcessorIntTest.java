@@ -80,7 +80,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         var argument = ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
         verify(eodRepository, atLeastOnce()).saveAndFlush(argument.capture());
         List<ExternalObjectDirectoryEntity> createdUnstructured = argument.getAllValues();
-        List<Integer> createdUnstructuredMediaIds = createdUnstructured.stream().map(eod -> eod.getMedia().getId()).collect(toList());
+        List<Long> createdUnstructuredMediaIds = createdUnstructured.stream().map(eod -> eod.getMedia().getId()).collect(toList());
         assertThat(createdUnstructuredMediaIds).contains(media1.getId(), media2.getId());
         assertThat(createdUnstructuredMediaIds).doesNotContain(media3.getId());
         assertThat(createdUnstructuredMediaIds).doesNotContain(media4.getId());

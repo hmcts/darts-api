@@ -11,5 +11,5 @@ public class HearingReportingRestrictionsId implements Serializable {
 
     private Integer hearingId;
 
-    private Integer eveId;
+    private Long eveId;
 }

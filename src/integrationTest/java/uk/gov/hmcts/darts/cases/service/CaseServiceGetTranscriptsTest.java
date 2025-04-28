@@ -44,7 +44,7 @@ class CaseServiceGetTranscriptsTest extends IntegrationBase {
         // transcription with 0 docs - should be visible
         // linked to case
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(courtCaseEntity);
-        transcription.setId(1);
+        transcription.setId(1L);
         transcription.setCreatedDateTime(DATE_TIME);
         transcription.setIsManualTranscription(true);
         dartsDatabase.save(transcription);
@@ -53,7 +53,7 @@ class CaseServiceGetTranscriptsTest extends IntegrationBase {
         // transcription with 3 docs, none hidden - should be visible
         // linked to case
         TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(courtCaseEntity);
-        transcription2.setId(1);
+        transcription2.setId(1L);
         transcription2.setCreatedDateTime(DATE_TIME);
         transcription2.setIsManualTranscription(true);
         dartsDatabase.save(transcription2);
@@ -62,7 +62,7 @@ class CaseServiceGetTranscriptsTest extends IntegrationBase {
         // transcription with 3 docs, 1 hidden - should be visible
         // linked to hearing
         TranscriptionEntity transcription3 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription3.setId(3);
+        transcription3.setId(3L);
         transcription3.setCreatedDateTime(DATE_TIME);
         transcription3.setIsManualTranscription(true);
         dartsDatabase.save(transcription3);
@@ -71,7 +71,7 @@ class CaseServiceGetTranscriptsTest extends IntegrationBase {
         // transcription with 3 docs, all hidden - should be hidden
         // linked to hearing
         TranscriptionEntity transcription4 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription3.setId(4);
+        transcription3.setId(4L);
         transcription4.setCreatedDateTime(DATE_TIME);
         transcription4.setIsManualTranscription(true);
         dartsDatabase.save(transcription4);

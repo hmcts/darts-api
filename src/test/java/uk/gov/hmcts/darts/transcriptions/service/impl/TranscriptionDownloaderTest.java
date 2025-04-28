@@ -38,7 +38,7 @@ import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -84,7 +84,7 @@ class TranscriptionDownloaderTest {
     void throwsExceptionIfNoTranscriptionFound() {
         when(transcriptionRepository.findById(any())).thenReturn(empty());
 
-        assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(random.nextInt()))
+        assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(random.nextLong()))
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
 
@@ -179,7 +179,7 @@ class TranscriptionDownloaderTest {
 
     @Test
     void throwsNotFoundExceptionIfTranscriptionDocumentHiddenAndUserIsNotSuperAdmin() {
-        when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+        when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong()))
             .thenReturn(List.of(new TranscriptionDocumentEntity()));
 
         var transcriptionDocuments = someTranscriptionDocumentsUploadedAtLeast2DaysAgo(1);
@@ -237,7 +237,7 @@ class TranscriptionDownloaderTest {
 
     private TranscriptionDocumentEntity someTranscriptionDocumentWithUploadDate(OffsetDateTime uploadedDateTime) {
         var transcriptionDocument = new TranscriptionDocumentEntity();
-        transcriptionDocument.setId(random.nextInt());
+        transcriptionDocument.setId(random.nextLong());
         transcriptionDocument.setUploadedDateTime(uploadedDateTime);
         transcriptionDocument.setFileName("some-file-name-" + random.nextInt());
         transcriptionDocument.setFileType("some-file-type-" + random.nextInt());
@@ -252,7 +252,7 @@ class TranscriptionDownloaderTest {
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryWithCreationDate(OffsetDateTime createdDateTime) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
-        externalObjectDirectory.setId(random.nextInt());
+        externalObjectDirectory.setId(random.nextLong());
         externalObjectDirectory.setCreatedDateTime(createdDateTime);
         externalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());
         externalObjectDirectory.setExternalLocationType(someExternalLocation());
@@ -267,7 +267,7 @@ class TranscriptionDownloaderTest {
 
     private TranscriptionEntity someTranscriptionWith(List<TranscriptionDocumentEntity> transcriptionDocuments) {
         var transcriptionEntity = new TranscriptionEntity();
-        transcriptionEntity.setId(random.nextInt());
+        transcriptionEntity.setId(random.nextLong());
         transcriptionEntity.setTranscriptionDocumentEntities(transcriptionDocuments);
         return transcriptionEntity;
     }

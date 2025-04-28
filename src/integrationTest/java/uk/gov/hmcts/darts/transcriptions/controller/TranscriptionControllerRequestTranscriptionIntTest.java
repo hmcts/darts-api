@@ -142,7 +142,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertNotNull(transcriptionId);
 
         TranscriptionRepository transcriptionRepository = dartsDatabase.getTranscriptionRepository();
-        TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId.longValue()).orElseThrow();
         assertTrue(transcriptionEntity.getIsManualTranscription());
         assertThat(transcriptionEntity.getCourtroom().getId()).isEqualTo(hearing.getCourtroom().getId());
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
@@ -228,7 +228,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId())));
+            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
     }
 
     @Test
@@ -254,7 +254,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId())));
+            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
     }
 
 
@@ -302,7 +302,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-        MediaEntity mediaEntity = TestUtils.getFirst(hearing.getMedias());
+        MediaEntity mediaEntity = TestUtils.getFirstLong(hearing.getMedias());
         OffsetDateTime startTime = mediaEntity.getStart().truncatedTo(ChronoUnit.SECONDS);
         OffsetDateTime endTime = mediaEntity.getEnd().truncatedTo(ChronoUnit.SECONDS);
 
@@ -333,7 +333,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-        MediaEntity mediaEntity = TestUtils.getFirst(hearing.getMedias());
+        MediaEntity mediaEntity = TestUtils.getFirstLong(hearing.getMedias());
         OffsetDateTime startTime = mediaEntity.getStart().plusMinutes(5);
         OffsetDateTime endTime = mediaEntity.getEnd().minusMinutes(15);
 

@@ -35,7 +35,7 @@ class MediaIdValidatorTest {
 
     @Test
     void testValidateNotHiddenThrowsIfHidden() {
-        Integer mediaId = 1;
+        long mediaId = 1;
         when(mediaRepository.existsByIdAndIsHiddenFalse(mediaId)).thenReturn(false);
         assertThatThrownBy(() -> mediaIdValidator.validateNotHidden(mediaId))
             .isExactlyInstanceOf(DartsApiException.class)
@@ -44,14 +44,14 @@ class MediaIdValidatorTest {
 
     @Test
     void testValidateNotHidden() {
-        Integer mediaId = 1;
+        long mediaId = 1;
         when(mediaRepository.existsByIdAndIsHiddenFalse(mediaId)).thenReturn(true);
         mediaIdValidator.validateNotHidden(mediaId);
     }
 
     @Test
     void validateNotZeroSecondAudio_shouldThrowException_ifStartAndEndAreEqual() {
-        Integer mediaId = 1;
+        long mediaId = 1;
         OffsetDateTime now = OffsetDateTime.now();
         when(media1.getStart()).thenReturn(now);
         when(media1.getEnd()).thenReturn(now);
@@ -63,7 +63,7 @@ class MediaIdValidatorTest {
 
     @Test
     void validateNotZeroSecondAudio_shouldThrowException_ifStartDateIsAfterAndEndDate() {
-        Integer mediaId = 1;
+        long mediaId = 1;
         OffsetDateTime now = OffsetDateTime.now();
         when(media1.getStart()).thenReturn(now.plusSeconds(1));
         when(media1.getEnd()).thenReturn(now);
@@ -75,7 +75,7 @@ class MediaIdValidatorTest {
 
     @Test
     void validateNotZeroSecondAudio_shouldThrowException_ifStartDateIsNull() {
-        Integer mediaId = 1;
+        long mediaId = 1;
         when(media1.getStart()).thenReturn(null);
         when(mediaRepository.findById(mediaId)).thenReturn(Optional.of(media1));
         assertThatThrownBy(() -> mediaIdValidator.validateNotZeroSecondAudio(mediaId))
@@ -85,7 +85,7 @@ class MediaIdValidatorTest {
 
     @Test
     void validateNotZeroSecondAudio_shouldThrowException_ifEndDateIsNull() {
-        Integer mediaId = 1;
+        long mediaId = 1;
         OffsetDateTime now = OffsetDateTime.now();
         when(media1.getStart()).thenReturn(now);
         when(media1.getEnd()).thenReturn(null);
@@ -97,7 +97,7 @@ class MediaIdValidatorTest {
 
     @Test
     void validateNotZeroSecondAudio_shouldNotThrowException_ifStartDateIsBeforeEndDate() {
-        Integer mediaId = 1;
+        long mediaId = 1;
         OffsetDateTime now = OffsetDateTime.now();
         when(media1.getStart()).thenReturn(now.minusSeconds(1));
         when(media1.getEnd()).thenReturn(now);

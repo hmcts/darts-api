@@ -31,5 +31,5 @@ public interface EventLinkedCaseRepository extends JpaRepository<EventLinkedCase
     @Transactional
     @Modifying
     @Query("DELETE FROM EventLinkedCaseEntity elc WHERE elc.event.id IN :eventsIds")
-    void deleteAllByEventIn(List<Integer> eventsIds);
+    void deleteAllByEventIn(List<Long> eventsIds);
 }

@@ -188,7 +188,7 @@ public class EventsController implements EventApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<AdminGetEventById200Response> adminGetEventById(Integer eventId) {
+    public ResponseEntity<AdminGetEventById200Response> adminGetEventById(Long eventId) {
         return new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
     }
 
@@ -196,7 +196,7 @@ public class EventsController implements EventApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<AdminGetVersionsByEventIdResponseResult> adminGetVersionsByEventId(Integer eventId) {
+    public ResponseEntity<AdminGetVersionsByEventIdResponseResult> adminGetVersionsByEventId(Long eventId) {
         return new ResponseEntity<>(eventService.adminGetVersionsByEventId(eventId), HttpStatus.OK);
     }
 

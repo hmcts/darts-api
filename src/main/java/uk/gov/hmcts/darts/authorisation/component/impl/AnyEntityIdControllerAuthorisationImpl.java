@@ -94,7 +94,7 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         }
 
         if (checkEntityExists(jsonNode, mediaIdControllerAuthorisation.getEntityIdParam())) {
-            authorisation.authoriseByMediaId(jsonNode.path(mediaIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            authorisation.authoriseByMediaId(jsonNode.path(mediaIdControllerAuthorisation.getEntityIdParam()).longValue(), roles);
             entityExists = true;
         }
 
@@ -104,7 +104,7 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         }
 
         if (checkEntityExists(jsonNode, transcriptionIdControllerAuthorisation.getEntityIdParam())) {
-            authorisation.authoriseByTranscriptionId(jsonNode.path(transcriptionIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            authorisation.authoriseByTranscriptionId(jsonNode.path(transcriptionIdControllerAuthorisation.getEntityIdParam()).longValue(), roles);
             entityExists = true;
         }
 

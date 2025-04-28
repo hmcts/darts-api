@@ -25,6 +25,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import static java.util.Objects.isNull;
@@ -136,8 +137,8 @@ public class AnnotationArchiveRecordMapperImpl extends BaseArchiveRecordMapper i
             if (nonNull(value)) {
                 processStringMetadataProperties(metadata, key, value);
             } else {
-                Integer intValue = mapToInt(annotationRecordProperties.getProperty(key), annotationDocument);
-                processIntMetadataProperties(metadata, key, intValue);
+                Long longValue = mapToLong(annotationRecordProperties.getProperty(key), annotationDocument);
+                processIntMetadataProperties(metadata, key, longValue);
             }
         }
     }
@@ -226,10 +227,10 @@ public class AnnotationArchiveRecordMapperImpl extends BaseArchiveRecordMapper i
         return uploadedBy;
     }
 
-    private Integer mapToInt(String key, AnnotationDocumentEntity annotationDocument) {
+    private Long mapToLong(String key, AnnotationDocumentEntity annotationDocument) {
         return switch (key) {
             case OBJECT_ID_KEY -> annotationDocument.getId();
-            case PARENT_ID_KEY -> annotationDocument.getAnnotation().getId();
+            case PARENT_ID_KEY -> Optional.ofNullable(annotationDocument.getAnnotation().getId()).map(Integer::longValue).orElse(null);
             default -> null;
         };
     }
@@ -238,7 +239,7 @@ public class AnnotationArchiveRecordMapperImpl extends BaseArchiveRecordMapper i
         return String.join(CASE_LIST_DELIMITER, caseNumberList);
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(AnnotationDocumentEntity annotationDocument, Integer relationId, String rawFilename) {
+    private UploadNewFileRecord createUploadNewFileRecord(AnnotationDocumentEntity annotationDocument, Long relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(String.valueOf(relationId));

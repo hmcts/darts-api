@@ -170,7 +170,7 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
             ExternalLocationTypeEnum.ARM,
             ObjectRecordStatusEnum.STORED,
             UUID.randomUUID().toString());
-        eodEntityForAssociatedFiles1.setId(1);
+        eodEntityForAssociatedFiles1.setId(1L);
 
         InputUploadAndAssociatedFilenames inputUploadAndAssociatedFilenames = new InputUploadAndAssociatedFilenames();
         inputUploadAndAssociatedFilenames.setInputUploadFilename(inputUploadBlobFilename);

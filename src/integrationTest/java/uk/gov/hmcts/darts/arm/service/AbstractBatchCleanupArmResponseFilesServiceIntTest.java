@@ -288,13 +288,13 @@ abstract class AbstractBatchCleanupArmResponseFilesServiceIntTest extends Integr
         return BinaryData.fromString(contents);
     }
 
-    private String getCreateRecordFileContents(String createRecordFilename, Integer externalObjectDirectoryId) throws IOException {
+    private String getCreateRecordFileContents(String createRecordFilename, Long externalObjectDirectoryId) throws IOException {
         String expectedResponse = getContentsFromFile(createRecordFilename);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(externalObjectDirectoryId));
         return expectedResponse;
     }
 
-    private String getUploadFileContents(String uploadFilename, int externalObjectDirectoryId, String checksum) throws IOException {
+    private String getUploadFileContents(String uploadFilename, long externalObjectDirectoryId, String checksum) throws IOException {
         String expectedResponse = getContentsFromFile(uploadFilename);
         expectedResponse = expectedResponse.replaceAll("<CHECKSUM>", checksum);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(externalObjectDirectoryId));

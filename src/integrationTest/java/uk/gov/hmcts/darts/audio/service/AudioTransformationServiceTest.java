@@ -56,7 +56,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
         assertEquals(2, mediaEntities.size());
 
-        List<Integer> mediaIds = mediaEntities.stream().map(MediaEntity::getId).collect(toList());
+        List<Long> mediaIds = mediaEntities.stream().map(MediaEntity::getId).collect(toList());
         assertTrue(mediaIds.contains(given.getMediaEntity1().getId()));
         assertTrue(mediaIds.contains(given.getMediaEntity2().getId()));
 
@@ -73,7 +73,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
         assertEquals(2, mediaEntities.size());
 
-        List<Integer> mediaIds = mediaEntities.stream().map(MediaEntity::getId).collect(toList());
+        List<Long> mediaIds = mediaEntities.stream().map(MediaEntity::getId).collect(toList());
         assertTrue(mediaIds.contains(given.getMediaEntity1().getId()));
         assertTrue(mediaIds.contains(given.getMediaEntity2().getId()));
     }

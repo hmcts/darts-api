@@ -134,7 +134,7 @@ class UserControllerTest extends IntegrationBase {
         UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            UserWithIdAndTimestamps.class);
 
-        List<Integer> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
+        List<Long> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
 
         List<TranscriptionWorkflowEntity> workflowEntityAfter
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
@@ -195,7 +195,7 @@ class UserControllerTest extends IntegrationBase {
         UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            UserWithIdAndTimestamps.class);
 
-        List<Integer> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
+        List<Long> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
 
         List<TranscriptionWorkflowEntity> workflowEntityAfter
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
@@ -258,7 +258,7 @@ class UserControllerTest extends IntegrationBase {
         UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            UserWithIdAndTimestamps.class);
 
-        List<Integer> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
+        List<Long> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
 
         List<TranscriptionWorkflowEntity> workflowEntityAfter
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);

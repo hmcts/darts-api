@@ -25,7 +25,7 @@ public class AnnotationCaseDocument extends CreatedModifiedCaseDocument {
     @Data
     public static class AnnotationDocumentCaseDocument {
 
-        private final Integer id;
+        private final Long id;
         private final OffsetDateTime lastModifiedTimestamp;
         private final Integer lastModifiedBy;
         private final String fileName;

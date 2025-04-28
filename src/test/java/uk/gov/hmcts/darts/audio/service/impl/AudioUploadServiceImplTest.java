@@ -238,7 +238,7 @@ class AudioUploadServiceImplTest {
             "COURTROOM_123",
             addAudioMetadataRequest.getStartedAt(),
             addAudioMetadataRequest.getEndedAt(),
-            123,
+            123L,
             1024L
         );
     }
@@ -265,7 +265,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldNotInvokeHideAllFunctionalityIfExistingMediaIsNotHidden() {
         MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
             .someMinimalBuilder()
-            .id(100)
+            .id(100L)
             .chronicleId("100")
             .antecedentId(null)
             .build()
@@ -273,7 +273,7 @@ class AudioUploadServiceImplTest {
 
         MediaEntity newMedia = PersistableFactory.getMediaTestData()
             .someMinimalBuilder()
-            .id(101)
+            .id(101L)
             .chronicleId("100")
             .antecedentId("100")
             .build()
@@ -299,7 +299,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldInvokeHideAllFunctionalityWithLimitedAdminActionDetailsIfExistingMediaIsHiddenWithNoExistingAdminAction() {
         MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
             .someMinimalBuilder()
-            .id(100)
+            .id(100L)
             .isHidden(true)
             .chronicleId("100")
             .antecedentId(null)
@@ -308,7 +308,7 @@ class AudioUploadServiceImplTest {
 
         MediaEntity newMedia = PersistableFactory.getMediaTestData()
             .someMinimalBuilder()
-            .id(101)
+            .id(101L)
             .chronicleId("100")
             .antecedentId("100")
             .build()
@@ -341,7 +341,7 @@ class AudioUploadServiceImplTest {
     void versionUpload_shouldInvokeHideAllFunctionalityWithCopiedAdminActionDetailsIfExistingMediaIsHiddenWithExistingAdminAction() {
         MediaEntity exisingMediaVersion = PersistableFactory.getMediaTestData()
             .someMinimalBuilder()
-            .id(100)
+            .id(100L)
             .isHidden(true)
             .chronicleId("100")
             .antecedentId(null)
@@ -360,7 +360,7 @@ class AudioUploadServiceImplTest {
 
         MediaEntity newMedia = PersistableFactory.getMediaTestData()
             .someMinimalBuilder()
-            .id(101)
+            .id(101L)
             .chronicleId("100")
             .antecedentId("100")
             .build()
@@ -391,7 +391,7 @@ class AudioUploadServiceImplTest {
 
     private AddAudioMetadataRequest setupVersionUploadTest(int endTimeOffset, long fileSize) {
         MediaEntity mediaEntity = mock(MediaEntity.class);
-        when(mediaEntity.getId()).thenReturn(123);
+        when(mediaEntity.getId()).thenReturn(123L);
         doReturn(mediaEntity).when(mapper).mapToMedia(any(), any());
 
         AddAudioMetadataRequest addAudioMetadataRequest = mock(AddAudioMetadataRequest.class);
@@ -481,7 +481,7 @@ class AudioUploadServiceImplTest {
         OffsetDateTime endedAt = OffsetDateTime.now();
 
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
-        mediaEntity.setId(10);
+        mediaEntity.setId(10L);
         when(mediaRepository.saveAndFlush(any(MediaEntity.class))).thenReturn(mediaEntity);
 
 
@@ -544,7 +544,7 @@ class AudioUploadServiceImplTest {
         OffsetDateTime endedAt = OffsetDateTime.now();
 
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
-        mediaEntity.setId(10);
+        mediaEntity.setId(10L);
         when(mediaRepository.saveAndFlush(any(MediaEntity.class))).thenReturn(mediaEntity);
 
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
@@ -598,7 +598,7 @@ class AudioUploadServiceImplTest {
 
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
         mediaEntity.setChecksum(addAudioMetadataRequest.getChecksum());
-        mediaEntity.setId(10);
+        mediaEntity.setId(10L);
 
         when(mediaRepository.findMediaByDetails(any(), any(), any(), any(), any()))
             .thenReturn(List.of(mediaEntity));

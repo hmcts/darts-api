@@ -71,7 +71,7 @@ class GetAdminMediaResponseMapperTest {
     @Test
     void mapAdminMediaVersionResponse_courtRoomDoesNotExist_shouldMapAdminMediaVersionResponse() {
         MediaEntity media = new MediaEntity();
-        media.setId(321);
+        media.setId(321L);
         media.setStart(OffsetDateTime.now());
         media.setEnd(OffsetDateTime.now().plusDays(1));
         media.setChannel(2);
@@ -109,7 +109,7 @@ class GetAdminMediaResponseMapperTest {
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
 
         MediaEntity media = new MediaEntity();
-        media.setId(123);
+        media.setId(123L);
         media.setCourtroom(courtroomEntity);
         media.setStart(OffsetDateTime.now());
         media.setEnd(OffsetDateTime.now().plusDays(1));

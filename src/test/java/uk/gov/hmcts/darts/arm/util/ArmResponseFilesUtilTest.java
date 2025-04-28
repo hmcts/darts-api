@@ -19,10 +19,10 @@ class ArmResponseFilesUtilTest {
     @Test
     void getPrefix_shouldReturnCorrectPrefix() {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        externalObjectDirectoryEntity.setId(1);
+        externalObjectDirectoryEntity.setId(1L);
         externalObjectDirectoryEntity.setTransferAttempts(2);
         MediaEntity media = new MediaEntity();
-        media.setId(3);
+        media.setId(3L);
         externalObjectDirectoryEntity.setMedia(media);
 
         String expectedPrefix = "1_3_2";
@@ -34,7 +34,7 @@ class ArmResponseFilesUtilTest {
     void getObjectTypeId_shouldReturnCorrectObjectTypeId() {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         MediaEntity media = new MediaEntity();
-        media.setId(3);
+        media.setId(3L);
         externalObjectDirectoryEntity.setMedia(media);
 
         String expectedObjectTypeId = "3";

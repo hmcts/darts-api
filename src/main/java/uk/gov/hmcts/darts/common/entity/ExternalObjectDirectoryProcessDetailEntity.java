@@ -26,7 +26,7 @@ public class ExternalObjectDirectoryProcessDetailEntity extends MandatoryCreated
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "epd_gen")
     @SequenceGenerator(name = "epd_gen", sequenceName = "epd_seq", allocationSize = 1)
     @Column(name = "epd_id")
-    private Integer id;
+    private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "eod_id", nullable = false)

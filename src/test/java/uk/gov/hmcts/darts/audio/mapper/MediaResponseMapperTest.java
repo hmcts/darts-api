@@ -17,7 +17,7 @@ class MediaResponseMapperTest {
 
     @Test
     void mapHideResponse() {
-        Integer mediaId = 100;
+        Long mediaId = 100L;
         boolean hide = true;
         boolean deleted = true;
 
@@ -66,7 +66,7 @@ class MediaResponseMapperTest {
 
     @Test
     void mapShowResponseWithNoObjectAdminAction() {
-        Integer mediaId = 100;
+        Long mediaId = 100L;
         boolean hide = true;
 
         MediaEntity mediaEntity = new MediaEntity();

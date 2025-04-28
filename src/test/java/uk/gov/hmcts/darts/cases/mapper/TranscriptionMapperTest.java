@@ -58,7 +58,7 @@ class TranscriptionMapperTest {
         transcriptionType.setDescription(TranscriptionTypeEnum.SENTENCING_REMARKS.name());
         transcription.setTranscriptionType(transcriptionType);
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
-        transcription.setId(1);
+        transcription.setId(1L);
         transcription.setHearingDate(LocalDate.of(2023, 6, 20));
         transcription.setRequestedBy(CommonTestDataUtil.createUserAccount("someLegacyRequestor"));
         transcription.setIsCurrent(true);
@@ -84,7 +84,7 @@ class TranscriptionMapperTest {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1);
 
-        TestUtils.getFirst(transcriptionList).setIsCurrent(false);
+        TestUtils.getFirstLong(transcriptionList).setIsCurrent(false);
 
         List<Transcript> transcripts = caseTranscriptionMapper.getTranscriptList(caseTranscriptionMapper.mapResponse(transcriptionList));
         assertEquals(0, transcripts.size());

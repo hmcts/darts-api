@@ -67,7 +67,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
 
-    private Integer transcriptionId;
+    private Long transcriptionId;
     private Integer transcriptCreatorId;
 
     @BeforeEach
@@ -205,7 +205,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verify(authorisation).authoriseByTranscriptionId(
-            -1, Set.of(APPROVER, TRANSCRIBER)
+            -1L, Set.of(APPROVER, TRANSCRIBER)
         );
         verifyNoInteractions(mockAuditApi);
     }

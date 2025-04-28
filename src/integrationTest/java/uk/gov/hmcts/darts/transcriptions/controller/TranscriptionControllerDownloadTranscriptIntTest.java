@@ -85,7 +85,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
-    private Integer transcriptionId;
+    private Long transcriptionId;
 
     @BeforeEach
     void beforeEach() {

@@ -115,7 +115,7 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = MEDIA_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
-    public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
+    public ResponseEntity<byte[]> preview(Long mediaId, String httpRangeList) {
         AudioPreview audioPreview = audioPreviewService.getOrCreateAudioPreview(mediaId);
         if (audioPreview.getStatus().equals(FAILED)) {
             log.info("Media with ID {} status FAILED", mediaId);
@@ -150,7 +150,7 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<MediaHideResponse> postAdminHideMediaId(Integer mediaId, MediaHideRequest mediaHideRequest) {
+    public ResponseEntity<MediaHideResponse> postAdminHideMediaId(Long mediaId, MediaHideRequest mediaHideRequest) {
         MediaHideResponse audioResponse = adminMediaService.adminHideOrShowMediaById(mediaId, mediaHideRequest);
         return new ResponseEntity<>(audioResponse, HttpStatus.OK);
     }
@@ -158,7 +158,7 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<MediaApproveMarkedForDeletionResponse> postAdminApproveMediaMarkedForDeletion(Integer mediaId) {
+    public ResponseEntity<MediaApproveMarkedForDeletionResponse> postAdminApproveMediaMarkedForDeletion(Long mediaId) {
         MediaApproveMarkedForDeletionResponse audioResponse = adminMediaService.adminApproveMediaMarkedForDeletion(mediaId);
         return new ResponseEntity<>(audioResponse, HttpStatus.OK);
     }
@@ -166,21 +166,21 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
-    public ResponseEntity<AdminMediaResponse> getAdminMediasById(Integer id) {
+    public ResponseEntity<AdminMediaResponse> getAdminMediasById(Long id) {
         return new ResponseEntity<>(adminMediaService.getMediasById(id), HttpStatus.OK);
     }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<AdminVersionedMediaResponse> getAdminMediaVersionsById(Integer id) {
+    public ResponseEntity<AdminVersionedMediaResponse> getAdminMediaVersionsById(Long id) {
         return new ResponseEntity<>(adminMediaService.getMediaVersionsById(id), HttpStatus.OK);
     }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<Void> patchAdminMediasById(Integer id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest) {
+    public ResponseEntity<Void> patchAdminMediasById(Long id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest) {
         adminMediaService.patchMediasById(id, patchAdminMediasByIdRequest);
         return ResponseEntity.ok().build();
     }

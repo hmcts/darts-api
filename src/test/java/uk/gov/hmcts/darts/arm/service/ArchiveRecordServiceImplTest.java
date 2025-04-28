@@ -44,7 +44,7 @@ class ArchiveRecordServiceImplTest {
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
     private static final String DARTS = "DARTS";
     private static final String REGION = "GBR";
-    private static final int EODID = 1234;
+    private static final long EODID = 1234;
     private static final String FILE_EXTENSION = "a360";
 
     @Mock(lenient = true)

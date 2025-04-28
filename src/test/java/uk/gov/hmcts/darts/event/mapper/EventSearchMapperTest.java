@@ -27,7 +27,7 @@ class EventSearchMapperTest {
 
     private static EventSearchResult someEventSearchResult() {
         return new EventSearchResult(
-            1,
+            1L,
             OffsetDateTime.now(),
             "eventTypeName",
             "eventText",

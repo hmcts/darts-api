@@ -154,7 +154,7 @@ class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
         return false;
     }
 
-    private ExternalObjectDirectoryEntity getExternalObjectDirectory(Integer eodId) {
+    private ExternalObjectDirectoryEntity getExternalObjectDirectory(Long eodId) {
         ExternalObjectDirectoryEntity externalObjectDirectory = null;
         try {
             externalObjectDirectory = externalObjectDirectoryService.eagerLoadExternalObjectDirectory(eodId).orElseThrow();

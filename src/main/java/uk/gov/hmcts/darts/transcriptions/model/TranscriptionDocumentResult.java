@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.transcriptions.model;
 import java.time.LocalDate;
 
 public record TranscriptionDocumentResult(
-    Integer transcriptionDocumentId,
-    Integer transcriptionId,
+    Long transcriptionDocumentId,
+    Long transcriptionId,
     Integer caseId,
     String caseNumber,
     Integer hearingCaseId,
