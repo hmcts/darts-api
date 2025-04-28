@@ -102,7 +102,7 @@ class AudioServiceImplTest {
         AudioMetadata audioMetadata = new AudioMetadata();
         audioMetadata.setId(mediaId);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
-        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2);
+        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2L);
         List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
 
         when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);
@@ -118,7 +118,7 @@ class AudioServiceImplTest {
         AudioMetadata audioMetadata = new AudioMetadata();
         audioMetadata.setId(mediaId);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
-        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2);
+        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2L);
         List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
 
         when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);

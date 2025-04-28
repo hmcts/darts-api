@@ -14,7 +14,7 @@ public class AudioBeingProcessedFromArchiveQueryResultRowMapper implements RowMa
     public AudioBeingProcessedFromArchiveQueryResult mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new AudioBeingProcessedFromArchiveQueryResult(
             rs.getLong("med_id"),
-            rs.getInt("arm_eod_id")
+            rs.getLong("arm_eod_id")
         );
     }
 
