@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity implements DbInsertable<TranscriptionDocumentEntity> {
     @lombok.Builder
-    public TestTranscriptionDocumentEntity(Integer id,
+    public TestTranscriptionDocumentEntity(Long id,
                                            TranscriptionEntity transcription,
                                            String clipId, String fileName, String fileType,
                                            Integer fileSize, UserAccountEntity uploadedBy,

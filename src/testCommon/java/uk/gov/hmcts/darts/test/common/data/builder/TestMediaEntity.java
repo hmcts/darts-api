@@ -23,7 +23,7 @@ import java.util.List;
 public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEntity> {
 
     @lombok.Builder
-    public TestMediaEntity(Integer id, CourtroomEntity courtroom,
+    public TestMediaEntity(Long id, CourtroomEntity courtroom,
                            String legacyObjectId, Integer channel, Integer totalChannels, OffsetDateTime start, OffsetDateTime end,
                            List<MediaLinkedCaseEntity> mediaLinkedCaseList, String legacyVersionLabel,
                            String mediaFile, String mediaFormat, Long fileSize, String checksum,

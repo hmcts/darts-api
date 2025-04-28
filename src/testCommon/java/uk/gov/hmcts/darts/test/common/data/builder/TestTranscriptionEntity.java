@@ -28,7 +28,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TestTranscriptionEntity extends TranscriptionEntity implements DbInsertable<TranscriptionEntity> {
     @lombok.Builder
-    public TestTranscriptionEntity(Integer id, Collection<CourtCaseEntity> courtCases,
+    public TestTranscriptionEntity(Long id, Collection<CourtCaseEntity> courtCases,
                                    TranscriptionTypeEntity transcriptionType,
                                    CourtroomEntity courtroom,
                                    TranscriptionUrgencyEntity transcriptionUrgency,
