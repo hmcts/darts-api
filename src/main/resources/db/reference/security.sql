@@ -21,6 +21,7 @@
 --v22 change name of FK on security_group last_modified
 --v23 switch all tablespaces to pg_default
 --v24 add group_display_name to security_group, for direct mapping from legacy
+--v25 removing caching from sequences
 
 -- assuming this already exists:
 -- CREATE TABLESPACE pg_default  location 'E:/PostgreSQL/Tables';
@@ -126,9 +127,9 @@ CREATE UNIQUE INDEX security_group_courthouse_ae_pk ON security_group_courthouse
 ALTER TABLE security_group_courthouse_ae            ADD PRIMARY KEY USING INDEX security_group_courthouse_ae_pk;
 
 
-CREATE SEQUENCE grp_seq CACHE 20;
-CREATE SEQUENCE rol_seq CACHE 20;
-CREATE SEQUENCE per_seq CACHE 20;
+CREATE SEQUENCE grp_seq CACHE 1;
+CREATE SEQUENCE rol_seq CACHE 1;
+CREATE SEQUENCE per_seq CACHE 1;
 
 ALTER TABLE security_group                    
 ADD CONSTRAINT security_group_role_fk

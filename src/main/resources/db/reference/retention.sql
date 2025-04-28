@@ -53,6 +53,7 @@
 --v20  remove not null from cas_id on case_overflow
 --     add c_case_id, c_courthouse, c_type, c_upload_priority, c_reporting_restrictions,
 --     case_object_name, r_folder_path, c_interpreter_used to case_overflow
+--v21  remove caching from sequences
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -304,14 +305,14 @@ ALTER TABLE case_retention_audit_heritage ADD PRIMARY KEY USING INDEX case_reten
 CREATE UNIQUE INDEX retention_policy_type_heritage_mapping_pk ON retention_policy_type_heritage_mapping(rhm_id) TABLESPACE pg_default; 
 ALTER TABLE retention_policy_type_heritage_mapping ADD PRIMARY KEY USING INDEX retention_policy_type_heritage_mapping_pk;
 
-CREATE SEQUENCE cmr_seq CACHE 20;
-CREATE SEQUENCE rpr_seq CACHE 20;
-CREATE SEQUENCE car_seq CACHE 20;
-CREATE SEQUENCE rcc_seq CACHE 20;
-CREATE SEQUENCE rpt_seq CACHE 20;
-CREATE SEQUENCE rah_seq CACHE 20;
-CREATE SEQUENCE rhm_seq CACHE 20;
-CREATE SEQUENCE cof_seq CACHE 20;
+CREATE SEQUENCE cmr_seq CACHE 1;
+CREATE SEQUENCE rpr_seq CACHE 1;
+CREATE SEQUENCE car_seq CACHE 1;
+CREATE SEQUENCE rcc_seq CACHE 1;
+CREATE SEQUENCE rpt_seq CACHE 1;
+CREATE SEQUENCE rah_seq CACHE 1;
+CREATE SEQUENCE rhm_seq CACHE 1;
+CREATE SEQUENCE cof_seq CACHE 1;
 
 
 ALTER TABLE rps_retainer      

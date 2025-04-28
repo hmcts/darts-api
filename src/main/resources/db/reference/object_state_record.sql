@@ -13,12 +13,14 @@
 --v9    add dal_id to object_state_record
 --v10   amend datatypes for eod_id and arm_eod_id to integer
 --v11   remove 4 indexes
+--v12   add sequence revinfo_seq
+--v13   amend eol_id and arm_eod_id to bigint
 
 
 CREATE TABLE object_state_record
 (osr_uuid                      BIGINT                     NOT NULL
-,eod_id                        INTEGER
-,arm_eod_id                    INTEGER
+,eod_id                        BIGINT
+,arm_eod_id                    BIGINT
 ,dal_id                        INTEGER
 ,parent_object_id              CHARACTER VARYING 
 ,content_object_id             CHARACTER VARYING   
@@ -71,6 +73,8 @@ CREATE TABLE revinfo
 ,audit_user                    INTEGER
 ,CONSTRAINT revinfo_pkey PRIMARY KEY(rev)
 ) TABLESPACE pg_default;
+
+CREATE SEQUENCE revinfo_seq CACHE 1;
 
 ALTER TABLE revinfo 
 ADD CONSTRAINT revinfo_audit_user_fk
