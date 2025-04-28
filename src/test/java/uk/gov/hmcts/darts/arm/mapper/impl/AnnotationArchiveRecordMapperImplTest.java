@@ -152,6 +152,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertMetadataAllFields(result.getAnnotationCreateArchiveRecordOperation().getRecordMetadata());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required due to object type comparison
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Annotation", metadata.getBf001());
         assertEquals("1001", metadata.getBf002());
@@ -175,6 +176,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertEquals("1", metadata.getBf020());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required due to object type comparison
     private void assertMetadataAllFields(RecordMetadata metadata) {
         assertEquals("Annotation", metadata.getBf001());
         assertEquals("1001", metadata.getBf002());

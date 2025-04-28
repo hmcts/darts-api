@@ -161,6 +161,7 @@ class MediaArchiveRecordMapperImplTest {
         assertNull(result.getMediaCreateArchiveRecord().getRecordMetadata().getBf001());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required due to object type comparison
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Media", metadata.getBf001());
         assertNull(metadata.getBf002());
@@ -184,6 +185,7 @@ class MediaArchiveRecordMapperImplTest {
         assertNotNull(metadata.getBf020());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required due to object type comparison
     private void assertMetadataAllProperties(RecordMetadata metadata) {
         assertEquals("Media", metadata.getBf001());
         assertNull(metadata.getBf002());
