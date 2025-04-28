@@ -163,7 +163,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = """
-            {"title":"Bad Request","status":400,"detail":"Required request parameter 'transcription_id' for method parameter type Integer is not present"}
+            {"title":"Bad Request","status":400,"detail":"Required request parameter 'transcription_id' for method parameter type Long is not present"}
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);

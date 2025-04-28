@@ -137,7 +137,7 @@ class UserManagementServiceImplTest {
         userAccountEntities.getFirst().setIsSystemUser(false);
 
         Integer userId = 1001;
-        Integer transcriptionId = 1001;
+        Long transcriptionId = 1001L;
         UserPatch patch = new UserPatch();
         patch.setActive(false);
 

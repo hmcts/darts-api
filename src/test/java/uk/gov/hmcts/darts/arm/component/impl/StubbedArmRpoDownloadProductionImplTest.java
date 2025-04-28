@@ -119,7 +119,7 @@ class StubbedArmRpoDownloadProductionImplTest {
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity() {
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
-        eod.setId(1);
+        eod.setId(1L);
         eod.setStatus(EodHelper.armRpoPendingStatus());
         return eod;
     }

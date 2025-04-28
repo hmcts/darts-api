@@ -266,7 +266,7 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
         return "{\"is_current\": %s}".formatted(isCurrent);
     }
 
-    private void assertMediaIsCurrentStatus(int mediaId, boolean isCurrent) {
+    private void assertMediaIsCurrentStatus(long mediaId, boolean isCurrent) {
         transactionalUtil.executeInTransaction(() -> {
             MediaEntity media = databaseStub.getMediaRepository().findById(mediaId).orElseThrow();
             assertThat(media.getIsCurrent()).isEqualTo(isCurrent);

@@ -6,5 +6,5 @@ import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import java.util.Optional;
 
 public interface ObjectStateRecordRepository extends JpaRepository<ObjectStateRecordEntity, Long> {
-    Optional<ObjectStateRecordEntity> findByArmEodId(Integer armEodId);
+    Optional<ObjectStateRecordEntity> findByArmEodId(long armEodId);
 }

@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 @Data
 public class EventCaseDocument extends CreatedModifiedCaseDocument {
 
-    private Integer id;
+    private Long id;
     private String legacyObjectId;
     private EventHandlerCaseDocument eventType;
     private Integer eventId;

@@ -65,14 +65,14 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
 
     @Override
     public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
-        authorisation.authoriseByTranscriptionId(jsonNode.path(TRANSCRIPTION_ID_PARAM).intValue(), roles);
+        authorisation.authoriseByTranscriptionId(jsonNode.path(TRANSCRIPTION_ID_PARAM).longValue(), roles);
     }
 
     void checkAuthorisationByTranscriptionId(Optional<String> transcriptionIdParamOptional,
                                              Set<SecurityRoleEnum> roles) {
         if (transcriptionIdParamOptional.isPresent()) {
             try {
-                Integer transcriptionId = Integer.valueOf(transcriptionIdParamOptional.get());
+                Long transcriptionId = Long.valueOf(transcriptionIdParamOptional.get());
                 authorisation.authoriseByTranscriptionId(transcriptionId, roles);
             } catch (NumberFormatException ex) {
                 log.error("Unable to parse transcription_id for checkAuthorisation", ex);

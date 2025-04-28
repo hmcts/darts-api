@@ -13,8 +13,8 @@ import java.util.Optional;
 
 @Repository
 @SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
-public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
-    SoftDeleteRepository<MediaEntity, Integer> {
+public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
+    SoftDeleteRepository<MediaEntity, Long> {
 
     //Warning - This deliberately does not filter on me.isCurrent. Admin may want to see the old media.
     @Query("""
@@ -88,7 +88,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
 
     //native query to bypass @SQLRestriction
     @Query(value = "SELECT me.* FROM darts.media me WHERE me.med_id = :mediaId", nativeQuery = true)
-    Optional<MediaEntity> findByIdIncludeDeleted(Integer mediaId);
+    Optional<MediaEntity> findByIdIncludeDeleted(Long mediaId);
 
     @Query("""
            select me
@@ -107,7 +107,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
         """)
     List<MediaEntity> findAllLinkedByMediaLinkedCaseByCaseId(Integer caseId);
 
-    boolean existsByIdAndIsHiddenFalse(Integer mediaId);
+    boolean existsByIdAndIsHiddenFalse(Long mediaId);
 
     @Query("""
            SELECT COUNT(me)

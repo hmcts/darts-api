@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ArmResponseBatchData {
-    private int externalObjectDirectoryId;
+    private long externalObjectDirectoryId;
 
     private ArmResponseCreateRecord armResponseCreateRecord;
     @Builder.Default

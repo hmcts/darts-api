@@ -15,12 +15,12 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class UserActivateValidator implements Validator<IdRequest<UserPatch>> {
+public class UserActivateValidator implements Validator<IdRequest<UserPatch, Integer>> {
 
     private final UserAccountRepository userAccountRepository;
 
     @Override
-    public void validate(IdRequest<UserPatch> request) {
+    public void validate(IdRequest<UserPatch, Integer> request) {
         if (!(request.getPayload() != null && Boolean.TRUE.equals(request.getPayload().getActive()))) {
             return;
         }

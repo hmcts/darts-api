@@ -40,7 +40,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -116,7 +116,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         invalidLineFileFilenameProcessor = new InvalidLineFileFilenameProcessor(invalidLineFileFilename);
 
         externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        externalObjectDirectoryEntity.setId(1);
+        externalObjectDirectoryEntity.setId(1L);
         externalObjectDirectoryEntity.setStatus(EodHelper.armProcessingResponseFilesStatus());
         externalObjectDirectoryEntity.setVerificationAttempts(1);
         objectStateRecordEntity = new ObjectStateRecordEntity();
@@ -168,7 +168,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             .armResponseUploadFileRecord(uploadFileRecord)
             .uploadFileFilenameProcessor(uploadFileFilenameProcessor)
             .build();
-        when(osrRepository.findByArmEodId(anyInt())).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(anyLong())).thenReturn(Optional.of(objectStateRecordEntity));
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
@@ -180,7 +180,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
                                                                                      userAccount);
 
         // then
-        verify(osrRepository).findByArmEodId(1);
+        verify(osrRepository).findByArmEodId(1L);
         verify(osrRepository).save(objectStateRecordEntity);
     }
 
@@ -190,7 +190,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         ArmResponseUploadFileRecord uploadFileRecord = new ArmResponseUploadFileRecord();
         uploadFileRecord.setA360FileId("a360FileId");
         uploadFileRecord.setMd5("invalidchecksum");
-        when(osrRepository.findByArmEodId(anyInt())).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(anyLong())).thenReturn(Optional.of(objectStateRecordEntity));
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
@@ -207,14 +207,14 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         // given
         ArmResponseUploadFileRecord uploadFileRecord = mock(ArmResponseUploadFileRecord.class);
         UploadFileFilenameProcessor processor = mock(UploadFileFilenameProcessor.class);
-        when(osrRepository.findByArmEodId(anyInt())).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(anyLong())).thenReturn(Optional.of(objectStateRecordEntity));
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
         detsToArmBatchProcessResponseFilesImpl.processUploadFileDataFailure(uploadFileRecord, processor, externalObjectDirectoryEntity, userAccount);
 
         // then
-        verify(osrRepository).findByArmEodId(1);
+        verify(osrRepository).findByArmEodId(1L);
         verify(osrRepository).save(objectStateRecordEntity);
     }
 
@@ -231,14 +231,14 @@ class DetsToArmBatchProcessResponseFilesImplTest {
                 \\\"recordDate\\\":\\\"2023-12-21T10:03:53Z\\\"}}
                 """);
 
-        when(osrRepository.findByArmEodId(anyInt())).thenReturn(Optional.of(objectStateRecordEntity));
+        when(osrRepository.findByArmEodId(anyLong())).thenReturn(Optional.of(objectStateRecordEntity));
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
         detsToArmBatchProcessResponseFilesImpl.processInvalidLineFileActions(invalidLineRecord, externalObjectDirectoryEntity, userAccount);
 
         // then
-        verify(osrRepository).findByArmEodId(1);
+        verify(osrRepository).findByArmEodId(1L);
         verify(osrRepository).save(objectStateRecordEntity);
     }
 

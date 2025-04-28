@@ -9,7 +9,7 @@ public interface DataAnonymisationService {
 
     void anonymiseCourtCaseById(UserAccountEntity userAccount, Integer courtCaseId, boolean isManuallyRequested);
 
-    void anonymiseEventByIds(UserAccountEntity userAccount, List<Integer> eveIds, boolean isManuallyRequested);
+    void anonymiseEventByIds(UserAccountEntity userAccount, List<Long> eveIds, boolean isManuallyRequested);
 
     void anonymiseEvent(UserAccountEntity userAccount, EventEntity eventEntity, boolean isManuallyRequested);
 }

@@ -164,7 +164,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
         String inputUploadFilename = inputUploadAndAssociates.getInputUploadFilename();
         for (EodIdAndAssociatedFilenames eodIdAndAssociatedFilenames : eodIdAndAssociatedFilenamesList) {
             boolean successfullyDeletedAssociatedFiles = true;
-            Integer eodId = eodIdAndAssociatedFilenames.getEodId();
+            Long eodId = eodIdAndAssociatedFilenames.getEodId();
             List<String> associatedFiles = eodIdAndAssociatedFilenames.getAssociatedFiles();
             log.info("{}: There are {} response files for EOD {}, linked to inputUpload filename {}",
                      loggingPrefix, associatedFiles.size(), eodId, inputUploadFilename);

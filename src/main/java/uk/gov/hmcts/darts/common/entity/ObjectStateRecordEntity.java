@@ -21,10 +21,10 @@ public class ObjectStateRecordEntity {
     private Long uuid;
 
     @Column(name = "eod_id")
-    private Integer eodId;
+    private Long eodId;
 
     @Column(name = "arm_eod_id")
-    private Integer armEodId;
+    private Long armEodId;
 
     @Column(name = "parent_object_id")
     private String parentObjectId;

@@ -30,7 +30,7 @@ public class MediaLinkedCaseEntity extends CreatedBaseEntity {
     @Column(name = "mlc_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mlc_gen")
     @SequenceGenerator(name = "mlc_gen", sequenceName = "mlc_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "med_id")

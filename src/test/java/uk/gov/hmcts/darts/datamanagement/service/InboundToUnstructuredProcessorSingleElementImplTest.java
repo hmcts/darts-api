@@ -38,7 +38,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @ExtendWith(MockitoExtension.class)
 class InboundToUnstructuredProcessorSingleElementImplTest {
 
-    private static final Integer INBOUND_ID = 5555;
+    private static final Long INBOUND_ID = 5555L;
     public static final String UUID_REGEX = "([a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8})";
     private static final String EXTERNAL_LOCATION_UUID = UUID.randomUUID().toString();
     private static final String INBOUND_CONTAINER_NAME = "darts-inbound-container";
@@ -102,7 +102,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         when(externalObjectDirectoryEntityInbound.getCaseDocument()).thenReturn(caseDocumentEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
-        when(caseDocumentEntity.getId()).thenReturn(44);
+        when(caseDocumentEntity.getId()).thenReturn(44L);
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 

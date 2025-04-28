@@ -96,6 +96,7 @@ paths:
           name: media_id
           schema:
             type: integer
+            format: int64
           required: true
           description: "Internal identifier for media"
           example: 1
@@ -424,6 +425,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -473,6 +475,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: OK
@@ -658,6 +661,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           example: 1
           description: Unique media identifier, used internally by DARTS.
         courthouse:
@@ -1056,6 +1060,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           description: 'The media id'
         is_hidden:
           type: boolean
@@ -1110,6 +1115,7 @@ components:
 
     MediaId:
       type: integer
+      format: int64
       description: med_id
 
     Format:

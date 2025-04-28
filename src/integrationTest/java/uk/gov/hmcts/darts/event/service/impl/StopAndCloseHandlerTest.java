@@ -743,7 +743,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
             .containsOnly(idFrom(persistedEvents));
     }
 
-    private Integer idFrom(List<EventEntity> eventEntities) {
+    private Long idFrom(List<EventEntity> eventEntities) {
         return eventEntities.getFirst().getId();
     }
 

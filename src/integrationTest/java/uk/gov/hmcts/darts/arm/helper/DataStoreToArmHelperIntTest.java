@@ -118,7 +118,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM);
 
-        List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
+        List<Long> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
                                                                                               EodHelper.armLocation(), 5);
         assertEquals(1, eodEntitiesToSendToArm.size());
 
@@ -138,7 +138,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         failedTooManyTimesEod.setTransferAttempts(4);
         dartsDatabase.save(failedTooManyTimesEod);
 
-        List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
+        List<Long> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
                                                                                               EodHelper.armLocation(), 5);
         assertEquals(3, eodEntitiesToSendToArm.size());
 
@@ -149,7 +149,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         ExternalLocationTypeEntity sourceLocation = externalObjectDirectoryStub.getLocation(DETS);
         ExternalLocationTypeEntity armLocation = externalObjectDirectoryStub.getLocation(ARM);
 
-        List<Integer> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
+        List<Long> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
 
         assertNotNull(result);
     }
@@ -343,10 +343,10 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
             .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
             .bf011("2024-01-23T11:39:30Z")
-            .bf012(1)
-            .bf013(1)
-            .bf014(3)
-            .bf015(4)
+            .bf012(1L)
+            .bf013(1L)
+            .bf014(3L)
+            .bf015(4L)
             .bf017("2024-01-23T11:40:00Z")
             .bf018("2024-01-23T13:40:00Z")
             .bf019("Swansea")

@@ -84,7 +84,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHE
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
-import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
+import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulatedInt;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -336,10 +336,10 @@ class MediaRequestServiceImplTest {
 
         when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
             .thenReturn(List.of(
-                new AudioRequestBeingProcessedFromArchiveQueryResult(181),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(182),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(183),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(184)
+                new AudioRequestBeingProcessedFromArchiveQueryResult(181L),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(182L),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(183L),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(184L)
             ));
 
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
@@ -425,7 +425,7 @@ class MediaRequestServiceImplTest {
     @Test
     void downloadShouldReturnExpectedData() {
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
+        mediaEntity.setId(1L);
         mediaEntity.setStart(START_TIME);
         mediaEntity.setEnd(END_TIME);
         mediaEntity.setChannel(1);
@@ -556,7 +556,7 @@ class MediaRequestServiceImplTest {
     @Test
     void playbackShouldReturnExpectedData() throws IOException {
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
+        mediaEntity.setId(1L);
         mediaEntity.setStart(START_TIME);
         mediaEntity.setEnd(END_TIME);
         mediaEntity.setChannel(1);
@@ -765,7 +765,7 @@ class MediaRequestServiceImplTest {
     @Test
     @SuppressWarnings("java:S1874")
     void auditsWhenOwnerChanged() {
-        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
+        var mediaRequest = withIdsPopulatedInt(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 
@@ -777,7 +777,7 @@ class MediaRequestServiceImplTest {
     @Test
     @SuppressWarnings("java:S1874")
     void doesNotAuditWhenOwnerNotChanged() {
-        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
+        var mediaRequest = withIdsPopulatedInt(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
 
         mediaRequestService.patchMediaRequest(

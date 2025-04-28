@@ -11,6 +11,6 @@ public class DownloadTranscriptResponse {
     private Resource resource;
     private String fileName;
     private String contentType;
-    private Integer transcriptionDocumentId;
+    private Long transcriptionDocumentId;
 
 }

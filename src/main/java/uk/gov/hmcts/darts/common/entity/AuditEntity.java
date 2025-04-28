@@ -23,7 +23,7 @@ public class AuditEntity extends CreatedModifiedBaseEntity {
     @Column(name = "aud_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "aud_gen")
     @SequenceGenerator(name = "aud_gen", sequenceName = "aud_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "cas_id")

@@ -15,9 +15,9 @@ public interface ExternalObjectDirectoryService {
 
     boolean hasAllMediaBeenCopiedFromInboundStorage(List<MediaEntity> mediaEntities);
 
-    Optional<ExternalObjectDirectoryEntity> eagerLoadExternalObjectDirectory(Integer externalObjectDirectoryId);
+    Optional<ExternalObjectDirectoryEntity> eagerLoadExternalObjectDirectory(Long externalObjectDirectoryId);
 
-    void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
+    void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Long> idsToUpdate, OffsetDateTime timestamp);
 
     ExternalObjectDirectoryEntity createAndSaveCaseDocumentEod(String externalLocation,
                                                                UserAccountEntity userAccountEntity,

@@ -36,8 +36,8 @@ import static java.util.Collections.emptyList;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
@@ -117,12 +117,12 @@ class UnstructuredToArmBatchProcessorTest {
     void testDartsArmClientConfigInBatchQuery() {
 
         ExternalObjectDirectoryEntity eod10 = new ExternalObjectDirectoryEntity();
-        eod10.setId(10);
+        eod10.setId(10L);
         eod10.setExternalLocationType(EodHelper.armLocation());
         eod10.setStatus(EodHelper.failedArmManifestFileStatus());
         //given
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(10));
-        when(externalObjectDirectoryRepository.findAllById(List.of(10))).thenReturn(List.of(eod10));
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(10L));
+        when(externalObjectDirectoryRepository.findAllById(List.of(10L))).thenReturn(List.of(eod10));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
@@ -140,13 +140,13 @@ class UnstructuredToArmBatchProcessorTest {
             EodHelper.armLocation(), 199
         );
 
-        verify(logApi).armPushFailed(anyInt());
+        verify(logApi).armPushFailed(anyLong());
     }
 
     @Test
     void testPaginatedBatchQuery() {
         //given
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12, 34));
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12L, 34L));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
         when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
@@ -174,7 +174,7 @@ class UnstructuredToArmBatchProcessorTest {
     @Test
     void processUnstructuredToArm_throwsInterruptedException() {
         //given
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12, 34));
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12L, 34L));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);

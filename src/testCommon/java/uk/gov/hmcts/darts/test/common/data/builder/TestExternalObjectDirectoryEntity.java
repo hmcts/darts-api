@@ -19,7 +19,7 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity> {
     @lombok.Builder
-    public TestExternalObjectDirectoryEntity(Integer id, MediaEntity media, TranscriptionDocumentEntity transcriptionDocumentEntity,
+    public TestExternalObjectDirectoryEntity(Long id, MediaEntity media, TranscriptionDocumentEntity transcriptionDocumentEntity,
                                              AnnotationDocumentEntity annotationDocumentEntity, CaseDocumentEntity caseDocument,
                                              ObjectRecordStatusEntity status,
                                              ExternalLocationTypeEntity externalLocationType, String externalLocation,

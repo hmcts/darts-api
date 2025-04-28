@@ -83,7 +83,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
             if (!eventsThatHaveBeenSuperseded.isEmpty()) {
                 eventRepository.saveAllAndFlush(eventsThatHaveBeenSuperseded);
 
-                List<Integer> eventIds = eventsThatHaveBeenSuperseded.stream()
+                List<Long> eventIds = eventsThatHaveBeenSuperseded.stream()
                     .map(EventEntity::getId)
                     .toList();
 
@@ -96,7 +96,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
         }
     }
 
-    private List<EventEntity> getEventsWithSameEventIdAndHearings(Integer eveId, Integer eventId) {
+    private List<EventEntity> getEventsWithSameEventIdAndHearings(Long eveId, Integer eventId) {
         List<EventEntity> returnList = new ArrayList<>();
         List<Integer> hearingIdsToMatch = hearingRepository.findHearingIdsByEventId(eveId);
         List<EventEntity> eventsWithSameEventId = eventRepository.findAllByEventId(eventId);

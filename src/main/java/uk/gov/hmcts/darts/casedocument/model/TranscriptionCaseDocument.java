@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class TranscriptionCaseDocument extends CreatedModifiedCaseDocument {
 
-    private final Integer id;
+    private final Long id;
     private final TranscriptionTypeEntity transcriptionType;
     private final TranscriptionUrgencyEntity transcriptionUrgency;
     private final TranscriptionStatusEntity transcriptionStatus;
@@ -38,7 +38,7 @@ public class TranscriptionCaseDocument extends CreatedModifiedCaseDocument {
     @Data
     public static class TranscriptionDocumentCaseDocument {
 
-        private final Integer id;
+        private final Long id;
         private final OffsetDateTime lastModifiedTimestamp;
         private final Integer lastModifiedBy;
         private final String clipId;

@@ -148,7 +148,7 @@ class ExternalObjectDirectoryServiceImplTest {
         "2, 2000",
         "3, 3000"
     })
-    void getFileSizeReturnsCorrectSizeForMedia(Integer mediaId, Long expectedSize) {
+    void getFileSizeReturnsCorrectSizeForMedia(Long mediaId, Long expectedSize) {
         when(mediaRepository.findById(mediaId)).thenReturn(Optional.of(media1));
         when(media1.getFileSize()).thenReturn(expectedSize);
         when(media1.getId()).thenReturn(mediaId);
@@ -167,7 +167,7 @@ class ExternalObjectDirectoryServiceImplTest {
         "2, 2000",
         "3, 3000"
     })
-    void getFileSizeReturnsCorrectSizeForAnnotationDocument(Integer annotationDocumentId, Long expectedSize) {
+    void getFileSizeReturnsCorrectSizeForAnnotationDocument(Long annotationDocumentId, Long expectedSize) {
         when(annotationDocumentRepository.findById(annotationDocumentId)).thenReturn(Optional.of(annotationDocument));
         when(annotationDocument.getFileSize()).thenReturn(expectedSize.intValue());
         when(annotationDocument.getId()).thenReturn(annotationDocumentId);
@@ -186,7 +186,7 @@ class ExternalObjectDirectoryServiceImplTest {
         "2, 2000",
         "3, 3000"
     })
-    void getFileSizeReturnsCorrectSizeForCaseDocument(Integer caseDocumentId, Long expectedSize) {
+    void getFileSizeReturnsCorrectSizeForCaseDocument(Long caseDocumentId, Long expectedSize) {
         when(caseDocumentRepository.findById(caseDocumentId)).thenReturn(Optional.of(caseDocumentEntity));
         when(caseDocumentEntity.getFileSize()).thenReturn(expectedSize.intValue());
         when(caseDocumentEntity.getId()).thenReturn(caseDocumentId);
@@ -205,7 +205,7 @@ class ExternalObjectDirectoryServiceImplTest {
         "2, 2000",
         "3, 3000"
     })
-    void getFileSizeReturnsCorrectSizeForTranscriptionDocument(Integer transcriptionId, Long expectedSize) {
+    void getFileSizeReturnsCorrectSizeForTranscriptionDocument(Long transcriptionId, Long expectedSize) {
         when(transcriptionDocumentRepository.findById(transcriptionId)).thenReturn(Optional.of(transcriptionDocument));
         when(transcriptionDocument.getFileSize()).thenReturn(expectedSize.intValue());
         when(transcriptionDocument.getId()).thenReturn(transcriptionId);

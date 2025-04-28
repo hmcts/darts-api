@@ -18,7 +18,7 @@ import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
-import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
@@ -32,13 +32,13 @@ import java.util.List;
 @Table(name = "annotation_document")
 @SQLRestriction("is_deleted = false")
 public class AnnotationDocumentEntity extends ModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities {
+    implements ConfidenceAware, SoftDelete, HasLongId, HasRetention, CanReturnExternalObjectDirectoryEntities {
 
     @Id
     @Column(name = "ado_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ado_gen")
     @SequenceGenerator(name = "ado_gen", sequenceName = "ado_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ann_id", nullable = false)

@@ -48,11 +48,11 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
     @Test
     void successfullyShow() {
-        Integer documentId = 200;
+        Long documentId = 200L;
         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
         transcriptionDocumentHideRequest.setIsHidden(false);
 
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+        IdRequest<TranscriptionDocumentHideRequest, Long> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
 
         transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId);
@@ -62,13 +62,13 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
     @Test
     void failShowWithAdminActionRequest() {
-        Integer documentId = 200;
+        Long documentId = 200L;
         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
         transcriptionDocumentHideRequest.setIsHidden(false);
 
         transcriptionDocumentHideRequest.setAdminAction(new AdminActionRequest());
 
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+        IdRequest<TranscriptionDocumentHideRequest, Long> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
 
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class,
@@ -80,7 +80,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
     @Test
     void successfullyHideWithActionRequest() {
-        Integer documentId = 200;
+        Long documentId = 200L;
         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
         transcriptionDocumentHideRequest.setIsHidden(true);
 
@@ -94,7 +94,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
         when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of());
 
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+        IdRequest<TranscriptionDocumentHideRequest, Long> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
 
         transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId);
@@ -104,11 +104,11 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
     @Test
     void failsWhenHideWithoutActionRequest() {
-        Integer documentId = 200;
+        Long documentId = 200L;
         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
         transcriptionDocumentHideRequest.setIsHidden(true);
 
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+        IdRequest<TranscriptionDocumentHideRequest, Long> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
 
         DartsApiException exception =
@@ -121,7 +121,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
     @Test
     void failWhenHideWithActionRequestWithDbAction() {
-        Integer documentId = 200;
+        Long documentId = 200L;
         AdminActionRequest adminActionResponse = new AdminActionRequest();
 
         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
@@ -132,7 +132,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of(objectAdminActionEntity));
 
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+        IdRequest<TranscriptionDocumentHideRequest, Long> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
 
         DartsApiException exception =
@@ -144,7 +144,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
     @Test
     void failWhenHideWithActionRequestAndWithoutCorrectReason() {
-        Integer documentId = 200;
+        Long documentId = 200L;
         AdminActionRequest adminActionResponse = new AdminActionRequest();
 
         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
@@ -157,7 +157,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
         when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of());
 
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+        IdRequest<TranscriptionDocumentHideRequest, Long> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
 
         DartsApiException exception
@@ -170,7 +170,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
     @Test
     void failWhenHideWithActionRequestAndWithReasonMarkedForDeletionButManualDeletionIsDisabled() {
         setManualDeletionEnabled(false);
-        Integer documentId = 200;
+        Long documentId = 200L;
         AdminActionRequest adminActionResponse = new AdminActionRequest();
 
         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
@@ -186,7 +186,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(reasonEntity));
         when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of());
 
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+        IdRequest<TranscriptionDocumentHideRequest, Long> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
 
         DartsApiException exception
@@ -199,7 +199,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
     @Test
     void successfullyHideWithActionRequestAndWithReasonMarkedForDeletionButManualDeletionIsEnabled() {
         setManualDeletionEnabled(true);
-        Integer documentId = 200;
+        Long documentId = 200L;
         AdminActionRequest adminActionResponse = new AdminActionRequest();
 
         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
@@ -215,7 +215,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(reasonEntity));
         when(objectAdminActionRepository.findByTranscriptionDocumentId(documentId)).thenReturn(List.of());
 
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+        IdRequest<TranscriptionDocumentHideRequest, Long> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
 
         Assertions.assertDoesNotThrow(() -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));

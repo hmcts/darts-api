@@ -14,9 +14,9 @@ public interface Authorisation {
 
     void authoriseByMediaRequestId(Integer mediaRequestId, Set<SecurityRoleEnum> securityRoles);
 
-    void authoriseByMediaId(Integer mediaId, Set<SecurityRoleEnum> securityRoles);
+    void authoriseByMediaId(Long mediaId, Set<SecurityRoleEnum> securityRoles);
 
-    void authoriseByTranscriptionId(Integer transcriptionId, Set<SecurityRoleEnum> securityRoles);
+    void authoriseByTranscriptionId(Long transcriptionId, Set<SecurityRoleEnum> securityRoles);
 
     void authoriseByTransformedMediaId(Integer transformedMediaId, Set<SecurityRoleEnum> securityRoles);
 

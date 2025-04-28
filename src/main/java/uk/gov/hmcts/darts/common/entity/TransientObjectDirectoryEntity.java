@@ -25,7 +25,7 @@ public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity im
     @Column(name = "tod_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tod_gen")
     @SequenceGenerator(name = "tod_gen", sequenceName = "tod_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "trm_id", foreignKey = @ForeignKey(name = "tod_transformed_media_fk"), nullable = false)

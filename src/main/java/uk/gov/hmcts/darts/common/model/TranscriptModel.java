@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 public interface TranscriptModel {
-    Integer getTranscriptionId();
+    Long getTranscriptionId();
 
-    void setTranscriptionId(Integer transcriptionId);
+    void setTranscriptionId(Long transcriptionId);
 
     Integer getHearingId();
 

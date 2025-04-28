@@ -12,17 +12,17 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class MediaIdValidator implements Validator<Integer> {
+public class MediaIdValidator implements Validator<Long> {
 
     private final MediaRepository mediaRepository;
 
-    public void validateNotHidden(Integer id) {
+    public void validateNotHidden(Long id) {
         if (!mediaRepository.existsByIdAndIsHiddenFalse(id)) {
             throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
         }
     }
 
-    public void validateNotZeroSecondAudio(Integer id) {
+    public void validateNotZeroSecondAudio(Long id) {
         Optional<MediaEntity> media = mediaRepository.findById(id);
         media.ifPresent(e -> {
             if (e.getStart() == null || e.getEnd() == null || e.getStart().isEqual(e.getEnd()) || e.getStart().isAfter(e.getEnd())) {
@@ -32,7 +32,7 @@ public class MediaIdValidator implements Validator<Integer> {
     }
 
     @Override
-    public void validate(Integer id) {
+    public void validate(Long id) {
         if (mediaRepository.findByIdIncludeDeleted(id).isEmpty()) {
             throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
         }

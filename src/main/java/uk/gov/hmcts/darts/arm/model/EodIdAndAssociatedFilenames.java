@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class EodIdAndAssociatedFilenames {
-    Integer eodId;
+    Long eodId;
     List<String> associatedFiles;
 
     void addAssociatedFile(String filename) {

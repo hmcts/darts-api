@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,54 +52,54 @@ class TranscriptionServiceGetWorkflowsTest {
 
     @Test
     void getCurrentTranscriptionWorkflowSuccess() {
-        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(new TranscriptionEntity()));
+        when(transcriptionRepository.findById(anyLong())).thenReturn(Optional.of(new TranscriptionEntity()));
         when(transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(any())).thenReturn(getListOfTranscriptionWorkflows());
         when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(mockTranscriptionWorkflowEntity), List.of()))
             .thenReturn(List.of(mockTranscriptionWorkflowResponse));
 
-        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, true);
+        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1L, true);
 
         assertEquals(1, transcriptionWorkflows.size());
-        verify(transcriptionRepository, times(1)).findById(anyInt());
+        verify(transcriptionRepository, times(1)).findById(anyLong());
         verify(transcriptionWorkflowRepository, times(1)).findByTranscriptionOrderByWorkflowTimestampDesc(any());
     }
 
     @Test
     void getTranscriptionWorkflowSuccess() {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(transcription));
+        when(transcriptionRepository.findById(anyLong())).thenReturn(Optional.of(transcription));
         when(transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(any())).thenReturn(getListOfTranscriptionWorkflows());
         when(transcriptionCommentRepository.getByTranscriptionAndTranscriptionWorkflowIsNull(any())).thenReturn(List.of(transcriptionComment));
         when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(getListOfTranscriptionWorkflows(), List.of(transcriptionComment)))
             .thenReturn(List.of(mockTranscriptionWorkflowResponse, mockTranscriptionWorkflowResponse2));
 
-        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, false);
+        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1L, false);
 
         assertEquals(2, transcriptionWorkflows.size());
-        verify(transcriptionRepository, times(1)).findById(anyInt());
+        verify(transcriptionRepository, times(1)).findById(anyLong());
         verify(transcriptionWorkflowRepository, times(1)).findByTranscriptionOrderByWorkflowTimestampDesc(any());
         verify(transcriptionCommentRepository).getByTranscriptionAndTranscriptionWorkflowIsNull(transcription);
     }
 
     @Test
     void handleNoTranscriptionWorkflows() {
-        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(new TranscriptionEntity()));
+        when(transcriptionRepository.findById(anyLong())).thenReturn(Optional.of(new TranscriptionEntity()));
         when(transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(any())).thenReturn(Collections.emptyList());
         when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(), List.of()))
             .thenReturn(List.of(mockTranscriptionWorkflowResponse));
 
-        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, true);
+        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1L, true);
 
         assertEquals(1, transcriptionWorkflows.size());
-        verify(transcriptionRepository, times(1)).findById(anyInt());
+        verify(transcriptionRepository, times(1)).findById(anyLong());
         verify(transcriptionWorkflowRepository, times(1)).findByTranscriptionOrderByWorkflowTimestampDesc(any());
     }
 
     @Test
     void shouldReturnEmptyListWhenTranscriptionIdNotFound() {
-        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.empty());
+        when(transcriptionRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        var transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, true);
+        var transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1L, true);
 
         verify(transcriptionRepository, times(1)).findById(any());
         assertEquals(0, transcriptionWorkflows.size());

@@ -90,7 +90,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         // If the owner filter is provided, we prefetch the ids of all the transcriptions owned by that owner.
         // This avoids using a sub query in the search query and improves performance.  These ids are then used
         // in the main query.
-        List<Integer> transcriptionsIdsForOwner = new ArrayList<>();
+        List<Long> transcriptionsIdsForOwner = new ArrayList<>();
         if (request.getOwner() != null) {
             transcriptionsIdsForOwner = transcriptionSearchQuery.findTranscriptionsIdsCurrentlyOwnedBy(request.getOwner());
             if (transcriptionsIdsForOwner.isEmpty()) {
@@ -102,7 +102,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             }
         }
 
-        var transcriptionIds = new ArrayList<Integer>();
+        var transcriptionIds = new ArrayList<Long>();
         if (request.getTranscriptionId() != null) {
             transcriptionIds.add(request.getTranscriptionId());
         } else if (isEmpty(transcriptionsIdsForOwner)) {
@@ -169,7 +169,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     }
 
     @Override
-    public GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument) {
+    public GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Long transcriptionDocument) {
         Optional<TranscriptionDocumentEntity> fndEntity = transcriptionDocumentRepository.findById(transcriptionDocument);
         if (fndEntity.isPresent()) {
             return transcriptionMapper.getSearchByTranscriptionDocumentId(fndEntity.get());
@@ -180,11 +180,11 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
     @Transactional
     @Override
-    public TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
+    public TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Long transcriptionDocumentId,
                                                                                  TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
         TranscriptionDocumentHideResponse response;
 
-        IdRequest<TranscriptionDocumentHideRequest> request = new IdRequest<>(transcriptionDocumentHideRequest, transcriptionDocumentId);
+        IdRequest<TranscriptionDocumentHideRequest, Long> request = new IdRequest<>(transcriptionDocumentHideRequest, transcriptionDocumentId);
         transcriptionDocumentHideOrShowValidator.validate(request);
 
         Optional<TranscriptionDocumentEntity> transcriptionDocumentEntity
@@ -244,7 +244,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
     @Transactional
     @Override
-    public AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Integer transcriptionDocumentId) {
+    public AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Long transcriptionDocumentId) {
         if (!this.isManualDeletionEnabled()) {
             throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");
         }
@@ -269,7 +269,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         return transcriptionMapper.mapAdminApproveDeletionResponse(transcriptionDocumentEntity, objectAdminActionEntity);
     }
 
-    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Integer transcriptionDocumentId) {
+    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Long transcriptionDocumentId) {
         return transcriptionDocumentRepository.findById(transcriptionDocumentId)
             .orElseThrow(() -> new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND));
     }

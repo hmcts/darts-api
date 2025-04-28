@@ -38,7 +38,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "eve_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eve_gen")
     @SequenceGenerator(name = "eve_gen", sequenceName = "eve_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @Column(name = "event_object_id", unique = true, length = 16)
     private String legacyObjectId;

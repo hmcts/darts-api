@@ -44,7 +44,7 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
     @InjectMocks
     private TranscriptionApproveMarkForDeletionValidator validator;
 
-    private static final Integer TRANSCRIPTION_DOCUMENT_ID = 1;
+    private static final Long TRANSCRIPTION_DOCUMENT_ID = 1L;
 
     @BeforeEach
     void setUp() {

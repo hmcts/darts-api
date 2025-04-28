@@ -158,7 +158,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event2, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
 
         assertThat(duplicates)
             .hasSize(3)
@@ -189,7 +189,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
     }
 
@@ -215,7 +215,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<Integer> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
     }
 
@@ -299,7 +299,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         eventWithCourtroomToBeIncluded = dartsPersistence.save(eventWithCourtroomToBeIncluded);
 
         // when
-        List<Integer> events = eventRepository.findAllByEventStatusAndNotCourtrooms(
+        List<Long> events = eventRepository.findAllByEventStatusAndNotCourtrooms(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
             List.of(eventWithCourtroomToBeExcluded.getCourtroom().getName()),
             Limit.of(5));

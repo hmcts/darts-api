@@ -73,7 +73,8 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.transcriptionDocumentWithAdminAction;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
-import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
+import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulatedInt;
+import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulatedLong;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -150,7 +151,7 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponseWithNoStatus() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, false, true, true);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
 
         GetTranscriptionByIdResponse transcriptionResponse =
             transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
@@ -168,7 +169,7 @@ class TranscriptionResponseMapperTest {
         courtroomEntity.setName(courtName);
 
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(null, true, false, true, courtroomEntity);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
         transcriptionEntity.setHearings(new HashSet<>());
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
         transcriptionEntity.setCourtCases(Set.of(CommonTestDataUtil.createCase("case1")));
@@ -185,7 +186,7 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionResponseWithCourtroom() throws Exception {
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(null, true, false, true, null);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
         transcriptionEntity.setHearings(new HashSet<>());
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
         transcriptionEntity.setCourtCases(Set.of(CommonTestDataUtil.createCase("case1")));
@@ -202,7 +203,7 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponseWithNoHearingsAndNoValidCourtCaseShouldFail() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, false);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
         transcriptionEntity.setHearings(new HashSet<>());
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
 
@@ -219,7 +220,7 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponseWithWorkflow() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, false, true);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
 
         GetTranscriptionByIdResponse transcriptionResponse =
             transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
@@ -234,7 +235,7 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponse() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, false, true);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
 
         GetTranscriptionByIdResponse transcriptionResponse =
             transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
@@ -249,7 +250,7 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponseWithOutLegacyComments() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, false, true);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
 
         transcriptionEntity.getTranscriptionCommentEntities()
             .forEach(transcriptionCommentEntity -> {
@@ -270,7 +271,7 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponseIsAutomated() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, false, true);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
         transcriptionEntity.setIsManualTranscription(false);
 
         GetTranscriptionByIdResponse transcriptionResponse =
@@ -287,7 +288,7 @@ class TranscriptionResponseMapperTest {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         hearing1.setCourtCase(null);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
 
 
         var exception = assertThrows(
@@ -302,7 +303,7 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponseWithRequestor() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, false, true);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
 
         GetTranscriptionByIdResponse transcriptionResponse =
             transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
@@ -317,7 +318,7 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponseWithHideFromRequestor() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, false, true);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
         transcriptionEntity.setHideRequestFromRequestor(true);
 
         GetTranscriptionByIdResponse transcriptionResponse =
@@ -351,7 +352,7 @@ class TranscriptionResponseMapperTest {
         Set<HearingEntity> hearingEntitys = new HashSet<>();
 
         // create the transaction to be mapped
-        Integer transactionId = 200;
+        Long transactionId = 200L;
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.setId(transactionId);
         transcriptionEntity.setHearings(hearingEntitys);
@@ -391,7 +392,7 @@ class TranscriptionResponseMapperTest {
         Set<HearingEntity> hearingEntitys = new HashSet<>();
 
         // create the transaction to be mapped
-        Integer transactionId = 200;
+        Long transactionId = 200L;
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.setId(transactionId);
         transcriptionEntity.setHearings(hearingEntitys);
@@ -430,7 +431,7 @@ class TranscriptionResponseMapperTest {
         Set<HearingEntity> hearingEntitys = new HashSet<>();
 
         // create the transaction to be mapped
-        Integer transactionId = 200;
+        Long transactionId = 200L;
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.setId(transactionId);
         transcriptionEntity.setHearings(hearingEntitys);
@@ -450,8 +451,8 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapSearchTranscriptionDocumentSearchResult() {
-        Integer transactionId = 200;
-        Integer transcriptionDocumentId = 300;
+        Long transactionId = 200L;
+        Long transcriptionDocumentId = 300L;
 
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
@@ -495,8 +496,8 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapSearchTranscriptionDocumentSearchResultWithNoHearingCourthouse() {
-        Integer transactionId = 200;
-        Integer transcriptionDocumentId = 300;
+        Long transactionId = 200L;
+        Long transcriptionDocumentId = 300L;
 
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
@@ -535,8 +536,8 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapSearchTranscriptionDocumentSearchResultWithNoHearingCase() {
-        Integer transactionId = 200;
-        Integer transcriptionDocumentId = 300;
+        Long transactionId = 200L;
+        Long transcriptionDocumentId = 300L;
 
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
@@ -572,8 +573,8 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapSearchTranscriptionDocumentSearchNoCaseNoHearingAndNoOwner() {
-        Integer transactionId = 200;
-        Integer transcriptionDocumentId = 300;
+        Long transactionId = 200L;
+        Long transcriptionDocumentId = 300L;
 
         boolean isManualTranscription = true;
         boolean isHidden = false;
@@ -603,9 +604,9 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapTransactionEntityToDocumentIdSearchResult() {
-        Integer transId = 200;
+        Long transId = 200L;
         Integer userId = 500;
-        Integer transDocumentId = 400;
+        Long transDocumentId = 400L;
         OffsetDateTime uploadedAt = OffsetDateTime.now();
 
         UserAccountEntity accountEntity = new UserAccountEntity();
@@ -622,7 +623,7 @@ class TranscriptionResponseMapperTest {
         String clipId = "clipId";
         String contentObjectId = "contentObjectId";
         String checksum = "checksum";
-        UserAccountEntity lastModifiedBy = withIdsPopulated(minimalUserAccount());
+        UserAccountEntity lastModifiedBy = withIdsPopulatedInt(minimalUserAccount());
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setId(transDocumentId);
@@ -658,7 +659,7 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void includesAdminActionWhenDocumentIsHidden() {
-        var hiddenTranscriptionDocument = withIdsPopulated(transcriptionDocumentWithAdminAction());
+        var hiddenTranscriptionDocument = withIdsPopulatedLong(transcriptionDocumentWithAdminAction());
         var adminActionEntity = hiddenTranscriptionDocument.getAdminActions().getFirst();
 
         var response = transcriptionResponseMapper.getSearchByTranscriptionDocumentId(hiddenTranscriptionDocument);
@@ -684,7 +685,7 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapHideResponse() {
-        Integer documentId = 100;
+        Long documentId = 100L;
         boolean hide = true;
 
         TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
@@ -730,7 +731,7 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapShowResponseWithNoObjectAdminAction() {
-        Integer documentId = 100;
+        Long documentId = 100L;
         boolean hide = true;
 
         TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
@@ -786,7 +787,7 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapAdminApproveDeletionResponseShouldReturnFullResponse() {
         // Arrange
-        Integer documentId = 100;
+        Long documentId = 100L;
         boolean isHidden = true;
 
         TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
@@ -851,7 +852,7 @@ class TranscriptionResponseMapperTest {
 
         UserAccountEntity userAccount = CommonTestDataUtil.createUserAccount();
         TranscriptionWorkflowEntity transcriptionWorkflow1 = new TranscriptionWorkflowEntity();
-        transcriptionWorkflow1.setTranscription(TestUtils.getFirst(transcriptionList));
+        transcriptionWorkflow1.setTranscription(TestUtils.getFirstLong(transcriptionList));
         transcriptionWorkflow1.setTranscriptionStatus(CommonTestDataUtil.createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
         transcriptionWorkflow1.setId(1);
         transcriptionWorkflow1.setWorkflowTimestamp(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
@@ -867,7 +868,7 @@ class TranscriptionResponseMapperTest {
         comment2b.setCommentTimestamp(OffsetDateTime.of(2020, 10, 10, 11, 1, 0, 0, ZoneOffset.UTC));
 
         TranscriptionWorkflowEntity transcriptionWorkflow2 = new TranscriptionWorkflowEntity();
-        transcriptionWorkflow2.setTranscription(TestUtils.getFirst(transcriptionList));
+        transcriptionWorkflow2.setTranscription(TestUtils.getFirstLong(transcriptionList));
         transcriptionWorkflow2.setTranscriptionStatus(CommonTestDataUtil.createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
         transcriptionWorkflow2.setId(2);
         transcriptionWorkflow2.setWorkflowTimestamp(OffsetDateTime.of(2020, 10, 11, 10, 0, 0, 0, ZoneOffset.UTC));
@@ -901,10 +902,10 @@ class TranscriptionResponseMapperTest {
     void mapToTranscriptionResponseWithApprovedTimeStamp() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         Set<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptions(hearing1, true, false, true);
-        TranscriptionEntity transcriptionEntity = TestUtils.getFirst(transcriptionList);
+        TranscriptionEntity transcriptionEntity = TestUtils.getFirstLong(transcriptionList);
 
         TranscriptionWorkflowEntity transcriptionWorkflow = new TranscriptionWorkflowEntity();
-        transcriptionWorkflow.setTranscription(TestUtils.getFirst(transcriptionList));
+        transcriptionWorkflow.setTranscription(TestUtils.getFirstLong(transcriptionList));
         transcriptionWorkflow.setTranscriptionStatus(CommonTestDataUtil.createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
         transcriptionWorkflow.setId(1);
         transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
@@ -999,7 +1000,7 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapTranscriptionEntity_whenNotNull_shouldReturnCorrectlyMappedData() {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setId(123);
+        transcription.setId(123L);
 
         TranscriptionResponseDetails responseDetails = transcriptionResponseMapper.mapTranscriptionEntity(transcription);
         assertThat(responseDetails).isNotNull();

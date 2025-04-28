@@ -64,7 +64,7 @@ public class AudioLinkingAutomatedTask
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
         Integer batchSize = getAutomatedTaskBatchSize();
-        List<Integer> eveIds = eventRepository.findAllByEventStatusAndNotCourtrooms(
+        List<Long> eveIds = eventRepository.findAllByEventStatusAndNotCourtrooms(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
             handheldCourtroomNumbers,
             Limit.of(batchSize));
@@ -90,7 +90,7 @@ public class AudioLinkingAutomatedTask
         private final UserIdentity userIdentity;
 
         @Transactional
-        public void processEvent(Integer eveId) {
+        public void processEvent(Long eveId) {
             log.info("Attempting to link media for event with eveId {}", eveId);
             try {
                 UserAccountEntity userAccount = userIdentity.getUserAccount();

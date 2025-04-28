@@ -84,7 +84,7 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(jsonNode, roles));
 
-        verify(authorisation).authoriseByTranscriptionId(5, roles);
+        verify(authorisation).authoriseByTranscriptionId(5L, roles);
     }
 
     @Test
@@ -102,7 +102,7 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(jsonNode, roles));
 
-        verify(authorisation).authoriseByTranscriptionId(0, roles);
+        verify(authorisation).authoriseByTranscriptionId(0L, roles);
     }
 
     @Test
@@ -114,7 +114,7 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
-        verify(authorisation).authoriseByTranscriptionId(5, roles);
+        verify(authorisation).authoriseByTranscriptionId(5L, roles);
     }
 
     @Test
@@ -128,7 +128,7 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
-        verify(authorisation).authoriseByTranscriptionId(5, roles);
+        verify(authorisation).authoriseByTranscriptionId(5L, roles);
     }
 
     @Test
@@ -142,7 +142,7 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
-        verify(authorisation).authoriseByTranscriptionId(5, roles);
+        verify(authorisation).authoriseByTranscriptionId(5L, roles);
     }
 
     @Test
@@ -168,7 +168,7 @@ class TranscriptionIdControllerAuthorisationImplTest {
     void checkAuthorisationSupplierIdParameter() {
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(() -> Optional.of(TRANSCRIPTION_ID_PARAM_VALUE), roles));
 
-        verify(authorisation).authoriseByTranscriptionId(5, roles);
+        verify(authorisation).authoriseByTranscriptionId(5L, roles);
     }
 
     @Test

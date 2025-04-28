@@ -184,7 +184,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
             .toList();
     }
 
-    private List<Integer> eventIdsFrom(List<EventEntity> reportingRestrictions) {
+    private List<Long> eventIdsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
             .map(EventEntity::getId)
             .toList();

@@ -19,7 +19,7 @@ public class HearingReportingRestrictionsEntity {
 
     @Column(name = "eve_id")
     @Id
-    Integer eveId;
+    Long eveId;
 
     @Column(name = "hea_id")
     @Id

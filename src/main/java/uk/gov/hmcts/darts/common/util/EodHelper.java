@@ -128,7 +128,7 @@ public class EodHelper {
     }
 
     @Transactional
-    public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity user, List<Integer> idsToBeUpdated, OffsetDateTime timestamp) {
+    public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity user, List<Long> idsToBeUpdated, OffsetDateTime timestamp) {
         eodRepository.updateStatus(
             newStatus,
             user.getId(),

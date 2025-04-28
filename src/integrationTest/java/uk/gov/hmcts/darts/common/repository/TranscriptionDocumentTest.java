@@ -194,7 +194,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                                .get(nameMatchIndex)
                                                                                .getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -214,7 +214,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -235,7 +235,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
 
@@ -257,7 +257,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -277,14 +277,14 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities.getFirst()
                                                                                .getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.getFirst()
                                                                                    .getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1)
                                                                                .getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(1)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -306,7 +306,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.getFirst()
                                                                                    .getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities
@@ -314,7 +314,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(1)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -336,7 +336,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.getFirst()
                                                                                    .getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities
@@ -344,7 +344,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(1)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -366,7 +366,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities
                                                                                .get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -418,7 +418,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -439,7 +439,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -461,7 +461,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -482,7 +482,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -505,7 +505,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -524,12 +524,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities.getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.getFirst().getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(1).getTranscription().getCourtCases()).get(1)))));
     }
 
@@ -551,7 +551,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -573,7 +573,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -597,7 +597,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -618,7 +618,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -640,7 +640,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                                            generatedDocumentEntities
                                                                                .get(nameMatchIndex).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(nameMatchIndex),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(nameMatchIndex)
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -657,12 +657,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities.getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.getFirst().getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(1).getTranscription().getCourtCases()).get(1)))));
     }
 
@@ -682,7 +682,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities.getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.getFirst()
                                                                                    .getTranscription().getCourtCases()).get(1)))));
     }
@@ -700,7 +700,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(1).getTranscription().getCourtCases()).get(1)))));
     }
 
@@ -719,12 +719,12 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                  List.of(getExpectedResult(testType, generatedDocumentEntities.getFirst(),
                                                                            generatedDocumentEntities.getFirst().getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.getFirst(),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.getFirst().getTranscription().getCourtCases()).get(1)),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
                                                                            generatedDocumentEntities.get(1).getTranscription().getCourtCase()),
                                                          getExpectedResult(testType, generatedDocumentEntities.get(1),
-                                                                           TestUtils.getOrderedByCreatedByAndId(
+                                                                           TestUtils.getOrderedByCreatedByAndIdInt(
                                                                                generatedDocumentEntities.get(1).getTranscription().getCourtCases()).get(1)))));
     }
 

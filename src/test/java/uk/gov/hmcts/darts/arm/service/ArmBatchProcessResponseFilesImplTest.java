@@ -280,7 +280,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
         Duration armMissingResponseDuration = Duration.ofHours(24);
 
-        when(externalObjectDirectoryEntity.getId()).thenReturn(123);
+        when(externalObjectDirectoryEntity.getId()).thenReturn(123L);
         when(armDataManagementConfiguration.getArmMissingResponseDuration()).thenReturn(armMissingResponseDuration);
 
         ObjectRecordStatusEntity objectRecordStatusEntity = mock(ObjectRecordStatusEntity.class);
@@ -296,7 +296,7 @@ class ArmBatchProcessResponseFilesImplTest {
             userAccount
         );
 
-        verify(logApi).logArmMissingResponse(armMissingResponseDuration, 123);
+        verify(logApi).logArmMissingResponse(armMissingResponseDuration, 123L);
         verify(externalObjectDirectoryEntity, times(2)).getId();
         verify(armDataManagementConfiguration).getArmMissingResponseDuration();
         verify(currentTimeHelper).currentOffsetDateTime();
@@ -321,10 +321,10 @@ class ArmBatchProcessResponseFilesImplTest {
 
         ArmResponseBatchData armResponseBatchData = mock(ArmResponseBatchData.class);
         armResponseBatchDataList.add(armResponseBatchData);
-        when(armResponseBatchData.getExternalObjectDirectoryId()).thenReturn(123);
+        when(armResponseBatchData.getExternalObjectDirectoryId()).thenReturn(123L);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = mock(ExternalObjectDirectoryEntity.class);
-        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123);
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123L);
 
         OffsetDateTime currentTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentTime);
@@ -345,7 +345,7 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(armBatchResponseMap).values();
         verify(externalObjectDirectoryEntity, times(2)).getInputUploadProcessedTs();
         verify(externalObjectDirectoryEntity, never()).getObjectStateRecordEntity();
-        verify(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123);
+        verify(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123L);
         verify(currentTimeHelper).currentOffsetDateTime();
         verify(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(
             externalObjectDirectoryEntity, EodHelper.armMissingResponseStatus(),
@@ -368,10 +368,10 @@ class ArmBatchProcessResponseFilesImplTest {
 
         ArmResponseBatchData armResponseBatchData = mock(ArmResponseBatchData.class);
         armResponseBatchDataList.add(armResponseBatchData);
-        when(armResponseBatchData.getExternalObjectDirectoryId()).thenReturn(123);
+        when(armResponseBatchData.getExternalObjectDirectoryId()).thenReturn(123L);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = mock(ExternalObjectDirectoryEntity.class);
-        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123);
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123L);
 
         OffsetDateTime currentTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentTime);
@@ -388,7 +388,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
         verify(armBatchResponses).getArmBatchResponseMap();
         verify(armBatchResponseMap).values();
-        verify(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123);
+        verify(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123L);
         verify(currentTimeHelper).currentOffsetDateTime();
         verify(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(
             externalObjectDirectoryEntity, EodHelper.armDropZoneStatus(),
@@ -460,7 +460,7 @@ class ArmBatchProcessResponseFilesImplTest {
         }
 
         @Override
-        public ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
+        public ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Long eodId) {
             return super.getExternalObjectDirectoryEntity(eodId);
         }
     }

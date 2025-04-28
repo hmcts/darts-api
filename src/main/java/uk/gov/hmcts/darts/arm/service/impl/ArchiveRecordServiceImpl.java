@@ -30,7 +30,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
     @Transactional
     @Override
-    public ArchiveRecord generateArchiveRecordInfo(Integer externalObjectDirectoryId, String rawFilename) {
+    public ArchiveRecord generateArchiveRecordInfo(Long externalObjectDirectoryId, String rawFilename) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(
             () -> new DartsException(format("external object directory not found with id: %d", externalObjectDirectoryId)));

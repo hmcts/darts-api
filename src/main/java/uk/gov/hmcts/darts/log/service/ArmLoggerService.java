@@ -4,15 +4,15 @@ import java.time.Duration;
 
 public interface ArmLoggerService {
 
-    void armPushSuccessful(Integer eodId);
+    void armPushSuccessful(Long eodId);
 
-    void armPushFailed(Integer eodId);
+    void armPushFailed(Long eodId);
 
-    void archiveToArmSuccessful(Integer eodId);
+    void archiveToArmSuccessful(Long eodId);
 
-    void archiveToArmFailed(Integer eodId);
+    void archiveToArmFailed(Long eodId);
 
-    void logArmMissingResponse(Duration armMissingResponseDuration, Integer eodId);
+    void logArmMissingResponse(Duration armMissingResponseDuration, Long eodId);
 
     void armRpoSearchSuccessful(Integer executionId);
 

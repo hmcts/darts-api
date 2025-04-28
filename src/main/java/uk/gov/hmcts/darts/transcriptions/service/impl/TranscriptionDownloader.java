@@ -35,7 +35,7 @@ public class TranscriptionDownloader {
     private final AuditApi auditApi;
     private final UserIdentity userIdentity;
 
-    public DownloadTranscriptResponse downloadTranscript(Integer transcriptionId) {
+    public DownloadTranscriptResponse downloadTranscript(Long transcriptionId) {
         var userAccountEntity = getUserAccount();
         var userIsSuperAdmin = this.userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN));
         var transcriptionEntity = transcriptionRepository.findById(transcriptionId)

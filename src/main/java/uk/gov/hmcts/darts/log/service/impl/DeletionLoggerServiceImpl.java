@@ -11,12 +11,12 @@ import uk.gov.hmcts.darts.log.service.DeletionLoggerService;
 public class DeletionLoggerServiceImpl implements DeletionLoggerService {
 
     @Override
-    public void mediaDeleted(Integer mediaId) {
+    public void mediaDeleted(Long mediaId) {
         log.info("Media deleted: med_id={}", mediaId);
     }
 
     @Override
-    public void transcriptionDeleted(Integer transcriptionId) {
+    public void transcriptionDeleted(Long transcriptionId) {
         log.info("Transcript deleted: trd_id={}", transcriptionId);
     }
 }

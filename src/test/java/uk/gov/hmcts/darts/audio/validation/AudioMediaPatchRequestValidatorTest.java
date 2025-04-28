@@ -34,7 +34,7 @@ class AudioMediaPatchRequestValidatorTest {
     void successfulPatchWithoutOwner() {
         Integer mediaRequestId = 200;
         MediaPatchRequest mediaPatchRequestId = new MediaPatchRequest();
-        IdRequest<MediaPatchRequest> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
+        IdRequest<MediaPatchRequest, Integer> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
 
         MediaRequestEntity entityResponse = new MediaRequestEntity();
         Mockito.when(mediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.of(entityResponse));
@@ -49,7 +49,7 @@ class AudioMediaPatchRequestValidatorTest {
 
         MediaPatchRequest mediaPatchRequestId = new MediaPatchRequest();
         mediaPatchRequestId.setOwnerId(ownerIntger);
-        IdRequest<MediaPatchRequest> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
+        IdRequest<MediaPatchRequest, Integer> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
 
         MediaRequestEntity entityResponse = new MediaRequestEntity();
         UserAccountEntity userAccountEntity = new UserAccountEntity();
@@ -67,7 +67,7 @@ class AudioMediaPatchRequestValidatorTest {
 
         MediaPatchRequest mediaPatchRequestId = new MediaPatchRequest();
         mediaPatchRequestId.setOwnerId(ownerIntger);
-        IdRequest<MediaPatchRequest> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
+        IdRequest<MediaPatchRequest, Integer> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
 
         Mockito.when(mediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.empty());
 
@@ -83,7 +83,7 @@ class AudioMediaPatchRequestValidatorTest {
 
         MediaPatchRequest mediaPatchRequestId = new MediaPatchRequest();
         mediaPatchRequestId.setOwnerId(ownerIntger);
-        IdRequest<MediaPatchRequest> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
+        IdRequest<MediaPatchRequest, Integer> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
 
         MediaRequestEntity entityResponse = new MediaRequestEntity();
 

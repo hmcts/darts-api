@@ -66,11 +66,11 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
-    private Integer transcriptionId;
+    private Long transcriptionId;
 
-    private Integer transcriptionId1;
+    private Long transcriptionId1;
 
-    private Integer transcriptionId2;
+    private Long transcriptionId2;
 
 
     @BeforeEach
@@ -256,7 +256,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         transcriptions1.setHideRequestFromRequestor(true);
 
         // force a failure on this record as the transcription will not be found
-        Integer idThatDoesNotExist = 100;
+        Long idThatDoesNotExist = 100L;
         UpdateTranscriptionsItem transcriptions2 = new UpdateTranscriptionsItem();
         transcriptions2.setTranscriptionId(idThatDoesNotExist);
         transcriptions2.setHideRequestFromRequestor(false);

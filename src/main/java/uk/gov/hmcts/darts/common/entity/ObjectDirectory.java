@@ -9,5 +9,5 @@ public interface ObjectDirectory {
 
     void setLastModifiedBy(UserAccountEntity systemUser);
 
-    Integer getId();
+    Long getId();
 }

@@ -83,7 +83,7 @@ class AudioLinkingAutomatedTaskTest {
     @Test
     void runTask_ExecutesSuccessfully() {
 
-        List<Integer> eventIds = List.of(1, 2, 3);
+        List<Long> eventIds = List.of(1L, 2L, 3L);
 
         doReturn(eventIds).when(eventRepository).findAllByEventStatusAndNotCourtrooms(anyInt(), any(), any());
         doNothing().when(eventProcessor).processEvent(any());
@@ -94,9 +94,9 @@ class AudioLinkingAutomatedTaskTest {
         verify(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
         verify(eventRepository).findAllByEventStatusAndNotCourtrooms(2, List.of("199", "99"), Limit.of(5));
 
-        verify(eventProcessor).processEvent(1);
-        verify(eventProcessor).processEvent(2);
-        verify(eventProcessor).processEvent(3);
+        verify(eventProcessor).processEvent(1L);
+        verify(eventProcessor).processEvent(2L);
+        verify(eventProcessor).processEvent(3L);
     }
 
     @Nested
@@ -137,7 +137,7 @@ class AudioLinkingAutomatedTaskTest {
             doReturn(Duration.ofSeconds(0)).when(eventProcessor).getPreAmbleDuration();
             doReturn(Duration.ofSeconds(0)).when(eventProcessor).getPostAmbleDuration();
             EventEntity event = mock(EventEntity.class);
-            when(eventService.getEventByEveId(1)).thenReturn(event);
+            when(eventService.getEventByEveId(1L)).thenReturn(event);
             OffsetDateTime timestamp = OffsetDateTime.now();
             when(event.getTimestamp()).thenReturn(timestamp);
             CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
@@ -149,7 +149,7 @@ class AudioLinkingAutomatedTaskTest {
             doReturn(mediaEntities).when(mediaRepository)
                 .findAllByCurrentMediaTimeContains(any(), any(), any());
 
-            eventProcessor.processEvent(1);
+            eventProcessor.processEvent(1L);
 
             verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.getFirst(), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.get(1), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
@@ -158,7 +158,7 @@ class AudioLinkingAutomatedTaskTest {
             verify(event).setEventStatus(3);
 
             verify(eventService).saveEvent(event);
-            verify(eventService).getEventByEveId(1);
+            verify(eventService).getEventByEveId(1L);
         }
 
         @Test
@@ -167,7 +167,7 @@ class AudioLinkingAutomatedTaskTest {
             doReturn(Duration.ofSeconds(10)).when(eventProcessor).getPreAmbleDuration();
             doReturn(Duration.ofSeconds(20)).when(eventProcessor).getPostAmbleDuration();
             EventEntity event = mock(EventEntity.class);
-            when(eventService.getEventByEveId(2)).thenReturn(event);
+            when(eventService.getEventByEveId(2L)).thenReturn(event);
             OffsetDateTime timestamp = OffsetDateTime.now();
             when(event.getTimestamp()).thenReturn(timestamp);
             CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
@@ -177,14 +177,14 @@ class AudioLinkingAutomatedTaskTest {
             List<MediaEntity> mediaEntities = List.of(mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
             doReturn(mediaEntities).when(mediaRepository).findAllByCurrentMediaTimeContains(any(), any(), any());
 
-            eventProcessor.processEvent(2);
+            eventProcessor.processEvent(2L);
 
             verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.getFirst(), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.get(1), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaLinkedCaseHelper).linkMediaByEvent(event, mediaEntities.get(2), MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
             verify(mediaRepository).findAllByCurrentMediaTimeContains(123, timestamp.plus(Duration.ofSeconds(10)), timestamp.minus(Duration.ofSeconds(20)));
             verify(event).setEventStatus(3);
-            verify(eventService).getEventByEveId(2);
+            verify(eventService).getEventByEveId(2L);
         }
 
     }

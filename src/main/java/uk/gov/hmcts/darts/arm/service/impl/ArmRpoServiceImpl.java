@@ -115,7 +115,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
             .orElseThrow(() -> new ArmRpoException(errorMessage.append("Automated task ProcessE2EArmRpoPending not found.").toString()));
 
-        List<Integer> csvEodList = getEodsListFromCsvFiles(csvFiles, errorMessage);
+        List<Long> csvEodList = getEodsListFromCsvFiles(csvFiles, errorMessage);
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
         Pageable pageRequest = PageRequest.of(0, batchSize);
@@ -145,7 +145,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             }
         );
 
-        List<Integer> missingEods = csvEodList.stream()
+        List<Long> missingEods = csvEodList.stream()
             .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
             .collect(Collectors.toList());
 
@@ -154,8 +154,8 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
     }
 
-    private static List<Integer> getEodsListFromCsvFiles(List<File> csvFiles, StringBuilder errorMessage) {
-        List<Integer> csvEodList = new ArrayList<>();
+    private static List<Long> getEodsListFromCsvFiles(List<File> csvFiles, StringBuilder errorMessage) {
+        List<Long> csvEodList = new ArrayList<>();
         Integer counter = 0;
         for (File csvFile : csvFiles) {
             try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()))) {
@@ -165,7 +165,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                     counter++;
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
                     if (StringUtils.isNotBlank(csvEod)) {
-                        csvEodList.add(Integer.parseInt(csvEod));
+                        csvEodList.add(Long.parseLong(csvEod));
                     }
                 }
                 log.info("Finished reading CSV file: {}. Read {} rows", csvFile.getName(), counter);

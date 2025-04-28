@@ -32,21 +32,21 @@ public interface TranscriptionService {
                                                           boolean isManual);
 
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
-    UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
+    UpdateTranscriptionResponse updateTranscription(Long transcriptionId,
                                                     UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection);
 
-    UpdateTranscriptionAdminResponse updateTranscriptionAdmin(Integer transcriptionId,
+    UpdateTranscriptionAdminResponse updateTranscriptionAdmin(Long transcriptionId,
                                                               UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection);
 
     List<TranscriptionTypeResponse> getTranscriptionTypes();
 
     List<TranscriptionUrgencyResponse> getTranscriptionUrgenciesByDisplayState();
 
-    GetTranscriptionByIdResponse getTranscription(Integer transcriptionId);
+    GetTranscriptionByIdResponse getTranscription(Long transcriptionId);
 
-    AttachTranscriptResponse attachTranscript(Integer transcriptionId, MultipartFile transcript);
+    AttachTranscriptResponse attachTranscript(Long transcriptionId, MultipartFile transcript);
 
-    DownloadTranscriptResponse downloadTranscript(Integer transcriptionId);
+    DownloadTranscriptResponse downloadTranscript(Long transcriptionId);
 
     GetYourTranscriptsResponse getYourTranscripts(Integer userId, Boolean includeHiddenFromRequester);
 
@@ -60,18 +60,18 @@ public interface TranscriptionService {
 
     List<TranscriptionStatus> getTranscriptionStatuses();
 
-    void closeTranscription(Integer transcriptionId, String transcriptionComment);
+    void closeTranscription(Long transcriptionId, String transcriptionComment);
 
     List<TranscriptionDocumentEntity> getAllCaseTranscriptionDocuments(Integer caseId);
 
-    List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent);
+    List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Long transcriptionId, Boolean isCurrent);
 
     TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
                                                                  TranscriptionEntity transcription,
                                                                  TranscriptionStatusEntity transcriptionStatus,
                                                                  String workflowComment);
 
-    List<Integer> rollbackUserTranscriptions(UserAccountEntity entity);
+    List<Long> rollbackUserTranscriptions(UserAccountEntity entity);
 
     List<AdminMarkedForDeletionResponseItem> adminGetTranscriptionDocumentsMarkedForDeletion();
 

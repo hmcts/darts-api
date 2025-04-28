@@ -248,7 +248,7 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(Integer transcriptionDocumentId,
+    public ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(Long transcriptionDocumentId,
                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity) {
         TranscriptionDocumentEntity transcriptionDocument = transcriptionDocumentRepository.findById(transcriptionDocumentId).orElseThrow();
@@ -512,8 +512,8 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public boolean areObjectDirectoriesMarkedForDeletionWithHousekeeper(List<Integer> entities) {
-        for (Integer entity : entities) {
+    public boolean areObjectDirectoriesMarkedForDeletionWithHousekeeper(List<Long> entities) {
+        for (Long entity : entities) {
             ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
 
             if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
@@ -528,9 +528,9 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public boolean areObjectDirectoriesMarkedForDeletionWithUser(List<Integer> entities, String userEmail) {
+    public boolean areObjectDirectoriesMarkedForDeletionWithUser(List<Long> entities, String userEmail) {
         UserAccountEntity userAccount = userAccountRepository.findFirstByEmailAddressIgnoreCase(userEmail).orElseThrow();
-        for (Integer entity : entities) {
+        for (Long entity : entities) {
             ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
 
             if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())

@@ -36,7 +36,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
 
     @Transactional
     @Override
-    public boolean calculateRetentionEventDate(Integer externalObjectDirectoryId) {
+    public boolean calculateRetentionEventDate(Long externalObjectDirectoryId) {
         UserAccountEntity userAccount = userIdentity.getUserAccount();
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow();
@@ -65,7 +65,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
     }
 
     private boolean processArmUpdate(ExternalObjectDirectoryEntity externalObjectDirectory, OffsetDateTime armRetentionDate,
-                                     UserAccountEntity userAccount, Integer externalObjectDirectoryId) {
+                                     UserAccountEntity userAccount, Long externalObjectDirectoryId) {
         ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
 
         if (confidenceAware != null) {

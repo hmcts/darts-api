@@ -94,7 +94,7 @@ class NotificationServiceImplTest {
 
     private List<NotificationEntity> someListOfNotifications() {
         var notificationEntity = new NotificationEntity();
-        notificationEntity.setId(1);
+        notificationEntity.setId(1L);
         notificationEntity.setAttempts(0);
         notificationEntity.setEventId("some-event-id");
         return List.of(notificationEntity);

@@ -33,16 +33,16 @@ public class InboundTranscriptionAnnotationDeleterProcessorImpl implements Inbou
     int hoursInUnstructured;
 
     @Override
-    public List<Integer> markForDeletion(int batchSize) {
+    public List<Long> markForDeletion(int batchSize) {
         return markForDeletion(hoursInUnstructured, batchSize);
     }
 
     @Override
-    public List<Integer> markForDeletion(int hourBeforeCurrentDate, int batchSize) {
+    public List<Long> markForDeletion(int hourBeforeCurrentDate, int batchSize) {
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime()
             .minusHours(hourBeforeCurrentDate);
 
-        List<Integer> recordsMarkedForDeletion
+        List<Long> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(),
                                                   EodHelper.storedStatus(),

@@ -544,6 +544,7 @@ paths:
           name: event_id
           schema:
             type: integer
+            format: int64
           description: "event_id is the internal event_id of the event."
           required: true
       responses:
@@ -576,6 +577,7 @@ paths:
           name: event_id
           schema:
             type: integer
+            format: int64
           description: "event_id is the internal event_id of the event."
           required: true
       responses:
@@ -613,6 +615,7 @@ paths:
                   type: array
                   items:
                     type: integer
+                    format: int64
       responses:
         '200':
           description: OK
@@ -798,6 +801,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         event_ts:
           type: string
           format: date-time
@@ -899,6 +903,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         documentum_id:
           type: string
         source_id:

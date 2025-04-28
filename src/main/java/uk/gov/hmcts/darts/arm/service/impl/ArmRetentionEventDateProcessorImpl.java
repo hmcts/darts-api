@@ -23,11 +23,11 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
     @Override
     public void calculateEventDates(Integer batchSize) {
         boolean updateRetention = true;
-        List<Integer> externalObjectDirectoryEntitiesIds =
+        List<Long> externalObjectDirectoryEntitiesIds =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(EodHelper.armLocation(), updateRetention,
                                                                                            Limit.of(batchSize));
         log.info("Processing {} EODs for retention event date calculation for batch size {}", externalObjectDirectoryEntitiesIds.size(), batchSize);
-        for (Integer externalObjectDirectoryId : externalObjectDirectoryEntitiesIds) {
+        for (Long externalObjectDirectoryId : externalObjectDirectoryEntitiesIds) {
             try {
                 armRetentionEventDateCalculator.calculateRetentionEventDate(externalObjectDirectoryId);
             } catch (Exception e) {

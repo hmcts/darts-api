@@ -110,10 +110,10 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
             mediaRequestId);
 
         List expected = List.of(
-            new AudioRequestBeingProcessedFromArchiveQueryResult(181),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(182),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(183),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(184)
+            new AudioRequestBeingProcessedFromArchiveQueryResult(181L),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(182L),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(183L),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(184L)
         );
         assertEquals(expected.size(), results.size());
         assertEquals(expected, results);
@@ -169,8 +169,8 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
             mediaRequestId);
 
         List expected = List.of(
-            new AudioRequestBeingProcessedFromArchiveQueryResult(182),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(183)
+            new AudioRequestBeingProcessedFromArchiveQueryResult(182L),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(183L)
         );
 
         assertEquals(expected.size(), results.size());

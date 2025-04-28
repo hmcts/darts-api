@@ -113,7 +113,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private boolean manualDeletionEnabled;
 
     @Override
-    public AdminMediaResponse getMediasById(Integer id) {
+    public AdminMediaResponse getMediasById(Long id) {
         var mediaEntity = getMediaEntityById(id);
 
         AdminMediaResponse adminMediaResponse = adminMediaMapper.toApiModel(mediaEntity);
@@ -122,7 +122,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         return adminMediaResponse;
     }
 
-    MediaEntity getMediaEntityById(Integer id) {
+    MediaEntity getMediaEntityById(Long id) {
         return mediaRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
     }
@@ -168,7 +168,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             });
         });
 
-        Set<Integer> uniqueIds = new HashSet<>();
+        Set<Long> uniqueIds = new HashSet<>();
         return responseMediaItemList.stream()
             .filter(item -> uniqueIds.add(item.getId()))
             .sorted((o1, o2) -> o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()))
@@ -177,8 +177,8 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     @Transactional
     @Override
-    public MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest) {
-        IdRequest<MediaHideRequest> request = new IdRequest<>(mediaHideRequest, mediaId);
+    public MediaHideResponse adminHideOrShowMediaById(Long mediaId, MediaHideRequest mediaHideRequest) {
+        IdRequest<MediaHideRequest, Long> request = new IdRequest<>(mediaHideRequest, mediaId);
         mediaHideOrShowValidator.validate(request);
 
         final MediaEntity targetedMedia = mediaRepository.findByIdIncludeDeleted(mediaId)
@@ -269,7 +269,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     @Override
     @Transactional
-    public MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId) {
+    public MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Long mediaId) {
         if (!this.isManualDeletionEnabled()) {
             throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");
         }
@@ -301,7 +301,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     }
 
     @Override
-    public AdminVersionedMediaResponse getMediaVersionsById(Integer id) {
+    public AdminVersionedMediaResponse getMediaVersionsById(Long id) {
         MediaEntity mediaEntityFromRequest = getMediaEntityById(id);
 
         if (mediaEntityFromRequest.getChronicleId() == null) {
@@ -342,7 +342,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     @Override
     @Transactional
-    public void patchMediasById(Integer id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest) {
+    public void patchMediasById(Long id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest) {
         if (!Boolean.TRUE.equals(patchAdminMediasByIdRequest.getIsCurrent())) {
             throw new DartsApiException(CommonApiError.INVALID_REQUEST, "is_current must be set to true");
         }

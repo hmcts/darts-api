@@ -21,7 +21,7 @@ import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
-import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.util.DataUtil;
@@ -41,14 +41,14 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = false)
 @SQLRestriction("is_deleted = false")
 public class MediaEntity extends CreatedModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities {
+    implements ConfidenceAware, SoftDelete, HasLongId, HasRetention, CanReturnExternalObjectDirectoryEntities {
     public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
     @Id
     @Column(name = "med_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "med_gen")
     @SequenceGenerator(name = "med_gen", sequenceName = "med_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ctr_id", foreignKey = @ForeignKey(name = "media_courtroom_fk"), nullable = false)

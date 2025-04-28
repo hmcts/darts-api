@@ -85,10 +85,10 @@ class ExternalInboundDataStoreDeleterImplTest {
             deletedItems,
             containsInAnyOrder(
                 allOf(
-                    Matchers.hasProperty("id", is(1))
+                    Matchers.hasProperty("id", is(1L))
                 ),
                 allOf(
-                    Matchers.hasProperty("id", is(2))
+                    Matchers.hasProperty("id", is(2L))
                 )
             )
         );
@@ -115,14 +115,14 @@ class ExternalInboundDataStoreDeleterImplTest {
         inboundData1.setStatus(markedForDeletionStatus);
         inboundData1.setExternalLocationType(new ExternalLocationTypeEntity());
         inboundData1.setExternalLocation(UUID.randomUUID().toString());
-        inboundData1.setId(1);
+        inboundData1.setId(1L);
         inboundData1.setVerificationAttempts(1);
 
         ExternalObjectDirectoryEntity inboundData2 = new ExternalObjectDirectoryEntity();
         inboundData2.setStatus(markedForDeletionStatus);
         inboundData2.setExternalLocationType(new ExternalLocationTypeEntity());
         inboundData2.setExternalLocation(UUID.randomUUID().toString());
-        inboundData2.setId(2);
+        inboundData2.setId(2L);
         inboundData2.setVerificationAttempts(2);
 
         List<ExternalObjectDirectoryEntity> inboundDataList = new ArrayList<>();

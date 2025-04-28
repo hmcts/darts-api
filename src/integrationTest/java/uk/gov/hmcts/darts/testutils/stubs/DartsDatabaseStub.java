@@ -1054,12 +1054,12 @@ public class DartsDatabaseStub {
         return securityGroupRepository.findRevisions(id);
     }
 
-    public Revisions<Long, TranscriptionEntity> findTranscriptionRevisionsFor(Integer id) {
+    public Revisions<Long, TranscriptionEntity> findTranscriptionRevisionsFor(Long id) {
         return transcriptionRepository.findRevisions(id);
     }
 
     @Transactional
-    public Revisions<Long, TranscriptionWorkflowEntity> findTranscriptionWorkflowRevisionsFor(Integer transcriptionId) {
+    public Revisions<Long, TranscriptionWorkflowEntity> findTranscriptionWorkflowRevisionsFor(Long transcriptionId) {
         var transcription = transcriptionRepository.findById(transcriptionId).orElseThrow();
         var latestWorkflow = transcription.getTranscriptionWorkflowEntities().stream()
             .min(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp))
@@ -1069,7 +1069,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public Revisions<Long, TranscriptionCommentEntity> findTranscriptionCommentRevisionsFor(Integer transcriptionId) {
+    public Revisions<Long, TranscriptionCommentEntity> findTranscriptionCommentRevisionsFor(Long transcriptionId) {
         var transcription = transcriptionRepository.findById(transcriptionId).orElseThrow();
         var latestComment = transcription.getTranscriptionCommentEntities().stream()
             .min(comparing(TranscriptionCommentEntity::getCreatedDateTime))

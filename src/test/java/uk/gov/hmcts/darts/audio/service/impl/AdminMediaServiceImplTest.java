@@ -207,7 +207,7 @@ class AdminMediaServiceImplTest {
     @Test
     void adminApproveMediaMarkedForDeletion_shouldThrowException_whenFeatureNotEnabled() {
         disableManualDeletion();
-        DartsApiException dartsApiException = assertThrows(DartsApiException.class, () -> mediaRequestService.adminApproveMediaMarkedForDeletion(1));
+        DartsApiException dartsApiException = assertThrows(DartsApiException.class, () -> mediaRequestService.adminApproveMediaMarkedForDeletion(1L));
         assertThat(dartsApiException.getError()).isEqualTo(CommonApiError.FEATURE_FLAG_NOT_ENABLED);
     }
 
@@ -444,7 +444,7 @@ class AdminMediaServiceImplTest {
         transformedMedia.setMediaRequest(mediaRequest);
 
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(5);
+        mediaEntity.setId(5L);
         mediaEntity.setChannel(6);
         mediaEntity.setStart(startDateTime);
         mediaEntity.setEnd(endDateTime);
@@ -477,13 +477,13 @@ class AdminMediaServiceImplTest {
         transformedMedia.setMediaRequest(mediaRequest);
 
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(5);
+        mediaEntity.setId(5L);
         mediaEntity.setChannel(6);
         mediaEntity.setStart(startDateTime);
         mediaEntity.setEnd(endDateTime);
 
         MediaEntity mediaEntity2 = new MediaEntity();
-        mediaEntity2.setId(50);
+        mediaEntity2.setId(50L);
         mediaEntity2.setChannel(60);
         mediaEntity2.setStart(startDateTime);
         mediaEntity2.setEnd(endDateTime);
@@ -517,13 +517,13 @@ class AdminMediaServiceImplTest {
         transformedMedia.setMediaRequest(mediaRequest);
 
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(5);
+        mediaEntity.setId(5L);
         mediaEntity.setChannel(6);
         mediaEntity.setStart(startDateTime);
         mediaEntity.setEnd(endDateTime);
 
         MediaEntity mediaEntity2 = new MediaEntity();
-        mediaEntity2.setId(50);
+        mediaEntity2.setId(50L);
         mediaEntity2.setChannel(60);
         mediaEntity2.setStart(startDateTime);
         mediaEntity2.setEnd(endDateTime);
@@ -548,7 +548,7 @@ class AdminMediaServiceImplTest {
         HearingEntity hearing = createHearing();
 
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(5);
+        mediaEntity.setId(5L);
         mediaEntity.setChannel(6);
         mediaEntity.setStart(startDateTime);
         mediaEntity.setEnd(endDateTime);
@@ -571,7 +571,7 @@ class AdminMediaServiceImplTest {
         HearingEntity hearing2 = createHearing();
 
         MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(5);
+        mediaEntity.setId(5L);
         mediaEntity.setChannel(6);
         mediaEntity.setStart(startDateTime);
         mediaEntity.setEnd(endDateTime);
@@ -594,18 +594,18 @@ class AdminMediaServiceImplTest {
     @Test
     void getMediaEntityById_shouldReutrnMediaEntity_ifOneExists() {
         MediaEntity mediaEntity = mock(MediaEntity.class);
-        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
+        when(mediaRepository.findById(1L)).thenReturn(Optional.of(mediaEntity));
 
-        assertThat(mediaRequestService.getMediaEntityById(1))
+        assertThat(mediaRequestService.getMediaEntityById(1L))
             .isEqualTo(mediaEntity);
-        verify(mediaRepository).findById(1);
+        verify(mediaRepository).findById(1L);
     }
 
     @Test
     void getMediaEntityById_shouldThrowException_ifNoMediaEntityExists() {
-        when(mediaRepository.findById(1)).thenReturn(Optional.empty());
+        when(mediaRepository.findById(1L)).thenReturn(Optional.empty());
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaEntityById(1));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaEntityById(1L));
 
         assertThat(exception.getError()).isEqualTo(AudioApiError.MEDIA_NOT_FOUND);
     }
@@ -618,9 +618,9 @@ class AdminMediaServiceImplTest {
         void getMediaVersionsById_shouldThrowException_whenChronicleIdIsNull() {
             MediaEntity mediaEntity = mock(MediaEntity.class);
             mediaEntity.setChronicleId(null);
-            doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123);
+            doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123L);
 
-            DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaVersionsById(123));
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaVersionsById(123L));
             assertThat(exception.getError()).isEqualTo(CommonApiError.INTERNAL_SERVER_ERROR);
             assertThat(exception.getMessage())
                 .isEqualTo("Internal server error. Media 123 has a Chronicle Id that is null. As such we can not ensure accurate results are returned");
@@ -630,18 +630,18 @@ class AdminMediaServiceImplTest {
         void getMediaVersionsById_shouldReturnEmptyVersionList_whenNoMediaVersionsExist() {
             final String chronicleId = "someChronicleId";
             MediaEntity mediaEntity = createMediaEntity(true, chronicleId, OffsetDateTime.now());
-            doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123);
+            doReturn(mediaEntity).when(mediaRequestService).getMediaEntityById(123L);
             when(mediaRepository.findAllByChronicleId(chronicleId)).thenReturn(List.of(mediaEntity));
 
             AdminVersionedMediaResponse response = mock(AdminVersionedMediaResponse.class);
             when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(mediaEntity, List.of())).thenReturn(response);
 
-            assertThat(mediaRequestService.getMediaVersionsById(123))
+            assertThat(mediaRequestService.getMediaVersionsById(123L))
                 .isEqualTo(response);
 
             verify(mediaRepository).findAllByChronicleId(chronicleId);
             verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(mediaEntity, List.of());
-            verify(mediaRequestService).getMediaEntityById(123);
+            verify(mediaRequestService).getMediaEntityById(123L);
         }
 
         @Test
@@ -652,7 +652,7 @@ class AdminMediaServiceImplTest {
             MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
             MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
 
-            doReturn(currentMediaEntity).when(mediaRequestService).getMediaEntityById(123);
+            doReturn(currentMediaEntity).when(mediaRequestService).getMediaEntityById(123L);
             when(mediaRepository.findAllByChronicleId(chronicleId))
                 .thenReturn(List.of(currentMediaEntity, versionedMediaEntity2, versionedMediaEntity1));
 
@@ -662,12 +662,12 @@ class AdminMediaServiceImplTest {
             when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(currentMediaEntity, expectedVersioendMedia))
                 .thenReturn(response);
 
-            assertThat(mediaRequestService.getMediaVersionsById(123))
+            assertThat(mediaRequestService.getMediaVersionsById(123L))
                 .isEqualTo(response);
 
             verify(mediaRepository).findAllByChronicleId(chronicleId);
             verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(currentMediaEntity, expectedVersioendMedia);
-            verify(mediaRequestService).getMediaEntityById(123);
+            verify(mediaRequestService).getMediaEntityById(123L);
         }
 
 
@@ -678,7 +678,7 @@ class AdminMediaServiceImplTest {
             MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
             MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
 
-            doReturn(versionedMediaEntity1).when(mediaRequestService).getMediaEntityById(123);
+            doReturn(versionedMediaEntity1).when(mediaRequestService).getMediaEntityById(123L);
 
 
             when(mediaRepository.findAllByChronicleId(chronicleId))
@@ -690,12 +690,12 @@ class AdminMediaServiceImplTest {
             when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(null, expectedVersioendMedia))
                 .thenReturn(response);
 
-            assertThat(mediaRequestService.getMediaVersionsById(123))
+            assertThat(mediaRequestService.getMediaVersionsById(123L))
                 .isEqualTo(response);
 
             verify(mediaRepository).findAllByChronicleId(chronicleId);
             verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(null, expectedVersioendMedia);
-            verify(mediaRequestService).getMediaEntityById(123);
+            verify(mediaRequestService).getMediaEntityById(123L);
 
         }
 
@@ -710,7 +710,7 @@ class AdminMediaServiceImplTest {
             MediaEntity versionedMediaEntity1 = createMediaEntity(null, chronicleId, now.plusMinutes(2));
             MediaEntity versionedMediaEntity2 = createMediaEntity(false, chronicleId, now.plusMinutes(1));
 
-            doReturn(currentMediaEntity1).when(mediaRequestService).getMediaEntityById(123);
+            doReturn(currentMediaEntity1).when(mediaRequestService).getMediaEntityById(123L);
             when(mediaRepository.findAllByChronicleId(chronicleId))
                 .thenReturn(List.of(currentMediaEntity1, currentMediaEntity2, currentMediaEntity3, versionedMediaEntity2, versionedMediaEntity1));
             AdminVersionedMediaResponse response = mock(AdminVersionedMediaResponse.class);
@@ -720,12 +720,12 @@ class AdminMediaServiceImplTest {
             when(getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(currentMediaEntity1, expectedVersioendMedia))
                 .thenReturn(response);
 
-            assertThat(mediaRequestService.getMediaVersionsById(123))
+            assertThat(mediaRequestService.getMediaVersionsById(123L))
                 .isEqualTo(response);
 
             verify(mediaRepository).findAllByChronicleId(chronicleId);
             verify(getAdminMediaResponseMapper).mapAdminVersionedMediaResponse(currentMediaEntity1, expectedVersioendMedia);
-            verify(mediaRequestService).getMediaEntityById(123);
+            verify(mediaRequestService).getMediaEntityById(123L);
 
         }
 
@@ -803,7 +803,7 @@ class AdminMediaServiceImplTest {
             when(baseMediaEntity.getCourtroom()).thenReturn(courtroomEntity);
 
 
-            when(baseMediaEntity.getId()).thenReturn(321);
+            when(baseMediaEntity.getId()).thenReturn(321L);
             when(baseMediaEntity.getChannel()).thenReturn(1);
             when(baseMediaEntity.getTotalChannels()).thenReturn(4);
             when(baseMediaEntity.getIsCurrent()).thenReturn(true);
@@ -828,7 +828,7 @@ class AdminMediaServiceImplTest {
             when(baseObjectAdminActionEntity.getHiddenDateTime()).thenReturn(OffsetDateTime.now());
 
             MediaEntity media2 = mock(MediaEntity.class);
-            when(media2.getId()).thenReturn(4321);
+            when(media2.getId()).thenReturn(4321L);
             when(media2.getChannel()).thenReturn(2);
             when(media2.getTotalChannels()).thenReturn(4);
             when(media2.getIsCurrent()).thenReturn(true);
@@ -904,7 +904,7 @@ class AdminMediaServiceImplTest {
         @NullSource
         void shouldThrowException_whenIsCurrentIsTrue(Boolean isCurrent) {
             PatchAdminMediasByIdRequest request = new PatchAdminMediasByIdRequest(isCurrent);
-            DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.patchMediasById(1, request));
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.patchMediasById(1L, request));
             assertThat(exception.getError()).isEqualTo(CommonApiError.INVALID_REQUEST);
             verifyNoInteractions(auditApi);
         }
@@ -913,9 +913,9 @@ class AdminMediaServiceImplTest {
         void shouldThrowException_whenMediaIsAlreadyIsCurrent() {
             PatchAdminMediasByIdRequest request = new PatchAdminMediasByIdRequest(true);
             MediaEntity media = mock(MediaEntity.class);
-            doReturn(media).when(mediaRequestService).getMediaEntityById(123);
+            doReturn(media).when(mediaRequestService).getMediaEntityById(123L);
             when(media.isCurrent()).thenReturn(true);
-            DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.patchMediasById(123, request));
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> mediaRequestService.patchMediasById(123L, request));
             assertThat(exception.getError()).isEqualTo(AudioApiError.MEDIA_ALREADY_CURRENT);
             verifyNoInteractions(auditApi);
         }
@@ -929,8 +929,8 @@ class AdminMediaServiceImplTest {
             MediaEntity media = new MediaEntity();
             media.setIsCurrent(false);
             media.setChronicleId(chronicleId);
-            media.setId(123);
-            doReturn(media).when(mediaRequestService).getMediaEntityById(123);
+            media.setId(123L);
+            doReturn(media).when(mediaRequestService).getMediaEntityById(123L);
 
             CourtCaseEntity courtCase1 = new CourtCaseEntity();
             CourtCaseEntity courtCase2 = new CourtCaseEntity();
@@ -944,16 +944,16 @@ class AdminMediaServiceImplTest {
 
             MediaEntity oldMedia1IsCurrent = new MediaEntity();
             oldMedia1IsCurrent.setIsCurrent(true);
-            oldMedia1IsCurrent.setId(1);
+            oldMedia1IsCurrent.setId(1L);
 
             MediaEntity oldMedia2IsCurrent = new MediaEntity();
             oldMedia2IsCurrent.setIsCurrent(true);
-            oldMedia2IsCurrent.setId(2);
+            oldMedia2IsCurrent.setId(2L);
 
             //Should not call deleteMediaLinkingAndSetCurrentFalse as not current
             MediaEntity oldMedia3IsNotCurrent = new MediaEntity();
             oldMedia3IsNotCurrent.setIsCurrent(false);
-            oldMedia3IsNotCurrent.setId(3);
+            oldMedia3IsNotCurrent.setId(3L);
 
             List<MediaEntity> mediaEntities = new ArrayList<>();
             mediaEntities.add(oldMedia1IsCurrent);
@@ -963,7 +963,7 @@ class AdminMediaServiceImplTest {
             when(mediaRepository.findAllByChronicleId(chronicleId)).thenReturn(mediaEntities);
 
             PatchAdminMediasByIdRequest request = new PatchAdminMediasByIdRequest(true);
-            mediaRequestService.patchMediasById(123, request);
+            mediaRequestService.patchMediasById(123L, request);
 
             verify(mediaRepository).findAllByChronicleId(chronicleId);
             verify(audioUploadService).deleteMediaLinkingAndSetCurrentFalse(oldMedia1IsCurrent);
@@ -997,10 +997,10 @@ class AdminMediaServiceImplTest {
             mediaResponseMapperMockedStatic = Mockito.mockStatic(GetAdminMediaResponseMapper.class);
 
             mediaEntity = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .build()
                 .getEntity();
-            when(mediaRepository.findByIdIncludeDeleted(1))
+            when(mediaRepository.findByIdIncludeDeleted(1L))
                 .thenReturn(Optional.of(mediaEntity));
         }
 
@@ -1019,7 +1019,7 @@ class AdminMediaServiceImplTest {
                 .thenReturn(Optional.of(objectHiddenReasonEntity));
 
             ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
-            when(objectAdminActionRepository.findByMediaId(1))
+            when(objectAdminActionRepository.findByMediaId(1L))
                 .thenReturn(Collections.singletonList(objectAdminActionEntity));
 
             MediaHideRequest mediaHideRequest = new MediaHideRequest();
@@ -1033,7 +1033,7 @@ class AdminMediaServiceImplTest {
             mediaHideRequest.setAdminAction(adminActionRequest);
 
             // When
-            mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest);
+            mediaRequestService.adminHideOrShowMediaById(1L, mediaHideRequest);
 
             // Then
             var expectedActionProperties = new ApplyAdminActionComponent.AdminActionProperties("Some reference",
@@ -1060,7 +1060,7 @@ class AdminMediaServiceImplTest {
 
             // When
             DartsApiException exception = assertThrows(DartsApiException.class, () ->
-                mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
+                mediaRequestService.adminHideOrShowMediaById(1L, mediaHideRequest));
 
             // Then
             assertEquals("Hide reason is incorrect", exception.getMessage());
@@ -1075,7 +1075,7 @@ class AdminMediaServiceImplTest {
             mediaHideRequest.setIsHidden(false);
 
             // When
-            mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest);
+            mediaRequestService.adminHideOrShowMediaById(1L, mediaHideRequest);
 
             // Then
             verify(removeAdminActionComponent).removeAdminActionFromAllVersions(eq(mediaEntity));
@@ -1084,14 +1084,14 @@ class AdminMediaServiceImplTest {
         @Test
         void shouldThrowException_whenNoMediaIsFound() {
             // Given
-            when(mediaRepository.findByIdIncludeDeleted(1))
+            when(mediaRepository.findByIdIncludeDeleted(1L))
                 .thenReturn(Optional.empty());
 
             MediaHideRequest mediaHideRequest = new MediaHideRequest();
 
             // When
             IllegalStateException exception = assertThrows(IllegalStateException.class,
-                                                           () -> mediaRequestService.adminHideOrShowMediaById(1, mediaHideRequest));
+                                                           () -> mediaRequestService.adminHideOrShowMediaById(1L, mediaHideRequest));
 
             // Then
             assertEquals(exception.getMessage(), "Media not found, expected this to be pre-validated");

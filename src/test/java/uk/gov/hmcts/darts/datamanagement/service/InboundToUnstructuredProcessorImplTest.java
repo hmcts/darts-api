@@ -56,11 +56,11 @@ class InboundToUnstructuredProcessorImplTest {
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
         // given
         ExternalObjectDirectoryEntity eod1 = new ExternalObjectDirectoryEntity();
-        eod1.setId(1);
+        eod1.setId(1L);
         ExternalObjectDirectoryEntity eod2 = new ExternalObjectDirectoryEntity();
-        eod2.setId(2);
+        eod2.setId(2L);
         when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any()))
-            .thenReturn(List.of(1, 2));
+            .thenReturn(List.of(1L, 2L));
 
         doThrow(new RuntimeException("some exception"))
             .doNothing()
@@ -77,11 +77,11 @@ class InboundToUnstructuredProcessorImplTest {
     void processInboundToUnstructured_throwsInterruptedException() {
         // given
         ExternalObjectDirectoryEntity eod1 = new ExternalObjectDirectoryEntity();
-        eod1.setId(1);
+        eod1.setId(1L);
         ExternalObjectDirectoryEntity eod2 = new ExternalObjectDirectoryEntity();
-        eod2.setId(2);
+        eod2.setId(2L);
         when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any()))
-            .thenReturn(List.of(1, 2));
+            .thenReturn(List.of(1L, 2L));
 
         try (MockedStatic<AsyncUtil> mockedStatic = mockStatic(AsyncUtil.class)) {
             // Mock the static method call to throw InterruptedException

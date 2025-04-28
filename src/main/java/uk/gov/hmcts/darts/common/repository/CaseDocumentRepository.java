@@ -7,8 +7,8 @@ import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 
 import java.util.List;
 
-public interface CaseDocumentRepository extends JpaRepository<CaseDocumentEntity, Integer>,
-    SoftDeleteRepository<CaseDocumentEntity, Integer> {
+public interface CaseDocumentRepository extends JpaRepository<CaseDocumentEntity, Long>,
+    SoftDeleteRepository<CaseDocumentEntity, Long> {
 
     List<CaseDocumentEntity> findByCourtCase(CourtCaseEntity courtCase);
 }

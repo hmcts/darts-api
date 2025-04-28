@@ -18,7 +18,9 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.zalando.problem.jackson.ProblemModule;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
+import uk.gov.hmcts.darts.task.runner.HasId;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,6 +37,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.BiFunction;
 
 import static java.lang.Character.isLetter;
 import static java.lang.Character.isUpperCase;
@@ -240,14 +243,34 @@ public final class TestUtils {
         }
     }
 
-    public static <T extends CreatedBy & HasIntegerId> T getFirst(Collection<T> data) {
+    public static <T extends CreatedBy & HasIntegerId> T getFirstInt(Collection<T> data) {
+        return getFirst(data, (o1, o2) -> Integer.compare(o1.getId(), o2.getId()));
+    }
+
+    public static <T extends CreatedBy & HasLongId> T getFirstLong(Collection<T> data) {
+        return getFirst(data, (o1, o2) -> Long.compare(o1.getId(), o2.getId()));
+    }
+
+    public static <T extends CreatedBy & HasId<?>> T getFirst(Collection<T> data,
+                                                              BiFunction<T, T, Integer> compareFunction) {
         if (data == null || data.isEmpty()) {
             return null;
         }
-        return getOrderedByCreatedByAndId(data).getFirst();
+        return getOrderedByCreatedByAndId(data, compareFunction).getFirst();
     }
 
-    public static <T extends CreatedBy & HasIntegerId> List<T> getOrderedByCreatedByAndId(Collection<T> data) {
+
+    public static <T extends CreatedBy & HasIntegerId> List<T> getOrderedByCreatedByAndIdInt(Collection<T> data) {
+        return getOrderedByCreatedByAndId(data, (o1, o2) -> Integer.compare(o1.getId(), o2.getId()));
+    }
+
+    public static <T extends CreatedBy & HasLongId> List<T> getOrderedByCreatedByAndIdLong(Collection<T> data) {
+        return getOrderedByCreatedByAndId(data, (o1, o2) -> Long.compare(o1.getId(), o2.getId()));
+
+    }
+
+    public static <T extends CreatedBy & HasId<?>> List<T> getOrderedByCreatedByAndId(Collection<T> data,
+                                                                                      BiFunction<T, T, Integer> compareFunction) {
         List<T> sortedData = new ArrayList<>();
         if (CollectionUtils.isEmpty(data)) {
             return sortedData;
@@ -260,7 +283,7 @@ public final class TestUtils {
                 .sorted((o1, o2) -> {
                     int compare = o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime());
                     if (compare == 0) {
-                        return Integer.compare(o1.getId(), o2.getId());
+                        return compareFunction.apply(o1, o2);
                     }
                     return compare;
                 })

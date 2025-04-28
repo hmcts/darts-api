@@ -21,9 +21,9 @@ class ExternalObjectDirectoryRepositoryTest {
     @Test
     void findEodsForTransfer_mediaItemsArelessThanLimit_shouldReturnBothMediaAndNonMedia() {
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        int mediaEod1 = 1;
-        int mediaEod2 = 2;
-        int nonMediaEod1 = 3;
+        long mediaEod1 = 1;
+        long mediaEod2 = 2;
+        long nonMediaEod1 = 3;
         doReturn(List.of(mediaEod1, mediaEod2))
             .when(externalObjectDirectoryRepository)
             .findEodsForTransferOnlyMedia(any(), any(), any(), any(), any(), any());
@@ -37,7 +37,7 @@ class ExternalObjectDirectoryRepositoryTest {
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
         int maxTransferAttempts = 5;
 
-        List<Integer> eods = externalObjectDirectoryRepository.findEodsForTransfer(
+        List<Long> eods = externalObjectDirectoryRepository.findEodsForTransfer(
             status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(5));
 
         assertThat(eods)
@@ -53,8 +53,8 @@ class ExternalObjectDirectoryRepositoryTest {
     @Test
     void findEodsForTransfer_mediaItemsAreEqualToLimit_shouldReturnOnlyMedia() {
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository = spy(ExternalObjectDirectoryRepository.class);
-        int mediaEod1 = 1;
-        int mediaEod2 = 2;
+        long mediaEod1 = 1;
+        long mediaEod2 = 2;
         doReturn(List.of(mediaEod1, mediaEod2))
             .when(externalObjectDirectoryRepository)
             .findEodsForTransferOnlyMedia(any(), any(), any(), any(), any(), any());
@@ -65,7 +65,7 @@ class ExternalObjectDirectoryRepositoryTest {
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
         int maxTransferAttempts = 5;
 
-        List<Integer> eods = externalObjectDirectoryRepository.findEodsForTransfer(
+        List<Long> eods = externalObjectDirectoryRepository.findEodsForTransfer(
             status, type, notExistsStatus, notExistsType, maxTransferAttempts, Limit.of(2));
 
         assertThat(eods)
@@ -81,9 +81,9 @@ class ExternalObjectDirectoryRepositoryTest {
 
     @Test
     void findEodsNotInOtherStorage_mediaItemsArelessThanLimit_shouldReturnBothMediaAndNonMedia() {
-        final int mediaEod1Id = 1;
-        final int mediaEod2Id = 2;
-        final int nonMediaEod1Id = 3;
+        final long mediaEod1Id = 1;
+        final long mediaEod2Id = 2;
+        final long nonMediaEod1Id = 3;
         final int statusId = 4;
         final int typeId = 5;
         final int notExistsTypeId = 6;
@@ -106,7 +106,7 @@ class ExternalObjectDirectoryRepositoryTest {
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
         when(notExistsType.getId()).thenReturn(notExistsTypeId);
 
-        List<Integer> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
+        List<Long> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             status, type, notExistsType, limitRecords);
 
         assertThat(eods)
@@ -121,8 +121,8 @@ class ExternalObjectDirectoryRepositoryTest {
 
     @Test
     void findEodsNotInOtherStorage_mediaItemsAreEqualToLimit_shouldReturnOnlyMedia() {
-        final int mediaEod1Id = 1;
-        final int mediaEod2Id = 2;
+        final long mediaEod1Id = 1;
+        final long mediaEod2Id = 2;
         final int statusId = 4;
         final int typeId = 5;
         final int notExistsTypeId = 6;
@@ -138,7 +138,7 @@ class ExternalObjectDirectoryRepositoryTest {
         ExternalLocationTypeEntity notExistsType = mock(ExternalLocationTypeEntity.class);
         when(notExistsType.getId()).thenReturn(notExistsTypeId);
 
-        List<Integer> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
+        List<Long> eods = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             status, type, notExistsType, limitRecords);
 
         assertThat(eods)

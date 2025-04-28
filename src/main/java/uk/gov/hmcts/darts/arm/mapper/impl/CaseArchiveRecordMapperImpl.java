@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Properties;
 
 import static java.util.Objects.isNull;
@@ -90,7 +91,7 @@ public class CaseArchiveRecordMapperImpl extends BaseArchiveRecordMapper impleme
             .build();
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(CaseDocumentEntity caseDocument, Integer relationId, String rawFilename) {
+    private UploadNewFileRecord createUploadNewFileRecord(CaseDocumentEntity caseDocument, Long relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(String.valueOf(relationId));
@@ -151,8 +152,8 @@ public class CaseArchiveRecordMapperImpl extends BaseArchiveRecordMapper impleme
             if (value != null) {
                 processStringMetadataProperties(metadata, key, value);
             } else {
-                Integer intValue = mapToInt(caseRecordProperties.getProperty(key), caseDocument);
-                processIntMetadataProperties(metadata, key, intValue);
+                Long longValue = mapToLong(caseRecordProperties.getProperty(key), caseDocument);
+                processIntMetadataProperties(metadata, key, longValue);
             }
         }
     }
@@ -203,10 +204,10 @@ public class CaseArchiveRecordMapperImpl extends BaseArchiveRecordMapper impleme
         return courthouse;
     }
 
-    private Integer mapToInt(String key, CaseDocumentEntity caseDocument) {
+    private Long mapToLong(String key, CaseDocumentEntity caseDocument) {
         return switch (key) {
             case OBJECT_ID_KEY -> caseDocument.getId();
-            case PARENT_ID_KEY -> caseDocument.getCourtCase().getId();
+            case PARENT_ID_KEY -> Optional.ofNullable(caseDocument.getCourtCase().getId()).map(Integer::longValue).orElse(null);
             default -> null;
         };
     }

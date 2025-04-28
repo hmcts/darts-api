@@ -206,7 +206,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
+    public UpdateTranscriptionResponse updateTranscription(Long transcriptionId,
                                                            UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
@@ -233,7 +233,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public UpdateTranscriptionAdminResponse updateTranscriptionAdmin(Integer transcriptionId,
+    public UpdateTranscriptionAdminResponse updateTranscriptionAdmin(Long transcriptionId,
                                                                      UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
@@ -406,7 +406,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     @SuppressWarnings("java:S6809")
-    public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
+    public void closeTranscription(Long transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
             updateTranscription.setTranscriptionStatusId(CLOSED.getId());
@@ -431,7 +431,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     @SuppressWarnings("java:S6809")
-    public AttachTranscriptResponse attachTranscript(Integer transcriptionId, MultipartFile transcript) {
+    public AttachTranscriptResponse attachTranscript(Long transcriptionId, MultipartFile transcript) {
 
         transcriptFileValidator.validate(transcript);
 
@@ -485,7 +485,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    public DownloadTranscriptResponse downloadTranscript(Integer transcriptionId) {
+    public DownloadTranscriptResponse downloadTranscript(Long transcriptionId) {
         return transcriptionDownloader.downloadTranscript(transcriptionId);
     }
 
@@ -529,7 +529,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @SuppressWarnings({"java:S2259"})
     @Override
-    public List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent) {
+    public List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Long transcriptionId, Boolean isCurrent) {
         var transcription = transcriptionRepository.findById(transcriptionId);
 
         if (transcription.isEmpty()) {
@@ -588,7 +588,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public GetTranscriptionByIdResponse getTranscription(Integer transcriptionId) {
+    public GetTranscriptionByIdResponse getTranscription(Long transcriptionId) {
         var userIsSuperAdmin = this.userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN));
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
             .filter(TranscriptionEntity::getIsCurrent)
@@ -640,11 +640,11 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    public List<Integer> rollbackUserTranscriptions(UserAccountEntity entity) {
+    public List<Long> rollbackUserTranscriptions(UserAccountEntity entity) {
         List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
             .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
 
-        List<Integer> transcriptionIds = new ArrayList<>();
+        List<Long> transcriptionIds = new ArrayList<>();
 
         // add the workflows back
         for (TranscriptionEntity transcription : transcriptionWorkflowEntities) {
@@ -695,23 +695,23 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return validated;
     }
 
-    private List<Integer> getTranscriptionIdsForRequest(List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
+    private List<Long> getTranscriptionIdsForRequest(List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
         return updateTranscriptionsItems.stream().map(UpdateTranscriptionsItem::getTranscriptionId).toList();
     }
 
-    private List<Integer> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {
+    private List<Long> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {
         return transcriptionEntities.stream().map(TranscriptionEntity::getId).toList();
     }
 
-    private List<UpdateTranscriptionsItem> getTranscriptionForIds(List<Integer> transcriptionIds, List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
+    private List<UpdateTranscriptionsItem> getTranscriptionForIds(List<Long> transcriptionIds, List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
         return updateTranscriptionsItems.stream().filter(e -> transcriptionIds.contains(e.getTranscriptionId())).toList();
     }
 
-    private Optional<UpdateTranscriptionsItem> getTranscriptionsItemForId(Integer transcriptionId, List<UpdateTranscriptionsItem> updateTranscriptions) {
+    private Optional<UpdateTranscriptionsItem> getTranscriptionsItemForId(Long transcriptionId, List<UpdateTranscriptionsItem> updateTranscriptions) {
         return updateTranscriptions.stream().filter(e -> e.getTranscriptionId().equals(transcriptionId)).findAny();
     }
 
-    private Optional<TranscriptionEntity> getTranscriptionEntityForId(Integer transcriptionId,
+    private Optional<TranscriptionEntity> getTranscriptionEntityForId(Long transcriptionId,
                                                                       List<TranscriptionEntity> updateTranscriptions) {
         return updateTranscriptions.stream().filter(e ->
                                                         e.getId().equals(transcriptionId)).findAny();

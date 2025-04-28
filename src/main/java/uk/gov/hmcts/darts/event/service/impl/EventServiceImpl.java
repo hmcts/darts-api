@@ -29,23 +29,23 @@ public class EventServiceImpl implements EventService {
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
 
     @Override
-    public AdminGetEventById200Response adminGetEventById(Integer eventId) {
-        return eventMapper.mapToAdminGetEventById200Response(getEventByEveId(eventId));
+    public AdminGetEventById200Response adminGetEventById(Long eveId) {
+        return eventMapper.mapToAdminGetEventById200Response(getEventByEveId(eveId));
     }
 
     @Override
-    public AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Integer eventId) {
-        return eventMapper.mapToAdminGetEventVersionsResponseForId(getRelatedEvents(eventId));
+    public AdminGetVersionsByEventIdResponseResult adminGetVersionsByEventId(Long eveId) {
+        return eventMapper.mapToAdminGetEventVersionsResponseForId(getRelatedEvents(eveId));
     }
 
     @Override
-    public EventEntity getEventByEveId(Integer eveId) {
+    public EventEntity getEventByEveId(Long eveId) {
         return eventRepository.findById(eveId)
             .orElseThrow(() -> new DartsApiException(CommonApiError.NOT_FOUND,
                                                      String.format("Event with id %s not found", eveId)));
     }
 
-    List<EventEntity> getRelatedEvents(Integer eveId) {
+    List<EventEntity> getRelatedEvents(Long eveId) {
         EventEntity event = getEventByEveId(eveId);
         if (event.getEventId() == 0) {
             return List.of(event);

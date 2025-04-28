@@ -16,7 +16,7 @@ import java.time.OffsetDateTime;
 public class TestAnnotationDocumentEntity extends AnnotationDocumentEntity implements DbInsertable<AnnotationDocumentEntity> {
 
     @lombok.Builder
-    public TestAnnotationDocumentEntity(Integer id, String fileName, String fileType, Integer fileSize,
+    public TestAnnotationDocumentEntity(Long id, String fileName, String fileType, Integer fileSize,
                                         UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
                                         String checksum, boolean isDeleted, UserAccountEntity deletedBy,
                                         OffsetDateTime deletedTs, String contentObjectId, String clipId,

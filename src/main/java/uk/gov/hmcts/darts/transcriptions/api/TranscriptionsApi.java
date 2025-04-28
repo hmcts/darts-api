@@ -8,6 +8,6 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 public interface TranscriptionsApi {
     RequestTranscriptionResponse saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails, boolean isManual);
 
-    UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscriptionRequest updateTranscription);
+    UpdateTranscriptionResponse updateTranscription(Long transcriptionId, UpdateTranscriptionRequest updateTranscription);
 
 }

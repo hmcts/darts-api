@@ -104,7 +104,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath(
                 "$.requester_transcriptions[0].case_number",
@@ -142,13 +142,13 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is(getRequestedTsStr(transcriptionEntity))))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
 
 
-            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcription.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcription.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is(getRequestedTsStr(transcription))))
             .andExpect(jsonPath("$.requester_transcriptions[1].courthouse_name", is(transcription.getCourtHouse().get().getDisplayName())))
             .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").isString())
@@ -196,7 +196,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath(
                 "$.requester_transcriptions[0].case_id",
                 is(courtCase.getId())
@@ -216,7 +216,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
 
-            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(systemUserTranscription.getId())))
+            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(systemUserTranscription.getId().intValue())))
             .andExpect(jsonPath(
                 "$.approver_transcriptions[0].case_id",
                 is(courtCase.getId())
@@ -242,9 +242,9 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is(getRequestedTsStr(transcriptionEntity))))
-            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(nonHiddenTranscription.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(nonHiddenTranscription.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is(getRequestedTsStr(nonHiddenTranscription))))
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
@@ -272,7 +272,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.approver_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(systemUserTranscription.getId())));
+            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(systemUserTranscription.getId().intValue())));
     }
 
     @Test
@@ -300,7 +300,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
@@ -321,7 +321,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath(
                 "$.requester_transcriptions[0].case_id",
                 is(courtCase.getId())
@@ -363,7 +363,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
             .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
@@ -398,7 +398,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
             .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))

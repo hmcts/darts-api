@@ -74,7 +74,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.detsLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<Integer> eodsForTransfer = getDetsEodEntitiesToSendToArm(eodSourceLocation,
+        List<Long> eodsForTransfer = getDetsEodEntitiesToSendToArm(eodSourceLocation,
                                                                       EodHelper.armLocation(),
                                                                       taskBatchSize);
 
@@ -82,7 +82,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                  eodsForTransfer.size(), eodSourceLocation.getDescription(), taskBatchSize);
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
-            List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer,
+            List<List<Long>> batchesForArm = ListUtils.partition(eodsForTransfer,
                                                                     detsToArmProcessorConfiguration.getMaxArmManifestItems());
             UserAccountEntity userAccount = userIdentity.getUserAccount();
 
@@ -120,7 +120,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         log.info("Finished running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
-    List<Integer> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
+    List<Long> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                 ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
         ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();
@@ -134,7 +134,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             Limit.of(maxResultSize)
         );
 
-        List<Integer> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
+        List<Long> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
 
         int remainingBatchSizeEods = maxResultSize - failedArmExternalObjectDirectoryEntities.size();
         if (remainingBatchSizeEods > 0) {

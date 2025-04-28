@@ -9,10 +9,10 @@ import java.time.OffsetDateTime;
 public class ObjectAdminActionCaseDocument {
 
     private final Integer id;
-    private final Integer annotationDocument;
-    private final Integer caseDocument;
-    private final Integer media;
-    private final Integer transcriptionDocument;
+    private final Long annotationDocument;
+    private final Long caseDocument;
+    private final Long media;
+    private final Long transcriptionDocument;
     private final ObjectHiddenReasonEntity objectHiddenReason;
     private final Integer hiddenBy;
     private final OffsetDateTime hiddenDateTime;

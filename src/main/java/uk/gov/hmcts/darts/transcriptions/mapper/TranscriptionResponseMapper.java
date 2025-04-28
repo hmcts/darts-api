@@ -491,7 +491,6 @@ public class TranscriptionResponseMapper {
         response.setCourtroom(mapCourtroom(courtroom));
         response.setCase(mapCase(courtCaseEntity));
         response.setAdminAction(adminAction);
-        response.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());
 
         return response;
     }

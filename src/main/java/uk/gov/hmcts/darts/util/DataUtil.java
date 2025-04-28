@@ -6,8 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.task.runner.HasId;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +64,7 @@ public final class DataUtil {
         metadata.setCourtroom(toUpperCase(StringUtils.trimToEmpty(metadata.getCourtroom())));
     }
 
-    public static <T extends CreatedBy & HasIntegerId> List<T> orderByCreatedByAndId(Collection<T> data) {
+    public static <T extends CreatedBy & HasId<?>> List<T> orderByCreatedByAndId(Collection<T> data) {
         List<T> sortedData = new ArrayList<>();
         if (CollectionUtils.isEmpty(data)) {
             return sortedData;
@@ -73,7 +77,7 @@ public final class DataUtil {
                 .sorted((o1, o2) -> {
                     int compare = o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime());
                     if (compare == 0) {
-                        return Integer.compare(o1.getId(), o2.getId());
+                        return compare(o1, o2);
                     }
                     return compare;
                 })
@@ -85,5 +89,15 @@ public final class DataUtil {
                 .filter(entity -> entity.getId() == null || entity.getCreatedDateTime() == null)
                 .toList());
         return sortedData;
+    }
+
+    private static int compare(Object id, Object id1) {
+        if (id instanceof HasIntegerId && id1 instanceof HasIntegerId) {
+            return Integer.compare(((HasIntegerId) id).getId(), ((HasIntegerId) id1).getId());
+        } else if (id instanceof HasLongId && id1 instanceof HasLongId) {
+            return Long.compare(((HasLongId) id).getId(), ((HasLongId) id1).getId());
+        }
+        throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
+                                    "Cannot compare ids of type " + id.getClass().getName() + " and " + id1.getClass().getName());
     }
 }

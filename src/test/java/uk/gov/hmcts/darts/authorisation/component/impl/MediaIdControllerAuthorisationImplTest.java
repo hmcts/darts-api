@@ -84,7 +84,7 @@ class MediaIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(jsonNode, roles));
 
-        verify(authorisation).authoriseByMediaId(3, roles);
+        verify(authorisation).authoriseByMediaId(3L, roles);
     }
 
     @Test
@@ -102,7 +102,7 @@ class MediaIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(jsonNode, roles));
 
-        verify(authorisation).authoriseByMediaId(0, roles);
+        verify(authorisation).authoriseByMediaId(0L, roles);
     }
 
     @Test
@@ -114,7 +114,7 @@ class MediaIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
-        verify(authorisation).authoriseByMediaId(3, roles);
+        verify(authorisation).authoriseByMediaId(3L, roles);
     }
 
     @Test
@@ -128,7 +128,7 @@ class MediaIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
-        verify(authorisation).authoriseByMediaId(3, roles);
+        verify(authorisation).authoriseByMediaId(3L, roles);
     }
 
     @Test
@@ -142,7 +142,7 @@ class MediaIdControllerAuthorisationImplTest {
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
-        verify(authorisation).authoriseByMediaId(3, roles);
+        verify(authorisation).authoriseByMediaId(3L, roles);
     }
 
     @Test
@@ -168,7 +168,7 @@ class MediaIdControllerAuthorisationImplTest {
     void checkAuthorisationSupplierIdParameter() {
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(() -> Optional.of(MEDIA_ID_PARAM_VALUE), roles));
 
-        verify(authorisation).authoriseByMediaId(3, roles);
+        verify(authorisation).authoriseByMediaId(3L, roles);
     }
 
     @Test

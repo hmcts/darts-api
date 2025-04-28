@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,7 +48,7 @@ class HearingEntityToCaseHearingTest {
 
     @BeforeEach
     void beforeEach() {
-        lenient().when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+        lenient().when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong()))
             .thenReturn(Collections.emptyList());
     }
 
@@ -64,7 +64,7 @@ class HearingEntityToCaseHearingTest {
             "Tests/cases/HearingEntityToCaseHearingTest/testWithSingleHearing/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        var transcriptionId = TestUtils.getFirst(hearings.getFirst().getTranscriptions()).getId();
+        var transcriptionId = TestUtils.getFirstLong(hearings.getFirst().getTranscriptions()).getId();
         verify(transcriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
@@ -80,13 +80,13 @@ class HearingEntityToCaseHearingTest {
             "Tests/cases/HearingEntityToCaseHearingTest/testWithMultipleHearings/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt());
+        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong());
     }
 
     @Test
     void testMappingToHearingsWithAutomatedTranscripts() {
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
-        var hearingTranscript = TestUtils.getFirst(hearings.getFirst().getTranscriptions());
+        var hearingTranscript = TestUtils.getFirstLong(hearings.getFirst().getTranscriptions());
         hearingTranscript.setIsManualTranscription(false);
         hearingTranscript.setLegacyObjectId(null);
 
@@ -99,53 +99,53 @@ class HearingEntityToCaseHearingTest {
     @Test
     void testMappingToHearingsWithLegacyTranscripts() {
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
-        var hearingTranscript = TestUtils.getFirst(hearings.getFirst().getTranscriptions());
+        var hearingTranscript = TestUtils.getFirstLong(hearings.getFirst().getTranscriptions());
         hearingTranscript.setLegacyObjectId("something");
 
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(1, hearingList.getFirst().getTranscriptCount());
-        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt());
+        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong());
     }
 
     @Test
     void testMappingToHearingsWithLegacyAutomatedTranscripts() {
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
-        var hearingTranscript = TestUtils.getFirst(hearings.getFirst().getTranscriptions());
+        var hearingTranscript = TestUtils.getFirstLong(hearings.getFirst().getTranscriptions());
         hearingTranscript.setIsManualTranscription(false);
         hearingTranscript.setLegacyObjectId("something");
 
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(1, hearingList.getFirst().getTranscriptCount());
-        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt());
+        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong());
     }
 
     @Test
     void testMappingToHearingsWithTranscriptsWithHiddenDocument() {
-        when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+        when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong()))
             .thenReturn(List.of(new TranscriptionDocumentEntity()));
 
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
         var hearingTranscripts = hearings.getFirst().getTranscriptions();
-        var transcriptDocs = TestUtils.getOrderedByCreatedByAndId(hearingTranscripts).getFirst().getTranscriptionDocumentEntities();
+        var transcriptDocs = TestUtils.getOrderedByCreatedByAndIdLong(hearingTranscripts).getFirst().getTranscriptionDocumentEntities();
         transcriptDocs.getFirst().setHidden(true);
 
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(0, hearingList.getFirst().getTranscriptCount());
-        var transcriptionId = TestUtils.getOrderedByCreatedByAndId(hearings.getFirst().getTranscriptions()).getFirst().getId();
+        var transcriptionId = TestUtils.getOrderedByCreatedByAndIdLong(hearings.getFirst().getTranscriptions()).getFirst().getId();
         verify(transcriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
     @Test
     void testMappingToHearingsWithTranscriptsWithOnlyOneHiddenDocument() {
-        when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+        when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong()))
             .thenReturn(List.of(new TranscriptionDocumentEntity()));
 
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
         var hearingTranscripts = hearings.getFirst().getTranscriptions();
-        var transcriptDocs = TestUtils.getFirst(hearingTranscripts).getTranscriptionDocumentEntities();
+        var transcriptDocs = TestUtils.getFirstLong(hearingTranscripts).getTranscriptionDocumentEntities();
         var transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setFileName("test2.doc");
         transcriptionDocumentEntity.setHidden(true);
@@ -154,14 +154,14 @@ class HearingEntityToCaseHearingTest {
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(0, hearingList.getFirst().getTranscriptCount());
-        var transcriptionId = TestUtils.getFirst(hearings.getFirst().getTranscriptions()).getId();
+        var transcriptionId = TestUtils.getFirstLong(hearings.getFirst().getTranscriptions()).getId();
         verify(transcriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
     @Test
     void mapToHearingList_shouldNotIncludeNonCurrentTranscriptions() {
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
-        TestUtils.getFirst(hearings.getFirst().getTranscriptions()).setIsCurrent(false);
+        TestUtils.getFirstLong(hearings.getFirst().getTranscriptions()).setIsCurrent(false);
 
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
         assertEquals(1, hearingList.size());

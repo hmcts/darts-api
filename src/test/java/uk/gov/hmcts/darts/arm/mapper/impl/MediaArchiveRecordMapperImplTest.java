@@ -161,6 +161,7 @@ class MediaArchiveRecordMapperImplTest {
         assertNull(result.getMediaCreateArchiveRecord().getRecordMetadata().getBf001());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required due to object type comparison
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals("Media", metadata.getBf001());
         assertNull(metadata.getBf002());
@@ -175,8 +176,8 @@ class MediaArchiveRecordMapperImplTest {
         assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf011());
         assertEquals(mediaEntity.getId(), metadata.getBf012());
         assertEquals(mediaEntity.getId(), metadata.getBf013());
-        assertEquals(mediaEntity.getChannel(), metadata.getBf014());
-        assertEquals(mediaEntity.getTotalChannels(), metadata.getBf015());
+        assertEquals(mediaEntity.getChannel().longValue(), metadata.getBf014());
+        assertEquals(mediaEntity.getTotalChannels().longValue(), metadata.getBf015());
         assertNull(metadata.getBf016());
         assertEquals("2025-01-23T17:30:00.000Z", metadata.getBf017());
         assertNull(metadata.getBf018());
@@ -184,6 +185,7 @@ class MediaArchiveRecordMapperImplTest {
         assertNotNull(metadata.getBf020());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required due to object type comparison
     private void assertMetadataAllProperties(RecordMetadata metadata) {
         assertEquals("Media", metadata.getBf001());
         assertNull(metadata.getBf002());
@@ -198,8 +200,8 @@ class MediaArchiveRecordMapperImplTest {
         assertNotNull(metadata.getBf011());
         assertEquals(mediaEntity.getId(), metadata.getBf012());
         assertEquals(mediaEntity.getId(), metadata.getBf013());
-        assertEquals(mediaEntity.getChannel(), metadata.getBf014());
-        assertEquals(mediaEntity.getTotalChannels(), metadata.getBf015());
+        assertEquals(mediaEntity.getChannel().longValue(), metadata.getBf014());
+        assertEquals(mediaEntity.getTotalChannels().longValue(), metadata.getBf015());
         assertNull(metadata.getBf016());
         assertEquals("2025-01-23T10:30:00.000Z", metadata.getBf017());
         assertEquals("2025-01-23T17:30:00.000Z", metadata.getBf018());

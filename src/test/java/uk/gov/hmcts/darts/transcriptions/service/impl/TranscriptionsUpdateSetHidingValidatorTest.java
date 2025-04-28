@@ -22,7 +22,7 @@ class TranscriptionsUpdateSetHidingValidatorTest {
     @Test
     void testValidateWhenSuccess() {
         UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
-        transcriptions.setTranscriptionId(100);
+        transcriptions.setTranscriptionId(100L);
         transcriptions.setHideRequestFromRequestor(true);
 
         TranscriptionStatusEntity status = new TranscriptionStatusEntity();
@@ -37,7 +37,7 @@ class TranscriptionsUpdateSetHidingValidatorTest {
     @Test
     void testValidateWhenFailureOnState() {
         UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
-        transcriptions.setTranscriptionId(100);
+        transcriptions.setTranscriptionId(100L);
         transcriptions.setHideRequestFromRequestor(true);
 
         TranscriptionStatusEntity status = new TranscriptionStatusEntity();
@@ -52,7 +52,7 @@ class TranscriptionsUpdateSetHidingValidatorTest {
     @Test
     void testValidateWhenEntityNotFound() {
         UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
-        transcriptions.setTranscriptionId(100);
+        transcriptions.setTranscriptionId(100L);
         transcriptions.setHideRequestFromRequestor(true);
 
         Assertions.assertFalse(validator.validate(Optional.empty(), transcriptions));
@@ -61,7 +61,7 @@ class TranscriptionsUpdateSetHidingValidatorTest {
     @Test
     void testValidateWhenSuccessWithHideFalseRegardlessOfState() {
         UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
-        transcriptions.setTranscriptionId(100);
+        transcriptions.setTranscriptionId(100L);
         transcriptions.setHideRequestFromRequestor(false);
 
         TranscriptionStatusEntity status = new TranscriptionStatusEntity();

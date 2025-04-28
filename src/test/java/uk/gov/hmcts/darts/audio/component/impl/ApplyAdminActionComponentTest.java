@@ -87,7 +87,7 @@ class ApplyAdminActionComponentTest {
         void shouldHideAndSetAdminActionOnTargetedMedia_whenTargetedMediaHasNoChronicleId() {
             // Given
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .build()
                 .getEntity();
 
@@ -135,12 +135,12 @@ class ApplyAdminActionComponentTest {
             final String commonChronicleId = "1000";
 
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId(commonChronicleId)
                 .build()
                 .getEntity();
             MediaEntity otherVersion = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(2)
+                .id(2L)
                 .chronicleId(commonChronicleId)
                 .build()
                 .getEntity();
@@ -186,7 +186,7 @@ class ApplyAdminActionComponentTest {
             verifyNoMoreInteractions(auditApi);
 
             // And verify the back-links
-            List<Integer> backLinkedMediaIds = mediaEntities.stream()
+            List<Long> backLinkedMediaIds = mediaEntities.stream()
                 .map(MediaEntity::getObjectAdminActions)
                 .flatMap(List::stream)
                 .map(ObjectAdminActionEntity::getMedia)
@@ -218,12 +218,12 @@ class ApplyAdminActionComponentTest {
             final String commonChronicleId = "1000";
 
             MediaEntity targetedMedia = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(1)
+                .id(1L)
                 .chronicleId(commonChronicleId)
                 .build()
                 .getEntity();
             MediaEntity otherVersion = PersistableFactory.getMediaTestData().someMinimalBuilder()
-                .id(2)
+                .id(2L)
                 .chronicleId(commonChronicleId)
                 .build()
                 .getEntity();
@@ -267,7 +267,7 @@ class ApplyAdminActionComponentTest {
             verifyNoMoreInteractions(auditApi);
 
             // And verify the back-links
-            List<Integer> backLinkedMediaIds = mediaEntities.stream()
+            List<Long> backLinkedMediaIds = mediaEntities.stream()
                 .map(MediaEntity::getObjectAdminActions)
                 .flatMap(List::stream)
                 .map(ObjectAdminActionEntity::getMedia)

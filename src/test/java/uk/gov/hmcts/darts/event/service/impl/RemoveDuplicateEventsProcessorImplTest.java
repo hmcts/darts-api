@@ -61,11 +61,11 @@ class RemoveDuplicateEventsProcessorImplTest {
     @Test
     void findAndRemoveDuplicateEvent_hasDuplicateEvents_allDuplicatesExcludingTheFirstOneAreDeleted() {
         //Setup
-        int duplicateEvent1Id = 1;
-        int duplicateEvent2Id = 2;
-        int duplicateEvent3Id = 3;
+        long duplicateEvent1Id = 1;
+        long duplicateEvent2Id = 2;
+        long duplicateEvent3Id = 3;
 
-        List<Integer> duplicateEvents = new ArrayList<>(List.of(duplicateEvent1Id, duplicateEvent2Id, duplicateEvent3Id));
+        List<Long> duplicateEvents = new ArrayList<>(List.of(duplicateEvent1Id, duplicateEvent2Id, duplicateEvent3Id));
         when(eventRepository.findDuplicateEventIds(any())).thenReturn(duplicateEvents);
 
         List<Integer> caseManagementIdsToBeDeleted = List.of(2, 3);
@@ -76,7 +76,7 @@ class RemoveDuplicateEventsProcessorImplTest {
 
 
         //Verification
-        List<Integer> toBeDeleted = List.of(duplicateEvent2Id, duplicateEvent3Id);
+        List<Long> toBeDeleted = List.of(duplicateEvent2Id, duplicateEvent3Id);
 
         verify(eventRepository).findDuplicateEventIds(123);
 

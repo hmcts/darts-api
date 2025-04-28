@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface AdminMediaService {
 
-    AdminMediaResponse getMediasById(Integer id);
+    AdminMediaResponse getMediasById(Long id);
 
     List<GetAdminMediaResponseItem> filterMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
                                                  OffsetDateTime endAt);
@@ -27,13 +27,13 @@ public interface AdminMediaService {
 
     List<PostAdminMediasSearchResponseItem> performAdminMediasSearchPost(PostAdminMediasSearchRequest adminMediasSearchRequest);
 
-    MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest);
+    MediaHideResponse adminHideOrShowMediaById(Long mediaId, MediaHideRequest mediaHideRequest);
 
     List<GetAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion();
 
-    MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId);
+    MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Long mediaId);
 
-    AdminVersionedMediaResponse getMediaVersionsById(Integer id);
+    AdminVersionedMediaResponse getMediaVersionsById(Long id);
 
-    void patchMediasById(Integer id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest);
+    void patchMediasById(Long id, PatchAdminMediasByIdRequest patchAdminMediasByIdRequest);
 }

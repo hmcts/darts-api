@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import java.util.List;
 
 @Repository
-public interface TransientObjectDirectoryRepository extends JpaRepository<TransientObjectDirectoryEntity, Integer> {
+public interface TransientObjectDirectoryRepository extends JpaRepository<TransientObjectDirectoryEntity, Long> {
 
     @Query("""
         SELECT tod FROM TransformedMediaEntity tm, TransientObjectDirectoryEntity tod

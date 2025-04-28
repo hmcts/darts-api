@@ -36,7 +36,7 @@ class HearingEntityTest {
                        .stream()
                        .map(mediaEntity -> mediaEntity.getId())
                        .toList())
-            .containsExactlyInAnyOrder(1, 2, 3);
+            .containsExactlyInAnyOrder(1L, 2L, 3L);
 
         MediaEntity media = createMedia(4);
         hearing.addMedia(media);
@@ -46,10 +46,10 @@ class HearingEntityTest {
                        .stream()
                        .map(mediaEntity -> mediaEntity.getId())
                        .toList())
-            .containsExactlyInAnyOrder(1, 2, 3, 4);
+            .containsExactlyInAnyOrder(1L, 2L, 3L, 4L);
     }
 
-    private MediaEntity createMedia(int id) {
+    private MediaEntity createMedia(long id) {
         MediaEntity media = new MediaEntity();
         media.setId(id);
         return media;

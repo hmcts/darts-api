@@ -127,7 +127,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
                 blobId
             ));
 
-        assertTrue(dartsDatabase.getTransformedMediaRepository().findById(extraTransientObjectDirectoryEntity.getId()).isPresent());
+        assertTrue(dartsDatabase.getTransientObjectDirectoryRepository().findById(extraTransientObjectDirectoryEntity.getId()).isPresent());
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,

@@ -79,7 +79,7 @@ class AudioLoggerServiceImplTest {
 
     @Test
     void addAudioSmallFileWithLongDuration_logsCorrectData() {
-        audioLoggerService.addAudioSmallFileWithLongDuration(SOME_COURTHOUSE, SOME_COURTROOM, STARTED_AT, ENDED_AT, 123, 1024L);
+        audioLoggerService.addAudioSmallFileWithLongDuration(SOME_COURTHOUSE, SOME_COURTROOM, STARTED_AT, ENDED_AT, 123L, 1024L);
 
         var expectedLogEntry = format("Audio file size problem: courthouse=%s, courtroom=%s, started_at=%s, ended_at=%s, med_id=%s, file_size=%s",
                                       SOME_COURTHOUSE.toUpperCase(Locale.ROOT),

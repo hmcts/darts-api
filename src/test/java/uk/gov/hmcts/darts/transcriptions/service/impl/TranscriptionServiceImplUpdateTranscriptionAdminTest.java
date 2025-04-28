@@ -87,7 +87,7 @@ class TranscriptionServiceImplUpdateTranscriptionAdminTest {
 
     @Test
     void updateTranscriptionAdmin_Success_ForManualTranscriptionAwaitingAuthToRequest() {
-        Integer transcriptionId = 1;
+        Long transcriptionId = 1L;
         UpdateTranscriptionRequest updateRequest = new UpdateTranscriptionRequest();
         updateRequest.setTranscriptionStatusId(REQUESTED.getId());
         updateRequest.setWorkflowComment("Approved");
@@ -127,7 +127,7 @@ class TranscriptionServiceImplUpdateTranscriptionAdminTest {
 
     @Test
     void updateTranscriptionAdmin_TranscriptionNotFound() {
-        Integer transcriptionId = 1;
+        Long transcriptionId = 1L;
         UpdateTranscriptionRequest updateRequest = new UpdateTranscriptionRequest();
         updateRequest.setTranscriptionStatusId(2);
 
@@ -145,7 +145,7 @@ class TranscriptionServiceImplUpdateTranscriptionAdminTest {
 
     @Test
     void updateTranscriptionAdmin_InvalidWorkflowTransition() {
-        Integer transcriptionId = 1;
+        Long transcriptionId = 1L;
         UpdateTranscriptionRequest updateRequest = new UpdateTranscriptionRequest();
         updateRequest.setTranscriptionStatusId(2);
 

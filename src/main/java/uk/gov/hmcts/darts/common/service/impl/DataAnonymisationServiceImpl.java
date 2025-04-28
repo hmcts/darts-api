@@ -107,7 +107,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     @Override
     @Transactional
-    public void anonymiseEventByIds(UserAccountEntity userAccount, List<Integer> eveIds, boolean isManuallyRequested) {
+    public void anonymiseEventByIds(UserAccountEntity userAccount, List<Long> eveIds, boolean isManuallyRequested) {
         eveIds.stream()
             .map(eventService::getEventByEveId)
             .distinct()

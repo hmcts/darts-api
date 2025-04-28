@@ -19,7 +19,7 @@ public class AudioPreviewServiceImpl implements AudioPreviewService {
     private final MediaIdValidator mediaIdValidator;
 
     @Override
-    public AudioPreview getOrCreateAudioPreview(Integer mediaId) {
+    public AudioPreview getOrCreateAudioPreview(Long mediaId) {
         mediaIdValidator.validateNotHidden(mediaId);
         mediaIdValidator.validateNotZeroSecondAudio(mediaId);
 

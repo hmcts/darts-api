@@ -22,7 +22,7 @@ public class TestEventEntity extends EventEntity implements DbInsertable<EventEn
 
     @lombok.Builder
     public TestEventEntity(
-        Integer id,
+        Long id,
         String legacyObjectId,
         EventHandlerEntity eventType,
         Integer eventId,

@@ -63,7 +63,7 @@ public class AudioServiceImpl implements AudioService {
         "PMD.ExceptionAsFlowControl",
         "PMD.DoNotUseThreads"//TODO - refactor to avoid using Thread.sleep() when this is next edited
     })
-    public BinaryData encode(Integer mediaId) {
+    public BinaryData encode(Long mediaId) {
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
         BinaryData mediaBinaryData;
@@ -110,8 +110,8 @@ public class AudioServiceImpl implements AudioService {
     @Override
     public void setIsAvailable(List<AudioMetadata> audioMetadataList) {
         if (!isEmpty(audioMetadataList)) {
-            List<Integer> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
-            List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(
+            List<Long> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
+            List<Long> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(
                 mediaIdList,
                 EodHelper.storedStatus(),
                 EodHelper.unstructuredLocation(), EodHelper.detsLocation());

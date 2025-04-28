@@ -64,15 +64,15 @@ class ExternalOutboundDataStoreDeleterImplTest {
     private List<TransientObjectDirectoryEntity> createOutboundData(OffsetDateTime expirtyTs) {
         TransientObjectDirectoryEntity outboundAudio = new TransientObjectDirectoryEntity();
         outboundAudio.setStatus(markedForDeletionStatus);
-        int id1 = 1;
+        Long id1 = 1L;
         outboundAudio.setId(id1);
-        outboundAudio.setTransformedMedia(createTransformedMedia(id1, expirtyTs));
+        outboundAudio.setTransformedMedia(createTransformedMedia(id1.intValue(), expirtyTs));
 
         TransientObjectDirectoryEntity outboundAudio2 = new TransientObjectDirectoryEntity();
         outboundAudio2.setStatus(markedForDeletionStatus);
-        int id2 = 21;
+        Long id2 = 21L;
         outboundAudio2.setId(id2);
-        outboundAudio2.setTransformedMedia(createTransformedMedia(id2, expirtyTs));
+        outboundAudio2.setTransformedMedia(createTransformedMedia(id2.intValue(), expirtyTs));
 
         List<TransientObjectDirectoryEntity> outboundList = new ArrayList<>();
         outboundList.add(outboundAudio);
@@ -99,8 +99,8 @@ class ExternalOutboundDataStoreDeleterImplTest {
             Collection<TransientObjectDirectoryEntity> deletedItems = deleter.delete(100);
 
             assertThat(deletedItems, containsInAnyOrder(
-                hasProperty("id", is(1)),
-                hasProperty("id", is(21))
+                hasProperty("id", is(1L)),
+                hasProperty("id", is(21L))
             ));
             assertEquals(2, deletedItems.size());
             verify(transientObjectDirectoryRepository)

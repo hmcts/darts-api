@@ -198,7 +198,7 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
         });
     }
 
-    private void assertCase(int caseId, boolean isAnonymised, int... excludeEventIds) {
+    private void assertCase(int caseId, boolean isAnonymised, long... excludeEventIds) {
         transactionalUtil.executeInTransaction(() -> {
             CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().getCourtCase(caseId);
             assertThat(courtCase.isDataAnonymised())
@@ -227,7 +227,7 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
             courtCase.getHearings().forEach(hearingEntity -> assertHearing(hearingEntity, isAnonymised));
 
-            Set<Integer> eventIdsToExclude = new HashSet<>();
+            Set<Long> eventIdsToExclude = new HashSet<>();
             Arrays.stream(excludeEventIds).forEach(eventIdsToExclude::add);
             List<EventLinkedCaseEntity> eventLinkedCaseEntities = new ArrayList<>();
             eventLinkedCaseEntities.addAll(dartsDatabase.getEventLinkedCaseRepository().findAllByCourtCase(courtCase));
@@ -455,7 +455,7 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
             hearingEntity.setMedias(mediaList.stream().collect(Collectors.toSet()));
             dartsDatabase.getHearingRepository().save(hearingEntity);
 
-            mediaLinkedCaseStub.createCaseLinkedMedia(TestUtils.getFirst(mediaList), courtCase);
+            mediaLinkedCaseStub.createCaseLinkedMedia(TestUtils.getFirstLong(mediaList), courtCase);
         });
     }
 

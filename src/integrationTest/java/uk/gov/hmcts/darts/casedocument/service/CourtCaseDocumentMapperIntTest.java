@@ -137,7 +137,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getDefences().getFirst().getLastModifiedBy()).isNotNull().isEqualTo(cc.getDefenceList().getFirst().getLastModifiedById())
         );
 
-        JudgeEntity judge = TestUtils.getFirst(cc.getJudges());
+        JudgeEntity judge = TestUtils.getFirstInt(cc.getJudges());
         assertAll(
             "Grouped assertions for Case Document judges",
             () -> assertThat(doc.getJudges().getFirst().getId()).isNotNull().isEqualTo(judge.getId()),
@@ -252,7 +252,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 cc.getCaseRetentionEntities().getFirst().getCaseManagementRetention().getEventEntity().getEventType().isReportingRestriction())
         );
 
-        JudgeEntity ccFirstHearingFirstJudge = TestUtils.getFirst(cc.getHearings().getFirst().getJudges());
+        JudgeEntity ccFirstHearingFirstJudge = TestUtils.getFirstInt(cc.getHearings().getFirst().getJudges());
         assertAll(
             "Grouped assertions for Case Document hearings",
             () -> assertThat(doc.getHearings().getFirst().getId()).isNotNull().isEqualTo(cc.getHearings().getFirst().getId()),
@@ -281,7 +281,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 ccFirstHearingFirstJudge.getLastModifiedById())
         );
 
-        MediaRequestEntity ccFirstHearingFirstMediaRequest = TestUtils.getFirst(cc.getHearings().getFirst().getMediaRequests());
+        MediaRequestEntity ccFirstHearingFirstMediaRequest = TestUtils.getFirstInt(cc.getHearings().getFirst().getMediaRequests());
         assertAll(
             "Grouped assertions for Case Document hearings media requests",
             () -> assertThat(doc.getHearings().getFirst().getMediaRequests().getFirst().getId()).isNotNull().isEqualTo(
@@ -311,7 +311,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         );
 
 
-        MediaEntity ccFirstHearingFirstMedia = TestUtils.getFirst(cc.getHearings().getFirst().getMedias());
+        MediaEntity ccFirstHearingFirstMedia = TestUtils.getFirstLong(cc.getHearings().getFirst().getMedias());
         assertAll(
             "Grouped assertions for Case Document hearings medias",
             () -> assertThat(doc.getHearings().getFirst().getMedias().getFirst().getId()).isNotNull().isEqualTo(
@@ -464,7 +464,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 mediaEodEntity.getLastModifiedDateTime())
         );
 
-        TranscriptionEntity ccFirstHearingFirstTranscription = TestUtils.getFirst(cc.getHearings().getFirst().getTranscriptions());
+        TranscriptionEntity ccFirstHearingFirstTranscription = TestUtils.getFirstLong(cc.getHearings().getFirst().getTranscriptions());
         assertAll(
             "Grouped assertions for Case Document hearings transcriptions",
             () -> assertThat(doc.getHearings().getFirst().getTranscriptions().getFirst().getId()).isNotNull().isEqualTo(
@@ -694,7 +694,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
                 ccFirstHearingFirstTranscription.getTranscriptionCommentEntities().getFirst().getAuthorUserId())
         );
 
-        AnnotationEntity ccFirstHearingFirstAnnotation = TestUtils.getFirst(cc.getHearings().getFirst().getAnnotations());
+        AnnotationEntity ccFirstHearingFirstAnnotation = TestUtils.getFirstInt(cc.getHearings().getFirst().getAnnotations());
         assertAll(
             "Grouped assertions for Case Document hearings annotations",
             () -> assertThat(doc.getHearings().getFirst().getAnnotations().getFirst().getId()).isNotNull().isEqualTo(

@@ -70,7 +70,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     @MockitoBean
     private AuditApi mockAuditApi;
 
-    private Integer transcriptionId;
+    private Long transcriptionId;
     private Integer testUserId;
 
     private TranscriptionEntity transcriptionEntity;

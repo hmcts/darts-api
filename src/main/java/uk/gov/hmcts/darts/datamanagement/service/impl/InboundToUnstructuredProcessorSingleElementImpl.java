@@ -38,7 +38,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream"})
     @Override
     @Transactional
-    public void processSingleElement(Integer inboundEodEntityId) {
+    public void processSingleElement(Long inboundEodEntityId) {
         ExternalObjectDirectoryEntity inboundEodEntity = externalObjectDirectoryRepository.findById(inboundEodEntityId).orElseThrow();
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundEodEntity);
 
@@ -66,10 +66,10 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
 
     private ExternalObjectDirectoryEntity getNewOrExistingInUnstructuredFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory) {
-        Integer mediaId = null;
-        Integer caseDocumentId = null;
-        Integer annotationDocumentId = null;
-        Integer transcriptionDocumentId = null;
+        Long mediaId = null;
+        Long caseDocumentId = null;
+        Long annotationDocumentId = null;
+        Long transcriptionDocumentId = null;
         if (inboundExternalObjectDirectory.getMedia() != null) {
             mediaId = inboundExternalObjectDirectory.getMedia().getId();
         }

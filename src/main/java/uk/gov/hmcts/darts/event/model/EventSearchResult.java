@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 
 public record EventSearchResult(
-    Integer id,
+    Long id,
     OffsetDateTime eventTs,
     String eventTypeName,
     String eventText,

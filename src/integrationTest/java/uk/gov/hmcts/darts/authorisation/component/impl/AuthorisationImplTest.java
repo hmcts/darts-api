@@ -189,7 +189,7 @@ class AuthorisationImplTest extends IntegrationBase {
         var exception = assertThrows(
             DartsApiException.class,
             () -> authorisationToTest.authoriseByMediaId(
-                -1, Set.of(JUDICIARY))
+                -1L, Set.of(JUDICIARY))
         );
 
         assertEquals(MEDIA_NOT_FOUND.getTitle(), exception.getMessage());
@@ -219,7 +219,7 @@ class AuthorisationImplTest extends IntegrationBase {
         var exception = assertThrows(
             DartsApiException.class,
             () -> authorisationToTest.authoriseByTranscriptionId(
-                -1, Set.of(JUDICIARY))
+                -1L, Set.of(JUDICIARY))
         );
 
         assertEquals(TRANSCRIPTION_NOT_FOUND.getTitle(), exception.getMessage());
