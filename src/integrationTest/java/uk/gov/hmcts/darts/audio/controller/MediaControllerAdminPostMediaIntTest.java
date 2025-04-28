@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
@@ -454,8 +455,8 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
             mvcResult.getResponse().getContentAsString(),
             new CustomComparator(
                 JSONCompareMode.NON_EXTENSIBLE,
-                new Customization("id", (actual, expected) -> originalTargetedMedia.getId().equals(actual)),
-                new Customization("admin_action.id", (actual, expected) -> adminActionEntity.getId().equals(actual)),
+                new Customization("id", (actual, expected) -> objectStringEquals(originalTargetedMedia.getId(), actual)),
+                new Customization("admin_action.id", (actual, expected) -> objectStringEquals(adminActionEntity.getId(), actual)),
                 new Customization("admin_action.reason_id", (actual, expected) -> HiddenReason.OTHER_HIDE.getId().equals(actual)),
                 new Customization("admin_action.hidden_by_id", (actual, expected) -> clientUser.getId().equals(actual)),
                 new Customization("admin_action.hidden_at", (actual, expected) -> isIsoDateTimeString((String) actual))
@@ -557,7 +558,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
             mvcResult.getResponse().getContentAsString(),
             new CustomComparator(
                 JSONCompareMode.NON_EXTENSIBLE,
-                new Customization("id", (actual, expected) -> actual.equals(originalTargetedMedia.getId()))
+                new Customization("id", (actual, expected) -> objectStringEquals(actual, originalTargetedMedia.getId()))
             )
         );
 
