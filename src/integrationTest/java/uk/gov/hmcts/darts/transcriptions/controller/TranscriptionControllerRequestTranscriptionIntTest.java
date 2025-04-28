@@ -137,7 +137,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andExpect(status().isOk())
             .andReturn();
 
-        Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
+        Long transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
             .read("$.transcription_id");
         assertNotNull(transcriptionId);
 
@@ -302,7 +302,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-        MediaEntity mediaEntity = TestUtils.getFirst(hearing.getMedias());
+        MediaEntity mediaEntity = TestUtils.getFirstLong(hearing.getMedias());
         OffsetDateTime startTime = mediaEntity.getStart().truncatedTo(ChronoUnit.SECONDS);
         OffsetDateTime endTime = mediaEntity.getEnd().truncatedTo(ChronoUnit.SECONDS);
 
@@ -333,7 +333,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-        MediaEntity mediaEntity = TestUtils.getFirst(hearing.getMedias());
+        MediaEntity mediaEntity = TestUtils.getFirstLong(hearing.getMedias());
         OffsetDateTime startTime = mediaEntity.getStart().plusMinutes(5);
         OffsetDateTime endTime = mediaEntity.getEnd().minusMinutes(15);
 

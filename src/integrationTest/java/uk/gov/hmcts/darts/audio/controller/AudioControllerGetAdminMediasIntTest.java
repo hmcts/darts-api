@@ -443,7 +443,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
         return createdBeforeAndAfterLst;
     }
 
-    private String getExpectedJsonRoot(Integer id, Integer courthouseId, Integer courtroomId,
+    private String getExpectedJsonRoot(Long id, Integer courthouseId, Integer courtroomId,
                                        Integer caseId, Integer hearingId, OffsetDateTime startDate, OffsetDateTime endDate)
         throws JsonProcessingException {
         String body = getExpectedJson(id, courthouseId, courtroomId, caseId, hearingId, startDate, endDate);
@@ -454,7 +454,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
             """.replace("${RESPONSE_BODY}", body);
     }
 
-    private String getExpectedJson(Integer id, Integer courthouseId, Integer courtroomId,
+    private String getExpectedJson(Long id, Integer courthouseId, Integer courtroomId,
                                    Integer caseId, Integer hearingId,
                                    OffsetDateTime startDate, OffsetDateTime endDate) throws JsonProcessingException {
         GetAdminMediaResponseItem responseItem = new GetAdminMediaResponseItem();

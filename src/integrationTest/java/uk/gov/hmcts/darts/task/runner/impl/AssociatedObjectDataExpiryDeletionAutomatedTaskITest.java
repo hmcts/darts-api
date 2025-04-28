@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
@@ -617,7 +618,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
             assignArm, storeArm);
     }
 
-    private void assertAuditEntries(AuditActivity auditActivity, HasIntegerId hasIntegerId, boolean isAnonymised) {
+    private void assertAuditEntries(AuditActivity auditActivity, HasLongId hasIntegerId, boolean isAnonymised) {
         List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
             .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
                 criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(hasIntegerId.getId())),

@@ -147,7 +147,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         assertEquals(11, transformedMediaEntityList.size());
 
         for (int results = 0; results < transformedMediaEntityList.size(); results++) {
-            Integer expectedId = generatedMediaEntities.get(results).getId();
+            Long expectedId = generatedMediaEntities.get(results).getId();
             assertEquals(expectedId, transformedMediaEntityList.get(results).getId());
         }
     }

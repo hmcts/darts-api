@@ -109,8 +109,8 @@ class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
         final List<AudioBeingProcessedFromArchiveQueryResult> results = audioBeingProcessedFromArchiveQuery.getResults(hearingId);
 
         List<AudioBeingProcessedFromArchiveQueryResult> expected = List.of(
-            new AudioBeingProcessedFromArchiveQueryResult(182, 2763),
-            new AudioBeingProcessedFromArchiveQueryResult(183, 2766)
+            new AudioBeingProcessedFromArchiveQueryResult(182L, 2763),
+            new AudioBeingProcessedFromArchiveQueryResult(183L, 2766)
         );
         assertEquals(expected, results);
     }

@@ -1833,10 +1833,10 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod.getId()));
         BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(
             getUploadFileContents(validUploadFileTest1, armEod.getId(), caseDocument.getChecksum()));
-        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest2, 1234));
-        BinaryData invalidLineFileBinaryDataTest2 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest2, 1234));
+        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest2, 1234L));
+        BinaryData invalidLineFileBinaryDataTest2 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest2, 1234L));
         BinaryData uploadFileBinaryDataTest3 = convertStringToBinaryData(getUploadFileContents(validUploadFileTest3, 2233, "123"));
-        BinaryData invalidLineFileBinaryDataTest3 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest3, 7788));
+        BinaryData invalidLineFileBinaryDataTest3 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest3, 7788L));
 
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
@@ -1904,9 +1904,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String validUploadFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
         String invalidLineFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
 
-        int externalObjectDirectoryId1 = 5678;
-        int externalObjectDirectoryId2 = 1234;
-        int externalObjectDirectoryId3 = 7788;
+        long externalObjectDirectoryId1 = 5678;
+        long externalObjectDirectoryId2 = 1234;
+        long externalObjectDirectoryId3 = 7788;
         BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, externalObjectDirectoryId1));
         BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(
             getUploadFileContents(validUploadFileTest1, externalObjectDirectoryId1, caseDocument.getChecksum()));
@@ -2363,7 +2363,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String createRecordFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
         String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
 
-        int eodId = 1234;
+        long eodId = 1234L;
         BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, eodId));
         BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(
             getUploadFileContents(validUploadFileTest1, eodId, annotationDocument.getChecksum()));
@@ -2463,20 +2463,20 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         return getContentsFromFile(inputUploadFile);
     }
 
-    protected String getInvalidLineFileContents(String invalidLineFilename, Integer externalObjectDirectoryId) throws IOException {
+    protected String getInvalidLineFileContents(String invalidLineFilename, Long externalObjectDirectoryId) throws IOException {
         String expectedResponse = getContentsFromFile(invalidLineFilename);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(externalObjectDirectoryId));
         return expectedResponse;
     }
 
-    protected String getUploadFileContents(String uploadFilename, int externalObjectDirectoryId, String checksum) throws IOException {
+    protected String getUploadFileContents(String uploadFilename, long externalObjectDirectoryId, String checksum) throws IOException {
         String expectedResponse = getContentsFromFile(uploadFilename);
         expectedResponse = expectedResponse.replaceAll("<CHECKSUM>", checksum);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(externalObjectDirectoryId));
         return expectedResponse;
     }
 
-    protected String getCreateRecordFileContents(String createRecordFilename, Integer externalObjectDirectoryId) throws IOException {
+    protected String getCreateRecordFileContents(String createRecordFilename, Long externalObjectDirectoryId) throws IOException {
         String expectedResponse = getContentsFromFile(createRecordFilename);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(externalObjectDirectoryId));
         return expectedResponse;

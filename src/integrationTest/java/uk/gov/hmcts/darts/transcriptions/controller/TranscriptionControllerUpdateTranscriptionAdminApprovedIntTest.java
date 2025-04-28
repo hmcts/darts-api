@@ -60,7 +60,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     @MockitoBean
     private AuditApi mockAuditApi;
 
-    private Integer transcriptionId;
+    private Long transcriptionId;
     private Integer transcriptCreatorId;
     private UserAccountEntity testUser;
 

@@ -339,7 +339,7 @@ class EventsControllerTest extends IntegrationBase {
     }
 
     @SneakyThrows
-    private void assertDataAnonymisedEntry(UserAccountEntity userAccount, DataAnonymisationEntity dataAnonymisationEntity, int eventEntityId,
+    private void assertDataAnonymisedEntry(UserAccountEntity userAccount, DataAnonymisationEntity dataAnonymisationEntity, long eventEntityId,
                                            TranscriptionCommentEntity transcriptionComment) {
         //Refresh event entity
         EventEntity eventEntity = dartsDatabaseStub.getEventRepository().findById(eventEntityId).orElseThrow();

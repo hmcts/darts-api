@@ -18,7 +18,7 @@ import java.util.List;
 
 @Repository
 @SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
-public interface EventRepository extends JpaRepository<EventEntity, Integer> {
+public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
     @Query("""
            SELECT ee
@@ -134,7 +134,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         AND e.courtroom.name not in (:courtroomNumbers)
         """
     )
-    List<Integer> findAllByEventStatusAndNotCourtrooms(Integer statusNumber, List<String> courtroomNumbers, Limit limit);
+    List<Long> findAllByEventStatusAndNotCourtrooms(Integer statusNumber, List<String> courtroomNumbers, Limit limit);
 
     @Query("""
                         SELECT e3.id from EventEntity e3
@@ -148,13 +148,13 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
                          WHERE e3.eventId >= :eventId
                          ORDER BY e3.createdDateTime ASC  
         """)
-    List<Integer> findDuplicateEventIds(Integer eventId);
+    List<Long> findDuplicateEventIds(Integer eventId);
 
 
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM darts.hearing_event_ae WHERE eve_id IN (:eventEntitiesIdsToDelete)", nativeQuery = true)
-    void deleteAllAssociatedHearings(List<Integer> eventEntitiesIdsToDelete);
+    void deleteAllAssociatedHearings(List<Long> eventEntitiesIdsToDelete);
 
     interface EventIdAndHearingIds {
 

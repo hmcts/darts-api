@@ -468,11 +468,11 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     private void assertResponseItems(List<MediaEntity> expectedEntities, MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
         String contentAsString = mvcResult.getResponse().getContentAsString();
 
-        List<Integer> expectedIds = expectedEntities.stream().map(MediaEntity::getId).sorted().toList();
+        List<Long> expectedIds = expectedEntities.stream().map(MediaEntity::getId).sorted().toList();
         List<PostAdminMediasSearchResponseItem> actualResponseItems = objectMapper.readValue(contentAsString,
                                                                                              new TypeReference<>() {
                                                                                              });
-        List<Integer> actualIds = actualResponseItems.stream().map(PostAdminMediasSearchResponseItem::getId).sorted().toList();
+        List<Long> actualIds = actualResponseItems.stream().map(PostAdminMediasSearchResponseItem::getId).sorted().toList();
         assertThat(actualIds, is(expectedIds));
     }
 

@@ -976,7 +976,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
     }
 
-    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Integer id, List<TranscriptionDocumentEntity> transformedMediaEntityList) {
+    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Long id, List<TranscriptionDocumentEntity> transformedMediaEntityList) {
         return transformedMediaEntityList.stream().filter(e -> e.getId().equals(id)).findFirst().get();
     }
 

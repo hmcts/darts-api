@@ -16,8 +16,8 @@ public interface CaseManagementRetentionRepository extends JpaRepository<CaseMan
     @Transactional
     @Modifying
     @Query("DELETE FROM CaseManagementRetentionEntity c WHERE c.eventEntity.id IN :eventsIds")
-    void deleteAllByEventEntityIn(List<Integer> eventsIds);
+    void deleteAllByEventEntityIn(List<Long> eventsIds);
 
     @Query("SELECT c.id FROM CaseManagementRetentionEntity c WHERE c.eventEntity.id IN :eventsIds")
-    List<Integer> getIdsForEvents(@Param("eventsIds") List<Integer> eventsIds);
+    List<Integer> getIdsForEvents(@Param("eventsIds") List<Long> eventsIds);
 }

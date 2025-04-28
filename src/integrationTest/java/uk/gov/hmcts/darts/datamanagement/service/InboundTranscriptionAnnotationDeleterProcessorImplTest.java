@@ -50,7 +50,7 @@ class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresInt
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // exercise the logic
-        List<Integer> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(hourDurationBeyondHours);
+        List<Long> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(hourDurationBeyondHours);
 
         // assert the logic
         assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
@@ -70,7 +70,7 @@ class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresInt
         generateData(setupHoursBeforeCurrentTime);
 
         // exercise the logic
-        List<Integer> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(100);
+        List<Long> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(100);
 
         // assert the logic
         assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
@@ -89,7 +89,7 @@ class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresInt
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime + 1; // which no records are
 
-        List<Integer> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(hourDurationBeyondHours);
+        List<Long> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(hourDurationBeyondHours);
 
         // assert that the test has inserted the data into the database
         Assertions.assertTrue(updatedResults.isEmpty());
@@ -136,9 +136,9 @@ class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresInt
         Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
     }
 
-    private void assertExternalObjectDirectoryUpdate(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
+    private void assertExternalObjectDirectoryUpdate(List<Long> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
         // find matching pn expected results
-        List<Integer> matchesEntity = new ArrayList<>(
+        List<Long> matchesEntity = new ArrayList<>(
             actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
 
         Assertions.assertEquals(resultCount, matchesEntity.size());
@@ -147,8 +147,8 @@ class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresInt
     }
 
 
-    private void assertExpectedResults(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
-        List<Integer> matchesEntity = new ArrayList<>(
+    private void assertExpectedResults(List<Long> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
+        List<Long> matchesEntity = new ArrayList<>(
             actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
 
         Assertions.assertEquals(resultCount, matchesEntity.size());

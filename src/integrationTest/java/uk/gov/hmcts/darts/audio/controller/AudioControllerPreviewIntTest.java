@@ -62,7 +62,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     @BeforeEach
     void setupData() {
         var hearing = dartsPersistence.save(hearingWithMedia());
-        mediaEntity = TestUtils.getFirst(hearing.getMedias());
+        mediaEntity = TestUtils.getFirstLong(hearing.getMedias());
 
         dartsPersistence.save(PersistableFactory.getExternalObjectDirectoryTestData().eodStoredInUnstructuredLocationForMedia(mediaEntity));
 

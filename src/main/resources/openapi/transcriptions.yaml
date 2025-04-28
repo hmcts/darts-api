@@ -1679,9 +1679,11 @@ components:
       properties:
         transcription_document_id:
           type: integer
+          format: int64
           description: 'The transcription document id'
         transcription_id:
           type: integer
+          format: int64
           description: 'The transcription id'
         case:
           type: object
