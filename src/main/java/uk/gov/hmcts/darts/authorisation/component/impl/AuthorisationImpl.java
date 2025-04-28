@@ -91,7 +91,7 @@ public class AuthorisationImpl implements Authorisation {
     }
 
     @Override
-    public void authoriseByMediaId(Integer mediaId, Set<SecurityRoleEnum> securityRoles) {
+    public void authoriseByMediaId(Long mediaId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final Set<CourthouseEntity> courthouses = mediaRepository.getReferenceById(mediaId)
                 .getHearings()
@@ -113,7 +113,7 @@ public class AuthorisationImpl implements Authorisation {
 
     @Override
     @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
-    public void authoriseByTranscriptionId(Integer transcriptionId, Set<SecurityRoleEnum> securityRoles) {
+    public void authoriseByTranscriptionId(Long transcriptionId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final List<CourthouseEntity> courthouses = getCourthousesFromTranscription(transcriptionId);
             if (CollectionUtils.isEmpty(courthouses)) {
@@ -126,7 +126,7 @@ public class AuthorisationImpl implements Authorisation {
         }
     }
 
-    private List<CourthouseEntity> getCourthousesFromTranscription(Integer transcriptionId) {
+    private List<CourthouseEntity> getCourthousesFromTranscription(Long transcriptionId) {
         Optional<TranscriptionEntity> transcriptionEntityOpt = transcriptionRepository.findById(transcriptionId);
         if (transcriptionEntityOpt.isEmpty()) {
             return Collections.emptyList();

@@ -125,7 +125,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
          AND elc.courtCase.id in :courtCaseIds
          AND (ee.eventId <> 0 or ee.id = :eveId)
         """)
-    List<EventEntity> findAllByRelatedEvents(Integer eveId, Integer eventId, List<Integer> courtCaseIds);
+    List<EventEntity> findAllByRelatedEvents(Long eveId, Integer eventId, List<Integer> courtCaseIds);
 
     @Query("""
         SELECT e.id
@@ -159,7 +159,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     interface EventIdAndHearingIds {
 
         @Column(name = "eve_id")
-        Integer getEveId();
+        Long getEveId();
 
         @Column(name = "event_id")
         Integer getEventId();

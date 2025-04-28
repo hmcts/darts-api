@@ -21,6 +21,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.LocalDate;
@@ -42,13 +43,13 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @AuditTable("transcription_aud")
-public class TranscriptionEntity extends CreatedModifiedBaseEntity implements HasIntegerId {
+public class TranscriptionEntity extends CreatedModifiedBaseEntity implements HasLongId {
 
     @Id
     @Column(name = "tra_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tra_gen")
     @SequenceGenerator(name = "tra_gen", sequenceName = "tra_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @NotAudited
     @ManyToMany(fetch = FetchType.EAGER)

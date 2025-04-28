@@ -23,7 +23,9 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.datamanagement.service.AssociatedObjectDataExpiryDeleterService;
 import uk.gov.hmcts.darts.task.config.AssociatedObjectDataExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
+import uk.gov.hmcts.darts.task.runner.HasId;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
@@ -147,7 +149,7 @@ public class AssociatedObjectDataExpiryDeleterServiceImpl implements AssociatedO
     }
 
 
-    <T extends SoftDelete & HasIntegerId & HasRetention & CanReturnExternalObjectDirectoryEntities> void deleteExternalObjectDirectoryEntity(
+    <T extends SoftDelete & HasId<?> & HasRetention & CanReturnExternalObjectDirectoryEntities> void deleteExternalObjectDirectoryEntity(
         UserAccountEntity userAccount,
         SoftDeleteRepository<T, ?> repository,
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
@@ -171,7 +173,7 @@ public class AssociatedObjectDataExpiryDeleterServiceImpl implements AssociatedO
         entitiesToDelete.forEach(t -> auditApi.record(auditActivity, userAccount, String.valueOf(t.getId())));
     }
 
-    <T extends SoftDelete & HasIntegerId & HasRetention & CanReturnExternalObjectDirectoryEntities> boolean shouldDeleteFilter(T entity) {
+    <T extends SoftDelete & HasId<?> & HasRetention & CanReturnExternalObjectDirectoryEntities> boolean shouldDeleteFilter(T entity) {
         ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity = entity.getExternalObjectDirectoryEntities()
             .stream()
             .filter(e -> ExternalLocationTypeEnum.ARM.getId().equals(e.getExternalLocationType().getId()))

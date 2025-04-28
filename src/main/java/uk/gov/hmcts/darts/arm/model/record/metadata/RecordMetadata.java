@@ -58,13 +58,13 @@ public class RecordMetadata implements ArchiveMetadata {
     @JsonProperty("bf_011")
     private String bf011;
     @JsonProperty("bf_012")
-    private Integer bf012;
+    private Long bf012;
     @JsonProperty("bf_013")
-    private Integer bf013;
+    private Long bf013;
     @JsonProperty("bf_014")
-    private Integer bf014;
+    private Long bf014;
     @JsonProperty("bf_015")
-    private Integer bf015;
+    private Long bf015;
     @JsonProperty("bf_016")
     private String bf016;
     @JsonProperty("bf_017")

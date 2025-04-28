@@ -30,7 +30,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "eod_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eod_gen")
     @SequenceGenerator(name = "eod_gen", sequenceName = "eod_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "med_id", foreignKey = @ForeignKey(name = "eod_media_fk"))

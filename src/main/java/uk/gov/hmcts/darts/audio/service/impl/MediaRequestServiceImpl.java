@@ -480,7 +480,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request) {
         MediaPatchResponse returnResponse = new MediaPatchResponse();
 
-        IdRequest<MediaPatchRequest> requestIdRequest = new IdRequest<>(request, mediaRequestId);
+        IdRequest<MediaPatchRequest, Integer> requestIdRequest = new IdRequest<>(request, mediaRequestId);
         mediaRequestValidator.validate(requestIdRequest);
 
         Optional<MediaRequestEntity> mediaRequestEntity = mediaRequestRepository.findById(mediaRequestId);

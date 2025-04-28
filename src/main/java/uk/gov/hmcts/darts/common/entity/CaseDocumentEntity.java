@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
@@ -31,7 +32,7 @@ import java.util.List;
 @Setter
 @SQLRestriction("is_deleted = false")
 public class CaseDocumentEntity extends CreatedModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities {
+    implements ConfidenceAware, SoftDelete, HasLongId, HasRetention, CanReturnExternalObjectDirectoryEntities {
 
     public static final String ID = "cad_id";
     public static final String TABLE_NAME = "case_document";
@@ -40,7 +41,7 @@ public class CaseDocumentEntity extends CreatedModifiedBaseEntity
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cad_gen")
     @SequenceGenerator(name = "cad_gen", sequenceName = "cad_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "cas_id")

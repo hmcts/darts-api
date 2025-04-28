@@ -53,13 +53,13 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
 
     @Override
     @Transactional
-    public Optional<ExternalObjectDirectoryEntity> eagerLoadExternalObjectDirectory(Integer externalObjectDirectoryId) {
+    public Optional<ExternalObjectDirectoryEntity> eagerLoadExternalObjectDirectory(Long externalObjectDirectoryId) {
         return eodRepository.findById(externalObjectDirectoryId);
     }
 
     @Override
     @Transactional
-    public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp) {
+    public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Long> idsToUpdate, OffsetDateTime timestamp) {
         eodRepository.updateStatus(newStatus, userAccount.getId(), idsToUpdate, timestamp);
     }
 

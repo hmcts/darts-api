@@ -110,7 +110,7 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
             .build();
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId, String rawFilename) {
+    private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Long relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(String.valueOf(relationId));
@@ -172,8 +172,8 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
             if (value != null) {
                 processStringMetadataProperties(metadata, key, value);
             } else {
-                Integer intValue = mapToInt(transcriptionRecordProperties.getProperty(key), transcriptionDocument);
-                processIntMetadataProperties(metadata, key, intValue);
+                Long longValue = mapToLong(transcriptionRecordProperties.getProperty(key), transcriptionDocument);
+                processIntMetadataProperties(metadata, key, longValue);
             }
         }
     }
@@ -339,10 +339,10 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
         return courthouse;
     }
 
-    private Integer mapToInt(String key, TranscriptionDocumentEntity transcriptionDocument) {
+    private Long mapToLong(String key, TranscriptionDocumentEntity transcriptionDocument) {
         return switch (key) {
-            case OBJECT_ID_KEY -> transcriptionDocument.getId();
-            case PARENT_ID_KEY -> transcriptionDocument.getTranscription().getId();
+            case OBJECT_ID_KEY -> Long.valueOf(transcriptionDocument.getId());
+            case PARENT_ID_KEY -> Long.valueOf(transcriptionDocument.getTranscription().getId());
             default -> null;
         };
     }

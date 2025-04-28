@@ -5,5 +5,6 @@ package uk.gov.hmcts.darts.task.runner;
  * Used with generic methods that need to work with entities that have an integer ID.
  */
 @FunctionalInterface
-public interface HasIntegerId extends HasId<Integer> {
+public interface HasId<T> {
+    T getId();
 }

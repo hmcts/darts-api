@@ -34,7 +34,7 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
             List<TranscriptionStatusEntity> finishedTranscriptionStatuses = transcriptionService.getFinishedTranscriptionStatuses();
             OffsetDateTime lastCreatedDateTime = currentTimeHelper.currentOffsetDateTime()
                 .minus(transcriptionConfigurationProperties.getMaxCreatedByDuration());
-            List<Integer> transcriptionsToBeClosed =
+            List<Long> transcriptionsToBeClosed =
                 transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
                     finishedTranscriptionStatuses,
                     lastCreatedDateTime,
@@ -44,7 +44,7 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
                 log.debug("No transcriptions to be closed off");
             } else {
                 log.info("Number of transcriptions to be closed off: {} out of a batch size {}", transcriptionsToBeClosed.size(), batchSize);
-                for (Integer transcriptionToBeClosed : transcriptionsToBeClosed) {
+                for (Long transcriptionToBeClosed : transcriptionsToBeClosed) {
                     transcriptionService.closeTranscription(transcriptionToBeClosed, AUTOMATICALLY_CLOSED_TRANSCRIPTION);
                 }
             }

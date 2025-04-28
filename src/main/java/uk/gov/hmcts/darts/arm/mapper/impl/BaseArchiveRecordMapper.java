@@ -50,13 +50,13 @@ class BaseArchiveRecordMapper {
         }
     }
 
-    protected void processIntMetadataProperties(RecordMetadata metadata, String key, Integer intValue) {
-        if (intValue != null) {
+    protected void processIntMetadataProperties(RecordMetadata metadata, String key, Long longValue) {
+        if (longValue != null) {
             switch (key) {
-                case BF_012_KEY -> metadata.setBf012(intValue);
-                case BF_013_KEY -> metadata.setBf013(intValue);
-                case BF_014_KEY -> metadata.setBf014(intValue);
-                case BF_015_KEY -> metadata.setBf015(intValue);
+                case BF_012_KEY -> metadata.setBf012(longValue);
+                case BF_013_KEY -> metadata.setBf013(longValue);
+                case BF_014_KEY -> metadata.setBf014(longValue);
+                case BF_015_KEY -> metadata.setBf015(longValue);
                 default -> log.warn("Archive record unknown integer property key: {}", key);
             }
         }

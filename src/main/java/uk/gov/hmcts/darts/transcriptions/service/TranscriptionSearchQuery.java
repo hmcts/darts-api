@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface TranscriptionSearchQuery {
 
-    List<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Integer> transcriptionIds);
+    List<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Long> transcriptionIds);
 
-    List<Integer> findTranscriptionsIdsCurrentlyOwnedBy(String owner);
+    List<Long> findTranscriptionsIdsCurrentlyOwnedBy(String owner);
 
 }

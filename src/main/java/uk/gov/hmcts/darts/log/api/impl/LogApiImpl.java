@@ -130,22 +130,22 @@ public class LogApiImpl implements LogApi {
     }
 
     @Override
-    public void armPushSuccessful(Integer eodId) {
+    public void armPushSuccessful(Long eodId) {
         armLoggerService.armPushSuccessful(eodId);
     }
 
     @Override
-    public void armPushFailed(Integer eodId) {
+    public void armPushFailed(Long eodId) {
         armLoggerService.armPushFailed(eodId);
     }
 
     @Override
-    public void archiveToArmSuccessful(Integer eodId) {
+    public void archiveToArmSuccessful(Long eodId) {
         armLoggerService.archiveToArmSuccessful(eodId);
     }
 
     @Override
-    public void archiveToArmFailed(Integer eodId) {
+    public void archiveToArmFailed(Long eodId) {
         armLoggerService.archiveToArmFailed(eodId);
     }
 
@@ -155,17 +155,17 @@ public class LogApiImpl implements LogApi {
     }
 
     @Override
-    public void mediaDeleted(Integer mediaId) {
+    public void mediaDeleted(Long mediaId) {
         deletionLoggerService.mediaDeleted(mediaId);
     }
 
     @Override
-    public void transcriptionDeleted(Integer transcriptionId) {
+    public void transcriptionDeleted(Long transcriptionId) {
         deletionLoggerService.transcriptionDeleted(transcriptionId);
     }
 
     @Override
-    public void logArmMissingResponse(Duration armMissingResponseDuration, Integer eodId) {
+    public void logArmMissingResponse(Duration armMissingResponseDuration, Long eodId) {
         armLoggerService.logArmMissingResponse(armMissingResponseDuration, eodId);
     }
 
@@ -196,7 +196,7 @@ public class LogApiImpl implements LogApi {
 
     @Override
     public void addAudioSmallFileWithLongDuration(String courthouse, String courtroom, OffsetDateTime startDate, OffsetDateTime finishDate,
-                                                  Integer medId, Long fileSize) {
+                                                  Long medId, Long fileSize) {
         audioLoggerService.addAudioSmallFileWithLongDuration(courthouse, courtroom, startDate, finishDate, medId, fileSize);
     }
 

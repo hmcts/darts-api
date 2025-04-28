@@ -18,12 +18,12 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validator<IdRequest<UserPatch>> {
+public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validator<IdRequest<UserPatch, Integer>> {
 
     private final SecurityGroupRepository securityGroupRepository;
 
     @Override
-    public void validate(IdRequest<UserPatch> userPatch) {
+    public void validate(IdRequest<UserPatch, Integer> userPatch) {
         if (!(userPatch.getPayload().getActive() != null && !userPatch.getPayload().getActive())) {
             return;
         }

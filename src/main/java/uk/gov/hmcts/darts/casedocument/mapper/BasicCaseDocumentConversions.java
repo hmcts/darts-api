@@ -15,19 +15,19 @@ public class BasicCaseDocumentConversions {
         return userAccountEntity == null ? null : userAccountEntity.getId();
     }
 
-    Integer convert(MediaEntity mediaEntity) {
+    Long convert(MediaEntity mediaEntity) {
         return mediaEntity == null ? null : mediaEntity.getId();
     }
 
-    Integer convert(CaseDocumentEntity caseDocumentEntity) {
+    Long convert(CaseDocumentEntity caseDocumentEntity) {
         return caseDocumentEntity == null ? null : caseDocumentEntity.getId();
     }
 
-    Integer convert(AnnotationDocumentEntity annotationDocumentEntity) {
+    Long convert(AnnotationDocumentEntity annotationDocumentEntity) {
         return annotationDocumentEntity == null ? null : annotationDocumentEntity.getId();
     }
 
-    Integer convert(TranscriptionDocumentEntity transcriptionDocumentEntity) {
+    Long convert(TranscriptionDocumentEntity transcriptionDocumentEntity) {
         return transcriptionDocumentEntity == null ? null : transcriptionDocumentEntity.getId();
     }
 

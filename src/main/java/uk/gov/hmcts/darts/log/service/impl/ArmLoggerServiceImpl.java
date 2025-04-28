@@ -27,22 +27,22 @@ public class ArmLoggerServiceImpl implements ArmLoggerService {
     private static final String ARM_RPO_POLLING_FAILED_FOR_EXECUTION_ID = "ARM RPO Polling - Failed for execution Id = {}";
 
     @Override
-    public void armPushSuccessful(Integer eodId) {
+    public void armPushSuccessful(Long eodId) {
         log.info(ARM_PUSH_SUCCESSFUL, eodId);
     }
 
     @Override
-    public void armPushFailed(Integer eodId) {
+    public void armPushFailed(Long eodId) {
         log.error(ARM_PUSHED_FAILED, eodId);
     }
 
     @Override
-    public void archiveToArmSuccessful(Integer eodId) {
+    public void archiveToArmSuccessful(Long eodId) {
         log.info(ARCHIVE_TO_ARM_SUCCESSFUL, eodId);
     }
 
     @Override
-    public void archiveToArmFailed(Integer eodId) {
+    public void archiveToArmFailed(Long eodId) {
         log.error(ARCHIVE_TO_ARM_FAILED, eodId);
     }
 
@@ -62,7 +62,7 @@ public class ArmLoggerServiceImpl implements ArmLoggerService {
     }
 
     @Override
-    public void logArmMissingResponse(Duration armMissingResponseDuration, Integer eodId) {
+    public void logArmMissingResponse(Duration armMissingResponseDuration, Long eodId) {
         log.error(ARM_MISSING_RESPONSE, DurationUtil.formatDurationHumanReadable(armMissingResponseDuration), eodId);
     }
 

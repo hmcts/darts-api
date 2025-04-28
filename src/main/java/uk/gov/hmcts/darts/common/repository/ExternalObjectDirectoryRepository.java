@@ -29,7 +29,7 @@ import java.util.Set;
     "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited,
     "PMD.ExcessivePublicCount"//TODO - refactor to reduce public methods when this class is next edited
 })
-public interface ExternalObjectDirectoryRepository extends JpaRepository<ExternalObjectDirectoryEntity, Integer> {
+public interface ExternalObjectDirectoryRepository extends JpaRepository<ExternalObjectDirectoryEntity, Long> {
 
     @Query(
         """
@@ -86,7 +86,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod.externalLocationType in :externalLocationTypes
             """
     )
-    List<Integer> findMediaIdsByInMediaIdStatusAndType(List<Integer> mediaIdList, ObjectRecordStatusEntity status,
+    List<Integer> findMediaIdsByInMediaIdStatusAndType(List<Long> mediaIdList, ObjectRecordStatusEntity status,
                                                        ExternalLocationTypeEntity... externalLocationTypes);
 
 
@@ -133,7 +133,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.osrUuid is null
             """
     )
-    List<Integer> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
+    List<Long> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
                                                                       ExternalLocationTypeEntity type,
                                                                       Integer transferAttempts,
                                                                       Pageable pageable);
@@ -147,7 +147,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.osrUuid is not null
             """
     )
-    List<Integer> findNotFinishedAndNotExceededRetryInStorageLocationForDets(List<ObjectRecordStatusEntity> failedStatuses,
+    List<Long> findNotFinishedAndNotExceededRetryInStorageLocationForDets(List<ObjectRecordStatusEntity> failedStatuses,
                                                                              ExternalLocationTypeEntity type,
                                                                              Integer transferAttempts,
                                                                              Limit limit);
@@ -217,7 +217,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod2.lastModifiedDateTime <= :lastModifiedBefore
             """
     )
-    List<Integer> findIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
+    List<Long> findIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
                                                        ObjectRecordStatusEntity status2,
                                                        ExternalLocationTypeEntity location1,
                                                        ExternalLocationTypeEntity location2,
@@ -239,7 +239,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.lastModifiedDateTime <= :lastModifiedBefore1
             """
     )
-    List<Integer> findIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
+    List<Long> findIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
                                                        ObjectRecordStatusEntity status2,
                                                        ExternalLocationTypeEntity location1,
                                                        ExternalLocationTypeEntity location2,
@@ -259,7 +259,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod2.status = :storedStatus
             """
     )
-    List<Integer> findIdsForAudioToBeDeletedFromUnstructured(ObjectRecordStatusEntity storedStatus,
+    List<Long> findIdsForAudioToBeDeletedFromUnstructured(ObjectRecordStatusEntity storedStatus,
                                                              ExternalLocationTypeEntity unstructuredLocation,
                                                              ExternalLocationTypeEntity armLocation,
                                                              OffsetDateTime unstructuredLastModifiedBefore,
@@ -361,7 +361,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             where eod.id in :idsToUpdate
             """
     )
-    void updateStatus(ObjectRecordStatusEntity newStatus, Integer userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
+    void updateStatus(ObjectRecordStatusEntity newStatus, Integer userAccount, List<Long> idsToUpdate, OffsetDateTime timestamp);
 
 
     default List<Integer> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
@@ -422,9 +422,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                     Integer maxTransferAttempts, Limit limit);
 
 
-    default List<Integer> findEodsNotInOtherStorage(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    default List<Long> findEodsNotInOtherStorage(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                     ExternalLocationTypeEntity notExistsLocation, Integer limitRecords) {
-        Set<Integer> results = new HashSet<>();//Ensures no duplicates
+        Set<Long> results = new HashSet<>();//Ensures no duplicates
         results.addAll(findEodsNotInOtherStorageOnlyMedia(status.getId(), type.getId(), notExistsLocation.getId(), limitRecords));
         if (results.size() < limitRecords) {
             results.addAll(findEodsNotInOtherStorageExcludingMedia(status.getId(), type.getId(), notExistsLocation.getId(), limitRecords - results.size()));
@@ -449,7 +449,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """,
         nativeQuery = true
     )
-    List<Integer> findEodsNotInOtherStorageOnlyMedia(Integer status, Integer type,
+    List<Long> findEodsNotInOtherStorageOnlyMedia(Integer status, Integer type,
                                                      Integer notExistsLocation, Integer limitRecords);
 
     @Query(
@@ -473,7 +473,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """,
         nativeQuery = true
     )
-    List<Integer> findEodsNotInOtherStorageExcludingMedia(Integer status, Integer type,
+    List<Long> findEodsNotInOtherStorageExcludingMedia(Integer status, Integer type,
                                                           Integer notExistsLocation, Integer limitRecords);
 
     @Query(
@@ -487,7 +487,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             order by eod.lastModifiedDateTime
             """
     )
-    ExternalObjectDirectoryEntity findByIdsAndFailure(Integer mediaId, Integer caseDocumentId, Integer annotationDocumentId, Integer transcriptionDocumentId,
+    ExternalObjectDirectoryEntity findByIdsAndFailure(Long mediaId, Long caseDocumentId, Long annotationDocumentId, Long transcriptionDocumentId,
                                                       List<Integer> failureStatesList);
 
 
@@ -527,7 +527,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         WHERE eod.externalLocationType = :externalLocationTypeEntity
         AND eod.updateRetention = :updateRetention
         """)
-    List<Integer> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
+    List<Long> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                boolean updateRetention, Limit limit);
 
     List<ExternalObjectDirectoryEntity> findByManifestFile(String manifestName);
@@ -603,7 +603,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod.status.id = 2
                 AND eod.externalLocationType.id IN (1, 2)
         """)
-    List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByMediaId(@Param("mediaId") Integer mediaId);
+    List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByMediaId(@Param("mediaId") Long mediaId);
 
     @Query("""
         SELECT eod FROM ExternalObjectDirectoryEntity eod
@@ -611,7 +611,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod.status.id = 2
                 AND eod.externalLocationType.id IN (1, 2)
         """)
-    List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByTranscriptionId(@Param("transcriptionDocumentId") Integer id);
+    List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByTranscriptionId(@Param("transcriptionDocumentId") Long id);
 
     @Modifying
     @Query("""

@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class IdRequest<T> {
+public class IdRequest<T, N extends Number> {
 
     private final T payload;
 
-    private final Integer id;
+    private final N id;
 }

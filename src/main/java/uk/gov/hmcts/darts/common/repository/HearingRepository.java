@@ -45,10 +45,10 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     @Query("""
         SELECT h.id FROM HearingEntity h
         JOIN h.events event
-        WHERE event.id = :eventId
+        WHERE event.id = :eveId
         """
     )
-    List<Integer> findHearingIdsByEventId(Integer eventId);
+    List<Integer> findHearingIdsByEventId(Long eveId);
 
     @Query("""
         SELECT h FROM HearingEntity h
@@ -56,7 +56,7 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         WHERE media.id = :mediaId
         """
     )
-    List<HearingEntity> findHearingIdsByMediaId(Integer mediaId);
+    List<HearingEntity> findHearingIdsByMediaId(Long mediaId);
 
     @Query("""
         SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr, CourtCaseEntity case

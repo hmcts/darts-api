@@ -37,7 +37,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
     public void markForDeletion(int batchSize) {
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(durationInUnstructured);
 
-        List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findIdsIn2StorageLocationsBeforeTime(
+        List<Long> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findIdsIn2StorageLocationsBeforeTime(
             EodHelper.storedStatus(),
             EodHelper.storedStatus(),
             EodHelper.inboundLocation(),
@@ -64,12 +64,12 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
         );
     }
 
-    private void logDeletion(List<Integer> audioFileIdsToBeMarked) {
+    private void logDeletion(List<Long> audioFileIdsToBeMarked) {
         //Azure will only log 32k characters, so want to balance between not too many messages in the logs and
         // allowing all the ids to fit without being truncated
-        List<List<Integer>> splitList = ListUtils.partition(audioFileIdsToBeMarked,
+        List<List<Long>> splitList = ListUtils.partition(audioFileIdsToBeMarked,
                                                             MAX_IDS_PER_LOG_MESSAGE);
-        for (List<Integer> eodIds : splitList) {
+        for (List<Long> eodIds : splitList) {
             log.info("Marking EODs to be marked for deletion with ids : {}", eodIds);
         }
     }

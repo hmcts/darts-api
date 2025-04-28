@@ -12,7 +12,7 @@ public class AudioRequestBeingProcessedFromArchiveQueryResultRowMapper implement
 
     @Override
     public AudioRequestBeingProcessedFromArchiveQueryResult mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new AudioRequestBeingProcessedFromArchiveQueryResult(rs.getInt("med_id"));
+        return new AudioRequestBeingProcessedFromArchiveQueryResult(rs.getLong("med_id"));
     }
 
 }

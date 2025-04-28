@@ -142,8 +142,8 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
             if (value != null) {
                 processStringMetadataProperties(metadata, key, value);
             } else {
-                Integer intValue = mapToInt(mediaRecordProperties.getProperty(key), mediaEntity);
-                processIntMetadataProperties(metadata, key, intValue);
+                Long longValue = mapToLong(mediaRecordProperties.getProperty(key), mediaEntity);
+                processIntMetadataProperties(metadata, key, longValue);
             }
         }
     }
@@ -217,11 +217,11 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
         return courtroom;
     }
 
-    private Integer mapToInt(String key, MediaEntity media) {
+    private Long mapToLong(String key, MediaEntity media) {
         return switch (key) {
             case OBJECT_ID_KEY, PARENT_ID_KEY -> media.getId();
-            case CHANNEL_KEY -> media.getChannel();
-            case MAX_CHANNELS_KEY -> media.getTotalChannels();
+            case CHANNEL_KEY -> Long.valueOf(media.getChannel());
+            case MAX_CHANNELS_KEY -> Long.valueOf(media.getTotalChannels());
             default -> null;
         };
     }
@@ -230,7 +230,7 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
         return String.join(CASE_LIST_DELIMITER, caseNumberList);
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId, String rawFilename) {
+    private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Long relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(String.valueOf(relationId));

@@ -87,7 +87,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<List<GetTranscriptionWorkflowsResponse>> adminTranscriptionWorkflowsGet(Integer transcriptionId, Boolean isCurrent) {
+    public ResponseEntity<List<GetTranscriptionWorkflowsResponse>> adminTranscriptionWorkflowsGet(Long transcriptionId, Boolean isCurrent) {
         return ResponseEntity.ok(transcriptionService.getTranscriptionWorkflows(transcriptionId, isCurrent));
     }
 
@@ -113,7 +113,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {APPROVER, TRANSCRIBER},
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
-    public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
+    public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Long transcriptionId,
                                                                            UpdateTranscriptionRequest updateTranscription) {
 
         return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription, false));
@@ -123,7 +123,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<UpdateTranscriptionAdminResponse> updateTranscriptionAdmin(Integer transcriptionId,
+    public ResponseEntity<UpdateTranscriptionAdminResponse> updateTranscriptionAdmin(Long transcriptionId,
                                                                                      UpdateTranscriptionRequest updateTranscriptionRequest) {
         return ResponseEntity.ok(transcriptionService.updateTranscriptionAdmin(transcriptionId, updateTranscriptionRequest, false));
     }
@@ -131,7 +131,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {TRANSCRIBER})
-    public ResponseEntity<AttachTranscriptResponse> attachTranscript(Integer transcriptionId,
+    public ResponseEntity<AttachTranscriptResponse> attachTranscript(Long transcriptionId,
                                                                      MultipartFile transcript) {
         return ResponseEntity.ok(transcriptionService.attachTranscript(transcriptionId, transcript));
     }
@@ -141,7 +141,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, TRANSLATION_QA, RCJ_APPEALS})
-    public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
+    public ResponseEntity<Resource> downloadTranscript(Long transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
         return ResponseEntity.ok()
@@ -192,7 +192,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, APPROVER, REQUESTER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
-    public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(Integer transcriptionId) {
+    public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(Long transcriptionId) {
         return new ResponseEntity<>(
             transcriptionService.getTranscription(transcriptionId),
             HttpStatus.OK
@@ -275,7 +275,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<GetTranscriptionDocumentByIdResponse> getByDocumentId(Integer transcriptionDocumentId) {
+    public ResponseEntity<GetTranscriptionDocumentByIdResponse> getByDocumentId(Long transcriptionDocumentId) {
         return new ResponseEntity<>(adminTranscriptionSearchService.getTranscriptionDocumentById(transcriptionDocumentId),
                                     HttpStatus.OK);
 
@@ -285,7 +285,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<TranscriptionDocumentHideResponse> hideTranscriptionDocumentId(Integer transcriptionDocumentId,
+    public ResponseEntity<TranscriptionDocumentHideResponse> hideTranscriptionDocumentId(Long transcriptionDocumentId,
                                                                                          TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
         TranscriptionDocumentHideResponse response
             = adminTranscriptionSearchService.hideOrShowTranscriptionDocumentById(transcriptionDocumentId, transcriptionDocumentHideRequest);
@@ -296,7 +296,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<AdminApproveDeletionResponse> approveDeletionOfTranscriptionDocumentId(Integer transcriptionDocumentId) {
+    public ResponseEntity<AdminApproveDeletionResponse> approveDeletionOfTranscriptionDocumentId(Long transcriptionDocumentId) {
         var response = adminTranscriptionSearchService.approveDeletionOfTranscriptionDocumentById(transcriptionDocumentId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

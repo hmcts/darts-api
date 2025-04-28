@@ -96,6 +96,7 @@ components:
           example: 1
         event_id:
           type: integer
+          format: int64
           example: 123
         event_name:
           type: string

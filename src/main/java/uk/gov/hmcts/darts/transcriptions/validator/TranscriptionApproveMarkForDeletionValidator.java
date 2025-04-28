@@ -15,7 +15,7 @@ import static java.util.Objects.isNull;
 
 @Component
 @RequiredArgsConstructor
-public class TranscriptionApproveMarkForDeletionValidator implements Validator<Integer> {
+public class TranscriptionApproveMarkForDeletionValidator implements Validator<Long> {
 
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
@@ -24,7 +24,7 @@ public class TranscriptionApproveMarkForDeletionValidator implements Validator<I
 
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
-    public void validate(Integer transcriptionDocumentId) {
+    public void validate(Long transcriptionDocumentId) {
         transcriptionDocumentIdValidator.validate(transcriptionDocumentId);
 
         var objectAdminActionEntityList = objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentId);

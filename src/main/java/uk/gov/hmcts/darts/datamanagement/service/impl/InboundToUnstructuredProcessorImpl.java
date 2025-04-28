@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         }
     }
 
-    private void processInboundToUnstructured(Integer inboundObjectId) {
+    private void processInboundToUnstructured(Long inboundObjectId) {
         try {
             singleElementProcessor.processSingleElement(inboundObjectId);
         } catch (Exception exception) {

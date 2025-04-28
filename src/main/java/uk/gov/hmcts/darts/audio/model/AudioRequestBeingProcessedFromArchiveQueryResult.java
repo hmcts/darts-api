@@ -1,4 +1,4 @@
 package uk.gov.hmcts.darts.audio.model;
 
-public record AudioRequestBeingProcessedFromArchiveQueryResult(Integer mediaId) {
+public record AudioRequestBeingProcessedFromArchiveQueryResult(Long mediaId) {
 }

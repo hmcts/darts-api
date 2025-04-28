@@ -21,7 +21,7 @@ public class TranscriptionsApiImpl implements TranscriptionsApi {
     }
 
     @Override
-    public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscriptionRequest updateTranscription) {
+    public UpdateTranscriptionResponse updateTranscription(Long transcriptionId, UpdateTranscriptionRequest updateTranscription) {
         return transcriptionService.updateTranscription(transcriptionId, updateTranscription, true);
     }
 }

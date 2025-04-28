@@ -11,7 +11,7 @@ public interface AudioService {
 
     List<MediaEntity> getMediaEntitiesByHearingAndChannel(Integer hearingId, Integer channel);
 
-    BinaryData encode(Integer mediaId);
+    BinaryData encode(Long mediaId);
 
     void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId);
 

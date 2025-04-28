@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
@@ -33,13 +34,13 @@ import java.util.List;
 @Setter
 @SQLRestriction("is_deleted = false")
 public class TranscriptionDocumentEntity extends ModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities {
+    implements ConfidenceAware, SoftDelete, HasLongId, HasRetention, CanReturnExternalObjectDirectoryEntities {
 
     @Id
     @Column(name = "trd_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trd_gen")
     @SequenceGenerator(name = "trd_gen", sequenceName = "trd_seq", allocationSize = 1)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tra_id", nullable = false, foreignKey = @ForeignKey(name = "transcription_document_transcription_fk"))
