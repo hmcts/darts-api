@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class MediaCaseDocument extends CreatedModifiedCaseDocument {
 
-    private final Integer id;
+    private final Long id;
     private final String legacyObjectId;
     private final Integer channel;
     private final Integer totalChannels;

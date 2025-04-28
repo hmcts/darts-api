@@ -11,11 +11,11 @@ import java.time.OffsetDateTime;
 @Data
 public class ExternalObjectDirectoryCaseDocument extends CreatedModifiedCaseDocument {
 
-    private final Integer id;
-    private final Integer media;
-    private final Integer transcriptionDocument;
-    private final Integer annotationDocument;
-    private final Integer caseDocument;
+    private final Long id;
+    private final Long media;
+    private final Long transcriptionDocument;
+    private final Long annotationDocument;
+    private final Long caseDocument;
     private final ObjectRecordStatusEntity status;
     private final ExternalLocationTypeEntity externalLocationType;
     private final String externalLocation;
