@@ -111,7 +111,7 @@ public class AudioServiceImpl implements AudioService {
     public void setIsAvailable(List<AudioMetadata> audioMetadataList) {
         if (!isEmpty(audioMetadataList)) {
             List<Long> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
-            List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(
+            List<Long> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(
                 mediaIdList,
                 EodHelper.storedStatus(),
                 EodHelper.unstructuredLocation(), EodHelper.detsLocation());

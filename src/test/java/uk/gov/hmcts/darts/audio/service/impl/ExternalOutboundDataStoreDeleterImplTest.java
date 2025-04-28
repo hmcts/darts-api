@@ -99,8 +99,8 @@ class ExternalOutboundDataStoreDeleterImplTest {
             Collection<TransientObjectDirectoryEntity> deletedItems = deleter.delete(100);
 
             assertThat(deletedItems, containsInAnyOrder(
-                hasProperty("id", is(1)),
-                hasProperty("id", is(21))
+                hasProperty("id", is(1L)),
+                hasProperty("id", is(21L))
             ));
             assertEquals(2, deletedItems.size());
             verify(transientObjectDirectoryRepository)

@@ -77,7 +77,7 @@ public final class DataUtil {
                 .sorted((o1, o2) -> {
                     int compare = o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime());
                     if (compare == 0) {
-                        return compare(o1.getId(), o2.getId());
+                        return compare(o1, o2);
                     }
                     return compare;
                 })

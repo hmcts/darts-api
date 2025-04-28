@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Properties;
 
 import static java.util.Objects.isNull;
@@ -206,7 +207,7 @@ public class CaseArchiveRecordMapperImpl extends BaseArchiveRecordMapper impleme
     private Long mapToLong(String key, CaseDocumentEntity caseDocument) {
         return switch (key) {
             case OBJECT_ID_KEY -> caseDocument.getId();
-            case PARENT_ID_KEY -> Long.valueOf(caseDocument.getCourtCase().getId());
+            case PARENT_ID_KEY -> Optional.ofNullable(caseDocument.getCourtCase().getId()).map(Integer::longValue).orElse(null);
             default -> null;
         };
     }

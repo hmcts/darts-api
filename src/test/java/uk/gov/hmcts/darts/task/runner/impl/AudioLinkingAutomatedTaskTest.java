@@ -83,7 +83,7 @@ class AudioLinkingAutomatedTaskTest {
     @Test
     void runTask_ExecutesSuccessfully() {
 
-        List<Integer> eventIds = List.of(1, 2, 3);
+        List<Long> eventIds = List.of(1L, 2L, 3L);
 
         doReturn(eventIds).when(eventRepository).findAllByEventStatusAndNotCourtrooms(anyInt(), any(), any());
         doNothing().when(eventProcessor).processEvent(any());

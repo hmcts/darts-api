@@ -25,6 +25,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import static java.util.Objects.isNull;
@@ -229,7 +230,7 @@ public class AnnotationArchiveRecordMapperImpl extends BaseArchiveRecordMapper i
     private Long mapToLong(String key, AnnotationDocumentEntity annotationDocument) {
         return switch (key) {
             case OBJECT_ID_KEY -> annotationDocument.getId();
-            case PARENT_ID_KEY -> annotationDocument.getAnnotation().getId().longValue();
+            case PARENT_ID_KEY -> Optional.ofNullable(annotationDocument.getAnnotation().getId()).map(Integer::longValue).orElse(null);
             default -> null;
         };
     }

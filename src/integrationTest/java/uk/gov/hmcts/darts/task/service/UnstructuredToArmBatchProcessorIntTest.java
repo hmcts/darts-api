@@ -250,7 +250,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm(5);
 
         //then
-        List<Integer> foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
+        List<Long> foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
             List.of(medias.getFirst().getId(),
                     medias.get(1).getId(),
                     medias.get(2).getId(),
@@ -266,7 +266,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         ).hasSize(1);
 
 
-        List<Integer> failedMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
+        List<Long> failedMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
             List.of(medias.getFirst().getId(),
                     medias.get(1).getId(),
                     medias.get(2).getId(),

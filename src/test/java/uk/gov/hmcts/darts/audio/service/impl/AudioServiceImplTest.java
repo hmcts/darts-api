@@ -150,7 +150,7 @@ class AudioServiceImplTest {
         audioMetadata3.setId(3L);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata1, audioMetadata2, audioMetadata3);
 
-        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any(), any())).thenReturn(List.of(1, 3));
+        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any(), any())).thenReturn(List.of(1L, 3L));
         eodHelperMocks = new EodHelperMocks();
         eodHelperMocks.simulateInitWithMockedData();
         audioService.setIsAvailable(audioMetadataList);

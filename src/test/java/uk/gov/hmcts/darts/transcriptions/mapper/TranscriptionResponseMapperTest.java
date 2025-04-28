@@ -73,7 +73,8 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.transcriptionDocumentWithAdminAction;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
-import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
+import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulatedInt;
+import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulatedLong;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -622,7 +623,7 @@ class TranscriptionResponseMapperTest {
         String clipId = "clipId";
         String contentObjectId = "contentObjectId";
         String checksum = "checksum";
-        UserAccountEntity lastModifiedBy = withIdsPopulated(minimalUserAccount());
+        UserAccountEntity lastModifiedBy = withIdsPopulatedInt(minimalUserAccount());
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setId(transDocumentId);
@@ -658,7 +659,7 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void includesAdminActionWhenDocumentIsHidden() {
-        var hiddenTranscriptionDocument = withIdsPopulated(transcriptionDocumentWithAdminAction());
+        var hiddenTranscriptionDocument = withIdsPopulatedLong(transcriptionDocumentWithAdminAction());
         var adminActionEntity = hiddenTranscriptionDocument.getAdminActions().getFirst();
 
         var response = transcriptionResponseMapper.getSearchByTranscriptionDocumentId(hiddenTranscriptionDocument);

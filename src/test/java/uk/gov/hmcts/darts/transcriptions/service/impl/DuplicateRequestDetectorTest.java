@@ -71,7 +71,7 @@ class DuplicateRequestDetectorTest {
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1L);
     }
 
     @Test
@@ -85,7 +85,7 @@ class DuplicateRequestDetectorTest {
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1L);
     }
 
     @Test
@@ -99,7 +99,7 @@ class DuplicateRequestDetectorTest {
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1L);
     }
 
     @Test
@@ -113,7 +113,7 @@ class DuplicateRequestDetectorTest {
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1L);
     }
 
     @Test
@@ -127,7 +127,7 @@ class DuplicateRequestDetectorTest {
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1L);
     }
 
     @Test

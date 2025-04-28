@@ -1132,6 +1132,7 @@ components:
         transcription_id:
           type: integer
           example: 1234
+          format: int64
         case_id:
           type: integer
           description: 'The case id'

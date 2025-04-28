@@ -85,10 +85,10 @@ class ExternalInboundDataStoreDeleterImplTest {
             deletedItems,
             containsInAnyOrder(
                 allOf(
-                    Matchers.hasProperty("id", is(1))
+                    Matchers.hasProperty("id", is(1L))
                 ),
                 allOf(
-                    Matchers.hasProperty("id", is(2))
+                    Matchers.hasProperty("id", is(2L))
                 )
             )
         );

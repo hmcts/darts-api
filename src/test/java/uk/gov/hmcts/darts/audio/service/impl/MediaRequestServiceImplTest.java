@@ -84,7 +84,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHE
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
-import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
+import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulatedInt;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -765,7 +765,7 @@ class MediaRequestServiceImplTest {
     @Test
     @SuppressWarnings("java:S1874")
     void auditsWhenOwnerChanged() {
-        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
+        var mediaRequest = withIdsPopulatedInt(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 
@@ -777,7 +777,7 @@ class MediaRequestServiceImplTest {
     @Test
     @SuppressWarnings("java:S1874")
     void doesNotAuditWhenOwnerNotChanged() {
-        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
+        var mediaRequest = withIdsPopulatedInt(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
 
         mediaRequestService.patchMediaRequest(

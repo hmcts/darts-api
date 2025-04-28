@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import static java.util.Objects.isNull;
@@ -220,8 +221,8 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
     private Long mapToLong(String key, MediaEntity media) {
         return switch (key) {
             case OBJECT_ID_KEY, PARENT_ID_KEY -> media.getId();
-            case CHANNEL_KEY -> Long.valueOf(media.getChannel());
-            case MAX_CHANNELS_KEY -> Long.valueOf(media.getTotalChannels());
+            case CHANNEL_KEY -> Optional.ofNullable(media.getChannel()).map(Integer::longValue).orElse(null);
+            case MAX_CHANNELS_KEY -> Optional.ofNullable(media.getTotalChannels()).map(Integer::longValue).orElse(null);
             default -> null;
         };
     }

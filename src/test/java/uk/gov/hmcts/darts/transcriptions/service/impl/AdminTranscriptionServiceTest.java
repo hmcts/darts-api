@@ -161,7 +161,7 @@ class AdminTranscriptionServiceTest {
 
         var searchResponses = adminTranscriptionService.searchTranscriptions(new TranscriptionSearchRequest());
 
-        assertThat(searchResponses).extracting("transcriptionId").containsExactly(1, 2, 3);
+        assertThat(searchResponses).extracting("transcriptionId").containsExactly(1L, 2L, 3L);
         assertThat(searchResponses).extracting("caseNumber").containsExactly("case-number-1", "case-number-2", "case-number-3");
         assertThat(searchResponses).extracting("courthouseId").containsExactly(11, 12, 13);
         assertThat(searchResponses).extracting("hearingDate").containsExactly(
@@ -379,7 +379,7 @@ class AdminTranscriptionServiceTest {
 
     private static TranscriptionSearchResult createTranscription(int seed) {
         return new TranscriptionSearchResult(
-            seed,
+            (long) seed,
             seed + 9,
             "case-number-" + seed,
             seed + 10,

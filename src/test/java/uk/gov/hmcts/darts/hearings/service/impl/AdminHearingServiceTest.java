@@ -140,16 +140,16 @@ class AdminHearingServiceTest {
 
         assertThat(result).hasSize(3);
 
-        assertHearingsAudiosResponseInner(result.get(0), 1, baseTime, baseTime.plusMinutes(1), "file1", 1, 2);
-        assertHearingsAudiosResponseInner(result.get(1), 2, baseTime.plusMinutes(1), baseTime.plusMinutes(3), "file2", 2, 2);
-        assertHearingsAudiosResponseInner(result.get(2), 3, baseTime.plusMinutes(2), baseTime.plusMinutes(4), "file3", 3, 3);
+        assertHearingsAudiosResponseInner(result.get(0), 1L, baseTime, baseTime.plusMinutes(1), "file1", 1, 2);
+        assertHearingsAudiosResponseInner(result.get(1), 2L, baseTime.plusMinutes(1), baseTime.plusMinutes(3), "file2", 2, 2);
+        assertHearingsAudiosResponseInner(result.get(2), 3L, baseTime.plusMinutes(2), baseTime.plusMinutes(4), "file3", 3, 3);
 
         verify(hearingsService).validateHearingExistsElseError(123);
         verify(mediaRepository).findAllCurrentMediaByHearingId(123);
     }
 
     private void assertHearingsAudiosResponseInner(HearingsAudiosResponseInner hearingsAudiosResponseInner,
-                                                   Integer id, OffsetDateTime start, OffsetDateTime end, String filename, Integer channel, Integer totalChannels
+                                                   Long id, OffsetDateTime start, OffsetDateTime end, String filename, Integer channel, Integer totalChannels
     ) {
         assertThat(hearingsAudiosResponseInner.getId()).isEqualTo(id);
         assertThat(hearingsAudiosResponseInner.getStartAt()).isEqualTo(start);

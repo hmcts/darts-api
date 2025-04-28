@@ -165,7 +165,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
         assertNull(metadata.getBf011());
         assertEquals(annotationDocument.getId(), metadata.getBf012());
-        assertEquals(annotationEntity.getId(), metadata.getBf013());
+        assertEquals(annotationEntity.getId().longValue(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertEquals(String.valueOf(annotationDocument.getUploadedBy().getId()), metadata.getBf016());
@@ -188,7 +188,7 @@ class AnnotationArchiveRecordMapperImplTest {
         assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf010());
         assertEquals("2020-10-10T10:11:00.000Z", metadata.getBf011());
         assertEquals(annotationDocument.getId(), metadata.getBf012());
-        assertEquals(annotationEntity.getId(), metadata.getBf013());
+        assertEquals(annotationEntity.getId().longValue(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertEquals(String.valueOf(annotationDocument.getUploadedBy().getId()), metadata.getBf016());

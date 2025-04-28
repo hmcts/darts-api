@@ -86,7 +86,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod.externalLocationType in :externalLocationTypes
             """
     )
-    List<Integer> findMediaIdsByInMediaIdStatusAndType(List<Long> mediaIdList, ObjectRecordStatusEntity status,
+    List<Long> findMediaIdsByInMediaIdStatusAndType(List<Long> mediaIdList, ObjectRecordStatusEntity status,
                                                        ExternalLocationTypeEntity... externalLocationTypes);
 
 

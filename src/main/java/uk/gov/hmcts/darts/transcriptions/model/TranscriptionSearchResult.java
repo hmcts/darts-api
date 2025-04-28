@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 public record TranscriptionSearchResult(
-    Integer id,
+    Long id,
     Integer caseId,
     String caseNumber,
     Integer courthouseId,

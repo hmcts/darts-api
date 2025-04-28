@@ -83,7 +83,7 @@ class RemoveAdminActionComponentTest {
             verify(auditApi).record(AuditActivity.UNHIDE_AUDIO, "Media id: 1, Ticket ref: Some ticket reference, Comments: Some comments");
             verifyNoMoreInteractions(auditApi);
 
-            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1)));
+            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1L)));
             verifyNoMoreInteractions(mediaRepository);
         }
 
@@ -144,8 +144,8 @@ class RemoveAdminActionComponentTest {
             verify(auditApi).record(AuditActivity.UNHIDE_AUDIO, "Media id: 2, Ticket ref: Some ticket reference, Comments: Some comments");
             verifyNoMoreInteractions(auditApi);
 
-            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1)));
-            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(2)));
+            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1L)));
+            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(2L)));
             verifyNoMoreInteractions(mediaRepository);
         }
 
@@ -176,7 +176,7 @@ class RemoveAdminActionComponentTest {
             // Then
             assertEquals(1, mediaEntities.size());
             MediaEntity mediaEntity = mediaEntities.getFirst();
-            assertEquals(1, mediaEntity.getId());
+            assertEquals(1L, mediaEntity.getId());
             assertFalse(mediaEntity.isHidden());
             assertFalse(mediaEntity.getObjectAdminAction().isPresent());
 
@@ -186,7 +186,7 @@ class RemoveAdminActionComponentTest {
             verify(auditApi).record(AuditActivity.UNHIDE_AUDIO, "Media id: 1, Ticket ref: Some ticket reference, Comments: Some comments");
             verifyNoMoreInteractions(auditApi);
 
-            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1)));
+            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1L)));
             verifyNoMoreInteractions(mediaRepository);
         }
 
@@ -206,7 +206,7 @@ class RemoveAdminActionComponentTest {
             // Then
             assertEquals(1, mediaEntities.size());
             MediaEntity mediaEntity = mediaEntities.getFirst();
-            assertEquals(1, mediaEntity.getId());
+            assertEquals(1L, mediaEntity.getId());
             assertFalse(mediaEntity.isHidden());
             assertFalse(mediaEntity.getObjectAdminAction().isPresent());
 
@@ -215,7 +215,7 @@ class RemoveAdminActionComponentTest {
             verify(auditApi).record(AuditActivity.UNHIDE_AUDIO, "Media id: 1, Ticket ref: null, Comments: null");
             verifyNoMoreInteractions(auditApi);
 
-            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1)));
+            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1L)));
             verifyNoMoreInteractions(mediaRepository);
         }
 
@@ -241,7 +241,7 @@ class RemoveAdminActionComponentTest {
             // Then
             assertEquals(1, mediaEntities.size());
             MediaEntity mediaEntity = mediaEntities.getFirst();
-            assertEquals(1, mediaEntity.getId());
+            assertEquals(1L, mediaEntity.getId());
             assertFalse(mediaEntity.isHidden());
             assertFalse(mediaEntity.getObjectAdminAction().isPresent());
 
@@ -251,7 +251,7 @@ class RemoveAdminActionComponentTest {
             verify(auditApi).record(AuditActivity.UNHIDE_AUDIO, "Media id: 1, Ticket ref: Some ticket reference, Comments: Some comments");
             verifyNoMoreInteractions(auditApi);
 
-            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1)));
+            verify(mediaRepository).saveAndFlush(argThat(media -> media.getId().equals(1L)));
             verifyNoMoreInteractions(mediaRepository);
         }
 
