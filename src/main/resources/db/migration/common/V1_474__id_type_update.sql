@@ -1,3 +1,5 @@
+DROP VIEW IF EXISTS hearing_reporting_restrictions;
+
 alter table darts.audit
     alter column aud_id type bigint;
 alter table darts.data_anonymisation
@@ -14,8 +16,6 @@ alter table darts.extobjdir_process_detail
     alter column epd_id type bigint;
 alter table darts.extobjdir_process_detail
     alter column eod_id type bigint;
-alter table darts.hearing_event_ae
-    alter column eve_id type bigint;
 alter table darts.hearing_media_ae
     alter column med_id type bigint;
 alter table darts.media
@@ -34,10 +34,6 @@ alter table darts.object_state_record
     alter column eod_id type bigint;
 alter table darts.object_state_record
     alter column arm_eod_id type bigint;
-
-
-DROP VIEW IF EXISTS hearing_reporting_restrictions;
-
 alter table darts.event
     alter column eve_id type bigint;
 alter table darts.hearing_event_ae
