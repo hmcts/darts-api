@@ -12,7 +12,7 @@ def component = "api"
 def branchesToSync = ['demo', 'perftest', 'ithc']
 
 def secrets = [
-    'darts-stg': [
+    'darts-${env}': [
         secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
         secret('app-insights-connection-string', 'APPLICATIONINSIGHTS_CONNECTION_STRING'),
         secret('AzureAdB2CTenantId', 'AAD_B2C_TENANT_ID'),
@@ -99,6 +99,10 @@ def determineDevEnvironmentDeployment() {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
+    onPR {
+        Object obj = secrets.remove('darts-${env}');
+        map.put('darts-stg', obj);
+    }
     enableDbMigration(product)
     loadVaultSecrets(secrets)
     enableSlackNotifications('#darts-builds')
