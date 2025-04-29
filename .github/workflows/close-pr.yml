@@ -14,8 +14,8 @@ jobs:
     steps:
       - name: Remove Internal AD callback URLs
         run: |
-          authCallbackUrl="https://darts-portal-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/internal/callback"
-          logoutUrl="https://darts-portal-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/internal/logout-callback"
+          authCallbackUrl="https://darts-portal-api-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/internal/callback"
+          logoutUrl="https://darts-portal-api-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/internal/logout-callback"
           targetAppName="darts-stg"
           appId="dec3be30-6325-4335-b898-eb01985d6c90"
 
@@ -47,8 +47,8 @@ jobs:
     steps:
       - name: Remove External AD B2C callback URLs
         run: |
-          authCallbackUrl="https://darts-portal-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/callback"
-          logoutUrl="https://darts-portal-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/logout-callback"
+          authCallbackUrl="https://darts-portal-api-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/callback"
+          logoutUrl="https://darts-portal-api-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/logout-callback"
           targetAppName="darts"
           appId="363c11cb-48b9-44bf-9d06-9a3973f6f413"
 
