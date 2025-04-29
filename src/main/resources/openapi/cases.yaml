@@ -635,8 +635,6 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/AdminCaseAudioResponseItem'
-                    description: Returned if no page_limit or page_number is provided
                   - $ref: './common.yaml#/components/schemas/paginated_list_common'
                     description: Returned if page_limit or page_number is provided
                     properties: #Fix data tab in spec
@@ -1196,6 +1194,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           example: 1
           description: Unique media identifier
         start_at:
