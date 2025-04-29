@@ -12,7 +12,7 @@ def component = "api"
 def branchesToSync = ['demo', 'perftest', 'ithc']
 
 def secrets = [
-    'darts-${env}': [
+    'darts-stg': [
         secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
         secret('app-insights-connection-string', 'APPLICATIONINSIGHTS_CONNECTION_STRING'),
         secret('AzureAdB2CTenantId', 'AAD_B2C_TENANT_ID'),
