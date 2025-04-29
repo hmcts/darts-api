@@ -100,8 +100,8 @@ GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
     onPR {
-        Object obj = secrets.remove('darts-${env}');
-        map.put('darts-stg', obj);
+        Object obj = secrets.remove('darts-${env}')
+        map.put('darts-stg', obj)
     }
     enableDbMigration(product)
     loadVaultSecrets(secrets)
