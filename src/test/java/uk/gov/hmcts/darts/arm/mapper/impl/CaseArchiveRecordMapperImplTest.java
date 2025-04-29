@@ -162,7 +162,7 @@ class CaseArchiveRecordMapperImplTest {
         assertEquals(T_10_30_00_000_Z, metadata.getBf010());
         assertNull(metadata.getBf011());
         assertEquals(caseDocument.getId(), metadata.getBf012());
-        assertEquals(courtCase.getId(), metadata.getBf013());
+        assertEquals(courtCase.getId().longValue(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertNull(metadata.getBf016());
@@ -185,7 +185,7 @@ class CaseArchiveRecordMapperImplTest {
         assertEquals(T_10_30_00_000_Z, metadata.getBf010());
         assertEquals(T_10_30_00_000_Z, metadata.getBf011());
         assertEquals(caseDocument.getId(), metadata.getBf012());
-        assertEquals(courtCase.getId(), metadata.getBf013());
+        assertEquals(courtCase.getId().longValue(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertNull(metadata.getBf016());
