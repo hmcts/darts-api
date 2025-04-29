@@ -10,7 +10,7 @@ def kv = product + '-ss-kv'
 def secrets = [
         'darts-${env}': [
                 secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
-                secret('app-insights-connection-string', 'app-insights-connection-string'),
+                secret('app-insights-connection-string', 'APPLICATIONINSIGHTS_CONNECTION_STRING'),
                 secret('AzureAdB2CTenantId', 'AAD_B2C_TENANT_ID'),
                 secret('AzureAdB2CClientId', 'AAD_B2C_CLIENT_ID'),
                 secret('AzureAdB2CClientSecret', 'AAD_B2C_CLIENT_SECRET'),

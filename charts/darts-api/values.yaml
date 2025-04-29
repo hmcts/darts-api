@@ -25,7 +25,7 @@ java:
         - name: AzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET
         - name: app-insights-connection-string
-          alias: app-insights-connection-string
+          alias: APPLICATIONINSIGHTS_CONNECTION_STRING
         - name: AzureAdB2CFuncTestROPCUsername
           alias: FUNC_TEST_ROPC_USERNAME
         - name: AzureAdB2CFuncTestROPCPassword
@@ -149,7 +149,7 @@ function:
         - name: AzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET
         - name: app-insights-connection-string
-          alias: app-insights-connection-string
+          alias: APPLICATIONINSIGHTS_CONNECTION_STRING
         - name: AzureAdB2CFuncTestROPCUsername
           alias: FUNC_TEST_ROPC_USERNAME
         - name: AzureAdB2CFuncTestROPCPassword
