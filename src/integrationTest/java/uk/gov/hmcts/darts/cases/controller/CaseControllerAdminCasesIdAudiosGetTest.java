@@ -164,7 +164,7 @@ class CaseControllerAdminCasesIdAudiosGetTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void adminCasesIdAudiosGet_ShouldReturnForbiddenError() throws Exception {
+    void adminCasesIdAudiosGet_ShouldReturnForbiddenError_WhenUserIsNotAuthenticated() throws Exception {
         // given
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "channel")

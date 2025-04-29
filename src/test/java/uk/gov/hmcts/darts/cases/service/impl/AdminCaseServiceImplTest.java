@@ -51,7 +51,7 @@ class AdminCaseServiceImplTest {
         courtCaseEntity.setId(222);
 
         MediaEntity mediaEntity = PersistableFactory.getMediaTestData().someMinimal();
-        mediaEntity.setId(111);
+        mediaEntity.setId(111l);
 
         MediaLinkedCaseEntity mediaLinkedCase = new MediaLinkedCaseEntity();
         mediaLinkedCase.setCourtCase(courtCaseEntity);
@@ -93,19 +93,19 @@ class AdminCaseServiceImplTest {
         hearing1.setCourtCase(courtCaseEntity);
 
         MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
-        media1.setId(111);
+        media1.setId(111l);
         media1.setChannel(1);
         media1.setCourtroom(hearing1.getCourtroom());
         media1.setIsCurrent(true);
 
         MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
-        media2.setId(222);
+        media2.setId(222l);
         media2.setChannel(2);
         media2.setCourtroom(hearing1.getCourtroom());
         media2.setIsCurrent(true);
 
         MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
-        media3.setId(333);
+        media3.setId(333l);
         media3.setChannel(3);
         media3.setCourtroom(hearing1.getCourtroom());
         media3.setIsCurrent(true);
