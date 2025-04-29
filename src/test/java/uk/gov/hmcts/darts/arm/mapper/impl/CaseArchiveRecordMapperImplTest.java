@@ -56,6 +56,7 @@ class CaseArchiveRecordMapperImplTest {
         externalObjectDirectory = testEod.getEntity();
         caseDocument = testEod.getCaseDocument();
         courtCase = testEod.getCaseDocument().getCourtCase();
+        courtCase.setId(123);
         caseDocument.setFileName("test-file.txt");
         caseDocument.setFileType("text/plain");
         caseDocument.setCreatedDateTime(OffsetDateTime.parse("2025-01-23T10:30:00Z"));
