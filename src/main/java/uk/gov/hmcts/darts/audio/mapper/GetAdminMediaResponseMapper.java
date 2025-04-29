@@ -134,8 +134,10 @@ public class GetAdminMediaResponseMapper {
 
     public AdminVersionedMediaResponse mapAdminVersionedMediaResponse(MediaEntity mediaEntity, List<MediaEntity> mediaVersions) {
         AdminVersionedMediaResponse response = new AdminVersionedMediaResponse();
-        response.setMediaObjectId(mediaEntity.getLegacyObjectId());
-        response.setCurrentVersion(mapAdminMediaVersionResponse(mediaEntity));
+        if (mediaEntity != null) {
+            response.setMediaObjectId(mediaEntity.getLegacyObjectId());
+            response.setCurrentVersion(mapAdminMediaVersionResponse(mediaEntity));
+        }
         response.setPreviousVersions(
             mediaVersions.stream()
                 .map(this::mapAdminMediaVersionResponse)
