@@ -1,5 +1,5 @@
 {
-  "connectionString": "${file:/mnt/secrets/darts/app-insights-connection-string}",
+  "connectionString": "${APPLICATIONINSIGHTS_CONNECTION_STRING}",
   "role": {
     "name": "${ROLE_NAME}"
   },
