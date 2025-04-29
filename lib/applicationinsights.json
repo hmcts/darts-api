@@ -3,9 +3,6 @@
   "role": {
     "name": "${ROLE_NAME}"
   },
-  "customDimensions": {
-    "mytag": "my value"
-  },
   "sampling": {
     "overrides": [
       {
