@@ -106,6 +106,10 @@ withPipeline(type, product, component) {
     disableCleanupOfHelmReleaseOnFailure()
     env.INTEGRATION_TEST_LOGGING_LEVEL = "off"
 
+    stageWithAgent('Darts Test', product) {
+
+    }
+
     afterAlways('test') {
         builder.gradle('jacocoTestReport')
 
