@@ -150,6 +150,7 @@ class CaseArchiveRecordMapperImplTest {
         assertMetadataAllProperties(result.getCaseCreateArchiveRecordOperation().getRecordMetadata());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required for Sonar
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals(CASE, metadata.getBf001());
         assertEquals(CASE_1, metadata.getBf002());
@@ -173,6 +174,7 @@ class CaseArchiveRecordMapperImplTest {
         assertNull(metadata.getBf020());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required for Sonar
     private void assertMetadataAllProperties(RecordMetadata metadata) {
         assertEquals(CASE, metadata.getBf001());
         assertEquals(CASE_1, metadata.getBf002());
