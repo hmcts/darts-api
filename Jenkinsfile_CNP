@@ -79,7 +79,7 @@ def determineDevEnvironmentDeployment() {
     def githubApi = new GithubAPI(this)
     if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_keep_helm")) {
         for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "enable_darts_") ) {
-            if (label == "enable_darts_portal") {
+            if (label ==~ "enable_darts_portal.*") {
                 env.DEV_ENABLE_DARTS_PORTAL = true
                 env.DEV_DARTS_PORTAL_URL = "https://darts-portal-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
 
