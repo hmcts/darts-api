@@ -1,19 +1,32 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -39,7 +52,17 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
     private static final URI ENDPOINT_URI = URI.create("/transcriptions");
 
     @Autowired
+    private GivenBuilder given;
+
+    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private TranscriptionUrgencyRepository transcriptionUrgencyRepository;
+    @Autowired
+    private SecurityGroupRepository securityGroupRepository;
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     private UserAccountEntity testUser;
     private UserAccountEntity systemUser;
@@ -54,10 +77,149 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+
+    }
+
+    @Test
+    void getYourTranscripts_ShouldReturnRequesterOnly_WithTranscriptionUrgency() throws Exception {
+        // creates a transcription for a different user that should not be returned
+        var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(systemUser)
+            .createdById(systemUser.getId())
+            .lastModifiedById(systemUser.getId())
+            .build().getEntity();
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), REQUESTED, transcriptionForOtherUser);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionForOtherUser);
+
+        TranscriptionUrgencyEntity urgencyEntity = transcriptionUrgencyRepository.findById(TranscriptionUrgencyEnum.STANDARD.getId()).orElseThrow();
+        var transcriptionByRequester = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+        transcriptionByRequester.setTranscriptionUrgency(urgencyEntity);
+
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionByRequester);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionByRequester);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header("user_id", testUser.getId());
+
+        var courtCase = transcriptionByRequester.getCourtCase();
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name",
+                                is(transcriptionByRequester.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id",
+                                is(TranscriptionUrgencyEnum.STANDARD.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
+
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
+
+    @Test
+    void getYourTranscripts_ShouldReturnMultipleRequesterOnly_WithNoTranscriptionUrgency() throws Exception {
+        // creates a transcription for a different user that should not be returned
+        var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(systemUser)
+            .createdById(systemUser.getId())
+            .lastModifiedById(systemUser.getId())
+            .build().getEntity();
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), REQUESTED, transcriptionForOtherUser);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionForOtherUser);
+
+        var transcriptionByRequester1 = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionByRequester1);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionByRequester1);
+
+        var transcriptionByRequester2 = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-24T09:00:00Z"), REQUESTED, transcriptionByRequester2);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-24T09:00:00Z"), AWAITING_AUTHORISATION, transcriptionByRequester2);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header("user_id", testUser.getId());
+        requestBuilder.content("");
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester2.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-24T09:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
+
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester1.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-20T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.priority_order").doesNotExist())
+
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
+
+    @Test
+    void getYourTranscripts_ShouldNotReturnHiddenTranscriptionRequests() throws Exception {
+        // creates a transcription for a different user that should not be returned
+        var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(systemUser)
+            .createdById(systemUser.getId())
+            .lastModifiedById(systemUser.getId())
+            .build().getEntity();
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), REQUESTED, transcriptionForOtherUser);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionForOtherUser);
+
+        var hiddenTranscription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+        hiddenTranscription.setHideRequestFromRequestor(true);
+        //dartsPersistence.save(hiddenTranscription);
+
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, hiddenTranscription);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, hiddenTranscription);
+
+        var transcriptionByRequester = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-24T09:00:00Z"), REQUESTED, transcriptionByRequester);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-24T09:00:00Z"), AWAITING_AUTHORISATION, transcriptionByRequester);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header("user_id", testUser.getId());
+        requestBuilder.content("");
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-24T09:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
+
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
     @Test
     void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenRevertedToRequested() throws Exception {
+
         var transcriptionEntity = PersistableFactory.getTranscriptionTestData().minimalTranscription();
 
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionEntity);
@@ -120,6 +282,39 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
     }
 
+    @Disabled("Disabled until we can get the test user to be an approver")
+    @Test
+    void getYourTranscripts_ShouldReturnApprover() throws Exception {
+        //var testUser = given.anAuthenticatedUserWithGlobalAccessAndRole(APPROVER);
+
+        TranscriptionUrgencyEntity urgencyEntity = transcriptionUrgencyRepository.findById(TranscriptionUrgencyEnum.STANDARD.getId()).orElseThrow();
+        var transcriptionByRequester = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+        transcriptionByRequester.setTranscriptionUrgency(urgencyEntity);
+
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionByRequester);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionByRequester);
+//        setupUserAccountAndSecurityGroup(transcriptionByRequester.getCourtCase().getCourthouse(), testUser, APPROVER);
+
+        var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(systemUser)
+            .createdById(systemUser.getId())
+            .lastModifiedById(systemUser.getId())
+            .build().getEntity();
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), REQUESTED, transcriptionForOtherUser);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionForOtherUser);
+//        setupUserAccountAndSecurityGroup(transcriptionForOtherUser.getCourtCase().getCourthouse(), testUser, APPROVER);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header("user_id", testUser.getId());
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
+
+            .andExpect(jsonPath("$.approver_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(transcriptionForOtherUser.getId())));
+    }
+
     private void createTranscriptionWorkflow(UserAccountEntity userAccount, OffsetDateTime dateTime, TranscriptionStatusEnum transcriptionStatusEnum,
                                              TranscriptionEntity transcriptionEntity) {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity =
@@ -132,4 +327,39 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
         dartsPersistence.save(transcriptionEntity);
     }
 
+    private SecurityGroupEntity createAndSaveSecurityGroup(UserAccountEntity user, String name, SecurityRoleEnum securityRoleEnum, boolean isGlobalAccess) {
+        SecurityGroupEntity groupEntity = new SecurityGroupEntity();
+        groupEntity.setGroupName(name);
+        groupEntity.setGlobalAccess(isGlobalAccess);
+        groupEntity.setDisplayState(true);
+        groupEntity.setDisplayName("Some name");
+        groupEntity.setUseInterpreter(false);
+        groupEntity.setCreatedBy(user);
+        groupEntity.setLastModifiedBy(user);
+        groupEntity.setCreatedDateTime(OffsetDateTime.now());
+        groupEntity.setLastModifiedDateTime(OffsetDateTime.now());
+
+        SecurityRoleRepository roleRepository = dartsPersistence.getSecurityRoleRepository();
+        SecurityRoleEntity roleEntity = roleRepository.findByRoleName(securityRoleEnum.name())
+            .orElseThrow();
+        roleRepository.save(roleEntity);
+
+        groupEntity.setSecurityRoleEntity(roleEntity);
+        return dartsPersistence.getSecurityGroupRepository()
+            .save(groupEntity);
+    }
+
+    private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse, UserAccountEntity user, SecurityRoleEnum role) {
+        var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(role, courthouse);
+        securityGroup.setGlobalAccess(false);
+        securityGroup.setUseInterpreter(false);
+        assignSecurityGroupToUser(user, securityGroup);
+    }
+
+    private void assignSecurityGroupToUser(UserAccountEntity user, SecurityGroupEntity securityGroup) {
+        securityGroup.getUsers().add(user);
+        user.getSecurityGroupEntities().add(securityGroup);
+        securityGroupRepository.save(securityGroup);
+        userAccountRepository.save(user);
+    }
 }
