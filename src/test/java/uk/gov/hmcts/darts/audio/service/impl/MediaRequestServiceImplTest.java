@@ -791,7 +791,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    void addAudioRequest_handHeldCourtroomWithMoreThenMaxHandheldAudios_shouldError() {
+    void addAudioRequest_handHeldCourtroomWithMoreThanMaxHandheldAudios_shouldError() {
         when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers()).thenReturn(List.of("123", "321"));
         when(audioConfigurationProperties.getMaxHandheldAudioFiles()).thenReturn(3);
         doReturn(false).when(mediaRequestService).isUserDuplicateAudioRequest(any(), any(), any());
@@ -885,7 +885,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    void addAudioRequest_nonHandHeldCourtroomWithMoreThenMaxHandheldAudios_shouldNotError() {
+    void addAudioRequest_nonHandHeldCourtroomWithMoreThanMaxHandheldAudios_shouldNotError() {
         when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers()).thenReturn(List.of("123", "321"));
         doReturn(false).when(mediaRequestService).isUserDuplicateAudioRequest(any(), any(), any());
         CourtroomEntity courtroomEntity = new CourtroomEntity();
