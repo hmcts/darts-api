@@ -143,7 +143,7 @@ darts-portal:
           - darts-portal-session-secret
     environment:
       ALLOW_CONFIG_MUTATIONS: true
-      DARTS_PORTAL_URL: "https://darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+      DARTS_PORTAL_URL: "https://darts-portal-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
       DARTS_API_URL: "https://darts-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
       DARTS_AZUREAD_B2C_ORIGIN_HOST: https://hmctsstgextid.b2clogin.com
       DARTS_AZUREAD_B2C_HOSTNAME: https://darts.staging.apps.hmcts.net
