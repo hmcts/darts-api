@@ -83,8 +83,8 @@ def determineDevEnvironmentDeployment() {
                 env.DEV_ENABLE_DARTS_PORTAL = true
                 env.DEV_DARTS_PORTAL_URL = "https://darts-portal-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
 
-                if(label ==~ 'enable_darts_portal_pr-.*') {
-                    env.DEV_DARTS_PORTAL_IMAGE_SUFFIX = label.replace("enable_darts_portal_", "")
+                if(label ==~ 'enable_darts_portal:pr-.*') {
+                    env.DEV_DARTS_PORTAL_IMAGE_SUFFIX = label.replace("enable_darts_portal:", "")
                     echo "DARTS portal image suffix: ${env.DEV_DARTS_PORTAL_IMAGE_SUFFIX}"
                 }
                 echo "Deploying DARTS portal (${env.DEV_DARTS_PORTAL_IMAGE_SUFFIX}) instance in PR environment"
