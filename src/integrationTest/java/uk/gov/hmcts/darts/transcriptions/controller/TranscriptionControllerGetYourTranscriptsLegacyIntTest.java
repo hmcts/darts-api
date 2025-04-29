@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -106,7 +105,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
             .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name",
@@ -151,7 +150,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester2.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester2.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-24T09:00:00Z")))
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
@@ -161,7 +160,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
 
-            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester1.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester1.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-20T13:00:00Z")))
             .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
@@ -204,7 +203,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-24T09:00:00Z")))
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
@@ -235,7 +234,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(1)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
             .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
@@ -281,40 +280,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
             .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts", is("2025-03-23T14:00:00Z")));
 
     }
-
-    @Disabled("Disabled until we can get the test user to be an approver")
-    @Test
-    void getYourTranscripts_ShouldReturnApprover() throws Exception {
-        //var testUser = given.anAuthenticatedUserWithGlobalAccessAndRole(APPROVER);
-
-        TranscriptionUrgencyEntity urgencyEntity = transcriptionUrgencyRepository.findById(TranscriptionUrgencyEnum.STANDARD.getId()).orElseThrow();
-        var transcriptionByRequester = PersistableFactory.getTranscriptionTestData().minimalTranscription();
-        transcriptionByRequester.setTranscriptionUrgency(urgencyEntity);
-
-        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionByRequester);
-        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionByRequester);
-//        setupUserAccountAndSecurityGroup(transcriptionByRequester.getCourtCase().getCourthouse(), testUser, APPROVER);
-
-        var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
-            .requestedBy(systemUser)
-            .createdById(systemUser.getId())
-            .lastModifiedById(systemUser.getId())
-            .build().getEntity();
-        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), REQUESTED, transcriptionForOtherUser);
-        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionForOtherUser);
-//        setupUserAccountAndSecurityGroup(transcriptionForOtherUser.getCourtCase().getCourthouse(), testUser, APPROVER);
-
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
-            .header("user_id", testUser.getId());
-
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-
-            .andExpect(jsonPath("$.approver_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(transcriptionForOtherUser.getId())));
-    }
-
+    
     private void createTranscriptionWorkflow(UserAccountEntity userAccount, OffsetDateTime dateTime, TranscriptionStatusEnum transcriptionStatusEnum,
                                              TranscriptionEntity transcriptionEntity) {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity =
