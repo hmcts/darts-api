@@ -71,6 +71,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 def determineDevEnvironmentDeployment() {
     env.DEV_ENABLE_DARTS_PORTAL = false
     env.DEV_DARTS_PORTAL_URL = "https://darts.staging.apps.hmcts.net"
+    env.DEV_DARTS_PORTAL_IMAGE_SUFFIX = "latest"
 
     echo "1 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
     echo "1 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
@@ -81,7 +82,12 @@ def determineDevEnvironmentDeployment() {
             if (label == "enable_darts_portal") {
                 env.DEV_ENABLE_DARTS_PORTAL = true
                 env.DEV_DARTS_PORTAL_URL = "https://darts-portal-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
-                echo "Deploying DARTS portal instance in PR environment"
+
+                if(label ==~ 'enable_darts_portal_PR.*') {
+                    env.DEV_DARTS_PORTAL_IMAGE_SUFFIX = label.replace("enable_darts_portal_", "")
+                    echo "DARTS portal image suffix: ${env.DEV_DARTS_PORTAL_IMAGE_SUFFIX}"
+                }
+                echo "Deploying DARTS portal (${env.DEV_DARTS_PORTAL_IMAGE_SUFFIX}) instance in PR environment"
             }
         }
     }

@@ -133,7 +133,7 @@ darts-portal:
   enabled: ${DEV_ENABLE_DARTS_PORTAL}
   nodejs:
     applicationPort: 3000
-    image: 'sdshmctspublic.azurecr.io/darts/portal:latest'
+    image: 'sdshmctspublic.azurecr.io/darts/portal:${DEV_DARTS_PORTAL_IMAGE_SUFFIX}'
     ingressHost: "darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
     aadIdentityName: darts
     keyVaults:
