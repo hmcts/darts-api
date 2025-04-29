@@ -7,21 +7,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
-import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -280,7 +274,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
             .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts", is("2025-03-23T14:00:00Z")));
 
     }
-    
+
     private void createTranscriptionWorkflow(UserAccountEntity userAccount, OffsetDateTime dateTime, TranscriptionStatusEnum transcriptionStatusEnum,
                                              TranscriptionEntity transcriptionEntity) {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity =
@@ -293,39 +287,4 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
         dartsPersistence.save(transcriptionEntity);
     }
 
-    private SecurityGroupEntity createAndSaveSecurityGroup(UserAccountEntity user, String name, SecurityRoleEnum securityRoleEnum, boolean isGlobalAccess) {
-        SecurityGroupEntity groupEntity = new SecurityGroupEntity();
-        groupEntity.setGroupName(name);
-        groupEntity.setGlobalAccess(isGlobalAccess);
-        groupEntity.setDisplayState(true);
-        groupEntity.setDisplayName("Some name");
-        groupEntity.setUseInterpreter(false);
-        groupEntity.setCreatedBy(user);
-        groupEntity.setLastModifiedBy(user);
-        groupEntity.setCreatedDateTime(OffsetDateTime.now());
-        groupEntity.setLastModifiedDateTime(OffsetDateTime.now());
-
-        SecurityRoleRepository roleRepository = dartsPersistence.getSecurityRoleRepository();
-        SecurityRoleEntity roleEntity = roleRepository.findByRoleName(securityRoleEnum.name())
-            .orElseThrow();
-        roleRepository.save(roleEntity);
-
-        groupEntity.setSecurityRoleEntity(roleEntity);
-        return dartsPersistence.getSecurityGroupRepository()
-            .save(groupEntity);
-    }
-
-    private void setupUserAccountAndSecurityGroup(CourthouseEntity courthouse, UserAccountEntity user, SecurityRoleEnum role) {
-        var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(role, courthouse);
-        securityGroup.setGlobalAccess(false);
-        securityGroup.setUseInterpreter(false);
-        assignSecurityGroupToUser(user, securityGroup);
-    }
-
-    private void assignSecurityGroupToUser(UserAccountEntity user, SecurityGroupEntity securityGroup) {
-        securityGroup.getUsers().add(user);
-        user.getSecurityGroupEntities().add(securityGroup);
-        securityGroupRepository.save(securityGroup);
-        userAccountRepository.save(user);
-    }
 }
