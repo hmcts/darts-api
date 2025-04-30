@@ -32,7 +32,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
            JOIN he.medias me
            WHERE he.id = :hearingId
            AND me.isCurrent = true
-           AND (me.isHidden = false or me.isHidden = :includeHidden)
+           AND (me.isHidden = false OR me.isHidden = :includeHidden)
            ORDER BY me.start
         """)
     List<MediaEntity> findAllCurrentMediaByHearingId(Integer hearingId, boolean includeHidden);
