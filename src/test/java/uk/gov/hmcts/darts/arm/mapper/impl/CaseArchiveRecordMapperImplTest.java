@@ -56,6 +56,7 @@ class CaseArchiveRecordMapperImplTest {
         externalObjectDirectory = testEod.getEntity();
         caseDocument = testEod.getCaseDocument();
         courtCase = testEod.getCaseDocument().getCourtCase();
+        courtCase.setId(123);
         caseDocument.setFileName("test-file.txt");
         caseDocument.setFileType("text/plain");
         caseDocument.setCreatedDateTime(OffsetDateTime.parse("2025-01-23T10:30:00Z"));
@@ -149,6 +150,7 @@ class CaseArchiveRecordMapperImplTest {
         assertMetadataAllProperties(result.getCaseCreateArchiveRecordOperation().getRecordMetadata());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required for Sonar
     private void assertMetadataSuccess(RecordMetadata metadata) {
         assertEquals(CASE, metadata.getBf001());
         assertEquals(CASE_1, metadata.getBf002());
@@ -162,7 +164,7 @@ class CaseArchiveRecordMapperImplTest {
         assertEquals(T_10_30_00_000_Z, metadata.getBf010());
         assertNull(metadata.getBf011());
         assertEquals(caseDocument.getId(), metadata.getBf012());
-        assertEquals(courtCase.getId(), metadata.getBf013());
+        assertEquals(courtCase.getId().longValue(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertNull(metadata.getBf016());
@@ -172,6 +174,7 @@ class CaseArchiveRecordMapperImplTest {
         assertNull(metadata.getBf020());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBoxing")//Required for Sonar
     private void assertMetadataAllProperties(RecordMetadata metadata) {
         assertEquals(CASE, metadata.getBf001());
         assertEquals(CASE_1, metadata.getBf002());
@@ -185,7 +188,7 @@ class CaseArchiveRecordMapperImplTest {
         assertEquals(T_10_30_00_000_Z, metadata.getBf010());
         assertEquals(T_10_30_00_000_Z, metadata.getBf011());
         assertEquals(caseDocument.getId(), metadata.getBf012());
-        assertEquals(courtCase.getId(), metadata.getBf013());
+        assertEquals(courtCase.getId().longValue(), metadata.getBf013());
         assertNull(metadata.getBf014());
         assertNull(metadata.getBf015());
         assertNull(metadata.getBf016());

@@ -42,19 +42,19 @@ class GetAdminMediaResponseMapperTest {
         MediaEntity mediaEntity = mock(MediaEntity.class);
         when(mediaEntity.getLegacyObjectId()).thenReturn(legacyObjectId);
 
-        MediaEntity versioendMediaEntity1 = mock(MediaEntity.class);
-        MediaEntity versioendMediaEntity2 = mock(MediaEntity.class);
-        MediaEntity versioendMediaEntity3 = mock(MediaEntity.class);
-        List<MediaEntity> versionedMediaEntities = List.of(versioendMediaEntity1, versioendMediaEntity2, versioendMediaEntity3);
+        MediaEntity versionedMediaEntity1 = mock(MediaEntity.class);
+        MediaEntity versionedMediaEntity2 = mock(MediaEntity.class);
+        MediaEntity versionedMediaEntity3 = mock(MediaEntity.class);
+        List<MediaEntity> versionedMediaEntities = List.of(versionedMediaEntity1, versionedMediaEntity2, versionedMediaEntity3);
 
         AdminMediaVersionResponse mediaEntityVersionedResponse = mock(AdminMediaVersionResponse.class);
         AdminMediaVersionResponse versionedMediaEntityVersionedResponse1 = mock(AdminMediaVersionResponse.class);
         AdminMediaVersionResponse versionedMediaEntityVersionedResponse3 = mock(AdminMediaVersionResponse.class);
 
         doReturn(mediaEntityVersionedResponse).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(mediaEntity);
-        doReturn(versionedMediaEntityVersionedResponse1).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versioendMediaEntity1);
-        doReturn(null).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versioendMediaEntity2);
-        doReturn(versionedMediaEntityVersionedResponse3).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versioendMediaEntity3);
+        doReturn(versionedMediaEntityVersionedResponse1).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versionedMediaEntity1);
+        doReturn(null).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versionedMediaEntity2);
+        doReturn(versionedMediaEntityVersionedResponse3).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versionedMediaEntity3);
 
 
         AdminVersionedMediaResponse adminVersionedMediaResponse = getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(mediaEntity,
@@ -63,6 +63,31 @@ class GetAdminMediaResponseMapperTest {
         assertThat(adminVersionedMediaResponse.getMediaObjectId()).isEqualTo(legacyObjectId);
         assertThat(adminVersionedMediaResponse.getCurrentVersion()).isEqualTo(mediaEntityVersionedResponse);
         //versionedMediaEntityVersionedResponse2 should be excluded as it is null
+        assertThat(adminVersionedMediaResponse.getPreviousVersions())
+            .containsExactly(versionedMediaEntityVersionedResponse1,
+                             versionedMediaEntityVersionedResponse3);
+    }
+
+    @Test
+    void mapAdminMediaVersionResponse_currentVersionDoesNotExist_shouldMapAdminMediaVersionResponse() {
+
+        MediaEntity versionedMediaEntity1 = mock(MediaEntity.class);
+        MediaEntity versionedMediaEntity2 = mock(MediaEntity.class);
+        MediaEntity versionedMediaEntity3 = mock(MediaEntity.class);
+        List<MediaEntity> versionedMediaEntities = List.of(versionedMediaEntity1, versionedMediaEntity2, versionedMediaEntity3);
+
+        AdminMediaVersionResponse versionedMediaEntityVersionedResponse1 = mock(AdminMediaVersionResponse.class);
+        AdminMediaVersionResponse versionedMediaEntityVersionedResponse3 = mock(AdminMediaVersionResponse.class);
+
+        doReturn(versionedMediaEntityVersionedResponse1).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versionedMediaEntity1);
+        doReturn(null).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versionedMediaEntity2);
+        doReturn(versionedMediaEntityVersionedResponse3).when(getAdminMediaResponseMapper).mapAdminMediaVersionResponse(versionedMediaEntity3);
+
+        AdminVersionedMediaResponse adminVersionedMediaResponse = getAdminMediaResponseMapper.mapAdminVersionedMediaResponse(null,
+                                                                                                                             versionedMediaEntities);
+        assertThat(adminVersionedMediaResponse).isNotNull();
+        assertThat(adminVersionedMediaResponse.getMediaObjectId()).isNull();
+        assertThat(adminVersionedMediaResponse.getCurrentVersion()).isNull();
         assertThat(adminVersionedMediaResponse.getPreviousVersions())
             .containsExactly(versionedMediaEntityVersionedResponse1,
                              versionedMediaEntityVersionedResponse3);

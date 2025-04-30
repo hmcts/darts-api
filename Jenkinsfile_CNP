@@ -71,17 +71,23 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 def determineDevEnvironmentDeployment() {
     env.DEV_ENABLE_DARTS_PORTAL = false
     env.DEV_DARTS_PORTAL_URL = "https://darts.staging.apps.hmcts.net"
+    env.DEV_DARTS_PORTAL_IMAGE_SUFFIX = "latest"
 
     echo "1 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
     echo "1 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
 
     def githubApi = new GithubAPI(this)
     if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_keep_helm")) {
-        for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "enable_darts_") ) {
-            if (label == "enable_darts_portal") {
+        for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "enable_darts_")) {
+            if (label ==~ /enable_darts_portal.*/) {
                 env.DEV_ENABLE_DARTS_PORTAL = true
-                env.DEV_DARTS_PORTAL_URL = "https://darts-portal-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
-                echo "Deploying DARTS portal instance in PR environment"
+                env.DEV_DARTS_PORTAL_URL = "https://darts-portal-api-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
+
+                if (label ==~ /enable_darts_portal:pr-.*/) {
+                    env.DEV_DARTS_PORTAL_IMAGE_SUFFIX = label.replace("enable_darts_portal:", "")
+                    echo "DARTS portal image suffix: ${env.DEV_DARTS_PORTAL_IMAGE_SUFFIX}"
+                }
+                echo "Deploying DARTS portal (${env.DEV_DARTS_PORTAL_IMAGE_SUFFIX}) instance in PR environment"
             }
         }
     }
@@ -101,6 +107,7 @@ withPipeline(type, product, component) {
     env.INTEGRATION_TEST_LOGGING_LEVEL = "off"
 
     afterAlways('test') {
+
         builder.gradle('jacocoTestReport')
 
         publishHTML target: [
@@ -149,48 +156,48 @@ withPipeline(type, product, component) {
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/tests/integration",
-                reportFiles          : "index.html",
-                reportName           : "Integration Tests Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/tests/integration",
+            reportFiles          : "index.html",
+            reportName           : "Integration Tests Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/pmd",
-                reportFiles          : "main.html",
-                reportName           : "PMD Main Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/pmd",
+            reportFiles          : "main.html",
+            reportName           : "PMD Main Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/pmd",
-                reportFiles          : "test.html",
-                reportName           : "PMD Test Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/pmd",
+            reportFiles          : "test.html",
+            reportName           : "PMD Test Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/pmd",
-                reportFiles          : "functionalTest.html",
-                reportName           : "PMD Functional Test Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/pmd",
+            reportFiles          : "functionalTest.html",
+            reportName           : "PMD Functional Test Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/pmd",
-                reportFiles          : "integrationTest.html",
-                reportName           : "PMD Integration Test Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/pmd",
+            reportFiles          : "integrationTest.html",
+            reportName           : "PMD Integration Test Report"
         ]
 
 
