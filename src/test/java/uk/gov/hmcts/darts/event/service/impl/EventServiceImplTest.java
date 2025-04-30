@@ -304,7 +304,7 @@ class EventServiceImplTest {
                 .record(
                     AuditActivity.CURRENT_EVENT_VERSION_UPDATED,
                     currentUser,
-                    "eve_id: 123L was made current replacing eve_id: [1, 2]"
+                    "eve_id: 123 was made current replacing eve_id: [1, 2]"
                 );
         }
     }
