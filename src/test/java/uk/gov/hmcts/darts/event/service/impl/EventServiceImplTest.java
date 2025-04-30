@@ -229,7 +229,7 @@ class EventServiceImplTest {
         @NullSource
         void shouldThrowException_whenIsCurrentIsTrue(Boolean isCurrent) {
             PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(isCurrent);
-            DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(1, request));
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(1L, request));
             assertThat(exception.getError()).isEqualTo(CommonApiError.INVALID_REQUEST);
             verifyNoInteractions(auditApi);
         }
@@ -238,9 +238,9 @@ class EventServiceImplTest {
         void shouldThrowException_whenMediaIsAlreadyIsCurrent() {
             PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(true);
             EventEntity event = mock(EventEntity.class);
-            doReturn(event).when(eventService).getEventByEveId(123);
+            doReturn(event).when(eventService).getEventByEveId(123L);
             when(event.isCurrent()).thenReturn(true);
-            DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(123, request));
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(123L, request));
             assertThat(exception.getError()).isEqualTo(EventError.EVENT_ALREADY_CURRENT);
             verifyNoInteractions(auditApi);
         }
@@ -252,8 +252,8 @@ class EventServiceImplTest {
 
             EventEntity event = new EventEntity();
             event.setIsCurrent(false);
-            event.setId(123);
-            doReturn(event).when(eventService).getEventByEveId(123);
+            event.setId(123L);
+            doReturn(event).when(eventService).getEventByEveId(123L);
 
             CourtCaseEntity courtCase1 = new CourtCaseEntity();
             CourtCaseEntity courtCase2 = new CourtCaseEntity();
@@ -267,16 +267,16 @@ class EventServiceImplTest {
 
             EventEntity oldEvent1IsCurrent = new EventEntity();
             oldEvent1IsCurrent.setIsCurrent(true);
-            oldEvent1IsCurrent.setId(1);
+            oldEvent1IsCurrent.setId(1L);
 
             EventEntity oldEvent2IsCurrent = new EventEntity();
             oldEvent2IsCurrent.setIsCurrent(true);
-            oldEvent2IsCurrent.setId(2);
+            oldEvent2IsCurrent.setId(2L);
 
             //Should not call deleteEventLinkingAndSetCurrentFalse as not current
             EventEntity oldEvent3IsNotCurrent = new EventEntity();
             oldEvent3IsNotCurrent.setIsCurrent(false);
-            oldEvent3IsNotCurrent.setId(3);
+            oldEvent3IsNotCurrent.setId(3L);
 
             List<EventEntity> eventEntities = new ArrayList<>();
             eventEntities.add(oldEvent1IsCurrent);
@@ -287,7 +287,7 @@ class EventServiceImplTest {
 
             PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(true);
             doNothing().when(eventService).deleteEventLinkingAndSetCurrentFalse(any());
-            eventService.patchEventById(123, request);
+            eventService.patchEventById(123L, request);
 
             verify(eventService).getRelatedEvents(event);
             verify(eventService).deleteEventLinkingAndSetCurrentFalse(oldEvent1IsCurrent);
@@ -298,13 +298,13 @@ class EventServiceImplTest {
             verify(eventRepository).save(event);
 
             assertThat(event.isCurrent()).isEqualTo(true);
-            verify(eventService).patchEventById(123, request);//Required for verifyNoMoreInteractions
+            verify(eventService).patchEventById(123L, request);//Required for verifyNoMoreInteractions
             verifyNoMoreInteractions(eventService, hearingCommonService);
             verify(auditApi)
                 .record(
                     AuditActivity.CURRENT_EVENT_VERSION_UPDATED,
                     currentUser,
-                    "eve_id: 123 was made current replacing eve_id: [1, 2]"
+                    "eve_id: 123L was made current replacing eve_id: [1, 2]"
                 );
         }
     }

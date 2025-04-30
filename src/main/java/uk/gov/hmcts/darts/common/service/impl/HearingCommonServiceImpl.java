@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.CaseCommonService;
 import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
 import uk.gov.hmcts.darts.common.service.HearingCommonService;
-import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -107,7 +107,7 @@ public class HearingCommonServiceImpl implements HearingCommonService {
         );
     }
 
-    <T extends HasIntegerId> boolean linkEntityToHearing(
+    <T extends HasLongId> boolean linkEntityToHearing(
         String type,
         T entity,
         CourtCaseEntity courtCaseEntity,

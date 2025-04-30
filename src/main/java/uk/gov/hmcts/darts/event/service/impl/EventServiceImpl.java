@@ -105,11 +105,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void patchEventById(Integer eventId, PatchAdminEventByIdRequest patchAdminEventByIdRequest) {
+    public void patchEventById(Long eveId, PatchAdminEventByIdRequest patchAdminEventByIdRequest) {
         if (!Boolean.TRUE.equals(patchAdminEventByIdRequest.getIsCurrent())) {
             throw new DartsApiException(CommonApiError.INVALID_REQUEST, "is_current must be set to true");
         }
-        EventEntity eventEntityToUpdate = getEventByEveId(eventId);
+        EventEntity eventEntityToUpdate = getEventByEveId(eveId);
         if (eventEntityToUpdate.isCurrent()) {
             throw new DartsApiException(EventError.EVENT_ALREADY_CURRENT);
         }
@@ -118,7 +118,7 @@ public class EventServiceImpl implements EventService {
             getRelatedEvents(eventEntityToUpdate)
                 .stream()
                 .filter(EventEntity::isCurrent) //No need to process is_current = false. These are already delinked
-                .filter(eventEntity -> !eventId.equals(eventEntity.getId())) //No need to process the media entity we are updating
+                .filter(eventEntity -> !eveId.equals(eventEntity.getId())) //No need to process the media entity we are updating
                 .peek(this::deleteEventLinkingAndSetCurrentFalse)
                 .toList();
 
@@ -135,7 +135,7 @@ public class EventServiceImpl implements EventService {
             AuditActivity.CURRENT_EVENT_VERSION_UPDATED,
             userIdentity.getUserAccount(),
             String.format("eve_id: %s was made current replacing eve_id: %s",
-                          String.valueOf(eventId),
+                          String.valueOf(eveId),
                           currentEventEntities.stream().map(EventEntity::getId).toList()
             ));
     }

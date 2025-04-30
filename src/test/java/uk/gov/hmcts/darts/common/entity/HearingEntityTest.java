@@ -14,42 +14,42 @@ class HearingEntityTest {
     @Test
     void containsMedia_shouldReturnTrue_whenHearingHasMedia() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMedias(Set.of(createMedia(1), createMedia(2), createMedia(3)));
-        Assertions.assertTrue(hearing.containsMedia(createMedia(1)));
+        hearing.setMedias(Set.of(createMedia(1L), createMedia(2L), createMedia(3L)));
+        Assertions.assertTrue(hearing.containsMedia(createMedia(1L)));
     }
 
     @Test
     void containsMedia_shouldReturnFalse_whenHearingDoesNotHasMedia() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMedias(Set.of(createMedia(1), createMedia(2), createMedia(3)));
-        Assertions.assertFalse(hearing.containsMedia(createMedia(4)));
+        hearing.setMedias(Set.of(createMedia(1L), createMedia(2L), createMedia(3L)));
+        Assertions.assertFalse(hearing.containsMedia(createMedia(4L)));
     }
 
     @Test
     void containsMedia_shouldReturnFalse_whenMediaHasNullId() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMedias(Set.of(createMedia(1), createMedia(2), createMedia(3)));
+        hearing.setMedias(Set.of(createMedia(1L), createMedia(2L), createMedia(3L)));
         Assertions.assertFalse(hearing.containsMedia(createMedia(null)));
     }
 
     @Test
     void containsEvent_shouldReturnTrue_whenHearingHasEvent() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setEvents(Set.of(createEvent(1), createEvent(2), createEvent(3)));
-        Assertions.assertTrue(hearing.containsEvent(createEvent(1)));
+        hearing.setEvents(Set.of(createEvent(1L), createEvent(2L), createEvent(3L)));
+        Assertions.assertTrue(hearing.containsEvent(createEvent(1L)));
     }
 
     @Test
     void containsEvent_shouldReturnFalse_whenHearingDoesNotHasEvent() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setEvents(Set.of(createEvent(1), createEvent(2), createEvent(3)));
-        Assertions.assertFalse(hearing.containsEvent(createEvent(4)));
+        hearing.setEvents(Set.of(createEvent(1L), createEvent(2L), createEvent(3L)));
+        Assertions.assertFalse(hearing.containsEvent(createEvent(4L)));
     }
 
     @Test
     void containsEvent_shouldReturnFalse_whenEventEntityHasNullId() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setEvents(Set.of(createEvent(1), createEvent(2), createEvent(3)));
+        hearing.setEvents(Set.of(createEvent(1L), createEvent(2L), createEvent(3L)));
         Assertions.assertFalse(hearing.containsEvent(createEvent(null)));
     }
 
@@ -57,7 +57,7 @@ class HearingEntityTest {
     @Test
     void addMedia_shouldAddToMedias_whenMediaDoesNotContainSameMediaId() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMedias(new HashSet<>(List.of(createMedia(1), createMedia(2), createMedia(3))));
+        hearing.setMedias(new HashSet<>(List.of(createMedia(1L), createMedia(2L), createMedia(3L))));
         assertThat(hearing.getMedias()).hasSize(3);
         assertThat(hearing.getMedias()
                        .stream()
@@ -65,7 +65,7 @@ class HearingEntityTest {
                        .toList())
             .containsExactlyInAnyOrder(1L, 2L, 3L);
 
-        MediaEntity media = createMedia(4);
+        MediaEntity media = createMedia(4L);
         hearing.addMedia(media);
         assertThat(hearing.getMedias()).hasSize(4);
 
@@ -79,22 +79,22 @@ class HearingEntityTest {
     @Test
     void addMedia_shouldNotAddToMedias_whenMediaDoesContainSameMediaId() {
         HearingEntity hearing = new HearingEntity();
-        hearing.setMedias(new HashSet<>(List.of(createMedia(1), createMedia(2), createMedia(3))));
+        hearing.setMedias(new HashSet<>(List.of(createMedia(1L), createMedia(2L), createMedia(3L))));
         assertThat(hearing.getMedias()).hasSize(3);
         assertThat(hearing.getMedias()
                        .stream()
                        .map(mediaEntity -> mediaEntity.getId())
                        .toList())
-            .containsExactlyInAnyOrder(1, 2, 3);
+            .containsExactlyInAnyOrder(1L, 2L, 3L);
 
-        MediaEntity media = createMedia(1);
+        MediaEntity media = createMedia(1L);
         hearing.addMedia(media);
         assertThat(hearing.getMedias()).hasSize(3);
         assertThat(hearing.getMedias()
                        .stream()
                        .map(mediaEntity -> mediaEntity.getId())
                        .toList())
-            .containsExactlyInAnyOrder(1, 2, 3);
+            .containsExactlyInAnyOrder(1L, 2L, 3L);
     }
 
     private MediaEntity createMedia(Long id) {

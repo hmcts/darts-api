@@ -542,6 +542,7 @@ paths:
           name: event_id
           schema:
             type: integer
+            format: int64
           description: "event_id is the internal event_id of the event."
           required: true
       requestBody:

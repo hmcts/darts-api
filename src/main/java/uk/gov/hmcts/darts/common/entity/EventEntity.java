@@ -18,7 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = false)
 public class EventEntity
     extends CreatedModifiedBaseEntity
-    implements HasIntegerId {
+    implements HasLongId {
 
     @Id
     @Column(name = "eve_id")

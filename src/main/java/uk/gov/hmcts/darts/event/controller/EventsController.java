@@ -213,7 +213,7 @@ public class EventsController implements EventApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<Void> patchAdminEventById(Integer eventId, PatchAdminEventByIdRequest patchAdminEventByIdRequest) {
+    public ResponseEntity<Void> patchAdminEventById(Long eventId, PatchAdminEventByIdRequest patchAdminEventByIdRequest) {
         eventService.patchEventById(eventId, patchAdminEventByIdRequest);
         return ResponseEntity.ok().build();
     }

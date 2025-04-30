@@ -21,5 +21,5 @@ public interface EventService {
 
     boolean allAssociatedCasesAnonymised(EventEntity eventEntity);
 
-    void patchEventById(Integer eventId, PatchAdminEventByIdRequest patchAdminEventByIdRequest);
+    void patchEventById(Long eventId, PatchAdminEventByIdRequest patchAdminEventByIdRequest);
 }

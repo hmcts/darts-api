@@ -193,7 +193,7 @@ class EventsControllerPatchAdminEventByIdIntTest extends IntegrationBase {
         return "{\"is_current\": %s}".formatted(isCurrent);
     }
 
-    private void assertEventIsCurrentStatus(int eventId, boolean isCurrent) {
+    private void assertEventIsCurrentStatus(long eventId, boolean isCurrent) {
         transactionalUtil.executeInTransaction(() -> {
             EventEntity event = databaseStub.getEventRepository().findById(eventId).orElseThrow();
             assertThat(event.getIsCurrent()).isEqualTo(isCurrent);
