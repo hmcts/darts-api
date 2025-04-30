@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.model.EventsResponse;
+import uk.gov.hmcts.darts.event.model.PatchAdminEventByIdRequest;
 import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
@@ -206,6 +207,14 @@ public class EventsController implements EventApi {
         globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEveByIdsRequest adminObfuscateEveByIdsRequest) {
         this.dataAnonymisationService.anonymiseEventByIds(userIdentity.getUserAccount(), adminObfuscateEveByIdsRequest.getEveIds(), true);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<Void> patchAdminEventById(Long eventId, PatchAdminEventByIdRequest patchAdminEventByIdRequest) {
+        eventService.patchEventById(eventId, patchAdminEventByIdRequest);
         return ResponseEntity.ok().build();
     }
 }

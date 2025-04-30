@@ -67,6 +67,24 @@ public class TestBase {
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(dartsApiError.getHttpStatus().value());
     }
 
+    public void assertStandardErrorJsonResponse(MvcResult mvcResult, DartsApiError dartsApiError, String detail) throws UnsupportedEncodingException {
+        String expectedJson = """
+            {
+              "type": "<TYPE>",
+              "title": "<TITLE>",
+              "status": <STATUS>,
+              "detail": "<DETAIL>"
+            }
+            """
+            .replace("<TYPE>", dartsApiError.getType())
+            .replace("<TITLE>", dartsApiError.getTitle())
+            .replace("<STATUS>", String.valueOf(dartsApiError.getHttpStatus().value()))
+            .replace("<DETAIL>", detail);
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+        assertThat(mvcResult.getResponse().getStatus()).isEqualTo(dartsApiError.getHttpStatus().value());
+    }
+
     protected UserAccountEntity anAuthenticatedUserFor(String userEmail) {
         return GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
     }

@@ -532,6 +532,72 @@ paths:
               schema:
                 $ref: './problem.yaml'
   /admin/events/{event_id}:
+    patch:
+      tags:
+        - Event
+      operationId: patchAdminEventById
+      description: Update a Event record
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+            format: int64
+          description: "event_id is the internal event_id of the event."
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_current:
+                  type: boolean
+                  enum: [ true ]
+              required:
+                - is_current
+      responses:
+        '202':
+          description: Accepted
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '409':
+          description: Data conflicting
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
     get:
       tags:
         - Event
@@ -984,6 +1050,7 @@ components:
         - "EVENT_107"
         - "EVENT_108"
         - "EVENT_109"
+        - "EVENT_110"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -993,7 +1060,8 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND
+        EVENT_ID_NOT_FOUND,
+        EVENT_ALREADY_CURRENT
       ]
 
     EventTitleErrors:
@@ -1008,6 +1076,7 @@ components:
         - "The mapping has already processed events, so cannot be deleted"
         - "The search resulted in too many results"
         - "Event id does not exist"
+        - "Event already current"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -1017,5 +1086,6 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND
+        EVENT_ID_NOT_FOUND,
+        EVENT_ALREADY_CURRENT
       ]

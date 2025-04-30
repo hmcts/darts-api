@@ -1,36 +1,52 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
+import uk.gov.hmcts.darts.common.service.HearingCommonService;
+import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
 import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
+import uk.gov.hmcts.darts.event.model.PatchAdminEventByIdRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +60,13 @@ class EventServiceImplTest {
     private DataAnonymisationService dataAnonymisationService;
     @Mock
     private EventLinkedCaseRepository eventLinkedCaseRepository;
+
+    @Mock
+    private HearingCommonService hearingCommonService;
+    @Mock
+    private AuditApi auditApi;
+    @Mock
+    private UserIdentity userIdentity;
 
     @InjectMocks
     @Spy
@@ -196,5 +219,110 @@ class EventServiceImplTest {
         assertThat(eventService.getRelatedEvents(123L)).isEqualTo(eventEntities);
         verify(eventRepository).findAllByRelatedEvents(123L, 321, List.of(1, 2, 3));
         verify(eventService).getEventByEveId(123L);
+    }
+
+    @Nested
+    class PatchEventByIdTests {
+
+        @ParameterizedTest
+        @ValueSource(booleans = false)
+        @NullSource
+        void shouldThrowException_whenIsCurrentIsTrue(Boolean isCurrent) {
+            PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(isCurrent);
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(1L, request));
+            assertThat(exception.getError()).isEqualTo(CommonApiError.INVALID_REQUEST);
+            verifyNoInteractions(auditApi);
+        }
+
+        @Test
+        void shouldThrowException_whenMediaIsAlreadyIsCurrent() {
+            PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(true);
+            EventEntity event = mock(EventEntity.class);
+            doReturn(event).when(eventService).getEventByEveId(123L);
+            when(event.isCurrent()).thenReturn(true);
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(123L, request));
+            assertThat(exception.getError()).isEqualTo(EventError.EVENT_ALREADY_CURRENT);
+            verifyNoInteractions(auditApi);
+        }
+
+        @Test
+        void shouldUpdateMediaIsCurrent_whenMediaIsNotCurrent() {
+            UserAccountEntity currentUser = new UserAccountEntity();
+            when(userIdentity.getUserAccount()).thenReturn(currentUser);
+
+            EventEntity event = new EventEntity();
+            event.setIsCurrent(false);
+            event.setId(123L);
+            doReturn(event).when(eventService).getEventByEveId(123L);
+
+            CourtCaseEntity courtCase1 = new CourtCaseEntity();
+            CourtCaseEntity courtCase2 = new CourtCaseEntity();
+            EventLinkedCaseEntity eventLinkedCaseEntity1 = new EventLinkedCaseEntity();
+            eventLinkedCaseEntity1.setCourtCase(courtCase1);
+            EventLinkedCaseEntity eventLinkedCaseEntity2 = new EventLinkedCaseEntity();
+            eventLinkedCaseEntity2.setCourtCase(courtCase2);
+
+            event.setEventLinkedCaseEntities(List.of(eventLinkedCaseEntity1, eventLinkedCaseEntity2));
+
+
+            EventEntity oldEvent1IsCurrent = new EventEntity();
+            oldEvent1IsCurrent.setIsCurrent(true);
+            oldEvent1IsCurrent.setId(1L);
+
+            EventEntity oldEvent2IsCurrent = new EventEntity();
+            oldEvent2IsCurrent.setIsCurrent(true);
+            oldEvent2IsCurrent.setId(2L);
+
+            //Should not call deleteEventLinkingAndSetCurrentFalse as not current
+            EventEntity oldEvent3IsNotCurrent = new EventEntity();
+            oldEvent3IsNotCurrent.setIsCurrent(false);
+            oldEvent3IsNotCurrent.setId(3L);
+
+            List<EventEntity> eventEntities = new ArrayList<>();
+            eventEntities.add(oldEvent1IsCurrent);
+            eventEntities.add(oldEvent2IsCurrent);
+            eventEntities.add(oldEvent3IsNotCurrent);
+            eventEntities.add(event);
+            doReturn(eventEntities).when(eventService).getRelatedEvents(event);
+
+            PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(true);
+            doNothing().when(eventService).deleteEventLinkingAndSetCurrentFalse(any());
+            eventService.patchEventById(123L, request);
+
+            verify(eventService).getRelatedEvents(event);
+            verify(eventService).deleteEventLinkingAndSetCurrentFalse(oldEvent1IsCurrent);
+            verify(eventService).deleteEventLinkingAndSetCurrentFalse(oldEvent2IsCurrent);
+
+            verify(hearingCommonService).linkEventToHearings(courtCase1, event);
+            verify(hearingCommonService).linkEventToHearings(courtCase2, event);
+            verify(eventRepository).save(event);
+
+            assertThat(event.isCurrent()).isEqualTo(true);
+            verify(eventService).patchEventById(123L, request);//Required for verifyNoMoreInteractions
+            verifyNoMoreInteractions(eventService, hearingCommonService);
+            verify(auditApi)
+                .record(
+                    AuditActivity.CURRENT_EVENT_VERSION_UPDATED,
+                    currentUser,
+                    "eve_id: 123 was made current replacing eve_id: [1, 2]"
+                );
+        }
+    }
+
+    @Test
+    void deleteEventLinkingAndSetCurrentFalse_shouldRemoveAllAssciatedHearingsAndSetIsCurrentToFalse_whenEventEntityIsGiven() {
+        EventEntity event = new EventEntity();
+        event.addHearing(new HearingEntity());
+        event.addHearing(new HearingEntity());
+        event.addHearing(new HearingEntity());
+        event.setIsCurrent(true);
+
+        assertThat(event.isCurrent()).isTrue();
+        assertThat(event.getHearingEntities()).hasSize(3);
+
+        eventService.deleteEventLinkingAndSetCurrentFalse(event);
+
+        assertThat(event.isCurrent()).isFalse();
+        assertThat(event.getHearingEntities()).isEmpty();
     }
 }
