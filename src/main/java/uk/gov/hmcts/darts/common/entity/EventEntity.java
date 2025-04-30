@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasLongId;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -32,7 +33,9 @@ import java.util.Set;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class EventEntity extends CreatedModifiedBaseEntity {
+public class EventEntity
+    extends CreatedModifiedBaseEntity
+    implements HasLongId {
 
     @Id
     @Column(name = "eve_id")
@@ -88,6 +91,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     private Integer eventStatus;
 
     @Column(name = "is_current")
+    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")//This is by design
     private Boolean isCurrent;
 
     @Column(name = "is_data_anonymised")
@@ -122,5 +126,9 @@ public class EventEntity extends CreatedModifiedBaseEntity {
                         .thenComparing(HearingEntity::getId))
             .findFirst()
             .orElseThrow(NoSuchElementException::new);
+    }
+
+    public boolean isCurrent() {
+        return isCurrent != null && isCurrent;
     }
 }

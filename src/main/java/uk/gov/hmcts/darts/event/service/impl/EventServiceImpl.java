@@ -3,6 +3,9 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventLinkedCaseEntity;
@@ -10,9 +13,12 @@ import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.service.HearingCommonService;
+import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
 import uk.gov.hmcts.darts.event.model.AdminGetEventById200Response;
 import uk.gov.hmcts.darts.event.model.AdminGetVersionsByEventIdResponseResult;
+import uk.gov.hmcts.darts.event.model.PatchAdminEventByIdRequest;
 import uk.gov.hmcts.darts.event.service.EventService;
 
 import java.util.HashSet;
@@ -27,6 +33,9 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final EventRepository eventRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
+    private final HearingCommonService hearingCommonService;
+    private final AuditApi auditApi;
+    private final UserIdentity userIdentity;
 
     @Override
     public AdminGetEventById200Response adminGetEventById(Long eveId) {
@@ -46,7 +55,10 @@ public class EventServiceImpl implements EventService {
     }
 
     List<EventEntity> getRelatedEvents(Long eveId) {
-        EventEntity event = getEventByEveId(eveId);
+        return getRelatedEvents(getEventByEveId(eveId));
+    }
+
+    List<EventEntity> getRelatedEvents(EventEntity event) {
         if (event.getEventId() == 0) {
             return List.of(event);
         }
@@ -90,5 +102,47 @@ public class EventServiceImpl implements EventService {
     @Override
     public boolean allAssociatedCasesAnonymised(EventEntity eventEntity) {
         return eventLinkedCaseRepository.areAllAssociatedCasesAnonymised(eventEntity);
+    }
+
+    @Override
+    public void patchEventById(Long eveId, PatchAdminEventByIdRequest patchAdminEventByIdRequest) {
+        if (!Boolean.TRUE.equals(patchAdminEventByIdRequest.getIsCurrent())) {
+            throw new DartsApiException(CommonApiError.INVALID_REQUEST, "is_current must be set to true");
+        }
+        EventEntity eventEntityToUpdate = getEventByEveId(eveId);
+        if (eventEntityToUpdate.isCurrent()) {
+            throw new DartsApiException(EventError.EVENT_ALREADY_CURRENT);
+        }
+
+        List<EventEntity> currentEventEntities =
+            getRelatedEvents(eventEntityToUpdate)
+                .stream()
+                .filter(EventEntity::isCurrent) //No need to process is_current = false. These are already delinked
+                .filter(eventEntity -> !eveId.equals(eventEntity.getId())) //No need to process the media entity we are updating
+                .peek(this::deleteEventLinkingAndSetCurrentFalse)
+                .toList();
+
+        eventEntityToUpdate.setIsCurrent(true);
+        eventRepository.save(eventEntityToUpdate);
+
+        eventEntityToUpdate.getEventLinkedCaseEntities()
+            .forEach(eventLinkedCaseEntity -> hearingCommonService.linkEventToHearings(
+                eventLinkedCaseEntity.getCourtCase(),
+                eventEntityToUpdate
+            ));
+
+        auditApi.record(
+            AuditActivity.CURRENT_EVENT_VERSION_UPDATED,
+            userIdentity.getUserAccount(),
+            String.format("eve_id: %s was made current replacing eve_id: %s",
+                          String.valueOf(eveId),
+                          currentEventEntities.stream().map(EventEntity::getId).toList()
+            ));
+    }
+
+    void deleteEventLinkingAndSetCurrentFalse(EventEntity eventEntity) {
+        eventEntity.getHearingEntities().clear();
+        eventEntity.setIsCurrent(false);
+        eventRepository.save(eventEntity);
     }
 }

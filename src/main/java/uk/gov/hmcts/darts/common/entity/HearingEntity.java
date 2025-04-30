@@ -100,6 +100,12 @@ public class HearingEntity extends CreatedModifiedBaseEntity
         }
     }
 
+    public void addEvent(EventEntity eventEntity) {
+        if (!containsEvent(eventEntity)) {
+            events.add(eventEntity);
+        }
+    }
+
     public void addJudge(JudgeEntity judgeEntity, boolean isFromDailyList) {
         if (judgeEntity == null || (!Boolean.TRUE.equals(hearingIsActual) && !isFromDailyList)) {
             return;
@@ -127,5 +133,10 @@ public class HearingEntity extends CreatedModifiedBaseEntity
 
     public boolean containsMedia(MediaEntity mediaEntity) {
         return mediaEntity.getId() != null && medias.stream().anyMatch(media -> mediaEntity.getId().equals(media.getId()));
+    }
+
+    public boolean containsEvent(EventEntity eventEntity) {
+        return eventEntity.getId() != null && events.stream().anyMatch(event -> eventEntity.getId().equals(event.getId()));
+
     }
 }

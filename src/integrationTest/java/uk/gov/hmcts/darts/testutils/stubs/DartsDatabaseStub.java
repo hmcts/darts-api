@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.entity.EventLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -1089,6 +1090,7 @@ public class DartsDatabaseStub {
 
     /**
      * Creates a media linked case.
+     *
      * @Deprecated use createMediaLinkedCase(MediaEntity mediaEntity, CourtCaseEntity courtCase)
      */
     @Transactional
@@ -1139,6 +1141,17 @@ public class DartsDatabaseStub {
             courthouseName,
             MediaLinkedCaseSourceType.LEGACY
         );
+    }
+
+    @Transactional
+    public EventLinkedCaseEntity createEventLinkedCase(
+        EventEntity eventEntity,
+        CourtCaseEntity courtCase
+    ) {
+        var eventLinkedCaseEntity = new EventLinkedCaseEntity();
+        eventLinkedCaseEntity.setEvent(eventEntity);
+        eventLinkedCaseEntity.setCourtCase(courtCase);
+        return eventLinkedCaseRepository.save(eventLinkedCaseEntity);
     }
 
     @Transactional
