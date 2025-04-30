@@ -525,7 +525,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
                 audioRequestDetails.getEndTime()
             );
             if (filteredMediaEntities.size() > audioConfigurationProperties.getMaxHandheldAudioFiles()) {
-                throw new DartsApiException(AudioRequestsApiError.MAX_HANDHELD_AUDIO_FILES_EXCEED,
+                throw new DartsApiException(AudioRequestsApiError.MAX_HANDHELD_AUDIO_FILES_EXCEEDED,
                                             String.format("The maximum supported number of handheld audio files is %s but this request has %s",
                                                           audioConfigurationProperties.getMaxHandheldAudioFiles(),
                                                           filteredMediaEntities.size()
