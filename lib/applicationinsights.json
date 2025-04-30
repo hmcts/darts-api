@@ -1,7 +1,7 @@
 {
-  "connectionString": "${APPLICATIONINSIGHTS_CONNECTION_STRING}",
+  "connectionString": "${file:/mnt/secrets/darts/app-insights-connection-string}",
   "role": {
-    "name": "${ROLE_NAME}"
+    "name": "DARTS API"
   },
   "sampling": {
     "overrides": [

@@ -7,9 +7,16 @@ java:
   devmemoryLimits: "2Gi"
   devcpuLimits: "1500m"
   ingressHost: ${SERVICE_FQDN}
+  aadIdentityName: darts
+  global:
+    enableKeyVaults: true
   keyVaults:
-    darts:
+    "darts":
       secrets:
+        - name: GovukNotifyTestApiKey
+          alias: GOVUK_NOTIFY_API_KEY
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
         - name: GovukNotifyTestApiKey
           alias: GOVUK_NOTIFY_API_KEY
         - name: api-POSTGRES-USER
@@ -27,9 +34,7 @@ java:
         - name: AzureAdB2CClientId
           alias: AAD_B2C_CLIENT_ID
         - name: AzureAdB2CClientSecret
-          alias: AAD_B2C_CLIENT_SECRET          
-        - name: app-insights-connection-string
-          alias: APPLICATIONINSIGHTS_CONNECTION_STRING
+          alias: AAD_B2C_CLIENT_SECRET
         - name: AzureAdB2CFuncTestROPCUsername
           alias: FUNC_TEST_ROPC_USERNAME
         - name: AzureAdB2CFuncTestROPCPassword
@@ -100,6 +105,7 @@ java:
           alias: ARM_SERVICE_ENTITLEMENT
         - name: ArmStorageAccountName
           alias: ARM_STORAGE_ACCOUNT_NAME
+
   environment:
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true
@@ -117,7 +123,7 @@ java:
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
-    ROLE_NAME: "DARTS API PR-${CHANGE_ID}"
+    APPLICATIONINSIGHTS_ROLE_NAME: "DARTS API PR-${CHANGE_ID}"
 
   secrets:
     DARTS_API_DB_PASSWORD:
@@ -182,7 +188,7 @@ darts-portal:
 #         - name: AzureAdB2CClientSecret
 #           alias: AAD_B2C_CLIENT_SECRET
 #         - name: app-insights-connection-string
-#           alias: APPLICATIONINSIGHTS_CONNECTION_STRING
+#           alias: app-insights-connection-string
 #         - name: AzureAdB2CFuncTestROPCClientId
 #           alias: AAD_B2C_ROPC_CLIENT_ID
 #         - name: AzureAdB2CFuncTestROPCClientSecret
