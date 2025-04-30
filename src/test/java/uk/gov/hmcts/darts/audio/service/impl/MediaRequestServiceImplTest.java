@@ -824,9 +824,9 @@ class MediaRequestServiceImplTest {
         DartsApiException exception = assertThrows(DartsApiException.class,
                                                    () -> mediaRequestService.addAudioRequest(audioRequestDetails, audioRequestType));
 
-        assertThat(exception.getError()).isEqualTo(AudioRequestsApiError.MAX_HAND_HELD_AUDIO_FILES_EXCEED);
+        assertThat(exception.getError()).isEqualTo(AudioRequestsApiError.MAX_HANDHELD_AUDIO_FILES_EXCEED);
         assertThat(exception.getMessage()).isEqualTo(
-            "Max hand held audio files exceed. The maximum supported number of handheld audio files is 3 but this request has 4"
+            "Max handheld audio files exceed. The maximum supported number of handheld audio files is 3 but this request has 4"
         );
 
 
