@@ -180,8 +180,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         var hiddenTranscription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         hiddenTranscription.setHideRequestFromRequestor(true);
-        //dartsPersistence.save(hiddenTranscription);
-
+        
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, hiddenTranscription);
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, hiddenTranscription);
 
