@@ -282,7 +282,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
     @ParameterizedTest(name = "{0} (StartTime: {1}. EndTime: {2}. EventTime: {3}. ExpectDataToReturn: {4})")
     @MethodSource("findAllByCurrentMediaTimeContains")
     void findAllByCurrentMediaTimeContains_tests(String testName, OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime eventTime,
-                                          boolean expectDataToReturn, boolean isMediaCurrent) {
+                                                 boolean expectDataToReturn, boolean isMediaCurrent) {
         CourtroomEntity courtroomEntity = PersistableFactory.getCourtroomTestData()
             .someMinimal();
         dartsPersistence.save(courtroomEntity);
@@ -347,5 +347,76 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         assertThat(mediaEntities.stream().map(MediaEntity::getId))
             .hasSize(2)
             .containsExactlyInAnyOrder(media1.getId(), media2.getId());
+    }
+
+
+    @Test
+    void findAllCurrentMediaByHearingId_whenIncludeHiddenIsTrue_allDataShouldBeReturned() {
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
+
+        dartsPersistence.save(hearing1);
+        dartsPersistence.save(hearing2);
+
+        MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
+        media1.setHidden(false);
+        media1.setIsCurrent(true);
+        MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
+        media2.setHidden(false);
+        media2.setIsCurrent(true);
+        MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
+        media3.setHidden(true);
+        media3.setIsCurrent(true);
+
+        dartsPersistence.save(media1);
+        dartsPersistence.save(media2);
+        dartsPersistence.save(media3);
+
+        hearing1.addMedia(media1);
+        hearing2.addMedia(media2);
+        hearing2.addMedia(media3);
+
+        hearingRepository.saveAll(List.of(hearing1, hearing2));
+
+        List<MediaEntity> mediaEntities = mediaRepository.findAllCurrentMediaByHearingId(hearing2.getId(), true);
+
+        assertThat(mediaEntities.stream().map(MediaEntity::getId))
+            .hasSize(2)
+            .containsExactlyInAnyOrder(media2.getId(), media3.getId());
+    }
+
+    @Test
+    void findAllCurrentMediaByHearingId_whenIncludeHiddenIsFalse_onlyNonHiddenShouldBeReturned() {
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
+
+        dartsPersistence.save(hearing1);
+        dartsPersistence.save(hearing2);
+
+        MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
+        media1.setHidden(false);
+        media1.setIsCurrent(true);
+        MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
+        media2.setHidden(false);
+        media2.setIsCurrent(true);
+        MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
+        media3.setHidden(true);
+        media3.setIsCurrent(true);
+
+        dartsPersistence.save(media1);
+        dartsPersistence.save(media2);
+        dartsPersistence.save(media3);
+
+        hearing1.addMedia(media1);
+        hearing2.addMedia(media2);
+        hearing2.addMedia(media3);
+
+        hearingRepository.saveAll(List.of(hearing1, hearing2));
+
+        List<MediaEntity> mediaEntities = mediaRepository.findAllCurrentMediaByHearingId(hearing2.getId(), false);
+
+        assertThat(mediaEntities.stream().map(MediaEntity::getId))
+            .hasSize(1)
+            .containsExactlyInAnyOrder(media2.getId());
     }
 }

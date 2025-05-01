@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.config;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -33,5 +34,9 @@ public class AudioConfigurationProperties {
     private Duration allowableAudioGapDuration;
     private Duration preAmbleDuration;
     private Duration postAmbleDuration;
+    @NotEmpty
     private List<String> handheldAudioCourtroomNumbers;
+
+    @NotNull
+    private Integer maxHandheldAudioFiles;
 }

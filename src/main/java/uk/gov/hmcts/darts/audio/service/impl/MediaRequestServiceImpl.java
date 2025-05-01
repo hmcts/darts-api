@@ -10,9 +10,11 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
+import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
@@ -46,6 +49,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -88,7 +92,7 @@ import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTe
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
 
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Lazy))
 @Service
 @SuppressWarnings({
     "PMD.CouplingBetweenObjects",
@@ -116,6 +120,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final AudioMediaPatchRequestValidator mediaRequestValidator;
     private final SystemUserHelper systemUserHelper;
     private final LogApi logApi;
+    private final AudioTransformationService audioTransformationService;
+    private final AudioConfigurationProperties audioConfigurationProperties;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -160,10 +166,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType) {
+    public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType, HearingEntity hearing) {
 
         var duplicateUserMediaRequests = mediaRequestRepository.findDuplicateUserMediaRequests(
-            hearingsService.getHearingByIdWithValidation(audioRequestDetails.getHearingId()),
+            hearing,
             userAccountRepository.getReferenceById(audioRequestDetails.getRequestor()),
             audioRequestDetails.getStartTime(),
             audioRequestDetails.getEndTime(),
@@ -174,10 +180,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return duplicateUserMediaRequests.isPresent();
     }
 
-    @Override
-    public MediaRequestEntity saveAudioRequest(AudioRequestDetails request, AudioRequestType audioRequestType) {
+    MediaRequestEntity saveAudioRequest(AudioRequestDetails request, AudioRequestType audioRequestType, HearingEntity hearingEntity) {
         MediaRequestEntity mediaRequest = saveAudioRequestToDb(
-            hearingsService.getHearingByIdWithValidation(request.getHearingId()),
+            hearingEntity,
             userAccountRepository.getReferenceById(request.getRequestor()),
             request.getStartTime(),
             request.getEndTime(),
@@ -506,11 +511,30 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public MediaRequestEntity addAudioRequest(AudioRequestDetails audioRequestDetails, AudioRequestType audioRequestType) {
-        if (isUserDuplicateAudioRequest(audioRequestDetails, audioRequestType)) {
+        HearingEntity hearingEntity = hearingsService.getHearingByIdWithValidation(audioRequestDetails.getHearingId());
+
+        if (isUserDuplicateAudioRequest(audioRequestDetails, audioRequestType, hearingEntity)) {
             throw new DartsApiException(AudioRequestsApiError.DUPLICATE_MEDIA_REQUEST);
         }
 
-        MediaRequestEntity audioRequest = saveAudioRequest(audioRequestDetails, audioRequestType);
+        if (audioConfigurationProperties.getHandheldAudioCourtroomNumbers().contains(hearingEntity.getCourtroom().getName())) {
+            List<MediaEntity> mediaEntitiesForHearing = audioTransformationService.getMediaByHearingId(hearingEntity.getId());
+            List<MediaEntity> filteredMediaEntities = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+                mediaEntitiesForHearing,
+                audioRequestDetails.getStartTime(),
+                audioRequestDetails.getEndTime()
+            );
+            if (filteredMediaEntities.size() > audioConfigurationProperties.getMaxHandheldAudioFiles()) {
+                throw new DartsApiException(AudioRequestsApiError.MAX_HANDHELD_AUDIO_FILES_EXCEEDED,
+                                            String.format("The maximum supported number of handheld audio files is %s but this request has %s",
+                                                          audioConfigurationProperties.getMaxHandheldAudioFiles(),
+                                                          filteredMediaEntities.size()
+                                            ));
+            }
+        }
+
+
+        MediaRequestEntity audioRequest = saveAudioRequest(audioRequestDetails, audioRequestType, hearingEntity);
         scheduleMediaRequestPendingNotification(audioRequest);
         logApi.atsProcessingUpdate(audioRequest);
         return audioRequest;

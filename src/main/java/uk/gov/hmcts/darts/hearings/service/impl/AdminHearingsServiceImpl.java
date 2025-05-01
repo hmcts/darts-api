@@ -68,7 +68,7 @@ public class AdminHearingsServiceImpl implements AdminHearingsService {
     @Override
     public List<HearingsAudiosResponseInner> getHearingAudios(Integer hearingId) {
         hearingsService.validateHearingExistsElseError(hearingId);
-        return mediaRepository.findAllCurrentMediaByHearingId(hearingId)
+        return mediaRepository.findAllCurrentMediaByHearingId(hearingId, true)
             .stream()
             .map(media -> {
                 HearingsAudiosResponseInner hearingsAudiosResponseInner = new HearingsAudiosResponseInner();
