@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,7 +23,9 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.Matchers.hasSize;
@@ -74,7 +77,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnRequesterOnly_WithTranscriptionUrgency() throws Exception {
+    void getYourTranscripts_ShouldReturnRequesterTranscriptions_WhenNoLinkedHearing_WithTranscriptionUrgency() throws Exception {
         // creates a transcription for a different user that should not be returned
         var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
             .requestedBy(systemUser)
@@ -117,7 +120,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnMultipleRequesterOnly_WithNoTranscriptionUrgency() throws Exception {
+    void getYourTranscripts_ShouldReturnRequesterTranscriptions_WhenNoLinkedHearing_WithNoTranscriptionUrgency() throws Exception {
         // creates a transcription for a different user that should not be returned
         var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
             .requestedBy(systemUser)
@@ -167,8 +170,48 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
+    @Disabled("This test should pass so a ticket has been raised to fix it - DMP-5053")
     @Test
-    void getYourTranscripts_ShouldNotReturnHiddenTranscriptionRequests() throws Exception {
+    void getYourTranscripts_ShouldReturnRequesterTranscriptions_WithLinkedHearingButNoCourtCase() throws Exception {
+        var hearing = PersistableFactory.getHearingTestData().someMinimalBuilder()
+            .hearingDate(LocalDate.of(2025, 3, 19))
+            .build().getEntity();
+        // creates a transcription where there is hearing but no case
+        var transcriptionByRequester = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(testUser)
+            .hearings(List.of(hearing))
+            .courtCases(List.of())
+            .createdById(testUser.getId())
+            .lastModifiedById(testUser.getId())
+            .build().getEntity();
+        dartsPersistence.save(transcriptionByRequester);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), REQUESTED, transcriptionByRequester);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionByRequester);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header("user_id", testUser.getId());
+        requestBuilder.content("");
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].case_number").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-19T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date", is("2025-03-19")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
+
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
+
+    @Test
+    void getYourTranscripts_ShouldNotReturnHiddenTranscriptionRequests_WhenNoLinkedHearing() throws Exception {
         // creates a transcription for a different user that should not be returned
         var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
             .requestedBy(systemUser)
@@ -180,7 +223,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         var hiddenTranscription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         hiddenTranscription.setHideRequestFromRequestor(true);
-        
+
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, hiddenTranscription);
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), AWAITING_AUTHORISATION, hiddenTranscription);
 
