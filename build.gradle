@@ -223,7 +223,7 @@ checkstyle {
 }
 
 pmd {
-    toolVersion = "7.12.0"
+    toolVersion = "7.13.0"
     reportsDir = file("$project.buildDir/reports/pmd")
     // https://github.com/pmd/pmd/issues/876
     ruleSets = []
@@ -436,13 +436,13 @@ dependencies {
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
-    implementation platform('com.azure:azure-sdk-bom:1.2.33')
+    implementation platform('com.azure:azure-sdk-bom:1.2.34')
     implementation 'com.azure:azure-storage-blob'
 
     implementation group: 'io.rest-assured', name: 'rest-assured'
     implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.8.0'
     implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.8.0'
-    implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.9'
+    implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.10'
 
     //database
     implementation 'org.postgresql:postgresql:42.7.5'
