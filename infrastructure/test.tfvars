@@ -1,2 +1,2 @@
-pgsqlSku = "GP_Standard_D8ds_v5"
-pgsqlstoragemb     = "2097152"
+pgsqlSku = "GP_Standard_D32ds_v5"
+pgsqlstoragemb     = "4193280"
