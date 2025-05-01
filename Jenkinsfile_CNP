@@ -3,7 +3,7 @@ properties([
     parameters([
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip all tests'),
         booleanParam(name: 'SKIP_SONAR', defaultValue: false, description: 'Skip sonar'),
-        booleanParam(name: 'FAIL_FAST', defaultValue: true, description: 'Should tests fail fast'),
+        booleanParam(name: 'FAIL_FAST', defaultValue: false, description: 'Should tests fail fast'),
     ])
 ])
 @Library("Infrastructure")
