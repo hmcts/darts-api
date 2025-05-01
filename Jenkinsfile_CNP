@@ -222,8 +222,10 @@ withPipeline(type, product, component) {
   }
 
   afterAlways('functionalTest:dev') {
-    stage('SKIP_TESTS OR SKIP_SONAR IS TRUE') {
-      error("Build can not fully complete when SKIP_TESTS or SKIP_SONAR is set to true")
+    if(env.SKIP_TESTS || env.SKIP_SONAR) {
+      stage('SKIP_TESTS OR SKIP_SONAR IS TRUE') {
+        error("Build can not fully complete when SKIP_TESTS or SKIP_SONAR is set to true")
+      }
     }
   }
 
