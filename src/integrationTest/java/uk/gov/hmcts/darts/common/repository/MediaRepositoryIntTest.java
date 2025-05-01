@@ -6,19 +6,30 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import uk.gov.hmcts.darts.cases.controller.CaseController;
+import uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem;
+import org.springframework.data.domain.Sort;
+import uk.gov.hmcts.darts.cases.controller.CaseController;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity_;
+import uk.gov.hmcts.darts.common.entity.MediaEntity_;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
+import uk.gov.hmcts.darts.util.pagination.PaginationDto;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
+import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -418,5 +429,58 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         assertThat(mediaEntities.stream().map(MediaEntity::getId))
             .hasSize(1)
             .containsExactlyInAnyOrder(media2.getId());
+    }
+
+    @Test
+    void findByCaseIdAndIsCurrentTruePageable() {
+        // given
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        dartsPersistence.save(hearing1);
+
+        MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
+        media1.setChannel(1);
+        media1.setCourtroom(hearing1.getCourtroom());
+        media1.setIsCurrent(true);
+        dartsPersistence.save(media1);
+
+        MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
+        media2.setChannel(2);
+        media2.setCourtroom(hearing1.getCourtroom());
+        media2.setIsCurrent(true);
+        dartsPersistence.save(media2);
+
+        MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
+        media3.setChannel(3);
+        media3.setCourtroom(hearing1.getCourtroom());
+        media3.setIsCurrent(true);
+        dartsPersistence.save(media3);
+
+        hearing1.addMedia(media1);
+        hearing1.addMedia(media2);
+        hearing1.addMedia(media3);
+
+        hearingRepository.saveAll(List.of(hearing1));
+        PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
+            CaseController.AdminCaseIdAudioGetPaginatedResponse::new,
+            1,
+            5,
+            List.of(MediaEntity_.CHANNEL),
+            List.of(Sort.Direction.DESC)
+        );
+
+        // when
+        PaginatedList<AdminCaseAudioResponseItem> adminCaseAudioResponseItemPaginatedList = paginationDto.toPaginatedList(
+            pageable -> mediaRepository.findByCaseIdAndIsCurrentTruePageable(hearing1.getCourtCase().getId(), pageable),
+            t -> t,
+            List.of("audioId", "courtroom", "startTime", "endTime", "channel"),
+            List.of(Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC, Sort.Direction.DESC),
+            Map.of("audioId", "med.id",
+                   "courtroom", "cr.name",
+                   "startTime", "med.start",
+                   "endTime", "med.end",
+                   "channel", "med.channel"));
+
+        assertEquals(3, adminCaseAudioResponseItemPaginatedList.getTotalItems());
+
     }
 }

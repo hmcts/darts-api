@@ -580,6 +580,92 @@ paths:
                 type: "CASE_104"
                 title: "The requested case cannot be found"
                 status: 404
+
+  /admin/cases/{id}/audios:
+    get:
+      tags:
+        - Cases
+      summary: |-
+        Admin view for current court case audios
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+        - in: query
+          name: sort_by
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - "audioId"
+                - "courtroom"
+                - "startTime"
+                - "endTime"
+                - "channel"
+        - in: query
+          name: sort_order
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - "ASC"
+                - "DESC"
+        - in: query
+          name: page_number
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: page_size
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            default: 25
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AdminCaseAudioResponseItem'
+                    description: Returned if no page_limit or page_number is provided
+                  - $ref: './common.yaml#/components/schemas/paginated_list_common'
+                    description: Returned if page_limit or page_number is provided
+                    properties: #Fix data tab in spec
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AdminCaseAudioResponseItem'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Unauthorised Error
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_104"
+                title: "The requested case cannot be found"
+                status: 404
 components:
   schemas:
     add_case_request:
@@ -1104,6 +1190,29 @@ components:
         is_interpreter_used:
           type: boolean
           example: false
+
+    AdminCaseAudioResponseItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique media identifier
+        start_at:
+          type: string
+          format: date-time
+          description: start timestamp
+        end_at:
+          type: string
+          format: date-time
+          description: end timestamp
+        channel:
+          type: integer
+          example: 1
+        courtroom:
+          type: string
+          example: "1"
+          description: courtroom name
 
     IsDataAnonymised:
       type: boolean
