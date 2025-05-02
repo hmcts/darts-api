@@ -138,12 +138,10 @@ class CaseControllerAdminCasesIdAudiosGetTest extends PostgresIntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationDefault/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
-
     }
 
     @Test
-    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByChannelAndStartTimeDesc() throws Exception {
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByChannelDesc() throws Exception {
         // given
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
@@ -159,6 +157,90 @@ class CaseControllerAdminCasesIdAudiosGetTest extends PostgresIntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByChannelDesc/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
+    @Test
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByAudioIdDesc() throws Exception {
+        // given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
+            .queryParam("sort_by", "audioId")
+            .queryParam("sort_order", "desc")
+            .queryParam("page_number", "1")
+            .queryParam("page_size", "3");
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        // then
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByAudioIdDesc/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
+    @Test
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByCourtroomDesc() throws Exception {
+        // given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
+            .queryParam("sort_by", "courtroom")
+            .queryParam("sort_order", "desc")
+            .queryParam("page_number", "1")
+            .queryParam("page_size", "3");
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        // then
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByCourtroomDesc/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
+    @Test
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByStartTimeDesc() throws Exception {
+        // given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
+            .queryParam("sort_by", "audioId")
+            .queryParam("sort_order", "desc")
+            .queryParam("page_number", "1")
+            .queryParam("page_size", "3");
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        // then
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByStartTimeDesc/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
+    @Test
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByEndTimeDesc() throws Exception {
+        // given
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
+            .queryParam("sort_by", "audioId")
+            .queryParam("sort_order", "desc")
+            .queryParam("page_number", "1")
+            .queryParam("page_size", "3");
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        // then
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByEndTimeDesc/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
