@@ -281,16 +281,18 @@ class StandardEventHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        var persistedEvents = dartsDatabase.getEventRepository().findAll();
-        var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedEvents = dartsDatabase.getEventRepository().findAll();
+            var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
 
-        assertThat(eventLinkedCases)
-            .extracting("courtCase.caseNumber")
-            .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
+            assertThat(eventLinkedCases)
+                .extracting("courtCase.caseNumber")
+                .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
 
-        assertThat(eventLinkedCases)
-            .extracting("event.id")
-            .containsOnly(idFrom(persistedEvents));
+            assertThat(eventLinkedCases)
+                .extracting("event.id")
+                .containsOnly(idFrom(persistedEvents));
+        });
     }
 
     @Test
@@ -312,16 +314,18 @@ class StandardEventHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        var persistedEvents = dartsDatabase.getEventRepository().findAll();
-        var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedEvents = dartsDatabase.getEventRepository().findAll();
+            var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
 
-        assertThat(eventLinkedCases)
-            .extracting("courtCase.caseNumber")
-            .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
+            assertThat(eventLinkedCases)
+                .extracting("courtCase.caseNumber")
+                .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
 
-        assertThat(eventLinkedCases)
-            .extracting("event.id")
-            .containsOnly(idFrom(persistedEvents));
+            assertThat(eventLinkedCases)
+                .extracting("event.id")
+                .containsOnly(idFrom(persistedEvents));
+        });
     }
 
     private Long idFrom(List<EventEntity> eventEntities) {
