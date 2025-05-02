@@ -17,7 +17,6 @@ import uk.gov.service.notify.NotificationClientException;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.lenient;
