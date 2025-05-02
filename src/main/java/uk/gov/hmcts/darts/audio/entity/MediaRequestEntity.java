@@ -60,7 +60,7 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity implements Has
     @Audited
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = HEARING_ID_COLUMN_NAME, nullable = false)
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private HearingEntity hearing;

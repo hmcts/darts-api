@@ -3,7 +3,11 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
@@ -53,7 +57,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor_ = {@Autowired, @Lazy})
 @Slf4j
 @SuppressWarnings({
     "PMD.ExceptionAsFlowControl",
@@ -61,7 +65,7 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 })
 public class AudioTransformationServiceImpl implements AudioTransformationService {
     public static final int MAX_LOOPS = 200;//Arbitrary high number, just a glass ceiling which we wouldn't expect the loop to reach unless there is a problem.
-    private final MediaRequestService mediaRequestService;
+
     private final OutboundFileProcessor outboundFileProcessor;
     private final OutboundFileZipGenerator outboundFileZipGenerator;
     private final FileOperationService fileOperationService;
@@ -73,6 +77,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final UnstructuredDataHelper unstructuredDataHelper;
     private final CurrentTimeHelper currentTimeHelper;
     private final AudioTransformationServiceProperties config;
+    private final ProcessMediaRequestsForKeda processMediaRequestsForKeda;
 
 
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
@@ -106,121 +111,147 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             if (counter > MAX_LOOPS) {
                 throw new DartsException("ATS potentially stuck in a loop.");
             }
-            Optional<MediaRequestEntity> mediaRequestOpt = mediaRequestService.retrieveMediaRequestForProcessing(mediaRequestIdsProcessed);
-
-            if (mediaRequestOpt.isPresent()) {
-                MediaRequestEntity mediaRequestEntity = mediaRequestOpt.get();
-                mediaRequestIdsProcessed.add(mediaRequestEntity.getId());
-                processAudioRequest(mediaRequestEntity);
-            } else {
-                log.info("No more open requests found for ATS to process.");
+            if (!processMediaRequestsForKeda.process(mediaRequestIdsProcessed)) {
                 return;
             }
             counter++;
         }
     }
 
-    /**
-     * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
-     * storage.
-     */
-    @SuppressWarnings({"PMD.AvoidRethrowingException", "PMD.CyclomaticComplexity"})
-    private void processAudioRequest(MediaRequestEntity mediaRequestEntity) {
+    @Component
+    public class ProcessMediaRequestsForKeda {
+        private final MediaRequestService mediaRequestService;
+        private final ExternalObjectDirectoryService eodService;
+        private final TransformedMediaHelper transformedMediaHelper;
+        private final LogApi logApi;
 
-        Integer requestId = mediaRequestEntity.getId();
-        HearingEntity hearingEntity = mediaRequestEntity.getHearing();
-        String blobId;
+        @Autowired
+        public ProcessMediaRequestsForKeda(MediaRequestService mediaRequestService, ExternalObjectDirectoryService eodService,
+                                           TransformedMediaHelper transformedMediaHelper, LogApi logApi) {
+            this.mediaRequestService = mediaRequestService;
+            this.eodService = eodService;
+            this.transformedMediaHelper = transformedMediaHelper;
+            this.logApi = logApi;
+        }
 
-        try {
-            log.info("Starting processing for audio request id: {}. Status: {}", requestId, mediaRequestEntity.getStatus());
+        @Transactional
+        public boolean process(List<Integer> mediaRequestIdsProcessed) {
+            Optional<MediaRequestEntity> mediaRequestOpt = mediaRequestService.retrieveMediaRequestForProcessing(mediaRequestIdsProcessed);
 
-            AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
-            if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
-                audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
+            if (mediaRequestOpt.isPresent()) {
+                MediaRequestEntity mediaRequestEntity = mediaRequestOpt.get();
+                mediaRequestIdsProcessed.add(mediaRequestEntity.getId());
+                processAudioRequest(mediaRequestEntity);
+                return true;
+            } else {
+                log.info("No more open requests found for ATS to process.");
+                return false;
             }
+        }
 
-            List<MediaEntity> mediaEntitiesForHearing = getMediaByHearingId(hearingEntity.getId());
+        /**
+         * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
+         * storage.
+         */
+        @SuppressWarnings({"PMD.AvoidRethrowingException", "PMD.CyclomaticComplexity"})
+        private void processAudioRequest(MediaRequestEntity mediaRequestEntity) {
 
-            if (mediaEntitiesForHearing.isEmpty()) {
-                logApi.atsProcessingUpdate(mediaRequestEntity);
-                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
-            }
+            Integer requestId = mediaRequestEntity.getId();
+            HearingEntity hearingEntity = mediaRequestEntity.getHearing();
+            String blobId;
 
-            List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
-                mediaEntitiesForHearing,
-                mediaRequestEntity.getStartTime(),
-                mediaRequestEntity.getEndTime()
-            );
-
-            if (filteredMediaEntities.isEmpty()) {
-                logApi.atsProcessingUpdate(mediaRequestEntity);
-                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No filtered media present to process");
-            }
-
-            boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
-
-            if (!hasAllMediaBeenCopiedFromInboundStorage) {
-                log.info("Skipping process for audio request id: {} as not all the media from Inbound has reached Unstructured data store", requestId);
-                mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
-                return;
-            }
-
-            logApi.atsProcessingUpdate(mediaRequestEntity);
-
-            Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
-
-            List<AudioFileInfo> generatedAudioFiles;
             try {
-                generatedAudioFiles = generateFilesForRequestType(mediaRequestEntity, downloadedMedias);
-            } catch (ExecutionException | InterruptedException e) {
-                // For Sonar rule S2142
-                throw e;
-            }
+                log.info("Starting processing for audio request id: {}. Status: {}", requestId, mediaRequestEntity.getStatus());
 
-            int index = 1;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
-            final String fileNamePrefix = String.format(
-                "%s_%s_",
-                hearingEntity.getCourtCase().getCaseNumber(),
-                hearingEntity.getHearingDate().format(formatter)
-            );
-            for (AudioFileInfo generatedAudioFile : generatedAudioFiles) {
-                final String fileName = String.format(
-                    "%s%d.%s",
-                    fileNamePrefix,
-                    index++,
-                    audioRequestOutputFormat.getExtension()
-                );
-
-                try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
-                    blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, inputStream, fileName, generatedAudioFile);
-                } catch (NoSuchFileException nsfe) {
-                    log.error("No file found when trying to save to storage. {}", generatedAudioFile.getPath());
-                    throw nsfe;
+                AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
+                if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
+                    audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
                 }
-                log.debug("Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
-                          requestId, fileName, blobId);
-            }
-            mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity);
-            logApi.atsProcessingUpdate(mediaRequestEntity);
-            transformedMediaHelper.notifyUser(
-                mediaRequestEntity,
-                hearingEntity.getCourtCase(),
-                NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString()
-            );
-        } catch (Exception e) {
-            log.error("Exception occurred for request id {}.", requestId, e);
-            var updatedMediaRequest = mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
-            if (hearingEntity != null) {
-                transformedMediaHelper.notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(),
-                                                  NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
+                List<MediaEntity> mediaEntitiesForHearing = getMediaByHearingId(hearingEntity.getId());
+
+                if (mediaEntitiesForHearing.isEmpty()) {
+                    logApi.atsProcessingUpdate(mediaRequestEntity);
+                    throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
+                }
+
+                List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+                    mediaEntitiesForHearing,
+                    mediaRequestEntity.getStartTime(),
+                    mediaRequestEntity.getEndTime()
                 );
-            }
 
-            logApi.atsProcessingUpdate(updatedMediaRequest);
+                if (filteredMediaEntities.isEmpty()) {
+                    logApi.atsProcessingUpdate(mediaRequestEntity);
+                    throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No filtered media present to process");
+                }
+
+                boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
+
+                if (!hasAllMediaBeenCopiedFromInboundStorage) {
+                    log.info("Skipping process for audio request id: {} as not all the media from Inbound has reached Unstructured data store", requestId);
+                    mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
+                    return;
+                }
+
+                logApi.atsProcessingUpdate(mediaRequestEntity);
+
+                Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
+
+                List<AudioFileInfo> generatedAudioFiles;
+                try {
+                    generatedAudioFiles = generateFilesForRequestType(mediaRequestEntity, downloadedMedias);
+                } catch (ExecutionException | InterruptedException e) {
+                    // For Sonar rule S2142
+                    throw e;
+                }
+
+                int index = 1;
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
+                final String fileNamePrefix = String.format(
+                    "%s_%s_",
+                    hearingEntity.getCourtCase().getCaseNumber(),
+                    hearingEntity.getHearingDate().format(formatter)
+                );
+                for (AudioFileInfo generatedAudioFile : generatedAudioFiles) {
+                    final String fileName = String.format(
+                        "%s%d.%s",
+                        fileNamePrefix,
+                        index++,
+                        audioRequestOutputFormat.getExtension()
+                    );
+
+                    try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
+                        blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, inputStream, fileName, generatedAudioFile);
+                    } catch (NoSuchFileException nsfe) {
+                        log.error("No file found when trying to save to storage. {}", generatedAudioFile.getPath());
+                        throw nsfe;
+                    }
+                    log.debug("Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
+                              requestId, fileName, blobId);
+                }
+                mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity);
+                logApi.atsProcessingUpdate(mediaRequestEntity);
+                transformedMediaHelper.notifyUser(
+                    mediaRequestEntity,
+                    hearingEntity.getCourtCase(),
+                    NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString()
+                );
+            } catch (Exception e) {
+                log.error("Exception occurred for request id {}.", requestId, e);
+                var updatedMediaRequest = mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
+
+                if (hearingEntity != null) {
+                    transformedMediaHelper.notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(),
+                                                      NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
+                    );
+                }
+
+                logApi.atsProcessingUpdate(updatedMediaRequest);
+            }
         }
     }
+
 
     @Override
     public List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
