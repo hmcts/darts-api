@@ -186,7 +186,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ha
         if (CollectionUtils.isEmpty(hearings)) {
             this.courtroom = null;
         } else {
-            this.courtroom = DataUtil.orderByCreatedByAndId(hearings).getFirst().getCourtroom();
+            this.courtroom = DataUtil.orderHearingsByCreatedByAndId(hearings).getFirst().getCourtroom();
         }
     }
 
@@ -245,7 +245,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ha
         if (CollectionUtils.isEmpty(hearings)) {
             return null;
         }
-        return DataUtil.orderByCreatedByAndId(hearings).getFirst();
+        return DataUtil.orderHearingsByCreatedByAndId(hearings).getFirst();
     }
 
     /**

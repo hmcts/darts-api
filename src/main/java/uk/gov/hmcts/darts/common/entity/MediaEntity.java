@@ -207,6 +207,6 @@ public class MediaEntity extends CreatedModifiedBaseEntity
      */
     @Deprecated
     public HearingEntity getHearing() {
-        return DataUtil.orderByCreatedByAndId(hearings).getFirst();
+        return DataUtil.orderHearingsByCreatedByAndId(hearings).getFirst();
     }
 }
