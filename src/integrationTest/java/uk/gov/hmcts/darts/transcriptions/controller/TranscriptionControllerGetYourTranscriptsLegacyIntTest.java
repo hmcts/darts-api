@@ -88,6 +88,7 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionForOtherUser);
 
         TranscriptionUrgencyEntity urgencyEntity = transcriptionUrgencyRepository.findById(TranscriptionUrgencyEnum.STANDARD.getId()).orElseThrow();
+        // Creates a transcription without a linked hearing
         var transcriptionByRequester = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         transcriptionByRequester.setTranscriptionUrgency(urgencyEntity);
 
