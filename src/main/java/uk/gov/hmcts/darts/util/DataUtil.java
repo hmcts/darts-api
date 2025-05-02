@@ -5,6 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.task.runner.HasLongId;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,7 +66,21 @@ public final class DataUtil {
         metadata.setCourtroom(toUpperCase(StringUtils.trimToEmpty(metadata.getCourtroom())));
     }
 
+    public static List<HearingEntity> orderHearingsByCreatedByAndId(Collection<HearingEntity> data) {
+        return orderByCreatedByAndId(data, (o1, o2) -> {
+            int compare = o1.getHearingDate().compareTo(o2.getHearingDate());
+            if (compare == 0) {
+                return compare(o1, o2);
+            }
+            return compare;
+        });
+    }
+
     public static <T extends CreatedBy & HasId<?>> List<T> orderByCreatedByAndId(Collection<T> data) {
+        return orderByCreatedByAndId(data, DataUtil::compare);
+    }
+
+    public static <T extends CreatedBy & HasId<?>> List<T> orderByCreatedByAndId(Collection<T> data, Comparator<? super T> secondaryComparator) {
         List<T> sortedData = new ArrayList<>();
         if (CollectionUtils.isEmpty(data)) {
             return sortedData;
@@ -77,7 +93,7 @@ public final class DataUtil {
                 .sorted((o1, o2) -> {
                     int compare = o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime());
                     if (compare == 0) {
-                        return compare(o1, o2);
+                        return secondaryComparator.compare(o1, o2);
                     }
                     return compare;
                 })
@@ -91,7 +107,7 @@ public final class DataUtil {
         return sortedData;
     }
 
-    private static int compare(Object id, Object id1) {
+    static int compare(Object id, Object id1) {
         if (id instanceof HasIntegerId && id1 instanceof HasIntegerId) {
             return Integer.compare(((HasIntegerId) id).getId(), ((HasIntegerId) id1).getId());
         } else if (id instanceof HasLongId && id1 instanceof HasLongId) {
