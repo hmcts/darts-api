@@ -184,10 +184,11 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         eventDispatcher.receive(createSentencingRemarksDartsEventFor(SOME_COURTHOUSE));
 
+        transactionalUtil.executeInTransaction(() -> {
         var notifications = dartsDatabase.getNotificationFor(SOME_CASE_NUMBER);
         assertThat(notifications).extracting("emailAddress")
             .hasSameElementsAs(List.of(transcriber.getEmailAddress()));
-
+        });
     }
 
     @Test
