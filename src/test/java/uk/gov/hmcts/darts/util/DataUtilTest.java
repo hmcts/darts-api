@@ -6,16 +6,11 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
-import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
-import uk.gov.hmcts.darts.task.runner.HasId;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.HasLongId;
-import uk.gov.hmcts.darts.task.runner.dailylist.schemas.courtservice.OfficerStructure;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -195,7 +190,7 @@ class DataUtilTest {
 
 
     @Nested
-    class orderByCreatedByAndIdTest {
+    class OrderByCreatedByAndIdTest {
 
         @Test
         void orderByCreatedByAndId_shouldReturnEmptyList_whenDataIsNull() {

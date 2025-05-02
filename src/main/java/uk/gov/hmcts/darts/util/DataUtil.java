@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import static java.util.Objects.isNull;
 
@@ -78,9 +77,7 @@ public final class DataUtil {
     }
 
     public static <T extends CreatedBy & HasId<?>> List<T> orderByCreatedByAndId(Collection<T> data) {
-        return orderByCreatedByAndId(data, (o1, o2) -> {
-            return compare(o1, o2);
-        });
+        return orderByCreatedByAndId(data, DataUtil::compare);
     }
 
     public static <T extends CreatedBy & HasId<?>> List<T> orderByCreatedByAndId(Collection<T> data, Comparator<? super T> secondaryComparator) {
