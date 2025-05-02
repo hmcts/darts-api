@@ -154,27 +154,28 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
         var sentencingRemarksDartsEvent = createSentencingRemarksDartsEventFor(SOME_COURTHOUSE);
 
         eventDispatcher.receive(sentencingRemarksDartsEvent);
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedTranscriptions = dartsDatabase.getTranscriptionRepository().findAll();
+            assertThat(persistedTranscriptions).hasSize(1);
+            var persistedTranscription = persistedTranscriptions.getFirst();
+            assertThat(persistedTranscription.getStartTime()).isEqualTo(sentencingRemarksDartsEvent.getStartTime());
+            assertThat(persistedTranscription.getEndTime()).isEqualTo(sentencingRemarksDartsEvent.getEndTime());
+            assertThat(persistedTranscription.getHearing()).isNotNull();
+            assertThat(persistedTranscription.getCourtCase().getCaseNumber()).isEqualTo(SOME_CASE_NUMBER);
+            assertThat(persistedTranscription.getTranscriptionStatus().getId()).isEqualTo(APPROVED.getId());
+            assertThat(persistedTranscription.getTranscriptionUrgency().getId()).isEqualTo(WORKING_DAYS_12.getId());
 
-        var persistedTranscriptions = dartsDatabase.getTranscriptionRepository().findAll();
-        assertThat(persistedTranscriptions).hasSize(1);
-        var persistedTranscription = persistedTranscriptions.getFirst();
-        assertThat(persistedTranscription.getStartTime()).isEqualTo(sentencingRemarksDartsEvent.getStartTime());
-        assertThat(persistedTranscription.getEndTime()).isEqualTo(sentencingRemarksDartsEvent.getEndTime());
-        assertThat(persistedTranscription.getHearing()).isNotNull();
-        assertThat(persistedTranscription.getCourtCase().getCaseNumber()).isEqualTo(SOME_CASE_NUMBER);
-        assertThat(persistedTranscription.getTranscriptionStatus().getId()).isEqualTo(APPROVED.getId());
-        assertThat(persistedTranscription.getTranscriptionUrgency().getId()).isEqualTo(WORKING_DAYS_12.getId());
+            var transcriptionWorkflows = dartsDatabase.getTranscriptionWorkflowRepository().findAll().stream()
+                .filter(t -> SOME_CASE_NUMBER.equals(t.getTranscription().getCourtCase().getCaseNumber()))
+                .toList();
 
-        var transcriptionWorkflows = dartsDatabase.getTranscriptionWorkflowRepository().findAll().stream()
-            .filter(t -> SOME_CASE_NUMBER.equals(t.getTranscription().getCourtCase().getCaseNumber()))
-            .toList();
+            assertThat(transcriptionWorkflows).extracting("transcriptionStatus.id")
+                .hasSameElementsAs(List.of(REQUESTED.getId(), APPROVED.getId()));
 
-        assertThat(transcriptionWorkflows).extracting("transcriptionStatus.id")
-            .hasSameElementsAs(List.of(REQUESTED.getId(), APPROVED.getId()));
-
-        var transcriptionComments = dartsDatabase.getTranscriptionCommentRepository().findAll();
-        assertThat(transcriptionComments).hasSize(1);
-        assertThat(transcriptionComments.getFirst().getComment()).isEqualTo("Transcription Automatically approved");
+            var transcriptionComments = dartsDatabase.getTranscriptionCommentRepository().findAll();
+            assertThat(transcriptionComments).hasSize(1);
+            assertThat(transcriptionComments.getFirst().getComment()).isEqualTo("Transcription Automatically approved");
+        });
     }
 
     @Test
@@ -185,9 +186,9 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
         eventDispatcher.receive(createSentencingRemarksDartsEventFor(SOME_COURTHOUSE));
 
         transactionalUtil.executeInTransaction(() -> {
-        var notifications = dartsDatabase.getNotificationFor(SOME_CASE_NUMBER);
-        assertThat(notifications).extracting("emailAddress")
-            .hasSameElementsAs(List.of(transcriber.getEmailAddress()));
+            var notifications = dartsDatabase.getNotificationFor(SOME_CASE_NUMBER);
+            assertThat(notifications).extracting("emailAddress")
+                .hasSameElementsAs(List.of(transcriber.getEmailAddress()));
         });
     }
 

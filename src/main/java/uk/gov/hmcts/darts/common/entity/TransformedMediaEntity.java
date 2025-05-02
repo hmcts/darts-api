@@ -39,7 +39,7 @@ public class TransformedMediaEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "trm_gen", sequenceName = "trm_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mer_id", foreignKey = @ForeignKey(name = "trm_media_request_fk"), nullable = false)
     private MediaRequestEntity mediaRequest;
 
