@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
-import uk.gov.hmcts.darts.cases.model.PaginatedListCommon;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
@@ -36,11 +35,9 @@ import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DataUtil;
-import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -156,15 +153,14 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = CASE_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
-    public ResponseEntity<PaginatedListCommon> casesCaseIdEventsGet(
+    public ResponseEntity<CasesCaseIdEventsGet200Response> casesCaseIdEventsGet(
         Integer caseId,
-        List<String> sortBy,
-        List<String> sortOrder,
         Integer pageNumber,
-        Integer pageSize
+        Integer pageSize,
+        List<String> sortBy,
+        List<String> sortOrder
     ) {
         PaginationDto<Event> paginationDto = new PaginationDto<>(
-            CasesCaseIdEventsGet200PaginatedResponse::new,
             pageNumber,
             pageSize,
             PaginationDto.toSortBy(sortBy),
@@ -173,18 +169,8 @@ public class CaseController implements CasesApi {
 
         return new ResponseEntity<>(
             caseService.getEventsByCaseId(caseId, paginationDto)
-                .asClass(PaginatedListCommon.class), HttpStatus.OK);
-    }
-
-    public static class CasesCaseIdEventsGet200PaginatedResponse extends PaginatedList<Event>
-        implements CasesCaseIdEventsGet200Response {
-    }
-
-    public static class CasesCaseIdEventsGet200PaginatedResponseList extends ArrayList<Event>
-        implements CasesCaseIdEventsGet200Response {
-        public CasesCaseIdEventsGet200PaginatedResponseList(List<Event> events) {
-            super(events);
-        }
+                .mapToPaginatedListCommon(new CasesCaseIdEventsGet200Response(), CasesCaseIdEventsGet200Response::setData),
+            HttpStatus.OK);
     }
 
     @Override

@@ -28,6 +28,10 @@ public class PaginationDto<T> {
     List<String> sortBy;
     List<Sort.Direction> sortDirection;
 
+    public PaginationDto(Integer pageNumber, Integer pageSize, List<String> sortBy, List<Sort.Direction> sortDirectio) {
+        this(PaginatedList<T>::new, pageNumber, pageSize, sortBy, sortDirectio);
+    }
+
     @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     public static List<Sort.Direction> toSortDirection(List<String> sortOrder) {
         if (sortOrder == null) {
