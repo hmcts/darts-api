@@ -27,7 +27,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTes
 
 @Slf4j
 @AutoConfigureMockMvc
-class CaseControllerAdminCasesIdAudiosGetTest extends PostgresIntegrationBase {
+class CaseControllerAdminCasesIdAudiosGetIntTest extends PostgresIntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/cases/{id}/audios";
     private static final String COURTROOM_NAME = "COURTROOM 1";
