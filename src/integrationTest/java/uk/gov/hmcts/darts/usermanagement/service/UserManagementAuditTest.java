@@ -30,11 +30,13 @@ class UserManagementAuditTest extends IntegrationBase {
 
         var user = createUser(true);
 
-        var createUserActivity = findAuditActivity("Create User", dartsDatabase.findAudits());
-        assertThat(createUserActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
+        transactionalUtil.executeInTransaction(() -> {
+            var createUserActivity = findAuditActivity("Create User", dartsDatabase.findAudits());
+            assertThat(createUserActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var userAccountRevisions = dartsDatabase.findUserAccountRevisionsFor(user.getId());
-        assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+            var userAccountRevisions = dartsDatabase.findUserAccountRevisionsFor(user.getId());
+            assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+        });
     }
 
     @Test
@@ -44,11 +46,13 @@ class UserManagementAuditTest extends IntegrationBase {
 
         userManagementService.modifyUser(existingUser.getId(), new UserPatch().active(false));
 
-        var deactivateUserActivity = findAuditActivity("Deactivate User", dartsDatabase.findAudits());
-        assertThat(deactivateUserActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
+        transactionalUtil.executeInTransaction(() -> {
+            var deactivateUserActivity = findAuditActivity("Deactivate User", dartsDatabase.findAudits());
+            assertThat(deactivateUserActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var userAccountRevisions = dartsDatabase.findUserAccountRevisionsFor(existingUser.getId());
-        assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            var userAccountRevisions = dartsDatabase.findUserAccountRevisionsFor(existingUser.getId());
+            assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+        });
     }
 
     @Test
@@ -57,12 +61,13 @@ class UserManagementAuditTest extends IntegrationBase {
         var inactiveUser = someInactiveUserExists();
 
         userManagementService.modifyUser(inactiveUser.getId(), new UserPatch().active(true));
+        transactionalUtil.executeInTransaction(() -> {
+            var reactivateUserActivity = findAuditActivity("Reactivate User", dartsDatabase.findAudits());
+            assertThat(reactivateUserActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var reactivateUserActivity = findAuditActivity("Reactivate User", dartsDatabase.findAudits());
-        assertThat(reactivateUserActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
-
-        var userAccountRevisions = dartsDatabase.findUserAccountRevisionsFor(inactiveUser.getId());
-        assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            var userAccountRevisions = dartsDatabase.findUserAccountRevisionsFor(inactiveUser.getId());
+            assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+        });
     }
 
     @Test
@@ -71,12 +76,13 @@ class UserManagementAuditTest extends IntegrationBase {
         var existingUser = someUserWithDefaultsExists();
 
         userManagementService.modifyUser(existingUser.getId(), new UserPatch().fullName("some-new-name"));
+        transactionalUtil.executeInTransaction(() -> {
+            var updateUserActivity = findAuditActivity("Update User", dartsDatabase.findAudits());
+            assertThat(updateUserActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var updateUserActivity = findAuditActivity("Update User", dartsDatabase.findAudits());
-        assertThat(updateUserActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
-
-        var userAccountRevisions = dartsDatabase.findUserAccountRevisionsFor(existingUser.getId());
-        assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            var userAccountRevisions = dartsDatabase.findUserAccountRevisionsFor(existingUser.getId());
+            assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+        });
     }
 
     private UserWithId someInactiveUserExists() {

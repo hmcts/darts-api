@@ -25,11 +25,11 @@ public class AuditEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "aud_gen", sequenceName = "aud_seq", allocationSize = 1)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "aua_id", nullable = false)
     private AuditActivityEntity auditActivity;
 

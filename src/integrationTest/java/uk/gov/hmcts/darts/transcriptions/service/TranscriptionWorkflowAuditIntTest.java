@@ -58,16 +58,17 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
             createTranscriptionResponse.getTranscriptionId(),
             new UpdateTranscriptionRequest().transcriptionStatusId(7).workflowComment("new comment"),
             true);
+        transactionalUtil.executeInTransaction(() -> {
+            var auditActivity = findAuditActivity("Amend Transcription Workflow", dartsDatabase.findAudits());
+            assertThat(auditActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
+            assertThat(auditActivity.getCourtCase().getId()).isEqualTo(transcriptionRequestDetails.getCaseId());
 
-        var auditActivity = findAuditActivity("Amend Transcription Workflow", dartsDatabase.findAudits());
-        assertThat(auditActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
-        assertThat(auditActivity.getCourtCase().getId()).isEqualTo(transcriptionRequestDetails.getCaseId());
+            var transcriptionWorkflowRevisions = dartsDatabase.findTranscriptionWorkflowRevisionsFor(createTranscriptionResponse.getTranscriptionId());
+            assertThat(transcriptionWorkflowRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
 
-        var transcriptionWorkflowRevisions = dartsDatabase.findTranscriptionWorkflowRevisionsFor(createTranscriptionResponse.getTranscriptionId());
-        assertThat(transcriptionWorkflowRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
-
-        var transcriptionCommentRevisions = dartsDatabase.findTranscriptionCommentRevisionsFor(createTranscriptionResponse.getTranscriptionId());
-        assertThat(transcriptionCommentRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+            var transcriptionCommentRevisions = dartsDatabase.findTranscriptionCommentRevisionsFor(createTranscriptionResponse.getTranscriptionId());
+            assertThat(transcriptionCommentRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+        });
     }
 
     @Test
@@ -115,15 +116,16 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
         assertEquals(AWAITING_AUTHORISATION.getId(), transcriptionWorkflows.get(0).getTranscriptionStatus().getId());
         assertEquals(REQUESTED.getId(), transcriptionWorkflows.get(1).getTranscriptionStatus().getId());
 
-        var auditActivity = findAuditActivity("Amend Transcription Workflow", dartsDatabase.findAudits());
-        assertThat(auditActivity.getUser().getId()).isEqualTo(adminUser.getId());
+        transactionalUtil.executeInTransaction(() -> {
+            var auditActivity = findAuditActivity("Amend Transcription Workflow", dartsDatabase.findAudits());
+            assertThat(auditActivity.getUser().getId()).isEqualTo(adminUser.getId());
 
-        var transcriptionWorkflowRevisions = dartsDatabase.findTranscriptionWorkflowRevisionsFor(transcription.getId());
-        assertThat(transcriptionWorkflowRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+            var transcriptionWorkflowRevisions = dartsDatabase.findTranscriptionWorkflowRevisionsFor(transcription.getId());
+            assertThat(transcriptionWorkflowRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
 
-        var transcriptionCommentRevisions = dartsDatabase.findTranscriptionCommentRevisionsFor(transcription.getId());
-        assertThat(transcriptionCommentRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
-
+            var transcriptionCommentRevisions = dartsDatabase.findTranscriptionCommentRevisionsFor(transcription.getId());
+            assertThat(transcriptionCommentRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+        });
     }
 
     private AuditEntity findAuditActivity(String activity, List<AuditEntity> audits) {
