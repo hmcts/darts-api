@@ -238,7 +238,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         }
 
         @Test
-        void casesGetEvents_usingPaginatedCrieria_WithNoOrder_shouldReturnPaginatedResultsUsingDefaultOrder_10Resultslimit3Page1() throws Exception {
+        void casesGetEvents_usingPaginatedCriteria_WithNoOrder_shouldReturnPaginatedResultsUsingDefaultOrder_10Resultslimit3Page1() throws Exception {
             MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
                 .queryParam("page_number", "1")
                 .queryParam("page_size", "3");
@@ -302,7 +302,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         }
 
         @Test
-        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderHearingDateAsc_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+        void casesGetEvents_usingPaginatedCriteria_WithCustomOrderHearingDateAsc_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
             throws Exception {
             MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
                 .queryParam("page_number", "1")
@@ -325,7 +325,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         }
 
         @Test
-        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderHearingDateDesc_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+        void casesGetEvents_usingPaginatedCriteria_WithCustomOrderHearingDateDesc_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
             throws Exception {
             MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
                 .queryParam("page_number", "1")
@@ -349,7 +349,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
 
 
         @Test
-        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderTimestamp_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+        void casesGetEvents_usingPaginatedCriteria_WithCustomOrderTimestamp_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
             throws Exception {
             MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
                 .queryParam("page_number", "1")
@@ -372,7 +372,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         }
 
         @Test
-        void casesGetEvents_usingPaginatedCrieria_WithCustomOrderEventName_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+        void casesGetEvents_usingPaginatedCriteria_WithCustomOrderEventName_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
             throws Exception {
             MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
                 .queryParam("page_number", "1")

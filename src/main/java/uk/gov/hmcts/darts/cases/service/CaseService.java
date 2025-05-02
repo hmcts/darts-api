@@ -34,8 +34,6 @@ public interface CaseService {
 
     CourtCaseEntity getCourtCaseById(Integer caseId);
 
-    List<Event> getEventsByCaseId(Integer caseId);
-
     PaginatedList<Event> getEventsByCaseId(Integer caseId, PaginationDto<Event> paginationDto);
 
     List<Transcript> getTranscriptsByCaseId(Integer caseId);

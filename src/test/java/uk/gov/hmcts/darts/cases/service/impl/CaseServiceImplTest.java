@@ -79,7 +79,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createEventWith;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
@@ -383,44 +382,6 @@ class CaseServiceImplTest {
         assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
     }
 
-    @Test
-    void testGetEventsByCaseId() throws Exception {
-        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
-        CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
-
-        when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
-        OffsetDateTime hearingDate = OffsetDateTime.parse("2024-07-01T12:00Z");
-
-        HearingEntity hearing = CommonTestDataUtil.createHearing(
-            courtCaseEntity,
-            courtroomEntity,
-            hearingDate.toLocalDate(),
-            true
-        );
-
-        List<EventEntity> events = Lists.newArrayList(createEventWith("eventName", "event", hearing, hearingDate));
-        when(eventRepository.findAllByCaseId(courtCaseEntity.getId())).thenReturn(events);
-        when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
-        List<Event> result = caseService.getEventsByCaseId(courtCaseEntity.getId());
-
-        String actualResponse = objectMapper.writeValueAsString(result);
-
-        String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/testGetEventsByCase/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void testGetEventsByCaseIdIsAnonymous() {
-        CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
-        courtCaseEntity.setDataAnonymised(true);
-        when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
-
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> caseService.getEventsByCaseId(courtCaseEntity.getId()));
-        assertThat(exception.getMessage()).isEqualTo("Case has expired.");
-        assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
-    }
 
     @Test
     void updateCase_WithNonExistingCourtroomAndMatchingHearingDate() {
@@ -641,7 +602,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void getEventsByCaseIdPaginated_whenCaseIsExpited_shouldThrowError() {
+    void getEventsByCaseIdPaginated_whenCaseIsExpired_shouldThrowError() {
         final int caseId = 123;
         CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
         courtCaseEntity.setDataAnonymised(true);

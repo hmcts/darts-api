@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
+import uk.gov.hmcts.darts.cases.model.PaginatedListCommon;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
@@ -155,7 +156,7 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = CASE_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
-    public ResponseEntity<CasesCaseIdEventsGet200Response> casesCaseIdEventsGet(
+    public ResponseEntity<PaginatedListCommon> casesCaseIdEventsGet(
         Integer caseId,
         List<String> sortBy,
         List<String> sortOrder,
@@ -170,12 +171,9 @@ public class CaseController implements CasesApi {
             PaginationDto.toSortDirection(sortOrder)
         );
 
-        if (paginationDto.shouldPaginate()) {
-            return new ResponseEntity<>(
-                caseService.getEventsByCaseId(caseId, paginationDto)
-                    .asClass(CasesCaseIdEventsGet200PaginatedResponse.class), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(new CasesCaseIdEventsGet200PaginatedResponseList(caseService.getEventsByCaseId(caseId)), HttpStatus.OK);
+        return new ResponseEntity<>(
+            caseService.getEventsByCaseId(caseId, paginationDto)
+                .asClass(PaginatedListCommon.class), HttpStatus.OK);
     }
 
     public static class CasesCaseIdEventsGet200PaginatedResponse extends PaginatedList<Event>

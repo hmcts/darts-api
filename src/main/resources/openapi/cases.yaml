@@ -313,12 +313,14 @@ paths:
           schema:
             type: integer
             minimum: 1
+          required: true
         - in: query
           name: page_size
           schema:
             type: integer
             minimum: 1
             default: 25
+          required: true
       responses:
         '200':
           description: OK
@@ -326,11 +328,9 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/events'
-                    description: Returned if no page_limit or page_number is provided
                   - $ref: './common.yaml#/components/schemas/paginated_list_common'
                     description: Returned if page_limit or page_number is provided
-                    properties:  #Fix data tab in spec
+                    properties: #Fix data tab in spec
                       data:
                         type: array
                         items:
@@ -794,10 +794,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/judge'
-    events:
-      type: array
-      items:
-        $ref: '#/components/schemas/event'
     event:
       type: object
       properties:

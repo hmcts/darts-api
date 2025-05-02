@@ -12,9 +12,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
-import uk.gov.hmcts.darts.cases.model.CasesCaseIdEventsGet200Response;
 import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.PaginatedListCommon;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -127,7 +127,7 @@ class CaseControllerTest {
 
         doReturn(response).when(caseService).getEventsByCaseId(any(), any());
 
-        ResponseEntity<CasesCaseIdEventsGet200Response> responseEntity = caseController
+        ResponseEntity<PaginatedListCommon> responseEntity = caseController
             .casesCaseIdEventsGet(caseId, sortBy, sortOrder, pageNumber, pageSize);
 
         assertThat(responseEntity.getBody()).isEqualTo(response);
@@ -139,20 +139,6 @@ class CaseControllerTest {
         assertThat(paginationDto.getPageSize()).isEqualTo(pageSize);
         assertThat(paginationDto.getSortBy()).isEqualTo(PaginationDto.toSortBy(sortBy));
         assertThat(paginationDto.getSortDirection()).isEqualTo(PaginationDto.toSortDirection(sortOrder));
-        verifyNoMoreInteractions(caseService);
-    }
-
-    @Test
-    void casesCaseIdEventsGet_doesNotHasPageNumber_shouldUseNonPaginatedRoute() {
-        final int caseId = 123;
-        List<Event> responseObj = List.of(mock(Event.class), mock(Event.class), mock(Event.class));
-        doReturn(responseObj).when(caseService).getEventsByCaseId(any());
-
-        ResponseEntity<CasesCaseIdEventsGet200Response> responseEntity = caseController.casesCaseIdEventsGet(caseId, null, null, null, null);
-
-        assertThat(responseEntity.getBody())
-            .isEqualTo(new CaseController.CasesCaseIdEventsGet200PaginatedResponseList(responseObj));
-        verify(caseService).getEventsByCaseId(caseId);
         verifyNoMoreInteractions(caseService);
     }
 }
