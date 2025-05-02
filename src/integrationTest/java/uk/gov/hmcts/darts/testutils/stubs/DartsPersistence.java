@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionConfidenceCategoryMapperEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -108,7 +109,8 @@ import static java.util.Objects.isNull;
 @Service
 @AllArgsConstructor
 @SuppressWarnings({
-    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
+    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity",
+    "PMD.AvoidReassigningParameters"})
 @Getter
 @Slf4j
 public class DartsPersistence {
@@ -182,7 +184,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public HearingEntity save(HearingEntity hearing) {
         hearing = (HearingEntity) preCheckPersist(hearing);
         hearing.setJudges(saveJudgeList(hearing.getJudges()));
@@ -198,7 +199,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
         annotationEntity = (AnnotationEntity) preCheckPersist(annotationEntity);
 
@@ -216,7 +216,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public CourthouseEntity save(CourthouseEntity courthouse) {
         courthouse = (CourthouseEntity) preCheckPersist(courthouse);
 
@@ -232,7 +231,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public CourtroomEntity save(CourtroomEntity courtroom) {
         courtroom = (CourtroomEntity) preCheckPersist(courtroom);
 
@@ -248,7 +246,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public MediaRequestEntity save(MediaRequestEntity mediaRequest) {
         mediaRequest = (MediaRequestEntity) preCheckPersist(mediaRequest);
 
@@ -279,7 +276,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public EventHandlerEntity save(EventHandlerEntity eventHandlerEntity) {
         eventHandlerEntity = (EventHandlerEntity) preCheckPersist(eventHandlerEntity);
 
@@ -331,7 +327,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public TranscriptionDocumentEntity save(TranscriptionDocumentEntity transcriptionDocumentEntity) {
         transcriptionDocumentEntity = (TranscriptionDocumentEntity) preCheckPersist(transcriptionDocumentEntity);
 
@@ -350,7 +345,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ObjectAdminActionEntity save(ObjectAdminActionEntity adminAction) {
         if (adminAction.getAnnotationDocument() != null) {
             save(adminAction.getAnnotationDocument());
@@ -370,7 +364,6 @@ public class DartsPersistence {
 
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity eod) {
         eod = (ExternalObjectDirectoryEntity) preCheckPersist(eod);
 
@@ -401,7 +394,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public DefenceEntity save(DefenceEntity defence) {
         defence = (DefenceEntity) preCheckPersist(defence);
 
@@ -416,7 +408,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public DefendantEntity save(DefendantEntity defendant) {
         defendant = (DefendantEntity) preCheckPersist(defendant);
 
@@ -431,7 +422,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ProsecutorEntity save(ProsecutorEntity prosecutor) {
         prosecutor = (ProsecutorEntity) preCheckPersist(prosecutor);
 
@@ -446,7 +436,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public TranscriptionEntity save(TranscriptionEntity transcription) {
         transcription = (TranscriptionEntity) preCheckPersist(transcription);
 
@@ -476,7 +465,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public TranscriptionWorkflowEntity save(TranscriptionWorkflowEntity workflowEntity) {
         workflowEntity = (TranscriptionWorkflowEntity) preCheckPersist(workflowEntity);
 
@@ -499,7 +487,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public EventEntity save(EventEntity event) {
         event = (EventEntity) preCheckPersist(event);
 
@@ -514,7 +501,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public RetentionPolicyTypeEntity save(RetentionPolicyTypeEntity retentionPolicyType) {
         retentionPolicyType = (RetentionPolicyTypeEntity) preCheckPersist(retentionPolicyType);
 
@@ -528,7 +514,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetention) {
         caseManagementRetention = (CaseManagementRetentionEntity) preCheckPersist(caseManagementRetention);
 
@@ -542,7 +527,6 @@ public class DartsPersistence {
         }
     }
 
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     @Transactional
     public UserAccountEntity save(UserAccountEntity userAccount) {
         userAccount = (UserAccountEntity) preCheckPersist(userAccount);
@@ -558,7 +542,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public AnnotationDocumentEntity save(AnnotationDocumentEntity annotationDocument) {
         annotationDocument = (AnnotationDocumentEntity) preCheckPersist(annotationDocument);
 
@@ -573,7 +556,6 @@ public class DartsPersistence {
         }
     }
 
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     @Transactional
     public JudgeEntity save(JudgeEntity judge) {
         judge = (JudgeEntity) preCheckPersist(judge);
@@ -588,7 +570,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public MediaEntity save(MediaEntity media) {
         preCheckPersist(media);
 
@@ -596,7 +577,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public CaseDocumentEntity save(CaseDocumentEntity caseDocumentEntity) {
         caseDocumentEntity = (CaseDocumentEntity) preCheckPersist(caseDocumentEntity);
 
@@ -611,7 +591,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public MediaEntity save(MediaEntity media, boolean processhHearing) {
         media = (MediaEntity) preCheckPersist(media);
 
@@ -632,7 +611,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public TransformedMediaEntity save(TransformedMediaEntity transformedMedia) {
         transformedMedia = (TransformedMediaEntity) preCheckPersist(transformedMedia);
 
@@ -649,7 +627,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public TranscriptionCommentEntity save(TranscriptionCommentEntity commentEntity) {
         commentEntity = (TranscriptionCommentEntity) preCheckPersist(commentEntity);
 
@@ -666,7 +643,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ArmRpoExecutionDetailEntity save(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         armRpoExecutionDetailEntity = (ArmRpoExecutionDetailEntity) preCheckPersist(armRpoExecutionDetailEntity);
 
@@ -682,7 +658,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ArmRpoStateEntity save(ArmRpoStateEntity armRpoStateEntity) {
         armRpoStateEntity = (ArmRpoStateEntity) preCheckPersist(armRpoStateEntity);
 
@@ -694,7 +669,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ArmRpoStatusEntity save(ArmRpoStatusEntity armRpoStatusEntity) {
         armRpoStatusEntity = (ArmRpoStatusEntity) preCheckPersist(armRpoStatusEntity);
 
@@ -706,7 +680,21 @@ public class DartsPersistence {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
+    public SecurityGroupEntity save(SecurityGroupEntity securityGroupEntity) {
+        securityGroupEntity = (SecurityGroupEntity) preCheckPersist(securityGroupEntity);
+
+        if (securityGroupEntity.getId() == null) {
+            securityGroupEntity.setCreatedById(Optional.ofNullable(securityGroupEntity.getCreatedById()).orElse(0));
+            securityGroupEntity.setLastModifiedById(Optional.ofNullable(securityGroupEntity.getLastModifiedById()).orElse(0));
+            return securityGroupRepository.save(securityGroupEntity);
+        } else {
+            entityManager.merge(securityGroupEntity);
+        }
+
+        return securityGroupEntity;
+    }
+
+    @Transactional
     public void saveAll(UserAccountEntity... userAccounts) {
         stream(userAccounts).forEach(user -> {
             user = (UserAccountEntity) preCheckPersist(user);
@@ -839,8 +827,6 @@ public class DartsPersistence {
         return objectToSave;
     }
 
-
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private DefenceEntity saveForCase(DefenceEntity defence) {
         defence = (DefenceEntity) preCheckPersist(defence);
 
@@ -852,7 +838,6 @@ public class DartsPersistence {
         return defence;
     }
 
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private DefendantEntity saveForCase(DefendantEntity defendant) {
         defendant = (DefendantEntity) preCheckPersist(defendant);
 
@@ -862,7 +847,6 @@ public class DartsPersistence {
         return defendant;
     }
 
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private ProsecutorEntity saveForCase(ProsecutorEntity prosecutor) {
         prosecutor = (ProsecutorEntity) preCheckPersist(prosecutor);
 
