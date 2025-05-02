@@ -67,6 +67,12 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         AdminGetVersionsByEventIdResponseResult responseResult = objectMapper.readValue(response.getResponse().getContentAsString(),
                                                                                         AdminGetVersionsByEventIdResponseResult.class);
 
+        currentEventEntity = transactionalUtil.executeInTransaction(() -> {
+            EventEntity event = dartsDatabase.getEventRepository().findById(eventEntityVersions.get(1).get(0).getId()).orElseThrow();
+            event.getEventType().getEventName();// to load the event type
+            event.getCourtroom().getCourthouse().getCourthouseName();// to load the courtroom & courthouse name
+            return event;
+        });
         // Then
         assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
         assertEquals(currentEventEntity.getLegacyObjectId(), responseResult.getCurrentVersion().getDocumentumId());
@@ -92,7 +98,12 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         assertEquals(currentEventEntity.getLastModifiedById(), responseResult.getCurrentVersion().getLastModifiedBy());
 
         // Previous version
-        EventEntity previousEventEntity = eventEntityVersions.get(1).get(1);
+        EventEntity previousEventEntity = transactionalUtil.executeInTransaction(() -> {
+            EventEntity event = dartsDatabase.getEventRepository().findById(eventEntityVersions.get(1).get(1).getId()).orElseThrow();
+            event.getEventType().getEventName();// to load the event type
+            event.getCourtroom().getCourthouse().getCourthouseName();// to load the courtroom & courthouse name
+            return event;
+        });
         assertEquals(1, responseResult.getPreviousVersions().size());
         assertEquals(previousEventEntity.getId(), responseResult.getPreviousVersions().getFirst().getId());
         assertEquals(previousEventEntity.getLegacyObjectId(), responseResult.getPreviousVersions().getFirst().getDocumentumId());
@@ -167,7 +178,6 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
         Map<Integer, List<EventEntity>> eventEntityVersions = eventStub.generateEventIdEventsIncludingZeroEventId(1, 2, false, EVENT_TS);
         CourtCaseEntity courtCase = dartsDatabase.createCase("courthouse", "1234567890");
         linkToCaseNumber(eventEntityVersions.get(0), courtCase);
-        EventEntity currentEventEntity = eventEntityVersions.get(0).get(0);
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
@@ -183,6 +193,14 @@ class EventsControllerAdminGetVersionsByEventIdTest extends IntegrationBase {
 
         // Then
         assertThat(responseResult.getPreviousVersions()).hasSize(0);
+
+
+        EventEntity currentEventEntity = transactionalUtil.executeInTransaction(() -> {
+            EventEntity event = dartsDatabase.getEventRepository().findById(eventEntityVersions.get(0).get(0).getId()).orElseThrow();
+            event.getEventType().getEventName();// to load the event type
+            event.getCourtroom().getCourthouse().getCourthouseName();// to load the courtroom & courthouse name
+            return event;
+        });
 
         assertEquals(currentEventEntity.getId(), responseResult.getCurrentVersion().getId());
         assertEquals(currentEventEntity.getLegacyObjectId(), responseResult.getCurrentVersion().getDocumentumId());

@@ -135,11 +135,15 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     }
 
     private List<EventEntity> getAllLogEventsMatchingText() {
-        return dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> LOG.equals(eventEntity.getEventType().getType()))
-            .filter(eventEntity -> SOME_TEXT.equals(eventEntity.getEventText()))
-            .toList();
+        return transactionalUtil.executeInTransaction(
+            () ->
+                dartsDatabase.getAllEvents()
+                    .stream()
+                    .filter(eventEntity -> LOG.equals(eventEntity.getEventType().getType()))
+                    .filter(eventEntity -> SOME_TEXT.equals(eventEntity.getEventText()))
+                    .peek(eventEntity -> eventEntity.getCourtroom().getCourthouse().getCourthouseName())
+                    .toList()
+        );
     }
 
     @Test

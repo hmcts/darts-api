@@ -38,9 +38,12 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     @Test
     void mapsOneReportingRestrictionsCorrectly() {
-        var reportingRestrictions = createEventsWithDefaults(1).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+        var reportingRestrictions = dartsDatabase.getTransactionalUtil()
+            .executeInTransaction(() -> createEventsWithDefaults(1).stream()
+                .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+                .peek(eventEntity -> eventEntity.getEventType().getEventName())//Load the event type
+                .toList());
+
         var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
@@ -56,9 +59,12 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     @Test
     void mapsMultipleReportingRestrictionsValuesCorrectly() {
-        var reportingRestrictions = createEventsWithDifferentTimestamps(3).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+        var reportingRestrictions = dartsDatabase.getTransactionalUtil()
+            .executeInTransaction(() -> createEventsWithDefaults(3).stream()
+                .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+                .peek(eventEntity -> eventEntity.getEventType().getEventName())//Load the event type
+                .toList());
+
         var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
