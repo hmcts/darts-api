@@ -241,7 +241,7 @@ public class CaseController implements CasesApi {
         List<String> sortOrder
     ) {
         PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
-            AdminCaseIdAudioGetPaginatedResponse::new,
+            PaginatedList<AdminCaseAudioResponseItem>::new,
             pageNumber,
             pageSize,
             PaginationDto.toSortBy(sortBy),
@@ -252,10 +252,6 @@ public class CaseController implements CasesApi {
             adminCaseService.getAudiosByCaseId(caseId, paginationDto)
                 .asClass(AdminCasesIdAudiosGet200Response.class), HttpStatus.OK);
 
-    }
-
-    public static class AdminCaseIdAudioGetPaginatedResponse extends PaginatedList<AdminCaseAudioResponseItem>
-        implements AdminCasesIdAudiosGet200Response {
     }
 
     void validateUppercase(String courthouse, String courtroom) {

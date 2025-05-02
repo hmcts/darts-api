@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import uk.gov.hmcts.darts.cases.controller.CaseController;
 import uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -59,7 +58,7 @@ class AdminCaseServiceImplTest {
         mediaEntity.setMediaLinkedCaseList(List.of(mediaLinkedCase));
 
         PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
-            CaseController.AdminCaseIdAudioGetPaginatedResponse::new,
+            PaginatedList<AdminCaseAudioResponseItem>::new,
             1,
             5,
             PaginationDto.toSortBy(List.of("audioId", "courtroom", "startTime", "endTime", "channel")),
@@ -120,7 +119,7 @@ class AdminCaseServiceImplTest {
         when(caseService.getCourtCaseById(caseId)).thenReturn(courtCaseEntity);
         when(mediaRepository.findByCaseIdAndIsCurrentTruePageable(eq(caseId), any(Pageable.class))).thenReturn(mediaPage);
         PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
-            CaseController.AdminCaseIdAudioGetPaginatedResponse::new,
+            PaginatedList<AdminCaseAudioResponseItem>::new,
             1,
             3,
             PaginationDto.toSortBy(List.of("audioId", "courtroom", "startTime", "endTime", "channel")),
