@@ -180,7 +180,7 @@ class CasesFunctionalTest extends FunctionalTest {
         Response getCaseResponse = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(CASES_PATH + "/" + caseId + EVENTS_PATH "?page_number=1&page_size=10"))
+            .baseUri(getUri(CASES_PATH + "/" + caseId + EVENTS_PATH + "?page_number=1&page_size=10"))
             .get()
             .then()
             .extract().response();
