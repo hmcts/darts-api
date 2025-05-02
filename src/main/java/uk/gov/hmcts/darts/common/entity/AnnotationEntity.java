@@ -66,7 +66,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity implements HasIn
     @Column(name = "deleted_ts")
     private OffsetDateTime deletedTimestamp;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = AnnotationDocumentEntity_.ANNOTATION)
+    @OneToMany(mappedBy = AnnotationDocumentEntity_.ANNOTATION)
     private List<AnnotationDocumentEntity> annotationDocuments = new ArrayList<>();
 
     @ManyToMany

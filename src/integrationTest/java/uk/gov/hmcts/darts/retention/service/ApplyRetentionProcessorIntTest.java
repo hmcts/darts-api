@@ -52,18 +52,21 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.getFirst();
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
+
         applyRetentionProcessor.processApplyRetention(1000);
 
-        caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
-        caseRetentionEntity = caseRetentionEntities.getFirst();
+        transactionalUtil.executeInTransaction(() -> {
+            List<CaseRetentionEntity> caseRetentionEntitiesPostUpdate = caseRetentionRepository.findAllByCourtCase(courtCase);
+            CaseRetentionEntity caseRetentionEntityPostUpdate = caseRetentionEntitiesPostUpdate.getFirst();
 
-        assertEquals(1, caseRetentionEntities.size());
-        assertTrue(caseRetentionEntity.getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
-        assertEquals(caseRetentionEntity.getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
-        assertEquals(CaseRetentionStatus.COMPLETE.name(), caseRetentionEntity.getCurrentState());
+            assertEquals(1, caseRetentionEntitiesPostUpdate.size());
+            assertTrue(caseRetentionEntityPostUpdate.getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
+            assertEquals(caseRetentionEntityPostUpdate.getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
+            assertEquals(CaseRetentionStatus.COMPLETE.name(), caseRetentionEntityPostUpdate.getCurrentState());
 
-        assertTrue(caseRetentionEntity.getCourtCase().isRetentionUpdated());
-        assertEquals(0, caseRetentionEntity.getCourtCase().getRetentionRetries());
+            assertTrue(caseRetentionEntityPostUpdate.getCourtCase().isRetentionUpdated());
+            assertEquals(0, caseRetentionEntityPostUpdate.getCourtCase().getRetentionRetries());
+        });
     }
 
     @Test
@@ -77,16 +80,18 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
         applyRetentionProcessor.processApplyRetention(1000);
 
-        caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
-        caseRetentionEntity = caseRetentionEntities.getFirst();
+        transactionalUtil.executeInTransaction(() -> {
+            List<CaseRetentionEntity> caseRetentionEntitiesPostUpdate = caseRetentionRepository.findAllByCourtCase(courtCase);
+            CaseRetentionEntity caseRetentionEntityPostUpdate = caseRetentionEntitiesPostUpdate.getFirst();
 
-        assertEquals(1, caseRetentionEntities.size());
-        assertTrue(caseRetentionEntity.getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
-        assertEquals(caseRetentionEntity.getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
-        assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
+            assertEquals(1, caseRetentionEntitiesPostUpdate.size());
+            assertTrue(caseRetentionEntityPostUpdate.getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
+            assertEquals(caseRetentionEntityPostUpdate.getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
+            assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntityPostUpdate.getCurrentState());
 
-        assertFalse(caseRetentionEntity.getCourtCase().isRetentionUpdated());
-        assertNull(caseRetentionEntity.getCourtCase().getRetentionRetries());
+            assertFalse(caseRetentionEntityPostUpdate.getCourtCase().isRetentionUpdated());
+            assertNull(caseRetentionEntityPostUpdate.getCourtCase().getRetentionRetries());
+        });
     }
 
     @Test
