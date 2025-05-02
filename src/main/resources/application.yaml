@@ -144,7 +144,7 @@ darts:
     audio-transformation-service:
       loop-cutoff-minutes: 15 #ATS pod will not pick up any more requests if this many minutes has passed since it started.
     trim-workspace: ${user.home}/audiotransform/trim
-    max-handheld-audio-files: 10
+    max-handheld-audio-files: ${MAX_HANDHELD_AUDIO_FILES:10}
   azure:
     active-directory-b2c-base-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI:https://hmctsstgextid.b2clogin.com}
     active-directory-b2c-auth-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}
