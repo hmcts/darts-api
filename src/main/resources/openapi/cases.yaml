@@ -327,10 +327,10 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
+                allOf:
                   - $ref: './common.yaml#/components/schemas/paginated_list_common'
                     description: Returned if page_limit or page_number is provided
-                    properties: #Fix data tab in spec
+                  - properties:
                       data:
                         type: array
                         items:
