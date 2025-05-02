@@ -47,7 +47,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     @Override
     @SuppressWarnings({
         "PMD.AvoidInstantiatingObjectsInLoops",
-        "PMD.CognitiveComplexity",
         "PMD.CyclomaticComplexity",
         "PMD.DoNotUseThreads"//TODO - refactor to avoid using Thread.sleep() when this is next edited
     })
@@ -59,8 +58,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
         List<Long> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                                                          EodHelper.armLocation(),
-                                                                                          taskBatchSize);
+                                                                                       EodHelper.armLocation(),
+                                                                                       taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
@@ -144,6 +143,10 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             return;
         }
 
+        updateSuccessfulOrRecoverBatchItems(userAccount, batchItems);
+    }
+
+    private void updateSuccessfulOrRecoverBatchItems(UserAccountEntity userAccount, ArmBatchItems batchItems) {
         for (var batchItem : batchItems.getItems()) {
             if (batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null) {
                 unstructuredToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
