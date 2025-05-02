@@ -179,8 +179,10 @@ class CasesFunctionalTest extends FunctionalTest {
     void getEventsByCaseId() {
         Response getCaseResponse = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
+            .queryParam("page_number", "1")
+            .queryParam("page_size", "1")
             .when()
-            .baseUri(getUri(CASES_PATH + "/" + caseId + EVENTS_PATH + "?page_number=1&page_size=10"))
+            .baseUri(getUri(CASES_PATH + "/" + caseId + EVENTS_PATH))
             .get()
             .then()
             .extract().response();
