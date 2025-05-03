@@ -75,12 +75,14 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
                                               Optional.of(transcriptionUrgency), systemUser);
 
-        final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
-        assertEquals(REQUESTED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
-
-        requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
-        dartsDatabase.save(requestedTranscriptionEntity);
+        final TranscriptionEntity requestedTranscriptionEntity = transactionalUtil.executeInTransaction(
+            () -> {
+                TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
+                    .findById(transcription.getId()).orElseThrow();
+                assertEquals(REQUESTED.getId(), transcriptionEntity.getTranscriptionStatus().getId());
+                transcriptionEntity.setCreatedDateTime(CREATED_DATE);
+                return dartsDatabase.save(transcriptionEntity);
+            });
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -126,12 +128,14 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, awaitingAuthTranscriptionStatus,
                                               Optional.of(transcriptionUrgency), systemUser);
 
-        final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
-        assertEquals(AWAITING_AUTHORISATION.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
-
-        requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
-        dartsDatabase.save(requestedTranscriptionEntity);
+        final TranscriptionEntity requestedTranscriptionEntity = transactionalUtil.executeInTransaction(
+            () -> {
+                TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
+                    .findById(transcription.getId()).orElseThrow();
+                assertEquals(AWAITING_AUTHORISATION.getId(), transcriptionEntity.getTranscriptionStatus().getId());
+                transcriptionEntity.setCreatedDateTime(CREATED_DATE);
+                return dartsDatabase.save(transcriptionEntity);
+            });
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -155,12 +159,14 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, approvedTranscriptionStatus,
                                               Optional.of(transcriptionUrgency), systemUser);
 
-        final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
-        assertEquals(APPROVED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
-
-        requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
-        dartsDatabase.save(requestedTranscriptionEntity);
+        final TranscriptionEntity requestedTranscriptionEntity = transactionalUtil.executeInTransaction(
+            () -> {
+                TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
+                    .findById(transcription.getId()).orElseThrow();
+                assertEquals(APPROVED.getId(), transcriptionEntity.getTranscriptionStatus().getId());
+                transcriptionEntity.setCreatedDateTime(CREATED_DATE);
+                return dartsDatabase.save(transcriptionEntity);
+            });
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -184,12 +190,14 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, rejectedTranscriptionStatus,
                                               Optional.of(transcriptionUrgency), systemUser);
 
-        final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
-        assertEquals(REJECTED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
-
-        requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
-        dartsDatabase.save(requestedTranscriptionEntity);
+        final TranscriptionEntity requestedTranscriptionEntity = transactionalUtil.executeInTransaction(
+            () -> {
+                TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
+                    .findById(transcription.getId()).orElseThrow();
+                assertEquals(REJECTED.getId(), transcriptionEntity.getTranscriptionStatus().getId());
+                transcriptionEntity.setCreatedDateTime(CREATED_DATE);
+                return dartsDatabase.save(transcriptionEntity);
+            });
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -212,12 +220,15 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, withTranscriberTranscriptionStatus,
                                               Optional.of(transcriptionUrgency), systemUser);
 
-        final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
-        assertEquals(WITH_TRANSCRIBER.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
+        final TranscriptionEntity requestedTranscriptionEntity = transactionalUtil.executeInTransaction(
+            () -> {
+                TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
+                    .findById(transcription.getId()).orElseThrow();
+                assertEquals(WITH_TRANSCRIBER.getId(), transcriptionEntity.getTranscriptionStatus().getId());
+                transcriptionEntity.setCreatedDateTime(CREATED_DATE);
+                return dartsDatabase.save(transcriptionEntity);
+            });
 
-        requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
-        dartsDatabase.save(requestedTranscriptionEntity);
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -241,12 +252,14 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, completeTranscriptionStatus,
                                               Optional.of(transcriptionUrgency), systemUser);
 
-        final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
-        assertEquals(COMPLETE.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
-
-        requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
-        dartsDatabase.save(requestedTranscriptionEntity);
+        final TranscriptionEntity requestedTranscriptionEntity = transactionalUtil.executeInTransaction(
+            () -> {
+                TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
+                    .findById(transcription.getId()).orElseThrow();
+                assertEquals(COMPLETE.getId(), transcriptionEntity.getTranscriptionStatus().getId());
+                transcriptionEntity.setCreatedDateTime(CREATED_DATE);
+                return dartsDatabase.save(transcriptionEntity);
+            });
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -269,12 +282,14 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, closedTranscriptionStatus,
                                               Optional.of(transcriptionUrgency), systemUser);
 
-        final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
-        assertEquals(CLOSED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
-
-        requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
-        dartsDatabase.save(requestedTranscriptionEntity);
+        final TranscriptionEntity requestedTranscriptionEntity = transactionalUtil.executeInTransaction(
+            () -> {
+                TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionRepository()
+                    .findById(transcription.getId()).orElseThrow();
+                assertEquals(CLOSED.getId(), transcriptionEntity.getTranscriptionStatus().getId());
+                transcriptionEntity.setCreatedDateTime(CREATED_DATE);
+                return dartsDatabase.save(transcriptionEntity);
+            });
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();

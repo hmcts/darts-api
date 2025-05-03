@@ -96,7 +96,6 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(AWAITING_AUTHORISATION.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
-        dartsDatabase.save(requestedTranscriptionEntity);
         var adminUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         // When
