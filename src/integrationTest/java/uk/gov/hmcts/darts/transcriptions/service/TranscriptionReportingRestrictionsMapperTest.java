@@ -44,9 +44,10 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
                 .peek(eventEntity -> eventEntity.getEventType().getEventName())//Load the event type
                 .toList());
 
-        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
-        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-
+        var transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+            return dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        });
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
         var mappedRestrictions = transcriptionResponse.getCaseReportingRestrictions();
@@ -65,9 +66,10 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
                 .peek(eventEntity -> eventEntity.getEventType().getEventName())//Load the event type
                 .toList());
 
-        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
-        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-
+        var transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+            return dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        });
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
         var mappedRestrictions = transcriptionResponse.getCaseReportingRestrictions();
@@ -84,9 +86,11 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
         var expectedOrderedTs = orderedTsFrom(reportingRestrictions);
-        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
-        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
+        var transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+            return dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        });
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
         rangeClosed(0, 9).forEach(index -> {
@@ -97,22 +101,23 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     @Test
     void includesReportingRestrictionsLifted() {
-        var event1 = dartsDatabase.getEventStub().createDefaultEvent();
-        event1.setTimestamp(now().minusDays(1));
-        var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
+        TranscriptionEntity transcription = transactionalUtil.executeInTransaction(() -> {
+            var event1 = dartsDatabase.getEventStub().createDefaultEvent();
+            event1.setTimestamp(now().minusDays(1));
+            var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
 
-        var event2 = dartsDatabase.getEventStub().createDefaultEvent();
-        event2.setTimestamp(now());
-        var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
+            var event2 = dartsDatabase.getEventStub().createDefaultEvent();
+            event2.setTimestamp(now());
+            var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
-        var hearingEntity = dartsDatabase.saveEventsForHearing(
-            dartsDatabase.getHearingStub().createMinimalHearing(),
-            reportingRestriction,
-            reportingRestrictionLifted
-        );
-        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-
-        var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
+            var hearingEntity = dartsDatabase.saveEventsForHearing(
+                dartsDatabase.getHearingStub().createMinimalHearing(),
+                reportingRestriction,
+                reportingRestrictionLifted
+            );
+            return dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        });
+        var transcriptionResponse = transcriptionService.getTranscription(transcription.getId());
 
         assertThat(transcriptionResponse.getCaseReportingRestrictions()).hasSize(2);
         assertThat(transcriptionResponse.getCaseReportingRestrictions()).extracting("eventName").contains("Restrictions lifted");

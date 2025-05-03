@@ -526,8 +526,10 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
         assertEquals(1, transformedMediaResponses.length);
 
-        assertResponseEquality(transformedMediaResponses[0],
-                               getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId(), transcriptionDocumentResults));
+        transactionalUtil.executeInTransaction(() -> {
+            assertResponseEquality(transformedMediaResponses[0],
+                                   getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId()));
+        });
     }
 
     @Test
@@ -562,8 +564,10 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
         assertEquals(1, transformedMediaResponses.length);
 
-        assertResponseEquality(transformedMediaResponses[0],
-                               getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId(), transcriptionDocumentResults));
+        transactionalUtil.executeInTransaction(() -> {
+            assertResponseEquality(transformedMediaResponses[0],
+                                   getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId()));
+        });
     }
 
 
@@ -615,9 +619,11 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
         assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
 
-        for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
-        }
+        transactionalUtil.executeInTransaction(() -> {
+            for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
+                assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId()));
+            }
+        });
     }
 
     @Test
@@ -642,9 +648,11 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
         assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
 
-        for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
-        }
+        transactionalUtil.executeInTransaction(() -> {
+            for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
+                assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId()));
+            }
+        });
     }
 
     @Test
@@ -703,8 +711,10 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         SearchTranscriptionDocumentResponse[] transformedMediaResponses
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
         assertEquals(1, transformedMediaResponses.length);
-        assertResponseEquality(transformedMediaResponses[0],
-                               getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId(), transcriptionDocumentResults));
+        transactionalUtil.executeInTransaction(() -> {
+            assertResponseEquality(transformedMediaResponses[0],
+                                   getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId()));
+        });
 
     }
 
@@ -726,9 +736,11 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
         assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
 
-        for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
-        }
+        transactionalUtil.executeInTransaction(() -> {
+            for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
+                assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId()));
+            }
+        });
     }
 
 
@@ -776,9 +788,11 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
 
 
-        for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
-        }
+        transactionalUtil.executeInTransaction(() -> {
+            for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
+                assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId()));
+            }
+        });
     }
 
 
@@ -811,9 +825,11 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
 
 
-        for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
-        }
+        transactionalUtil.executeInTransaction(() -> {
+            for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
+                assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId()));
+            }
+        });
     }
 
     @Test
@@ -976,8 +992,8 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
     }
 
-    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Long id, List<TranscriptionDocumentEntity> transformedMediaEntityList) {
-        return transformedMediaEntityList.stream().filter(e -> e.getId().equals(id)).findFirst().get();
+    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Long id) {
+        return dartsDatabase.getTranscriptionDocumentRepository().findById(id).orElseThrow();
     }
 
     private void assertResponseEquality(SearchTranscriptionDocumentResponse response, TranscriptionDocumentEntity entity) {

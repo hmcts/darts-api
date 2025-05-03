@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -119,20 +120,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Component
-    public class ProcessMediaRequestsForKeda {
+    @AllArgsConstructor
+    public static class ProcessMediaRequestsForKeda {
         private final MediaRequestService mediaRequestService;
         private final ExternalObjectDirectoryService eodService;
         private final TransformedMediaHelper transformedMediaHelper;
         private final LogApi logApi;
+        private AudioTransformationServiceImpl audioTransformationService;
 
-        @Autowired
-        public ProcessMediaRequestsForKeda(MediaRequestService mediaRequestService, ExternalObjectDirectoryService eodService,
-                                           TransformedMediaHelper transformedMediaHelper, LogApi logApi) {
-            this.mediaRequestService = mediaRequestService;
-            this.eodService = eodService;
-            this.transformedMediaHelper = transformedMediaHelper;
-            this.logApi = logApi;
-        }
 
         @Transactional
         public boolean process(List<Integer> mediaRequestIdsProcessed) {
@@ -168,14 +163,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                     audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
                 }
 
-                List<MediaEntity> mediaEntitiesForHearing = getMediaByHearingId(hearingEntity.getId());
+                List<MediaEntity> mediaEntitiesForHearing = audioTransformationService.getMediaByHearingId(hearingEntity.getId());
 
                 if (mediaEntitiesForHearing.isEmpty()) {
                     logApi.atsProcessingUpdate(mediaRequestEntity);
                     throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
                 }
 
-                List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+                List<MediaEntity> filteredMediaEntities = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
                     mediaEntitiesForHearing,
                     mediaRequestEntity.getStartTime(),
                     mediaRequestEntity.getEndTime()
@@ -196,11 +191,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
                 logApi.atsProcessingUpdate(mediaRequestEntity);
 
-                Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
+                Map<MediaEntity, Path> downloadedMedias = audioTransformationService.downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
                 List<AudioFileInfo> generatedAudioFiles;
                 try {
-                    generatedAudioFiles = generateFilesForRequestType(mediaRequestEntity, downloadedMedias);
+                    generatedAudioFiles = audioTransformationService.generateFilesForRequestType(mediaRequestEntity, downloadedMedias);
                 } catch (ExecutionException | InterruptedException e) {
                     // For Sonar rule S2142
                     throw e;

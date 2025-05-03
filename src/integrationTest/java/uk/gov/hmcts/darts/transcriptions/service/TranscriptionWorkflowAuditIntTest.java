@@ -74,38 +74,42 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
     @Test
     void updateTranscriptionAdmin_Succeeds_WhenManualTranscriptionWorkflowTransitionsFromAwaitingAuthToRequestThenMovedToAwaitingAuth() {
         // Given
-        var systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            "SOME_CASE_ID",
-            "SOME_COURTHOUSE",
-            "SOME_COURTROOM",
-            LocalDateTime.now()
-        );
-
-        var hearing = dartsDatabase.save(hearingEntity);
-        var courtroom = hearing.getCourtroom();
-        TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
-        TranscriptionStatusEntity awaitingAuthTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(AWAITING_AUTHORISATION);
-        final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, awaitingAuthTranscriptionStatus,
-                                              Optional.of(transcriptionUrgency), systemUser, courtroom);
-
-        final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
-        assertEquals(AWAITING_AUTHORISATION.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
-
         var adminUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        var transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            var systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+            HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                "SOME_CASE_ID",
+                "SOME_COURTHOUSE",
+                "SOME_COURTROOM",
+                LocalDateTime.now()
+            );
 
+            var hearing = dartsDatabase.save(hearingEntity);
+            var courtroom = hearing.getCourtroom();
+            TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
+            TranscriptionStatusEntity awaitingAuthTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(
+                AWAITING_AUTHORISATION);
+            final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
+
+            TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
+                .createAndSaveTranscriptionEntity(hearing, transcriptionType, awaitingAuthTranscriptionStatus,
+                                                  Optional.of(transcriptionUrgency), systemUser, courtroom);
+
+            final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
+                .findById(transcription.getId()).orElseThrow();
+            assertEquals(AWAITING_AUTHORISATION.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
+
+
+            return transcription;
+        });
         // When
         transcriptionService.updateTranscriptionAdmin(
-            transcription.getId(),
+            transcriptionEntity.getId(),
             new UpdateTranscriptionRequest().transcriptionStatusId(REQUESTED.getId()).workflowComment("new comment"),
             true);
 
         // Then
-        var updatedTranscription = dartsDatabase.getTranscriptionRepository().findById(transcription.getId()).orElseThrow();
+        var updatedTranscription = dartsDatabase.getTranscriptionRepository().findById(transcriptionEntity.getId()).orElseThrow();
         assertEquals(updatedTranscription.getTranscriptionStatus().getId(), AWAITING_AUTHORISATION.getId());
 
         var transcriptionWorkflows = dartsDatabase.getTranscriptionWorkflowRepository()
@@ -119,10 +123,10 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
             var auditActivity = findAuditActivity("Amend Transcription Workflow", dartsDatabase.findAudits());
             assertThat(auditActivity.getUser().getId()).isEqualTo(adminUser.getId());
 
-            var transcriptionWorkflowRevisions = dartsDatabase.findTranscriptionWorkflowRevisionsFor(transcription.getId());
+            var transcriptionWorkflowRevisions = dartsDatabase.findTranscriptionWorkflowRevisionsFor(transcriptionEntity.getId());
             assertThat(transcriptionWorkflowRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
 
-            var transcriptionCommentRevisions = dartsDatabase.findTranscriptionCommentRevisionsFor(transcription.getId());
+            var transcriptionCommentRevisions = dartsDatabase.findTranscriptionCommentRevisionsFor(transcriptionEntity.getId());
             assertThat(transcriptionCommentRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
         });
     }
@@ -146,5 +150,5 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
             .startDateTime(startTime)
             .endDateTime(startTime.plusHours(1));
     }
-    
+
 }

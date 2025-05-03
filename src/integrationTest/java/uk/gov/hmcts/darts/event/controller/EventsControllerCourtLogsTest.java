@@ -174,26 +174,27 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Test
     void courtLogsGetResultMatch() throws Exception {
+        HearingEntity hearing = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
+            dartsDatabase.save(event);
 
-        var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
-        dartsDatabase.save(event);
+            // generate a hearing that we do not expect to be returned. This test is to validate that we only return the applicable hearings.
+            // // Relates to verification of https://tools.hmcts.net/jira/browse/DMP-3967
+            HearingEntity hearingEntityNotToBeReturned = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                "casenumbernotreturned",
+                SOME_COURTHOUSE,
+                SOME_COURTROOM,
+                DateConverterUtil.toLocalDateTime(SOME_DATE_TIME));
+            dartsDatabase.saveEventsForHearing(hearingEntityNotToBeReturned, event);
 
-        // generate a hearing that we do not expect to be returned. This test is to validate that we only return the applicable hearings.
-        // // Relates to verification of https://tools.hmcts.net/jira/browse/DMP-3967
-        HearingEntity hearingEntityNotToBeReturned = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            "casenumbernotreturned",
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME));
-        dartsDatabase.saveEventsForHearing(hearingEntityNotToBeReturned, event);
-
-        String courthouseName = hearingEntity.getCourtCase().getCourthouse().getDisplayName();
-        String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
-
-        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
-
+            setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
+            hearingEntity.getCourtCase().getCourthouse().getDisplayName();//Load the entity to avoid lazy loading issues
+            return hearingEntity;
+        });
+        String caseNumber = hearing.getCourtCase().getCaseNumber();
+        String courthouseName = hearing.getCourtCase().getCourthouse().getCourthouseName();
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, courthouseName)
             .queryParam(CASE_NUMBER, caseNumber)
@@ -212,28 +213,30 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Test
     void courtlogsGetOnlyExpectedResults() throws Exception {
+        HearingEntity hearing = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
+            var event = createEventWith(LOG, "test", hearingEntity, eventTime);
+            var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
+            var event3 = createEventWith("Event", "ShouldNotShow", hearingEntity, eventTime);
+            var event4 = createEventWith("Event", "ShouldAlsoNotShow", hearingEntity, eventTime);
 
-        var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
-        var event = createEventWith(LOG, "test", hearingEntity, eventTime);
-        var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
-        var event3 = createEventWith("Event", "ShouldNotShow", hearingEntity, eventTime);
-        var event4 = createEventWith("Event", "ShouldAlsoNotShow", hearingEntity, eventTime);
+            dartsDatabase.save(event);
+            dartsDatabase.save(event2);
+            dartsDatabase.save(event3);
+            dartsDatabase.save(event4);
 
-        dartsDatabase.save(event);
-        dartsDatabase.save(event2);
-        dartsDatabase.save(event3);
-        dartsDatabase.save(event4);
 
-        String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
-        String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
+            setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
-        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
+            hearingEntity.getCourtCase().getCourthouse().getCourthouseName();//Load the entity to avoid lazy loading issues
 
+            return hearingEntity;
+        });
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam(COURTHOUSE, courthouseName)
-            .queryParam(CASE_NUMBER, caseNumber)
+            .queryParam(COURTHOUSE, hearing.getCourtCase().getCourthouse().getCourthouseName())
+            .queryParam(CASE_NUMBER, hearing.getCourtCase().getCaseNumber())
             .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
             .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
@@ -244,32 +247,31 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Test
     void courtLogsWrongCaseNumber() throws Exception {
+        String displayName = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
+            var event = createEventWith(LOG, "eventText", hearingEntity, eventTime);
+            var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
 
-        var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
-        var event = createEventWith(LOG, "eventText", hearingEntity, eventTime);
-        var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
+            HearingEntity hearingEntity1 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                NEW_CASE,
+                SOME_COURTHOUSE,
+                "CR1",
+                DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+            );
 
-        HearingEntity hearingEntity1 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            NEW_CASE,
-            SOME_COURTHOUSE,
-            "CR1",
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
-        );
+            var eventHearing = createEventWith(LOG, "eventText", hearingEntity1, eventTime);
+            var eventHearing2 = createEventWith(LOG, "eventText2", hearingEntity1, eventTime);
 
-        var eventHearing = createEventWith(LOG, "eventText", hearingEntity1, eventTime);
-        var eventHearing2 = createEventWith(LOG, "eventText2", hearingEntity1, eventTime);
+            dartsDatabase.save(event);
+            dartsDatabase.save(event2);
+            dartsDatabase.save(eventHearing);
+            dartsDatabase.save(eventHearing2);
 
-        dartsDatabase.save(event);
-        dartsDatabase.save(event2);
-        dartsDatabase.save(eventHearing);
-        dartsDatabase.save(eventHearing2);
-
-        String displayName = hearingEntity.getCourtCase().getCourthouse().getDisplayName();
-
-        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
-
+            setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
+            return hearingEntity.getCourtCase().getCourthouse().getDisplayName();
+        });
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, SOME_COURTHOUSE)
             .queryParam(CASE_NUMBER, NEW_CASE)

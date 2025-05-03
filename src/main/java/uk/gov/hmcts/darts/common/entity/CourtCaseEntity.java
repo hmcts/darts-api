@@ -64,7 +64,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
     /**
      * The reporting restriction maps to the EventHandlerEntity.event_name
      */
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = EVH_ID)
     private EventHandlerEntity reportingRestrictions;
 
@@ -80,7 +80,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
     @Column(name = CASE_NUMBER, nullable = false)
     private String caseNumber;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = CTH_ID)
     private CourthouseEntity courthouse;
 
@@ -99,13 +99,13 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
     @Column(name = RETENTION_RETRIES)
     private Integer retentionRetries;
 
-    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefendantEntity> defendantList = new ArrayList<>();
 
-    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<ProsecutorEntity> prosecutorList = new ArrayList<>();
 
-    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefenceEntity> defenceList = new ArrayList<>();
 
     @Column(name = IS_DELETED)
@@ -124,7 +124,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
     @OneToMany(mappedBy = CaseRetentionEntity_.COURT_CASE)
     private List<CaseRetentionEntity> caseRetentionEntities = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "case_judge_ae",
         joinColumns = {@JoinColumn(name = "cas_id")},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})

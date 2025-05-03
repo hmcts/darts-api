@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -43,8 +42,7 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
     private TranscriptionEntity transcriptionEntity;
 
 
-    @BeforeEach
-    public void beforeAll() {
+    private void setup() {
         accountEntity = UserAccountTestData.minimalUserAccount();
         userAccountRepository.save(accountEntity);
 
@@ -65,6 +63,7 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
     @Test
     void testFindWorkflowForUserWithTranscriptionState() {
         transactionalUtil.executeInTransaction(() -> {
+            setup();
             List<TranscriptionEntity> fndTranscriptionLst = transcriptionWorkflowRepository
                 .findWorkflowForUserWithTranscriptionState(accountEntity.getId(), transcriptionEntity.getTranscriptionStatus().getId());
             assertEquals(1, fndTranscriptionLst.size());
@@ -85,6 +84,7 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
     @Test
     void testFindTranscriptionForUser() {
         transactionalUtil.executeInTransaction(() -> {
+            setup();
             List<TranscriptionEntity> fndTranscriptionLst = transcriptionRepository
                 .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
                                                        null);
@@ -106,6 +106,7 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
     @Test
     void testFindTranscriptionForUserWithCreatedDateNowAndBeyond() {
         transactionalUtil.executeInTransaction(() -> {
+            setup();
             List<TranscriptionEntity> fndTranscriptionLst = transcriptionRepository
                 .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
                                                        transcriptionEntity.getCreatedDateTime());

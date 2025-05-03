@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.hearings.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -45,9 +44,8 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     private static final String SOME_DATE = "2023-01-01";
 
-    @BeforeEach
-    void setUp() {
-
+    @SuppressWarnings("PMD.UnitTestShouldUseBeforeAnnotation")//False positive needs to be called within same trasnaction
+    private void setUp() {
         var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         courtCase.addProsecutor(createProsecutorForCase(courtCase));
         courtCase.addDefendant(createDefendantForCase(courtCase));
@@ -66,7 +64,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     @Test
     void okGet() throws Exception {
-
+        transactionalUtil.executeInTransaction(this::setUp);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
@@ -87,11 +85,13 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     @Test
     void getEvents_shouldBeOrderedByTimestamp() throws Exception {
-
-        EventEntity eventEntity = dartsDatabase.createEvent(hearingEntity);
-        eventEntity.setTimestamp(event.getTimestamp().plusMinutes(1));
-        eventEntity.setEventId(2);
-        dartsDatabase.save(eventEntity);
+        transactionalUtil.executeInTransaction(() -> {
+            setUp();
+            EventEntity eventEntity = dartsDatabase.createEvent(hearingEntity);
+            eventEntity.setTimestamp(event.getTimestamp().plusMinutes(1));
+            eventEntity.setEventId(2);
+            dartsDatabase.save(eventEntity);
+        });
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
@@ -121,6 +121,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     @Test
     void errorGetNotFound() throws Exception {
+        transactionalUtil.executeInTransaction(this::setUp);
         int hearingId = -1;
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingId);
@@ -140,6 +141,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     @Test
     void hearingEventsGetEndpointShouldReturnForbiddenError() throws Exception {
+        transactionalUtil.executeInTransaction(this::setUp);
 
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
