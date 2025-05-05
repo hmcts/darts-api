@@ -426,7 +426,7 @@ dependencies {
     implementation 'net.javacrumbs.shedlock:shedlock-spring:6.5.0'
     implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.5.0'
 
-    implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.8'
+    implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
     implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.4.0'
