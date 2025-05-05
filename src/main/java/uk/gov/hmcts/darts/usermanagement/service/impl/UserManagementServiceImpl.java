@@ -206,9 +206,6 @@ public class UserManagementServiceImpl implements UserManagementService {
             userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
         }
 
-        userAccountEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
-        userAccountEntity.setLastModifiedDateTime(OffsetDateTime.now());
-
         return rolledBackTranscriptionsList;
     }
 
