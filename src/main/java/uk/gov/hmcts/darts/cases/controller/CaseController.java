@@ -38,6 +38,7 @@ import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DataUtil;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.time.LocalDate;
@@ -250,7 +251,7 @@ public class CaseController implements CasesApi {
 
         return new ResponseEntity<>(
             adminCaseService.getAudiosByCaseId(caseId, paginationDto)
-                .asClass(AdminCasesIdAudiosGet200Response.class), HttpStatus.OK);
+                .mapToPaginatedListCommon(new AdminCasesIdAudiosGet200Response(), AdminCasesIdAudiosGet200Response::setData), HttpStatus.OK);
 
     }
 
