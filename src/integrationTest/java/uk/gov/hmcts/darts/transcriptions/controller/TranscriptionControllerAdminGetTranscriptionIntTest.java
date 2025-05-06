@@ -372,6 +372,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                        "display_name": "COURT NAME:1POST COURTHOUSE"
                      },
                      "hearing": {
+                       "id": 3,
                        "hearing_date": "%DATE_3%"
                      },
                      "is_manual_transcription": false,
@@ -388,6 +389,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                        "display_name": "COURT NAME:1POST COURTHOUSE"
                      },
                      "hearing": {
+                       "id": 2,
                        "hearing_date": "%DATE_2%"
                      },
                      "is_manual_transcription": false,
@@ -438,6 +440,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                         "display_name": "COURT NAME:1POST COURTHOUSE"
                       },
                       "hearing": {
+                        "id": 4,
                         "hearing_date": "%DATE_4%"
                       },
                       "is_manual_transcription": false,
@@ -454,6 +457,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                         "display_name": "COURT NAME:1POST COURTHOUSE"
                       },
                       "hearing": {
+                        "id": 3,
                         "hearing_date": "%DATE_3%"
                       },
                       "is_manual_transcription": false,
@@ -470,6 +474,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                         "display_name": "COURT NAME:1POST COURTHOUSE"
                       },
                       "hearing": {
+                        "id": 2,
                         "hearing_date": "%DATE_2%"
                       },
                       "is_manual_transcription": false,
@@ -486,6 +491,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                         "display_name": "COURT NAME:1POST COURTHOUSE"
                       },
                       "hearing": {
+                        "id": 1,
                         "hearing_date": "%DATE_1%"
                       },
                       "is_manual_transcription": false,

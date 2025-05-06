@@ -168,6 +168,7 @@ class AdminTranscriptionServiceTest {
             LocalDate.parse("2020-01-02"),
             LocalDate.parse("2020-01-03"),
             LocalDate.parse("2020-01-04"));
+        assertThat(searchResponses).extracting("hearingId").containsExactly(16, 17, 18);
         assertThat(searchResponses).extracting("requestedAt").containsExactly(
             OffsetDateTime.parse("2021-02-03T00:00:00Z"),
             OffsetDateTime.parse("2021-02-04T00:00:00Z"),
@@ -383,6 +384,7 @@ class AdminTranscriptionServiceTest {
             seed + 9,
             "case-number-" + seed,
             seed + 10,
+            seed + 15,
             LocalDate.parse("2020-01-01").plusDays(seed),
             OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed),
             seed + 20,
