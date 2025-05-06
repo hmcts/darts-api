@@ -359,6 +359,7 @@ public class TranscriptionResponseMapper {
         if (transcriptionDocumentResponse.hearingDate() != null) {
             SearchTranscriptionDocumentResponseHearing hearingResponse = new SearchTranscriptionDocumentResponseHearing();
             hearingResponse.setHearingDate(transcriptionDocumentResponse.hearingDate());
+            hearingResponse.setId(transcriptionDocumentResponse.hearingId());
             transformedMediaDetails.setHearing(hearingResponse);
         }
 

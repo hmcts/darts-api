@@ -8,6 +8,7 @@ public record TranscriptionSearchResult(
     Integer caseId,
     String caseNumber,
     Integer courthouseId,
+    Integer hearingId,
     LocalDate hearingDate,
     OffsetDateTime requestedAt,
     Integer transcriptionStatusId,

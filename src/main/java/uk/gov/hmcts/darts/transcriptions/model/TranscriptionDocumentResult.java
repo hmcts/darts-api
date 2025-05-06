@@ -7,6 +7,7 @@ public record TranscriptionDocumentResult(
     Long transcriptionId,
     Integer caseId,
     String caseNumber,
+    Integer hearingId,
     Integer hearingCaseId,
     String hearingCaseNumber,
     String courthouseDisplayName,
