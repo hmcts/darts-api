@@ -160,6 +160,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         transcriptionSearchResponse.setCaseId(transcriptionSearchResult.caseId());
         transcriptionSearchResponse.setCaseNumber(transcriptionSearchResult.caseNumber());
         transcriptionSearchResponse.setCourthouseId(transcriptionSearchResult.courthouseId());
+        transcriptionSearchResponse.setHearingId(transcriptionSearchResult.hearingId());
         transcriptionSearchResponse.setHearingDate(transcriptionSearchResult.hearingDate());
         transcriptionSearchResponse.setRequestedAt(transcriptionSearchResult.requestedAt());
         transcriptionSearchResponse.setIsManualTranscription(transcriptionSearchResult.isManualTranscription());

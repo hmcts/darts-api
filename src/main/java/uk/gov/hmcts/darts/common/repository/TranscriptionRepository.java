@@ -120,6 +120,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              coalesce(hcc.id, tcc.id),
              coalesce(hcc.caseNumber, tcc.caseNumber),
              coalesce(hcth.id, tcth.id),
+             h.id,
              coalesce(h.hearingDate, t.hearingDate),
              t.createdDateTime,
              ts.id,

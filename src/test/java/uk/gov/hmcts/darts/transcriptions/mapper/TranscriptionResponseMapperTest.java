@@ -458,6 +458,7 @@ class TranscriptionResponseMapperTest {
         String caseNumber = "case" + caseId;
 
         Integer hearingCaseId = caseId + 2;
+        Integer hearingId = caseId + 3;
         String hearingCaseNumber = "hearing case" + hearingCaseId;
 
         String courthouseDisplayNumber = "courthouse" + caseId;
@@ -473,6 +474,7 @@ class TranscriptionResponseMapperTest {
                                                                              transactionId,
                                                                              caseId,
                                                                              caseNumber,
+                                                                             hearingId,
                                                                              hearingCaseId,
                                                                              hearingCaseNumber,
                                                                              courthouseDisplayNumber,
@@ -487,6 +489,7 @@ class TranscriptionResponseMapperTest {
         assertEquals(transactionId, response.getTranscriptionId());
         assertEquals(hearingCaseNumber, response.getCase().getCaseNumber());
         assertEquals(hearingDate, response.getHearing().getHearingDate());
+        assertEquals(hearingId, response.getHearing().getId());
 
         // ensure we prioritise the courthouse directly mapped to the transcription not the hearing courthouse
         assertEquals(hearingcourthouseDisplayName, response.getCourthouse().getDisplayName());
@@ -503,6 +506,7 @@ class TranscriptionResponseMapperTest {
         String caseNumber = "case" + caseId;
 
         Integer hearingCaseId = caseId + 2;
+        Integer hearingId = caseId + 3;
         String hearingCaseNumber = "hearing case" + hearingCaseId;
 
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
@@ -516,6 +520,7 @@ class TranscriptionResponseMapperTest {
                                                                              caseId,
                                                                              caseNumber,
                                                                              hearingCaseId,
+                                                                             hearingId,
                                                                              hearingCaseNumber,
                                                                              courthouseDisplayName,
                                                                              null,
@@ -528,6 +533,7 @@ class TranscriptionResponseMapperTest {
         assertEquals(transcriptionDocumentId, response.getTranscriptionDocumentId());
         assertEquals(transactionId, response.getTranscriptionId());
         assertEquals(hearingCaseNumber, response.getCase().getCaseNumber());
+        assertEquals(hearingId, response.getHearing().getId());
         assertEquals(hearingDate, response.getHearing().getHearingDate());
         assertEquals(courthouseDisplayName, response.getCourthouse().getDisplayName());
         assertEquals(isManualTranscription, response.getIsManualTranscription());
@@ -554,6 +560,7 @@ class TranscriptionResponseMapperTest {
                                                                              caseNumber,
                                                                              null,
                                                                              null,
+                                                                             null,
                                                                              courthouseDisplayName,
                                                                              null,
                                                                              hearingDate,
@@ -566,6 +573,7 @@ class TranscriptionResponseMapperTest {
         assertEquals(transactionId, response.getTranscriptionId());
         assertEquals(caseNumber, response.getCase().getCaseNumber());
         assertEquals(hearingDate, response.getHearing().getHearingDate());
+        assertNull(response.getHearing().getId());
         assertEquals(courthouseDisplayName, response.getCourthouse().getDisplayName());
         assertEquals(isManualTranscription, response.getIsManualTranscription());
         assertEquals(isHidden, response.getIsHidden());
@@ -581,6 +589,7 @@ class TranscriptionResponseMapperTest {
 
         TranscriptionDocumentResult result = new TranscriptionDocumentResult(transcriptionDocumentId,
                                                                              transactionId,
+                                                                             null,
                                                                              null,
                                                                              null,
                                                                              null,
