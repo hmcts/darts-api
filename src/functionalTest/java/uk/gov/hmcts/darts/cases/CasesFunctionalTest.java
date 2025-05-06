@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.cases;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 
 @Slf4j
@@ -179,6 +177,8 @@ class CasesFunctionalTest extends FunctionalTest {
     void getEventsByCaseId() {
         Response getCaseResponse = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
+            .queryParam("page_number", "1")
+            .queryParam("page_size", "1")
             .when()
             .baseUri(getUri(CASES_PATH + "/" + caseId + EVENTS_PATH))
             .get()
@@ -186,8 +186,6 @@ class CasesFunctionalTest extends FunctionalTest {
             .extract().response();
 
         assertEquals(200, getCaseResponse.statusCode());
-        JSONArray jsonResponseArray = new JSONArray(getCaseResponse.asString());
-        assertFalse(jsonResponseArray.isEmpty());
     }
 
 }

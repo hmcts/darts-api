@@ -17,7 +17,6 @@ import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CaseTranscriptionMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
-import uk.gov.hmcts.darts.cases.mapper.EventMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
@@ -37,7 +36,6 @@ import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
@@ -186,15 +184,6 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearings = hearingRepository.findByIsActualCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
-    }
-
-    @Override
-    @Transactional
-    public List<Event> getEventsByCaseId(Integer caseId) {
-        getCourtCaseById(caseId).validateIsExpired();
-        List<EventEntity> eventEntities = eventRepository.findAllByCaseId(caseId);
-        return EventMapper.mapToEvents(eventEntities);
-
     }
 
     @Transactional
