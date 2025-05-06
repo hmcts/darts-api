@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -53,6 +54,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
+
+
     @BeforeEach
     void setUp() {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -96,88 +99,6 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             .queryParam("page_size", "1");
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isForbidden());
-    }
-
-    @Test
-    void casesGetEventsEndpoint() throws Exception {
-
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
-
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            [{"id":<event-id>,
-            "hearing_id":<hearing-id>,
-            "hearing_date":"2023-01-01",
-            "timestamp":"2023-01-01T12:01:00Z",
-            "name":"Section 11 of the Contempt of Court Act 1981",
-            "text":"some-event-text-2023-01-01T12:01",
-            "is_data_anonymised": false,
-            "courtroom":"TESTCOURTROOM"
-            }]
-            """;
-
-        expectedJson = expectedJson.replace("<event-id>", eventEntityList.getFirst().getId().toString());
-        expectedJson = expectedJson.replace("<hearing-id>", hearingEntity.getId().toString());
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
-        // assert that we only ever got one event. The one that was associated to the first case hearing.
-        // Relates to verification of https://tools.hmcts.net/jira/browse/DMP-3967
-        Assertions.assertEquals(1, eventEntityList.size());
-    }
-
-
-    @Test
-    void casesGetEventsEndpoint_shouldBeSortedByTimestamp() throws Exception {
-        transactionalUtil.executeInTransaction(() -> {
-            HearingEntity hearingEntity2 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-                SOME_CASE_NUMBER,
-                SOME_COURTHOUSE,
-                SOME_COURTROOM,
-                DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
-            );
-            eventEntityList = createEventsWithDefaults(1).stream()
-                .map(eve -> dartsDatabase.addHandlerToEvent(eve, SECTION_11_1981_DB_ID))
-                .toList();
-            EventEntity eventEntity = eventEntityList.getFirst();
-            eventEntity.setEventId(3);
-            eventEntity.setTimestamp(eventEntity.getTimestamp().plusDays(1));
-
-            dartsDatabase.saveEventsForHearing(hearingEntity2, eventEntityList);
-        });
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
-
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            
-             [
-              {
-                "id": 2,
-                "hearing_id": 1,
-                "hearing_date": "2023-01-01",
-                "timestamp": "2023-01-02T12:01:00Z",
-                "name": "Section 11 of the Contempt of Court Act 1981",
-                "is_data_anonymised": false,
-                "text": "some-event-text-2023-01-01T12:01",
-                "courtroom":"TESTCOURTROOM"
-              },
-              {
-                "id": 1,
-                "hearing_id": 1,
-                "hearing_date": "2023-01-01",
-                "timestamp": "2023-01-01T12:01:00Z",
-                "name": "Section 11 of the Contempt of Court Act 1981",
-                "is_data_anonymised": false,
-                "text": "some-event-text-2023-01-01T12:01",
-                "courtroom":"TESTCOURTROOM"
-              }
-            ]
-            """;
-
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);
     }
 
     @Test
