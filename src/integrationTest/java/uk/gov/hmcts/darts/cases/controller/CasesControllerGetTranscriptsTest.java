@@ -42,7 +42,7 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
-    @SuppressWarnings("PMD.UnitTestShouldUseBeforeAnnotation")//False positive needs to be called within same trasnaction
+    @SuppressWarnings("PMD.UnitTestShouldUseBeforeAnnotation")//False positive needs to be called within same transaction
     private void setUp() {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,

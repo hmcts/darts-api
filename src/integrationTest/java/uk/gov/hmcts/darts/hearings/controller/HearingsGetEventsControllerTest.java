@@ -44,7 +44,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     private static final String SOME_DATE = "2023-01-01";
 
-    @SuppressWarnings("PMD.UnitTestShouldUseBeforeAnnotation")//False positive needs to be called within same trasnaction
+    @SuppressWarnings("PMD.UnitTestShouldUseBeforeAnnotation")//False positive needs to be called within same transaction
     private void setUp() {
         var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         courtCase.addProsecutor(createProsecutorForCase(courtCase));
