@@ -487,7 +487,7 @@ dependencies {
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
-  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.5'
+  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.6'
 
   testImplementation 'org.testcontainers:postgresql:1.21.0'
   testImplementation 'com.h2database:h2:2.3.232'
