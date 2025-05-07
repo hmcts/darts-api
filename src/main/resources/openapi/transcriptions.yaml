@@ -1133,6 +1133,8 @@ components:
           type: integer
           example: 1234
           format: int64
+        hearing_id:
+          type: integer
         case_id:
           type: integer
           description: 'The case id'
@@ -1707,6 +1709,9 @@ components:
           type: object
           description: 'The hearing details'
           properties:
+            id:
+              type: integer
+              description: 'The hearing id'
             hearing_date:
               type: date
               description: 'The hearing date'

@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.time.LocalDate;
@@ -114,7 +115,6 @@ class CaseControllerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")//Caused by argument captor this can never be incorrect
     void casesCaseIdEventsGet_hasPageNumber_shouldUsePaginatedRoute() {
         final int caseId = 123;
         final int pageNumber = 3;
@@ -122,37 +122,29 @@ class CaseControllerTest {
         final List<String> sortBy = List.of("ABC,DEF");
         final List<String> sortOrder = List.of("ASC", "DESC");
 
-        CaseController.CasesCaseIdEventsGet200PaginatedResponse response = mock(CaseController.CasesCaseIdEventsGet200PaginatedResponse.class);
-        doReturn(response).when(response).asClass(CaseController.CasesCaseIdEventsGet200PaginatedResponse.class);
+        PaginatedList<Event> serviceResponse = mock();
+        doReturn(serviceResponse).when(caseService).getEventsByCaseId(any(), any());
 
-        doReturn(response).when(caseService).getEventsByCaseId(any(), any());
+        CasesCaseIdEventsGet200Response response = mock();
+        doReturn(response).when(serviceResponse).mapToPaginatedListCommon(any(), any());
+
+        when(caseService.getEventsByCaseId(eq(caseId), any())).thenReturn(serviceResponse);
 
         ResponseEntity<CasesCaseIdEventsGet200Response> responseEntity = caseController
-            .casesCaseIdEventsGet(caseId, sortBy, sortOrder, pageNumber, pageSize);
+            .casesCaseIdEventsGet(caseId, pageNumber, pageSize, sortBy, sortOrder);
 
         assertThat(responseEntity.getBody()).isEqualTo(response);
-        ArgumentCaptor<PaginationDto<Event>> argumentCaptor = ArgumentCaptor.forClass(PaginationDto.class);
+
+        ArgumentCaptor<PaginationDto<Event>> argumentCaptor = ArgumentCaptor.captor();
+
         verify(caseService).getEventsByCaseId(eq(caseId), argumentCaptor.capture());
+
         PaginationDto<Event> paginationDto = argumentCaptor.getValue();
         assertThat(paginationDto).isNotNull();
         assertThat(paginationDto.getPageNumber()).isEqualTo(pageNumber);
         assertThat(paginationDto.getPageSize()).isEqualTo(pageSize);
         assertThat(paginationDto.getSortBy()).isEqualTo(PaginationDto.toSortBy(sortBy));
         assertThat(paginationDto.getSortDirection()).isEqualTo(PaginationDto.toSortDirection(sortOrder));
-        verifyNoMoreInteractions(caseService);
-    }
-
-    @Test
-    void casesCaseIdEventsGet_doesNotHasPageNumber_shouldUseNonPaginatedRoute() {
-        final int caseId = 123;
-        List<Event> responseObj = List.of(mock(Event.class), mock(Event.class), mock(Event.class));
-        doReturn(responseObj).when(caseService).getEventsByCaseId(any());
-
-        ResponseEntity<CasesCaseIdEventsGet200Response> responseEntity = caseController.casesCaseIdEventsGet(caseId, null, null, null, null);
-
-        assertThat(responseEntity.getBody())
-            .isEqualTo(new CaseController.CasesCaseIdEventsGet200PaginatedResponseList(responseObj));
-        verify(caseService).getEventsByCaseId(caseId);
         verifyNoMoreInteractions(caseService);
     }
 }

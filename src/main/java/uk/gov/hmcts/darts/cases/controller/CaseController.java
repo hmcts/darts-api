@@ -35,11 +35,9 @@ import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DataUtil;
-import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -157,36 +155,22 @@ public class CaseController implements CasesApi {
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<CasesCaseIdEventsGet200Response> casesCaseIdEventsGet(
         Integer caseId,
-        List<String> sortBy,
-        List<String> sortOrder,
         Integer pageNumber,
-        Integer pageSize
+        Integer pageSize,
+        List<String> sortBy,
+        List<String> sortOrder
     ) {
         PaginationDto<Event> paginationDto = new PaginationDto<>(
-            CasesCaseIdEventsGet200PaginatedResponse::new,
             pageNumber,
             pageSize,
             PaginationDto.toSortBy(sortBy),
             PaginationDto.toSortDirection(sortOrder)
         );
 
-        if (paginationDto.shouldPaginate()) {
-            return new ResponseEntity<>(
-                caseService.getEventsByCaseId(caseId, paginationDto)
-                    .asClass(CasesCaseIdEventsGet200PaginatedResponse.class), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(new CasesCaseIdEventsGet200PaginatedResponseList(caseService.getEventsByCaseId(caseId)), HttpStatus.OK);
-    }
-
-    public static class CasesCaseIdEventsGet200PaginatedResponse extends PaginatedList<Event>
-        implements CasesCaseIdEventsGet200Response {
-    }
-
-    public static class CasesCaseIdEventsGet200PaginatedResponseList extends ArrayList<Event>
-        implements CasesCaseIdEventsGet200Response {
-        public CasesCaseIdEventsGet200PaginatedResponseList(List<Event> events) {
-            super(events);
-        }
+        return new ResponseEntity<>(
+            caseService.getEventsByCaseId(caseId, paginationDto)
+                .mapToPaginatedListCommon(new CasesCaseIdEventsGet200Response(), CasesCaseIdEventsGet200Response::setData),
+            HttpStatus.OK);
     }
 
     @Override

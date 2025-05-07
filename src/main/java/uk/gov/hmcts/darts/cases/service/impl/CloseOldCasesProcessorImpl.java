@@ -87,6 +87,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         public void closeCase(Integer courtCaseId, UserAccountEntity userAccount) {
             CourtCaseEntity courtCase = caseService.getCourtCaseById(courtCaseId);
 
+
             log.debug("About to close court case id {}", courtCase.getId());
             List<EventEntity> eventList = new ArrayList<>();
             for (HearingEntity hearingEntity : courtCase.getHearings()) {

@@ -11,10 +11,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.collections.CollectionUtils;
+import uk.gov.hmcts.darts.cases.model.PaginatedListCommon;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 @Builder
 @Data
@@ -70,5 +72,14 @@ public class PaginatedList<T> {
             "Invalid class type provided for conversion: " + clazz.getName() +
                 ". Expected: " + this.getClass().getName() + "."
         );
+    }
+
+    public <P extends PaginatedListCommon> P mapToPaginatedListCommon(P paginatedListCommon, BiConsumer<P, List<T>> dataConsumer) {
+        paginatedListCommon.setCurrentPage(currentPage);
+        paginatedListCommon.setPageSize(pageSize);
+        paginatedListCommon.setTotalPages(totalPages);
+        paginatedListCommon.setTotalItems(totalItems);
+        dataConsumer.accept(paginatedListCommon, data);
+        return paginatedListCommon;
     }
 }
