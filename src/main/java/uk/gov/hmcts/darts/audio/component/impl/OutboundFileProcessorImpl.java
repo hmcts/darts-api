@@ -112,13 +112,14 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             List<ChannelAudio> concatenationsList = new ArrayList<>();
 
             if (isWellFormedAudio(audioFileInfos)) {
-                log.debug("Audio files {} are well formed", audioFilenames);
+                log.info("Audio files {} are well formed", audioFilenames);
                 List<ChannelAudio> concatenatedAudios = concatenateByChannelWithGaps(audioFileInfos);
                 if (isNotEmpty(concatenatedAudios)) {
+                    log.info("Size of concatenated Audio List {}", concatenatedAudios.size());
                     concatenationsList = convertChannelsListToConcatenationsList(concatenatedAudios);
                 }
             } else {
-                log.debug("Audio files {} are not well formed", audioFilenames);
+                log.info("Audio files {} are not well formed", audioFilenames);
                 concatenationsList = convertChannelsListToFilesList(audioFileInfos);
             }
 
@@ -169,10 +170,10 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                 numberOfChannelsMatch = numberOfChannelsList.stream().allMatch(numberOfChannelsList.getFirst()::equals);
                 startTimesMatch = numberOfStartTimesList.stream().allMatch(numberOfStartTimesList.getFirst()::equals)
                     && !numberOfStartTimesList.contains(1);
-                log.debug("Do channels match: {}, start times match: {} for audios {}", numberOfChannelsMatch, startTimesMatch, audioFilenames);
+                log.info("Do channels match: {}, start times match: {} for audios {}", numberOfChannelsMatch, startTimesMatch, audioFilenames);
                 return numberOfChannelsMatch && startTimesMatch;
             } else {
-                log.debug("Unable to group audio by channels", audioFilenames);
+                log.info("Unable to group audio by channels {}", audioFilenames);
                 return false;
             }
         }
@@ -347,7 +348,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             }
             audioFileInfoByFileList.add(new ChannelAudio(audioFileInfoList));
             String reorderedAudioFilenames = audioFileInfosByChannel.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
-            log.debug("Reordered audio files {} to {} by start time", audioFilenames, reorderedAudioFilenames);
+            log.info("Reordered audio files {} to {} by start time", audioFilenames, reorderedAudioFilenames);
         }
         return audioFileInfoByFileList;
     }
