@@ -254,3 +254,5 @@ function:
 
 darts-portal:
   enabled: false
+darts-gateway:
+  enabled: false

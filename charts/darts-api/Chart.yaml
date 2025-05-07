@@ -22,4 +22,8 @@ dependencies:
     version: ~0.0.28
     repository: 'oci://sdshmctspublic.azurecr.io/helm'
     condition: darts-portal.enabled
+  - name: darts-gateway
+    version: ~0.0.28
+    repository: 'oci://sdshmctspublic.azurecr.io/helm'
+    condition: darts-gateway.enabled
 
