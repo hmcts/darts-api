@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:11.8.0")
+    classpath("org.flywaydb:flyway-database-postgresql:11.8.1")
   }
 }
 
@@ -17,7 +17,7 @@ plugins {
     id 'org.sonarqube' version '6.1.0.5360'
     id "io.freefair.lombok" version "8.13.1"
     id "org.openapi.generator" version "7.13.0"
-    id "org.flywaydb.flyway" version "11.8.0"
+    id "org.flywaydb.flyway" version "11.8.1"
     id 'maven-publish'
     id("com.dorongold.task-tree") version "4.0.1"
 }
@@ -437,8 +437,8 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.2.1'
   implementation 'org.springframework.retry:spring-retry:2.0.11'
 
-    implementation 'net.javacrumbs.shedlock:shedlock-spring:6.5.0'
-    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.5.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-spring:6.6.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.6.0'
 
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
@@ -454,8 +454,8 @@ dependencies {
     implementation 'com.azure:azure-storage-blob'
 
     implementation group: 'io.rest-assured', name: 'rest-assured'
-    implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.8.0'
-    implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.8.0'
+    implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.8.1'
+    implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.8.1'
     implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.10'
 
   //database
@@ -487,7 +487,7 @@ dependencies {
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
-  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.5'
+  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.6'
 
   testImplementation 'org.testcontainers:postgresql:1.21.0'
   testImplementation 'com.h2database:h2:2.3.232'
