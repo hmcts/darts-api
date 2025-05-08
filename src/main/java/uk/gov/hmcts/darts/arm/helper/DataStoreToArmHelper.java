@@ -122,8 +122,8 @@ public class DataStoreToArmHelper {
         if (nonNull(armExternalObjectDirectory)) {
             log.debug(
                 "Updating ARM status from {} to {} for ID {}",
-                armExternalObjectDirectory.getStatus().getDescription(),
-                armStatus.getDescription(),
+                armExternalObjectDirectory.getStatus().getId(),
+                armStatus.getId(),
                 armExternalObjectDirectory.getId()
             );
             armExternalObjectDirectory.setStatus(armStatus);

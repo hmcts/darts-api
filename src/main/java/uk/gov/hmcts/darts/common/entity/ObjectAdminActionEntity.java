@@ -27,27 +27,27 @@ public class ObjectAdminActionEntity {
     @SequenceGenerator(name = "oaa_gen", sequenceName = "oaa_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ado_id")
     private AnnotationDocumentEntity annotationDocument;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cad_id")
     private CaseDocumentEntity caseDocument;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "med_id")
     private MediaEntity media;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trd_id")
     private TranscriptionDocumentEntity transcriptionDocument;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ohr_id")
     private ObjectHiddenReasonEntity objectHiddenReason;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hidden_by")
     private UserAccountEntity hiddenBy;
 
@@ -57,7 +57,7 @@ public class ObjectAdminActionEntity {
     @Column(name = "marked_for_manual_deletion")
     private boolean markedForManualDeletion;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marked_for_manual_del_by")
     private UserAccountEntity markedForManualDelBy;
 

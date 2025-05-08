@@ -78,23 +78,25 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         task.runTask();
 
         // Then
-        List<ArmRpoExecutionDetailEntity> allExecutionDetails = dartsDatabase.getArmRpoExecutionDetailRepository()
-            .findAll();
-        assertEquals(1, allExecutionDetails.size());
+        transactionalUtil.executeInTransaction(() -> {
+            List<ArmRpoExecutionDetailEntity> allExecutionDetails = dartsDatabase.getArmRpoExecutionDetailRepository()
+                .findAll();
+            assertEquals(1, allExecutionDetails.size());
 
-        var executionDetail = allExecutionDetails.getFirst();
-        assertEquals(ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH.getId(), executionDetail.getArmRpoState().getId());
-        assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), executionDetail.getArmRpoStatus().getId());
+            var executionDetail = allExecutionDetails.getFirst();
+            assertEquals(ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH.getId(), executionDetail.getArmRpoState().getId());
+            assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), executionDetail.getArmRpoStatus().getId());
 
-        assertEquals(MATTER_ID, executionDetail.getMatterId());
-        assertEquals(INDEX_ID, executionDetail.getIndexId());
-        assertEquals(ENTITLEMENT_ID, executionDetail.getEntitlementId());
-        assertEquals(STORAGE_ACCOUNT_INDEX_ID, executionDetail.getStorageAccountId());
-        assertNull(executionDetail.getProductionId());
-        assertEquals(SOME_MASTER_INDEX_FIELD_ID, executionDetail.getSortingField());
-        assertNull(executionDetail.getSearchItemCount());
-        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedById());
-        assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedById());
+            assertEquals(MATTER_ID, executionDetail.getMatterId());
+            assertEquals(INDEX_ID, executionDetail.getIndexId());
+            assertEquals(ENTITLEMENT_ID, executionDetail.getEntitlementId());
+            assertEquals(STORAGE_ACCOUNT_INDEX_ID, executionDetail.getStorageAccountId());
+            assertNull(executionDetail.getProductionId());
+            assertEquals(SOME_MASTER_INDEX_FIELD_ID, executionDetail.getSortingField());
+            assertNull(executionDetail.getSearchItemCount());
+            assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedById());
+            assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedById());
+        });
     }
 
     @Test

@@ -80,7 +80,6 @@ public class StopAndCloseHandler extends EventHandlerBase {
 
     @Override
     @Transactional
-    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         DataUtil.preProcess(dartsEvent);
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler); // saveEvent
@@ -89,7 +88,8 @@ public class StopAndCloseHandler extends EventHandlerBase {
         try {
             var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING, hearingAndEvent.getCourtroomId());
             darNotifyService.notifyDarPc(notifyEvent);
-        } catch (DarNotifyError ignored) {
+        } catch (DarNotifyError e) {
+            log.warn("Dar notify failed for {}", dartsEvent, e);
             // if DAR notify fails, continue processing the event
         }
 

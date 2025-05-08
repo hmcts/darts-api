@@ -55,7 +55,47 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                         .courthouse(SOME_COURTHOUSE)
                                         .courtroom(SOME_ROOM)
                                         .dateTime(HEARING_DATE_ODT));
+            transactionalUtil.executeInTransaction(() -> {
+                var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                    SOME_CASE_NUMBER,
+                    SOME_COURTHOUSE
+                ).get();
 
+                var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                    SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+
+                var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+
+                assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+                assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+                assertThat(hearingsForCase.size()).isEqualTo(1);
+                assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
+
+                assertEquals(
+                    "Judge directed on reporting restrictions",
+                    persistedCase.getReportingRestrictions().getEventName()
+                );
+
+                dartsGateway.verifyReceivedNotificationType(3);
+                dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+            });
+        });
+    }
+
+    @Test
+    void givenSetReportingRestrictionEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdate() {
+        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM
+        );
+
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
             var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
                 SOME_CASE_NUMBER,
                 SOME_COURTHOUSE
@@ -82,44 +122,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     }
 
     @Test
-    void givenSetReportingRestrictionEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdate() {
-        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_ROOM
-        );
-
-        eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                    .courthouse(SOME_COURTHOUSE)
-                                    .courtroom(SOME_ROOM)
-                                    .dateTime(HEARING_DATE_ODT));
-
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
-
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
-
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
-
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
-
-        assertEquals(
-            "Judge directed on reporting restrictions",
-            persistedCase.getReportingRestrictions().getEventName()
-        );
-
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
-    }
-
-    @Test
     void givenSetReportingRestrictionEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdate() {
         var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
@@ -135,31 +137,32 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_OTHER_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(caseHearing.size()).isEqualTo(1);
+            assertThat(caseHearing.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(caseHearing.size()).isEqualTo(1);
-        assertThat(caseHearing.getFirst().getHearingIsActual()).isEqualTo(true);
+            assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
-        assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
+            assertEquals(
+                "Judge directed on reporting restrictions",
+                persistedCase.getReportingRestrictions().getEventName()
+            );
 
-        assertEquals(
-            "Judge directed on reporting restrictions",
-            persistedCase.getReportingRestrictions().getEventName()
-        );
-
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+            dartsGateway.verifyReceivedNotificationType(3);
+            dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        });
     }
 
     @Test
@@ -176,28 +179,29 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
+            assertEquals(
+                "Judge directed on reporting restrictions",
+                persistedCase.getReportingRestrictions().getEventName()
+            );
 
-        assertEquals(
-            "Judge directed on reporting restrictions",
-            persistedCase.getReportingRestrictions().getEventName()
-        );
-
-        dartsGateway.verifyDoesntReceiveDarEvent();
+            dartsGateway.verifyDoesntReceiveDarEvent();
+        });
     }
 
     @Test
@@ -214,24 +218,25 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
+            assertEquals("Restrictions lifted", persistedCase.getReportingRestrictions().getEventName());
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
-        assertEquals("Restrictions lifted", persistedCase.getReportingRestrictions().getEventName());
-
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+            dartsGateway.verifyReceivedNotificationType(3);
+            dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        });
     }
 
     private DartsEvent someMinimalDartsEvent() {

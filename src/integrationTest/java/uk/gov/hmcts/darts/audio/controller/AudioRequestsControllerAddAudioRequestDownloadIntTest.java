@@ -140,36 +140,40 @@ class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationB
         String actualJson = mvcResult.getResponse().getContentAsString();
         Integer mediaRequestId = JsonPath.parse(actualJson).read("$.request_id");
         assertNotNull(mediaRequestId);
+        transactionalUtil.executeInTransaction(() -> {
+            MediaRequestEntity mediaRequestEntity = dartsDatabase.getMediaRequestRepository().findById(mediaRequestId)
+                .orElseThrow();
 
-        MediaRequestEntity mediaRequestEntity = dartsDatabase.getMediaRequestRepository().findById(mediaRequestId)
-            .orElseThrow();
+            assertEquals(hearingEntity.getId(), mediaRequestEntity.getHearing().getId());
+            assertEquals(testUser.getId(), mediaRequestEntity.getRequestor().getId());
+            assertEquals(START_TIME, mediaRequestEntity.getStartTime());
+            assertEquals(END_TIME, mediaRequestEntity.getEndTime());
+            assertEquals(AUDIO_REQUEST_TYPE_DOWNLOAD, mediaRequestEntity.getRequestType());
+            assertEquals(MediaRequestStatus.OPEN, mediaRequestEntity.getStatus());
+            assertEquals(0, mediaRequestEntity.getAttempts());
 
-        assertEquals(hearingEntity.getId(), mediaRequestEntity.getHearing().getId());
-        assertEquals(testUser.getId(), mediaRequestEntity.getRequestor().getId());
-        assertEquals(START_TIME, mediaRequestEntity.getStartTime());
-        assertEquals(END_TIME, mediaRequestEntity.getEndTime());
-        assertEquals(AUDIO_REQUEST_TYPE_DOWNLOAD, mediaRequestEntity.getRequestType());
-        assertEquals(MediaRequestStatus.OPEN, mediaRequestEntity.getStatus());
-        assertEquals(0, mediaRequestEntity.getAttempts());
+            List<Long> notificationsIds = dartsDatabase.getNotificationRepository()
+                .findIdsByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
 
-        List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository()
-            .findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
-        assertEquals(1, notifications.size());
-        assertEquals(
-            NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
-            notifications.getFirst().getEventId()
-        );
-        assertEquals(
-            dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
-            notifications.getFirst().getEmailAddress()
-        );
-        assertEquals(
-            mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
-            notifications.getFirst().getCourtCase().getCaseNumber()
-        );
+            assertEquals(1, notificationsIds.size());
+            NotificationEntity notificationEntity = dartsDatabase.getNotificationRepository()
+                .findById(notificationsIds.get(0))
+                .orElseThrow();
+            assertEquals(
+                NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
+                notificationEntity.getEventId()
+            );
+            assertEquals(
+                dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
+                notificationEntity.getEmailAddress()
+            );
+            assertEquals(
+                mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
+                notificationEntity.getCourtCase().getCaseNumber()
+            );
 
-        assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
-
+            assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
+        });
     }
 
     @Test

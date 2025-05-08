@@ -39,12 +39,12 @@ public class TranscriptionWorkflowEntity {
     @SequenceGenerator(name = "trw_gen", sequenceName = "trw_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tra_id", nullable = false)
     private TranscriptionEntity transcription;
 
     @Audited(targetAuditMode = NOT_AUDITED)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trs_id", nullable = false)
     private TranscriptionStatusEntity transcriptionStatus;
 

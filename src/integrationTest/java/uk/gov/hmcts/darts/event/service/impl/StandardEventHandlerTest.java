@@ -72,29 +72,30 @@ class StandardEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE,
+                SOME_ROOM,
+                HEARING_DATE_ODT.toLocalDate()
+            );
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE,
-            SOME_ROOM,
-            HEARING_DATE_ODT.toLocalDate()
-        );
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
+            assertThat(persistedEvent.getEventStatus()).isEqualTo(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
-        assertThat(persistedEvent.getEventStatus()).isEqualTo(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
-
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+            dartsGateway.verifyReceivedNotificationType(3);
+            dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        });
     }
 
     @Test
@@ -110,25 +111,26 @@ class StandardEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
-
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+            dartsGateway.verifyReceivedNotificationType(3);
+            dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        });
     }
 
     @Test
@@ -147,27 +149,28 @@ class StandardEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_OTHER_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(caseHearing.size()).isEqualTo(1);
+            assertThat(caseHearing.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(caseHearing.size()).isEqualTo(1);
-        assertThat(caseHearing.getFirst().getHearingIsActual()).isEqualTo(true);
+            assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
-        assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
-
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+            dartsGateway.verifyReceivedNotificationType(3);
+            dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        });
     }
 
     @Test
@@ -184,24 +187,25 @@ class StandardEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
-
-        dartsGateway.verifyDoesntReceiveDarEvent();
+            dartsGateway.verifyDoesntReceiveDarEvent();
+        });
     }
 
     private static DartsEvent someMinimalDartsEvent() {
@@ -277,16 +281,18 @@ class StandardEventHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        var persistedEvents = dartsDatabase.getEventRepository().findAll();
-        var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedEvents = dartsDatabase.getEventRepository().findAll();
+            var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
 
-        assertThat(eventLinkedCases)
-            .extracting("courtCase.caseNumber")
-            .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
+            assertThat(eventLinkedCases)
+                .extracting("courtCase.caseNumber")
+                .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
 
-        assertThat(eventLinkedCases)
-            .extracting("event.id")
-            .containsOnly(idFrom(persistedEvents));
+            assertThat(eventLinkedCases)
+                .extracting("event.id")
+                .containsOnly(idFrom(persistedEvents));
+        });
     }
 
     @Test
@@ -308,16 +314,18 @@ class StandardEventHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        var persistedEvents = dartsDatabase.getEventRepository().findAll();
-        var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedEvents = dartsDatabase.getEventRepository().findAll();
+            var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
 
-        assertThat(eventLinkedCases)
-            .extracting("courtCase.caseNumber")
-            .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
+            assertThat(eventLinkedCases)
+                .extracting("courtCase.caseNumber")
+                .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
 
-        assertThat(eventLinkedCases)
-            .extracting("event.id")
-            .containsOnly(idFrom(persistedEvents));
+            assertThat(eventLinkedCases)
+                .extracting("event.id")
+                .containsOnly(idFrom(persistedEvents));
+        });
     }
 
     private Long idFrom(List<EventEntity> eventEntities) {

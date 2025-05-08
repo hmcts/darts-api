@@ -44,9 +44,11 @@ class CaseMapperTest extends IntegrationBase {
     void mapsOneReportingRestrictionsCorrectly() {
         List<OffsetDateTime> eventDateTimes = new ArrayList<>();
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
-        var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+        var reportingRestrictions = dartsDatabase.getTransactionalUtil()
+            .executeInTransaction(() -> createEventsWithDifferentTimestamps(eventDateTimes).stream()
+                .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+                .peek(eventEntity -> eventEntity.getEventType().getEventName())//Load the event type
+                .toList());
         var minimalHearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
@@ -84,9 +86,12 @@ class CaseMapperTest extends IntegrationBase {
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T14:45:12Z"));
 
-        var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+        var reportingRestrictions = dartsDatabase.getTransactionalUtil()
+            .executeInTransaction(() -> createEventsWithDifferentTimestamps(eventDateTimes).stream()
+                .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+                .peek(eventEntity -> eventEntity.getEventType().getEventName())//Load the event type
+                .toList());
+
         var minimalHearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 

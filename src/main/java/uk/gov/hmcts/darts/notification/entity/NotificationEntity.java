@@ -50,7 +50,7 @@ public class NotificationEntity extends CreatedModifiedBaseEntity {
     private String eventId;
 
     @JoinColumn(name = CASE_ID)
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {PERSIST, MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
     private CourtCaseEntity courtCase;
 
     @Column(name = EMAIL_ADDRESS)
