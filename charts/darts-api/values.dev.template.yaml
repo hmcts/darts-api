@@ -160,7 +160,7 @@ darts-portal:
 
 darts-gateway:
   enabled: ${DEV_ENABLE_DARTS_GATEWAY}
-  gateway:
+  java:
     applicationPort: 8070
     image: 'sdshmctspublic.azurecr.io/darts/gateway:${DEV_DARTS_GATEWAY_IMAGE_SUFFIX}'
     ingressHost: "darts-gateway-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
