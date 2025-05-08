@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,7 +17,8 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
-import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
@@ -43,7 +43,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
  * Integration test for the TranscriptionController class, specifically for the "Get Your Transcripts" endpoint for legacy data.
  */
 @AutoConfigureMockMvc
-class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresIntegrationBase {
+class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions");
 
@@ -52,6 +52,8 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private AuthorisationStub authorisationStub;
 
     @Autowired
     private TranscriptionUrgencyRepository transcriptionUrgencyRepository;
@@ -70,14 +72,15 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
     void beforeEach() {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        authorisationStub.givenTestSchema();
 
-        testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+        testUser = authorisationStub.getTestUser();
+        systemUser = authorisationStub.getSystemUser();
 
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnRequesterTranscriptions_WhenNoLinkedHearing_WithTranscriptionUrgency() throws Exception {
+    void getYourTranscripts_shouldReturnRequesterTranscriptions_associatedThroughCourtCaseAndNotHearing_withTranscriptionUrgency() throws Exception {
         // creates a transcription for a different user that should not be returned
         var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
             .requestedBy(systemUser)
@@ -102,26 +105,26 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId().intValue())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name",
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_number", is(courtCase.getCaseNumber())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].courthouse_name",
                                 is(transcriptionByRequester.getCourtHouse().get().getDisplayName())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id",
+            .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.transcription_urgency_id",
                                 is(TranscriptionUrgencyEnum.STANDARD.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description", is(urgencyEntity.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts").isString())
 
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnRequesterTranscriptions_WhenNoLinkedHearing_WithNoTranscriptionUrgency() throws Exception {
+    void getYourTranscripts_shouldReturnRequesterTranscriptions_associatedThroughCourtCaseAndNotHearing_withNoTranscriptionUrgency() throws Exception {
         // creates a transcription for a different user that should not be returned
         var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
             .requestedBy(systemUser)
@@ -147,19 +150,9 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester2.getId().intValue())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-24T09:00:00Z")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].urgency").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
-
-            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester1.getId().intValue())))
-            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-20T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(3)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester2.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-24T09:00:00Z")))
             .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
             .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Awaiting Authorisation")))
@@ -168,12 +161,21 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
             .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description").doesNotExist())
             .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.priority_order").doesNotExist())
 
+            .andExpect(jsonPath("$.requester_transcriptions[2].transcription_id", is(transcriptionByRequester1.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[2].requested_ts", is("2025-03-20T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[2].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[2].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[2].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[2].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[2].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[2].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[2].transcription_urgency.priority_order").doesNotExist())
+
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
-    @Disabled("This test should pass so a ticket has been raised to fix it - DMP-5053")
     @Test
-    void getYourTranscripts_ShouldReturnRequesterTranscriptions_WithLinkedHearingButNoCourtCase() throws Exception {
+    void getYourTranscripts_shouldReturnRequesterTranscriptions_associatedThroughHearingAndNotCourtCase() throws Exception {
         var hearing = PersistableFactory.getHearingTestData().someMinimalBuilder()
             .hearingDate(LocalDate.of(2025, 3, 19))
             .build().getEntity();
@@ -193,26 +195,86 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
             .header("user_id", testUser.getId());
         requestBuilder.content("");
 
+        var courtCase = transcriptionByRequester.getCourtCase();
+
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId().intValue())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].case_id").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].case_number").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-19T13:00:00Z")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date", is("2025-03-19")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].urgency").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_number", is(courtCase.getCaseNumber())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-19T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date", is("2025-03-19")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.priority_order").doesNotExist())
 
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
     @Test
-    void getYourTranscripts_ShouldNotReturnHiddenTranscriptionRequests_WhenNoLinkedHearing() throws Exception {
+    void getYourTranscripts_shouldReturnRequesterAndApproverTranscriptionsCombined_associatedThroughHearingAndNotCourtCase() throws Exception {
+        var stubbedCase = authorisationStub.getCourtCaseEntity();
+
+        var hearing = PersistableFactory.getHearingTestData().someMinimalBuilder()
+            .hearingDate(LocalDate.of(2025, 3, 19))
+            .build().getEntity();
+        // creates a transcription where there is hearing but no case
+        var transcriptionByRequester = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(testUser)
+            .hearings(List.of(hearing))
+            .courtCases(List.of())
+            .createdById(testUser.getId())
+            .lastModifiedById(testUser.getId())
+            .build().getEntity();
+
+        hearing.getCourtCase().setCourthouse(stubbedCase.getCourthouse());
+
+        dartsPersistence.save(transcriptionByRequester);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), REQUESTED, transcriptionByRequester);
+        createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionByRequester);
+
+        var transcriptionForApprover = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(systemUser)
+            .hearings(List.of(hearing))
+            .courtCases(List.of())
+            .createdById(systemUser.getId())
+            .lastModifiedById(systemUser.getId())
+            .build().getEntity();
+
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), REQUESTED, transcriptionForApprover);
+        createTranscriptionWorkflow(systemUser, OffsetDateTime.parse("2025-03-19T13:00:00Z"), AWAITING_AUTHORISATION, transcriptionForApprover);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header("user_id", testUser.getId());
+        requestBuilder.content("");
+
+        var courtCase = transcriptionByRequester.getCourtCase();
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_id", is(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_number", is(courtCase.getCaseNumber())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-19T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date", is("2025-03-19")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.priority_order").doesNotExist())
+
+            .andExpect(jsonPath("$.approver_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(transcriptionForApprover.getId().intValue())));
+    }
+
+    @Test
+    void getYourTranscripts_shouldNotReturnHiddenTranscriptionRequests_whenNoAssociatedHearing() throws Exception {
         // creates a transcription for a different user that should not be returned
         var transcriptionForOtherUser = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
             .requestedBy(systemUser)
@@ -239,22 +301,22 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionByRequester.getId().intValue())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-24T09:00:00Z")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].urgency").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionByRequester.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-24T09:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.priority_order").doesNotExist())
 
             .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenRevertedToRequested() throws Exception {
+    void getYourTranscripts_shouldReturnSingleWorkflow_whenWorkflowHasBeenRevertedToRequested() throws Exception {
 
         var transcriptionEntity = PersistableFactory.getTranscriptionTestData().minimalTranscription();
 
@@ -270,24 +332,24 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId().intValue())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts").doesNotExist());
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionEntity.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_number", is(courtCase.getCaseNumber())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.priority_order").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-20T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].approved_ts").doesNotExist());
 
     }
 
     @Test
-    void getYourTranscripts_ShouldReturnSingleWorkflow_WhenWorkflowHasBeenRevertedBackToApproved() throws Exception {
+    void getYourTranscripts_shouldReturnSingleWorkflow_whenWorkflowHasBeenRevertedBackToApproved() throws Exception {
         var transcriptionEntity = PersistableFactory.getTranscriptionTestData().minimalTranscription();
 
         createTranscriptionWorkflow(testUser, OffsetDateTime.parse("2025-03-20T13:00:00Z"), REQUESTED, transcriptionEntity);
@@ -302,19 +364,19 @@ class TranscriptionControllerGetYourTranscriptsLegacyIntTest extends PostgresInt
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(1)))
-            .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].case_number", is(courtCase.getCaseNumber())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Sentencing remarks")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Approved")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.priority_order").doesNotExist())
-            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts", is("2025-03-20T13:00:00Z")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].approved_ts", is("2025-03-23T14:00:00Z")));
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionEntity.getId().intValue())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_number", is(courtCase.getCaseNumber())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].hearing_date").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_type", is("Sentencing remarks")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].status", is("Approved")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_urgency.priority_order").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[1].requested_ts", is("2025-03-20T13:00:00Z")))
+            .andExpect(jsonPath("$.requester_transcriptions[1].approved_ts", is("2025-03-23T14:00:00Z")));
 
     }
 

@@ -51,11 +51,11 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
-                JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
-                JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
-                JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
+                JOIN darts.court_case cas ON hea.cas_id = cas.cas_id
+                
+                JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
@@ -154,8 +154,10 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.priority_order as transcription_urgency_priority_order,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts
                 FROM darts.transcription tra
-                JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
-                JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
+                JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
+                JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
+                JOIN darts.court_case cas ON hea.cas_id = cas.cas_id
+                
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id AND cth.cth_id IN (
                     SELECT DISTINCT(grc.cth_id)
                     FROM darts.user_account usr
@@ -166,8 +168,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     AND grp.rol_id = :rol_id
                     AND usr.is_active = true
                 )
-                JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
-                JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
