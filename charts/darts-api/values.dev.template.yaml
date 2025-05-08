@@ -1,5 +1,5 @@
 # Attention: if you are changing values in here, please ensure you also update any corresponding files in the charts-dev-overrides directory
-java:
+api:
   # Don't modify below here
   image: ${IMAGE_NAME}
   devmemoryRequests: "1Gi"
