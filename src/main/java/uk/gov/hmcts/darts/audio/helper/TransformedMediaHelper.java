@@ -104,7 +104,6 @@ public class TransformedMediaHelper {
         return transformedMediaRepository.save(entity);
     }
 
-    @SuppressWarnings({"PMD.CognitiveComplexity"})
     public void notifyUser(MediaRequestEntity mediaRequestEntity,
                            CourtCaseEntity courtCase,
                            String notificationTemplateName) {
@@ -127,16 +126,13 @@ public class TransformedMediaHelper {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getDisplayName() != null
-                    ? mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getDisplayName() : NOT_AVAILABLE;
+                String courthouseName = getCourthouseName(mediaRequestEntity);
 
                 String hearingDate = getFormattedHearingDate(mediaRequestEntity.getHearing().getHearingDate());
 
-                String audioStartTime = mediaRequestEntity.getStartTime() != null
-                    ? DateConverterUtil.toLocalDateTime(mediaRequestEntity.getStartTime()).format(formatter) : NOT_AVAILABLE;
+                String audioStartTime = getAudioStartTime(mediaRequestEntity, formatter);
 
-                String audioEndTime = mediaRequestEntity.getEndTime() != null
-                    ? DateConverterUtil.toLocalDateTime(mediaRequestEntity.getEndTime()).format(formatter) : NOT_AVAILABLE;
+                String audioEndTime = getAudioEndTime(mediaRequestEntity, formatter);
 
                 templateParams.put(REQUEST_ID, String.valueOf(mediaRequestEntity.getId()));
                 templateParams.put(COURTHOUSE, courthouseName);
@@ -159,6 +155,21 @@ public class TransformedMediaHelper {
         } else {
             log.error("No notification scheduled for request id {} and court case {} ", mediaRequestEntity.getId(), courtCase.getId());
         }
+    }
+
+    private static String getAudioEndTime(MediaRequestEntity mediaRequestEntity, DateTimeFormatter formatter) {
+        return mediaRequestEntity.getEndTime() != null
+            ? DateConverterUtil.toLocalDateTime(mediaRequestEntity.getEndTime()).format(formatter) : NOT_AVAILABLE;
+    }
+
+    private static String getAudioStartTime(MediaRequestEntity mediaRequestEntity, DateTimeFormatter formatter) {
+        return mediaRequestEntity.getStartTime() != null
+            ? DateConverterUtil.toLocalDateTime(mediaRequestEntity.getStartTime()).format(formatter) : NOT_AVAILABLE;
+    }
+
+    private static String getCourthouseName(MediaRequestEntity mediaRequestEntity) {
+        return mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getDisplayName() != null
+            ? mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getDisplayName() : NOT_AVAILABLE;
     }
 
     private static String getFormattedHearingDate(LocalDate dateOfHearing) {

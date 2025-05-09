@@ -138,7 +138,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
 
-    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
+    @SuppressWarnings("PMD.DoNotUseThreads")
     void runTasksAsync(List<Callable<Void>> tasks, AsyncTaskConfig asyncTaskConfig) {
         try {
             AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
@@ -296,7 +296,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     @SuppressWarnings({
         "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
-        "PMD.CognitiveComplexity"//TODO - refactor to reduce complexity when this is next edited
     })
     protected void processBatchResponseFiles(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
                                              ArmBatchResponses armBatchResponses,
@@ -333,26 +332,30 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     deleteArmResponseFilesHelper.deleteResponseBlobs(armResponseBatchData);
                 } else {
                     log.info("Unable to find response files for external object {}", armResponseBatchData.getExternalObjectDirectoryId());
-                    logResponsesFound(armResponseBatchData);
-                    try {
-                        ExternalObjectDirectoryEntity externalObjectDirectory =
-                            getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
-
-                        OffsetDateTime minInputUploadProcessedTime = timeHelper.currentOffsetDateTime().minus(
-                            armDataManagementConfiguration.getArmMissingResponseDuration());
-
-                        if (externalObjectDirectory.getInputUploadProcessedTs() != null
-                            && externalObjectDirectory.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
-                            markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
-                        } else {
-                            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus(), userAccount);
-                        }
-                    } catch (Exception e) {
-                        log.error(UNABLE_TO_UPDATE_EOD, e);
-                    }
+                    missingAllResponsesFiles(userAccount, armResponseBatchData);
                 }
             }
         );
+    }
+
+    private void missingAllResponsesFiles(UserAccountEntity userAccount, ArmResponseBatchData armResponseBatchData) {
+        logResponsesFound(armResponseBatchData);
+        try {
+            ExternalObjectDirectoryEntity externalObjectDirectory =
+                getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
+
+            OffsetDateTime minInputUploadProcessedTime = timeHelper.currentOffsetDateTime().minus(
+                armDataManagementConfiguration.getArmMissingResponseDuration());
+
+            if (externalObjectDirectory.getInputUploadProcessedTs() != null
+                && externalObjectDirectory.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
+                markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
+            } else {
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus(), userAccount);
+            }
+        } catch (Exception e) {
+            log.error(UNABLE_TO_UPDATE_EOD, e);
+        }
     }
 
     protected void markEodAsResponseProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
