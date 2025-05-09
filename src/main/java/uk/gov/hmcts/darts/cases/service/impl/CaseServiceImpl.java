@@ -149,8 +149,8 @@ public class CaseServiceImpl implements CaseService {
         }
     }
 
-    @Transactional
     @Override
+    @Transactional
     public PostCaseResponse addCaseOrUpdate(AddCaseRequest addCaseRequest) {
         CourtCaseEntity courtCase = retrieveCoreObjectService.retrieveOrCreateCase(
             addCaseRequest.getCourthouse(),
@@ -169,6 +169,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
         List<Integer> caseIds;
         try {

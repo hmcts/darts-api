@@ -42,12 +42,13 @@ class AudioAuditTest extends IntegrationBase {
         mediaRequestService.patchMediaRequest(
             mediaRequest.getId(),
             new MediaPatchRequest().ownerId(newOwner.getId()));
+        transactionalUtil.executeInTransaction(() -> {
+            var changeAudioOwnership = findAuditActivity("Changing Audio Ownership", dartsDatabase.findAudits());
+            assertThat(changeAudioOwnership.getUser().getId()).isEqualTo(activeUser.getId());
 
-        var changeAudioOwnership = findAuditActivity("Changing Audio Ownership", dartsDatabase.findAudits());
-        assertThat(changeAudioOwnership.getUser().getId()).isEqualTo(activeUser.getId());
-
-        var mediaRequestRevisions = dartsDatabase.findMediaRequestRevisionsFor(mediaRequest.getId());
-        assertThat(mediaRequestRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            var mediaRequestRevisions = dartsDatabase.findMediaRequestRevisionsFor(mediaRequest.getId());
+            assertThat(mediaRequestRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+        });
     }
 
     private AuditEntity findAuditActivity(String activity, List<AuditEntity> audits) {

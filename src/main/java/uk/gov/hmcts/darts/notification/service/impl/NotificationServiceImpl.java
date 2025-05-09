@@ -3,16 +3,21 @@ package uk.gov.hmcts.darts.notification.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
@@ -46,36 +51,27 @@ public class NotificationServiceImpl implements NotificationService {
     private final SystemUserHelper systemUserHelper;
     private final NotificationRepository notificationRepo;
     private final CaseRepository caseRepository;
-    private final GovNotifyService govNotifyService;
-    private final TemplateIdHelper templateIdHelper;
-    private final GovNotifyRequestHelper govNotifyRequestHelper;
     private final LogApi logApi;
     private final boolean notificationsEnabled;
     private final boolean automatedTasksMode;
-    private final int maxRetry;
+    private final SendNotificationToGovNotifyNowProcessor sendNotificationToGovNotifyNowProcessor;
 
     public NotificationServiceImpl(
         SystemUserHelper systemUserHelper,
         NotificationRepository notificationRepo,
         CaseRepository caseRepository,
-        GovNotifyService govNotifyService,
-        TemplateIdHelper templateIdHelper,
-        GovNotifyRequestHelper govNotifyRequestHelper,
         LogApi logApi,
         @Value("${darts.notification.enabled}") boolean notificationsEnabled,
         @Value("${darts.automated-tasks-pod}") boolean automatedTasksMode,
-        @Value("${darts.notification.max_retry_attempts}") int maxRetry) {
+        SendNotificationToGovNotifyNowProcessor sendNotificationToGovNotifyNowProcessor) {
 
         this.systemUserHelper = systemUserHelper;
         this.notificationRepo = notificationRepo;
         this.caseRepository = caseRepository;
-        this.govNotifyService = govNotifyService;
-        this.templateIdHelper = templateIdHelper;
-        this.govNotifyRequestHelper = govNotifyRequestHelper;
         this.logApi = logApi;
         this.notificationsEnabled = notificationsEnabled;
         this.automatedTasksMode = automatedTasksMode;
-        this.maxRetry = maxRetry;
+        this.sendNotificationToGovNotifyNowProcessor = sendNotificationToGovNotifyNowProcessor;
     }
 
     @Override
@@ -167,22 +163,42 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendNotificationToGovNotifyNow() {
         log.debug("sendNotificationToGovNotify scheduler started.");
-
-        List<NotificationEntity> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);
+        List<Long> notificationEntriesIds = notificationRepo.findIdsByStatusIn(STATUS_ELIGIBLE_TO_SEND);
         int notificationCounter = 0;
-        for (NotificationEntity notification : notificationEntries) {
+        for (Long notificationId : notificationEntriesIds) {
             log.trace(
                 "Processing {} of {}, Id {}.",
                 ++notificationCounter,
-                notificationEntries.size(),
-                notification.getId()
+                notificationEntriesIds.size(),
+                notificationId
             );
+            this.sendNotificationToGovNotifyNowProcessor.process(notificationId);
+        }
+    }
+
+
+    @Component
+    @AllArgsConstructor(onConstructor_ = {@Autowired})
+    public static class SendNotificationToGovNotifyNowProcessor {
+
+        @Value("${darts.notification.max_retry_attempts}")
+        private int maxRetry;
+        private final NotificationRepository notificationRepository;
+        private final GovNotifyService govNotifyService;
+        private final TemplateIdHelper templateIdHelper;
+        private final GovNotifyRequestHelper govNotifyRequestHelper;
+        private final LogApi logApi;
+
+        @Transactional
+        public void process(Long notificationId) {
             String templateId;
+            NotificationEntity notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new DartsApiException(CommonApiError.NOT_FOUND, "Notification not found"));
             try {
                 templateId = templateIdHelper.findTemplateId(notification.getEventId());
             } catch (TemplateNotFoundException e) {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
-                break;
+                return;
             }
 
             GovNotifyRequest govNotifyRequest;
@@ -205,28 +221,29 @@ public class NotificationServiceImpl implements NotificationService {
                 incrementNotificationFailureCount(notification);
             }
         }
-    }
 
-    private void updateNotificationStatus(NotificationEntity notification, NotificationStatus status) {
-        notification.setStatus(status);
-        notificationRepo.saveAndFlush(notification);
-    }
 
-    private void incrementNotificationFailureCount(NotificationEntity notification) {
-        Integer attempts = notification.getAttempts();
-        if (attempts == null) {
-            attempts = 0;
+        private void updateNotificationStatus(NotificationEntity notification, NotificationStatus status) {
+            notification.setStatus(status);
+            notificationRepository.saveAndFlush(notification);
         }
-        attempts++;
-        if (attempts <= maxRetry) {
-            notification.setAttempts(attempts);
-            notification.setStatus(NotificationStatus.PROCESSING);
-            log.info("Notification has failed to send, retrying ID: {}", notification.getId());
-        } else {
-            updateNotificationStatus(notification, NotificationStatus.FAILED);
-            log.error("Notification ID {} has fully failed", notification.getId());
+
+        private void incrementNotificationFailureCount(NotificationEntity notification) {
+            Integer attempts = notification.getAttempts();
+            if (attempts == null) {
+                attempts = 0;
+            }
+            attempts++;
+            if (attempts <= maxRetry) {
+                notification.setAttempts(attempts);
+                notification.setStatus(NotificationStatus.PROCESSING);
+                log.info("Notification has failed to send, retrying ID: {}", notification.getId());
+            } else {
+                updateNotificationStatus(notification, NotificationStatus.FAILED);
+                log.error("Notification ID {} has fully failed", notification.getId());
+            }
+            notificationRepository.saveAndFlush(notification);
         }
-        notificationRepo.saveAndFlush(notification);
     }
 
 }

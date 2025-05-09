@@ -48,7 +48,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @JoinColumn(name = "cad_id", foreignKey = @ForeignKey(name = "eod_case_document_fk"))
     private CaseDocumentEntity caseDocument;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ors_id", foreignKey = @ForeignKey(name = "eod_object_record_status_fk"), nullable = false)
     private ObjectRecordStatusEntity status;
 

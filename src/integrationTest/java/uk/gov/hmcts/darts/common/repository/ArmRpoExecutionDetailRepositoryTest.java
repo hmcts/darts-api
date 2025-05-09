@@ -51,37 +51,40 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findLatestByCreatedDateTimeDescShouldReturnLatestArmRpoExecutionDetail() {
-        // when
-        var result = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDesc();
+        transactionalUtil.executeInTransaction(() -> {
+            // when
+            var result = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDesc();
 
-        // then
-        assertThat(result.get()).isEqualTo(armRpoExecutionDetailEntity6);
+            // then
+            assertThat(result.get()).isEqualTo(armRpoExecutionDetailEntity6);
+        });
     }
 
     @Test
     void findLatestByCreatedDateTimeDescWithStateAndStatusShouldReturnLatestArmRpoExecutionDetail() {
+        transactionalUtil.executeInTransaction(() -> {
+            // when
+            var result1 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
+                stateOf(REMOVE_PRODUCTION), statusOf(COMPLETED));
+            var result2 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
+                stateOf(GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY), statusOf(FAILED));
+            var result3 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
+                stateOf(GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY), statusOf(COMPLETED));
+            var result4 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
+                stateOf(SAVE_BACKGROUND_SEARCH), statusOf(FAILED));
+            var result5 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
+                stateOf(SAVE_BACKGROUND_SEARCH), statusOf(COMPLETED));
+            var result6 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
+                stateOf(GET_PRODUCTION_OUTPUT_FILES), statusOf(COMPLETED));
 
-        // when
-        var result1 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
-            stateOf(REMOVE_PRODUCTION), statusOf(COMPLETED));
-        var result2 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
-            stateOf(GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY), statusOf(FAILED));
-        var result3 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
-            stateOf(GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY), statusOf(COMPLETED));
-        var result4 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
-            stateOf(SAVE_BACKGROUND_SEARCH), statusOf(FAILED));
-        var result5 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
-            stateOf(SAVE_BACKGROUND_SEARCH), statusOf(COMPLETED));
-        var result6 = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(
-            stateOf(GET_PRODUCTION_OUTPUT_FILES), statusOf(COMPLETED));
-
-        // then
-        assertThat(result1.get()).isEqualTo(armRpoExecutionDetailEntity1);
-        assertThat(result2.get()).isEqualTo(armRpoExecutionDetailEntity2);
-        assertThat(result3.get()).isEqualTo(armRpoExecutionDetailEntity3);
-        assertThat(result4.get()).isEqualTo(armRpoExecutionDetailEntity4);
-        assertThat(result5.get()).isEqualTo(armRpoExecutionDetailEntity5);
-        assertThat(result6.get()).isEqualTo(armRpoExecutionDetailEntity6);
+            // then
+            assertThat(result1.get()).isEqualTo(armRpoExecutionDetailEntity1);
+            assertThat(result2.get()).isEqualTo(armRpoExecutionDetailEntity2);
+            assertThat(result3.get()).isEqualTo(armRpoExecutionDetailEntity3);
+            assertThat(result4.get()).isEqualTo(armRpoExecutionDetailEntity4);
+            assertThat(result5.get()).isEqualTo(armRpoExecutionDetailEntity5);
+            assertThat(result6.get()).isEqualTo(armRpoExecutionDetailEntity6);
+        });
 
     }
 

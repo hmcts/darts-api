@@ -164,22 +164,21 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     @Test
     void caseHearingsMultipleWithTranscripts() throws Exception {
         var otherCourtroom = "CR1";
-        dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            otherCourtroom,
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
-        );
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        HearingEntity hearingEntity2 = dartsDatabase.getHearingRepository().findAll().get(1);
+        transactionalUtil.executeInTransaction(() -> {
+            dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                SOME_CASE_ID,
+                SOME_COURTHOUSE,
+                otherCourtroom,
+                DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+            );
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            HearingEntity hearingEntity2 = dartsDatabase.getHearingRepository().findAll().get(1);
+            dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
+                testUser, hearingEntity.getCourtCase(), hearingEntity2, SOME_DATE_TIME, false
+            );
+        });
 
-        hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"), false);
-        hearingEntity2.addJudge(dartsDatabase.createSimpleJudge("hearing2Judge"), false);
-
-        dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
-            testUser, hearingEntity.getCourtCase(), hearingEntity2, SOME_DATE_TIME, false
-        );
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
@@ -197,7 +196,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         assertEquals(0, hearing1.getTranscriptCount());
 
         var hearing2 = hearingResultList[1];
-        assertEquals(hearingEntity2.getId(), hearing2.getId());
+        assertEquals(2, hearing2.getId());
         assertEquals(otherCourtroom, hearing2.getCourtroom());
         assertEquals(1, hearing2.getJudges().size());
         assertEquals("1JUDGE1", hearing2.getJudges().getFirst());
@@ -207,13 +206,14 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     @Test
     void caseHearingsMultipleWithTranscriptsWithHiddenDocument() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-
-        hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"), false);
-
-        dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
-            testUser, hearingEntity.getCourtCase(), hearingEntity, SOME_DATE_TIME, true
-        );
+        HearingEntity hearingEntity = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearing = dartsDatabase.getHearingRepository().findAll().getFirst();
+            hearing.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"), false);
+            dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
+                testUser, hearing.getCourtCase(), hearing, SOME_DATE_TIME, true
+            );
+            return hearing;
+        });
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 

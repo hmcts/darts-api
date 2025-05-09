@@ -116,7 +116,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             );
         assertTrue(foundArmEodOptional.isPresent());
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
-        assertEquals(EodHelper.armDropZoneStatus(), foundArmEod.getStatus());
+        assertEquals(EodHelper.armDropZoneStatus().getId(), foundArmEod.getStatus().getId());
         assertNotNull(foundArmEod.getOsrUuid());
 
         ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
@@ -178,7 +178,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             );
         assertTrue(foundArmEodOptional.isPresent());
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
-        assertEquals(EodHelper.armDropZoneStatus(), foundArmEod.getStatus());
+        assertEquals(EodHelper.armDropZoneStatus().getId(), foundArmEod.getStatus().getId());
         assertNotNull(foundArmEod.getOsrUuid());
 
         ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
@@ -240,7 +240,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             );
         assertTrue(foundArmEodOptional.isPresent());
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
-        assertEquals(EodHelper.armDropZoneStatus(), foundArmEod.getStatus());
+        assertEquals(EodHelper.armDropZoneStatus().getId(), foundArmEod.getStatus().getId());
         assertNotNull(foundArmEod.getOsrUuid());
 
         ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
@@ -312,7 +312,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             );
         assertTrue(foundArmEodOptional.isPresent());
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
-        assertEquals(EodHelper.failedArmManifestFileStatus(), foundArmEod.getStatus());
+        assertEquals(EodHelper.failedArmManifestFileStatus().getId(), foundArmEod.getStatus().getId());
         assertNotNull(foundArmEod.getOsrUuid());
 
         ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
@@ -362,7 +362,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             );
         assertTrue(foundArmEodOptional.isPresent());
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
-        assertEquals(EodHelper.failedArmRawDataStatus(), foundArmEod.getStatus());
+        assertEquals(EodHelper.failedArmRawDataStatus().getId(), foundArmEod.getStatus().getId());
         assertNotNull(foundArmEod.getOsrUuid());
 
         ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()

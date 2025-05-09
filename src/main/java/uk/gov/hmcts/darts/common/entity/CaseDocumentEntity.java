@@ -42,7 +42,7 @@ public class CaseDocumentEntity extends CreatedModifiedBaseEntity
     @SequenceGenerator(name = "cad_gen", sequenceName = "cad_seq", allocationSize = 1)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 

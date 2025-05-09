@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.retention.service.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -26,7 +29,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
     private final CaseRetentionRepository caseRetentionRepository;
     private final CurrentTimeHelper currentTimeHelper;
-    private final CaseRepository caseRepository;
+    private final ApplyRetentionCaseProcessor applyRetentionCaseProcessor;
 
     @Value("${darts.data-management.pending-retention-duration: 7d}")
     private final Duration pendingRetentionDuration;
@@ -37,28 +40,36 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
             caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minus(pendingRetentionDuration),
                                                          Limit.of(batchSize));
         log.info("Processing {} case retention entities out of a batch size {}", caseRetentionEntitiesIds.size(), batchSize);
-        processList(caseRetentionEntitiesIds);
-
-    }
-
-
-    @SuppressWarnings("java:S135")//Required to ensure we continue processing the list even if one of the elements fails
-    protected void processList(List<Integer> caseRetentionEntitiesIds) {
         Set<Integer> processedCases = new HashSet<>();
 
         //List is ordered in createdDateTime desc order
         for (Integer caseRetentionEntitiesId : caseRetentionEntitiesIds) {
+            applyRetentionCaseProcessor.process(processedCases, caseRetentionEntitiesId);
+        }
+
+    }
+
+    @Component
+    @AllArgsConstructor
+    public static class ApplyRetentionCaseProcessor {
+
+        private final CaseRetentionRepository caseRetentionRepository;
+        private final CurrentTimeHelper currentTimeHelper;
+        private final CaseRepository caseRepository;
+
+        @Transactional
+        public void process(Set<Integer> processedCases, int caseRetentionEntitiesId) {
             Optional<CaseRetentionEntity> caseRetentionEntityOpt = caseRetentionRepository.findById(caseRetentionEntitiesId);
             if (caseRetentionEntityOpt.isEmpty()) {
                 log.error("CaseRetentionEntity with id {} not found", caseRetentionEntitiesId);
-                continue;
+                return;
             }
             CaseRetentionEntity caseRetentionEntity = caseRetentionEntityOpt.get();
             CourtCaseEntity courtCaseEntity = caseRetentionEntity.getCourtCase();
             if (processedCases.contains(courtCaseEntity.getId())) {
                 caseRetentionEntity.setCurrentState(CaseRetentionStatus.IGNORED.name());
                 caseRetentionRepository.save(caseRetentionEntity);
-                continue;
+                return;
             }
 
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());

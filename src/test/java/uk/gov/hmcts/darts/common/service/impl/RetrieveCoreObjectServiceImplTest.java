@@ -42,11 +42,11 @@ class RetrieveCoreObjectServiceImplTest {
     @Mock
     private AuthorisationApi authorisationApi;
 
-    private RetrieveCoreObjectServiceImpl retrieveCoreObjectService;
+    private RetrieveCoreObjectServiceSupport retrieveCoreObjectService;
 
     @BeforeEach
     void setUp() {
-        retrieveCoreObjectService = new RetrieveCoreObjectServiceImpl(
+        retrieveCoreObjectService = new RetrieveCoreObjectServiceSupport(
             hearingCommonService,
             courthouseCommonService,
             courtroomCommonService,

@@ -51,36 +51,36 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ha
     private Long id;
 
     @NotAudited
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "case_transcription_ae",
         joinColumns = {@JoinColumn(name = "tra_id")},
         inverseJoinColumns = {@JoinColumn(name = "cas_id")})
     private Set<CourtCaseEntity> courtCases = new HashSet<>();
 
     @Audited(targetAuditMode = NOT_AUDITED)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trt_id", nullable = false)
     private TranscriptionTypeEntity transcriptionType;
 
     @Audited(targetAuditMode = NOT_AUDITED)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ctr_id")
     private CourtroomEntity courtroom;
 
     @NotAudited
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tru_id")
     private TranscriptionUrgencyEntity transcriptionUrgency;
 
     @NotAudited
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "hearing_transcription_ae",
         joinColumns = {@JoinColumn(name = "tra_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})
     private Set<HearingEntity> hearings = new HashSet<>();
 
     @NotAudited
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trs_id")
     private TranscriptionStatusEntity transcriptionStatus;
 

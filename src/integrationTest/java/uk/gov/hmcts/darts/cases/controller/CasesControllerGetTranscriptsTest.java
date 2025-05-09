@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -43,9 +42,8 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
-    @BeforeEach
-    void setUp() {
-
+    @SuppressWarnings("PMD.UnitTestShouldUseBeforeAnnotation")//False positive needs to be called within same transaction
+    private void setUp() {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
@@ -65,7 +63,7 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void caseGetTranscriptEndpointNotFound() throws Exception {
-
+        setUp();
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, "25");
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
@@ -75,12 +73,17 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void casesGetTranscriptEndpointOneObjectReturned() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        dartsDatabase.save(transcription);
+        final TranscriptionEntity[] transcription = new TranscriptionEntity[1];
+        HearingEntity hearing = transactionalUtil.executeInTransaction(() -> {
+            setUp();
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            transcription[0] = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            dartsDatabase.save(transcription[0]);
+            return hearingEntity;
+        });
+        dartsDatabase.updateCreatedBy(transcription[0], OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, hearingEntity.getCourtCase().getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, hearing.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
             "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointOneObjectReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -91,15 +94,22 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void casesGetTranscriptEndpointTwoObjectsReturned() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        dartsDatabase.save(transcription);
-        TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 1, 0, 0, ZoneOffset.UTC));
-        dartsDatabase.save(transcription2);
+        final TranscriptionEntity[] transcription = new TranscriptionEntity[2];
+        HearingEntity hearing = transactionalUtil.executeInTransaction(() -> {
+            setUp();
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            transcription[0] = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            dartsDatabase.save(transcription[0]);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, hearingEntity.getCourtCase().getId());
+            transcription[1] = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            dartsDatabase.save(transcription[1]);
+            return hearingEntity;
+        });
+        dartsDatabase.updateCreatedBy(transcription[0], OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.updateCreatedBy(transcription[1], OffsetDateTime.of(2023, 6, 20, 10, 1, 0, 0, ZoneOffset.UTC));
+
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, hearing.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
             "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointTwoObjectsReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -110,37 +120,43 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
 
     @Test
     void ignoreAutomaticTranscripts() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+        final TranscriptionEntity[] transcription = new TranscriptionEntity[4];
+        HearingEntity hearing = transactionalUtil.executeInTransaction(() -> {
+            setUp();
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
 
-        //modernised manual transcription
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 1, 0, 0, ZoneOffset.UTC));
-        transcription.setIsManualTranscription(true);
-        dartsDatabase.save(transcription);
+            //modernised manual transcription
+            transcription[0] = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription[0].setIsManualTranscription(true);
+            dartsDatabase.save(transcription[0]);
 
-        //modernised automatic transcription
-        TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 2, 0, 0, ZoneOffset.UTC));
-        transcription2.setIsManualTranscription(false);
-        transcription2.setLegacyObjectId(null);
-        dartsDatabase.save(transcription2);
+            //modernised automatic transcription
+            transcription[1] = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription[1].setIsManualTranscription(false);
+            transcription[1].setLegacyObjectId(null);
+            dartsDatabase.save(transcription[1]);
 
-        //legacy manual transcription
-        TranscriptionEntity transcription3 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription3.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 3, 0, 0, ZoneOffset.UTC));
-        transcription3.setIsManualTranscription(true);
-        transcription3.setLegacyObjectId("Something");
-        dartsDatabase.save(transcription3);
+            //legacy manual transcription
+            transcription[2] = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription[2].setIsManualTranscription(true);
+            transcription[2].setLegacyObjectId("Something");
+            dartsDatabase.save(transcription[2]);
 
-        //legacy automatic transcription
-        TranscriptionEntity transcription4 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription4.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 4, 0, 0, ZoneOffset.UTC));
-        transcription4.setIsManualTranscription(false);
-        transcription4.setLegacyObjectId("Something");
-        dartsDatabase.save(transcription4);
-        dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(transcription4);
+            //legacy automatic transcription
+            transcription[3] = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription[3].setIsManualTranscription(false);
+            transcription[3].setLegacyObjectId("Something");
+            dartsDatabase.save(transcription[3]);
+            dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(transcription[3]);
+            return hearingEntity;
+        });
+        dartsDatabase.updateCreatedBy(transcription[0], OffsetDateTime.of(2023, 6, 20, 10, 1, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.updateCreatedBy(transcription[1], OffsetDateTime.of(2023, 6, 20, 10, 2, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.updateCreatedBy(transcription[2], OffsetDateTime.of(2023, 6, 20, 10, 3, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.updateCreatedBy(transcription[3], OffsetDateTime.of(2023, 6, 20, 10, 4, 0, 0, ZoneOffset.UTC));
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, hearingEntity.getCourtCase().getId());
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, hearing.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
             "tests/cases/CaseControllerGetCaseTranscriptsTest/ignoreAutomaticTranscripts.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
