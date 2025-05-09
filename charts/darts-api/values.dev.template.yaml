@@ -204,9 +204,9 @@ darts-gateway:
           - name: ExternalServiceBasicAuthorisationWhitelist
             alias: EXTERNAL_SERVICE_BASIC_AUTHORISATION_WHITELIST
     environment:
-    DARTS_API_URL: ${SERVICE_FQDN}
-    TESTING_SUPPORT_ENDPOINTS_ENABLED: true
-    ALLOW_CONFIG_MUTATIONS: true
+      DARTS_API_URL: ${SERVICE_FQDN}
+      TESTING_SUPPORT_ENDPOINTS_ENABLED: true
+      ALLOW_CONFIG_MUTATIONS: true
 
 # function:
 #   scaleType: Job
