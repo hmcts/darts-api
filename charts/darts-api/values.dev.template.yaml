@@ -1,5 +1,6 @@
 # Attention: if you are changing values in here, please ensure you also update any corresponding files in the charts-dev-overrides directory
 java:
+  releaseNameOverride: '{{ .Release.Name }}-api'
   # Don't modify below here
   image: ${IMAGE_NAME}
   devmemoryRequests: "1Gi"
@@ -141,6 +142,7 @@ postgresql:
 darts-portal:
   enabled: ${DEV_ENABLE_DARTS_PORTAL}
   nodejs:
+    releaseNameOverride: '{{ .Release.Name }}-portal'
     applicationPort: 3000
     image: 'sdshmctspublic.azurecr.io/darts/portal:${DEV_DARTS_PORTAL_IMAGE_SUFFIX}'
     ingressHost: "darts-portal-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
