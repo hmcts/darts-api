@@ -1,5 +1,5 @@
 # Attention: if you are changing values in here, please ensure you also update any corresponding files in the charts-dev-overrides directory
-api:
+java:
   # Don't modify below here
   image: ${IMAGE_NAME}
   devmemoryRequests: "1Gi"
@@ -160,7 +160,8 @@ darts-portal:
 
 darts-gateway:
   enabled: ${DEV_ENABLE_DARTS_GATEWAY}
-  java-gateway:
+  releaseNameOverride: 'darts-api-${CHANGE_ID}-gateway'
+  java:
     applicationPort: 8070
     image: 'sdshmctspublic.azurecr.io/darts/gateway:${DEV_DARTS_GATEWAY_IMAGE_SUFFIX}'
     ingressHost: "darts-gateway-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
