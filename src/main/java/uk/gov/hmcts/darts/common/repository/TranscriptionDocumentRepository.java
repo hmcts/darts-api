@@ -73,6 +73,6 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
     List<TranscriptionDocumentEntity> getMarkedForDeletion();
 
     // native query to bypass @SQLRestriction
-    @Query(value = "SELECT trd.* FROM darts.transcription_document trd WHERE trd.tra_id = :trdId AND trd.is_hidden = true", nativeQuery = true)
-    List<TranscriptionDocumentEntity> findByTranscriptionIdAndHiddenTrueIncludeDeleted(Long trdId);
+    @Query(value = "SELECT trd.* FROM darts.transcription_document trd WHERE trd.tra_id = :traId AND trd.is_hidden = true", nativeQuery = true)
+    List<TranscriptionDocumentEntity> findByTranscriptionIdAndHiddenTrueIncludeDeleted(Long traId);
 }

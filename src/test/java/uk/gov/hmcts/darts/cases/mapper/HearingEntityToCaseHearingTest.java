@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.test.common.TestUtils;
@@ -25,6 +26,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -106,6 +108,20 @@ class HearingEntityToCaseHearingTest {
 
         assertEquals(1, hearingList.getFirst().getTranscriptCount());
         verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong());
+    }
+
+    @Test
+    void mapToHearingList_shouldIgnoreLegacyAutomatedTranscripts_whenNoDocumentsAreAssociated() {
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
+        TranscriptionEntity hearingTranscript = TestUtils.getFirstLong(hearings.getFirst().getTranscriptions());
+        hearingTranscript.setIsManualTranscription(false);
+        hearingTranscript.setLegacyObjectId("something");
+        hearingTranscript.setTranscriptionDocumentEntities(Collections.emptyList());
+
+        List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
+
+        assertEquals(0, hearingList.getFirst().getTranscriptCount());
+        verify(transcriptionDocumentRepository, never()).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyLong());
     }
 
     @Test
