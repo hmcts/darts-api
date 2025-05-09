@@ -79,12 +79,22 @@ def determineDevEnvironmentDeployment() {
   env.DEV_DARTS_PORTAL_URL = "https://darts.staging.apps.hmcts.net"
   env.DEV_DARTS_PORTAL_IMAGE_SUFFIX = "latest"
 
+  env.DEV_ENABLE_DARTS_GATEWAY = false
+  env.DEV_DARTS_GATEWAY_URL = "http://darts-gateway.staging.platform.hmcts.net"
+  env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX = "latest"
+
   echo "1 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
   echo "1 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
+
+  echo "1 - env.DEV_ENABLE_DARTS_GATEWAY: ${env.DEV_ENABLE_DARTS_GATEWAY}"
+  echo "1 - env.DEV_DARTS_GATEWAY_URL: ${env.DEV_DARTS_GATEWAY_URL}"
+
 
   def githubApi = new GithubAPI(this)
   if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_keep_helm")) {
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "enable_darts_")) {
+
+      //Portal
       if (label ==~ /enable_darts_portal.*/) {
         env.DEV_ENABLE_DARTS_PORTAL = true
         env.DEV_DARTS_PORTAL_URL = "https://darts-portal-api-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
@@ -95,11 +105,25 @@ def determineDevEnvironmentDeployment() {
         }
         echo "Deploying DARTS portal (${env.DEV_DARTS_PORTAL_IMAGE_SUFFIX}) instance in PR environment"
       }
+
+      //Gateway
+      if (label ==~ /enable_darts_gateway.*/) {
+        env.DEV_ENABLE_DARTS_GATEWAY = true
+        env.DEV_DARTS_GATEWAY_URL = "https://darts-gateway-api-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
+
+        if (label ==~ /enable_darts_gateway:pr-.*/) {
+          env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX = label.replace("enable_darts_gateway:", "")
+          echo "DARTS gateway image suffix: ${env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX}"
+        }
+        echo "Deploying DARTS gateway (${env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX}) instance in PR environment"
+      }
     }
   }
 
   echo "2 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
   echo "2 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
+  echo "2 - env.DEV_ENABLE_DARTS_GATEWAY: ${env.DEV_ENABLE_DARTS_GATEWAY}"
+  echo "2 - env.DEV_DARTS_GATEWAY_URL: ${env.DEV_DARTS_GATEWAY_URL}"
 }
 
 GradleBuilder builder = new GradleBuilder(this, product)

@@ -1,5 +1,6 @@
 # Attention: if you are changing values in here, please ensure you also update any corresponding files in the charts-dev-overrides directory
 java:
+  releaseNameOverride: '{{ .Release.Name }}-api'
   # Don't modify below here
   image: ${IMAGE_NAME}
   devmemoryRequests: "1Gi"
@@ -116,7 +117,7 @@ java:
     DARTS_API_DB_USERNAME: "hmcts"
     spring.profiles.active: dev
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
-    DARTS_GATEWAY_URL: "http://darts-gateway.staging.platform.hmcts.net"
+    DARTS_GATEWAY_URL: ${DEV_DARTS_GATEWAY_URL}
     DARTS_PORTAL_URL: ${DEV_DARTS_PORTAL_URL}
     AUTOMATED_TASK_MODE: true
     API_MODE: true
@@ -141,6 +142,7 @@ postgresql:
 darts-portal:
   enabled: ${DEV_ENABLE_DARTS_PORTAL}
   nodejs:
+    releaseNameOverride: '{{ .Release.Name }}-portal'
     applicationPort: 3000
     image: 'sdshmctspublic.azurecr.io/darts/portal:${DEV_DARTS_PORTAL_IMAGE_SUFFIX}'
     ingressHost: "darts-portal-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
@@ -157,6 +159,53 @@ darts-portal:
       DARTS_AZUREAD_B2C_ORIGIN_HOST: https://hmctsstgextid.b2clogin.com
       DARTS_AZUREAD_B2C_HOSTNAME: https://darts.staging.apps.hmcts.net
       MANUAL_DELETION_ENABLED: true
+
+darts-gateway:
+  enabled: ${DEV_ENABLE_DARTS_GATEWAY}
+  java:
+    releaseNameOverride: '{{ .Release.Name }}-gateway'
+    applicationPort: 8070
+    image: 'sdshmctspublic.azurecr.io/darts/gateway:${DEV_DARTS_GATEWAY_IMAGE_SUFFIX}'
+    ingressHost: "darts-gateway-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+    aadIdentityName: darts
+    keyVaults:
+      darts:
+        secrets:
+          - name: AzureAdB2CFuncTestROPCClientId
+            alias: AAD_B2C_ROPC_CLIENT_ID
+          - name: AzureAdB2CClientId
+            alias: AAD_B2C_CLIENT_ID
+          - name: app-insights-connection-string
+            alias: app-insights-connection-string
+          - name: MaxFileUploadSizeInMegabytes
+            alias: MAX_FILE_UPLOAD_SIZE_MEGABYTES
+          - name: redis-connection-string
+            alias: REDIS_CONNECTION_STRING
+          - name: AzureAdB2CTenantId
+            alias: AAD_B2C_TENANT_ID
+          - name: ViQExternalUserName
+            alias: VIQ_EXTERNAL_USER_NAME
+          - name: ViQExternalPassword
+            alias: VIQ_EXTERNAL_PASSWORD
+          - name: ViQInternalPassword
+            alias: VIQ_INTERNAL_PASSWORD
+          - name: XhibitExternalUserName
+            alias: XHIBIT_EXTERNAL_USER_NAME
+          - name: XhibitExternalPassword
+            alias: XHIBIT_EXTERNAL_PASSWORD
+          - name: XhibitInternalPassword
+            alias: XHIBIT_INTERNAL_PASSWORD
+          - name: CPExternalUserName
+            alias: CP_EXTERNAL_USER_NAME
+          - name: CPExternalPassword
+            alias: CP_EXTERNAL_PASSWORD
+          - name: CPInternalPassword
+            alias: CP_INTERNAL_PASSWORD
+          - name: ExternalServiceBasicAuthorisationWhitelist
+            alias: EXTERNAL_SERVICE_BASIC_AUTHORISATION_WHITELIST
+    environment:
+      DARTS_API_URL: "https://darts-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+      TESTING_SUPPORT_ENDPOINTS_ENABLED: true
 
 # function:
 #   scaleType: Job
