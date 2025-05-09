@@ -12,6 +12,8 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.http.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem;
+import uk.gov.hmcts.darts.cases.model.AdminCasesIdAudiosGet200Response;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdminSingleCaseResponseItem;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.model.Transcript;
+import uk.gov.hmcts.darts.cases.service.AdminCaseService;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -35,6 +38,7 @@ import uk.gov.hmcts.darts.common.util.AdminSearchRequestValidator;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DataUtil;
+import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.time.LocalDate;
@@ -67,6 +71,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 public class CaseController implements CasesApi {
 
     private final CaseService caseService;
+    private final AdminCaseService adminCaseService;
 
     private final LogApi logApi;
     private final AdminSearchRequestValidator adminSearchRequestValidator;
@@ -225,9 +230,35 @@ public class CaseController implements CasesApi {
         return new ResponseEntity<>(caseService.adminGetCaseById(id), HttpStatus.OK);
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    public ResponseEntity<AdminCasesIdAudiosGet200Response> adminCasesIdAudiosGet(
+        Integer caseId,
+        Integer pageNumber,
+        Integer pageSize,
+        List<String> sortBy,
+        List<String> sortOrder
+    ) {
+        PaginationDto<AdminCaseAudioResponseItem> paginationDto = new PaginationDto<>(
+            PaginatedList<AdminCaseAudioResponseItem>::new,
+            pageNumber,
+            pageSize,
+            PaginationDto.toSortBy(sortBy),
+            PaginationDto.toSortDirection(sortOrder)
+        );
+
+        return new ResponseEntity<>(
+            adminCaseService.getAudiosByCaseId(caseId, paginationDto)
+                .mapToPaginatedListCommon(new AdminCasesIdAudiosGet200Response(), AdminCasesIdAudiosGet200Response::setData), HttpStatus.OK);
+
+    }
+
     void validateUppercase(String courthouse, String courtroom) {
         if (!CourtValidationUtils.isUppercase(courthouse, courtroom)) {
             throw new DartsApiException(CaseApiError.INVALID_REQUEST, "Courthouse and courtroom must be uppercase.");
         }
     }
+
 }
