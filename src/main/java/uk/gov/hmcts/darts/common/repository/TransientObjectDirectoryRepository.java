@@ -19,5 +19,11 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
         """)
     List<TransientObjectDirectoryEntity> findByTransformedMediaId(Integer transformedMediaId);
 
+    @Query("""
+        SELECT tod FROM TransientObjectDirectoryEntity tod
+        LEFT JOIN FETCH tod.transformedMedia         
+        WHERE tod.status = :status
+        """)
+    //Join required to ensure transient media is loaded into session
     List<TransientObjectDirectoryEntity> findByStatus(ObjectRecordStatusEntity status, Limit limit);
 }

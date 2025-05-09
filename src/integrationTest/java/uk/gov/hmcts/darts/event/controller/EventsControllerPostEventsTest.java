@@ -96,17 +96,18 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isCreated());
+        transactionalUtil.executeInTransaction(() -> {
+            List<EventEntity> results = dartsDatabase.getAllEvents()
+                .stream()
+                .filter(eventEntity -> "ActiveTestType".equals(eventEntity.getEventType().getType()))
+                .toList();
 
-        List<EventEntity> results = dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> "ActiveTestType".equals(eventEntity.getEventType().getType()))
-            .toList();
+            Assertions.assertEquals(1, results.size());
+            EventEntity persistedEvent = results.getFirst();
 
-        Assertions.assertEquals(1, results.size());
-        EventEntity persistedEvent = results.getFirst();
-
-        EventHandlerEntity eventType = persistedEvent.getEventType();
-        Assertions.assertEquals("New Description", eventType.getEventName());
+            EventHandlerEntity eventType = persistedEvent.getEventType();
+            Assertions.assertEquals("New Description", eventType.getEventName());
+        });
     }
 
 
@@ -213,15 +214,16 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isCreated());
+        transactionalUtil.executeInTransaction(() -> {
+            List<EventEntity> results = dartsDatabase.getAllEvents()
+                .stream()
+                .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
+                .toList();
 
-        List<EventEntity> results = dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
-            .toList();
-
-        Assertions.assertEquals(1, results.size());
-        Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
-        Assertions.assertEquals("12309", results.getFirst().getEventType().getSubType());
+            Assertions.assertEquals(1, results.size());
+            Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
+            Assertions.assertEquals("12309", results.getFirst().getEventType().getSubType());
+        });
     }
 
     @Test
@@ -252,15 +254,16 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isCreated());
+        transactionalUtil.executeInTransaction(() -> {
+            List<EventEntity> results = dartsDatabase.getAllEvents()
+                .stream()
+                .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
+                .toList();
 
-        List<EventEntity> results = dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
-            .toList();
-
-        Assertions.assertEquals(1, results.size());
-        Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
-        Assertions.assertNull(results.getFirst().getEventType().getSubType());
+            Assertions.assertEquals(1, results.size());
+            Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
+            Assertions.assertNull(results.getFirst().getEventType().getSubType());
+        });
     }
 
     private static EventHandlerEntity getActiveHandler() {

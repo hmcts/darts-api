@@ -131,14 +131,14 @@ class EventsControllerTest extends IntegrationBase {
         // setup an event id
         LocalDateTime hearingDate = LocalDateTime.of(2020, 6, 6, 20, 0, 0);
         HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", hearingDate);
-        EventEntity eventEntity = dartsDatabaseStub.createEvent(hearing);
+        EventEntity event = dartsDatabaseStub.createEvent(hearing);
 
-        eventLinkedCaseStub.createCaseLinkedEvent(eventEntity, hearing.getCourtCase());
+        eventLinkedCaseStub.createCaseLinkedEvent(event, hearing.getCourtCase());
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
-        MockHttpServletRequestBuilder requestBuilder = get("/admin/events/" + eventEntity.getId())
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/events/" + event.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
@@ -147,52 +147,56 @@ class EventsControllerTest extends IntegrationBase {
                                                                              AdminGetEventById200Response.class);
 
         // Then
-        Assertions.assertEquals(eventEntity.getId(), responseResult.getId());
-        Assertions.assertEquals(eventEntity.getLegacyObjectId(), responseResult.getDocumentumId());
-        Assertions.assertEquals(eventEntity.getEventId(), responseResult.getSourceId());
-        Assertions.assertEquals(eventEntity.getMessageId(), responseResult.getMessageId());
-        Assertions.assertEquals(eventEntity.getEventText(), responseResult.getText());
-        Assertions.assertEquals(eventEntity.getEventType().getId(), responseResult.getEventMapping().getId());
-        Assertions.assertEquals(eventEntity.isLogEntry(), responseResult.getIsLogEntry());
-        Assertions.assertEquals(eventEntity.getCourtroom().getId(), responseResult.getCourtroom().getId());
-        Assertions.assertEquals(eventEntity.getCourtroom().getName(), responseResult.getCourtroom().getName());
-        Assertions.assertEquals(eventEntity.getCourtroom().getCourthouse().getId(), responseResult.getCourthouse().getId());
-        Assertions.assertEquals(eventEntity.getCourtroom().getCourthouse().getDisplayName(), responseResult.getCourthouse().getDisplayName());
-        Assertions.assertEquals(eventEntity.getLegacyVersionLabel(), responseResult.getVersion());
-        Assertions.assertEquals(eventEntity.getTimestamp(), responseResult.getEventTs());
-        Assertions.assertEquals(eventEntity.getIsCurrent(), responseResult.getIsCurrent());
-        Assertions.assertEquals(eventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getCreatedAt());
-        Assertions.assertEquals(eventEntity.getCreatedById(), responseResult.getCreatedBy());
-        Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getLastModifiedAt());
-        Assertions.assertEquals(eventEntity.getLastModifiedById(), responseResult.getLastModifiedBy());
-        Assertions.assertEquals(eventEntity.isDataAnonymised(), responseResult.getIsDataAnonymised());
-        Assertions.assertEquals(eventEntity.getEventStatus(), responseResult.getEventStatus());
+        transactionalUtil.executeInTransaction(() -> {
+            EventEntity eventEntity = dartsDatabase.getEventRepository().findById(event.getId()).orElseThrow();
+            Assertions.assertEquals(eventEntity.getId(), responseResult.getId());
+            Assertions.assertEquals(eventEntity.getLegacyObjectId(), responseResult.getDocumentumId());
+            Assertions.assertEquals(eventEntity.getEventId(), responseResult.getSourceId());
+            Assertions.assertEquals(eventEntity.getMessageId(), responseResult.getMessageId());
+            Assertions.assertEquals(eventEntity.getEventText(), responseResult.getText());
+            Assertions.assertEquals(eventEntity.getEventType().getId(), responseResult.getEventMapping().getId());
+            Assertions.assertEquals(eventEntity.isLogEntry(), responseResult.getIsLogEntry());
+            Assertions.assertEquals(eventEntity.getCourtroom().getId(), responseResult.getCourtroom().getId());
+            Assertions.assertEquals(eventEntity.getCourtroom().getName(), responseResult.getCourtroom().getName());
+            Assertions.assertEquals(eventEntity.getCourtroom().getCourthouse().getId(), responseResult.getCourthouse().getId());
+            Assertions.assertEquals(eventEntity.getCourtroom().getCourthouse().getDisplayName(), responseResult.getCourthouse().getDisplayName());
+            Assertions.assertEquals(eventEntity.getLegacyVersionLabel(), responseResult.getVersion());
+            Assertions.assertEquals(eventEntity.getTimestamp(), responseResult.getEventTs());
+            Assertions.assertEquals(eventEntity.getIsCurrent(), responseResult.getIsCurrent());
+            Assertions.assertEquals(eventEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getCreatedAt());
+            Assertions.assertEquals(eventEntity.getCreatedById(), responseResult.getCreatedBy());
+            Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(),
+                                    responseResult.getLastModifiedAt());
+            Assertions.assertEquals(eventEntity.getLastModifiedById(), responseResult.getLastModifiedBy());
+            Assertions.assertEquals(eventEntity.isDataAnonymised(), responseResult.getIsDataAnonymised());
+            Assertions.assertEquals(eventEntity.getEventStatus(), responseResult.getEventStatus());
 
-        assertThat(responseResult.getHearings()).hasSize(1);
-        AdminGetEventResponseDetailsHearingsHearingsInner hearingsInner = responseResult.getHearings().getFirst();
+            assertThat(responseResult.getHearings()).hasSize(1);
+            AdminGetEventResponseDetailsHearingsHearingsInner hearingsInner = responseResult.getHearings().getFirst();
 
-        assertThat(hearingsInner.getId()).isEqualTo(hearing.getId());
-        assertThat(hearingsInner.getCaseId()).isEqualTo(hearing.getCourtCase().getId());
-        assertThat(hearingsInner.getCaseNumber()).isEqualTo(hearing.getCourtCase().getCaseNumber());
-        assertThat(hearingsInner.getHearingDate()).isEqualTo(hearing.getHearingDate());
+            assertThat(hearingsInner.getId()).isEqualTo(hearing.getId());
+            assertThat(hearingsInner.getCaseId()).isEqualTo(hearing.getCourtCase().getId());
+            assertThat(hearingsInner.getCaseNumber()).isEqualTo(hearing.getCourtCase().getCaseNumber());
+            assertThat(hearingsInner.getHearingDate()).isEqualTo(hearing.getHearingDate());
 
-        CourthouseResponseDetails courthouseResponseDetails = hearingsInner.getCourthouse();
-        CourtroomResponseDetails courtroomResponseDetails = hearingsInner.getCourtroom();
+            CourthouseResponseDetails courthouseResponseDetails = hearingsInner.getCourthouse();
+            CourtroomResponseDetails courtroomResponseDetails = hearingsInner.getCourtroom();
 
-        assertThat(courthouseResponseDetails.getId()).isEqualTo(hearing.getCourtroom().getCourthouse().getId());
-        assertThat(courthouseResponseDetails.getDisplayName()).isEqualTo(hearing.getCourtroom().getCourthouse().getDisplayName());
+            assertThat(courthouseResponseDetails.getId()).isEqualTo(hearing.getCourtroom().getCourthouse().getId());
+            assertThat(courthouseResponseDetails.getDisplayName()).isEqualTo(hearing.getCourtroom().getCourthouse().getDisplayName());
 
-        assertThat(courtroomResponseDetails.getId()).isEqualTo(hearing.getCourtroom().getId());
-        assertThat(courtroomResponseDetails.getName()).isEqualTo(hearing.getCourtroom().getName());
+            assertThat(courtroomResponseDetails.getId()).isEqualTo(hearing.getCourtroom().getId());
+            assertThat(courtroomResponseDetails.getName()).isEqualTo(hearing.getCourtroom().getName());
 
-        assertThat(responseResult.getCases()).hasSize(1);
-        AdminGetEventResponseDetailsCasesCasesInner casesCasesInner = responseResult.getCases().getFirst();
-        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+            assertThat(responseResult.getCases()).hasSize(1);
+            AdminGetEventResponseDetailsCasesCasesInner casesCasesInner = responseResult.getCases().getFirst();
+            CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
 
-        assertThat(casesCasesInner.getId()).isEqualTo(courtCaseEntity.getId());
-        assertThat(casesCasesInner.getCaseNumber()).isEqualTo(courtCaseEntity.getCaseNumber());
-        assertThat(casesCasesInner.getCourthouse().getId()).isEqualTo(courtCaseEntity.getCourthouse().getId());
-        assertThat(casesCasesInner.getCourthouse().getDisplayName()).isEqualTo(courtCaseEntity.getCourthouse().getDisplayName());
+            assertThat(casesCasesInner.getId()).isEqualTo(courtCaseEntity.getId());
+            assertThat(casesCasesInner.getCaseNumber()).isEqualTo(courtCaseEntity.getCaseNumber());
+            assertThat(casesCasesInner.getCourthouse().getId()).isEqualTo(courtCaseEntity.getCourthouse().getId());
+            assertThat(casesCasesInner.getCourthouse().getDisplayName()).isEqualTo(courtCaseEntity.getCourthouse().getDisplayName());
+        });
     }
 
     @Test

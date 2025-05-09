@@ -305,130 +305,138 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void findByCourthouseCourtroomAndDate_ReturnsHearing() {
-        // given
-        CourthouseEntity courthouse = someMinimalCourthouse();
-        courthouse.setCourthouseName("Test Courthouse");
+        transactionalUtil.executeInTransaction(() -> {
+            // given
+            CourthouseEntity courthouse = someMinimalCourthouse();
+            courthouse.setCourthouseName("Test Courthouse");
 
-        CourtroomEntity courtroom = someMinimalCourtRoom();
-        courtroom.setName("Test Courtroom");
-        courtroom.setCourthouse(courthouse);
+            CourtroomEntity courtroom = someMinimalCourtRoom();
+            courtroom.setName("Test Courtroom");
+            courtroom.setCourthouse(courthouse);
 
-        HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
-        dartsPersistence.saveAll(hearingForCase);
+            HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
+            dartsPersistence.saveAll(hearingForCase);
 
-        String courthouseName = hearingForCase.getCourtroom().getCourthouse().getCourthouseName();
-        String courtroomName = hearingForCase.getCourtroom().getName();
+            String courthouseName = hearingForCase.getCourtroom().getCourthouse().getCourthouseName();
+            String courtroomName = hearingForCase.getCourtroom().getName();
 
-        List<HearingEntity> hearingEntities = hearingRepository.findByCourthouseCourtroomAndDate(
-            courthouseName,
-            courtroomName,
-            hearingForCase.getHearingDate()
-        );
+            List<HearingEntity> hearingEntities = hearingRepository.findByCourthouseCourtroomAndDate(
+                courthouseName,
+                courtroomName,
+                hearingForCase.getHearingDate()
+            );
 
-        // then
-        assertThat(hearingEntities).hasSize(1);
-        assertThat(hearingEntities.getFirst().getId()).isEqualTo(hearingForCase.getId());
-        assertEquals(COURTHOUSE_NAME, hearingEntities.getFirst().getCourtroom().getCourthouse().getCourthouseName());
-        assertEquals(COURTROOM_NAME, hearingEntities.getFirst().getCourtroom().getName());
+            // then
+            assertThat(hearingEntities).hasSize(1);
+            assertThat(hearingEntities.getFirst().getId()).isEqualTo(hearingForCase.getId());
+            assertEquals(COURTHOUSE_NAME, hearingEntities.getFirst().getCourtroom().getCourthouse().getCourthouseName());
+            assertEquals(COURTROOM_NAME, hearingEntities.getFirst().getCourtroom().getName());
+        });
     }
 
     @Test
     void findByCourthouseCourtroomAndDate_ReturnsHearing_UsingWhitespacesFindBy() {
-        // given
-        CourthouseEntity courthouse = someMinimalCourthouse();
-        courthouse.setCourthouseName("Test Courthouse");
+        transactionalUtil.executeInTransaction(() -> {
+            // given
+            CourthouseEntity courthouse = someMinimalCourthouse();
+            courthouse.setCourthouseName("Test Courthouse");
 
-        CourtroomEntity courtroom = someMinimalCourtRoom();
-        courtroom.setName("Test Courtroom");
-        courtroom.setCourthouse(courthouse);
+            CourtroomEntity courtroom = someMinimalCourtRoom();
+            courtroom.setName("Test Courtroom");
+            courtroom.setCourthouse(courthouse);
 
-        HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
-        dartsPersistence.saveAll(hearingForCase);
+            HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
+            dartsPersistence.saveAll(hearingForCase);
 
-        String courthouseName = " Test Courthouse ";
-        String courtroomName = " Test Courtroom ";
+            String courthouseName = " Test Courthouse ";
+            String courtroomName = " Test Courtroom ";
 
-        log.info("Courthouse name: {}", courthouseName);
-        log.info("Courtroom name: {}", courtroomName);
+            log.info("Courthouse name: {}", courthouseName);
+            log.info("Courtroom name: {}", courtroomName);
 
-        // when
-        List<HearingEntity> hearingEntities = hearingRepository.findByCourthouseCourtroomAndDate(
-            courthouseName,
-            courtroomName,
-            hearingForCase.getHearingDate()
-        );
+            // when
+            List<HearingEntity> hearingEntities = hearingRepository.findByCourthouseCourtroomAndDate(
+                courthouseName,
+                courtroomName,
+                hearingForCase.getHearingDate()
+            );
 
-        // then
-        assertThat(hearingEntities).hasSize(1);
-        assertThat(hearingEntities.getFirst().getId()).isEqualTo(hearingForCase.getId());
-        assertEquals(COURTHOUSE_NAME, hearingEntities.getFirst().getCourtroom().getCourthouse().getCourthouseName());
-        assertEquals(COURTROOM_NAME, hearingEntities.getFirst().getCourtroom().getName());
+            // then
+            assertThat(hearingEntities).hasSize(1);
+            assertThat(hearingEntities.getFirst().getId()).isEqualTo(hearingForCase.getId());
+            assertEquals(COURTHOUSE_NAME, hearingEntities.getFirst().getCourtroom().getCourthouse().getCourthouseName());
+            assertEquals(COURTROOM_NAME, hearingEntities.getFirst().getCourtroom().getName());
+        });
     }
 
     @Test
     void findHearing_ReturnsHearing() {
-        CourthouseEntity courthouse = someMinimalCourthouse();
-        courthouse.setCourthouseName("Test Courthouse");
+        transactionalUtil.executeInTransaction(() -> {
+            CourthouseEntity courthouse = someMinimalCourthouse();
+            courthouse.setCourthouseName("Test Courthouse");
 
-        CourtroomEntity courtroom = someMinimalCourtRoom();
-        courtroom.setName("Test Courtroom");
-        courtroom.setCourthouse(courthouse);
+            CourtroomEntity courtroom = someMinimalCourtRoom();
+            courtroom.setName("Test Courtroom");
+            courtroom.setCourthouse(courthouse);
 
-        HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
-        dartsPersistence.saveAll(hearingForCase);
+            HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
+            dartsPersistence.saveAll(hearingForCase);
 
-        String courthouseName = hearingForCase.getCourtroom().getCourthouse().getCourthouseName();
-        String courtroomName = hearingForCase.getCourtroom().getName();
+            String courthouseName = hearingForCase.getCourtroom().getCourthouse().getCourthouseName();
+            String courtroomName = hearingForCase.getCourtroom().getName();
 
-        log.info("Courthouse name: {}", courthouseName);
-        log.info("Courtroom name: {}", courtroomName);
+            log.info("Courthouse name: {}", courthouseName);
+            log.info("Courtroom name: {}", courtroomName);
 
-        // when
-        Optional<HearingEntity> hearingEntities = hearingRepository.findHearing(
-            courthouseName,
-            courtroomName,
-            "Case0000001",
-            hearingForCase.getHearingDate()
-        );
+            // when
+            Optional<HearingEntity> hearingEntities = hearingRepository.findHearing(
+                courthouseName,
+                courtroomName,
+                "Case0000001",
+                hearingForCase.getHearingDate()
+            );
 
-        // then
-        assertThat(hearingEntities).isPresent();
-        assertThat(hearingEntities.get().getId()).isEqualTo(hearingForCase.getId());
-        assertEquals(COURTHOUSE_NAME, hearingEntities.get().getCourtroom().getCourthouse().getCourthouseName());
-        assertEquals(COURTROOM_NAME, hearingEntities.get().getCourtroom().getName());
+            // then
+            assertThat(hearingEntities).isPresent();
+            assertThat(hearingEntities.get().getId()).isEqualTo(hearingForCase.getId());
+            assertEquals(COURTHOUSE_NAME, hearingEntities.get().getCourtroom().getCourthouse().getCourthouseName());
+            assertEquals(COURTROOM_NAME, hearingEntities.get().getCourtroom().getName());
+        });
     }
 
     @Test
     void findHearing_ReturnsHearing_UsingWhitespaceFindBy() {
-        CourthouseEntity courthouse = someMinimalCourthouse();
-        courthouse.setCourthouseName("Test Courthouse");
+        transactionalUtil.executeInTransaction(() -> {
+            CourthouseEntity courthouse = someMinimalCourthouse();
+            courthouse.setCourthouseName("Test Courthouse");
 
-        CourtroomEntity courtroom = someMinimalCourtRoom();
-        courtroom.setName("Test Courtroom");
-        courtroom.setCourthouse(courthouse);
+            CourtroomEntity courtroom = someMinimalCourtRoom();
+            courtroom.setName("Test Courtroom");
+            courtroom.setCourthouse(courthouse);
 
-        HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
-        dartsPersistence.saveAll(hearingForCase);
+            HearingEntity hearingForCase = setupHearingForCase(courthouse, courtroom);
+            dartsPersistence.saveAll(hearingForCase);
 
-        String courthouseName = " Test Courthouse ";
-        String courtroomName = " Test Courtroom ";
+            String courthouseName = " Test Courthouse ";
+            String courtroomName = " Test Courtroom ";
 
-        log.info("Courthouse name: {}", courthouseName);
-        log.info("Courtroom name: {}", courtroomName);
+            log.info("Courthouse name: {}", courthouseName);
+            log.info("Courtroom name: {}", courtroomName);
 
-        // when
-        Optional<HearingEntity> hearingEntities = hearingRepository.findHearing(
-            courthouseName,
-            courtroomName,
-            "Case0000001",
-            hearingForCase.getHearingDate()
-        );
+            // when
+            Optional<HearingEntity> hearingEntities = hearingRepository.findHearing(
+                courthouseName,
+                courtroomName,
+                "Case0000001",
+                hearingForCase.getHearingDate()
+            );
 
-        // then
-        assertThat(hearingEntities).isPresent();
-        assertThat(hearingEntities.get().getId()).isEqualTo(hearingForCase.getId());
-        assertEquals(COURTHOUSE_NAME, hearingEntities.get().getCourtroom().getCourthouse().getCourthouseName());
-        assertEquals(COURTROOM_NAME, hearingEntities.get().getCourtroom().getName());
+            // then
+            assertThat(hearingEntities).isPresent();
+            assertThat(hearingEntities.get().getId()).isEqualTo(hearingForCase.getId());
+            assertEquals(COURTHOUSE_NAME, hearingEntities.get().getCourtroom().getCourthouse().getCourthouseName());
+            assertEquals(COURTROOM_NAME, hearingEntities.get().getCourtroom().getName());
+        });
     }
 
     @Test

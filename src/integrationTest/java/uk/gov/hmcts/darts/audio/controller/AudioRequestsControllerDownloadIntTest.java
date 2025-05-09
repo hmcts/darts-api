@@ -141,12 +141,14 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         Integer courtCaseId = mediaRequestEntity.getHearing().getCourtCase().getId();
         OffsetDateTime fromDate = OffsetDateTime.now().minusDays(1);
         OffsetDateTime toDate = OffsetDateTime.now().plusDays(1);
-        List<AuditEntity> auditEntities = auditRepository.getAuditEntitiesByCaseAndActivityForDateRange(courtCaseId,
-                                                                                                        DOWNLOAD_AUDIT_ACTIVITY_ID,
-                                                                                                        fromDate, toDate);
+        transactionalUtil.executeInTransaction(() -> {
+            List<AuditEntity> auditEntities = auditRepository.getAuditEntitiesByCaseAndActivityForDateRange(courtCaseId,
+                                                                                                            DOWNLOAD_AUDIT_ACTIVITY_ID,
+                                                                                                            fromDate, toDate);
 
-        assertEquals("2", auditEntities.getFirst().getCourtCase().getCaseNumber());
-        assertEquals(1, auditEntities.size());
+            assertEquals("2", auditEntities.getFirst().getCourtCase().getCaseNumber());
+            assertEquals(1, auditEntities.size());
+        });
     }
 
     @Test

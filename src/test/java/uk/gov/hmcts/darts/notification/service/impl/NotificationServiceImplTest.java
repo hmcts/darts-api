@@ -44,7 +44,13 @@ class NotificationServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(notificationRepo.findByStatusIn(anyList())).thenReturn(someListOfNotifications());
+        List<NotificationEntity> notificationEntities = someListOfNotifications();
+        lenient().when(notificationRepo.findIdsByStatusIn(anyList()))
+            .thenReturn(notificationEntities.stream().map(NotificationEntity::getId).toList());
+        notificationEntities.forEach(
+            notificationEntity ->
+                lenient().when(notificationRepo.findById(notificationEntity.getId()))
+                    .thenReturn(java.util.Optional.of(notificationEntity)));
     }
 
     @Test
@@ -88,8 +94,9 @@ class NotificationServiceImplTest {
 
     private NotificationServiceImpl buildNotificationService(boolean atsMode, boolean enabled) {
         return new NotificationServiceImpl(
-            systemUserHelper, notificationRepo, caseRepository, govNotifyService, templateIdHelper, govNotifyRequestHelper, logApi,
-            enabled, atsMode, 0);
+            systemUserHelper, notificationRepo, caseRepository, logApi,
+            enabled, atsMode, new NotificationServiceImpl.SendNotificationToGovNotifyNowProcessor(
+            0, notificationRepo, govNotifyService, templateIdHelper, govNotifyRequestHelper, logApi));
     }
 
     private List<NotificationEntity> someListOfNotifications() {
