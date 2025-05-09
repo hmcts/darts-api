@@ -30,6 +30,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
          tmd.isHidden)
               FROM TranscriptionDocumentEntity tmd
               JOIN tmd.transcription t
+              LEFT JOIN t.requestedBy
               LEFT JOIN t.hearings hearings
               LEFT JOIN t.courtCases courtCase
               LEFT JOIN hearings.courtCase hearingCase                 
