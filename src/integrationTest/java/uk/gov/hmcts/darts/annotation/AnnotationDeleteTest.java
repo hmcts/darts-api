@@ -54,10 +54,11 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void judgeWithCourthouseAccessCanDeleteTheirOwnAnnotation() throws Exception {
-        var hearing = dartsPersistence.save(PersistableFactory.getHearingTestData().someMinimalHearing());
-        var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
-        var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, hearing);
-
+        var annotation = transactionalUtil.executeInTransaction(() -> {
+            var hearing = dartsPersistence.save(PersistableFactory.getHearingTestData().someMinimalHearing());
+            var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
+            return someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, hearing);
+        });
         mockMvc.perform(
                 delete(ENDPOINT + "/" + annotation.getId()))
             .andExpect(status().isNoContent())
@@ -66,11 +67,13 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void preventsJudgeNotAuthorizedForCourthouseDeletingAnnotationAssociatedWithThatCourthouse() throws Exception {
-        var annotationHearing = dartsPersistence.save(PersistableFactory.getHearingTestData().someMinimalHearing());
-        var someOtherCourthouse = dartsPersistence.save(someMinimalCourthouse());
-        var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, someOtherCourthouse);
-        var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, annotationHearing);
+        var annotation = transactionalUtil.executeInTransaction(() -> {
+            var annotationHearing = dartsPersistence.save(PersistableFactory.getHearingTestData().someMinimalHearing());
 
+            var someOtherCourthouse = dartsPersistence.save(someMinimalCourthouse());
+            var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, someOtherCourthouse);
+            return someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, annotationHearing);
+        });
         mockMvc.perform(
                 delete(ENDPOINT + "/" + annotation.getId()))
             .andExpect(status().isForbidden())

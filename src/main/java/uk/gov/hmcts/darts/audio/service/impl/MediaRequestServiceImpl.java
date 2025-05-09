@@ -466,6 +466,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MediaRequest getMediaRequestById(Integer mediaRequestId) {
         return mediaRequestMapper.mediaRequestFrom(getMediaRequestEntityById(mediaRequestId));
     }

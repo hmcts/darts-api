@@ -35,6 +35,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -164,29 +166,34 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void closeCases_shouldCloseCases_andUseDateAsClosedDate_andSetNullConfidenceReasonAndScore_whenNoConfidenceMappingExists() {
-        // Given createAndSaveRetentionConfidenceCategoryMappings() is not invoked, so no confidence mappings exist in the DB
-
-        // And
-        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7).plusMonths(3));
-
         OffsetDateTime expectedCloseDate = OffsetDateTime.now().minusYears(7);
+        AtomicInteger courtCaseId = new AtomicInteger();
+        AtomicReference<EventEntity> eventEntity = new AtomicReference<>();
+        CourtCaseEntity courtCase = transactionalUtil.executeInTransaction(() -> {
+            // Given createAndSaveRetentionConfidenceCategoryMappings() is not invoked, so no confidence mappings exist in the DB
 
-        Integer someEventHandlerId = dartsPersistence.getEventHandlerRepository().findAll().getFirst().getId();
-        EventEntity eventEntity = dartsDatabase.getEventStub().createEvent(hearing, someEventHandlerId);
-        eventEntity.setCreatedDateTime(expectedCloseDate);
-        dartsDatabase.save(eventEntity);
+            // And
+            HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7).plusMonths(3));
 
-        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
-        courtCaseEntity.setCreatedDateTime(expectedCloseDate.minusYears(3));
-        dartsDatabase.getCaseRepository().save(courtCaseEntity);
-        assertFalse(courtCaseEntity.getClosed());
 
+            Integer someEventHandlerId = dartsPersistence.getEventHandlerRepository().findAll().getFirst().getId();
+            eventEntity.set(dartsDatabase.getEventStub().createEvent(hearing, someEventHandlerId));
+            dartsDatabase.save(eventEntity.get());
+
+            CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+            courtCaseId.set(courtCaseEntity.getId());
+            dartsDatabase.getCaseRepository().save(courtCaseEntity);
+            assertFalse(courtCaseEntity.getClosed());
+            return courtCaseEntity;
+        });
+        dartsDatabase.updateCreatedBy(eventEntity.get(), expectedCloseDate);
+        dartsDatabase.updateCreatedBy(courtCase, expectedCloseDate.minusYears(3));
         // When
         closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         // Then
         Optional<CourtCaseEntity> updatedCourtCaseEntityOptional = dartsDatabase.getCaseRepository()
-            .findById(courtCaseEntity.getId());
+            .findById(courtCaseId.get());
 
         assertTrue(updatedCourtCaseEntityOptional.isPresent());
         CourtCaseEntity updatedCourtCaseEntity = updatedCourtCaseEntityOptional.get();
@@ -240,24 +247,28 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenOneEventUseLatestDateAsClosedDate() {
-        createAndSaveRetentionConfidenceCategoryMappings();
-
-        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
-
+        AtomicInteger courtCaseId = new AtomicInteger();
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
-        EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 3);
-        eventEntity2.setCreatedDateTime(closeDate);
+        AtomicReference<EventEntity> eventEntity = new AtomicReference<>();
+        CourtCaseEntity courtCase = transactionalUtil.executeInTransaction(() -> {
+            createAndSaveRetentionConfidenceCategoryMappings();
 
-        dartsDatabase.save(eventEntity2);
+            HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
 
-        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
-        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(10));
-        dartsDatabase.getCaseRepository().save(courtCaseEntity);
-        assertFalse(courtCaseEntity.getClosed());
+            eventEntity.set(dartsDatabase.getEventStub().createEvent(hearing, 3));
+            dartsDatabase.save(eventEntity.get());
 
+            CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+            courtCaseId.set(courtCaseEntity.getId());
+            dartsDatabase.getCaseRepository().save(courtCaseEntity);
+            assertFalse(courtCaseEntity.getClosed());
+            return courtCaseEntity;
+        });
+        dartsDatabase.updateCreatedBy(eventEntity.get(), closeDate);
+        dartsDatabase.updateCreatedBy(courtCase, OffsetDateTime.now().minusYears(10));
         closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
-        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseId.get()).orElse(null);
         assert updatedCourtCaseEntity != null;
         assertTrue(updatedCourtCaseEntity.getClosed());
         assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
@@ -265,7 +276,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionConfidenceReasonEnum.MAX_EVENT_CLOSED, updatedCourtCaseEntity.getRetConfReason());
         assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
-        assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
+        assertEquals(courtCaseId.get(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }

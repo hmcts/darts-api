@@ -46,7 +46,7 @@ public class EventEntity
     @Column(name = "event_object_id", unique = true, length = 16)
     private String legacyObjectId;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "evh_id")
     private EventHandlerEntity eventType;
 
@@ -59,7 +59,7 @@ public class EventEntity
     @Column(name = "event_ts", nullable = false)
     private OffsetDateTime timestamp;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ctr_id", nullable = false)
     private CourtroomEntity courtroom;
 
@@ -81,7 +81,7 @@ public class EventEntity
     @Column(name = "antecedent_id")
     private String antecedentId;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = "eve_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})

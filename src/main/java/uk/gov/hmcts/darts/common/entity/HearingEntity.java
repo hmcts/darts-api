@@ -45,7 +45,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     private Integer id;
 
     @JoinColumn(name = "ctr_id")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
 
     @Column(name = "hearing_date", nullable = false)
@@ -57,7 +57,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
     @Column(name = "hearing_is_actual", nullable = false)
     private Boolean hearingIsActual;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "hearing_judge_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
@@ -69,7 +69,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private Set<MediaEntity> medias = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARINGS)
+    @ManyToMany(mappedBy = TranscriptionEntity_.HEARINGS)
     private Set<TranscriptionEntity> transcriptions = new HashSet<>();
 
     @OneToMany(mappedBy = MediaRequestEntity_.HEARING)
@@ -84,7 +84,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity
         inverseJoinColumns = {@JoinColumn(name = "eve_id")})
     private Set<EventEntity> events = new HashSet<>();
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 

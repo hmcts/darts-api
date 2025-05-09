@@ -36,7 +36,7 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity
     @SequenceGenerator(name = "car_gen", sequenceName = "car_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 

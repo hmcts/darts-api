@@ -507,7 +507,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         assertThat(result.getContent()).hasSize(10);
         assertThat(result.getTotalElements()).isEqualTo(11);
         result.getContent().forEach(entity -> {
-            assertThat(entity.getStatus()).isEqualTo(status);
+            assertThat(entity.getStatus().getId()).isEqualTo(status.getId());
             assertThat(entity.getInputUploadProcessedTs()).isBetween(startDateTime, endDateTime);
         });
     }

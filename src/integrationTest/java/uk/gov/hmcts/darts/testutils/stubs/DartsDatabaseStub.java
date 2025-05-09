@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Id;
 import jakarta.persistence.Query;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -50,6 +52,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.entity.base.LastModifiedBy;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -111,6 +114,7 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
+import uk.gov.hmcts.darts.task.runner.HasId;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
@@ -821,14 +825,14 @@ public class DartsDatabaseStub {
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
         if (event.getHearingEntities().isEmpty()) {
-            event.setHearingEntities(Set.of(hearingRepository.getReferenceById(hearing.getId())));
+            event.setHearingEntities(new HashSet<>(Set.of(hearingRepository.findById(hearing.getId()).orElseThrow())));
             dartsDatabaseSaveStub.save(event);
         } else {
             Set<HearingEntity> hearingEntities = new HashSet<>();
             hearingEntities.addAll(event.getHearingEntities());
             boolean alreadyExists = hearingEntities.stream().anyMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()));
             if (!alreadyExists) {
-                hearingEntities.add(hearingRepository.getReferenceById(hearing.getId()));
+                hearingEntities.add(hearingRepository.findById(hearing.getId()).orElseThrow());
             }
 
             event.setHearingEntities(hearingEntities);
@@ -1161,5 +1165,24 @@ public class DartsDatabaseStub {
         clearDatabaseInThisOrder();
         resetTablesWithPredefinedTestData();
         removeAllAudits();//Ensures any newly added delete audits are removed
+    }
+
+    @Transactional
+    public <T extends HasId<?> & CreatedBy> void updateCreatedBy(T object, OffsetDateTime createdDateTime) {
+        Table table = object.getClass().getAnnotation(Table.class);
+
+        entityManager.createNativeQuery("UPDATE darts." + table.name() + " set created_ts = ? where " + getIdColumnName(object) + " = ?")
+            .setParameter(1, createdDateTime)
+            .setParameter(2, object.getId())
+            .executeUpdate();
+    }
+
+    private String getIdColumnName(HasId<?> object) {
+        return stream(object.getClass().getDeclaredFields())
+            .filter(field -> field.getAnnotation(Id.class) != null)
+            .map(field -> field.getAnnotation(Column.class))
+            .findFirst()
+            .orElseThrow()
+            .name();
     }
 }

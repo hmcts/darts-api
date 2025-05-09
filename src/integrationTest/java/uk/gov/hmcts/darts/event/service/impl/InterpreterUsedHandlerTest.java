@@ -69,23 +69,24 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
-
-        assertThat(persistedCase.getInterpreterUsed()).isTrue();
+            assertThat(persistedCase.getInterpreterUsed()).isTrue();
+        });
     }
 
     @Test
@@ -104,23 +105,24 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
-
-        assertThat(persistedCase.getInterpreterUsed()).isTrue();
+            assertThat(persistedCase.getInterpreterUsed()).isTrue();
+        });
     }
 
     @Test
@@ -143,24 +145,27 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+        transactionalUtil.executeInTransaction(() -> {
 
-        var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(caseHearing.size()).isEqualTo(1);
-        assertThat(caseHearing.getFirst().getHearingIsActual()).isEqualTo(true);
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(caseHearing.size()).isEqualTo(1);
+            assertThat(caseHearing.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedCase.getInterpreterUsed()).isTrue();
+            assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
+
+            assertThat(persistedCase.getInterpreterUsed()).isTrue();
+        });
     }
 
     @Test
@@ -177,25 +182,26 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
 
-        var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
+            assertThat(persistedCase.getInterpreterUsed()).isTrue();
 
-        assertThat(persistedCase.getInterpreterUsed()).isTrue();
-
-        dartsGateway.verifyDoesntReceiveDarEvent();
+            dartsGateway.verifyDoesntReceiveDarEvent();
+        });
     }
 
     private static DartsEvent someMinimalDartsEvent() {

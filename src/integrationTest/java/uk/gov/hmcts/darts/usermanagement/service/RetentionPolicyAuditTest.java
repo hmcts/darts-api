@@ -34,12 +34,13 @@ class RetentionPolicyAuditTest extends IntegrationBase {
             adminPostRetentionRequestWithDefaults(),
             false
         );
+        transactionalUtil.executeInTransaction(() -> {
+            var createRetentionPolicyActivity = findAuditActivity("Create Retention Policy", dartsDatabase.findAudits());
+            assertThat(createRetentionPolicyActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var createRetentionPolicyActivity = findAuditActivity("Create Retention Policy", dartsDatabase.findAudits());
-        assertThat(createRetentionPolicyActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
-
-        var retentionPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(retentionPolicy.getId());
-        assertThat(retentionPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+            var retentionPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(retentionPolicy.getId());
+            assertThat(retentionPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+        });
     }
 
     @Test
@@ -57,16 +58,18 @@ class RetentionPolicyAuditTest extends IntegrationBase {
             true
         );
 
-        var audits = dartsDatabase.findAudits();
-        assertThat(audits).extracting("auditActivity.name")
-            .containsExactlyInAnyOrder("Create Retention Policy", "Revise Retention Policy");
-        assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId(), userAccountEntity.getId());
+        transactionalUtil.executeInTransaction(() -> {
+            var audits = dartsDatabase.findAudits();
+            assertThat(audits).extracting("auditActivity.name")
+                .containsExactlyInAnyOrder("Create Retention Policy", "Revise Retention Policy");
+            assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId(), userAccountEntity.getId());
 
-        var retentionPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(retentionPolicy.getId());
-        assertThat(retentionPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+            var retentionPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(retentionPolicy.getId());
+            assertThat(retentionPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
 
-        var priorPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(priorPolicyEntity.getId());
-        assertThat(priorPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            var priorPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(priorPolicyEntity.getId());
+            assertThat(priorPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+        });
     }
 
     @Test
@@ -83,12 +86,14 @@ class RetentionPolicyAuditTest extends IntegrationBase {
             retentionPolicyType.getId(),
             adminPatchRetentionPolicy);
 
-        var audits = dartsDatabase.findAudits();
-        assertThat(audits).extracting("auditActivity.name").containsExactly("Edit Retention Policy");
-        assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId());
+        transactionalUtil.executeInTransaction(() -> {
+            var audits = dartsDatabase.findAudits();
+            assertThat(audits).extracting("auditActivity.name").containsExactly("Edit Retention Policy");
+            assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId());
 
-        var retentionPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(retentionPolicyType.getId());
-        assertThat(retentionPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            var retentionPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(retentionPolicyType.getId());
+            assertThat(retentionPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+        });
     }
 
     private static AdminPostRetentionRequest adminPostRetentionRequestWithDefaults() {

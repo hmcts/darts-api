@@ -53,6 +53,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
+
+
     @BeforeEach
     void setUp() {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -134,21 +136,23 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         }
 
         private List<EventEntity> createHearingWithEvents(OffsetDateTime date, int numberOfEvents, int handlerId) {
-            HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-                SOME_CASE_NUMBER,
-                SOME_COURTHOUSE,
-                SOME_COURTROOM,
-                date.toLocalDateTime()
-            );
-            CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-            dartsDatabase.save(courtCase);
+            return transactionalUtil.executeInTransaction(() -> {
+                HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                    SOME_CASE_NUMBER,
+                    SOME_COURTHOUSE,
+                    SOME_COURTROOM,
+                    date.toLocalDateTime()
+                );
+                CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+                dartsDatabase.save(courtCase);
 
-            List<EventEntity> eventEntityList = createEventsWithDefaults(numberOfEvents, date).stream()
-                .map(eve -> dartsDatabase.addHandlerToEvent(eve, handlerId))
-                .toList();
+                List<EventEntity> eventEntityList = createEventsWithDefaults(numberOfEvents, date).stream()
+                    .map(eve -> dartsDatabase.addHandlerToEvent(eve, handlerId))
+                    .toList();
 
-            dartsDatabase.saveEventsForHearing(hearingEntity, eventEntityList);
-            return eventEntityList;
+                dartsDatabase.saveEventsForHearing(hearingEntity, eventEntityList);
+                return eventEntityList;
+            });
         }
 
         @Test

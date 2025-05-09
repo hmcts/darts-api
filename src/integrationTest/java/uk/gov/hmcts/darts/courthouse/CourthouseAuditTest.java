@@ -35,13 +35,14 @@ class CourthouseAuditTest extends IntegrationBase {
             new CourthousePost()
                 .courthouseName(courthouse.getCourthouseName())
                 .displayName(courthouse.getDisplayName()));
+        transactionalUtil.executeInTransaction(() -> {
+            var createCourtHouseActivity = findAuditActivity("Create Courthouse", dartsDatabase.findAudits());
+            assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var createCourtHouseActivity = findAuditActivity("Create Courthouse", dartsDatabase.findAudits());
-        assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
-
-        var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
-        assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
-        assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
+            var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
+            assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+            assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
+        });
     }
 
     @Test
@@ -58,12 +59,14 @@ class CourthouseAuditTest extends IntegrationBase {
             initialCourthouse.getId(),
             new CourthousePatch().displayName("some-other-display-name"));
 
-        var createCourtHouseActivity = findAuditActivity("Update Courthouse", dartsDatabase.findAudits());
-        assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
+        transactionalUtil.executeInTransaction(() -> {
+            var createCourtHouseActivity = findAuditActivity("Update Courthouse", dartsDatabase.findAudits());
+            assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
-        assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
-        assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
+            var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
+            assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
+        });
     }
 
     @Test
@@ -79,13 +82,14 @@ class CourthouseAuditTest extends IntegrationBase {
         var courthouseAndGroups = courthouseService.updateCourthouse(
             initialCourthouse.getId(),
             new CourthousePatch().securityGroupIds(List.of(2)));
+        transactionalUtil.executeInTransaction(() -> {
+            var createCourtHouseActivity = findAuditActivity("Update Courthouse Group", dartsDatabase.findAudits());
+            assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var createCourtHouseActivity = findAuditActivity("Update Courthouse Group", dartsDatabase.findAudits());
-        assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
-
-        var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
-        assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
-        assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
+            var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
+            assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
+        });
     }
 
     @Test

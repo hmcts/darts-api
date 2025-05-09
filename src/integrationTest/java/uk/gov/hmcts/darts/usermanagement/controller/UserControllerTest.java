@@ -34,10 +34,8 @@ import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
@@ -375,26 +373,9 @@ class UserControllerTest extends IntegrationBase {
 
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        Set<UserAccountEntity> entitiesSet = new HashSet<>();
-        entitiesSet.add(userAccountEntity);
 
         userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
-
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME));
-
-        HearingEntity hearingEntity1 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME));
-
-        dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity, userAccountEntity, TranscriptionStatusEnum.WITH_TRANSCRIBER);
-        dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity1, userAccountEntity, TranscriptionStatusEnum.WITH_TRANSCRIBER);
 
         UserPatch userPatch = new UserPatch();
         userPatch.setActive(false);

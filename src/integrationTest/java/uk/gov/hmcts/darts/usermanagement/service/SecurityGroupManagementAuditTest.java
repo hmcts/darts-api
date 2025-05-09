@@ -31,12 +31,13 @@ class SecurityGroupManagementAuditTest extends IntegrationBase {
     void auditsWhenSecurityGroupsAreCreated() {
         var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var securityGroup = createSecurityGroup();
+        transactionalUtil.executeInTransaction(() -> {
+            var createGroupActivity = findAuditActivity("Create Group", dartsDatabase.findAudits());
+            assertThat(createGroupActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var createGroupActivity = findAuditActivity("Create Group", dartsDatabase.findAudits());
-        assertThat(createGroupActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
-
-        var userAccountRevisions = dartsDatabase.findSecurityGroupRevisionsFor(securityGroup.getId());
-        assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+            var userAccountRevisions = dartsDatabase.findSecurityGroupRevisionsFor(securityGroup.getId());
+            assertThat(userAccountRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
+        });
     }
 
     @Test
@@ -47,12 +48,13 @@ class SecurityGroupManagementAuditTest extends IntegrationBase {
         securityGroupService.modifySecurityGroup(
             securityGroup.getId(),
             new SecurityGroupPatch().name("some-new-security-group-name"));
+        transactionalUtil.executeInTransaction(() -> {
+            var updateGroupActivity = findAuditActivity("Update Group", dartsDatabase.findAudits());
+            assertThat(updateGroupActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
-        var updateGroupActivity = findAuditActivity("Update Group", dartsDatabase.findAudits());
-        assertThat(updateGroupActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
-
-        var securityGroupRevisions = dartsDatabase.findSecurityGroupRevisionsFor(securityGroup.getId());
-        assertThat(securityGroupRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+            var securityGroupRevisions = dartsDatabase.findSecurityGroupRevisionsFor(securityGroup.getId());
+            assertThat(securityGroupRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
+        });
     }
 
     @Test
@@ -65,9 +67,11 @@ class SecurityGroupManagementAuditTest extends IntegrationBase {
             securityGroup.getId(),
             new SecurityGroupPatch().userIds(List.of(userAccount.getId())));
 
-        var audits = dartsDatabase.findAudits();
-        assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId());
-        assertThat(audits).extracting("auditActivity.name").containsExactly("Update Users Group");
+        transactionalUtil.executeInTransaction(() -> {
+            var audits = dartsDatabase.findAudits();
+            assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId());
+            assertThat(audits).extracting("auditActivity.name").containsExactly("Update Users Group");
+        });
     }
 
     private SecurityGroupWithIdAndRole createSecurityGroup() {

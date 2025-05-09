@@ -71,25 +71,30 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionWithHearing() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        transcription.setStartTime(SOME_DATE_TIME);
-        transcription.setEndTime(SOME_DATE_TIME);
-        transcription = dartsDatabase.save(transcription);
+        TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription.setStartTime(SOME_DATE_TIME);
+            transcription.setEndTime(SOME_DATE_TIME);
+            transcription = dartsDatabase.save(transcription);
+            UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
-        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
+            addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+            addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
+            transcription.getCourtroom().getCourthouse().getCourthouseName();//Lookup to ensure the entity is loaded
+            transcription.getRequestedBy().getUserName();//Lookup to ensure the entity is loaded
+            return transcription;
+        });
+        dartsDatabase.updateCreatedBy(transcriptionEntity, OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
 
-        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
-        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId());
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
                 "tests/transcriptions/transcription/expectedResponse.json")
-                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
-                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
+                .replace("$COURTHOUSE_ID", transcriptionEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", transcriptionEntity.getCreatedById().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
@@ -126,26 +131,31 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionWithLegacyComments() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        transcription.setStartTime(SOME_DATE_TIME);
-        transcription.setEndTime(SOME_DATE_TIME);
-        transcription = dartsDatabase.save(transcription);
+        TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(
+            () -> {
+                HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+                TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+                transcription.setStartTime(SOME_DATE_TIME);
+                transcription.setEndTime(SOME_DATE_TIME);
+                transcription = dartsDatabase.save(transcription);
 
 
-        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
+                UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
-        addComment(transcription, null, "comment1", userAccount);
-        addComment(transcription, null, "comment2", userAccount);
-
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+                addComment(transcription, null, "comment1", userAccount);
+                addComment(transcription, null, "comment2", userAccount);
+                transcription.getCourtroom().getCourthouse().getId();//Lookup to ensure the entity is loaded
+                transcription.getRequestedBy().getUserName();//Lookup to ensure the entity is loaded
+                return transcription;
+            });
+        dartsDatabase.updateCreatedBy(transcriptionEntity, OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId());
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
                 "tests/transcriptions/transcription/expectedResponseWithLegacyComment.json")
-                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
-                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
+                .replace("$COURTHOUSE_ID", transcriptionEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", transcriptionEntity.getCreatedById().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
@@ -155,28 +165,31 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     @Test
     void getTranscriptionNoHearing() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity.getCourtroom());
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity.getCourtroom());
+            transcription.getCourtCases().add(hearingEntity.getCourtCase());
+            transcription.setStartTime(SOME_DATE_TIME);
+            transcription.setEndTime(SOME_DATE_TIME);
+            transcription = dartsDatabase.save(transcription);
 
-        transcription.getCourtCases().add(hearingEntity.getCourtCase());
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        transcription.setStartTime(SOME_DATE_TIME);
-        transcription.setEndTime(SOME_DATE_TIME);
-        transcription = dartsDatabase.save(transcription);
+            UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
-        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
-
-        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
-        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
-
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+            addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+            addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
+            transcription.getCourtroom().getCourthouse().getId();//Lookup to ensure the entity is loaded
+            transcription.getRequestedBy().getUserName();//Lookup to ensure the entity is loaded
+            return transcription;
+        });
+        dartsDatabase.updateCreatedBy(transcriptionEntity, OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId());
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
                 "tests/transcriptions/transcription/expectedResponseNoHearing.json")
-                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
-                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
+                .replace("$COURTHOUSE_ID", transcriptionEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", transcriptionEntity.getCreatedById().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
@@ -187,27 +200,29 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     void getTranscriptionNoHearingOrCourtroom() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription((CourtroomEntity) null);
+        TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription((CourtroomEntity) null);
 
-        transcription.getCourtCases().add(hearingEntity.getCourtCase());
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        transcription.setStartTime(SOME_DATE_TIME);
-        transcription.setEndTime(SOME_DATE_TIME);
-        transcription = dartsDatabase.save(transcription);
+            transcription.getCourtCases().add(hearingEntity.getCourtCase());
+            transcription.setStartTime(SOME_DATE_TIME);
+            transcription.setEndTime(SOME_DATE_TIME);
+            transcription = dartsDatabase.save(transcription);
 
-        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
+            UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
-        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
-        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
-
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+            addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+            addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
+            return transcription;
+        });
+        dartsDatabase.updateCreatedBy(transcriptionEntity, OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId());
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
                 "tests/transcriptions/transcription/expectedResponseNoCourtroom.json")
-                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
-                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
+                .replace("$COURTHOUSE_ID", transcriptionEntity.getCourtCase().getId().toString())
+                .replace("$USER_ACCOUNT_ID", transcriptionEntity.getCreatedById().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
@@ -216,25 +231,29 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionNoUrgency() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity, false);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        transcription.setStartTime(SOME_DATE_TIME);
-        transcription.setEndTime(SOME_DATE_TIME);
-        transcription = dartsDatabase.save(transcription);
+        TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity, false);
+            transcription.setStartTime(SOME_DATE_TIME);
+            transcription.setEndTime(SOME_DATE_TIME);
+            transcription = dartsDatabase.save(transcription);
 
-        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
+            UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
-        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
-        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
-
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+            addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+            addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
+            transcription.getCourtroom().getCourthouse().getId();//Lookup to ensure the entity is loaded
+            transcription.getRequestedBy().getUserName();//Lookup to ensure the entity is loaded
+            return transcription;
+        });
+        dartsDatabase.updateCreatedBy(transcriptionEntity, OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId());
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
                 "tests/transcriptions/transcription/expectedResponseNoUrgency.json")
-                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
-                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
+                .replace("$COURTHOUSE_ID", transcriptionEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", transcriptionEntity.getCreatedById().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
@@ -243,20 +262,24 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @Test
     void getTranscriptionNotFoundWhenIsCurrentFalse() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        transcription.setStartTime(SOME_DATE_TIME);
-        transcription.setEndTime(SOME_DATE_TIME);
-        transcription.setIsCurrent(false);
-        transcription = dartsDatabase.save(transcription);
+        TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription.setStartTime(SOME_DATE_TIME);
+            transcription.setEndTime(SOME_DATE_TIME);
+            transcription.setIsCurrent(false);
+            transcription = dartsDatabase.save(transcription);
 
-        UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
+            UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
 
-        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
-        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
-
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+            addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+            addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
+            transcription.getCourtroom().getCourthouse().getId();//Lookup to ensure the entity is loaded
+            transcription.getRequestedBy().getUserName();//Lookup to ensure the entity is loaded
+            return transcription;
+        });
+        dartsDatabase.updateCreatedBy(transcriptionEntity, OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId());
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");

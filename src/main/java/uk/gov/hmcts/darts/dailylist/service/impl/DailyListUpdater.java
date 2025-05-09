@@ -130,6 +130,8 @@ class DailyListUpdater {
                             addProsecution(courtCase, dailyListHearing);
                             addDefenders(courtCase, dailyListHearing.getDefendants());
                             hearingRepository.saveAndFlush(hearing);
+                            log.info("Court case has been processed for courthouse {} and case number {} daily list entry with id {}",
+                                      courtHouseNameUpperTrimmed, caseNumber, dailyListEntity.getId());
                         }
                     }
                 } else {
