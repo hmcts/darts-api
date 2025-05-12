@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -141,6 +142,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                     externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
                 } else {
                     externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
+                    externalObjectDirectoryEntity.setInputUploadProcessedTs(null);
                 }
             }
         );
@@ -149,7 +151,9 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
             .collect(Collectors.toList());
 
-        log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
+        if (CollectionUtils.isNotEmpty(missingEods)) {
+            log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
+        }
 
         externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
     }

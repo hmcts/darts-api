@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
@@ -49,6 +50,8 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
     private MediaEntity media2;
     private MediaEntity media3;
     private MediaEntity media4;
+    private MediaEntity media5;
+    private MediaEntity media6;
 
     @BeforeEach
     void setUp() {
@@ -98,6 +101,23 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
             ));
         media4 = dartsDatabase.save(media4);
 
+        media5 = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-27T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-27T13:45:00Z"),
+                1
+            ));
+        media5 = dartsDatabase.save(media5);
+
+        media6 = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-27T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-27T13:45:00Z"),
+                2
+            ));
+        media6 = dartsDatabase.save(media6);
 
         armRpoExecutionDetailEntity = dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
@@ -149,6 +169,24 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         externalObjectDirectoryEntity4.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(28));
         dartsDatabase.save(externalObjectDirectoryEntity4);
 
+        var externalObjectDirectoryEntity5 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media5,
+            ARM_RPO_PENDING,
+            ARM,
+            UUID.randomUUID().toString()
+        );
+        dartsDatabase.save(externalObjectDirectoryEntity5);
+        dartsDatabase.getExternalObjectDirectoryRepository().delete(externalObjectDirectoryEntity5);
+
+        var externalObjectDirectoryEntity6 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media6,
+            ARM_RPO_PENDING,
+            ARM,
+            UUID.randomUUID().toString()
+        );
+        externalObjectDirectoryEntity6.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(28));
+        dartsDatabase.save(externalObjectDirectoryEntity6);
+
         log.info("eod 1: {}, eod 2: {}", externalObjectDirectoryEntity1.getId(), externalObjectDirectoryEntity2.getId());
 
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
@@ -182,6 +220,18 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         assertEquals(1, foundMediaList4.size());
         ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.getFirst();
         assertEquals(STORED.getId(), foundMedia4.getStatus().getId());
+
+        List<ExternalObjectDirectoryEntity> foundMediaList5 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media5, dartsDatabase.getExternalLocationTypeEntity(ARM));
+        assertEquals(0, foundMediaList5.size());
+
+        List<ExternalObjectDirectoryEntity> foundMediaList6 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media6, dartsDatabase.getExternalLocationTypeEntity(ARM));
+        assertEquals(1, foundMediaList6.size());
+        ExternalObjectDirectoryEntity foundMedia6 = foundMediaList6.getFirst();
+        assertEquals(ARM_REPLAY.getId(), foundMedia6.getStatus().getId());
+        assertNull(foundMedia6.getInputUploadProcessedTs());
+
     }
 
     @Test
@@ -226,7 +276,6 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         assertEquals(1, foundMediaList2.size());
         ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
         assertEquals(ARM_RPO_PENDING.getId(), foundMedia2.getStatus().getId());
-
     }
 
     @Test
@@ -283,6 +332,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(ARM_REPLAY.getId(), foundMedia.getStatus().getId());
+        assertNull(foundMedia.getInputUploadProcessedTs());
     }
 
     @Test
