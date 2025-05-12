@@ -13,11 +13,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,25 +33,33 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTes
 class CaseControllerAdminCasesIdAudiosGetIntTest extends PostgresIntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/cases/{id}/audios";
-    private static final String COURTROOM_NAME = "COURTROOM 1";
+    private static final String COURTROOM_NAME1 = "COURTROOM 1";
+    private static final String COURTROOM_NAME2 = "COURTROOM 2";
+    private static final String COURTROOM_NAME3 = "COURTROOM 3";
 
     private CourtCaseEntity courtCaseEntity1;
+    private CourtroomEntity courtroomEntity1;
+    private CourtroomEntity courtroomEntity2;
+    private CourtroomEntity courtroomEntity3;
+    private HearingEntity hearingEntity1;
+    private HearingEntity hearingEntity2;
+    private HearingEntity hearingEntity3;
 
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
     @MockitoBean
-    private UserIdentity mockUserIdentity;
+    private UserIdentity userIdentity;
 
     @BeforeEach
     void setupData() {
         var minimalHearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
-        var hearingEntity1 = dartsDatabase.save(minimalHearing1);
+        hearingEntity1 = dartsDatabase.save(minimalHearing1);
 
-        var courtroomEntity = hearingEntity1.getCourtroom();
-        courtroomEntity.setName(COURTROOM_NAME);
-        dartsDatabase.save(courtroomEntity);
+        courtroomEntity1 = hearingEntity1.getCourtroom();
+        courtroomEntity1.setName(COURTROOM_NAME1);
+        dartsDatabase.save(courtroomEntity1);
 
         courtCaseEntity1 = hearingEntity1.getCourtCase();
 
@@ -106,24 +117,50 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends PostgresIntegrationBase
         dartsDatabase.save(hearingEntity1);
 
         var minimalHearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
-        var hearingEntity2 = dartsDatabase.save(minimalHearing2);
+        var hearingEntityDifferenceCase = dartsDatabase.save(minimalHearing2);
 
         var media6 = dartsPersistence.save(
             getMediaTestData().createMediaWith(
-                hearingEntity2.getCourtroom(),
+                hearingEntityDifferenceCase.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T15:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T17:45:00Z"),
                 1
             ));
         MediaEntity currentMediaEntityForHearing2 = dartsDatabase.save(media6);
-        hearingEntity2.addMedia(currentMediaEntityForHearing2);
-        dartsDatabase.save(hearingEntity2);
+        hearingEntityDifferenceCase.addMedia(currentMediaEntityForHearing2);
+        dartsDatabase.save(hearingEntityDifferenceCase);
+
+        // extra courtrooms
+        courtroomEntity2 = PersistableFactory.getCourtroomTestData().someMinimalBuilder()
+            .courthouse(hearingEntity1.getCourtroom().getCourthouse())
+            .name(COURTROOM_NAME2)
+            .build();
+
+        var hearing2Case1Courtroom2 = PersistableFactory.getHearingTestData().someMinimalBuilder()
+            .courtCase(courtCaseEntity1)
+            .courtroom(courtroomEntity2)
+            .hearingDate(LocalDate.now().plusDays(6))
+            .build();
+        hearingEntity2 = dartsDatabase.save(hearing2Case1Courtroom2);
+
+        courtroomEntity3 = PersistableFactory.getCourtroomTestData().someMinimalBuilder()
+            .courthouse(hearingEntity1.getCourtroom().getCourthouse())
+            .name(COURTROOM_NAME2)
+            .build();
+        dartsDatabase.save(courtroomEntity3);
+
+        var hearing3Case1Courtroom3 = PersistableFactory.getHearingTestData().someMinimalBuilder()
+            .courtCase(courtCaseEntity1)
+            .courtroom(courtroomEntity3)
+            .hearingDate(LocalDate.now().plusDays(5))
+            .build();
+        hearingEntity3 = dartsDatabase.save(hearing3Case1Courtroom3);
     }
 
     @Test
     void adminCasesIdAudiosGet_ShouldReturnPaginatedListWithMultiplePages() throws Exception {
         // given
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "audioId")
             .queryParam("sort_order", "asc")
@@ -143,7 +180,7 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends PostgresIntegrationBase
     @Test
     void adminCasesIdAudiosGet_ShouldReturnPaginatedListByChannelDesc() throws Exception {
         // given
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "channel")
             .queryParam("sort_order", "desc")
@@ -164,7 +201,7 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends PostgresIntegrationBase
     @Test
     void adminCasesIdAudiosGet_ShouldReturnPaginatedListByAudioIdDesc() throws Exception {
         // given
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "audioId")
             .queryParam("sort_order", "desc")
@@ -185,7 +222,28 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends PostgresIntegrationBase
     @Test
     void adminCasesIdAudiosGet_ShouldReturnPaginatedListByCourtroomDesc() throws Exception {
         // given
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        var media1 = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
+                courtroomEntity2,
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+        MediaEntity currentMediaEntity1 = dartsDatabase.save(media1);
+        hearingEntity2.addMedia(currentMediaEntity1);
+
+        var media2 = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
+                courtroomEntity3,
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                2
+            ));
+        MediaEntity currentMediaEntity2 = dartsDatabase.save(media2);
+        hearingEntity3.addMedia(currentMediaEntity2);
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "courtroom")
             .queryParam("sort_order", "desc")
@@ -206,7 +264,7 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends PostgresIntegrationBase
     @Test
     void adminCasesIdAudiosGet_ShouldReturnPaginatedListByStartTimeDesc() throws Exception {
         // given
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "audioId")
             .queryParam("sort_order", "desc")
@@ -227,7 +285,7 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends PostgresIntegrationBase
     @Test
     void adminCasesIdAudiosGet_ShouldReturnPaginatedListByEndTimeDesc() throws Exception {
         // given
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "audioId")
             .queryParam("sort_order", "desc")
