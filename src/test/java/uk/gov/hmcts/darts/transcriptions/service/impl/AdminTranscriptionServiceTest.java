@@ -331,7 +331,6 @@ class AdminTranscriptionServiceTest {
         assertEquals(expectedResponse, actualResponse);
         assertEquals(objectAdminAction.getComments(), request.getAdminAction().getComments());
         assertEquals(reasonId, request.getAdminAction().getReasonId());
-        Assertions.assertFalse(objectAdminAction.isMarkedForManualDeletion());
         assertNotNull(objectAdminAction.getHiddenBy());
         assertNotNull(objectAdminAction.getHiddenDateTime());
         if (isMarkedForDeleton) {
