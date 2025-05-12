@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
