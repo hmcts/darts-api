@@ -49,8 +49,10 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = tra.trs_id) as state_change_ts,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription tra
-                JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
-                JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
+                LEFT JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
+                LEFT JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
+                LEFT JOIN darts.case_transcription_ae case_transcription ON (case_transcription.cas_id != hea.cas_id and tra.tra_id = case_transcription.tra_id)
+                JOIN darts.court_case cas ON ((case_transcription.cas_id = cas.cas_id) or (hea.cas_id = cas.cas_id))                        
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
                 AND cth.cth_id IN (
                     SELECT DISTINCT(grc.cth_id)
@@ -62,8 +64,6 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     AND grp.rol_id = :rol_id
                     AND usr.is_active = true
                 )
-                JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
-                JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
@@ -102,8 +102,10 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tra.is_manual_transcription      as is_manual,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription tra
-                JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
-                JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
+                LEFT JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
+                LEFT JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
+                LEFT JOIN darts.case_transcription_ae case_transcription ON (case_transcription.cas_id != hea.cas_id and tra.tra_id = case_transcription.tra_id)
+                JOIN darts.court_case cas ON ((case_transcription.cas_id = cas.cas_id) or (hea.cas_id = cas.cas_id))                    
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
                 AND cth.cth_id IN (
                     SELECT DISTINCT(grc.cth_id)
@@ -115,8 +117,6 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     AND grp.rol_id = :rol_id
                     AND usr.is_active = true
                 )
-                JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
-                JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
@@ -167,8 +167,10 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tra.is_manual_transcription as is_manual,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription tra
-                JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
-                JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
+                LEFT JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
+                LEFT JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
+                LEFT JOIN darts.case_transcription_ae case_transcription ON (tra.tra_id = case_transcription.tra_id AND case_transcription.cas_id != hea.cas_id)
+                JOIN darts.court_case cas ON ((case_transcription.cas_id = cas.cas_id) or (hea.cas_id = cas.cas_id))
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
                 AND cth.cth_id IN (
                     SELECT DISTINCT(grc.cth_id)
@@ -180,8 +182,6 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     AND grp.rol_id = :rol_id
                     AND usr.is_active = true
                 )
-                JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
-                JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
@@ -263,14 +263,16 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
             workflowSubQuery.append(" AND trw.workflow_actor = ").append(userId);
         }
         workflowSubQuery.append(" GROUP BY tra_id");
-
         StringBuilder sql = new StringBuilder(433)
             .append(
                 """
                     SELECT count(*)
                     FROM darts.transcription transcription
-                    JOIN darts.case_transcription_ae case_transcription ON transcription.tra_id = case_transcription.tra_id
-                    JOIN darts.court_case court_case ON case_transcription.cas_id = court_case.cas_id
+                    
+                    LEFT JOIN darts.hearing_transcription_ae hearing_transcription ON transcription.tra_id = hearing_transcription.tra_id
+                    LEFT JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
+                    LEFT JOIN darts.case_transcription_ae case_transcription ON (case_transcription.cas_id != hea.cas_id and transcription.tra_id = case_transcription.tra_id)
+                    JOIN darts.court_case court_case ON ((case_transcription.cas_id = court_case.cas_id) or (hea.cas_id = court_case.cas_id))
                     JOIN darts.courthouse courthouse ON courthouse.cth_id=court_case.cth_id
                     JOIN (""")
             .append(workflowSubQuery)
