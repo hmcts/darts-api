@@ -70,6 +70,52 @@ class TranscriberTranscriptsQueryImplIntTest extends IntegrationBase {
     }
 
     @Test
+    void getTranscriptRequests_hasOnlyHearingTranscription() {
+        transactionalUtil.executeInTransaction(() -> {
+            TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
+                userAccountEntity, courtCaseEntity, hearingEntity, NOW.minusDays(2), false
+            );
+
+            var approved = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+                transcriptionEntity, NOW.minusDays(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+            );
+            transcriptionEntity.getTranscriptionWorkflowEntities().add(approved);
+            transcriptionEntity.setTranscriptionStatus(approved.getTranscriptionStatus());
+            dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+            //Remove any linked court cases
+            transcriptionEntity.getCourtCases().clear();
+            dartsDatabase.save(transcriptionEntity);
+        });
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriptRequests(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+    }
+
+    @Test
+    void getTranscriptRequests_hasOnlyCaseTranscription() {
+        transactionalUtil.executeInTransaction(() -> {
+            TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
+                userAccountEntity, courtCaseEntity, hearingEntity, NOW.minusDays(2), false
+            );
+
+            var approved = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+                transcriptionEntity, NOW.minusDays(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+            );
+            transcriptionEntity.getTranscriptionWorkflowEntities().add(approved);
+            transcriptionEntity.setTranscriptionStatus(approved.getTranscriptionStatus());
+            dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+            //Remove any linked hearings
+            transcriptionEntity.getHearings().clear();
+            dartsDatabase.save(transcriptionEntity);
+        });
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriptRequests(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+    }
+
+    @Test
     void getTranscriptRequestsWithMultipleWorkflowsWithSameWorkflowTimestamp() {
         var yesterday = NOW.minusDays(1);
         TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveApprovedTranscription(
@@ -166,6 +212,50 @@ class TranscriberTranscriptsQueryImplIntTest extends IntegrationBase {
     }
 
     @Test
+    void getTranscriberTranscriptions_hasOnlyHearingTranscription() {
+        transactionalUtil.executeInTransaction(() -> {
+            var yesterday = NOW.minusDays(1);
+            TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(
+                userAccountEntity, courtCaseEntity, hearingEntity, yesterday, false
+            );
+            var withTranscriber = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+                transcriptionEntity, yesterday, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+            );
+            transcriptionEntity.getTranscriptionWorkflowEntities().add(withTranscriber);
+            dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+            //Remove any linked court cases
+            transcriptionEntity.getCourtCases().clear();
+            dartsDatabase.save(transcriptionEntity);
+        });
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriberTranscriptions(userAccountEntity.getId());
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+    }
+
+    @Test
+    void getTranscriberTranscriptions_hasOnlyCaseTranscription() {
+        transactionalUtil.executeInTransaction(() -> {
+            var yesterday = NOW.minusDays(1);
+            TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(
+                userAccountEntity, courtCaseEntity, hearingEntity, yesterday, false
+            );
+            var withTranscriber = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+                transcriptionEntity, yesterday, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+            );
+            transcriptionEntity.getTranscriptionWorkflowEntities().add(withTranscriber);
+            dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+            //Remove any linked hearings
+            transcriptionEntity.getHearings().clear();
+            dartsDatabase.save(transcriptionEntity);
+        });
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriberTranscriptions(userAccountEntity.getId());
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+    }
+
+    @Test
     void getApprovedTranscriptionsCountForCourthouses() {
         TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveApprovedTranscription(
             userAccountEntity, courtCaseEntity, hearingEntity, NOW.minusDays(5), false
@@ -204,6 +294,64 @@ class TranscriberTranscriptsQueryImplIntTest extends IntegrationBase {
             .addAll(List.of(backToApproved, withTranscriber));
         dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
 
+        Integer approvedTranscriptionCount = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(
+            List.of(courthouse.getId()),
+            WITH_TRANSCRIBER.getId(),
+            userAccountEntity.getId()
+        );
+
+        assertThat(approvedTranscriptionCount).isEqualTo(1);
+    }
+
+    @Test
+    void getTranscriptionsCountForCourthouses_hasOnlyHearingTranscription() {
+        transactionalUtil.executeInTransaction(() -> {
+            TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(
+                userAccountEntity, courtCaseEntity, hearingEntity, NOW.minusDays(3), false
+            );
+            var backToApproved = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+                transcriptionEntity, NOW.minusDays(2), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+            );
+            var withTranscriber = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+                transcriptionEntity, NOW.minusDays(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+            );
+            transcriptionEntity.getTranscriptionWorkflowEntities()
+                .addAll(List.of(backToApproved, withTranscriber));
+            dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+            //Remove any linked court cases
+            transcriptionEntity.getCourtCases().clear();
+            dartsDatabase.save(transcriptionEntity);
+        });
+        Integer approvedTranscriptionCount = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(
+            List.of(courthouse.getId()),
+            WITH_TRANSCRIBER.getId(),
+            userAccountEntity.getId()
+        );
+
+        assertThat(approvedTranscriptionCount).isEqualTo(1);
+    }
+
+    @Test
+    void getTranscriptionsCountForCourthouses_hasOnlyCaseTranscription() {
+        transactionalUtil.executeInTransaction(() -> {
+            TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(
+                userAccountEntity, courtCaseEntity, hearingEntity, NOW.minusDays(3), false
+            );
+            var backToApproved = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+                transcriptionEntity, NOW.minusDays(2), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+            );
+            var withTranscriber = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+                transcriptionEntity, NOW.minusDays(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+            );
+            transcriptionEntity.getTranscriptionWorkflowEntities()
+                .addAll(List.of(backToApproved, withTranscriber));
+            dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+            //Remove any linked hearings
+            transcriptionEntity.getHearings().clear();
+            dartsDatabase.save(transcriptionEntity);
+        });
         Integer approvedTranscriptionCount = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(
             List.of(courthouse.getId()),
             WITH_TRANSCRIBER.getId(),
