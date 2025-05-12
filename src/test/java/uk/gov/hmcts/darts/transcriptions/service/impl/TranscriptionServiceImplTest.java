@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -110,9 +109,6 @@ class TranscriptionServiceImplTest {
 
     @Mock
     private TranscriptionWorkflowEntity mockTranscriptionWorkflowEntity;
-
-    @Mock
-    private CaseService mockCaseService;
     @Mock
     private HearingsService mockHearingsService;
     @Mock
@@ -214,9 +210,6 @@ class TranscriptionServiceImplTest {
         Integer hearingId = 1;
         when(mockHearingsService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearing);
 
-        Integer caseId = 1;
-        when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
-
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
@@ -242,6 +235,7 @@ class TranscriptionServiceImplTest {
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
+        Integer caseId = 1;
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearingId,
             caseId,
@@ -301,9 +295,6 @@ class TranscriptionServiceImplTest {
     void saveTranscriptionRequestWithValidValuesNullHearingAndCourtLogTypeReturnSuccess() {
         doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
-        Integer caseId = 1;
-        when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
-
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
@@ -330,6 +321,7 @@ class TranscriptionServiceImplTest {
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
+        Integer caseId = 1;
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearingId,
             caseId,
@@ -346,7 +338,6 @@ class TranscriptionServiceImplTest {
 
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
         assertThat(transcriptionEntity.getHearing()).isNull();
-        assertThat(transcriptionEntity.getCourtCase()).isNotNull();
         assertThat(transcriptionEntity.getCourtroom()).isNull();
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isNotNull();
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
@@ -472,9 +463,6 @@ class TranscriptionServiceImplTest {
         Integer hearingId = 1;
         when(mockHearingsService.getHearingByIdWithValidation(hearingId)).thenReturn(mockHearing);
 
-        Integer caseId = 1;
-        when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
-
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
@@ -500,6 +488,7 @@ class TranscriptionServiceImplTest {
         OffsetDateTime startDateTime = null;
         OffsetDateTime endDateTime = null;
 
+        Integer caseId = 1;
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearingId,
             caseId,
