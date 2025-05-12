@@ -281,6 +281,7 @@ class AdminTranscriptionServiceTest {
     void hideOrShowTranscriptionDocumentById_shouldSetMarkedForDeletion_whenObjectHiddenReasonIsMarkedForDeletion() {
         assertTestTranscriptionDocumentHide(new TranscriptionDocumentHideRequest(), true);
     }
+
     @Test
     void hideOrShowTranscriptionDocumentById_shouldNotSetMarkedForDeletion_whenObjectHiddenReasonNotIsMarkedForDeletion() {
         assertTestTranscriptionDocumentHide(new TranscriptionDocumentHideRequest(), false);
@@ -387,7 +388,7 @@ class AdminTranscriptionServiceTest {
             = adminTranscriptionService.hideOrShowTranscriptionDocumentById(hideOrShowTranscriptionDocument, request);
 
         // make the assertion
-        Assertions.assertFalse(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
+        assertFalse(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
         assertEquals(expectedResponse, actualResponse);
         verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId);
         verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId1);
