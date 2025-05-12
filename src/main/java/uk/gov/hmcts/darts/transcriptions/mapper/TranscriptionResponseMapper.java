@@ -453,9 +453,11 @@ public class TranscriptionResponseMapper {
         adminActionResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
         adminActionResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
         adminActionResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
-        adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
-        adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
-        adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+        if (objectAdminActionEntity.isMarkedForManualDeletion()) {
+            adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
+            adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
+            adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+        }
         adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
         adminActionResponse.setComments(objectAdminActionEntity.getComments());
 

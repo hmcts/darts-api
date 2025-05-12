@@ -135,6 +135,70 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         assertEquals(objectAdminActionEntity.getFirst()
                          .getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS),
                      transcriptionResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
+        assertNull(transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
+        assertNull(transcriptionResponse.getAdminAction().getMarkedForManualDeletionAt());
+    }
+
+    @Test
+    void transcriptionDocument_usingAReasonThatIsMarkForDeletion_shouldAddMarkedForDeletionFieldsToResponse() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        CourtroomEntity courtroomAtNewcastleEntity = dartsDatabase.createCourtroomUnlessExists("Newcastle", "room_a");
+        HearingEntity headerEntity = dartsDatabase.createHearing(
+            courtroomAtNewcastleEntity.getCourthouse().getCourthouseName(),
+            courtroomAtNewcastleEntity.getName(),
+            "c1",
+            LocalDateTime.of(2020, 6, 20, 10, 0, 0)
+        );
+
+        String fileName = "file";
+        String fileType = "fileType";
+        Integer fileBytes = 299;
+        boolean hidden = true;
+
+        TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transactionDocumentStub
+            .createTranscriptionDocument(fileName, fileBytes, fileType, hidden, transcriptionEntity);
+
+        TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
+        transcriptionDocumentHideRequest.setIsHidden(true);
+
+        String comment = "comments";
+        String ticketReference = "reference";
+
+        AdminActionRequest adminActionRequest = new AdminActionRequest();
+        adminActionRequest.setReasonId(HiddenReason.OTHER_DELETE.getId());
+        adminActionRequest.setComments(comment);
+        adminActionRequest.setTicketReference(ticketReference);
+        transcriptionDocumentHideRequest.setAdminAction(adminActionRequest);
+
+        // run the test
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
+                "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        TranscriptionDocumentEntity documentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentEntity.getId()).get();
+        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentEntity.getId());
+
+        TranscriptionDocumentHideResponse transcriptionResponse
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), TranscriptionDocumentHideResponse.class);
+
+        // ensure that the database data is contained in the response
+        assertEquals(documentEntity.getId(), transcriptionResponse.getId());
+        assertEquals(documentEntity.isHidden(), transcriptionResponse.getIsHidden());
+        assertEquals(objectAdminActionEntity.getFirst().getId(), transcriptionResponse.getAdminAction().getId());
+        assertEquals(objectAdminActionEntity.getFirst().getComments(), transcriptionResponse.getAdminAction().getComments());
+        assertEquals(objectAdminActionEntity.getFirst().getTicketReference(), transcriptionResponse.getAdminAction().getTicketReference());
+        assertEquals(objectAdminActionEntity.getFirst().getObjectHiddenReason().getId(), transcriptionResponse.getAdminAction().getReasonId());
+        assertEquals(objectAdminActionEntity.getFirst().getHiddenBy().getId(), transcriptionResponse.getAdminAction().getHiddenById());
+        assertEquals(objectAdminActionEntity.getFirst().getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS),
+                     transcriptionResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
+
+        assertTrue(objectAdminActionEntity.getFirst().isMarkedForManualDeletion());
+
         assertEquals(objectAdminActionEntity.getFirst().getMarkedForManualDelBy().getId(),
                      transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
         assertEquals(objectAdminActionEntity.getFirst().getMarkedForManualDelDateTime()
