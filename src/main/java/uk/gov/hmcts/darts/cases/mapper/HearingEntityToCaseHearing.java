@@ -40,7 +40,12 @@ public class HearingEntityToCaseHearing {
             .stream()
             .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsCurrent()))
             .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
-                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId())
+                ||
+                (
+                    StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId())
+                    &&
+                    !transcriptionEntity.getTranscriptionDocumentEntities().isEmpty()
+                )
             )
             .filter(transcriptionEntity ->
                 transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionEntity.getId()).isEmpty()
