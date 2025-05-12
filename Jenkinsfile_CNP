@@ -124,7 +124,7 @@ def determineDevEnvironmentDeployment() {
       }
 
       //Gateway
-      if (label ==~ /enable_keda/) {
+      if (label ==~ /enable_keda.*/) {
         env.DEV_ENABLE_DARTS_KEDA = true
         echo "DARTS KEDA enabled in PR environment"
       }
