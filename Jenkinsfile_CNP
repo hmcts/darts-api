@@ -136,7 +136,6 @@ def determineDevEnvironmentDeployment() {
   echo "2 - env.DEV_ENABLE_DARTS_GATEWAY: ${env.DEV_ENABLE_DARTS_GATEWAY}"
   echo "2 - env.DEV_DARTS_GATEWAY_URL: ${env.DEV_DARTS_GATEWAY_URL}"
   echo "2 - env.DEV_ENABLE_DARTS_KEDA: ${env.DEV_ENABLE_DARTS_KEDA}"
-  env.DEV_ENABLE_DARTS_KEDA = true
 }
 
 GradleBuilder builder = new GradleBuilder(this, product)

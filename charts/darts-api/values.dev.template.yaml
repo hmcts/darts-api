@@ -212,7 +212,7 @@ function:
   scaleType: Job
   image: ${IMAGE_NAME}
   aadIdentityName: darts
-  pollingInterval: 300 # every 5 mins, but this should probably be configurable per env
+  pollingInterval: 30 # every 5 mins, but this should probably be configurable per env
   minReplicaCount: 0
   maxReplicaCount: 2
   scalingStrategy: accurate
@@ -262,7 +262,10 @@ function:
         - name: AzureADClientSecretJustice
           alias: AAD_CLIENT_SECRET_JUSTICE
   environment:
-    DARTS_API_DB_CONNECTION_STRING: jdbc:postgresql://${DARTS_API_DB_HOST}:5432/${DARTS_API_DB_NAME}${DARTS_API_DB_OPTIONS:}
+    DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
+    DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"
+    DARTS_API_DB_USERNAME: "hmcts"
+    DARTS_API_DB_CONNECTION_STRING: jdbc:postgresql://darts-modernisation-dev.postgres.database.azure.com:5432/pr-${CHANGE_ID}-darts${DARTS_API_DB_OPTIONS:}
     ATS_MODE: true
     API_MODE: false
     NOTIFICATION_SCHEDULER_ENABLED: false
