@@ -1,29 +1,29 @@
 {
   "current_page": 1,
   "page_size": 3,
-  "total_pages": 2,
-  "total_items": 4,
+  "total_pages": 1,
+  "total_items": 3,
   "data": [
     {
-      "id": 1,
-      "start_at": "2023-09-26T13:00:00Z",
-      "end_at": "2023-09-26T13:45:00Z",
+      "id": 9,
+      "start_at": "2023-01-01T12:00:00Z",
+      "end_at": "2023-01-01T13:00:00Z",
+      "channel": 3,
+      "courtroom": "TESTCOURTROOM2"
+    },
+    {
+      "id": 7,
+      "start_at": "2023-01-01T12:00:00Z",
+      "end_at": "2023-01-01T13:00:00Z",
       "channel": 1,
-      "courtroom": "COURTROOM 1"
+      "courtroom": "TESTCOURTROOM"
     },
     {
-      "id": 2,
-      "start_at": "2023-09-26T13:00:00Z",
-      "end_at": "2023-09-26T13:45:00Z",
+      "id": 8,
+      "start_at": "2023-01-01T12:00:00Z",
+      "end_at": "2023-01-01T13:00:00Z",
       "channel": 2,
-      "courtroom": "COURTROOM 1"
-    },
-    {
-      "id": 4,
-      "start_at": "2023-09-26T13:00:00Z",
-      "end_at": "2023-09-26T13:45:00Z",
-      "channel": 4,
-      "courtroom": "COURTROOM 1"
+      "courtroom": "TESTCOURTROOM"
     }
   ]
 }

@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -104,12 +105,15 @@ public class CourtCaseStub {
     }
 
     @Transactional
-    public void createCasesWithHearings(int numOfCases, int numOfCourtrooms, int numOfHearingsPerCourtroom) {
+    public List<CourtCaseEntity> createCasesWithHearings(int numOfCases, int numOfCourtrooms, int numOfHearingsPerCourtroom) {
+        List<CourtCaseEntity> courtCases = new ArrayList<>();
         CourthouseEntity courthouse = courthouseStub.createMinimalCourthouse();
         for (int caseCounter = 1; caseCounter <= numOfCases; caseCounter++) {
             CourtCaseEntity courtCase = createAndSaveMinimalCourtCase("caseNumber" + caseCounter, courthouse);
             hearingStub.createHearingsForCase(courtCase, numOfCourtrooms, numOfHearingsPerCourtroom, courthouseStub, userAccountStub);
+            courtCases.add(courtCase);
         }
+        return courtCases;
     }
 
     /**
