@@ -457,6 +457,8 @@ public class TranscriptionResponseMapper {
             adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
             adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
             adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+        } else {
+            adminActionResponse.setIsMarkedForManualDeletion(false);
         }
         adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
         adminActionResponse.setComments(objectAdminActionEntity.getComments());
