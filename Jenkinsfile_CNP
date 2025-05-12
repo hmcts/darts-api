@@ -124,7 +124,7 @@ def determineDevEnvironmentDeployment() {
       }
 
       //Gateway
-      if (label ==~ /enable_keda.*/) {
+      if (label ==~ /enable_darts_ats_keda.*/) {
         env.DEV_ENABLE_DARTS_KEDA = true
         echo "DARTS KEDA enabled in PR environment"
       }
@@ -136,6 +136,7 @@ def determineDevEnvironmentDeployment() {
   echo "2 - env.DEV_ENABLE_DARTS_GATEWAY: ${env.DEV_ENABLE_DARTS_GATEWAY}"
   echo "2 - env.DEV_DARTS_GATEWAY_URL: ${env.DEV_DARTS_GATEWAY_URL}"
   echo "2 - env.DEV_ENABLE_DARTS_KEDA: ${env.DEV_ENABLE_DARTS_KEDA}"
+  env.DEV_ENABLE_DARTS_KEDA = true
 }
 
 GradleBuilder builder = new GradleBuilder(this, product)
