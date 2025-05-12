@@ -1,0 +1,29 @@
+{
+  "current_page": 1,
+  "page_size": 3,
+  "total_pages": 1,
+  "total_items": 3,
+  "data": [
+    {
+      "id": 9,
+      "start_at": "2023-01-01T12:00:00Z",
+      "end_at": "2023-01-01T13:00:00Z",
+      "channel": 3,
+      "courtroom": "TESTCOURTROOM2"
+    },
+    {
+      "id": 7,
+      "start_at": "2023-01-01T12:00:00Z",
+      "end_at": "2023-01-01T13:00:00Z",
+      "channel": 1,
+      "courtroom": "TESTCOURTROOM"
+    },
+    {
+      "id": 8,
+      "start_at": "2023-01-01T12:00:00Z",
+      "end_at": "2023-01-01T13:00:00Z",
+      "channel": 2,
+      "courtroom": "TESTCOURTROOM"
+    }
+  ]
+}

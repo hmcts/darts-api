@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.cases.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
     private static final String COURTROOM_NAME1 = "COURTROOM 1";
 
     private CourtCaseEntity courtCaseEntity1;
-    
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -58,7 +60,7 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
         var media1 = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearingEntity1.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T09:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
@@ -67,8 +69,8 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
         var media2 = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearingEntity1.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                OffsetDateTime.parse("2023-09-26T10:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T14:45:00Z"),
                 2
             ));
         MediaEntity currentMediaEntity2 = dartsDatabase.save(media2);
@@ -76,8 +78,8 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
         var media3 = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearingEntity1.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                OffsetDateTime.parse("2023-09-26T11:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T15:45:00Z"),
                 3
             ));
         MediaEntity currentMediaEntity3 = dartsDatabase.save(media3);
@@ -85,8 +87,8 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
         var media4 = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearingEntity1.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                OffsetDateTime.parse("2023-09-26T12:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T16:45:00Z"),
                 4
             ));
         MediaEntity currentMediaEntity4 = dartsDatabase.save(media4);
@@ -125,13 +127,11 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
     }
 
     @Test
-    void adminCasesIdAudiosGet_ShouldReturnPaginatedListWithMultiplePages() throws Exception {
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListWithDefaultValuesAndMultiplePages() throws Exception {
         // given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_USER);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
-            .queryParam("sort_by", "audioId")
-            .queryParam("sort_order", "asc")
             .queryParam("page_number", "1")
             .queryParam("page_size", "3");
 
@@ -145,13 +145,17 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    @Test
-    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByChannelDesc() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "asc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByChannelAsc/expectedResponse.json",
+        "desc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByChannelDesc/expectedResponse.json"
+    })
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByChannel(String sortOrder, String expectedResponseFile) throws Exception {
         // given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_USER);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "channel")
-            .queryParam("sort_order", "desc")
+            .queryParam("sort_order", sortOrder)
             .queryParam("page_number", "1")
             .queryParam("page_size", "3");
 
@@ -160,20 +164,22 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
 
         // then
         String actualResponse = mvcResult.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByChannelDesc/expectedResponse.json");
+        String expectedResponse = getContentsFromFile(expectedResponseFile);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
     }
 
-    @Test
-    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByAudioIdDesc() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "asc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByAudioIdAsc/expectedResponse.json",
+        "desc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByAudioIdDesc/expectedResponse.json"
+    })
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByAudioId(String sortOrder, String expectedResponseFile) throws Exception {
         // given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_USER);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
             .queryParam("sort_by", "audioId")
-            .queryParam("sort_order", "desc")
+            .queryParam("sort_order", sortOrder)
             .queryParam("page_number", "1")
             .queryParam("page_size", "3");
 
@@ -182,19 +188,20 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
 
         // then
         String actualResponse = mvcResult.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByAudioIdDesc/expectedResponse.json");
+        String expectedResponse = getContentsFromFile(expectedResponseFile);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
     }
 
-    @Test
-    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByCourtroomDesc() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "asc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByCourtroomAsc/expectedResponse.json",
+        "desc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByCourtroomDesc/expectedResponse.json"
+    })
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByCourtroom(String sortOrder, String expectedResponseFile) throws Exception {
         // given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_USER);
 
         var caseA = courtCaseStub.createAndSaveCourtCaseWithHearings();
-
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
 
         var hearA1 = caseA.getHearings().getFirst();
@@ -218,7 +225,7 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, caseA.getId())
             .queryParam("sort_by", "courtroom")
-            .queryParam("sort_order", "desc")
+            .queryParam("sort_order", sortOrder)
             .queryParam("page_number", "1")
             .queryParam("page_size", "3");
 
@@ -227,19 +234,21 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
 
         // then
         String actualResponse = mvcResult.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByCourtroomDesc/expectedResponse.json");
+        String expectedResponse = getContentsFromFile(expectedResponseFile);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
     }
 
-    @Test
-    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByStartTimeDesc() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "asc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByStartTimeAsc/expectedResponse.json",
+        "desc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByStartTimeDesc/expectedResponse.json"
+    })
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByStartTime(String sortOrder, String expectedResponseFile) throws Exception {
         // given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_USER);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
-            .queryParam("sort_by", "audioId")
-            .queryParam("sort_order", "desc")
+            .queryParam("sort_by", "startTime")
+            .queryParam("sort_order", sortOrder)
             .queryParam("page_number", "1")
             .queryParam("page_size", "3");
 
@@ -248,19 +257,21 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
 
         // then
         String actualResponse = mvcResult.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByStartTimeDesc/expectedResponse.json");
+        String expectedResponse = getContentsFromFile(expectedResponseFile);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
     }
 
-    @Test
-    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByEndTimeDesc() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "asc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByEndTimeAsc/expectedResponse.json",
+        "desc, tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByEndTimeDesc/expectedResponse.json"
+    })
+    void adminCasesIdAudiosGet_ShouldReturnPaginatedListByEndTime(String sortOrder, String expectedResponseFile) throws Exception {
         // given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_USER);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCaseEntity1.getId())
-            .queryParam("sort_by", "audioId")
-            .queryParam("sort_order", "desc")
+            .queryParam("sort_by", "endTime")
+            .queryParam("sort_order", sortOrder)
             .queryParam("page_number", "1")
             .queryParam("page_size", "3");
 
@@ -269,10 +280,8 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
 
         // then
         String actualResponse = mvcResult.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerAdminCasesIdAudiosGetTest/testPaginationByEndTimeDesc/expectedResponse.json");
+        String expectedResponse = getContentsFromFile(expectedResponseFile);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
     }
 
     @Test
