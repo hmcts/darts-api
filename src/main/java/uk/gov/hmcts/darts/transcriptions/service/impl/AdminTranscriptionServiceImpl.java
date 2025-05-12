@@ -207,18 +207,21 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
                 auditApi.record(HIDE_TRANSCRIPTION);
 
+                ObjectHiddenReasonEntity objectHiddenReason = objectHiddenReasonEntity.get();
+                UserAccountEntity currentUser = userIdentity.getUserAccount();
                 // on hiding add the relevant hide record
                 ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
-                objectAdminActionEntity.setObjectHiddenReason(objectHiddenReasonEntity.get());
+                objectAdminActionEntity.setObjectHiddenReason(objectHiddenReason);
                 objectAdminActionEntity.setTicketReference(transcriptionDocumentHideRequest.getAdminAction().getTicketReference());
                 objectAdminActionEntity.setComments(transcriptionDocumentHideRequest.getAdminAction().getComments());
                 objectAdminActionEntity.setTranscriptionDocument(documentEntity);
-                objectAdminActionEntity.setHiddenBy(userIdentity.getUserAccount());
+                objectAdminActionEntity.setHiddenBy(currentUser);
                 objectAdminActionEntity.setHiddenDateTime(OffsetDateTime.now());
-                objectAdminActionEntity.setMarkedForManualDeletion(false);
-                objectAdminActionEntity.setMarkedForManualDelBy(userIdentity.getUserAccount());
-                objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
-
+                if (objectHiddenReason.isMarkedForDeletion()) {
+                    objectAdminActionEntity.setMarkedForManualDeletion(true);
+                    objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
+                    objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
+                }
                 objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
 
                 response = transcriptionMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
