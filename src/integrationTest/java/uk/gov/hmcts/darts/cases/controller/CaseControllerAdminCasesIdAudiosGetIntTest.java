@@ -205,7 +205,14 @@ class CaseControllerAdminCasesIdAudiosGetIntTest extends IntegrationBase {
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
 
         var hearA1 = caseA.getHearings().getFirst();
+        var courtroom1 = hearA1.getCourtroom();
+        courtroom1.setName(COURTROOM_NAME1);
+        dartsDatabase.save(courtroom1);
         var hearA2 = caseA.getHearings().get(1);
+        var courtroom2 = hearA2.getCourtroom();
+        courtroom2.setName("COURTROOM 2");
+        dartsDatabase.save(courtroom2);
+
         var media1 = medias.getFirst();
         media1.setCourtroom(hearA1.getCourtroom());
         dartsDatabase.save(media1);
