@@ -679,3 +679,8 @@ task runAllStyleChecks {
 // migratePostgresDatabase.dependsOn cleanPostgresDatabase
 processResources.dependsOn updateOpenSpecificationsWithVersion
 assemble.dependsOn openapiJar
+
+// ensure the openApi specs are processed before building the JAR
+tasks.named('openapiJar') {
+  dependsOn updateOpenSpecificationsWithVersion
+}
