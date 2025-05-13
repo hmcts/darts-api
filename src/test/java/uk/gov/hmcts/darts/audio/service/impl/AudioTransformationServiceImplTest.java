@@ -170,7 +170,8 @@ class AudioTransformationServiceImplTest {
             mock(),
             currentTimeHelper,
             mock(),
-            processMediaRequestsForKeda
+            processMediaRequestsForKeda,
+            mock()
         );
 
         ReflectionTestUtils.setField(processMediaRequestsForKeda, "audioTransformationService", audioTransformationService);

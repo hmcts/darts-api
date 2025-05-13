@@ -79,6 +79,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final CurrentTimeHelper currentTimeHelper;
     private final AudioTransformationServiceProperties config;
     private final ProcessMediaRequestsForKeda processMediaRequestsForKeda;
+    private final MediaRequestService mediaRequestService;
 
 
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
@@ -112,9 +113,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             if (counter > MAX_LOOPS) {
                 throw new DartsException("ATS potentially stuck in a loop.");
             }
-            if (!processMediaRequestsForKeda.process(mediaRequestIdsProcessed)) {
+            Optional<Integer> mediaRequestIdToProcess = mediaRequestService.retrieveMediaRequestForProcessing(mediaRequestIdsProcessed);
+            if (mediaRequestIdToProcess.isEmpty()) {
+                log.info("No more open requests found for ATS to process.");
                 return;
             }
+            Integer mediaRequestId = mediaRequestIdToProcess.get();
+            mediaRequestIdsProcessed.add(mediaRequestId);
+            processMediaRequestsForKeda.processAudioRequest(mediaRequestId);
             counter++;
         }
     }
@@ -129,29 +135,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         private AudioTransformationServiceImpl audioTransformationService;
 
 
-        @Transactional
-        public boolean process(List<Integer> mediaRequestIdsProcessed) {
-            Optional<MediaRequestEntity> mediaRequestOpt = mediaRequestService.retrieveMediaRequestForProcessing(mediaRequestIdsProcessed);
-
-            if (mediaRequestOpt.isPresent()) {
-                MediaRequestEntity mediaRequestEntity = mediaRequestOpt.get();
-                mediaRequestIdsProcessed.add(mediaRequestEntity.getId());
-                processAudioRequest(mediaRequestEntity);
-                return true;
-            } else {
-                log.info("No more open requests found for ATS to process.");
-                return false;
-            }
-        }
-
         /**
          * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
          * storage.
          */
         @SuppressWarnings({"PMD.AvoidRethrowingException", "PMD.CyclomaticComplexity"})
-        private void processAudioRequest(MediaRequestEntity mediaRequestEntity) {
-
-            Integer requestId = mediaRequestEntity.getId();
+        @Transactional
+        public void processAudioRequest(Integer requestId) {
+            MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(requestId);
             HearingEntity hearingEntity = mediaRequestEntity.getHearing();
             String blobId;
 
