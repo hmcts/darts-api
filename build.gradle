@@ -27,8 +27,10 @@ jacoco {
   reportsDirectory.set(layout.buildDirectory.dir("jacocoHtml"))
 }
 
-group = 'com.github.hmcts'
-version = System.getenv('RELEASE_VERSION') ?: 'DEV-SNAPSHOT'
+def buildNumber = System.getenv("RELEASE_VERSION")?: "DEV-SNAPSHOT"
+
+group 'com.github.hmcts'
+version buildNumber
 
 compileJava {
   sourceCompatibility = '21'
