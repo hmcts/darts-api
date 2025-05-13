@@ -14,14 +14,18 @@ import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static org.skyscreamer.jsonassert.JSONAssert.assertNotEquals;
 import static org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -42,42 +46,31 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private Authorisation mockAuthorisation;
-
     private TransformedMediaEntity transformedMediaEntity;
-
+    private MediaRequestEntity mediaRequestEntity;
 
     @BeforeEach
     void beforeEach() {
         UserAccountEntity requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         transformedMediaEntity = dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
     }
 
     @Test
     void updateTransformedMediaLastAccessedTimestampShouldReturnSuccess() throws Exception {
+        authenticateValid();
+
         Integer transformedMediaId = transformedMediaEntity.getId();
-        doNothing().when(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
-        );
-        doNothing().when(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, transformedMediaId);
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isNoContent())
             .andReturn();
-
-        verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaEntity.getId(),
-            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
-        );
-        verify(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
     }
 
     @Test
     void updateTransformedMediaLastAccessedTimestampShouldReturnNotFound() throws Exception {
+        authenticateValid();
         MockHttpServletRequestBuilder requestBuilder = patch(
             ENDPOINT_URL,
             -999
@@ -91,14 +84,10 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
 
     @Test
     void updateTransformedMediaLastAccessedTimestampShouldReturnForbiddenErrorWhenRequestorDifferentUser() throws Exception {
-        Integer transformedMediaId = transformedMediaEntity.getId();
-        doNothing().when(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaEntity.getId(),
-            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
-        );
+        UserAccountEntity userAccount = givenBuilder.anAuthenticatedUserWithRoles(mediaRequestEntity.getHearing().getCourtroom().getCourthouse(), TRANSCRIBER);
+        assertFalse(userAccount.getId() == mediaRequestEntity.getCurrentOwner().getId());
 
-        doThrow(new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER))
-            .when(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
+        Integer transformedMediaId = transformedMediaEntity.getId();
 
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, transformedMediaId);
 
@@ -115,12 +104,12 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
             }""";
 
         assertEquals(expectedJson, actualJson, NON_EXTENSIBLE);
-
-        verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaEntity.getId(),
-            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
-        );
-        verify(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
     }
 
+    private void authenticateValid() {
+        UserAccountEntity userAccount = givenBuilder.anAuthenticatedUserWithRoles(mediaRequestEntity.getHearing().getCourtroom().getCourthouse(), TRANSCRIBER);
+        mediaRequestEntity.setCurrentOwner(userAccount);
+        dartsDatabase.save(mediaRequestEntity);
+        assertTrue(userAccount.getId() == mediaRequestEntity.getCurrentOwner().getId());
+    }
 }
