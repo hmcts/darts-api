@@ -22,11 +22,25 @@ jobs:
           java-version: 21
           cache: 'gradle'
 
+      - name: Calc Version, Tag & Push
+        id: version_tag
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match '0.1.*')
+          NEXT_PATCH=$(echo "$LATEST_TAG" | awk -F. '{ print $3+1 }')
+          NEXT_VERSION="0.1.${NEXT_PATCH}"
+
+          # Set the calculated version as a step output
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+          git tag "$NEXT_VERSION"
+          git push origin "$NEXT_VERSION"
+        shell: bash
+
       - name: Publish to Azure DevOps Artifacts
         run: |
           ./gradlew publish
         env:
           AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
           AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
-          RELEASE_VERSION: ${{ github.ref_name }}
+          RELEASE_VERSION: ${{ steps.version_tag.outputs.next_version }}
         shell: bash
