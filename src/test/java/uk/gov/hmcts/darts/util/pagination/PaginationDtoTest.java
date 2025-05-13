@@ -22,7 +22,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("unchecked")//Caused by mockio this can never be incorrect
+@SuppressWarnings("unchecked")//Caused by mockito this can never be incorrect
 class PaginationDtoTest {
 
     private PaginationDto<String> createValidObject() {
