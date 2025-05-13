@@ -230,7 +230,18 @@ class EventServiceImplTest {
         void shouldThrowException_whenIsCurrentIsTrue(Boolean isCurrent) {
             PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(isCurrent);
             DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(1L, request));
-            assertThat(exception.getError()).isEqualTo(CommonApiError.INVALID_REQUEST);
+            assertThat(exception.getError()).isEqualTo(CommonApiError.BAD_REQUEST);
+            verifyNoInteractions(auditApi);
+        }
+
+        @Test
+        void shouldThrowException_whenEventIdIsZero() {
+            PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(true);
+            EventEntity event = mock(EventEntity.class);
+            doReturn(event).when(eventService).getEventByEveId(123L);
+            when(event.getEventId()).thenReturn(0);
+            DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(123L, request));
+            assertThat(exception.getError()).isEqualTo(EventError.CAN_NOT_UPDATE_EVENT_ID_0);
             verifyNoInteractions(auditApi);
         }
 
