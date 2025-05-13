@@ -66,9 +66,10 @@ class MediaRequestRepositoryTest extends PostgresIntegrationBase {
         OffsetDateTime createdTime = request.getLastModifiedDateTime();
 
         mediaRequestService.getMediaRequestEntityById(request.getId());
-        MediaRequestEntity mediaRequestEntityAfterUpdate = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(request.getLastModifiedById(),
+        Integer mediaIdAfterUpdate = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(request.getLastModifiedById(),
                                                                                                                  List.of(0));
 
+        MediaRequestEntity mediaRequestEntityAfterUpdate = mediaRequestRepository.findById(mediaIdAfterUpdate).orElseThrow();
         // prove an update happened on the date and time
         Assertions.assertNotEquals(createdTime.atZoneSameInstant(ZoneOffset.UTC),
                                    mediaRequestEntityAfterUpdate.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC));

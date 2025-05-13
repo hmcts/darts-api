@@ -134,8 +134,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             mediaRequestIdsToIgnore.add(0);//JPA doesn't work well with empty lists in JQL, so adding this dummy value
         }
         return Optional.ofNullable(
-                mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(systemUserHelper.getSystemUser().getId(), mediaRequestIdsToIgnore))
-            .map(MediaRequestEntity::getId);
+                mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(systemUserHelper.getSystemUser().getId(), mediaRequestIdsToIgnore));
     }
 
     @Override
