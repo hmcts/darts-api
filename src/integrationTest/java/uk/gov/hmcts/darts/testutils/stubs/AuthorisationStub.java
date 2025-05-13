@@ -126,12 +126,12 @@ public class AuthorisationStub {
         dartsDatabaseStub.getUserAccountRepository().save(separateIntegrationUser);
 
         transcriptionEntity = dartsDatabaseStub.getTranscriptionStub()
-            .createAndSaveAwaitingAuthorisationTranscription(testUser, courtCaseEntity, hearingEntity, YESTERDAY);
+            .createAndSaveAwaitingAuthorisationTranscription(testUser, null, hearingEntity, YESTERDAY);
     }
 
     public TranscriptionEntity addNewTranscription() {
         return dartsDatabaseStub.getTranscriptionStub()
-            .createAndSaveAwaitingAuthorisationTranscription(separateIntegrationUser, courtCaseEntity, hearingEntity, YESTERDAY);
+            .createAndSaveAwaitingAuthorisationTranscription(separateIntegrationUser, null, hearingEntity, YESTERDAY);
     }
 
     private void createHearing() {
