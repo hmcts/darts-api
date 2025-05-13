@@ -32,17 +32,6 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
     List<EventEntity> findAllByEventId(Integer eventId);
 
     @Query("""
-           SELECT ee
-           FROM EventEntity ee, CourtCaseEntity ce
-           JOIN ee.hearingEntities he
-           WHERE ce.id = :caseId
-           AND he.courtCase = ce
-          ORDER BY he.hearingDate DESC, ee.timestamp DESC
-        """)
-    List<EventEntity> findAllByCaseId(Integer caseId);
-
-
-    @Query("""
            SELECT new uk.gov.hmcts.darts.cases.model.Event(
                   ee.id,
                   he.id,
@@ -57,6 +46,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
            JOIN ee.hearingEntities he
            LEFT JOIN ee.eventType et        
            WHERE he.courtCase.id = :caseId
+           AND ee.isCurrent = true
         """)
     Page<Event> findAllByCaseIdPaginated(Integer caseId, Pageable pageable);
 
