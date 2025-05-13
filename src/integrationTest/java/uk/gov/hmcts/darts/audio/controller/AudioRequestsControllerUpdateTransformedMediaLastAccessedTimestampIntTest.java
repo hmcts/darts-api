@@ -4,39 +4,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
-import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-import static org.skyscreamer.jsonassert.JSONAssert.assertNotEquals;
 import static org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @AutoConfigureMockMvc
 class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest extends IntegrationBase {
@@ -85,7 +70,7 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
     @Test
     void updateTransformedMediaLastAccessedTimestampShouldReturnForbiddenErrorWhenRequestorDifferentUser() throws Exception {
         UserAccountEntity userAccount = givenBuilder.anAuthenticatedUserWithRoles(mediaRequestEntity.getHearing().getCourtroom().getCourthouse(), TRANSCRIBER);
-        assertFalse(userAccount.getId() == mediaRequestEntity.getCurrentOwner().getId());
+        assertNotSame(userAccount.getId(), mediaRequestEntity.getCurrentOwner().getId());
 
         Integer transformedMediaId = transformedMediaEntity.getId();
 
@@ -110,6 +95,6 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
         UserAccountEntity userAccount = givenBuilder.anAuthenticatedUserWithRoles(mediaRequestEntity.getHearing().getCourtroom().getCourthouse(), TRANSCRIBER);
         mediaRequestEntity.setCurrentOwner(userAccount);
         dartsDatabase.save(mediaRequestEntity);
-        assertTrue(userAccount.getId() == mediaRequestEntity.getCurrentOwner().getId());
+        assertSame(userAccount.getId(), mediaRequestEntity.getCurrentOwner().getId());
     }
 }
