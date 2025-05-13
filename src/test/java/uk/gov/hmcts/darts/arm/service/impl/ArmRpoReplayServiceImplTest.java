@@ -74,7 +74,7 @@ class ArmRpoReplayServiceImplTest {
             .thenReturn(armAutomatedTaskEntity);
         when(externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
             any(), eq(startTs), eq(endTs), any(), any(Limit.class)
-        )).thenReturn(List.of(22, 14));
+        )).thenReturn(List.of(22L, 14L));
         UserAccountEntity userAccountEntity = mock(UserAccountEntity.class);
         int userId = 100;
         when(userAccountEntity.getId()).thenReturn(userId);
@@ -88,7 +88,7 @@ class ArmRpoReplayServiceImplTest {
             EodHelper.failedArmRawDataStatus(),
             0,
             userId,
-            List.of(22, 14)
+            List.of(22L, 14L)
         );
     }
 }
