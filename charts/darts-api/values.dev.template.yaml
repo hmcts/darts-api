@@ -218,6 +218,7 @@ function:
   scalingStrategy: accurate
   global:
     enableKeyVaults: true
+    environment: dev
   keyVaults:
     "darts":
       secrets:
@@ -288,6 +289,6 @@ function:
     completions: 1
   triggers:
     - type: postgres
-      connectionFromEnv: 'jdbc:postgresql://darts-modernisation-dev.postgres.database.azure.com:5432/pr-${CHANGE_ID}-darts'
+      connectionFromEnv: 'DARTS_API_DB_CONNECTION_STRING'
       query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
       targetQueryValue: "0.9"
