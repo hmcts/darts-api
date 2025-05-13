@@ -23,7 +23,8 @@ public enum SecurityRoleEnum {
     XHIBIT(11),
     CPP(12),
     DAR_PC(13),
-    MID_TIER(14);
+    MID_TIER(14),
+    MEDIA_IN_PERPETUITY(15);
 
     private final Integer id;
 
