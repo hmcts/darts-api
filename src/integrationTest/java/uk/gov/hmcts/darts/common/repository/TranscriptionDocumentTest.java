@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     private static final int GENERATION_CASES_PER_TRANSCRIPTION = 2;
 
     enum TestType {
-        MODENISED, LEGACY
+        MODERNISED, LEGACY
     }
 
     public List<TranscriptionDocumentEntity> dataSetup(TestType testType) {
@@ -48,7 +49,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                        boolean isManualTranscription,
                                                        boolean noCourtHouse,
                                                        boolean associatedWorkflow) {
-        if (TestType.MODENISED.equals(testType)) {
+        if (TestType.MODERNISED.equals(testType)) {
             generatedDocumentEntities = transcriptionStub
                 .generateTranscriptionEntities(count, hearingCount, caseCount, isManualTranscription, noCourtHouse, associatedWorkflow);
         } else {
@@ -71,7 +72,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             = transcriptionDocumentRepository.findTranscriptionMedia(null, null, null, null, null, null, null, null, false);
 
 
-        if (TestType.MODENISED.equals(testType)) {
+        if (TestType.MODERNISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
         } else {
@@ -91,7 +92,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             = transcriptionDocumentRepository.findTranscriptionMedia(null, null, null, null, null, null, null, null, true);
 
 
-        if (TestType.MODENISED.equals(testType)) {
+        if (TestType.MODERNISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(4, transcriptionDocumentResults.size());
         } else {
@@ -108,7 +109,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             = transcriptionDocumentRepository
             .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
                                         .getTranscription().getCourtCase().getCaseNumber(), null, null, null, null, null, null, null, true);
-        if (TestType.MODENISED.equals(testType)) {
+        if (TestType.MODERNISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
         } else {
@@ -125,7 +126,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
             = transcriptionDocumentRepository
             .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
                                         .getTranscription().getCourtCase().getCaseNumber(), null, null, null, null, null, null, null, true);
-        if (TestType.MODENISED.equals(testType)) {
+        if (TestType.MODERNISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
         } else {
@@ -396,7 +397,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     }
 
     private LocalDate getHearingDate(TestType testType, TranscriptionEntity transcription) {
-        if (TestType.MODENISED.equals(testType)) {
+        if (TestType.MODERNISED.equals(testType)) {
             return transcription.getHearing().getHearingDate();
         } else {
             return transcription.getHearingDate();
@@ -792,6 +793,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
     @EnumSource(TestType.class)
     void testFindTranscriptionDocumentWithAllQueryParameters(TestType testType) {
         dataSetup(testType);
+        generatedDocumentEntities.getFirst().getTranscription().setRequestedBy(null);
         UserAccountEntity createdBy = dartsDatabase.getUserAccountRepository()
             .findById(generatedDocumentEntities.getFirst().getTranscription().getCreatedById()).orElseThrow();
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -805,7 +807,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                     generatedDocumentEntities.getFirst().getTranscription().getTranscriptionWorkflowEntities()
                                         .getFirst().getWorkflowActor().getUserFullName(),
                                     true);
-        if (TestType.MODENISED.equals(testType)) {
+        if (TestType.MODERNISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
         } else {
@@ -813,6 +815,19 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         }
         Assertions.assertEquals(generatedDocumentEntities.getFirst().getId(),
                                 transcriptionDocumentResults.getFirst().transcriptionDocumentId());
+    }
+
+    @Test
+    void findTranscriptionMedia_shouldFindResult_whenTranscriptionRequestedByIsNull() {
+        dataSetup(TestType.LEGACY);
+        generatedDocumentEntities.forEach(generatedDocumentEntity -> {
+            generatedDocumentEntity.getTranscription().setRequestedBy(null);
+            dartsDatabase.save(generatedDocumentEntity.getTranscription());
+        });
+        List<TranscriptionDocumentResult> transcriptionDocumentResults
+            = transcriptionDocumentRepository
+            .findTranscriptionMedia(null, null, null, null, null, null, null, null, true);
+        Assertions.assertEquals(4, transcriptionDocumentResults.size());
     }
 
     private boolean assertResultEquals(TranscriptionDocumentResult asserted, TranscriptionDocumentResult expected) {
@@ -851,7 +866,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Integer hearingCaseId = null;
         Integer hearingId = null;
 
-        if (TestType.MODENISED.equals(testType) && transcriptionDocumentEntity.getTranscription().getHearing() != null) {
+        if (TestType.MODERNISED.equals(testType) && transcriptionDocumentEntity.getTranscription().getHearing() != null) {
             hearingCourthouseDisplayName = transcriptionDocumentEntity.getTranscription().getHearing().getCourtroom().getCourthouse().getDisplayName();
             hearingDate = transcriptionDocumentEntity.getTranscription().getHearing().getHearingDate();
             hearingId = transcriptionDocumentEntity.getTranscription().getHearing().getId();

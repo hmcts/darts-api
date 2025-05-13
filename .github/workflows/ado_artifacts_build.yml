@@ -1,10 +1,9 @@
 name: Publish to Azure Artifacts
 
 on:
-  workflow_dispatch:
   push:
-    tags:
-      - '*'
+    branches:
+      - master
 
 jobs:
   PublishToAzureArtifacts:

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -138,7 +137,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionNotifications transcriptionNotifications;
     private final DataManagementApi dataManagementApi;
 
-    private final CaseService caseService;
     private final HearingsService hearingsService;
     private final AuditApi auditApi;
 
@@ -294,7 +292,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
     void validateUpdateTranscription(TranscriptionEntity transcription,
-                                             UpdateTranscriptionRequest updateTranscription, boolean allowSelfApprovalOrRejection, boolean isAdmin) {
+                                     UpdateTranscriptionRequest updateTranscription, boolean allowSelfApprovalOrRejection, boolean isAdmin) {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
         UserAccountEntity transcriptionUser = userAccountRepository.getReferenceById(transcription.getCreatedById());
@@ -341,10 +339,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setHideRequestFromRequestor(false);
         transcription.setIsCurrent(true);
         transcription.setRequestedBy(userAccount);
-
-        if (nonNull(transcriptionRequestDetails.getCaseId())) {
-            transcription.addCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));
-        }
 
         if (nonNull(transcriptionRequestDetails.getHearingId())) {
             HearingEntity hearing = hearingsService.getHearingByIdWithValidation(transcriptionRequestDetails.getHearingId());
