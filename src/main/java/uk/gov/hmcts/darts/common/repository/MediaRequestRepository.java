@@ -38,9 +38,9 @@ public interface MediaRequestRepository extends
           LIMIT 1
           )
         
-        RETURNING *
+        RETURNING mer_id
         """, nativeQuery = true)
-    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing(int userModifiedId, List<Integer> mediaRequestIdsToIgnore);
+    Integer updateAndRetrieveMediaRequestToProcessing(int userModifiedId, List<Integer> mediaRequestIdsToIgnore);
 
     @Query("""
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
