@@ -67,7 +67,7 @@ class MediaRequestRepositoryTest extends PostgresIntegrationBase {
 
         mediaRequestService.getMediaRequestEntityById(request.getId());
         Integer mediaIdAfterUpdate = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(request.getLastModifiedById(),
-                                                                                                                 List.of(0));
+                                                                                                      List.of(0));
 
         MediaRequestEntity mediaRequestEntityAfterUpdate = mediaRequestRepository.findById(mediaIdAfterUpdate).orElseThrow();
         // prove an update happened on the date and time
