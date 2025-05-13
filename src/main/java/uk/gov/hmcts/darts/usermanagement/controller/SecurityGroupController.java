@@ -30,7 +30,7 @@ public class SecurityGroupController implements SecurityGroupApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<SecurityGroupWithIdAndRoleAndUsers> adminGetSecurityGroup(Integer securityGroupId) {
         return ResponseEntity.ok(securityGroupService.getSecurityGroup(securityGroupId));
     }
