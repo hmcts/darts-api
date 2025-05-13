@@ -28,7 +28,7 @@ jacoco {
 }
 
 group = 'com.github.hmcts'
-version = '0.0.1'
+version System.getenv('RELEASE_VERSION') ?: 'DEV-SNAPSHOT'
 
 compileJava {
   sourceCompatibility = '21'
