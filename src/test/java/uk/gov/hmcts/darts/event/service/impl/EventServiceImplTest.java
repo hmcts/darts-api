@@ -250,6 +250,7 @@ class EventServiceImplTest {
             PatchAdminEventByIdRequest request = new PatchAdminEventByIdRequest(true);
             EventEntity event = mock(EventEntity.class);
             doReturn(event).when(eventService).getEventByEveId(123L);
+            when(event.getEventId()).thenReturn(3);
             when(event.isCurrent()).thenReturn(true);
             DartsApiException exception = assertThrows(DartsApiException.class, () -> eventService.patchEventById(123L, request));
             assertThat(exception.getError()).isEqualTo(EventError.EVENT_ALREADY_CURRENT);
@@ -264,6 +265,7 @@ class EventServiceImplTest {
             EventEntity event = new EventEntity();
             event.setIsCurrent(false);
             event.setId(123L);
+            event.setEventId(3);
             doReturn(event).when(eventService).getEventByEveId(123L);
 
             CourtCaseEntity courtCase1 = new CourtCaseEntity();
