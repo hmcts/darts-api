@@ -1,8 +1,11 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
@@ -120,7 +123,6 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
 
     List<MediaEntity> findAllByChronicleId(String chronicleId);
 
-
     @Query("""
         SELECT distinct media
         FROM MediaEntity media
@@ -128,4 +130,19 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
         WHERE hearing.courtCase.id = :caseId
         """)
     List<MediaEntity> findByCaseIdWithMediaList(Integer caseId);
+    
+    @Query("""
+        SELECT new uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem(
+            med.id,
+            med.start,
+            med.end,
+            med.channel,
+            med.courtroom.name
+        )
+        FROM MediaEntity med
+        JOIN med.hearings hea
+        WHERE hea.courtCase.id = :caseId
+        AND med.isCurrent = true
+        """)
+    Page<AdminCaseAudioResponseItem> findByCaseIdAndIsCurrentTruePageable(Integer caseId, Pageable pageable);
 }

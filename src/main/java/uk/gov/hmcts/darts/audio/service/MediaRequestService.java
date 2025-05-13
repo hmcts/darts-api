@@ -21,7 +21,7 @@ import java.util.Optional;
 @SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
 public interface MediaRequestService {
 
-    Optional<MediaRequestEntity> retrieveMediaRequestForProcessing(List<Integer> mediaRequestIdsToIgnore);
+    Optional<Integer> retrieveMediaRequestForProcessing(List<Integer> mediaRequestIdsToIgnore);
 
     AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId);
 

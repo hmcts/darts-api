@@ -6,6 +6,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -13,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 
 import java.time.Duration;
@@ -28,9 +32,6 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
     HearingRepository hearingRepository;
-
-    @Autowired
-    CourtCaseStub caseStub;
 
     @Autowired
     MediaRepository mediaRepository;
@@ -418,5 +419,54 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         assertThat(mediaEntities.stream().map(MediaEntity::getId))
             .hasSize(1)
             .containsExactlyInAnyOrder(media2.getId());
+    }
+
+    @Test
+    void findByCaseIdAndIsCurrentTruePageable_ReturnsPaginatedList() {
+        // given
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        dartsPersistence.save(hearing1);
+
+        MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
+        media1.setChannel(1);
+        media1.setCourtroom(hearing1.getCourtroom());
+        media1.setIsCurrent(true);
+        dartsPersistence.save(media1);
+
+        MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
+        media2.setChannel(2);
+        media2.setCourtroom(hearing1.getCourtroom());
+        media2.setIsCurrent(true);
+        dartsPersistence.save(media2);
+
+        MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
+        media3.setChannel(3);
+        media3.setCourtroom(hearing1.getCourtroom());
+        media3.setIsCurrent(true);
+        dartsPersistence.save(media3);
+
+        hearing1.addMedia(media1);
+        hearing1.addMedia(media2);
+        hearing1.addMedia(media3);
+
+        hearingRepository.saveAll(List.of(hearing1));
+
+        Pageable sortedByChannelDesc =
+            PageRequest.of(0, 3, Sort.by("channel").descending());
+
+        // when
+        Page<AdminCaseAudioResponseItem> pages = mediaRepository.findByCaseIdAndIsCurrentTruePageable(hearing1.getCourtCase().getId(), sortedByChannelDesc);
+
+        // then
+        assertEquals(3, pages.getTotalElements());
+
+        var results = pages.stream().toList();
+        assertThat(results)
+            .extracting(AdminCaseAudioResponseItem::getId)
+            .containsExactly(media3.getId(), media2.getId(), media1.getId());
+
+        assertThat(results)
+            .extracting(AdminCaseAudioResponseItem::getChannel)
+            .containsExactly(3, 2, 1);
     }
 }
