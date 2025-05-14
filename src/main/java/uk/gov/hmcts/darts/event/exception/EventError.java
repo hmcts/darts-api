@@ -60,6 +60,11 @@ public enum EventError implements DartsApiError {
         EventErrorCode.EVENT_ALREADY_CURRENT.getValue(),
         HttpStatus.CONFLICT,
         EventTitleErrors.EVENT_ALREADY_CURRENT.toString()
+    ),
+    CAN_NOT_UPDATE_EVENT_ID_0(
+        EventErrorCode.CAN_NOT_UPDATE_EVENT_ID_0.getValue(),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        EventTitleErrors.CAN_NOT_UPDATE_EVENT_ID_0.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "EVENT";
