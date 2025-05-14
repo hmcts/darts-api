@@ -35,6 +35,8 @@ public class TestBase {
     protected TransactionalUtil transactionalUtil;
     @Autowired
     protected ObjectMapper objectMapper;
+    @Autowired
+    protected GivenBuilder givenBuilder;
 
     @Autowired
     @Qualifier("inMemoryCacheManager")
