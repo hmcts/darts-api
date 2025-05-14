@@ -240,8 +240,6 @@ function:
           alias: AAD_B2C_CLIENT_ID
         - name: AzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET
-        - name: app-insights-connection-string
-          alias: app-insights-connection-string
         - name: AzureAdB2CFuncTestROPCClientId
           alias: AAD_B2C_ROPC_CLIENT_ID
         - name: AzureAdB2CFuncTestROPCClientSecret
@@ -283,6 +281,7 @@ function:
     ARM_RPO_POLL_DURATION: 4h
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
+
   secrets:
     DARTS_API_DB_CONNECTION_STRING:
       secretRef: darts-api-function-values
