@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -501,9 +503,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertTrue(initialCaseRetentionEntity.getCreatedDateTime().isBefore(latestCaseRetentionEntity.getCreatedDateTime()));
 
         // only one event linked to the case
-        List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByCaseId(courtCaseEntity.getId());
-        assertEquals(1, eventsForHearing.size());
-        EventEntity latestEvent = eventsForHearing.getFirst();
+        Page<Event> eventsForHearing = dartsDatabase.getEventRepository().findAllByCaseIdPaginated(courtCaseEntity.getId(), null);
+        assertEquals(1, eventsForHearing.toList().size());
+        Event latestEvent = eventsForHearing.toList().getFirst();
 
         // only one case management retention entity, created with the latest event received
         List<CaseManagementRetentionEntity> caseManagementRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findAll();
