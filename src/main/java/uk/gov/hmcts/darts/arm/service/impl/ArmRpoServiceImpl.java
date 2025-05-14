@@ -142,7 +142,6 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                     externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
                 } else {
                     externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
-                    externalObjectDirectoryEntity.setInputUploadProcessedTs(null);
                 }
             }
         );

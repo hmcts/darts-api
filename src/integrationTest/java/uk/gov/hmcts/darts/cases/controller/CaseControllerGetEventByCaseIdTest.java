@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.IntStream.rangeClosed;
@@ -131,11 +132,15 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             eventEntityList1 = createHearingWithEvents(baseTime, 2, SECTION_4_1981_DB_ID); //1,2
             eventEntityList2 = createHearingWithEvents(baseTime.minusDays(1), 2, SECTION_4_1981_DB_ID);//4,5
             eventEntityList3 = createHearingWithEvents(baseTime.plusHours(1), 2, SECTION_11_1981_DB_ID);//6,7
-            eventEntityList4 = createHearingWithEvents(baseTime.minusDays(2), 2, SECTION_11_1981_DB_ID);//8,9
+            eventEntityList4 = createHearingWithEvents(baseTime.minusDays(2), 2, SECTION_11_1981_DB_ID, true);//8,9
             eventEntityList5 = createHearingWithEvents(baseTime.plusHours(2), 2, SECTION_39_1933_DB_ID);//10,11
         }
 
         private List<EventEntity> createHearingWithEvents(OffsetDateTime date, int numberOfEvents, int handlerId) {
+            return createHearingWithEvents(date, numberOfEvents, handlerId, false);
+        }
+
+        private List<EventEntity> createHearingWithEvents(OffsetDateTime date, int numberOfEvents, int handlerId, boolean includeVersion) {
             return transactionalUtil.executeInTransaction(() -> {
                 HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
                     SOME_CASE_NUMBER,
@@ -150,7 +155,19 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                     .map(eve -> dartsDatabase.addHandlerToEvent(eve, handlerId))
                     .toList();
 
+
+                if (includeVersion) {
+                    var eventVersion = dartsDatabase.getEventStub().createDefaultEvent();
+                    eventVersion.setEventText("some-event-text-" + date);
+                    eventVersion.setTimestamp(date);
+                    eventVersion.setIsCurrent(false);
+                    dartsDatabase.addHandlerToEvent(eventVersion, handlerId);
+                    eventEntityList = new ArrayList<>(eventEntityList);
+                    eventEntityList.add(eventVersion);
+                }
+
                 dartsDatabase.saveEventsForHearing(hearingEntity, eventEntityList);
+
                 return eventEntityList;
             });
         }
@@ -183,7 +200,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                       "total_items": 10,
                       "data": [
                         {
-                          "id": 11,
+                          "id": 12,
                           "hearing_id": 3,
                           "hearing_date": "2020-01-01",
                           "timestamp": "2020-01-01T14:02:00Z",
@@ -193,7 +210,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
                           "courtroom": "TESTCOURTROOM"
                         },
                         {
-                          "id": 10,
+                          "id": 11,
                           "hearing_id": 3,
                           "hearing_date": "2020-01-01",
                           "timestamp": "2020-01-01T14:01:00Z",
@@ -220,7 +237,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         }
 
         @Test
-        void casesGetEvents_usingPaginatedCriteria_WithCustomOrderHearingDateAsc_shouldReturnPaginatedResultsUsingCustomOrder_10Resultslimit3Page1()
+        void casesGetEvents_usingPaginatedCriteria_WithCustomOrderHearingDateAsc_shouldReturnPaginatedResults_10Resultslimit3Page1_andExcludeIsCurrentFalse()
             throws Exception {
             MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
                 .queryParam("page_number", "1")
@@ -232,14 +249,18 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
 
             PaginatedList<Event> paginatedList = paginationTestSupport.getPaginatedList(mvcResult, Event.class);
             paginationTestSupport.assertPaginationDetails(paginatedList, 1, 3, 4, 10);
-            assertThat(
-                paginatedList.getData()
-                    .stream().map(Event::getId)
-                    .toList())
+            var result = paginatedList.getData()
+                .stream().map(Event::getId)
+                .toList();
+
+            assertThat(result)
                 .contains(
                     eventEntityList4.get(0).getId(),
                     eventEntityList4.get(1).getId(),
                     eventEntityList2.get(1).getId());
+            assertThat(result)
+                .doesNotContain(
+                    eventEntityList4.get(2).getId());
         }
 
         @Test
