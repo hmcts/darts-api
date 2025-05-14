@@ -177,9 +177,8 @@ public class AuthorisationImpl implements Authorisation {
 
     private void checkMediaRequestIsRequestedByUser(MediaRequestEntity mediaRequest) {
         UserAccountEntity userAccount = userIdentity.getUserAccount();
-        if (!mediaRequest.getRequestor().getId().equals(userAccount.getId())) {
+        if (!mediaRequest.getCurrentOwner().getId().equals(userAccount.getId())) {
             throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
         }
     }
-
 }
