@@ -9,10 +9,12 @@ import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity_;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.mapper.EventHandlerMapper;
 import uk.gov.hmcts.darts.event.model.EventMapping;
+import uk.gov.hmcts.darts.event.service.EventHandler;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
 
@@ -39,6 +41,7 @@ public class EventMappingServiceImpl implements EventMappingService {
     private static final String NO_HANDLER_WITH_NAME_IN_DB_MESSAGE = "No event handler with name %s could be found in the database.";
     // {0,number,#} is to format numbers without commas
     private static final String MAPPING_IS_INACTIVE_MESSAGE = "Event handler mapping {0,number,#} cannot be deleted because it is inactive.";
+    private static final String MAPPING_IS_INACTIVE_MESSAGE_UPDATE = "Event handler mapping %s cannot be updated because it is inactive.";
     private static final String MAPPING_IN_USE_MESSAGE = "Event handler mapping {0} already has processed events, so cannot be deleted.";
 
     private final EventRepository eventRepository;
@@ -52,35 +55,50 @@ public class EventMappingServiceImpl implements EventMappingService {
     @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     public EventMapping postEventMapping(EventMapping eventMapping, Boolean isRevision) {
         List<EventHandlerEntity> activeMappings = getActiveMappingsForTypeAndSubtype(eventMapping.getType(), eventMapping.getSubType());
-        if (isRevision && !doesActiveEventMappingExist(activeMappings)) {
-            throw new DartsApiException(
-                EVENT_MAPPING_DOES_NOT_EXIST_IN_DB,
-                format(HANDLER_DOES_NOT_EXIST_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
-            );
+
+
+        if (isRevision) {
+            if (!doesActiveEventMappingExist(activeMappings)) {
+                throw new DartsApiException(
+                    EVENT_MAPPING_DOES_NOT_EXIST_IN_DB,
+                    format(HANDLER_DOES_NOT_EXIST_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
+                );
+            }
+
+            Optional<EventHandlerEntity> mappingBeingUpdated = activeMappings.stream()
+                .filter(eventHandlerEntity -> eventHandlerEntity.getId().equals(eventMapping.getId()))
+                .findAny();
+
+            if (mappingBeingUpdated.isEmpty()) {
+                throw new DartsApiException(
+                    EVENT_HANDLER_MAPPING_INACTIVE,
+                    format(MAPPING_IS_INACTIVE_MESSAGE_UPDATE, eventMapping.getId())
+                );
+            }
         }
         if (!isRevision && doesActiveEventMappingExist(activeMappings)) {
             throw new DartsApiException(
                 EVENT_MAPPING_DUPLICATE_IN_DB,
                 format(HANDLER_ALREADY_EXISTS_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
             );
-        } else {
-            var eventHandlerEntity = eventHandlerMapper.mapFromEventMappingAndMakeActive(eventMapping);
-
-            if (!doesEventHandlerNameExist(eventHandlerEntity.getHandler())) {
-                throw new DartsApiException(
-                    EVENT_HANDLER_NAME_DOES_NOT_EXIST,
-                    format(NO_HANDLER_WITH_NAME_IN_DB_MESSAGE, eventHandlerEntity.getHandler())
-                );
-            }
-            if (isRevision) {
-                updatePreviousVersionsToInactive(activeMappings);
-            }
-
-            var createdEventHandler = eventHandlerRepository.saveAndFlush(eventHandlerEntity);
-            auditApi.record(AuditActivity.ADDING_EVENT_MAPPING);
-
-            return eventHandlerMapper.mapToEventMappingResponse(createdEventHandler);
         }
+
+        var eventHandlerEntity = eventHandlerMapper.mapFromEventMappingAndMakeActive(eventMapping);
+
+        if (!doesEventHandlerNameExist(eventHandlerEntity.getHandler())) {
+            throw new DartsApiException(
+                EVENT_HANDLER_NAME_DOES_NOT_EXIST,
+                format(NO_HANDLER_WITH_NAME_IN_DB_MESSAGE, eventHandlerEntity.getHandler())
+            );
+        }
+        if (isRevision) {
+            updatePreviousVersionsToInactive(activeMappings);
+        }
+
+        var createdEventHandler = eventHandlerRepository.saveAndFlush(eventHandlerEntity);
+        auditApi.record(AuditActivity.ADDING_EVENT_MAPPING);
+
+        return eventHandlerMapper.mapToEventMappingResponse(createdEventHandler);
     }
 
     private void updatePreviousVersionsToInactive(List<EventHandlerEntity> activeMappings) {
