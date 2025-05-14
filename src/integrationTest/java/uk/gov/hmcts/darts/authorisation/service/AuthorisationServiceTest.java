@@ -177,6 +177,8 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         Set<String> judgePermissions = judgeRole.getPermissions();
         assertEquals(0, judgePermissions.size());
+
+        assertEquals(TEST_JUDGE_EMAIL, judgeUserState.getEmailAddress());
     }
 
     @Test
@@ -199,6 +201,8 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         Set<String> judgePermissions = judgeRole.getPermissions();
         assertEquals(0, judgePermissions.size());
+
+        assertEquals(TEST_JUDGE_GLOBAL_EMAIL, judgeUserState.getEmailAddress());
     }
 
     @Test
@@ -219,6 +223,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertEquals(APPROVER.getId(), requesterRole.getRoleId());
         Set<String> requesterPermissions = requesterRole.getPermissions();
         assertEquals(0, requesterPermissions.size());
+        assertEquals("test.bristol@example.com", userState.getEmailAddress());
     }
 
     @Test
@@ -228,6 +233,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertTrue(userState.getUserId() > 0);
         assertEquals("Test New", userState.getUserName());
         assertEquals(0, userState.getRoles().size());
+        assertEquals(TEST_NEW_EMAIL, userState.getEmailAddress());
     }
 
     @Test
@@ -237,6 +243,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertTrue(userState.getUserId() > 0);
         assertEquals("Test Multiple User 1", userState.getUserName());
         assertEquals(0, userState.getRoles().size());
+        assertEquals(TEST_MULTIPLE_USER_EMAIL, TEST_MULTIPLE_USER_EMAIL);
     }
 
     @Test
