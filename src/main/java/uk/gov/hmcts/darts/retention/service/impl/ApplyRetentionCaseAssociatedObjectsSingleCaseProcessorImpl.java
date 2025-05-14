@@ -95,7 +95,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
             mediaLinkedCaseRepository.findByMedia(media).stream()
                 .map(MediaLinkedCaseEntity::getCourtCase)
                 .filter(Objects::nonNull)
-                .forEach(courtCaseEntity -> cases.add(courtCaseEntity));
+                .forEach(cases::add);
 
             var allCases = io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
             if (allClosed(allCases)) {
