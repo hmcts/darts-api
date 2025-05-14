@@ -1051,6 +1051,7 @@ components:
         - "EVENT_108"
         - "EVENT_109"
         - "EVENT_110"
+        - "EVENT_111"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -1061,7 +1062,8 @@ components:
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
         EVENT_ID_NOT_FOUND,
-        EVENT_ALREADY_CURRENT
+        EVENT_ALREADY_CURRENT,
+        CAN_NOT_UPDATE_EVENT_ID_0
       ]
 
     EventTitleErrors:
@@ -1077,6 +1079,7 @@ components:
         - "The search resulted in too many results"
         - "Event id does not exist"
         - "Event already current"
+        - "Cannot update event id 0"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -1087,5 +1090,6 @@ components:
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
         EVENT_ID_NOT_FOUND,
-        EVENT_ALREADY_CURRENT
+        EVENT_ALREADY_CURRENT,
+        CAN_NOT_UPDATE_EVENT_ID_0
       ]

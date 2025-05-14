@@ -30,6 +30,11 @@ public enum CommonApiError implements DartsApiError {
         HttpStatus.UNPROCESSABLE_ENTITY,
         CommonTitleErrors.INVALID_REQUEST.getValue()
     ),
+    BAD_REQUEST(
+        CommonErrorCode.INVALID_REQUEST.getValue(),
+        HttpStatus.BAD_REQUEST,
+        CommonTitleErrors.INVALID_REQUEST.getValue()
+    ),
     INTERNAL_SERVER_ERROR(
         CommonErrorCode.INTERNAL_SERVER_ERROR.getValue(),
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -107,9 +107,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public void patchEventById(Long eveId, PatchAdminEventByIdRequest patchAdminEventByIdRequest) {
         if (!Boolean.TRUE.equals(patchAdminEventByIdRequest.getIsCurrent())) {
-            throw new DartsApiException(CommonApiError.INVALID_REQUEST, "is_current must be set to true");
+            throw new DartsApiException(CommonApiError.BAD_REQUEST, "is_current must be set to true");
         }
         EventEntity eventEntityToUpdate = getEventByEveId(eveId);
+        if (eventEntityToUpdate.getEventId() == 0) {
+            throw new DartsApiException(EventError.CAN_NOT_UPDATE_EVENT_ID_0);
+        }
         if (eventEntityToUpdate.isCurrent()) {
             throw new DartsApiException(EventError.EVENT_ALREADY_CURRENT);
         }
