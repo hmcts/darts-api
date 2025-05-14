@@ -293,6 +293,6 @@ function:
     completions: 1
   triggers:
     - type: postgres
-      connectionFromEnv: 'DARTS_API_DB_CONNECTION_STRING'
+      connectionFromEnv: 'DARTS_API_DB_CONNECTION_STRING_DEV'
       query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
       targetQueryValue: "0.9"
