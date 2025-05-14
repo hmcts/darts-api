@@ -6,6 +6,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -243,6 +244,162 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                    "All results should have either INBOUND or UNSTRUCTURED location type");
     }
 
+    @Test
+    void findAllByStatusAndInputUploadProcessedTsBetweenAndLimit_ReturnsResults()
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        OffsetDateTime pastCurrentDateTime = now.minusHours(30);
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 20, Optional.of(pastCurrentDateTime));
+
+        OffsetDateTime ingestionStartDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(30);
+        externalObjectDirectoryEntities.forEach(eod -> {
+            if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
+                // within the time range
+                eod.setCreatedDateTime(ingestionStartDateTime);
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
+            } else if (eod.getId() % 3 == 0) {
+                // before the time range
+                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
+            } else {
+                // after the time range
+                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
+                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
+            }
+        });
+        dartsPersistence.saveAll(externalObjectDirectoryEntities);
+
+        // Verify test data setup
+        List<ExternalObjectDirectoryEntity> allEntities = externalObjectDirectoryRepository.findAll();
+        assertEquals(20, allEntities.size(), "Test data setup failed: Expected 20 entities in the database");
+
+        // when
+        ingestionEndDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(24);
+        var results = externalObjectDirectoryRepository.findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
+            EodHelper.armRpoPendingStatus(), ingestionStartDateTime, ingestionEndDateTime,
+            Limit.of(20));
+
+        // then
+        assertEquals(7, results.size(), "Query returned unexpected number of results");
+        results.forEach(eod -> {
+            assertTrue(eod.getInputUploadProcessedTs().isAfter(ingestionStartDateTime));
+            assertTrue(eod.getInputUploadProcessedTs().isBefore(ingestionEndDateTime));
+        });
+    }
+
+    @Test
+    void findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit_Success() throws Exception {
+        // given
+        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
+        ExternalLocationTypeEntity locationType = EodHelper.armLocation();
+        OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
+        OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusDays(2);
+
+        externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime1));
+
+        externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime2));
+
+        OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(10);
+        OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(1);
+
+        // when
+        List<Long> result = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
+            status, startDateTime, endDateTime, locationType, Limit.of(10)
+        );
+
+        // then
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit_NoResults() {
+        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
+        ExternalLocationTypeEntity locationType = EodHelper.armLocation();
+        OffsetDateTime newStartDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(2);
+        OffsetDateTime newEndDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(1);
+
+        List<Long> result = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
+            status, newStartDateTime, newEndDateTime, locationType, Limit.of(10)
+        );
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findByStatusAndInputUploadProcessedTsWithPaging_ReturnsResults() throws Exception {
+        // Given
+        OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
+        OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(20);
+
+        List<ExternalObjectDirectoryEntity> matchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 11, Optional.of(pastCurrentDateTime1));
+        matchingEods.forEach(eod -> {
+            eod.setInputUploadProcessedTs(pastCurrentDateTime1);
+        });
+        dartsPersistence.saveAll(matchingEods);
+        assertEquals(11, matchingEods.size());
+
+        List<ExternalObjectDirectoryEntity> nonMatchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 4, Optional.of(pastCurrentDateTime2));
+        nonMatchingEods.forEach(eod -> {
+            eod.setInputUploadProcessedTs(pastCurrentDateTime2);
+        });
+        dartsPersistence.saveAll(nonMatchingEods);
+        assertEquals(4, nonMatchingEods.size());
+
+        OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(10);
+        OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(1);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
+
+
+        // When
+        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
+            status, startDateTime, endDateTime, pageable
+        );
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(10);
+        assertThat(result.getTotalElements()).isEqualTo(11);
+        result.getContent().forEach(entity -> {
+            assertThat(entity.getStatus().getId()).isEqualTo(status.getId());
+            assertThat(entity.getInputUploadProcessedTs()).isBetween(startDateTime, endDateTime);
+        });
+    }
+
+    @Transactional
+    @Test
+    void updateEodStatusAndTransferAttemptsWhereIdIn_UpdatesValues() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // Given
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 10, Optional.empty());
+        dartsPersistence.saveAll(externalObjectDirectoryEntities);
+
+        List<Long> idsToUpdate = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
+
+        // When
+        externalObjectDirectoryRepository.updateEodStatusAndTransferAttemptsWhereIdIn(
+            EodHelper.storedStatus(), 0, 0, idsToUpdate);
+
+        // Then
+        List<ExternalObjectDirectoryEntity> updatedEntities = externalObjectDirectoryRepository.findAllById(idsToUpdate);
+        assertThat(updatedEntities).hasSize(idsToUpdate.size());
+        updatedEntities.forEach(entity -> {
+            assertThat(entity.getStatus().getId()).isEqualTo(EodHelper.storedStatus().getId());
+            assertThat(entity.getTransferAttempts()).isEqualTo(0);
+            assertThat(entity.getInputUploadProcessedTs()).isNull();
+        });
+
+    }
+
     private void assertExpectedResults(List<Long> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
         List<Long> matchesEntity = new ArrayList<>(
             actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
@@ -379,136 +536,5 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         // assert that the test has inserted the data into the database
         assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
-    }
-
-    @Test
-    void findAllByStatusAndInputUploadProcessedTsBetweenAndLimit_ReturnsResults()
-        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        // given
-        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
-        OffsetDateTime pastCurrentDateTime = now.minusHours(30);
-
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 20, Optional.of(pastCurrentDateTime));
-
-        OffsetDateTime ingestionStartDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(30);
-        externalObjectDirectoryEntities.forEach(eod -> {
-            if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
-                // within the time range
-                eod.setCreatedDateTime(ingestionStartDateTime);
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
-            } else if (eod.getId() % 3 == 0) {
-                // before the time range
-                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
-            } else {
-                // after the time range
-                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
-            }
-        });
-        dartsPersistence.saveAll(externalObjectDirectoryEntities);
-
-        // Verify test data setup
-        List<ExternalObjectDirectoryEntity> allEntities = externalObjectDirectoryRepository.findAll();
-        assertEquals(20, allEntities.size(), "Test data setup failed: Expected 20 entities in the database");
-
-        // when
-        ingestionEndDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(24);
-        var results = externalObjectDirectoryRepository.findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
-            EodHelper.armRpoPendingStatus(), ingestionStartDateTime, ingestionEndDateTime,
-            Limit.of(20));
-
-        // then
-        assertEquals(7, results.size(), "Query returned unexpected number of results");
-        results.forEach(eod -> {
-            assertTrue(eod.getInputUploadProcessedTs().isAfter(ingestionStartDateTime));
-            assertTrue(eod.getInputUploadProcessedTs().isBefore(ingestionEndDateTime));
-        });
-    }
-
-    @Test
-    void findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit_Success() throws Exception {
-        // given
-        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
-        ExternalLocationTypeEntity locationType = EodHelper.armLocation();
-        OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
-        OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusDays(2);
-
-        externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime1));
-
-        externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 2, Optional.of(pastCurrentDateTime2));
-
-        OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(10);
-        OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(1);
-
-        // when
-        List<Integer> result = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
-            status, startDateTime, endDateTime, locationType, Limit.of(10)
-        );
-
-        // then
-        assertThat(result).hasSize(2);
-    }
-
-    @Test
-    void findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit_NoResults() {
-        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
-        ExternalLocationTypeEntity locationType = EodHelper.armLocation();
-        OffsetDateTime newStartDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(2);
-        OffsetDateTime newEndDateTime = currentTimeHelper.currentOffsetDateTime().minusDays(1);
-
-        List<Integer> result = externalObjectDirectoryRepository.findIdsByStatusAndLastModifiedBetweenAndLocationAndLimit(
-            status, newStartDateTime, newEndDateTime, locationType, Limit.of(10)
-        );
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void findByStatusAndInputUploadProcessedTsWithPaging_ReturnsResults() throws Exception {
-        // Given
-        OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
-        OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(20);
-
-        List<ExternalObjectDirectoryEntity> matchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 11, Optional.of(pastCurrentDateTime1));
-        matchingEods.forEach(eod -> {
-            eod.setInputUploadProcessedTs(pastCurrentDateTime1);
-        });
-        dartsPersistence.saveAll(matchingEods);
-        assertEquals(11, matchingEods.size());
-
-        List<ExternalObjectDirectoryEntity> nonMatchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 4, Optional.of(pastCurrentDateTime2));
-        nonMatchingEods.forEach(eod -> {
-            eod.setInputUploadProcessedTs(pastCurrentDateTime2);
-        });
-        dartsPersistence.saveAll(nonMatchingEods);
-        assertEquals(4, nonMatchingEods.size());
-
-        OffsetDateTime startDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(10);
-        OffsetDateTime endDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(1);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
-
-
-        // When
-        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
-            status, startDateTime, endDateTime, pageable
-        );
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(10);
-        assertThat(result.getTotalElements()).isEqualTo(11);
-        result.getContent().forEach(entity -> {
-            assertThat(entity.getStatus().getId()).isEqualTo(status.getId());
-            assertThat(entity.getInputUploadProcessedTs()).isBetween(startDateTime, endDateTime);
-        });
     }
 }

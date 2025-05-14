@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
@@ -230,7 +230,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         assertEquals(1, foundMediaList6.size());
         ExternalObjectDirectoryEntity foundMedia6 = foundMediaList6.getFirst();
         assertEquals(ARM_REPLAY.getId(), foundMedia6.getStatus().getId());
-        assertNull(foundMedia6.getInputUploadProcessedTs());
+        assertNotNull(foundMedia6.getInputUploadProcessedTs());
 
     }
 
@@ -332,7 +332,7 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(ARM_REPLAY.getId(), foundMedia.getStatus().getId());
-        assertNull(foundMedia.getInputUploadProcessedTs());
+        assertNotNull(foundMedia.getInputUploadProcessedTs());
     }
 
     @Test

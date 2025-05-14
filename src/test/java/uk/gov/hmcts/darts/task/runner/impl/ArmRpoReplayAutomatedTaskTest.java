@@ -92,7 +92,7 @@ class ArmRpoReplayAutomatedTaskTest {
             endTs,
             EodHelper.armLocation(),
             Limit.of(0)
-        )).thenReturn(List.of(22, 14));
+        )).thenReturn(List.of(22L, 14L));
 
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
         int userId = 123;
@@ -111,7 +111,7 @@ class ArmRpoReplayAutomatedTaskTest {
             EodHelper.failedArmRawDataStatus(),
             0,
             userId,
-            List.of(22, 14)
+            List.of(22L, 14L)
         );
     }
 }
