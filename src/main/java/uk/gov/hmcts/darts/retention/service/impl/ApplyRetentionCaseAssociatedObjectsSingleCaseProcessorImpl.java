@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
@@ -90,7 +92,11 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var allMedia = io.vavr.collection.List.ofAll(mediaEntities).distinctBy(MediaEntity::getId).toJavaList();
         for (var media : allMedia) {
             List<CourtCaseEntity> cases = media.associatedCourtCases();
-            mediaLinkedCaseRepository.findByMedia(media).forEach(mediaLinkedCase -> cases.add(mediaLinkedCase.getCourtCase()));
+            mediaLinkedCaseRepository.findByMedia(media).stream()
+                .map(MediaLinkedCaseEntity::getCourtCase)
+                .filter(Objects::nonNull)
+                .forEach(courtCaseEntity -> cases.add(courtCaseEntity));
+
             var allCases = io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
             if (allClosed(allCases)) {
                 setLongestRetentionDateForMedia(media, allCases);
