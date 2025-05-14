@@ -218,10 +218,11 @@ function:
   scalingStrategy: accurate
   global:
     enableKeyVaults: true
-    environment: dev
   keyVaults:
     "darts":
       secrets:
+        - name: api-POSTGRES-CONNECTION-STRING-dev
+          alias: DARTS_API_DB_CONNECTION_STRING_DEV
         - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
         - name: api-POSTGRES-USER
@@ -264,7 +265,6 @@ function:
     DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
     DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"
     DARTS_API_DB_USERNAME: "hmcts"
-    DARTS_API_DB_CONNECTION_STRING: 'jdbc:postgresql://darts-modernisation-dev.postgres.database.azure.com:5432/pr-${CHANGE_ID}-darts'
     ATS_MODE: true
     API_MODE: false
     NOTIFICATION_SCHEDULER_ENABLED: false
