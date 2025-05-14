@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,9 @@ import java.util.Optional;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -265,16 +266,27 @@ class AdminTranscriptionServiceTest {
     void testTranscriptionDocumentHide() {
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
         request.setIsHidden(true);
-        setupTestTranscriptionDocumentHide(request);
+        assertTestTranscriptionDocumentHide(request, false);
     }
 
     @Test
     void testTranscriptionDocumentHideDefaultIsHidden() {
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
-        setupTestTranscriptionDocumentHide(request);
+        assertTestTranscriptionDocumentHide(request, false);
     }
 
-    void setupTestTranscriptionDocumentHide(TranscriptionDocumentHideRequest request) {
+
+    @Test
+    void hideOrShowTranscriptionDocumentById_shouldSetMarkedForDeletion_whenObjectHiddenReasonIsMarkedForDeletion() {
+        assertTestTranscriptionDocumentHide(new TranscriptionDocumentHideRequest(), true);
+    }
+
+    @Test
+    void hideOrShowTranscriptionDocumentById_shouldNotSetMarkedForDeletion_whenObjectHiddenReasonNotIsMarkedForDeletion() {
+        assertTestTranscriptionDocumentHide(new TranscriptionDocumentHideRequest(), false);
+    }
+
+    void assertTestTranscriptionDocumentHide(TranscriptionDocumentHideRequest request, boolean isMarkedForDeleton) {
         Long hideOrShowTranscriptionDocument = 343L;
         Integer reasonId = 555;
 
@@ -297,6 +309,7 @@ class AdminTranscriptionServiceTest {
         when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
         ObjectHiddenReasonEntity objectHiddenReasonEntity = new ObjectHiddenReasonEntity();
+        objectHiddenReasonEntity.setMarkedForDeletion(isMarkedForDeleton);
         TranscriptionDocumentHideResponse expectedResponse = new TranscriptionDocumentHideResponse();
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(objectHiddenReasonEntity));
@@ -311,15 +324,24 @@ class AdminTranscriptionServiceTest {
 
 
         // make the assertion
-        assertTrue(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
+        TranscriptionDocumentEntity transcriptionDocument = transcriptionDocumentEntityArgumentCaptor.getValue();
+        ObjectAdminActionEntity objectAdminAction = objectAdminActionEntityArgumentCaptor.getValue();
+
+        assertTrue(transcriptionDocument.isHidden());
         assertEquals(expectedResponse, actualResponse);
-        assertEquals(request.getAdminAction().getComments(), objectAdminActionEntityArgumentCaptor.getValue().getComments());
-        assertEquals(request.getAdminAction().getReasonId(), reasonId);
-        Assertions.assertFalse(objectAdminActionEntityArgumentCaptor.getValue().isMarkedForManualDeletion());
-        assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenBy());
-        assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenDateTime());
-        assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelBy());
-        assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelDateTime());
+        assertEquals(objectAdminAction.getComments(), request.getAdminAction().getComments());
+        assertEquals(reasonId, request.getAdminAction().getReasonId());
+        assertNotNull(objectAdminAction.getHiddenBy());
+        assertNotNull(objectAdminAction.getHiddenDateTime());
+        if (isMarkedForDeleton) {
+            assertTrue(objectAdminAction.isMarkedForManualDeletion());
+            assertNotNull(objectAdminAction.getMarkedForManualDelBy());
+            assertNotNull(objectAdminAction.getMarkedForManualDelDateTime());
+        } else {
+            assertNull(objectAdminAction.getMarkedForManualDelBy());
+            assertNull(objectAdminAction.getMarkedForManualDelDateTime());
+            assertFalse(objectAdminAction.isMarkedForManualDeletion());
+        }
         verify(auditApi).record(HIDE_TRANSCRIPTION);
     }
 
@@ -365,7 +387,7 @@ class AdminTranscriptionServiceTest {
             = adminTranscriptionService.hideOrShowTranscriptionDocumentById(hideOrShowTranscriptionDocument, request);
 
         // make the assertion
-        Assertions.assertFalse(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
+        assertFalse(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
         assertEquals(expectedResponse, actualResponse);
         verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId);
         verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId1);
