@@ -287,68 +287,6 @@ function:
       secretRef: darts-api-function-values
       key: DARTS_API_DB_CONNECTION_STRING
       disabled: true
-
-
-    GOVUK_NOTIFY_API_KEY:
-      secretRef: GovukNotifyApiKey
-      key: GOVUK_NOTIFY_API_KEY
-    DARTS_API_DB_USERNAME:
-      secretRef: api-POSTGRES-USER
-      key: DARTS_API_DB_USERNAME
-    DARTS_API_DB_PASSWORD:
-      secretRef: api-POSTGRES-PASS
-      key: DARTS_API_DB_PASSWORD
-    DARTS_API_DB_HOST:
-      secretRef: api-POSTGRES-HOST
-      key: DARTS_API_DB_HOST
-    DARTS_API_DB_NAME:
-      secretRef: api-POSTGRES-DATABASE
-      key: DARTS_API_DB_NAME
-    DARTS_API_DB_SCHEMA:
-      secretRef: api-POSTGRES-SCHEMA
-      key: DARTS_API_DB_SCHEMA
-    AAD_B2C_TENANT_ID:
-      secretRef: AzureAdB2CTenantId
-      key: AAD_B2C_TENANT_ID
-    AAD_B2C_CLIENT_ID:
-      secretRef: AzureAdB2CClientId
-      key: AAD_B2C_CLIENT_ID
-    AAD_B2C_CLIENT_SECRET:
-      secretRef: AzureAdB2CClientSecret
-      key: AAD_B2C_CLIENT_SECRET
-    app-insights-connection-string:
-      secretRef: app-insights-connection-string
-      key: app-insights-connection-string
-    AAD_B2C_ROPC_CLIENT_ID:
-      secretRef: AzureAdB2CFuncTestROPCClientId
-      key: AAD_B2C_ROPC_CLIENT_ID
-    AAD_B2C_ROPC_CLIENT_SECRET:
-      secretRef: AzureAdB2CFuncTestROPCClientSecret
-      key: AAD_B2C_ROPC_CLIENT_SECRET
-    AZURE_STORAGE_CONNECTION_STRING:
-      secretRef: AzureStorageConnectionString
-      key: AZURE_STORAGE_CONNECTION_STRING
-    DARTS_API_DB_CONNECTION_STRING:
-      secretRef: api-POSTGRES-CONNECTION-STRING
-      key: DARTS_API_DB_CONNECTION_STRING
-    AAD_TENANT_ID:
-      secretRef: AzureADTenantId
-      key: AAD_TENANT_ID
-    AAD_CLIENT_ID:
-      secretRef: AzureADClientId
-      key: AAD_CLIENT_ID
-    AAD_CLIENT_SECRET:
-      secretRef: AzureADClientSecret
-      key: AAD_CLIENT_SECRET
-    AAD_TENANT_ID_JUSTICE:
-      secretRef: AzureADTenantIdJustice
-      key: AAD_TENANT_ID_JUSTICE
-    AAD_CLIENT_ID_JUSTICE:
-      secretRef: AzureADClientIdJustice
-      key: AAD_CLIENT_ID_JUSTICE
-    AAD_CLIENT_SECRET_JUSTICE:
-      secretRef: AzureADClientSecretJustice
-      key: AAD_CLIENT_SECRET_JUSTICE
   job:
     activeDeadlineSeconds: 300
     parallelism: 1
