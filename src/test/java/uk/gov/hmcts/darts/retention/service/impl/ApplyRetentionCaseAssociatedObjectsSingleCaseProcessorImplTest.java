@@ -282,8 +282,10 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         when(mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaC1));
 
         var mediaC1LinkedToCase1 = createMediaLinkedCase(mediaC1, case5PerfectlyClosed);
-
-        when(mediaLinkedCaseRepository.findByMedia(mediaA1)).thenReturn(List.of(mediaC1LinkedToCase1));
+        //Adding mediaLinkedWithNull case (refering legacy data that has courtroom/casenumber but could not be linked to a case correctly)
+        //Previously this would cause a nullpointer this should not happen anymore
+        var mediaLinkedToNullCase = createMediaLinkedCase(mediaC1, null);
+        when(mediaLinkedCaseRepository.findByMedia(mediaA1)).thenReturn(List.of(mediaC1LinkedToCase1, mediaLinkedToNullCase));
 
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case2PerfectlyClosed)).thenReturn(Optional.of(caseRetentionB1));
