@@ -64,6 +64,13 @@ public class MediaStub {
                                                      courtroomStub, courthouseName, courtroomName, startTime, endTime, channel);
     }
 
+    public MediaEntity createMediaEntity(String courthouseName, String courtroomName,
+                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel, boolean isCurrent) {
+        return mediaStubComposable.createMediaEntity(courthouseStubComposable,
+                                                     courtroomStub, courthouseName, courtroomName, startTime, endTime, channel, isCurrent);
+    }
+
+
     @Transactional
     public List<MediaEntity> createAndSaveSomeMedias() {
         return List.of(
