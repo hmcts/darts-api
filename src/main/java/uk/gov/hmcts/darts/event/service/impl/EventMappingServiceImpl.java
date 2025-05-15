@@ -62,17 +62,17 @@ public class EventMappingServiceImpl implements EventMappingService {
                     format(HANDLER_DOES_NOT_EXIST_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
                 );
             }
-            if (eventMapping.getId() != null) {
-                Optional<EventHandlerEntity> mappingBeingUpdated = activeMappings.stream()
-                    .filter(eventHandlerEntity -> eventHandlerEntity.getId().equals(eventMapping.getId()))
-                    .findAny();
+            //Skip the check for inactive mappings if the event handler id is null as we can not vierfy which mapping is inactive
+            if (eventMapping.getId() != null
+                //Check if the event handler id is not returned it means it is inactive
+                && activeMappings.stream()
+                .filter(eventHandlerEntity -> eventHandlerEntity.getId().equals(eventMapping.getId()))
+                .findAny().isEmpty()) {
 
-                if (mappingBeingUpdated.isEmpty()) {
-                    throw new DartsApiException(
-                        EVENT_HANDLER_MAPPING_INACTIVE,
-                        format(MAPPING_IS_INACTIVE_MESSAGE_UPDATE, eventMapping.getId())
-                    );
-                }
+                throw new DartsApiException(
+                    EVENT_HANDLER_MAPPING_INACTIVE,
+                    format(MAPPING_IS_INACTIVE_MESSAGE_UPDATE, eventMapping.getId())
+                );
             }
         }
         if (!isRevision && doesActiveEventMappingExist(activeMappings)) {
