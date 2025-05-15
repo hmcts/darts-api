@@ -50,10 +50,11 @@ public class EventMappingServiceImpl implements EventMappingService {
     private final AuditApi auditApi;
 
     @Override
-    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
     public EventMapping postEventMapping(EventMapping eventMapping, Boolean isRevision) {
         List<EventHandlerEntity> activeMappings = getActiveMappingsForTypeAndSubtype(eventMapping.getType(), eventMapping.getSubType());
 
+        var eventHandlerEntity = eventHandlerMapper.mapFromEventMappingAndMakeActive(eventMapping);
+        validateEventHandlerExists(eventHandlerEntity.getHandler());
 
         if (isRevision) {
             if (!doesActiveEventMappingExist(activeMappings)) {
@@ -66,7 +67,7 @@ public class EventMappingServiceImpl implements EventMappingService {
             if (eventMapping.getId() != null
                 //Check if the event handler id is not returned it means it is inactive
                 && activeMappings.stream()
-                .filter(eventHandlerEntity -> eventHandlerEntity.getId().equals(eventMapping.getId()))
+                .filter(eventHandler -> eventHandler.getId().equals(eventMapping.getId()))
                 .findAny().isEmpty()) {
 
                 throw new DartsApiException(
@@ -74,6 +75,7 @@ public class EventMappingServiceImpl implements EventMappingService {
                     format(MAPPING_IS_INACTIVE_MESSAGE_UPDATE, eventMapping.getId())
                 );
             }
+            updatePreviousVersionsToInactive(activeMappings);
         } else if (doesActiveEventMappingExist(activeMappings)) {
             throw new DartsApiException(
                 EVENT_MAPPING_DUPLICATE_IN_DB,
@@ -81,22 +83,20 @@ public class EventMappingServiceImpl implements EventMappingService {
             );
         }
 
-        var eventHandlerEntity = eventHandlerMapper.mapFromEventMappingAndMakeActive(eventMapping);
-
-        if (!doesEventHandlerNameExist(eventHandlerEntity.getHandler())) {
-            throw new DartsApiException(
-                EVENT_HANDLER_NAME_DOES_NOT_EXIST,
-                format(NO_HANDLER_WITH_NAME_IN_DB_MESSAGE, eventHandlerEntity.getHandler())
-            );
-        }
-        if (isRevision) {
-            updatePreviousVersionsToInactive(activeMappings);
-        }
-
         var createdEventHandler = eventHandlerRepository.saveAndFlush(eventHandlerEntity);
         auditApi.record(AuditActivity.ADDING_EVENT_MAPPING);
 
         return eventHandlerMapper.mapToEventMappingResponse(createdEventHandler);
+    }
+
+    private void validateEventHandlerExists(String handlerName) {
+        if (eventHandlers.obtainHandlers().contains(handlerName)) {
+            return;
+        }
+        throw new DartsApiException(
+            EVENT_HANDLER_NAME_DOES_NOT_EXIST,
+            format(NO_HANDLER_WITH_NAME_IN_DB_MESSAGE, handlerName)
+        );
     }
 
     private void updatePreviousVersionsToInactive(List<EventHandlerEntity> activeMappings) {
@@ -114,10 +114,6 @@ public class EventMappingServiceImpl implements EventMappingService {
 
     private List<EventHandlerEntity> getActiveMappingsForTypeAndSubtype(String type, String subType) {
         return eventHandlerRepository.findActiveMappingsForTypeAndSubtype(type, subType);
-    }
-
-    private boolean doesEventHandlerNameExist(String handlerName) {
-        return eventHandlers.obtainHandlers().contains(handlerName);
     }
 
     @Override
