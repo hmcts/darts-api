@@ -351,5 +351,6 @@ function:
       dbName: "pr-${CHANGE_ID}-darts"
       host: "darts-modernisation-dev.postgres.database.azure.com"
       port: "5432"
+      sslmode: "require"
       query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
       targetQueryValue: "0.9"
