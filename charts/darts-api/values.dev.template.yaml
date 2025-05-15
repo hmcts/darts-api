@@ -221,8 +221,6 @@ function:
   keyVaults:
     "darts":
       secrets:
-        - name: api-POSTGRES-CONNECTION-STRING-dev
-          alias: DARTS_API_DB_CONNECTION_STRING_DEV
         - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
         - name: api-POSTGRES-USER
@@ -241,6 +239,16 @@ function:
           alias: AAD_B2C_CLIENT_ID
         - name: AzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
+        - name: AzureAdB2CFuncTestROPCUsername
+          alias: FUNC_TEST_ROPC_USERNAME
+        - name: AzureAdB2CFuncTestROPCPassword
+          alias: FUNC_TEST_ROPC_PASSWORD
+        - name: AzureADFunctionalTestUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
+        - name: AzureADFunctionalTestPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureAdB2CFuncTestROPCClientId
           alias: AAD_B2C_ROPC_CLIENT_ID
         - name: AzureAdB2CFuncTestROPCClientSecret
@@ -261,6 +269,48 @@ function:
           alias: AAD_CLIENT_ID_JUSTICE
         - name: AzureADClientSecretJustice
           alias: AAD_CLIENT_SECRET_JUSTICE
+        - name: XhibitUserName
+          alias: XHIBIT_USER_NAME
+        - name: XhibitPassword
+          alias: XHIBIT_PASSWORD
+        - name: CppUserName
+          alias: CPP_USER_NAME
+        - name: CppPassword
+          alias: CPP_PASSWORD
+        - name: DarPcUserName
+          alias: DARPC_USER_NAME
+        - name: DarPcPassword
+          alias: DARPC_PASSWORD
+        - name: DarMidTierUserName
+          alias: DAR_MIDTIER_USER_NAME
+        - name: DarMidTierPassword
+          alias: DAR_MIDTIER_PASSWORD
+        - name: DartsSystemUserEmail
+          alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
+        - name: AzureAdB2CFuncTestROPCGlobalUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
+        - name: AzureAdB2CFuncTestROPCGlobalPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
+        - name: ARMSasEndpoint
+          alias: ARM_SAS_ENDPOINT
+        - name: DETSSasURLEndpoint
+          alias: DETS_SAS_URL_ENDPOINT
+        - name: ArmUsername
+          alias: ARM_USERNAME
+        - name: ArmPassword
+          alias: ARM_PASSWORD
+        - name: DartsInboundStorageSasUrl
+          alias: DARTS_INBOUND_STORAGE_SAS_URL
+        - name: DartsUnstructuredStorageSasUrl
+          alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
+        - name: ArmServiceProfile
+          alias: ARM_SERVICE_PROFILE
+        - name: ArmServiceEntitlement
+          alias: ARM_SERVICE_ENTITLEMENT
+        - name: ArmStorageAccountName
+          alias: ARM_STORAGE_ACCOUNT_NAME
   environment:
     DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
     DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"
@@ -286,6 +336,10 @@ function:
     DARTS_API_DEV_DB_PASSWORD:
       secretRef: postgres
       key: PASSWORD
+    DARTS_API_DB_CONNECTION_STRING:
+      secretRef: darts-api-function-values
+      key: DARTS_API_DB_CONNECTION_STRING
+      disabled: true
   job:
     activeDeadlineSeconds: 300
     parallelism: 1
