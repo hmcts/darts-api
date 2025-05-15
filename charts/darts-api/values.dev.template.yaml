@@ -223,14 +223,8 @@ function:
       secrets:
         - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
-        - name: api-POSTGRES-USER
-          alias: DARTS_API_DB_USERNAME
         - name: api-POSTGRES-PASS
           alias: DARTS_API_DB_PASSWORD
-        - name: api-POSTGRES-HOST
-          alias: DARTS_API_DB_HOST
-        - name: api-POSTGRES-DATABASE
-          alias: DARTS_API_DB_NAME
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
         - name: AzureAdB2CTenantId
@@ -333,9 +327,10 @@ function:
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
 
   secrets:
-    DARTS_API_DEV_DB_PASSWORD:
-      secretRef: postgres
+    DARTS_API_DB_PASSWORD:
+      secretRef: "postgres"
       key: PASSWORD
+      disabled: false
     DARTS_API_DB_CONNECTION_STRING:
       secretRef: darts-api-function-values
       key: DARTS_API_DB_CONNECTION_STRING
@@ -347,7 +342,7 @@ function:
   triggers:
     - type: "postgres"
       userName: "hmcts"
-      passwordFromEnv: "DARTS_API_DEV_DB_PASSWORD"
+      passwordFromEnv: "DARTS_API_DB_PASSWORD"
       dbName: "pr-${CHANGE_ID}-darts"
       host: "darts-modernisation-dev.postgres.database.azure.com"
       port: "5432"
