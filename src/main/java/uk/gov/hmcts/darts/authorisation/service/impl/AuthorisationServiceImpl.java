@@ -120,12 +120,13 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         return userAccountEntityEntityGraph;
     }
 
-    private UserState getUserState(UserAccountEntity userAccountEntity) {
+    UserState getUserState(UserAccountEntity userAccountEntity) {
         return UserState.builder()
             .userId(userAccountEntity.getId())
             .userName(userAccountEntity.getUserFullName())
             .isActive(userAccountEntity.isActive())
             .roles(mapRoles(userAccountEntity.getSecurityGroupEntities()))
+            .emailAddress(userAccountEntity.getEmailAddress())
             .build();
     }
 

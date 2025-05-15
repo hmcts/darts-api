@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
@@ -81,6 +82,7 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
         validEodResults.forEach(eod -> {
             assertEquals(ARM_RAW_DATA_FAILED.getId(), eod.getStatus().getId());
             assertEquals(0, eod.getTransferAttempts());
+            assertNull(eod.getInputUploadProcessedTs());
         });
 
         invalidEodResults.forEach(eod -> {

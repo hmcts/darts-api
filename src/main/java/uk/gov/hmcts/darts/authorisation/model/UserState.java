@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.authorisation.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -21,4 +22,6 @@ public class UserState {
     @NonNull
     private Boolean isActive;
 
+    @JsonProperty("email_address")
+    private String emailAddress;
 }

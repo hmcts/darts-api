@@ -417,7 +417,7 @@ public class TranscriptionResponseMapper {
             .isMarkedForManualDeletion(action.isMarkedForManualDeletion())
             .markedForManualDeletionAt(action.getMarkedForManualDelDateTime())
             .ticketReference(action.getTicketReference())
-            .markedForManualDeletionById(action.getMarkedForManualDelBy().getId());
+            .markedForManualDeletionById(action.getMarkedForManualDelBy() == null ? null : action.getMarkedForManualDelBy().getId());
 
     }
 
@@ -453,9 +453,13 @@ public class TranscriptionResponseMapper {
         adminActionResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
         adminActionResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
         adminActionResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
-        adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
-        adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
-        adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+        if (objectAdminActionEntity.isMarkedForManualDeletion()) {
+            adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
+            adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
+            adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+        } else {
+            adminActionResponse.setIsMarkedForManualDeletion(false);
+        }
         adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
         adminActionResponse.setComments(objectAdminActionEntity.getComments());
 

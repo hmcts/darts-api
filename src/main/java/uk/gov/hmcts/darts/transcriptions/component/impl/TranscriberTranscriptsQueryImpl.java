@@ -53,7 +53,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 LEFT JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 LEFT JOIN darts.case_transcription_ae case_transcription 
                     ON ((hea.cas_id is null or case_transcription.cas_id != hea.cas_id) and tra.tra_id = case_transcription.tra_id)
-                JOIN darts.court_case cas ON ((case_transcription.cas_id = cas.cas_id) or (hea.cas_id = cas.cas_id))                        
+                JOIN darts.court_case cas ON cas.cas_id = COALESCE(hea.cas_id, case_transcription.cas_id)                       
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
                 AND cth.cth_id IN (
                     SELECT DISTINCT(grc.cth_id)
@@ -107,7 +107,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 LEFT JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 LEFT JOIN darts.case_transcription_ae case_transcription 
                     ON ((hea.cas_id is null or case_transcription.cas_id != hea.cas_id) and tra.tra_id = case_transcription.tra_id)
-                JOIN darts.court_case cas ON ((case_transcription.cas_id = cas.cas_id) or (hea.cas_id = cas.cas_id))                    
+                JOIN darts.court_case cas ON cas.cas_id = COALESCE(hea.cas_id, case_transcription.cas_id)                    
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
                 AND cth.cth_id IN (
                     SELECT DISTINCT(grc.cth_id)
@@ -173,7 +173,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 LEFT JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 LEFT JOIN darts.case_transcription_ae case_transcription 
                     ON ((hea.cas_id is null or case_transcription.cas_id != hea.cas_id) and tra.tra_id = case_transcription.tra_id)
-                JOIN darts.court_case cas ON ((case_transcription.cas_id = cas.cas_id) or (hea.cas_id = cas.cas_id))
+                JOIN darts.court_case cas ON cas.cas_id = COALESCE(hea.cas_id, case_transcription.cas_id)
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
                 AND cth.cth_id IN (
                     SELECT DISTINCT(grc.cth_id)
@@ -275,7 +275,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     LEFT JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                     LEFT JOIN darts.case_transcription_ae case_transcription ON 
                          ((hea.cas_id is null or case_transcription.cas_id != hea.cas_id) and transcription.tra_id = case_transcription.tra_id)
-                    JOIN darts.court_case court_case ON ((case_transcription.cas_id = court_case.cas_id) or (hea.cas_id = court_case.cas_id))
+                    JOIN darts.court_case court_case ON court_case.cas_id = COALESCE(hea.cas_id, case_transcription.cas_id)
                     JOIN darts.courthouse courthouse ON courthouse.cth_id=court_case.cth_id
                     JOIN (""")
             .append(workflowSubQuery)

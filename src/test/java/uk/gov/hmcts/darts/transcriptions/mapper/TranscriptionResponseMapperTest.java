@@ -61,6 +61,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -724,6 +725,53 @@ class TranscriptionResponseMapperTest {
 
         TranscriptionDocumentHideResponse response = transcriptionResponseMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
 
+        assertEquals(documentEntity.getId(), response.getId());
+        assertEquals(documentEntity.isHidden(), response.getIsHidden());
+        assertEquals(objectAdminActionEntity.getObjectHiddenReason().getId(), response.getAdminAction().getReasonId());
+        assertEquals(objectAdminActionEntity.getComments(), response.getAdminAction().getComments());
+        assertEquals(objectAdminActionEntity.getTicketReference(), response.getAdminAction().getTicketReference());
+        assertEquals(objectAdminActionEntity.getId(), response.getAdminAction().getId());
+        assertEquals(objectAdminActionEntity.getHiddenDateTime(), response.getAdminAction().getHiddenAt());
+        assertEquals(objectAdminActionEntity.getHiddenBy().getId(), response.getAdminAction().getHiddenById());
+        assertEquals(userAccountEntity.getId(), response.getAdminAction().getHiddenById());
+        assertEquals(objectAdminActionEntity.getMarkedForManualDelBy().getId(), response.getAdminAction().getMarkedForManualDeletionById());
+        assertNull(response.getAdminAction().getMarkedForManualDeletionAt());
+        assertFalse(response.getAdminAction().getIsMarkedForManualDeletion());
+    }
+
+    @Test
+    void mapHideResponse_isMarkedForDeletion_shouldMapMarkedForDeletionFields() {
+        Long documentId = 100L;
+        boolean hide = true;
+
+        TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+        documentEntity.setId(documentId);
+        documentEntity.setHidden(hide);
+
+        Integer objectAdminActionId = 101;
+        String comments = "comments";
+        String reference = "reference";
+
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+
+        ObjectHiddenReasonEntity reasonEntity = mock(ObjectHiddenReasonEntity.class);
+        when(reasonEntity.getId()).thenReturn(2332);
+
+        OffsetDateTime creationDate = OffsetDateTime.now();
+        ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+        objectAdminActionEntity.setId(objectAdminActionId);
+        objectAdminActionEntity.setComments(comments);
+        objectAdminActionEntity.setTicketReference(reference);
+        objectAdminActionEntity.setId(objectAdminActionId);
+        objectAdminActionEntity.setHiddenBy(userAccountEntity);
+        objectAdminActionEntity.setHiddenDateTime(creationDate);
+        objectAdminActionEntity.setMarkedForManualDeletion(true);
+        objectAdminActionEntity.setMarkedForManualDelBy(userAccountEntity);
+        objectAdminActionEntity.setMarkedForManualDelDateTime(creationDate);
+        objectAdminActionEntity.setObjectHiddenReason(reasonEntity);
+
+        TranscriptionDocumentHideResponse response = transcriptionResponseMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
+
         assertEquals(response.getId(), documentEntity.getId());
         assertEquals(response.getIsHidden(), documentEntity.isHidden());
         assertEquals(response.getAdminAction().getReasonId(), objectAdminActionEntity.getObjectHiddenReason().getId());
@@ -736,6 +784,53 @@ class TranscriptionResponseMapperTest {
         assertEquals(response.getAdminAction().getMarkedForManualDeletionById(), objectAdminActionEntity.getMarkedForManualDelBy().getId());
         assertEquals(response.getAdminAction().getMarkedForManualDeletionAt(), objectAdminActionEntity.getMarkedForManualDelDateTime());
         assertEquals(response.getAdminAction().getIsMarkedForManualDeletion(), objectAdminActionEntity.isMarkedForManualDeletion());
+    }
+
+    @Test
+    void mapHideResponse_isNotMarkedForDeletion_shouldNotMapMarkedForDeletionFields() {
+        Long documentId = 100L;
+        boolean hide = true;
+
+        TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+        documentEntity.setId(documentId);
+        documentEntity.setHidden(hide);
+
+        Integer objectAdminActionId = 101;
+        String comments = "comments";
+        String reference = "reference";
+
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+
+        ObjectHiddenReasonEntity reasonEntity = mock(ObjectHiddenReasonEntity.class);
+        when(reasonEntity.getId()).thenReturn(2332);
+
+        OffsetDateTime creationDate = OffsetDateTime.now();
+        ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+        objectAdminActionEntity.setId(objectAdminActionId);
+        objectAdminActionEntity.setComments(comments);
+        objectAdminActionEntity.setTicketReference(reference);
+        objectAdminActionEntity.setId(objectAdminActionId);
+        objectAdminActionEntity.setHiddenBy(userAccountEntity);
+        objectAdminActionEntity.setHiddenDateTime(creationDate);
+        objectAdminActionEntity.setMarkedForManualDeletion(false);
+        objectAdminActionEntity.setMarkedForManualDelBy(userAccountEntity);
+        objectAdminActionEntity.setMarkedForManualDelDateTime(creationDate);
+        objectAdminActionEntity.setObjectHiddenReason(reasonEntity);
+
+        TranscriptionDocumentHideResponse response = transcriptionResponseMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
+
+        assertEquals(response.getId(), documentEntity.getId());
+        assertEquals(response.getIsHidden(), documentEntity.isHidden());
+        assertEquals(response.getAdminAction().getReasonId(), objectAdminActionEntity.getObjectHiddenReason().getId());
+        assertEquals(response.getAdminAction().getComments(), objectAdminActionEntity.getComments());
+        assertEquals(response.getAdminAction().getTicketReference(), objectAdminActionEntity.getTicketReference());
+        assertEquals(response.getAdminAction().getId(), objectAdminActionEntity.getId());
+        assertEquals(response.getAdminAction().getHiddenAt(), objectAdminActionEntity.getHiddenDateTime());
+        assertEquals(response.getAdminAction().getHiddenById(), objectAdminActionEntity.getHiddenBy().getId());
+        assertEquals(response.getAdminAction().getHiddenById(), userAccountEntity.getId());
+        assertEquals(objectAdminActionEntity.getMarkedForManualDelBy().getId(), response.getAdminAction().getMarkedForManualDeletionById());
+        assertNull(response.getAdminAction().getMarkedForManualDeletionAt());
+        assertFalse(response.getAdminAction().getIsMarkedForManualDeletion());
     }
 
     @Test
