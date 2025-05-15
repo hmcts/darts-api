@@ -216,6 +216,10 @@ function:
   minReplicaCount: 0
   maxReplicaCount: 2
   scalingStrategy: accurate
+  devmemoryRequests: 500Mi
+  devcpuRequests: 500m
+  devmemoryLimits: 4Gi
+  devcpuLimits: 4
   global:
     enableKeyVaults: true
   keyVaults:
@@ -223,8 +227,6 @@ function:
       secrets:
         - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
-        - name: api-POSTGRES-PASS
-          alias: DARTS_API_DB_PASSWORD
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
         - name: AzureAdB2CTenantId
