@@ -283,16 +283,19 @@ function:
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
 
   secrets:
-    DARTS_API_DB_CONNECTION_STRING:
-      secretRef: darts-api-function-values
-      key: DARTS_API_DB_CONNECTION_STRING
-      disabled: true
+    DARTS_API_DEV_DB_PASSWORD:
+      secretRef: postgres
+      key: PASSWORD
   job:
     activeDeadlineSeconds: 300
     parallelism: 1
     completions: 1
   triggers:
     - type: postgres
-      connectionFromEnv: 'DARTS_API_DB_CONNECTION_STRING_DEV'
+      userName: hmcts
+      passwordFromEnv: DARTS_API_DEV_DB_PASSWORD
+      dbName: pr-${CHANGE_ID}-darts
+      host: darts-modernisation-dev.postgres.database.azure.com
+      port: 5432
       query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
       targetQueryValue: "0.9"
