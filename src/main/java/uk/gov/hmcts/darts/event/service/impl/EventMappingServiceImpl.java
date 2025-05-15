@@ -62,16 +62,17 @@ public class EventMappingServiceImpl implements EventMappingService {
                     format(HANDLER_DOES_NOT_EXIST_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
                 );
             }
+            if (eventMapping.getId() != null) {
+                Optional<EventHandlerEntity> mappingBeingUpdated = activeMappings.stream()
+                    .filter(eventHandlerEntity -> eventHandlerEntity.getId().equals(eventMapping.getId()))
+                    .findAny();
 
-            Optional<EventHandlerEntity> mappingBeingUpdated = activeMappings.stream()
-                .filter(eventHandlerEntity -> eventHandlerEntity.getId().equals(eventMapping.getId()))
-                .findAny();
-
-            if (mappingBeingUpdated.isEmpty()) {
-                throw new DartsApiException(
-                    EVENT_HANDLER_MAPPING_INACTIVE,
-                    format(MAPPING_IS_INACTIVE_MESSAGE_UPDATE, eventMapping.getId())
-                );
+                if (mappingBeingUpdated.isEmpty()) {
+                    throw new DartsApiException(
+                        EVENT_HANDLER_MAPPING_INACTIVE,
+                        format(MAPPING_IS_INACTIVE_MESSAGE_UPDATE, eventMapping.getId())
+                    );
+                }
             }
         }
         if (!isRevision && doesActiveEventMappingExist(activeMappings)) {
