@@ -76,15 +76,17 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
             .andReturn();
 
         // Then
-        JSONAssert.assertEquals("""
-                                    {
-                                       "userId": 15000,
-                                       "userName": "Test UserFullName",
-                                       "roles": [],
-                                       "isActive": true
-                                    }""",
-                                mvcResult.getResponse().getContentAsString(),
-                                JSONCompareMode.NON_EXTENSIBLE
+        JSONAssert.assertEquals(
+            """
+                {
+                   "userId": 15000,
+                   "userName": "Test UserFullName",
+                   "email_address": "test@test.com",
+                   "roles": [],
+                   "isActive": true
+                }""",
+            mvcResult.getResponse().getContentAsString(),
+            JSONCompareMode.NON_EXTENSIBLE
         );
     }
 
@@ -104,36 +106,38 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
             .andReturn();
 
         // Then
-        JSONAssert.assertEquals("""
-                                    {
-                                      "userId": 15000,
-                                      "userName": "Test UserFullName",
-                                      "roles": [
-                                        {
-                                          "roleId": 1,
-                                          "roleName": "JUDICIARY",
-                                          "globalAccess": true,
-                                          "courthouseIds": [],
-                                          "permissions": [
-                                            "VIEW_MY_TRANSCRIPTIONS",
-                                            "SEARCH_CASES",
-                                            "VIEW_MY_AUDIOS",
-                                            "READ_JUDGES_NOTES",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_TRANSCRIPTION",
-                                            "REQUEST_AUDIO",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                                            "RETENTION_ADMINISTRATION",
-                                            "UPLOAD_JUDGES_NOTES"
-                                          ]
-                                        }
-                                      ],
-                                      "isActive": true
-                                    }""",
-                                mvcResult.getResponse().getContentAsString(),
-                                JSONCompareMode.NON_EXTENSIBLE
+        JSONAssert.assertEquals(
+            """
+                {
+                  "userId": 15000,
+                  "userName": "Test UserFullName",
+                  "email_address": "test@test.com",
+                  "roles": [
+                    {
+                      "roleId": 1,
+                      "roleName": "JUDICIARY",
+                      "globalAccess": true,
+                      "courthouseIds": [],
+                      "permissions": [
+                        "VIEW_MY_TRANSCRIPTIONS",
+                        "SEARCH_CASES",
+                        "VIEW_MY_AUDIOS",
+                        "READ_JUDGES_NOTES",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_TRANSCRIPTION",
+                        "REQUEST_AUDIO",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK",
+                        "RETENTION_ADMINISTRATION",
+                        "UPLOAD_JUDGES_NOTES"
+                      ]
+                    }
+                  ],
+                  "isActive": true
+                }""",
+            mvcResult.getResponse().getContentAsString(),
+            JSONCompareMode.NON_EXTENSIBLE
         );
     }
 
@@ -154,36 +158,38 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
             .andReturn();
 
         // Then
-        JSONAssert.assertEquals("""
-                                    {
-                                      "userId": 15000,
-                                      "userName": "Test UserFullName",
-                                      "roles": [
-                                        {
-                                          "roleId": 1,
-                                          "roleName": "JUDICIARY",
-                                          "globalAccess": true,
-                                          "courthouseIds": [],
-                                          "permissions": [
-                                            "VIEW_MY_TRANSCRIPTIONS",
-                                            "SEARCH_CASES",
-                                            "VIEW_MY_AUDIOS",
-                                            "READ_JUDGES_NOTES",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_TRANSCRIPTION",
-                                            "REQUEST_AUDIO",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                                            "RETENTION_ADMINISTRATION",
-                                            "UPLOAD_JUDGES_NOTES"
-                                          ]
-                                        }
-                                      ],
-                                      "isActive": true
-                                    }""",
-                                mvcResult.getResponse().getContentAsString(),
-                                JSONCompareMode.NON_EXTENSIBLE
+        JSONAssert.assertEquals(
+            """
+                {
+                  "userId": 15000,
+                  "userName": "Test UserFullName",
+                  "email_address": "test@test.com",
+                  "roles": [
+                    {
+                      "roleId": 1,
+                      "roleName": "JUDICIARY",
+                      "globalAccess": true,
+                      "courthouseIds": [],
+                      "permissions": [
+                        "VIEW_MY_TRANSCRIPTIONS",
+                        "SEARCH_CASES",
+                        "VIEW_MY_AUDIOS",
+                        "READ_JUDGES_NOTES",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_TRANSCRIPTION",
+                        "REQUEST_AUDIO",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK",
+                        "RETENTION_ADMINISTRATION",
+                        "UPLOAD_JUDGES_NOTES"
+                      ]
+                    }
+                  ],
+                  "isActive": true
+                }""",
+            mvcResult.getResponse().getContentAsString(),
+            JSONCompareMode.NON_EXTENSIBLE
         );
     }
 
@@ -211,38 +217,40 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
             .andReturn();
 
         // Then
-        JSONAssert.assertEquals("""
-                                    {
-                                      "userId": 15000,
-                                      "userName": "Test UserFullName",
-                                      "roles": [
-                                        {
-                                          "roleId": 1,
-                                          "roleName": "JUDICIARY",
-                                          "globalAccess": true,
-                                          "courthouseIds": [
-                                            1
-                                          ],
-                                          "permissions": [
-                                            "VIEW_MY_TRANSCRIPTIONS",
-                                            "SEARCH_CASES",
-                                            "VIEW_MY_AUDIOS",
-                                            "READ_JUDGES_NOTES",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_AUDIO",
-                                            "REQUEST_TRANSCRIPTION",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                                            "RETENTION_ADMINISTRATION",
-                                            "UPLOAD_JUDGES_NOTES"
-                                          ]
-                                        }
-                                      ],
-                                      "isActive": true
-                                    }""",
-                                mvcResult.getResponse().getContentAsString(),
-                                JSONCompareMode.NON_EXTENSIBLE
+        JSONAssert.assertEquals(
+            """
+                {
+                  "userId": 15000,
+                  "userName": "Test UserFullName",
+                  "email_address": "test@test.com",
+                  "roles": [
+                    {
+                      "roleId": 1,
+                      "roleName": "JUDICIARY",
+                      "globalAccess": true,
+                      "courthouseIds": [
+                        1
+                      ],
+                      "permissions": [
+                        "VIEW_MY_TRANSCRIPTIONS",
+                        "SEARCH_CASES",
+                        "VIEW_MY_AUDIOS",
+                        "READ_JUDGES_NOTES",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_AUDIO",
+                        "REQUEST_TRANSCRIPTION",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK",
+                        "RETENTION_ADMINISTRATION",
+                        "UPLOAD_JUDGES_NOTES"
+                      ]
+                    }
+                  ],
+                  "isActive": true
+                }""",
+            mvcResult.getResponse().getContentAsString(),
+            JSONCompareMode.NON_EXTENSIBLE
         );
     }
 
@@ -264,56 +272,58 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
             .andReturn();
 
         // Then
-        JSONAssert.assertEquals("""
-                                    {
-                                      "userId": 15000,
-                                      "userName": "Test UserFullName",
-                                      "roles": [
-                                        {
-                                          "roleId": 3,
-                                          "roleName": "APPROVER",
-                                          "globalAccess": false,
-                                          "courthouseIds": [],
-                                          "permissions": [
-                                            "VIEW_MY_TRANSCRIPTIONS",
-                                            "APPROVE_REJECT_TRANSCRIPTION_REQUEST",
-                                            "SEARCH_CASES",
-                                            "VIEW_MY_AUDIOS",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_TRANSCRIPTION",
-                                            "REQUEST_AUDIO",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                                            "RETENTION_ADMINISTRATION"
-                                          ]
-                                        },
-                                        {
-                                          "roleId": 1,
-                                          "roleName": "JUDICIARY",
-                                          "globalAccess": true,
-                                          "courthouseIds": [],
-                                          "permissions": [
-                                            "VIEW_MY_TRANSCRIPTIONS",
-                                            "SEARCH_CASES",
-                                            "VIEW_MY_AUDIOS",
-                                            "READ_JUDGES_NOTES",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_TRANSCRIPTION",
-                                            "REQUEST_AUDIO",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                                            "UPLOAD_JUDGES_NOTES",
-                                            "RETENTION_ADMINISTRATION"
-                                          ]
-                                        }
-                                      ],
-                                      "isActive": true
-                                    }
-                                    """,
-                                mvcResult.getResponse().getContentAsString(),
-                                JSONCompareMode.NON_EXTENSIBLE
+        JSONAssert.assertEquals(
+            """
+                {
+                  "userId": 15000,
+                  "userName": "Test UserFullName",
+                  "email_address": "test@test.com",
+                  "roles": [
+                    {
+                      "roleId": 3,
+                      "roleName": "APPROVER",
+                      "globalAccess": false,
+                      "courthouseIds": [],
+                      "permissions": [
+                        "VIEW_MY_TRANSCRIPTIONS",
+                        "APPROVE_REJECT_TRANSCRIPTION_REQUEST",
+                        "SEARCH_CASES",
+                        "VIEW_MY_AUDIOS",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_TRANSCRIPTION",
+                        "REQUEST_AUDIO",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK",
+                        "RETENTION_ADMINISTRATION"
+                      ]
+                    },
+                    {
+                      "roleId": 1,
+                      "roleName": "JUDICIARY",
+                      "globalAccess": true,
+                      "courthouseIds": [],
+                      "permissions": [
+                        "VIEW_MY_TRANSCRIPTIONS",
+                        "SEARCH_CASES",
+                        "VIEW_MY_AUDIOS",
+                        "READ_JUDGES_NOTES",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_TRANSCRIPTION",
+                        "REQUEST_AUDIO",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK",
+                        "UPLOAD_JUDGES_NOTES",
+                        "RETENTION_ADMINISTRATION"
+                      ]
+                    }
+                  ],
+                  "isActive": true
+                }
+                """,
+            mvcResult.getResponse().getContentAsString(),
+            JSONCompareMode.NON_EXTENSIBLE
         );
     }
 
@@ -354,100 +364,102 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
             .andReturn();
 
         // Then
-        JSONAssert.assertEquals("""
-                                    {
-                                      "userId": 15000,
-                                      "userName": "Test UserFullName",
-                                      "roles": [
-                                        {
-                                          "roleId": 2,
-                                          "roleName": "REQUESTER",
-                                          "globalAccess": false,
-                                          "courthouseIds": [
-                                            1
-                                          ],
-                                          "permissions": [
-                                            "VIEW_MY_TRANSCRIPTIONS",
-                                            "SEARCH_CASES",
-                                            "VIEW_MY_AUDIOS",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_TRANSCRIPTION",
-                                            "REQUEST_AUDIO",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                                            "RETENTION_ADMINISTRATION"
-                                          ]
-                                        },
-                                        {
-                                          "roleId": 5,
-                                          "roleName": "TRANSLATION_QA",
-                                          "globalAccess": false,
-                                          "courthouseIds": [
-                                            1,
-                                            2
-                                          ],
-                                          "permissions": [
-                                            "SEARCH_CASES",
-                                            "VIEW_MY_AUDIOS",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_AUDIO",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK"
-                                          ]
-                                        },
-                                        {
-                                          "roleId": 3,
-                                          "roleName": "APPROVER",
-                                          "globalAccess": false,
-                                          "courthouseIds": [
-                                            1,
-                                            2
-                                          ],
-                                          "permissions": [
-                                            "VIEW_MY_TRANSCRIPTIONS",
-                                            "SEARCH_CASES",
-                                            "APPROVE_REJECT_TRANSCRIPTION_REQUEST",
-                                            "VIEW_MY_AUDIOS",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_TRANSCRIPTION",
-                                            "REQUEST_AUDIO",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                                            "RETENTION_ADMINISTRATION"
-                                          ]
-                                        },
-                                        {
-                                          "roleId": 1,
-                                          "roleName": "JUDICIARY",
-                                          "globalAccess": true,
-                                          "courthouseIds": [
-                                            1,
-                                            2,
-                                            3
-                                          ],
-                                          "permissions": [
-                                            "VIEW_MY_TRANSCRIPTIONS",
-                                            "SEARCH_CASES",
-                                            "VIEW_MY_AUDIOS",
-                                            "READ_JUDGES_NOTES",
-                                            "EXPORT_PROCESSED_PLAYBACK_AUDIO",
-                                            "REQUEST_AUDIO",
-                                            "REQUEST_TRANSCRIPTION",
-                                            "VIEW_DARTS_INBOX",
-                                            "READ_TRANSCRIBED_DOCUMENT",
-                                            "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                                            "UPLOAD_JUDGES_NOTES",
-                                            "RETENTION_ADMINISTRATION"
-                                          ]
-                                        }
-                                      ],
-                                      "isActive": true
-                                    }""",
-                                mvcResult.getResponse().getContentAsString(),
-                                JSONCompareMode.NON_EXTENSIBLE
+        JSONAssert.assertEquals(
+            """
+                {
+                  "userId": 15000,
+                  "userName": "Test UserFullName",
+                  "email_address": "test@test.com",
+                  "roles": [
+                    {
+                      "roleId": 2,
+                      "roleName": "REQUESTER",
+                      "globalAccess": false,
+                      "courthouseIds": [
+                        1
+                      ],
+                      "permissions": [
+                        "VIEW_MY_TRANSCRIPTIONS",
+                        "SEARCH_CASES",
+                        "VIEW_MY_AUDIOS",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_TRANSCRIPTION",
+                        "REQUEST_AUDIO",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK",
+                        "RETENTION_ADMINISTRATION"
+                      ]
+                    },
+                    {
+                      "roleId": 5,
+                      "roleName": "TRANSLATION_QA",
+                      "globalAccess": false,
+                      "courthouseIds": [
+                        1,
+                        2
+                      ],
+                      "permissions": [
+                        "SEARCH_CASES",
+                        "VIEW_MY_AUDIOS",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_AUDIO",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK"
+                      ]
+                    },
+                    {
+                      "roleId": 3,
+                      "roleName": "APPROVER",
+                      "globalAccess": false,
+                      "courthouseIds": [
+                        1,
+                        2
+                      ],
+                      "permissions": [
+                        "VIEW_MY_TRANSCRIPTIONS",
+                        "SEARCH_CASES",
+                        "APPROVE_REJECT_TRANSCRIPTION_REQUEST",
+                        "VIEW_MY_AUDIOS",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_TRANSCRIPTION",
+                        "REQUEST_AUDIO",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK",
+                        "RETENTION_ADMINISTRATION"
+                      ]
+                    },
+                    {
+                      "roleId": 1,
+                      "roleName": "JUDICIARY",
+                      "globalAccess": true,
+                      "courthouseIds": [
+                        1,
+                        2,
+                        3
+                      ],
+                      "permissions": [
+                        "VIEW_MY_TRANSCRIPTIONS",
+                        "SEARCH_CASES",
+                        "VIEW_MY_AUDIOS",
+                        "READ_JUDGES_NOTES",
+                        "EXPORT_PROCESSED_PLAYBACK_AUDIO",
+                        "REQUEST_AUDIO",
+                        "REQUEST_TRANSCRIPTION",
+                        "VIEW_DARTS_INBOX",
+                        "READ_TRANSCRIBED_DOCUMENT",
+                        "LISTEN_TO_AUDIO_FOR_PLAYBACK",
+                        "UPLOAD_JUDGES_NOTES",
+                        "RETENTION_ADMINISTRATION"
+                      ]
+                    }
+                  ],
+                  "isActive": true
+                }""",
+            mvcResult.getResponse().getContentAsString(),
+            JSONCompareMode.NON_EXTENSIBLE
         );
     }
 

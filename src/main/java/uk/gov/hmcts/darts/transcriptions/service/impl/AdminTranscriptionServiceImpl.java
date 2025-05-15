@@ -217,11 +217,6 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
                 objectAdminActionEntity.setTranscriptionDocument(documentEntity);
                 objectAdminActionEntity.setHiddenBy(currentUser);
                 objectAdminActionEntity.setHiddenDateTime(OffsetDateTime.now());
-                if (objectHiddenReason.isMarkedForDeletion()) {
-                    objectAdminActionEntity.setMarkedForManualDeletion(true);
-                    objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
-                    objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
-                }
                 objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
 
                 response = transcriptionMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
