@@ -246,7 +246,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void givenEventsUseLatestCurrentEventDateAsClosedDate() {
+    void closeCases_shouldCloseCases_andUseLatestCurrentEventDate_whenCurrentAndNonCurrentEventsExists() {
         createAndSaveRetentionConfidenceCategoryMappings();
 
         HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
@@ -361,7 +361,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void givenAudioUseCurrentDateAsClosedDate() {
+    void closeCases_shouldCloseCase_andUseLatestCurrentMediaDate_whenCurrentAndNonCurrentMediaExists() {
         createAndSaveRetentionConfidenceCategoryMappings();
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(6).plusDays(2);
