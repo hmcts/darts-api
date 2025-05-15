@@ -146,7 +146,9 @@ class EventMappingServiceImplTest {
 
     @Test
     void handleRequestToSaveEventMappingForHandlerMappingThatAlreadyExistsAndIsRevisionFalse() {
+        setupHandlers();
         when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
+        when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
 
         var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, false));
 
@@ -158,7 +160,9 @@ class EventMappingServiceImplTest {
 
     @Test
     void handleRequestToSaveEventMappingForHandlerMappingThatDoesNotAlreadyExistsAndIsRevisionTrue() {
+        setupHandlers();
         when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(null);
+        when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
 
         var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, true));
 
@@ -170,9 +174,11 @@ class EventMappingServiceImplTest {
 
     @Test
     void postEventMapping_shouldError_whenEventHandlerIsInactive() {
+        setupHandlers();
         eventHandlerEntity.setId(EVENT_HANDLER_ID + 1);
         eventMapping.setId(EVENT_HANDLER_ID);//Have a different ID to the active mapping
         when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
+        when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
 
         var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, true));
 
