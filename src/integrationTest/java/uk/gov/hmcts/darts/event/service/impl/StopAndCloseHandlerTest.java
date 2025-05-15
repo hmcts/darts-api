@@ -346,11 +346,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     }
 
     @Test
-    void shouldUpdateExistingCaseRetentionWhenPendingExist() {
+    void givenStopAndCloseEvent_shouldUpdateExistingCaseRetention_whenPendingRetentionExists() {
         // given
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
-        assertFalse(courtCaseEntity.getClosed());
-        assertNull(courtCaseEntity.getCaseClosedTimestamp());
+        courtCaseEntity.setClosed(true);
+        courtCaseEntity.setCaseClosedTimestamp(testTime);
+        dartsDatabase.save(courtCaseEntity);
 
         HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER,
                                                                              DateConverterUtil.toLocalDateTime(testTime));
@@ -378,11 +379,13 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         retentionPolicy2.caseRetentionFixedPolicy("2");
         retentionPolicy2.setCaseTotalSentence("20Y3M4D");//this should get ignored.
 
+        var eventTime = testTime.plusSeconds(10);
+
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())
             .subType(hearingEndedEventHandler.getSubType())
             .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .dateTime(testTime.plusSeconds(10))
+            .dateTime(eventTime)
             .retentionPolicy(retentionPolicy2);
 
         // when
@@ -418,7 +421,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         ).get();
 
         assertTrue(persistedCase.getClosed());
-        assertEquals(testTime.plusSeconds(10), persistedCase.getCaseClosedTimestamp());
+        assertEquals(eventTime, persistedCase.getCaseClosedTimestamp());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
         assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
         assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
@@ -438,16 +441,16 @@ class StopAndCloseHandlerTest extends HandlerTestData {
      * The created datetime fields are set correctly as per the order received. When retention is applied the latest
      * record becomes COMPLETE and the initial one IGNORED, as expected.
      *
-     * <p>This differs from the "shouldUpdateExistingCaseRetentionWhenPendingExist" test above, where the existing case
-     * retention record is updated with the information received in the latest event. When retention is applied the
-     * record becomes COMPLETE, as expected and also giving the same result as this test.
+     * <p>This differs from the "givenStopAndCloseEvent_shouldUpdateExistingCaseRetention_whenPendingRetentionExists" test above,
+     * where the existing case retention record is updated with the information received in the latest event. When retention is applied
+     * the record becomes COMPLETE, as expected and also giving the same result as this test.
      */
     @Test
-    void createsAdditionalPendingCaseRetentionWhenCaseManagementRetentionDoesNotExist() {
-        // create an open case
+    void givenStopAndCloseEvent_shouldCreateAdditionalPendingCaseRetention_whenCaseManagementRetentionDoesNotExistAndRetentionExists() {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
-        assertFalse(courtCaseEntity.getClosed());
-        assertNull(courtCaseEntity.getCaseClosedTimestamp());
+        courtCaseEntity.setClosed(true);
+        courtCaseEntity.setCaseClosedTimestamp(testTime);
+        dartsDatabase.save(courtCaseEntity);
 
         // setup existing retention, without link to case management retention
         var initialRetainUntilDate = OffsetDateTime.of(2021, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
@@ -466,11 +469,13 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         retentionPolicy2.caseRetentionFixedPolicy("2");
         retentionPolicy2.setCaseTotalSentence("20Y3M4D");//this should get ignored.
 
+        var eventTime = testTime.plusSeconds(10);
+
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())
             .subType(hearingEndedEventHandler.getSubType())
             .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .dateTime(testTime.plusSeconds(10))
+            .dateTime(eventTime)
             .retentionPolicy(retentionPolicy2);
 
         // when
@@ -519,7 +524,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         // checking the case is closed
         var persistedCase = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).get();
         assertTrue(persistedCase.getClosed());
-        assertEquals(testTime.plusSeconds(10), persistedCase.getCaseClosedTimestamp());
+        assertEquals(eventTime, persistedCase.getCaseClosedTimestamp());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
         assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
         assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
@@ -534,10 +539,11 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     }
 
     @Test
-    void shouldDoNothingWhenPendingExistBeforeThisOne() {
+    void givenStopAndCloseEvent_shouldOnlyUpdateCaseClosedInformationAndNotUpdateRetention_whenPendingRetentionRecordExistsWithEventDateLaterThanThisOne() {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
-        assertFalse(courtCaseEntity.getClosed());
-        assertNull(courtCaseEntity.getCaseClosedTimestamp());
+        courtCaseEntity.setClosed(true);
+        courtCaseEntity.setCaseClosedTimestamp(testTime);
+        dartsDatabase.save(courtCaseEntity);
 
         HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER,
                                                                              DateConverterUtil.toLocalDateTime(testTime));
@@ -562,11 +568,13 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         DartsEventRetentionPolicy retentionPolicy2 = new DartsEventRetentionPolicy();
         retentionPolicy2.caseRetentionFixedPolicy("2");
 
+        var eventTime = testTime.plusSeconds(10);
+
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())
             .subType(hearingEndedEventHandler.getSubType())
             .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .dateTime(testTime.plusSeconds(10))
+            .dateTime(eventTime)
             .retentionPolicy(retentionPolicy2);
 
         eventDispatcher.receive(dartsEvent);
@@ -579,6 +587,13 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(String.valueOf(PENDING), caseRetentionEntity.getCurrentState());
         assertEquals(7, caseRetentionEntity.getRetentionPolicyType().getId());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
+
+        var persistedCase = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).get();
+        assertTrue(persistedCase.getClosed());
+        assertEquals(eventTime, persistedCase.getCaseClosedTimestamp());
+        assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
+        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
+        assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
 
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByHearingId(hearing.getId());
         assertEquals(2, eventsForHearing.size());
