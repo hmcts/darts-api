@@ -529,6 +529,13 @@ public class DartsDatabaseStub {
         return mediaStub.createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel);
     }
 
+    @Transactional
+    public MediaEntity createMediaEntity(String courthouseName, String courtroomName,
+                                         OffsetDateTime startTime, OffsetDateTime endTime,
+                                         int channel, boolean isCurrent) {
+        return mediaStub.createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel, isCurrent);
+    }
+
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
         return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).orElse(null);
     }

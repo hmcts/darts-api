@@ -246,6 +246,42 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     }
 
     @Test
+    void givenEventsUseLatestCurrentEventDateAsClosedDate() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
+
+        OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
+        OffsetDateTime closeDateNonCurrent = OffsetDateTime.now().minusYears(7).minusDays(2);
+        EventEntity eventEntity1 = dartsDatabase.getEventStub().createEvent(hearing, 8);
+        eventEntity1.setCreatedDateTime(OffsetDateTime.now().minusYears(7).minusDays(10));
+        EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 3, false);
+        eventEntity2.setCreatedDateTime(closeDateNonCurrent);
+        EventEntity eventEntity3 = dartsDatabase.getEventStub().createEvent(hearing, 3);
+        eventEntity3.setCreatedDateTime(closeDate);
+        dartsDatabase.saveAll(eventEntity1, eventEntity2, eventEntity3);
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(10));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
+
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+
+        assert updatedCourtCaseEntity != null;
+        assertTrue(updatedCourtCaseEntity.getClosed());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+        assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity.getRetConfScore());
+        assertEquals(RetentionConfidenceReasonEnum.MAX_EVENT_CLOSED, updatedCourtCaseEntity.getRetConfReason());
+        assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
+        CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
+        assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
+    }
+
+    @Test
     void givenOneEventUseLatestDateAsClosedDate() {
         AtomicInteger courtCaseId = new AtomicInteger();
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
@@ -296,6 +332,50 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         MediaEntity mediaEntity3 = dartsDatabase.createMediaEntity("acourthosue", "1",
                                                                    OffsetDateTime.now().minusYears(7), OffsetDateTime.now().minusYears(7).plusMinutes(20), 1);
         mediaEntity3.setCreatedDateTime(OffsetDateTime.now().minusYears(6).minusDays(2));
+        dartsDatabase.saveAll(mediaEntity1, mediaEntity2, mediaEntity3);
+
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
+        hearing.addMedia(mediaEntity1);
+        hearing.addMedia(mediaEntity2);
+        hearing.addMedia(mediaEntity3);
+        dartsDatabase.getHearingRepository().save(hearing);
+
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(10));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
+
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+        assert updatedCourtCaseEntity != null;
+        assertTrue(updatedCourtCaseEntity.getClosed());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+        assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity.getRetConfScore());
+        assertEquals(RetentionConfidenceReasonEnum.MAX_MEDIA_CLOSED, updatedCourtCaseEntity.getRetConfReason());
+        assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
+        CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
+        assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
+    }
+
+    @Test
+    void givenAudioUseCurrentDateAsClosedDate() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
+        OffsetDateTime closeDate = OffsetDateTime.now().minusYears(6).plusDays(2);
+        OffsetDateTime closeDateNonCurrent = OffsetDateTime.now().minusYears(6).plusDays(5);
+        MediaEntity mediaEntity1 = dartsDatabase.createMediaEntity("acourthosue", "1",
+                                                                   OffsetDateTime.now().minusYears(7), OffsetDateTime.now().minusYears(7).plusMinutes(20), 1);
+        mediaEntity1.setCreatedDateTime(OffsetDateTime.now().minusYears(6));
+        MediaEntity mediaEntity2 = dartsDatabase.createMediaEntity("acourthosue", "1",
+                                                                   OffsetDateTime.now().minusYears(7), OffsetDateTime.now().minusYears(7).plusMinutes(20), 1,
+                                                                   false);
+        mediaEntity2.setCreatedDateTime(closeDateNonCurrent);
+        MediaEntity mediaEntity3 = dartsDatabase.createMediaEntity("acourthosue", "1",
+                                                                   OffsetDateTime.now().minusYears(7), OffsetDateTime.now().minusYears(7).plusMinutes(20), 1);
+        mediaEntity3.setCreatedDateTime(closeDate);
         dartsDatabase.saveAll(mediaEntity1, mediaEntity2, mediaEntity3);
 
         HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));

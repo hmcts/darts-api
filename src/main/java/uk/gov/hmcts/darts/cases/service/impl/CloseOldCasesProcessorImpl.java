@@ -93,6 +93,8 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             for (HearingEntity hearingEntity : courtCase.getHearings()) {
                 eventList.addAll(hearingEntity.getEvents());
             }
+            // remove non current events
+            eventList.removeIf(event -> !event.isCurrent());
             if (CollectionUtils.isNotEmpty(eventList)) {
                 eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
                 //find latest closed event
@@ -117,6 +119,8 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 for (HearingEntity hearingEntity : courtCase.getHearings()) {
                     mediaList.addAll(hearingEntity.getMedias());
                 }
+                // remove non current media
+                mediaList.removeIf(media -> !media.isCurrent());
                 if (mediaList.isEmpty()) {
                     //look for the last hearing date and use that
                     courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
