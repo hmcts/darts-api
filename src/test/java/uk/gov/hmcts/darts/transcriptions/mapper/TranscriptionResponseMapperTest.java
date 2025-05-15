@@ -740,7 +740,7 @@ class TranscriptionResponseMapperTest {
     }
 
     @Test
-    void mapHideResponse_isMakredForDeletion_shouldMapMarkedForDeletionFields() {
+    void mapHideResponse_isMarkedForDeletion_shouldMapMarkedForDeletionFields() {
         Long documentId = 100L;
         boolean hide = true;
 
@@ -787,7 +787,7 @@ class TranscriptionResponseMapperTest {
     }
 
     @Test
-    void mapHideResponse_isNotMakredForDeletion_shouldNotMapMarkedForDeletionFields() {
+    void mapHideResponse_isNotMarkedForDeletion_shouldNotMapMarkedForDeletionFields() {
         Long documentId = 100L;
         boolean hide = true;
 

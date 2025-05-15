@@ -417,7 +417,7 @@ public class TranscriptionResponseMapper {
             .isMarkedForManualDeletion(action.isMarkedForManualDeletion())
             .markedForManualDeletionAt(action.getMarkedForManualDelDateTime())
             .ticketReference(action.getTicketReference())
-            .markedForManualDeletionById(action.getMarkedForManualDelBy().getId());
+            .markedForManualDeletionById(action.getMarkedForManualDelBy() == null ? null : action.getMarkedForManualDelBy().getId());
 
     }
 

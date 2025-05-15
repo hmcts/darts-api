@@ -197,13 +197,9 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         assertEquals(objectAdminActionEntity.getFirst().getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS),
                      transcriptionResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
 
-        assertTrue(objectAdminActionEntity.getFirst().isMarkedForManualDeletion());
-
-        assertEquals(objectAdminActionEntity.getFirst().getMarkedForManualDelBy().getId(),
-                     transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
-        assertEquals(objectAdminActionEntity.getFirst().getMarkedForManualDelDateTime()
-                         .truncatedTo(ChronoUnit.SECONDS), transcriptionResponse.getAdminAction()
-                         .getMarkedForManualDeletionAt().truncatedTo(ChronoUnit.SECONDS));
+        assertFalse(objectAdminActionEntity.getFirst().isMarkedForManualDeletion());
+        assertNull(objectAdminActionEntity.getFirst().getMarkedForManualDelBy());
+        assertNull(objectAdminActionEntity.getFirst().getMarkedForManualDelDateTime());
     }
 
     @Test
