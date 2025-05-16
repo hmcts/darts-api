@@ -437,7 +437,7 @@ dependencies {
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.8'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.2.1'
-  implementation 'org.springframework.retry:spring-retry:2.0.11'
+  implementation 'org.springframework.retry:spring-retry:2.0.12'
 
     implementation 'net.javacrumbs.shedlock:shedlock-spring:6.6.1'
     implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.6.1'
