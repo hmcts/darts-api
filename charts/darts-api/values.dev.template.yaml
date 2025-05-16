@@ -212,7 +212,7 @@ function:
   scaleType: Job
   image: ${IMAGE_NAME}
   aadIdentityName: darts
-  pollingInterval: 30 # every 5 mins, but this should probably be configurable per env
+  pollingInterval: 60
   minReplicaCount: 0
   maxReplicaCount: 2
   scalingStrategy: accurate
@@ -317,7 +317,7 @@ function:
     AUTOMATED_TASK_MODE: false
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
-    DARTS_GATEWAY_URL: "https://darts-gateway-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+    DARTS_GATEWAY_URL: ${DEV_DARTS_GATEWAY_URL}
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
@@ -338,7 +338,7 @@ function:
       key: DARTS_API_DB_CONNECTION_STRING
       disabled: true
   job:
-    activeDeadlineSeconds: 300
+    activeDeadlineSeconds: 1800
     parallelism: 1
     completions: 1
   triggers:
