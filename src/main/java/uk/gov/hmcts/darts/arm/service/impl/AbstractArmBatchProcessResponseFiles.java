@@ -104,13 +104,14 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             for (int inputUploadResponseFilesFound = 0; inputUploadResponseFilesFound < batchSize; inputUploadResponseFilesFound += effectiveBatchSize) {
                 ContinuationTokenBlobs continuationTokenData =
                     armDataManagementApi.listResponseBlobsUsingMarker(prefix, effectiveBatchSize, continuationToken);
+                if (nonNull(continuationTokenData)) {
+                    inputUploadResponseFiles.addAll(continuationTokenData.getBlobNamesAndPaths());
+                    continuationToken = continuationTokenData.getContinuationToken();
+                }
                 // if no more data found break out of loop
-                continuationToken = continuationTokenData.getContinuationToken();
                 if (isNull(continuationToken)) {
                     break;
                 }
-                inputUploadResponseFiles.addAll(continuationTokenData.getBlobNamesAndPaths());
-                continuationToken = continuationTokenData.getContinuationToken();
             }
         } catch (Exception e) {
             log.error("Unable to find response file for prefix: {}", prefix, e);
