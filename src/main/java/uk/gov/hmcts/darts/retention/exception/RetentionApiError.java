@@ -50,11 +50,13 @@ public enum RetentionApiError implements DartsApiError {
     ), NON_UNIQUE_POLICY_NAME(
         RetentionErrorCode.NON_UNIQUE_POLICY_NAME.getValue(),
         HttpStatus.CONFLICT,
-        RetentionTitleErrors.NON_UNIQUE_POLICY_NAME.toString()
+        RetentionTitleErrors.NON_UNIQUE_POLICY_NAME.toString(),
+        false
     ), NON_UNIQUE_POLICY_DISPLAY_NAME(
         RetentionErrorCode.NON_UNIQUE_POLICY_DISPLAY_NAME.getValue(),
         HttpStatus.CONFLICT,
-        RetentionTitleErrors.NON_UNIQUE_POLICY_DISPLAY_NAME.toString()
+        RetentionTitleErrors.NON_UNIQUE_POLICY_DISPLAY_NAME.toString(),
+        false
     ), DURATION_TOO_SHORT(
         RetentionErrorCode.DURATION_TOO_SHORT.getValue(),
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -70,7 +72,8 @@ public enum RetentionApiError implements DartsApiError {
     ), NON_UNIQUE_FIXED_POLICY_KEY(
         RetentionErrorCode.NON_UNIQUE_FIXED_POLICY_KEY.getValue(),
         HttpStatus.CONFLICT,
-        RetentionTitleErrors.NON_UNIQUE_FIXED_POLICY_KEY.toString()
+        RetentionTitleErrors.NON_UNIQUE_FIXED_POLICY_KEY.toString(),
+        false
     ), FIXED_POLICY_KEY_NOT_FOUND(
         RetentionErrorCode.FIXED_POLICY_KEY_NOT_FOUND.getValue(),
         HttpStatus.BAD_REQUEST,
@@ -78,7 +81,8 @@ public enum RetentionApiError implements DartsApiError {
     ), LIVE_POLICIES_CANNOT_BE_EDITED(
         RetentionErrorCode.LIVE_POLICIES_CANNOT_BE_EDITED.getValue(),
         HttpStatus.CONFLICT,
-        RetentionTitleErrors.LIVE_POLICIES_CANNOT_BE_EDITED.toString()
+        RetentionTitleErrors.LIVE_POLICIES_CANNOT_BE_EDITED.toString(),
+        false
     ), TARGET_POLICY_HAS_PENDING_REVISION(
         RetentionErrorCode.TARGET_POLICY_HAS_PENDING_REVISION.getValue(),
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -94,9 +98,19 @@ public enum RetentionApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean shouldLogException;
+
+    RetentionApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return shouldLogException;
     }
 }

@@ -19,7 +19,8 @@ public enum AutomatedTaskApiError implements DartsApiError {
     AUTOMATED_TASK_ALREADY_RUNNING(
         AutomatedTaskErrorCode.AUTOMATED_TASK_ALREADY_RUNNING.getValue(),
         HttpStatus.CONFLICT,
-        AutomatedTaskTitleErrors.AUTOMATED_TASK_ALREADY_RUNNING.toString()
+        AutomatedTaskTitleErrors.AUTOMATED_TASK_ALREADY_RUNNING.toString(),
+        false
     ),
     AUTOMATED_TASK_NOT_CONFIGURED_CORRECTLY(
         AutomatedTaskErrorCode.AUTOMATED_TASK_NOT_CONFIGURED.getValue(),
@@ -37,10 +38,19 @@ public enum AutomatedTaskApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean shouldLogException;
+
+    AutomatedTaskApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
     }
 
+    @Override
+    public boolean shouldLogException() {
+        return shouldLogException;
+    }
 }

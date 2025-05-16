@@ -34,7 +34,8 @@ public enum AudioRequestsApiError implements DartsApiError {
     DUPLICATE_MEDIA_REQUEST(
         AudioRequestsErrorCode.DUPLICATE_MEDIA_REQUEST.getValue(),
         HttpStatus.CONFLICT,
-        AudioRequestsTitleErrors.DUPLICATE_MEDIA_REQUEST.toString()
+        AudioRequestsTitleErrors.DUPLICATE_MEDIA_REQUEST.toString(),
+        false
     ),
     USER_IS_NOT_FOUND(
         AudioRequestsErrorCode.USER_NOT_FOUND.getValue(),
@@ -57,10 +58,20 @@ public enum AudioRequestsApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean shouldLogException;
+
+    AudioRequestsApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return shouldLogException;
     }
 
 }

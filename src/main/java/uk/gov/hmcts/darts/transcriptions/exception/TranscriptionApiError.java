@@ -41,7 +41,8 @@ public enum TranscriptionApiError implements DartsApiError {
     TRANSCRIPTION_WORKFLOW_ACTION_INVALID(
         TranscriptionsErrorCode.TRANSCRIPTION_WORKFLOW_ACTION_INVALID.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.TRANSCRIPTION_WORKFLOW_ACTION_INVALID.toString()
+        TranscriptionsTitleErrors.TRANSCRIPTION_WORKFLOW_ACTION_INVALID.toString(),
+        false
     ),
     BAD_REQUEST_TRANSCRIPTION_URGENCY(
         TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_URGENCY.getValue(),
@@ -51,7 +52,8 @@ public enum TranscriptionApiError implements DartsApiError {
     DUPLICATE_TRANSCRIPTION(
         TranscriptionsErrorCode.DUPLICATE_TRANSCRIPTION.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.DUPLICATE_TRANSCRIPTION.toString()
+        TranscriptionsTitleErrors.DUPLICATE_TRANSCRIPTION.toString(),
+        false
     ),
     FAILED_TO_ATTACH_TRANSCRIPT(
         TranscriptionsErrorCode.FAILED_TO_ATTACH_TRANSCRIPT.getValue(),
@@ -91,17 +93,20 @@ public enum TranscriptionApiError implements DartsApiError {
     TRANSCRIPTION_ALREADY_HIDDEN(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue()
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue(),
+        false
     ),
     TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue()
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue(),
+        false
     ),
     TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue()
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue(),
+        false
     ),
     TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST.getValue(),
@@ -138,10 +143,20 @@ public enum TranscriptionApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean shouldLogException;
+
+    TranscriptionApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return shouldLogException;
     }
 
 }

@@ -24,12 +24,14 @@ public enum EventError implements DartsApiError {
     EVENT_MAPPING_DUPLICATE_IN_DB(
         EventErrorCode.DUPLICATE_EVENT_MAPPING.getValue(),
         HttpStatus.CONFLICT,
-        EventTitleErrors.DUPLICATE_EVENT_MAPPING.toString()
+        EventTitleErrors.DUPLICATE_EVENT_MAPPING.toString(),
+        false
     ),
     EVENT_MAPPING_DOES_NOT_EXIST_IN_DB(
         EventErrorCode.NO_EVENT_MAPPING.getValue(),
         HttpStatus.CONFLICT,
-        EventTitleErrors.NO_EVENT_MAPPING.toString()
+        EventTitleErrors.NO_EVENT_MAPPING.toString(),
+        false
     ),
     EVENT_HANDLER_NAME_DOES_NOT_EXIST(
         EventErrorCode.INVALID_HANDLER_MAPPING_NAME.getValue(),
@@ -39,12 +41,14 @@ public enum EventError implements DartsApiError {
     EVENT_HANDLER_MAPPING_INACTIVE(
         EventErrorCode.MAPPING_INACTIVE.getValue(),
         HttpStatus.CONFLICT,
-        EventTitleErrors.MAPPING_INACTIVE.toString()
+        EventTitleErrors.MAPPING_INACTIVE.toString(),
+        false
     ),
     EVENT_HANDLER_MAPPING_IN_USE(
         EventErrorCode.MAPPING_IN_USE.getValue(),
         HttpStatus.CONFLICT,
-        EventTitleErrors.MAPPING_IN_USE.toString()
+        EventTitleErrors.MAPPING_IN_USE.toString(),
+        false
     ),
     TOO_MANY_SEARCH_RESULTS(
         EventErrorCode.TOO_MANY_RESULTS.getValue(),
@@ -59,7 +63,8 @@ public enum EventError implements DartsApiError {
     EVENT_ALREADY_CURRENT(
         EventErrorCode.EVENT_ALREADY_CURRENT.getValue(),
         HttpStatus.CONFLICT,
-        EventTitleErrors.EVENT_ALREADY_CURRENT.toString()
+        EventTitleErrors.EVENT_ALREADY_CURRENT.toString(),
+        false
     ),
     CAN_NOT_UPDATE_EVENT_ID_0(
         EventErrorCode.CAN_NOT_UPDATE_EVENT_ID_0.getValue(),
@@ -72,10 +77,20 @@ public enum EventError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean shouldLogException;
+
+    EventError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return shouldLogException;
     }
 
 }

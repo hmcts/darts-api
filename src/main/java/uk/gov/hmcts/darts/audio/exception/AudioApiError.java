@@ -39,7 +39,8 @@ public enum AudioApiError implements DartsApiError {
     MEDIA_ALREADY_HIDDEN(
         AddAudioErrorCode.MEDIA_ALREADY_HIDDEN.getValue(),
         HttpStatus.CONFLICT,
-        AddAudioTitleErrors.MEDIA_ALREADY_HIDDEN.getValue()
+        AddAudioTitleErrors.MEDIA_ALREADY_HIDDEN.getValue(),
+        false
     ),
     MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE(
         AddAudioErrorCode.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
@@ -69,7 +70,8 @@ public enum AudioApiError implements DartsApiError {
     MEDIA_ALREADY_MARKED_FOR_DELETION(
         AddAudioErrorCode.MEDIA_ALREADY_MARKED_FOR_DELETION.getValue(),
         HttpStatus.CONFLICT,
-        AddAudioTitleErrors.MEDIA_ALREADY_MARKED_FOR_DELETION.getValue()
+        AddAudioTitleErrors.MEDIA_ALREADY_MARKED_FOR_DELETION.getValue(),
+        false
     ),
     ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND(
         AddAudioErrorCode.ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND.getValue(),
@@ -99,7 +101,8 @@ public enum AudioApiError implements DartsApiError {
     MEDIA_ALREADY_CURRENT(
         AddAudioErrorCode.MEDIA_ALREADY_CURRENT.getValue(),
         HttpStatus.CONFLICT,
-        AddAudioTitleErrors.MEDIA_ALREADY_CURRENT.getValue()
+        AddAudioTitleErrors.MEDIA_ALREADY_CURRENT.getValue(),
+        false
     );
 
 
@@ -108,10 +111,20 @@ public enum AudioApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean shouldLogException;
+
+    AudioApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return shouldLogException;
     }
 
 }

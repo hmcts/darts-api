@@ -14,12 +14,14 @@ public enum CourthouseApiError implements DartsApiError {
     COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS(
         CourthouseErrorCode.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS.getValue(),
         HttpStatus.CONFLICT,
-        CourthouseTitleErrors.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS.toString()
+        CourthouseTitleErrors.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS.toString(),
+        false
     ),
     COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS(
         CourthouseErrorCode.COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS.getValue(),
         HttpStatus.CONFLICT,
-        CourthouseTitleErrors.COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS.toString()
+        CourthouseTitleErrors.COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS.toString(),
+        false
     ),
     COURTHOUSE_NOT_FOUND(
         CourthouseErrorCode.COURTHOUSE_NOT_FOUND.getValue(),
@@ -39,7 +41,8 @@ public enum CourthouseApiError implements DartsApiError {
     COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS(
         CourthouseErrorCode.COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS.getValue(),
         HttpStatus.CONFLICT,
-        CourthouseTitleErrors.COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS.toString()
+        CourthouseTitleErrors.COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS.toString(),
+        false
     ),
     SECURITY_GROUP_ID_DOES_NOT_EXIST(
         CourthouseErrorCode.SECURITY_GROUP_ID_DOES_NOT_EXIST.getValue(),
@@ -62,10 +65,20 @@ public enum CourthouseApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean shouldLogException;
+
+    CourthouseApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return shouldLogException;
     }
 
 }

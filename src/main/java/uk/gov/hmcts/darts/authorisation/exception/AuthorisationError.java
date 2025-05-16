@@ -74,7 +74,8 @@ public enum AuthorisationError implements DartsApiError {
     UNABLE_TO_DEACTIVATE_USER(
         AuthorisationErrorCode.UNABLE_TO_DEACTIVATE_USER.getValue(),
         HttpStatus.CONFLICT,
-        AuthorisationTitleErrors.UNABLE_TO_DEACTIVATE_USER.getValue()
+        AuthorisationTitleErrors.UNABLE_TO_DEACTIVATE_USER.getValue(),
+        false
     ),
     USER_NOT_AUTHORISED_TO_ACTIVATE_USER(
         AuthorisationErrorCode.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getValue(),
@@ -87,10 +88,20 @@ public enum AuthorisationError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean shouldLogException;
+
+    AuthorisationError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return shouldLogException;
     }
 
 }
