@@ -207,72 +207,147 @@ darts-gateway:
       DARTS_API_URL: "https://darts-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
       TESTING_SUPPORT_ENDPOINTS_ENABLED: true
 
-# function:
-#   scaleType: Job
-#   image: ${IMAGE_NAME}
-#   aadIdentityName: darts
-#   pollingInterval: 300 # every 5 mins, but this should probably be configurable per env
-#   minReplicaCount: 0
-#   maxReplicaCount: 2
-#   scalingStrategy: accurate
-#   keyVaults:
-#     "darts":
-#       secrets:
-#         - name: GovukNotifyApiKey
-#           alias: GOVUK_NOTIFY_API_KEY
-#         - name: api-POSTGRES-USER
-#           alias: DARTS_API_DB_USERNAME
-#         - name: api-POSTGRES-PASS
-#           alias: DARTS_API_DB_PASSWORD
-#         - name: api-POSTGRES-HOST
-#           alias: DARTS_API_DB_HOST
-#         - name: api-POSTGRES-DATABASE
-#           alias: DARTS_API_DB_NAME
-#         - name: api-POSTGRES-SCHEMA
-#           alias: DARTS_API_DB_SCHEMA
-#         - name: AzureAdB2CTenantId
-#           alias: AAD_B2C_TENANT_ID
-#         - name: AzureAdB2CClientId
-#           alias: AAD_B2C_CLIENT_ID
-#         - name: AzureAdB2CClientSecret
-#           alias: AAD_B2C_CLIENT_SECRET
-#         - name: app-insights-connection-string
-#           alias: app-insights-connection-string
-#         - name: AzureAdB2CFuncTestROPCClientId
-#           alias: AAD_B2C_ROPC_CLIENT_ID
-#         - name: AzureAdB2CFuncTestROPCClientSecret
-#           alias: AAD_B2C_ROPC_CLIENT_SECRET
-#         - name: AzureStorageConnectionString
-#           alias: AZURE_STORAGE_CONNECTION_STRING
-#         - name: api-POSTGRES-CONNECTION-STRING
-#           alias: DARTS_API_DB_CONNECTION_STRING
-#         - name: AzureADTenantId
-#           alias: AAD_TENANT_ID
-#         - name: AzureADClientId
-#           alias: AAD_CLIENT_ID
-#         - name: AzureADClientSecret
-#           alias: AAD_CLIENT_SECRET
-#         - name: AzureADTenantIdJustice
-#           alias: AAD_TENANT_ID_JUSTICE
-#         - name: AzureADClientIdJustice
-#           alias: AAD_CLIENT_ID_JUSTICE
-#         - name: AzureADClientSecretJustice
-#           alias: AAD_CLIENT_SECRET_JUSTICE
-#   environment:
-#     ATS_MODE: true
-#     POSTGRES_SSL_MODE: require
-#     RUN_DB_MIGRATION_ON_STARTUP: false
-#     DARTS_GATEWAY_URL: https://darts-gateway.staging.platform.hmcts.net
-#   secrets:
-#     DARTS_API_DB_CONNECTION_STRING:
-#       secretRef: darts-api-{{ .Release.Name }}-postgresql
-#       key: connectionString
-#   job:
-#     activeDeadlineSeconds: 300
-#     parallelism: 1
-#     completions: 1
-#   triggers:
-#     - type: postgres
-#       connectionFromEnv: DARTS_API_DB_CONNECTION_STRING
-#       query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
-#       targetQueryValue: "0.9"
+function:
+  enabled: ${DEV_ENABLE_DARTS_KEDA}
+  scaleType: Job
+  image: ${IMAGE_NAME}
+  aadIdentityName: darts
+  pollingInterval: 60
+  minReplicaCount: 0
+  maxReplicaCount: 2
+  scalingStrategy: accurate
+  devmemoryRequests: 500Mi
+  devcpuRequests: 500m
+  devmemoryLimits: 4Gi
+  devcpuLimits: 4
+  global:
+    enableKeyVaults: true
+  keyVaults:
+    "darts":
+      secrets:
+        - name: GovukNotifyApiKey
+          alias: GOVUK_NOTIFY_API_KEY
+        - name: api-POSTGRES-SCHEMA
+          alias: DARTS_API_DB_SCHEMA
+        - name: AzureAdB2CTenantId
+          alias: AAD_B2C_TENANT_ID
+        - name: AzureAdB2CClientId
+          alias: AAD_B2C_CLIENT_ID
+        - name: AzureAdB2CClientSecret
+          alias: AAD_B2C_CLIENT_SECRET
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
+        - name: AzureAdB2CFuncTestROPCUsername
+          alias: FUNC_TEST_ROPC_USERNAME
+        - name: AzureAdB2CFuncTestROPCPassword
+          alias: FUNC_TEST_ROPC_PASSWORD
+        - name: AzureADFunctionalTestUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
+        - name: AzureADFunctionalTestPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
+        - name: AzureAdB2CFuncTestROPCClientId
+          alias: AAD_B2C_ROPC_CLIENT_ID
+        - name: AzureAdB2CFuncTestROPCClientSecret
+          alias: AAD_B2C_ROPC_CLIENT_SECRET
+        - name: AzureStorageConnectionString
+          alias: AZURE_STORAGE_CONNECTION_STRING
+        - name: api-POSTGRES-CONNECTION-STRING
+          alias: DARTS_API_DB_CONNECTION_STRING
+        - name: AzureADTenantId
+          alias: AAD_TENANT_ID
+        - name: AzureADClientId
+          alias: AAD_CLIENT_ID
+        - name: AzureADClientSecret
+          alias: AAD_CLIENT_SECRET
+        - name: AzureADTenantIdJustice
+          alias: AAD_TENANT_ID_JUSTICE
+        - name: AzureADClientIdJustice
+          alias: AAD_CLIENT_ID_JUSTICE
+        - name: AzureADClientSecretJustice
+          alias: AAD_CLIENT_SECRET_JUSTICE
+        - name: XhibitUserName
+          alias: XHIBIT_USER_NAME
+        - name: XhibitPassword
+          alias: XHIBIT_PASSWORD
+        - name: CppUserName
+          alias: CPP_USER_NAME
+        - name: CppPassword
+          alias: CPP_PASSWORD
+        - name: DarPcUserName
+          alias: DARPC_USER_NAME
+        - name: DarPcPassword
+          alias: DARPC_PASSWORD
+        - name: DarMidTierUserName
+          alias: DAR_MIDTIER_USER_NAME
+        - name: DarMidTierPassword
+          alias: DAR_MIDTIER_PASSWORD
+        - name: DartsSystemUserEmail
+          alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
+        - name: AzureAdB2CFuncTestROPCGlobalUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
+        - name: AzureAdB2CFuncTestROPCGlobalPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
+        - name: ARMSasEndpoint
+          alias: ARM_SAS_ENDPOINT
+        - name: DETSSasURLEndpoint
+          alias: DETS_SAS_URL_ENDPOINT
+        - name: ArmUsername
+          alias: ARM_USERNAME
+        - name: ArmPassword
+          alias: ARM_PASSWORD
+        - name: DartsInboundStorageSasUrl
+          alias: DARTS_INBOUND_STORAGE_SAS_URL
+        - name: DartsUnstructuredStorageSasUrl
+          alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
+        - name: ArmServiceProfile
+          alias: ARM_SERVICE_PROFILE
+        - name: ArmServiceEntitlement
+          alias: ARM_SERVICE_ENTITLEMENT
+        - name: ArmStorageAccountName
+          alias: ARM_STORAGE_ACCOUNT_NAME
+  environment:
+    DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
+    DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"
+    DARTS_API_DB_USERNAME: "hmcts"
+    ATS_MODE: true
+    API_MODE: false
+    NOTIFICATION_SCHEDULER_ENABLED: false
+    AUTOMATED_TASK_MODE: false
+    POSTGRES_SSL_MODE: require
+    RUN_DB_MIGRATION_ON_STARTUP: false
+    DARTS_GATEWAY_URL: ${DEV_DARTS_GATEWAY_URL}
+    ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
+    ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
+    ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    FEIGN_LOG_LEVEL: none
+    IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
+    ARM_RPO_THREAD_SLEEP_DURATION: 60s
+    ARM_RPO_POLL_DURATION: 4h
+    AZCOPY_LOG_LEVEL: "--log-level=ERROR"
+    AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
+
+  secrets:
+    DARTS_API_DB_PASSWORD:
+      secretRef: "postgres"
+      key: PASSWORD
+      disabled: false
+    DARTS_API_DB_CONNECTION_STRING:
+      secretRef: darts-api-function-values
+      key: DARTS_API_DB_CONNECTION_STRING
+      disabled: true
+  job:
+    activeDeadlineSeconds: 1800
+    parallelism: 1
+    completions: 1
+  triggers:
+    - type: "postgres"
+      userName: "hmcts"
+      passwordFromEnv: "DARTS_API_DB_PASSWORD"
+      dbName: "pr-${CHANGE_ID}-darts"
+      host: "darts-modernisation-dev.postgres.database.azure.com"
+      port: "5432"
+      sslmode: "require"
+      query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
+      targetQueryValue: "0.9"
