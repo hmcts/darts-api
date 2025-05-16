@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
+import uk.gov.hmcts.darts.event.model.EventSearchResult;
+import uk.gov.hmcts.darts.event.service.impl.AdminEventsSearchGivensBuilder;
 import uk.gov.hmcts.darts.test.common.data.EventTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class EventRepositoryTest extends PostgresIntegrationBase {
+class EventRepositoryIntTest extends PostgresIntegrationBase {
     @Autowired
     private EventRepository eventRepository;
 
@@ -37,6 +40,9 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     private HearingStub hearingStub;
     @Autowired
     private EventLinkedCaseStub eventLinkedCaseStub;
+
+    @Autowired
+    private AdminEventsSearchGivensBuilder given;
 
     @Test
     void eventProcessing_ShouldExcludeZeroEventAndDuplicates() {
@@ -90,15 +96,6 @@ class EventRepositoryTest extends PostgresIntegrationBase {
             .toList();
 
         assertTrue(eventIdsToBeProcessed3.isEmpty());
-    }
-
-    private List<EventEntity> getEventsForEventIds(List<Integer> eventIds) {
-        List<EventEntity> events = new ArrayList<>();
-        for (Integer eventId : eventIds) {
-            List<EventEntity> eventEntities = eventRepository.findAllByEventId(eventId);
-            events.addAll(eventEntities);
-        }
-        return events;
     }
 
     @Test
@@ -227,7 +224,6 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         final EventEntity event4 = EventTestData.someMinimalEvent();
         final EventEntity event5 = EventTestData.someMinimalEvent();
 
-
         event1.setEventId(123);
         event2.setEventId(123);
         event3.setEventId(123);
@@ -334,7 +330,6 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         dartsDatabase.save(event3HasHearingsExcluded);
         dartsDatabase.save(event4NoHearingsIncluded);
 
-
         eventRepository.deleteAllAssociatedHearings(List.of(
             event1HasHearingsIncluded.getId(),
             event2HasHearingsIncluded.getId(),
@@ -354,6 +349,51 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         });
     }
 
+    @Test
+    void searchEventsFilteringOn_ReturnsMatchEvents_WithNoSearchCriteria() {
+        EventEntity eventEntity1 = EventTestData.someMinimalEvent();
+        EventEntity eventEntity2 = EventTestData.someMinimalEvent();
+        EventEntity eventEntity3 = EventTestData.someMinimalEvent();
+
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimal();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimal();
+        HearingEntity hearing3 = PersistableFactory.getHearingTestData().someMinimal();
+
+        dartsDatabase.save(hearing1);
+        dartsDatabase.save(hearing2);
+        dartsDatabase.save(hearing3);
+
+        eventEntity1.setHearingEntities(Set.of(hearing1));
+        eventEntity2.setHearingEntities(Set.of(hearing2));
+        eventEntity3.setHearingEntities(Set.of(hearing3));
+
+        var event1 = dartsDatabase.save(eventEntity1);
+        var event2 = dartsDatabase.save(eventEntity2);
+        var event3 = dartsDatabase.save(eventEntity3);
+
+        var persistedEventsForCourtroom = List.of(event1, event2, event3);
+
+        var mutablePersistedEvents = new ArrayList<>(persistedEventsForCourtroom);
+        mutablePersistedEvents.sort((ev1, ev2) -> ev1.getCourtroom().getCourthouse().getDisplayName().compareTo(
+            ev2.getCourtroom().getCourthouse().getDisplayName()));
+
+        List<EventSearchResult> eventSearchResults = eventRepository.searchEventsFilteringOn(
+            null,
+            null,
+            null,
+            null,
+            null,
+            Limit.of(10)
+        );
+
+        assertThat(mutablePersistedEvents).hasSize(3);
+        assertThat(eventSearchResults)
+            .extracting(event -> event.courtHouseDisplayName())
+            .isEqualTo(mutablePersistedEvents.stream()
+                           .map(event -> event.getCourtroom().getCourthouse().getDisplayName().toUpperCase(Locale.ROOT))
+                           .toList());
+    }
+
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
         event.setCreatedDateTime(offsetDateTime);
         dartsDatabase.save(event);
@@ -364,4 +404,14 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         event2.setMessageId(event1.getMessageId());
         event2.setEventText(event1.getEventText());
     }
+
+    private List<EventEntity> getEventsForEventIds(List<Integer> eventIds) {
+        List<EventEntity> events = new ArrayList<>();
+        for (Integer eventId : eventIds) {
+            List<EventEntity> eventEntities = eventRepository.findAllByEventId(eventId);
+            events.addAll(eventEntities);
+        }
+        return events;
+    }
+
 }
