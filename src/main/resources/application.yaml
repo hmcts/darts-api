@@ -133,12 +133,12 @@ darts:
     merge-workspace: ${user.home}/audiotransform/merge
     outbounddeleter:
       last-accessed-deletion-day: 2
-    pre-amble-duration: 30m
+    pre-amble-duration: ${AUDIO_LINKING_PRE_AMBLE_DURATION:30m}
     preview:
       redis-ttl-mins: ${AUDIO_PREVIEW_REDIS_TTL:10}
       redis-failed-ttl-mins: ${AUDIO_PREVIEW_REDIS_FAILED_TTL:2}
       redis-folder: audio-previews
-    post-amble-duration: 30m
+    post-amble-duration: ${AUDIO_LINKING_POST_AMBLE_DURATION:30m}
     re-encode-workspace: ${user.home}/audiotransform/encode
     temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
     audio-transformation-service:
