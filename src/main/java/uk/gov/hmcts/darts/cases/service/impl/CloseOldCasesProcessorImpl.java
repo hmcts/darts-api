@@ -88,10 +88,12 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             CourtCaseEntity courtCase = caseService.getCourtCaseById(courtCaseId);
 
 
-            log.debug("About to close court case id {}", courtCase.getId());
+            log.info("About to close court case id {}", courtCase.getId());
             List<EventEntity> eventList = new ArrayList<>();
             for (HearingEntity hearingEntity : courtCase.getHearings()) {
-                eventList.addAll(hearingEntity.getEvents());
+                eventList.addAll(hearingEntity.getEvents().stream()
+                     .filter(EventEntity::isCurrent)
+                     .toList());
             }
             if (CollectionUtils.isNotEmpty(eventList)) {
                 eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
@@ -115,7 +117,9 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 //look for the last audio and use its recorded date
                 List<MediaEntity> mediaList = new ArrayList<>();
                 for (HearingEntity hearingEntity : courtCase.getHearings()) {
-                    mediaList.addAll(hearingEntity.getMedias());
+                    mediaList.addAll(hearingEntity.getMedias().stream()
+                         .filter(MediaEntity::isCurrent)
+                         .toList());
                 }
                 if (mediaList.isEmpty()) {
                     //look for the last hearing date and use that
