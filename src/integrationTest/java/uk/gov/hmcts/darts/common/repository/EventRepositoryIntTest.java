@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -351,32 +350,69 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void searchEventsFilteringOn_ReturnsMatchEvents_WithNoSearchCriteria() {
-        EventEntity eventEntity1 = EventTestData.someMinimalEvent();
-        EventEntity eventEntity2 = EventTestData.someMinimalEvent();
-        EventEntity eventEntity3 = EventTestData.someMinimalEvent();
 
+        // Create and save courthouses with consistent display names
+        var courthouse1 = PersistableFactory.getCourthouseTestData().someMinimal();
+        courthouse1.setDisplayName("SOME-COURTHOUSE-1111");
+        var courthouse2 = PersistableFactory.getCourthouseTestData().someMinimal();
+        courthouse2.setDisplayName("SOME-COURTHOUSE-2222");
+        var courthouse3 = PersistableFactory.getCourthouseTestData().someMinimal();
+        courthouse3.setDisplayName("SOME-COURTHOUSE-3333");
+
+        dartsDatabase.save(courthouse1);
+        dartsDatabase.save(courthouse2);
+        dartsDatabase.save(courthouse3);
+
+        // Create and save courtrooms linked to courthouses
+        var courtroom1 = PersistableFactory.getCourtroomTestData().someMinimal();
+        courtroom1.setCourthouse(courthouse1);
+        var courtroom2 = PersistableFactory.getCourtroomTestData().someMinimal();
+        courtroom2.setCourthouse(courthouse2);
+        var courtroom3 = PersistableFactory.getCourtroomTestData().someMinimal();
+        courtroom3.setCourthouse(courthouse3);
+
+        dartsDatabase.save(courtroom1);
+        dartsDatabase.save(courtroom2);
+        dartsDatabase.save(courtroom3);
+
+        // Create and save hearings
         HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimal();
         HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimal();
         HearingEntity hearing3 = PersistableFactory.getHearingTestData().someMinimal();
+
+        hearing1.setCourtroom(courtroom1);
+        hearing2.setCourtroom(courtroom2);
+        hearing3.setCourtroom(courtroom3);
 
         dartsDatabase.save(hearing1);
         dartsDatabase.save(hearing2);
         dartsDatabase.save(hearing3);
 
-        eventEntity1.setHearingEntities(Set.of(hearing1));
-        eventEntity2.setHearingEntities(Set.of(hearing2));
-        eventEntity3.setHearingEntities(Set.of(hearing3));
+        // Create and save events linked to courtrooms and hearings
+        EventEntity event1 = EventTestData.someMinimalEvent();
+        event1.setCourtroom(courtroom1);
+        event1.setHearingEntities(Set.of(hearing1));
 
-        var event1 = dartsDatabase.save(eventEntity1);
-        var event2 = dartsDatabase.save(eventEntity2);
-        var event3 = dartsDatabase.save(eventEntity3);
+        EventEntity event2 = EventTestData.someMinimalEvent();
+        event2.setCourtroom(courtroom2);
+        event2.setHearingEntities(Set.of(hearing2));
 
-        var persistedEventsForCourtroom = List.of(event1, event2, event3);
+        EventEntity event3 = EventTestData.someMinimalEvent();
+        event3.setCourtroom(courtroom3);
+        event3.setHearingEntities(Set.of(hearing3));
 
-        var mutablePersistedEvents = new ArrayList<>(persistedEventsForCourtroom);
+        var persistedEvents = List.of(
+            dartsDatabase.save(event1),
+            dartsDatabase.save(event2),
+            dartsDatabase.save(event3)
+        );
+
+        // Sort events by courthouse display name
+        var mutablePersistedEvents = new ArrayList<>(persistedEvents);
         mutablePersistedEvents.sort((ev1, ev2) -> ev1.getCourtroom().getCourthouse().getDisplayName().compareTo(
             ev2.getCourtroom().getCourthouse().getDisplayName()));
 
+        // Call the repository method
         List<EventSearchResult> eventSearchResults = eventRepository.searchEventsFilteringOn(
             null,
             null,
@@ -386,11 +422,12 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
             Limit.of(10)
         );
 
-        assertThat(mutablePersistedEvents).hasSize(3);
+        // Assert the results
+        assertThat(eventSearchResults).hasSize(3);
         assertThat(eventSearchResults)
-            .extracting(event -> event.courtHouseDisplayName())
+            .extracting(EventSearchResult::courtHouseDisplayName)
             .isEqualTo(mutablePersistedEvents.stream()
-                           .map(event -> event.getCourtroom().getCourthouse().getDisplayName().toUpperCase(Locale.ROOT))
+                           .map(event -> event.getCourtroom().getCourthouse().getDisplayName())
                            .toList());
     }
 
