@@ -87,7 +87,7 @@ public enum AuthorisationError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
-    private final boolean shouldLogException;
+    private final boolean logException;
 
     AuthorisationError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
         this(errorTypeNumeric, httpStatus, title, true);
@@ -100,7 +100,7 @@ public enum AuthorisationError implements DartsApiError {
 
     @Override
     public boolean shouldLogException() {
-        return shouldLogException;
+        return logException;
     }
 
 }

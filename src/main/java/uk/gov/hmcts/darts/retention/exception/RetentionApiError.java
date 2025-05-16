@@ -98,7 +98,7 @@ public enum RetentionApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
-    private final boolean shouldLogException;
+    private final boolean logException;
 
     RetentionApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
         this(errorTypeNumeric, httpStatus, title, true);
@@ -111,6 +111,6 @@ public enum RetentionApiError implements DartsApiError {
 
     @Override
     public boolean shouldLogException() {
-        return shouldLogException;
+        return logException;
     }
 }

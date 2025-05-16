@@ -141,7 +141,7 @@ public enum TranscriptionApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
-    private final boolean shouldLogException;
+    private final boolean logException;
 
     TranscriptionApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
         this(errorTypeNumeric, httpStatus, title, true);
@@ -154,7 +154,7 @@ public enum TranscriptionApiError implements DartsApiError {
 
     @Override
     public boolean shouldLogException() {
-        return shouldLogException;
+        return logException;
     }
 
 }
