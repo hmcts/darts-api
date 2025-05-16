@@ -277,16 +277,16 @@ class AdminTranscriptionServiceTest {
 
 
     @Test
-    void hideOrShowTranscriptionDocumentById_shouldSetMarkedForDeletion_whenObjectHiddenReasonIsMarkedForDeletion() {
+    void hideOrShowTranscriptionDocumentById_shouldNotSetMarkedForDeletion_whenObjectHiddenReasonIsMarkedForDeletion() {
         assertTestTranscriptionDocumentHide(new TranscriptionDocumentHideRequest(), true);
     }
 
     @Test
-    void hideOrShowTranscriptionDocumentById_shouldNotSetMarkedForDeletion_whenObjectHiddenReasonNotIsMarkedForDeletion() {
+    void hideOrShowTranscriptionDocumentById_shouldNotSetMarkedForDeletion_whenObjectHiddenReasonIsNotMarkedForDeletion() {
         assertTestTranscriptionDocumentHide(new TranscriptionDocumentHideRequest(), false);
     }
 
-    void assertTestTranscriptionDocumentHide(TranscriptionDocumentHideRequest request, boolean isMarkedForDeleton) {
+    void assertTestTranscriptionDocumentHide(TranscriptionDocumentHideRequest request, boolean isMarkedForDeletion) {
         Long hideOrShowTranscriptionDocument = 343L;
         Integer reasonId = 555;
 
@@ -309,7 +309,7 @@ class AdminTranscriptionServiceTest {
         when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
         ObjectHiddenReasonEntity objectHiddenReasonEntity = new ObjectHiddenReasonEntity();
-        objectHiddenReasonEntity.setMarkedForDeletion(isMarkedForDeleton);
+        objectHiddenReasonEntity.setMarkedForDeletion(isMarkedForDeletion);
         TranscriptionDocumentHideResponse expectedResponse = new TranscriptionDocumentHideResponse();
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(objectHiddenReasonEntity));
@@ -333,15 +333,9 @@ class AdminTranscriptionServiceTest {
         assertEquals(reasonId, request.getAdminAction().getReasonId());
         assertNotNull(objectAdminAction.getHiddenBy());
         assertNotNull(objectAdminAction.getHiddenDateTime());
-        if (isMarkedForDeleton) {
-            assertTrue(objectAdminAction.isMarkedForManualDeletion());
-            assertNotNull(objectAdminAction.getMarkedForManualDelBy());
-            assertNotNull(objectAdminAction.getMarkedForManualDelDateTime());
-        } else {
-            assertNull(objectAdminAction.getMarkedForManualDelBy());
-            assertNull(objectAdminAction.getMarkedForManualDelDateTime());
-            assertFalse(objectAdminAction.isMarkedForManualDeletion());
-        }
+        assertNull(objectAdminAction.getMarkedForManualDelBy());
+        assertNull(objectAdminAction.getMarkedForManualDelDateTime());
+        assertFalse(objectAdminAction.isMarkedForManualDeletion());
         verify(auditApi).record(HIDE_TRANSCRIPTION);
     }
 
