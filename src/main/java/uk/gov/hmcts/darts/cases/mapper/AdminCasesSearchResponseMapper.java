@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -46,9 +47,9 @@ public class AdminCasesSearchResponseMapper {
         return responseCourthouse;
     }
 
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")//TODO - refactor to avoid instantiating objects in loops when this is next edited
     private List<CourtroomResponseObject> createCourtroomList(List<HearingEntity> hearings) {
-        List<CourtroomEntity> courtroomEntityList = hearings.stream().map(HearingEntity::getCourtroom).distinct().toList();
+        List<CourtroomEntity> courtroomEntityList = new ArrayList<>(hearings.stream().map(HearingEntity::getCourtroom).distinct().toList());
+        courtroomEntityList.sort(Comparator.comparing(CourtroomEntity::getName));
         List<CourtroomResponseObject> responseList = new ArrayList<>();
         for (CourtroomEntity courtroomEntity : courtroomEntityList) {
             CourtroomResponseObject courtroomResponseObject = new CourtroomResponseObject();
