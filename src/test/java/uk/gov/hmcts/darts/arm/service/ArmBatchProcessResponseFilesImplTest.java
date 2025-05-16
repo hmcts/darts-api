@@ -202,6 +202,75 @@ class ArmBatchProcessResponseFilesImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void batchProcessResponseFiles_batchSizeLargerThanMaxContinuationBatchSize_shouldLoop() {
+        // given
+        final String continuationToken = "abc";
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
+        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]");
+
+        BinaryData binaryData = mock(BinaryData.class);
+        when(armDataManagementApi.getBlobData(any())).thenReturn(binaryData);
+        String inputUploadResponse = INPUT_UPLOAD_RESPONSE.replace(DATETIMEKEY, INPUT_UPLOAD_RESPONSE_DATETIME);
+        when(binaryData.toString()).thenReturn(inputUploadResponse);
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifest2Uuid = UUID.randomUUID().toString();
+
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(List.of(blobNameAndPath1))
+            .continuationToken(continuationToken)
+            .build();
+        ContinuationTokenBlobs continuationTokenBlobs2 = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(List.of(blobNameAndPath2))
+            .continuationToken(null)
+            .build();
+
+        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(1);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 1, null)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 1, continuationToken)).thenReturn(continuationTokenBlobs2);
+
+
+        List<ExternalObjectDirectoryEntity> inboundList1 = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = mock(ExternalObjectDirectoryEntity.class);
+        List<ExternalObjectDirectoryEntity> inboundList2 = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntity2));
+
+        when(externalObjectDirectoryRepository.findAllByStatusAndManifestFile(any(), any()))
+            .thenReturn(inboundList1, inboundList2);
+
+        // when
+        armBatchProcessResponseFiles.processResponseFiles(2, asyncTaskConfig);
+
+        // then
+        final String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        final String manifestFile2 = "DARTS_" + manifest1Uuid + ".a360";
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);
+        verify(externalObjectDirectoryRepository, times(2)).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile1);
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile2);
+        verify(externalObjectDirectoryRepository, times(2)).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile2);
+
+        verify(armDataManagementApi).getBlobData(blobNameAndPath1);
+        verify(armDataManagementApi).getBlobData(blobNameAndPath2);
+
+        OffsetDateTime inputUploadProcessedTs = OffsetDateTime.parse(INPUT_UPLOAD_RESPONSE_DATETIME);
+        verify(externalObjectDirectoryArmDropZone).setInputUploadProcessedTs(inputUploadProcessedTs);
+        verify(externalObjectDirectoryEntity2).setInputUploadProcessedTs(inputUploadProcessedTs);
+
+        verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryArmDropZone));
+        verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryEntity2));
+
+
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, 1, null);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, 1, continuationToken);
+        verifyNoMoreInteractions(logApi);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void batchProcessResponseFilesWithBatchSizeTwoWithFailedToUpload() {
 
         // given
