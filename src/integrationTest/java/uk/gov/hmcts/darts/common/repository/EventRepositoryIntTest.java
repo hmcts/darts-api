@@ -380,13 +380,14 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
         HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimal();
         HearingEntity hearing3 = PersistableFactory.getHearingTestData().someMinimal();
 
-        hearing1.setCourtroom(courtroom1);
-        hearing2.setCourtroom(courtroom2);
-        hearing3.setCourtroom(courtroom3);
-
         dartsDatabase.save(hearing1);
         dartsDatabase.save(hearing2);
         dartsDatabase.save(hearing3);
+
+        hearing1.setCourtroom(courtroom1);
+        hearing2.setCourtroom(courtroom2);
+        hearing3.setCourtroom(courtroom3);
+        dartsDatabase.saveAll(hearing1, hearing2, hearing3);
 
         // Create and save events linked to courtrooms and hearings
         EventEntity event1 = EventTestData.someMinimalEvent();
