@@ -41,8 +41,7 @@ public enum TranscriptionApiError implements DartsApiError {
     TRANSCRIPTION_WORKFLOW_ACTION_INVALID(
         TranscriptionsErrorCode.TRANSCRIPTION_WORKFLOW_ACTION_INVALID.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.TRANSCRIPTION_WORKFLOW_ACTION_INVALID.toString(),
-        false
+        TranscriptionsTitleErrors.TRANSCRIPTION_WORKFLOW_ACTION_INVALID.toString()
     ),
     BAD_REQUEST_TRANSCRIPTION_URGENCY(
         TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_URGENCY.getValue(),
@@ -99,8 +98,7 @@ public enum TranscriptionApiError implements DartsApiError {
     TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue(),
-        false
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue()
     ),
     TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue(),

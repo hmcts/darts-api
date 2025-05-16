@@ -74,8 +74,7 @@ public enum AuthorisationError implements DartsApiError {
     UNABLE_TO_DEACTIVATE_USER(
         AuthorisationErrorCode.UNABLE_TO_DEACTIVATE_USER.getValue(),
         HttpStatus.CONFLICT,
-        AuthorisationTitleErrors.UNABLE_TO_DEACTIVATE_USER.getValue(),
-        false
+        AuthorisationTitleErrors.UNABLE_TO_DEACTIVATE_USER.getValue()
     ),
     USER_NOT_AUTHORISED_TO_ACTIVATE_USER(
         AuthorisationErrorCode.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getValue(),

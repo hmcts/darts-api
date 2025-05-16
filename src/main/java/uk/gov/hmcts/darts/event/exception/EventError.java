@@ -30,8 +30,7 @@ public enum EventError implements DartsApiError {
     EVENT_MAPPING_DOES_NOT_EXIST_IN_DB(
         EventErrorCode.NO_EVENT_MAPPING.getValue(),
         HttpStatus.CONFLICT,
-        EventTitleErrors.NO_EVENT_MAPPING.toString(),
-        false
+        EventTitleErrors.NO_EVENT_MAPPING.toString()
     ),
     EVENT_HANDLER_NAME_DOES_NOT_EXIST(
         EventErrorCode.INVALID_HANDLER_MAPPING_NAME.getValue(),
@@ -63,8 +62,7 @@ public enum EventError implements DartsApiError {
     EVENT_ALREADY_CURRENT(
         EventErrorCode.EVENT_ALREADY_CURRENT.getValue(),
         HttpStatus.CONFLICT,
-        EventTitleErrors.EVENT_ALREADY_CURRENT.toString(),
-        false
+        EventTitleErrors.EVENT_ALREADY_CURRENT.toString()
     ),
     CAN_NOT_UPDATE_EVENT_ID_0(
         EventErrorCode.CAN_NOT_UPDATE_EVENT_ID_0.getValue(),

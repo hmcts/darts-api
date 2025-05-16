@@ -101,8 +101,7 @@ public enum AudioApiError implements DartsApiError {
     MEDIA_ALREADY_CURRENT(
         AddAudioErrorCode.MEDIA_ALREADY_CURRENT.getValue(),
         HttpStatus.CONFLICT,
-        AddAudioTitleErrors.MEDIA_ALREADY_CURRENT.getValue(),
-        false
+        AddAudioTitleErrors.MEDIA_ALREADY_CURRENT.getValue()
     );
 
 
