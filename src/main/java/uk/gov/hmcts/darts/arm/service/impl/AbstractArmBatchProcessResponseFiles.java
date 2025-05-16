@@ -100,18 +100,17 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             String continuationToken = null;
             // Iterate through the continuation token until no more data is found. First time round continuation token is null
             // which sets up the session and when there are no more results the result from listResponseBlobsUsingMarker will be null
-            for (int pageSize = 0; pageSize < batchSize; pageSize += maxContinuationBatchSize) {
-
+            final int effectiveBatchSize = Math.min(batchSize, maxContinuationBatchSize);
+            for (int inputUploadResponseFilesFound = 0; inputUploadResponseFilesFound < batchSize; inputUploadResponseFilesFound += effectiveBatchSize) {
                 ContinuationTokenBlobs continuationTokenData =
-                    armDataManagementApi.listResponseBlobsUsingMarker(prefix, batchSize, continuationToken);
-                if (nonNull(continuationTokenData)) {
-                    inputUploadResponseFiles.addAll(continuationTokenData.getBlobNamesAndPaths());
-                    continuationToken = continuationTokenData.getContinuationToken();
-                }
+                    armDataManagementApi.listResponseBlobsUsingMarker(prefix, effectiveBatchSize, continuationToken);
                 // if no more data found break out of loop
+                continuationToken = continuationTokenData.getContinuationToken();
                 if (isNull(continuationToken)) {
                     break;
                 }
+                inputUploadResponseFiles.addAll(continuationTokenData.getBlobNamesAndPaths());
+                continuationToken = continuationTokenData.getContinuationToken();
             }
         } catch (Exception e) {
             log.error("Unable to find response file for prefix: {}", prefix, e);
