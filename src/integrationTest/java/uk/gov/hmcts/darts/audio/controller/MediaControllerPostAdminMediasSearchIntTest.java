@@ -162,9 +162,12 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
         OffsetDateTime twelfth10am = OffsetDateTime.of(2020, 10, 12, 10, 0, 0, 0, ZoneOffset.UTC);
         startTime = twelfth10am.plusHours(1).plusSeconds(1);
         mediaEntity2d = createMedia(courthouse2, "courtroom2", startTime, "caseNumber2");
+        mediaEntity2d.setChannel(1);
         mediaEntity2e = createMedia(courthouse2, "courtroom2", startTime.plusSeconds(1), "caseNumber2");
+        mediaEntity2e.setChannel(2);
         mediaEntity2f = createMedia(courthouse2, "courtroom2", startTime.plusSeconds(2), "caseNumber2");
-
+        mediaEntity2f.setChannel(3);
+        dartsDatabase.saveAll(mediaEntity2d, mediaEntity2e, mediaEntity2f);
         startTime = twelfth10am.plusHours(2).plusSeconds(1);
         mediaEntity3d = createMedia(courthouse2, "courtroom2", startTime, "caseNumber3");
         mediaEntity3e = createMedia(courthouse2, "courtroom2", startTime.plusSeconds(1), "caseNumber3");
@@ -465,13 +468,84 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
     }
 
+    @Test
+    void adminSearchForMedia_ShouldOnlyReturnCurrentMedia_whenMediaMatchesCaseNumberAndCourtroom() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        PostAdminMediasSearchRequest request = new PostAdminMediasSearchRequest();
+        request.setCaseNumber("caseNumber2");
+        request.setCourtroomName("courtroom2");
+
+        // run the test
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        List<MediaEntity> expectedEntities = List.of(mediaEntity2d, mediaEntity2e, mediaEntity2f);
+        assertResponseItems(expectedEntities, mvcResult);
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String expectedResponse = """
+            [
+                  {
+                    "id": 23,
+                    "courthouse": {
+                      "id": 2,
+                      "display_name": "COURTHOUSE2"
+                    },
+                    "courtroom": {
+                      "id": 3,
+                      "name": "COURTROOM2"
+                    },
+                    "start_at": "2020-10-12T11:00:01Z",
+                    "end_at": "2020-10-12T12:00:01Z",
+                    "channel": 1,
+                    "is_hidden": false
+                  },
+                  {
+                    "id": 24,
+                    "courthouse": {
+                      "id": 2,
+                      "display_name": "COURTHOUSE2"
+                    },
+                    "courtroom": {
+                      "id": 3,
+                      "name": "COURTROOM2"
+                    },
+                    "start_at": "2020-10-12T11:00:02Z",
+                    "end_at": "2020-10-12T12:00:02Z",
+                    "channel": 2,
+                    "is_hidden": false
+                  },
+                  {
+                    "id": 25,
+                    "courthouse": {
+                      "id": 2,
+                      "display_name": "COURTHOUSE2"
+                    },
+                    "courtroom": {
+                      "id": 3,
+                      "name": "COURTROOM2"
+                    },
+                    "start_at": "2020-10-12T11:00:03Z",
+                    "end_at": "2020-10-12T12:00:03Z",
+                    "channel": 3,
+                    "is_hidden": false
+                  }
+                ]
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     private void assertResponseItems(List<MediaEntity> expectedEntities, MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
         String contentAsString = mvcResult.getResponse().getContentAsString();
 
         List<Long> expectedIds = expectedEntities.stream().map(MediaEntity::getId).sorted().toList();
-        List<PostAdminMediasSearchResponseItem> actualResponseItems = objectMapper.readValue(contentAsString,
-                                                                                             new TypeReference<>() {
-                                                                                             });
+        List<PostAdminMediasSearchResponseItem> actualResponseItems =
+            objectMapper.readValue(contentAsString, new TypeReference<>() {
+            });
         List<Long> actualIds = actualResponseItems.stream().map(PostAdminMediasSearchResponseItem::getId).sorted().toList();
         assertThat(actualIds, is(expectedIds));
     }

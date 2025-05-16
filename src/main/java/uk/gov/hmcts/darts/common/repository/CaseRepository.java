@@ -118,8 +118,9 @@ public interface CaseRepository
     @Query("""
         SELECT cc
         FROM CourtCaseEntity cc
-        WHERE cc.id in :ids
-        ORDER BY cc.caseNumber DESC
+        WHERE cc.id IN :ids
+        ORDER BY cc.courthouse.courthouseName ASC,
+            cc.caseNumber ASC
         """)
     List<CourtCaseEntity> findAllWithIdMatchingOneOf(List<Integer> ids);
 }
