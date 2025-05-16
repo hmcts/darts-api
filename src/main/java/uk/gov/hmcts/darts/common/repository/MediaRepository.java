@@ -130,9 +130,9 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
         WHERE hearing.courtCase.id = :caseId
         """)
     List<MediaEntity> findByCaseIdWithMediaList(Integer caseId);
-    
+
     @Query("""
-        SELECT new uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem(
+        SELECT DISTINCT new uk.gov.hmcts.darts.cases.model.AdminCaseAudioResponseItem(
             med.id,
             med.start,
             med.end,
@@ -143,6 +143,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
         JOIN med.hearings hea
         WHERE hea.courtCase.id = :caseId
         AND med.isCurrent = true
+        GROUP BY med.id, med.start, med.end, med.channel, med.courtroom.name
         """)
     Page<AdminCaseAudioResponseItem> findByCaseIdAndIsCurrentTruePageable(Integer caseId, Pageable pageable);
 }
