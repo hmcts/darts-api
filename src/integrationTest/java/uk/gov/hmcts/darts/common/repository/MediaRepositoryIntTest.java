@@ -473,47 +473,40 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void findByCaseIdAndIsCurrentTruePageable_ReturnsDistinctPaginatedList_WhereMediaIsLinkedToMultipleHearings() {
         // given
-        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
-        dartsPersistence.save(hearing1);
+        var caseA = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var hearA1 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
+        var hearA2 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
+        var hearA3 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
 
-        MediaEntity media1 = PersistableFactory.getMediaTestData().someMinimal();
-        media1.setChannel(1);
-        media1.setCourtroom(hearing1.getCourtroom());
-        media1.setIsCurrent(true);
+        var caseB = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var hearB = PersistableFactory.getHearingTestData().createHearingFor(caseB);
+
+        var caseC = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var hearC = PersistableFactory.getHearingTestData().createHearingFor(caseC);
+
+        var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        var media3 = PersistableFactory.getMediaTestData().someMinimalMedia();
         dartsPersistence.save(media1);
-
-        MediaEntity media2 = PersistableFactory.getMediaTestData().someMinimal();
-        media2.setChannel(2);
-        media2.setCourtroom(hearing1.getCourtroom());
-        media2.setIsCurrent(true);
         dartsPersistence.save(media2);
-
-        MediaEntity media3 = PersistableFactory.getMediaTestData().someMinimal();
-        media3.setChannel(3);
-        media3.setCourtroom(hearing1.getCourtroom());
-        media3.setIsCurrent(true);
         dartsPersistence.save(media3);
 
-        hearing1.addMedia(media1);
-        hearing1.addMedia(media2);
-        hearing1.addMedia(media3);
+        hearA1.addMedia(media1);
+        hearA1.addMedia(media2);
+        hearA2.addMedia(media3);
+        hearB.addMedia(media1);
 
-        hearingRepository.saveAll(List.of(hearing1));
+        dartsPersistence.saveAll(hearA1, hearA2, hearA3, hearB, hearC);
 
-        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
-        dartsPersistence.save(hearing2);
-
-        hearing2.addMedia(media1);
-        hearing2.addMedia(media2);
-        hearing2.addMedia(media3);
-
-        hearingRepository.saveAll(List.of(hearing2));
+        mediaLinkedCaseRepository.save(createMediaLinkedCase(media1, caseA));
+        mediaLinkedCaseRepository.save(createMediaLinkedCase(media2, caseA));
+        mediaLinkedCaseRepository.save(createMediaLinkedCase(media3, caseC));
 
         Pageable sortedByMediaDesc =
             PageRequest.of(0, 3, Sort.by("med.id").descending());
 
         // when
-        Page<AdminCaseAudioResponseItem> pages = mediaRepository.findByCaseIdAndIsCurrentTruePageable(hearing1.getCourtCase().getId(), sortedByMediaDesc);
+        Page<AdminCaseAudioResponseItem> pages = mediaRepository.findByCaseIdAndIsCurrentTruePageable(caseA.getId(), sortedByMediaDesc);
 
         // then
         assertEquals(3, pages.getTotalElements());
@@ -525,7 +518,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
         assertThat(results)
             .extracting(AdminCaseAudioResponseItem::getChannel)
-            .containsExactly(3, 2, 1);
+            .containsExactly(1, 1, 1);
 
     }
 }
