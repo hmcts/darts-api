@@ -101,9 +101,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             // Iterate through the continuation token until no more data is found. First time round continuation token is null
             // which sets up the session and when there are no more results the result from listResponseBlobsUsingMarker will be null
             for (int pageSize = 0; pageSize < batchSize; pageSize += maxContinuationBatchSize) {
-
+                int listBatchSize = Math.min(maxContinuationBatchSize, batchSize);
                 ContinuationTokenBlobs continuationTokenData =
-                    armDataManagementApi.listResponseBlobsUsingMarker(prefix, maxContinuationBatchSize, continuationToken);
+                    armDataManagementApi.listResponseBlobsUsingMarker(prefix, listBatchSize, continuationToken);
                 if (nonNull(continuationTokenData)) {
                     inputUploadResponseFiles.addAll(continuationTokenData.getBlobNamesAndPaths());
                     continuationToken = continuationTokenData.getContinuationToken();
