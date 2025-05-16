@@ -133,6 +133,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             )
         );
 
+        clearEntityManagerCache();
         assertEquals(1, outboundAudioDeleterProcessor.markForDeletion(1000).size());
 
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
@@ -173,6 +174,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             )
         );
 
+        clearEntityManagerCache();
         assertEquals(1, outboundAudioDeleterProcessor.markForDeletion(1000).size());
 
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
@@ -300,6 +302,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             OffsetDateTime.parse("2023-10-25T11:45:00Z")
         );
 
+        clearEntityManagerCache();
         assertEquals(1, outboundAudioDeleterProcessor.markForDeletion(1000).size());
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
         assertEquals(
@@ -424,6 +427,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             )
         );
 
+        clearEntityManagerCache();
         assertEquals(1, outboundAudioDeleterProcessor.markForDeletion(1000).size());
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
@@ -492,6 +496,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     void whereLastAccessedIsNullUseCreatedAtAndInProgressStatus() {
         TransientObjectDirectoryEntity markedForDeletion = createMediaRequestsAndTransientObjectDirectoryWithHearingWithLastAccessedTimeIsNull();
 
+        clearEntityManagerCache();
         List<TransientObjectDirectoryEntity> responseList = outboundAudioDeleterProcessor.markForDeletion(1000);
         assertEquals(1, responseList.size());
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
