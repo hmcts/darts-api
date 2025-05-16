@@ -15,4 +15,8 @@ public interface DartsApiError {
     default String getType() {
         return getErrorTypeNumeric();
     }
+
+    default boolean shouldLogException() {
+        return true;
+    }
 }
