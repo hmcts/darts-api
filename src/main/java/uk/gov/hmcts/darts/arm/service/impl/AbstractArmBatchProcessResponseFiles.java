@@ -103,7 +103,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             for (int pageSize = 0; pageSize < batchSize; pageSize += maxContinuationBatchSize) {
 
                 ContinuationTokenBlobs continuationTokenData =
-                    armDataManagementApi.listResponseBlobsUsingMarker(prefix, maxContinuationBatchSize, continuationToken);
+                    armDataManagementApi.listResponseBlobsUsingMarker(prefix, batchSize, continuationToken);
                 if (nonNull(continuationTokenData)) {
                     inputUploadResponseFiles.addAll(continuationTokenData.getBlobNamesAndPaths());
                     continuationToken = continuationTokenData.getContinuationToken();

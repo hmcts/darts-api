@@ -169,8 +169,8 @@ class ArmBatchProcessResponseFilesImplTest {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(2);
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 2, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(BATCH_SIZE * 2);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         List<ExternalObjectDirectoryEntity> inboundList1 = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = mock(ExternalObjectDirectoryEntity.class);
         List<ExternalObjectDirectoryEntity> inboundList2 = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntity2));
@@ -196,6 +196,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
         verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryArmDropZone));
         verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryEntity2));
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verifyNoMoreInteractions(logApi);
     }
 
@@ -241,8 +242,8 @@ class ArmBatchProcessResponseFilesImplTest {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(2);
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 2, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(BATCH_SIZE * 2);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = mock(ExternalObjectDirectoryEntity.class);
 
@@ -269,6 +270,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
         verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryEntity1));
         verify(externalObjectDirectoryRepository).saveAll(any());
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verifyNoMoreInteractions(logApi);
     }
 
@@ -417,8 +419,8 @@ class ArmBatchProcessResponseFilesImplTest {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(2);
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 2, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(BATCH_SIZE * 2);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
 
         try (MockedStatic<AsyncUtil> mockedStatic = mockStatic(AsyncUtil.class)) {
             // Mock the static method call to throw InterruptedException
