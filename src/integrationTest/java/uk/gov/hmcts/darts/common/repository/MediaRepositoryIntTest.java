@@ -477,12 +477,15 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         var hearA1 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
         var hearA2 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
         var hearA3 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
+        dartsPersistence.saveAll(hearA1, hearA2, hearA3);
 
         var caseB = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         var hearB = PersistableFactory.getHearingTestData().createHearingFor(caseB);
+        dartsPersistence.saveAll(hearB);
 
         var caseC = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         var hearC = PersistableFactory.getHearingTestData().createHearingFor(caseC);
+        dartsPersistence.saveAll(hearC);
 
         var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
         var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
