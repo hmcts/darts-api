@@ -52,12 +52,16 @@ public class AdminCasesSearchResponseMapper {
         courtroomEntityList.sort(Comparator.comparing(CourtroomEntity::getName));
         List<CourtroomResponseObject> responseList = new ArrayList<>();
         for (CourtroomEntity courtroomEntity : courtroomEntityList) {
-            CourtroomResponseObject courtroomResponseObject = new CourtroomResponseObject();
-            courtroomResponseObject.setId(courtroomEntity.getId());
-            courtroomResponseObject.setName(courtroomEntity.getName());
-            responseList.add(courtroomResponseObject);
+            responseList.add(createCourtroomResponseObject(courtroomEntity));
         }
         return responseList;
+    }
+
+    private static CourtroomResponseObject createCourtroomResponseObject(CourtroomEntity courtroomEntity) {
+        CourtroomResponseObject courtroomResponseObject = new CourtroomResponseObject();
+        courtroomResponseObject.setId(courtroomEntity.getId());
+        courtroomResponseObject.setName(courtroomEntity.getName());
+        return courtroomResponseObject;
     }
 
 }
