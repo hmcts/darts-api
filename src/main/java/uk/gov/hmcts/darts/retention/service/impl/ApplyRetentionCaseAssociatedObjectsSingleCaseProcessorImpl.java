@@ -62,7 +62,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private final CaseRetentionConfidenceReasonMapper caseRetentionConfidenceReasonMapper;
 
-    private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
     private final ObjectMapper objectMapper;
 
@@ -145,7 +144,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var longestRetentionDate = findLongestRetentionDate(cases);
         if (longestRetentionDate != null) {
             media.setRetainUntilTs(longestRetentionDate);
-            media.setLastModifiedBy(userIdentity.getUserAccount());
             var armEods = eodRepository.findByMediaAndExternalLocationType(media, EodHelper.armLocation());
             updateArmEodRetention(
                 armEods,
@@ -160,7 +158,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var longestRetentionDate = findLongestRetentionDate(cases);
         if (longestRetentionDate != null) {
             annotationDoc.setRetainUntilTs(longestRetentionDate);
-            annotationDoc.setLastModifiedBy(userIdentity.getUserAccount());
             var armEods = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(annotationDoc, EodHelper.armLocation());
             updateArmEodRetention(
                 armEods,
@@ -175,7 +172,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var longestRetentionDate = findLongestRetentionDate(cases);
         if (longestRetentionDate != null) {
             transcriptionDoc.setRetainUntilTs(longestRetentionDate);
-            transcriptionDoc.setLastModifiedBy(userIdentity.getUserAccount());
             var armEods = eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(transcriptionDoc, EodHelper.armLocation());
             updateArmEodRetention(
                 armEods,
@@ -190,7 +186,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var longestRetentionDate = findLongestRetentionDate(List.of(courtCase));
         if (longestRetentionDate != null) {
             caseDocument.setRetainUntilTs(longestRetentionDate);
-            caseDocument.setLastModifiedBy(userIdentity.getUserAccount());
             var armEods = eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation());
             updateArmEodRetention(
                 armEods,
@@ -216,9 +211,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
                 log.error("Unable to generate case retention confidence reason for media {}", media.getId());
             }
         }
-        media.setLastModifiedBy(userIdentity.getUserAccount());
         mediaRepository.saveAndFlush(media);
-
     }
 
     private void setRetentionConfidenceScoreAndReasonForAnnotationDocument(AnnotationDocumentEntity annotationDoc, List<CourtCaseEntity> cases) {
@@ -232,7 +225,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
                 format("Unable to generate retention confidence reason for annotation document %s", annotationDoc.getId()));
             annotationDoc.setRetConfReason(StringEscapeUtils.escapeJson(retentionConfidenceReasonJson));
         }
-        annotationDoc.setLastModifiedBy(userIdentity.getUserAccount());
         annotationDocumentRepository.saveAndFlush(annotationDoc);
     }
 
@@ -248,7 +240,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
                 format("Unable to generate retention confidence reason for transcription document %s", transcriptionDoc.getId()));
             transcriptionDoc.setRetConfReason(StringEscapeUtils.escapeJson(retentionConfidenceReasonJson));
         }
-        transcriptionDoc.setLastModifiedBy(userIdentity.getUserAccount());
         transcriptionDocumentRepository.saveAndFlush(transcriptionDoc);
     }
 
