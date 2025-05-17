@@ -45,7 +45,6 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
                 log.error("Error applying retention to case associated objects for case id '{}'", courtCase.getId(), exc);
                 courtCase.setRetentionRetries(courtCase.getRetentionRetries() + 1);
                 courtCase.setRetentionUpdated(true);
-                courtCase.setLastModifiedBy(userIdentity.getUserAccount());
                 caseRepository.saveAndFlush(courtCase);
             }
         }
