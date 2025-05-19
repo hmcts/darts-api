@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -12,11 +11,13 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +31,6 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createListOfJudg
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createListOfProsecutor;
 
 @Slf4j
-@Transactional
 class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     // generation count. Should always be an even number
@@ -48,6 +48,9 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
     @Autowired
     private HearingRepository hearingRepository;
 
+    @Autowired
+    protected TransactionalUtil transactionalUtil;
+
     @BeforeEach
     public void before() {
         generatedHearingEntities = hearingStub.generateHearings(GENERATION_COUNT);
@@ -55,38 +58,44 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void findHearingDetails_ReturnsAllHearings_WithNoSearchCriteria() {
-        var mutablePersistedHearings = new ArrayList<>(generatedHearingEntities);
-        mutablePersistedHearings.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getCourthouseName().compareTo(
-            event2.getCourtroom().getCourthouse().getCourthouseName()));
 
-        List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null, null,
-                                                                                     null, null,
-                                                                                     null, RESULT_LIMIT);
-        assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
-        assertThat(hearingEntityList)
-            .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
-            .isEqualTo(mutablePersistedHearings.stream()
-                           .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
-                           .toList());
+        var mutablePersistedHearings = new ArrayList<>(generatedHearingEntities);
+        mutablePersistedHearings.sort(Comparator.comparing(event -> event.getCourtroom().getCourthouse().getCourthouseName()));
+
+        transactionalUtil.executeInTransaction(
+            () -> {
+                List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(
+                    null, null, null, null, null, RESULT_LIMIT);
+                assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
+                assertThat(hearingEntityList)
+                    .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
+                    .isEqualTo(mutablePersistedHearings.stream()
+                                   .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
+                                   .toList());
+            }
+        );
     }
 
     @Test
     void findHearingDetails_ReturnsHearings_UsingLimit() {
         var mutablePersistedHearings = new ArrayList<>(generatedHearingEntities);
-        mutablePersistedHearings.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getCourthouseName().compareTo(
-            event2.getCourtroom().getCourthouse().getCourthouseName()));
+        mutablePersistedHearings.sort(Comparator.comparing(event -> event.getCourtroom().getCourthouse().getCourthouseName()));
         var expectedHearingEntities = mutablePersistedHearings.subList(0, 2);
 
         int resultLimit = 2;
-        List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null, null,
-                                                                                     null, null,
-                                                                                     null, resultLimit);
-        assertEquals(expectedHearingEntities.size(), hearingEntityList.size());
-        assertThat(hearingEntityList)
-            .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
-            .isEqualTo(expectedHearingEntities.stream()
-                           .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
-                           .toList());
+
+        transactionalUtil.executeInTransaction(
+            () -> {
+                List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null, null,
+                                                                                             null, null,
+                                                                                             null, resultLimit);
+                assertEquals(expectedHearingEntities.size(), hearingEntityList.size());
+                assertThat(hearingEntityList)
+                    .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
+                    .isEqualTo(expectedHearingEntities.stream()
+                                   .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
+                                   .toList());
+            });
     }
 
     @Test
@@ -116,26 +125,29 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
         generatedHearingEntities.subList(recordIndexToFind, recordIndexToFindNext);
         var mutablePersistedHearings = generatedHearingEntities.subList(recordIndexToFind, recordIndexToFindNext + 1);
 
-        mutablePersistedHearings.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getCourthouseName().compareTo(
-            event2.getCourtroom().getCourthouse().getCourthouseName()));
+        mutablePersistedHearings.sort(Comparator.comparing(event -> event.getCourtroom().getCourthouse().getCourthouseName()));
 
-        List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(List.of(generatedHearingEntities
-                                                                                                 .get(recordIndexToFind)
-                                                                                                 .getCourtroom().getCourthouse().getId(),
-                                                                                             generatedHearingEntities
-                                                                                                 .get(recordIndexToFindNext)
-                                                                                                 .getCourtroom().getCourthouse().getId()),
-                                                                                     null,
-                                                                                     null,
-                                                                                     null,
-                                                                                     null, RESULT_LIMIT);
+        transactionalUtil.executeInTransaction(
+            () -> {
+                List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(List.of(generatedHearingEntities
+                                                                                                         .get(recordIndexToFind)
+                                                                                                         .getCourtroom().getCourthouse().getId(),
+                                                                                                     generatedHearingEntities
+                                                                                                         .get(recordIndexToFindNext)
+                                                                                                         .getCourtroom().getCourthouse().getId()),
+                                                                                             null,
+                                                                                             null,
+                                                                                             null,
+                                                                                             null, RESULT_LIMIT);
 
-        assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
-        assertThat(hearingEntityList)
-            .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
-            .isEqualTo(mutablePersistedHearings.stream()
-                           .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
-                           .toList());
+
+                assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
+                assertThat(hearingEntityList)
+                    .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
+                    .isEqualTo(mutablePersistedHearings.stream()
+                                   .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
+                                   .toList());
+            });
     }
 
     @Test
@@ -229,21 +241,24 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
         Integer recordIndexToFindFrom = GENERATION_COUNT / 2;
         List<HearingEntity> expectedHearings = generatedHearingEntities.subList(0, recordIndexToFindFrom + 1);
         var mutablePersistedHearings = new ArrayList<>(expectedHearings);
-        mutablePersistedHearings.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getCourthouseName().compareTo(
-            event2.getCourtroom().getCourthouse().getCourthouseName()));
+        mutablePersistedHearings.sort(Comparator.comparing(event -> event.getCourtroom().getCourthouse().getCourthouseName()));
 
-        List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
-                                                                                     null,
-                                                                                     null,
-                                                                                     generatedHearingEntities.get(recordIndexToFindFrom).getHearingDate(),
-                                                                                     null, RESULT_LIMIT);
+        transactionalUtil.executeInTransaction(
+            () -> {
+                List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
+                                                                                             null,
+                                                                                             null,
+                                                                                             generatedHearingEntities.get(
+                                                                                                 recordIndexToFindFrom).getHearingDate(),
+                                                                                             null, RESULT_LIMIT);
 
-        assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
-        assertThat(hearingEntityList)
-            .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
-            .isEqualTo(mutablePersistedHearings.stream()
-                           .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
-                           .toList());
+                assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
+                assertThat(hearingEntityList)
+                    .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
+                    .isEqualTo(mutablePersistedHearings.stream()
+                                   .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
+                                   .toList());
+            });
     }
 
     @Test
@@ -252,22 +267,24 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
         generatedHearingEntities.sort((he1, he2) -> he2.getHearingDate().compareTo(he1.getHearingDate()));
         List<HearingEntity> expectedHearings = generatedHearingEntities.subList(recordIndexToFindTo, generatedHearingEntities.size());
         var mutablePersistedHearings = new ArrayList<>(expectedHearings);
-        mutablePersistedHearings.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getCourthouseName().compareTo(
-            event2.getCourtroom().getCourthouse().getCourthouseName()));
+        mutablePersistedHearings.sort(Comparator.comparing(event -> event.getCourtroom().getCourthouse().getCourthouseName()));
 
-        List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
-                                                                                     null,
-                                                                                     null,
-                                                                                     null,
-                                                                                     generatedHearingEntities.get(recordIndexToFindTo).getHearingDate(),
-                                                                                     RESULT_LIMIT);
+        transactionalUtil.executeInTransaction(
+            () -> {
+                List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
+                                                                                             null,
+                                                                                             null,
+                                                                                             null,
+                                                                                             generatedHearingEntities.get(recordIndexToFindTo).getHearingDate(),
+                                                                                             RESULT_LIMIT);
 
-        assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
-        assertThat(hearingEntityList)
-            .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
-            .isEqualTo(mutablePersistedHearings.stream()
-                           .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
-                           .toList());
+                assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
+                assertThat(hearingEntityList)
+                    .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
+                    .isEqualTo(mutablePersistedHearings.stream()
+                                   .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
+                                   .toList());
+            });
     }
 
     @Test
@@ -278,25 +295,27 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
         Integer recordIndexToFindTo = (GENERATION_COUNT / 2) + recordToOffset - 1;
 
         List<HearingEntity> expectedHearings = generatedHearingEntities.subList(recordIndexToFindFrom, recordIndexToFindTo + 1);
-        assertEquals(expectedHearings.size(), expectedHearings.size());
 
         var mutablePersistedHearings = new ArrayList<>(expectedHearings);
-        mutablePersistedHearings.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getCourthouseName().compareTo(
-            event2.getCourtroom().getCourthouse().getCourthouseName()));
+        mutablePersistedHearings.sort(Comparator.comparing(event -> event.getCourtroom().getCourthouse().getCourthouseName()));
 
-        List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
-                                                                                     null,
-                                                                                     null,
-                                                                                     generatedHearingEntities.get(recordIndexToFindTo).getHearingDate(),
-                                                                                     generatedHearingEntities.get(recordIndexToFindFrom).getHearingDate(),
-                                                                                     RESULT_LIMIT);
+        transactionalUtil.executeInTransaction(
+            () -> {
+                List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null,
+                                                                                             null,
+                                                                                             null,
+                                                                                             generatedHearingEntities.get(recordIndexToFindTo).getHearingDate(),
+                                                                                             generatedHearingEntities.get(
+                                                                                                 recordIndexToFindFrom).getHearingDate(),
+                                                                                             RESULT_LIMIT);
 
-        assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
-        assertThat(hearingEntityList)
-            .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
-            .isEqualTo(mutablePersistedHearings.stream()
-                           .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
-                           .toList());
+                assertEquals(mutablePersistedHearings.size(), hearingEntityList.size());
+                assertThat(hearingEntityList)
+                    .extracting(hearing1 -> hearing1.getCourtroom().getCourthouse().getCourthouseName())
+                    .isEqualTo(mutablePersistedHearings.stream()
+                                   .map(hearing2 -> hearing2.getCourtroom().getCourthouse().getCourthouseName())
+                                   .toList());
+            });
     }
 
     @Test
@@ -386,9 +405,6 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
             String courthouseName = " Test Courthouse ";
             String courtroomName = " Test Courtroom ";
 
-            log.info("Courthouse name: {}", courthouseName);
-            log.info("Courtroom name: {}", courtroomName);
-
             // when
             List<HearingEntity> hearingEntities = hearingRepository.findByCourthouseCourtroomAndDate(
                 courthouseName,
@@ -419,9 +435,6 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
             String courthouseName = hearingForCase.getCourtroom().getCourthouse().getCourthouseName();
             String courtroomName = hearingForCase.getCourtroom().getName();
-
-            log.info("Courthouse name: {}", courthouseName);
-            log.info("Courtroom name: {}", courtroomName);
 
             // when
             Optional<HearingEntity> hearingEntities = hearingRepository.findHearing(
@@ -454,9 +467,6 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
             String courthouseName = " Test Courthouse ";
             String courtroomName = " Test Courtroom ";
-
-            log.info("Courthouse name: {}", courthouseName);
-            log.info("Courtroom name: {}", courtroomName);
 
             // when
             Optional<HearingEntity> hearingEntities = hearingRepository.findHearing(
