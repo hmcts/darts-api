@@ -400,7 +400,7 @@ repositories {
 
 ext {
   log4JVersion = "2.24.3"
-  tomcatEmbedVersion = "11.0.6"
+  tomcatEmbedVersion = "11.0.7"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -474,7 +474,7 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
-  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.5'
+  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.0'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.15.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.5.Final'
 
