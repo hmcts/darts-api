@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleEleme
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -35,16 +34,16 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
 
     @Override
     @Transactional
-    public List<TransientObjectDirectoryEntity> markForDeletion(UserAccountEntity userAccount, TransformedMediaEntity transformedMedia) {
+    public List<TransientObjectDirectoryEntity> markForDeletion(TransformedMediaEntity transformedMedia) {
 
-        markTransformedMediaAsExpired(userAccount, transformedMedia);
+        markTransformedMediaAsExpired(transformedMedia);
 
         ObjectRecordStatusEntity deletionStatus = EodHelper.markForDeletionStatus();
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByTransformedMediaId(
             transformedMedia.getId()
         );
         for (TransientObjectDirectoryEntity entity : transientObjectDirectoryEntities) {
-            markTransientObjectDirectoryAsDeleted(entity, userAccount, deletionStatus);
+            markTransientObjectDirectoryAsDeleted(entity, deletionStatus);
         }
 
         return transientObjectDirectoryEntities;
@@ -57,13 +56,12 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
      */
     @Override
     @Transactional
-    public void markMediaRequestAsExpired(MediaRequestEntity mediaRequest, UserAccountEntity userAccount) {
+    public void markMediaRequestAsExpired(MediaRequestEntity mediaRequest) {
 
         List<TransformedMediaEntity> transformedMedias = transformedMediaRepository.findByMediaRequestId(mediaRequest.getId());
         boolean areAllTransformedMediasExpired = transformedMedias.stream().allMatch(t -> t.getExpiryTime() != null);
         if (areAllTransformedMediasExpired) {
             log.debug("Setting media request ID {} to be expired", mediaRequest.getId());
-            mediaRequest.setLastModifiedBy(userAccount);
             mediaRequest.setStatus(MediaRequestStatus.EXPIRED);
             mediaRequestRepository.saveAndFlush(mediaRequest);
         } else {
@@ -71,18 +69,16 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
         }
     }
 
-    private void markTransformedMediaAsExpired(UserAccountEntity userAccount, TransformedMediaEntity transformedMedia) {
+    private void markTransformedMediaAsExpired(TransformedMediaEntity transformedMedia) {
         OffsetDateTime expiryTime = currentTimeHelper.currentOffsetDateTime();
         log.debug("Updating transformed media id {} expiry time to {}", transformedMedia.getId(), expiryTime);
         transformedMedia.setExpiryTime(expiryTime);
-        transformedMedia.setLastModifiedBy(userAccount);
         transformedMediaRepository.saveAndFlush(transformedMedia);
     }
 
-    private void markTransientObjectDirectoryAsDeleted(TransientObjectDirectoryEntity entity, UserAccountEntity systemUser,
+    private void markTransientObjectDirectoryAsDeleted(TransientObjectDirectoryEntity entity,
                                                        ObjectRecordStatusEntity deletionStatus) {
         log.debug("Updating transient object directory {} to be  deleted", entity.getId());
-        entity.setLastModifiedBy(systemUser);
         entity.setStatus(deletionStatus);
     }
 }

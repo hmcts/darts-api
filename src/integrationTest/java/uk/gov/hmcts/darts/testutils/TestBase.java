@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -89,5 +90,17 @@ public class TestBase {
 
     protected UserAccountEntity anAuthenticatedUserFor(String userEmail) {
         return GivenBuilder.anAuthenticatedUserFor(userEmail, dartsDatabase.getUserAccountRepository());
+    }
+
+
+    protected void clearEntityManagerCache() {
+        if (hasTransaction()) {
+            dartsDatabase.getEntityManager().flush();//Commit the transaction to ensure all changes are saved
+        }
+        dartsDatabase.getEntityManager().clear();//Clear the entity manager to force a new query
+    }
+
+    protected boolean hasTransaction() {
+        return TransactionSynchronizationManager.isActualTransactionActive();
     }
 }

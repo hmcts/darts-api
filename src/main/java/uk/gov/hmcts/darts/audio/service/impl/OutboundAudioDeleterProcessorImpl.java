@@ -10,10 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleElement;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -30,7 +28,6 @@ import java.util.Set;
 public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterProcessor {
     private final UserAccountRepository userAccountRepository;
     private final LastAccessedDeletionDayCalculator deletionDayCalculator;
-    private final UserIdentity userIdentity;
     private final TransformedMediaRepository transformedMediaRepository;
     private final OutboundAudioDeleterProcessorSingleElement singleElementProcessor;
     private final TransformedMediaEntityProcessor transformedMediaEntityProcessor;
@@ -44,8 +41,6 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         List<TransientObjectDirectoryEntity> deletedValues = new ArrayList<>();
 
-        UserAccountEntity systemUser = userIdentity.getUserAccount();
-
         OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(getDeletionDays());
 
         List<Integer> transformedMediaListIds = transformedMediaRepository.findAllDeletableTransformedMedia(deletionStartDateTime, Limit.of(batchSize));
@@ -56,12 +51,12 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
             log.info("Found {} transformed media to be marked for deletion out of batch size {}", transformedMediaListIds.size(), batchSize);
             Set<MediaRequestEntity> mediaRequests = new HashSet<>();
             for (Integer transformedMediaId : transformedMediaListIds) {
-                MediaRequestEntity mediaRequest = transformedMediaEntityProcessor.process(transformedMediaId, systemUser, deletedValues);
+                MediaRequestEntity mediaRequest = transformedMediaEntityProcessor.process(transformedMediaId, deletedValues);
                 if (mediaRequest != null) {
                     mediaRequests.add(mediaRequest);
                 }
             }
-            mediaRequests.forEach(mr -> singleElementProcessor.markMediaRequestAsExpired(mr, systemUser));
+            mediaRequests.forEach(singleElementProcessor::markMediaRequestAsExpired);
         }
         return deletedValues;
     }
@@ -74,7 +69,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
 
         @Transactional
-        public MediaRequestEntity process(Integer transformedMediaId, UserAccountEntity systemUser, List<TransientObjectDirectoryEntity> deletedValues) {
+        public MediaRequestEntity process(Integer transformedMediaId, List<TransientObjectDirectoryEntity> deletedValues) {
             try {
                 log.info("Processing transformed media {}", transformedMediaId);
                 Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
@@ -83,7 +78,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
                     return null;
                 }
                 TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
-                deletedValues.addAll(singleElementProcessor.markForDeletion(systemUser, transformedMedia));
+                deletedValues.addAll(singleElementProcessor.markForDeletion(transformedMedia));
                 return transformedMedia.getMediaRequest();
             } catch (Exception exception) {
                 log.error("Unable to mark for deletion transformed media {}", transformedMediaId, exception);
