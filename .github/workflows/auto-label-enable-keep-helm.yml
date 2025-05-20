@@ -1,0 +1,36 @@
+# This workflow will triage pull requests and apply the enable_keep_helm label.
+#
+# To use this workflow, you will need to set up a .github/labeler.yml
+# file with configuration.  For more information, see:
+# https://github.com/actions/labeler
+name: Auto-label New Pull Requests with enable_keep_helm
+
+on:
+  pull_request:
+    types: [opened, reopened] # Triggers when a PR is opened or reopened
+
+jobs:
+  add-label:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # Grant write permissions to PRs for adding labels
+
+    steps:
+      - name: Add a specific label to all new PRs
+        uses: actions/github-script@v6 # Use github-script for direct API interaction
+        with:
+          script: |
+            const labelToAdd = 'enable_keep_helm';
+            const pullRequestNumber = context.payload.pull_request.number;
+            const repoOwner = context.repo.owner;
+            const repoName = context.repo.repo;
+            
+            await github.rest.issues.addLabels({
+              owner: repoOwner,
+              repo: repoName,
+              issue_number: pullRequestNumber,
+              labels: [labelToAdd]
+            });
+            console.log(`Added label '<span class="math-inline">\{labelToAdd\}' to PR \#</span>{pullRequestNumber}`);
+            
+          github-token: ${{ secrets.GITHUB_TOKEN }}
