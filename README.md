@@ -13,7 +13,7 @@
 # Building and deploying the application
 
 ## Prerequisites
-
+Jack test
 - [Java 21](https://www.oracle.com/java)
 - ffmpeg
 
