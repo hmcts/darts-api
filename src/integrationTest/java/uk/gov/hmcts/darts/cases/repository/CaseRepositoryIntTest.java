@@ -359,7 +359,10 @@ class CaseRepositoryIntTest extends IntegrationBase {
         CourtCaseEntity case1 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
         dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
         CourtCaseEntity case3 = dartsDatabase.createCase(SOME_COURTHOUSE, "SOME_CASE_NUMBER_3");
-        CourtCaseEntity case4 = dartsDatabase.createCase(SOME_COURTHOUSE, "SOME_CASE_NUMBER_0");
+        CourtCaseEntity case4 = dartsDatabase.createCase("SOME OTHER COURTHOUSE", "SOME_CASE_NUMBER_0");
+
+        dartsDatabase.getHearingStub().createHearing("SOME OTHER COURTHOUSE", SOME_ROOM, "SOME_CASE_NUMBER_0",
+                                                     DateConverterUtil.toLocalDateTime(testTime));
 
         // when
         List<CourtCaseEntity> returnedCourtCases = caseRepository.findAllWithIdMatchingOneOf(List.of(
@@ -368,8 +371,8 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // then
         assertThat(returnedCourtCases).hasSize(3);
-        assertThat(returnedCourtCases.getFirst().getId()).isEqualTo(case3.getId());
-        assertThat(returnedCourtCases.get(1).getId()).isEqualTo(case4.getId());
-        assertThat(returnedCourtCases.get(2).getId()).isEqualTo(case1.getId());
+        assertThat(returnedCourtCases.getFirst().getId()).isEqualTo(case4.getId());
+        assertThat(returnedCourtCases.get(1).getId()).isEqualTo(case1.getId());
+        assertThat(returnedCourtCases.get(2).getId()).isEqualTo(case3.getId());
     }
 }

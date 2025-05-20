@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -90,9 +89,6 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-
-    @Mock
-    private UserIdentity userIdentity;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
@@ -123,7 +119,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         caseObjectsProcessor = new ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl(
             caseRetentionRepository, caseService, eodRepository, mediaRepository, annotationDocumentRepository, transcriptionService,
-            caseDocumentRepository, transcriptionDocumentRepository, caseRetentionConfidenceReasonMapper, userIdentity,
+            caseDocumentRepository, transcriptionDocumentRepository, caseRetentionConfidenceReasonMapper,
             currentTimeHelper, objectMapper, mediaLinkedCaseRepository);
 
         case1PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 101);

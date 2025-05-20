@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.event.service.EventSearchService;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.LocalDate.parse;
@@ -40,13 +41,19 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
     void findsEventsByCourtHouseIdOnly() {
         var persistedEvents = given.persistedEvents(3);
 
+        var mutablePersistedEvents = new ArrayList<>(persistedEvents);
+        mutablePersistedEvents.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getDisplayName().compareTo(
+            event2.getCourtroom().getCourthouse().getDisplayName()));
+
         var eventSearchResults = eventSearchService.searchForEvents(
             new AdminEventSearch()
                 .courthouseIds(courthouseIdsAssociatedWithEvents(persistedEvents)));
 
         assertThat(eventSearchResults)
-            .extracting("id")
-            .isEqualTo(idsOf(persistedEvents));
+            .extracting(event -> event.getCourthouse().getDisplayName())
+            .isEqualTo(mutablePersistedEvents.stream()
+                           .map(event -> event.getCourtroom().getCourthouse().getDisplayName())
+                           .toList());
     }
 
     @Test
@@ -55,13 +62,19 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
         var persistedEventsForHearing = given.persistedEventsForHearing(3, hearing, true);
         given.persistedEvents(3);  // Persist some other events for the other hearings
 
+        var mutablePersistedEvents = new ArrayList<>(persistedEventsForHearing);
+        mutablePersistedEvents.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getDisplayName().compareTo(
+            event2.getCourtroom().getCourthouse().getDisplayName()));
+
         var eventSearchResults = eventSearchService.searchForEvents(
             new AdminEventSearch()
                 .caseNumber(hearing.getCourtCase().getCaseNumber()));
 
         assertThat(eventSearchResults)
-            .extracting("id")
-            .isEqualTo(idsOf(persistedEventsForHearing));
+            .extracting(event -> event.getCourthouse().getDisplayName())
+            .isEqualTo(mutablePersistedEvents.stream()
+                           .map(event -> event.getCourtroom().getCourthouse().getDisplayName())
+                           .toList());
     }
 
     @Test
@@ -70,13 +83,19 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
         var persistedEventsForCourtroom = given.persistedEventsForCourtroom(3, courtRoom);
         given.persistedEvents(3);  // Persist some other events for the other courtrooms
 
+        var mutablePersistedEvents = new ArrayList<>(persistedEventsForCourtroom);
+        mutablePersistedEvents.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getDisplayName().compareTo(
+            event2.getCourtroom().getCourthouse().getDisplayName()));
+
         var eventSearchResults = eventSearchService.searchForEvents(
             new AdminEventSearch()
                 .courtroomName(courtRoom.getName()));
 
         assertThat(eventSearchResults)
-            .extracting("id")
-            .isEqualTo(idsOf(persistedEventsForCourtroom));
+            .extracting(event -> event.getCourthouse().getDisplayName())
+            .isEqualTo(mutablePersistedEvents.stream()
+                           .map(event -> event.getCourtroom().getCourthouse().getDisplayName())
+                           .toList());
     }
 
     @Test
@@ -90,7 +109,6 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
         var eventSearchResults = eventSearchService.searchForEvents(
             new AdminEventSearch()
                 .hearingStartAt(parse("2020-02-28")));
-
 
         assertThat(eventSearchResults)
             .extracting("id")
@@ -109,7 +127,6 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
             new AdminEventSearch()
                 .hearingEndAt(parse("2020-01-28")));
 
-
         assertThat(eventSearchResults)
             .extracting("id")
             .containsExactly(persistedEvents.getFirst().getId());
@@ -119,13 +136,19 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
     void treatsEmptyCourthouseIdListAsNull() {
         var persistedEvents = given.persistedEvents(3);
 
+        var mutablePersistedEvents = new ArrayList<>(persistedEvents);
+        mutablePersistedEvents.sort((event1, event2) -> event1.getCourtroom().getCourthouse().getDisplayName().compareTo(
+            event2.getCourtroom().getCourthouse().getDisplayName()));
+
         var eventSearchResults = eventSearchService.searchForEvents(
             new AdminEventSearch()
                 .courthouseIds(List.of()));
 
         assertThat(eventSearchResults)
-            .extracting("id")
-            .isEqualTo(idsOf(persistedEvents));
+            .extracting(event -> event.getCourthouse().getDisplayName())
+            .isEqualTo(mutablePersistedEvents.stream()
+                           .map(event -> event.getCourtroom().getCourthouse().getDisplayName())
+                           .toList());
     }
 
     @Test
@@ -139,14 +162,6 @@ class AdminEventSearchTest extends IntegrationBaseWithWiremock {
                 .caseNumber(hearing.getCourtCase().getCaseNumber()));
 
         assertThat(eventSearchResults).isEmpty();
-    }
-
-
-    private static List<Long> idsOf(List<EventEntity> persistedEvents) {
-        return persistedEvents.stream()
-            .sorted((o1, o2) -> o2.getId().compareTo(o1.getId()))
-            .map(EventEntity::getId)
-            .toList();
     }
 
     private List<Integer> courthouseIdsAssociatedWithEvents(List<EventEntity> events) {
