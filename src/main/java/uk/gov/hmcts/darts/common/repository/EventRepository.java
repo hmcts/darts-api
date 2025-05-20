@@ -86,7 +86,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
              AND (cast(:hearingStartDate as LocalDate) IS NULL OR h.hearingDate >= :hearingStartDate)
              AND (cast(:hearingEndDate as LocalDate) IS NULL OR h.hearingDate <= :hearingEndDate)
              AND e.isCurrent = true
-        ORDER BY e.id DESC
+        ORDER BY ch.displayName ASC, c.name ASC, e.timestamp ASC
         """)
     List<EventSearchResult> searchEventsFilteringOn(
         List<Integer> courthouseIds,
