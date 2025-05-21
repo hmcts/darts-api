@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.EventSearchResult;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -140,6 +141,14 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
         """)
     List<Long> findDuplicateEventIds(Integer eventId);
 
+    @Query("""
+           SELECT ee FROM EventEntity ee
+           WHERE ee.courtroom.courthouse.courthouseName = upper(trim(:courtHouse))
+           AND ee.courtroom.name = upper(trim(:courtRoomName))
+           AND ee.timestamp between :start AND :end
+           AND ee.isCurrent = true
+        """)
+    List<EventEntity> findByCourthouseAndCourtroomBetweenStartAndEnd(String courtHouse, String courtRoomName, OffsetDateTime start, OffsetDateTime end);
 
     @Transactional
     @Modifying

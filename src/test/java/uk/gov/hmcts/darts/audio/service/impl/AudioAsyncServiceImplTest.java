@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
-import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.time.OffsetDateTime;
@@ -42,7 +42,7 @@ class AudioAsyncServiceImplTest {
     @Mock
     private HearingRepository hearingRepository;
     @Mock
-    private CourtLogEventRepository courtLogEventRepository;
+    private EventRepository eventRepository;
     @Mock
     private AudioConfigurationProperties audioConfigurationProperties;
     @Mock
@@ -57,7 +57,7 @@ class AudioAsyncServiceImplTest {
     void setUp() {
         audioAsyncService = new AudioAsyncServiceImpl(
             audioConfigurationProperties,
-            courtLogEventRepository,
+            eventRepository,
             hearingRepository,
             mediaLinkedCaseHelper);
     }
@@ -95,7 +95,7 @@ class AudioAsyncServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+        when(eventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             anyString(),
             anyString(),
             any(),
@@ -121,7 +121,7 @@ class AudioAsyncServiceImplTest {
         addAudioMetadataRequest.setCourthouse(" SWANSEA ");
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+        when(eventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             "SWANSEA",
             addAudioMetadataRequest.getCourtroom(),
             addAudioMetadataRequest.getStartedAt(),
@@ -148,7 +148,7 @@ class AudioAsyncServiceImplTest {
         addAudioMetadataRequest.setCourtroom(" 1 ");
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+        when(eventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             addAudioMetadataRequest.getCourthouse(),
             "1",
             STARTED_AT,
@@ -174,7 +174,7 @@ class AudioAsyncServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+        when(eventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             anyString(),
             anyString(),
             any(),
@@ -201,7 +201,7 @@ class AudioAsyncServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+        when(eventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             anyString(),
             anyString(),
             any(),
