@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
-import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.time.OffsetDateTime;
@@ -26,7 +26,7 @@ import java.util.List;
 public class AudioAsyncServiceImpl implements AudioAsyncService {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
-    private final CourtLogEventRepository courtLogEventRepository;
+    private final EventRepository eventRepository;
     private final HearingRepository hearingRepository;
     private final MediaLinkedCaseHelper mediaLinkedCaseHelper;
 
@@ -44,7 +44,7 @@ public class AudioAsyncServiceImpl implements AudioAsyncService {
         String courtroom = StringUtils.toRootUpperCase(StringUtils.trimToEmpty(addAudioMetadataRequest.getCourtroom()));
         OffsetDateTime start = addAudioMetadataRequest.getStartedAt().minus(audioConfigurationProperties.getPreAmbleDuration());
         OffsetDateTime end = addAudioMetadataRequest.getEndedAt().plus(audioConfigurationProperties.getPostAmbleDuration());
-        List<EventEntity> courtLogs = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+        List<EventEntity> courtLogs = eventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             courthouse,
             courtroom,
             start,
