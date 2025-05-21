@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleElement;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -36,20 +35,15 @@ class OutboundAudioDeleterProcessorImplTest {
     private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
 
     @Mock
-    private UserIdentity userIdentity;
-
-    @Mock
     private TransformedMediaRepository transformedMediaRepository;
 
     @BeforeEach
     void setUp() {
         this.outboundAudioDeleterProcessorImpl = new OutboundAudioDeleterProcessorImpl(
             userAccountRepository, lastAccessedDeletionDayCalculator,
-            userIdentity, transformedMediaRepository,
-            singleElementProcessor,
+            transformedMediaRepository, singleElementProcessor,
             new OutboundAudioDeleterProcessorImpl.TransformedMediaEntityProcessor(singleElementProcessor, transformedMediaRepository)
         );
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
     }
 
     @Test
@@ -64,7 +58,7 @@ class OutboundAudioDeleterProcessorImplTest {
         when(transformedMediaRepository.findById(2)).thenReturn(Optional.of(transformedMedia2));
 
         var deletedValues = List.of(new TransientObjectDirectoryEntity());
-        when(singleElementProcessor.markForDeletion(any(), any()))
+        when(singleElementProcessor.markForDeletion(any()))
             .thenThrow(new RuntimeException("Some error"))
             .thenReturn(deletedValues);
 
