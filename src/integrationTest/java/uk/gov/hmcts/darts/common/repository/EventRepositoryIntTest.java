@@ -26,6 +26,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventRepositoryIntTest extends PostgresIntegrationBase {
@@ -42,6 +43,8 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
     private AdminEventsSearchGivensBuilder given;
+
+    private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2020-06-20T10:00Z");
 
     @Test
     void eventProcessing_ShouldExcludeZeroEventAndDuplicates() {
@@ -129,7 +132,7 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
         });
         List<EventEntity> events = eventRepository.findAll().stream().toList();
 
-        Assertions.assertFalse(eventStub.isOnlyOneOfTheEventIdSetToCurrent(events));
+        assertFalse(eventStub.isOnlyOneOfTheEventIdSetToCurrent(events));
     }
 
     @Test
@@ -430,6 +433,38 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
             .isEqualTo(mutablePersistedEvents.stream()
                            .map(event -> event.getCourtroom().getCourthouse().getDisplayName())
                            .toList());
+    }
+
+    @Test
+    void findByCourthouseAndCourtroomBetweenStartAndEnd_shouldFindEventEntities_whenEventIsCurrent() {
+        HearingEntity hearingEntity = PersistableFactory.getHearingTestData().someMinimal();
+        dartsPersistence.saveAll(hearingEntity);
+
+        final EventEntity eventEntity1 = dartsDatabase.createEvent(hearingEntity, 54);
+        final EventEntity eventEntity2 = dartsDatabase.createEvent(hearingEntity, 54);
+        final EventEntity eventEntity3 = dartsDatabase.createEvent(hearingEntity, 32);
+        final EventEntity eventEntity4 = dartsDatabase.createEvent(hearingEntity, 68);
+        final EventEntity eventEntity5 = dartsDatabase.createEvent(hearingEntity, 188);
+        eventEntity5.setIsCurrent(false);
+
+        dartsDatabase.saveAll(eventEntity1, eventEntity2, eventEntity3, eventEntity4, eventEntity5);
+
+        // when
+        List<EventEntity> resultEvents = eventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+            hearingEntity.getCourtroom().getCourthouse().getCourthouseName(),
+            hearingEntity.getCourtroom().getName(),
+            SOME_DATE_TIME.minusHours(1),
+            SOME_DATE_TIME.plusHours(1)
+        );
+
+        // then
+        assertFalse(resultEvents.isEmpty());
+        assertEquals(resultEvents.size(), 4);
+        List.of(eventEntity1, eventEntity2, eventEntity3, eventEntity4).forEach(event -> {
+            event.equals(resultEvents.stream().filter(
+                resultEvent -> resultEvent.getId().equals(event.getId())).findFirst().get()
+            );
+        });
     }
 
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
