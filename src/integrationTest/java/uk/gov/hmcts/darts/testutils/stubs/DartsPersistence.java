@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionConfidenceCategoryMapperEntity;
@@ -284,6 +285,21 @@ public class DartsPersistence {
             return eventHandlerRepository.save(eventHandlerEntity);
         } else {
             return entityManager.merge(eventHandlerEntity);
+        }
+    }
+
+    @Transactional
+    public NodeRegisterEntity save(NodeRegisterEntity nodeRegisterEntity) {
+        nodeRegisterEntity = (NodeRegisterEntity) preCheckPersist(nodeRegisterEntity);
+
+        if (nodeRegisterEntity.getNodeId() == null) {
+            if (isNull(nodeRegisterEntity.getCourtroom().getId())) {
+                nodeRegisterEntity.setCourtroom(save(nodeRegisterEntity.getCourtroom()));
+            }
+            nodeRegisterEntity.setCreatedById(Optional.ofNullable(nodeRegisterEntity.getCreatedById()).orElse(0));
+            return nodeRegisterRepository.save(nodeRegisterEntity);
+        } else {
+            return entityManager.merge(nodeRegisterEntity);
         }
     }
 
