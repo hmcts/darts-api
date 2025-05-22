@@ -82,27 +82,6 @@ public class EventStub {
         return dartsDatabaseSaveStub.save(savedEvent);
     }
 
-    public EventEntity createEvent(HearingEntity hearing, int eventHandlerId, boolean isCurrent) {
-        OffsetDateTime timestamp = OffsetDateTime.now().minusDays(1);
-        EventEntity eventEntity = new EventEntity();
-        eventEntity.setEventText("testEventText");
-        EventHandlerEntity eventHandlerEntity = eventHandlerRepository.findById(eventHandlerId).orElseThrow();
-        eventEntity.setEventType(eventHandlerEntity);
-        eventEntity.setTimestamp(timestamp);
-        eventEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
-        eventEntity.addHearing(hearing);
-        eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
-        eventEntity.setLastModifiedDateTime(timestamp);
-        eventEntity.setLogEntry(false);
-        eventEntity.setCourtroom(hearing.getCourtroom());
-        eventEntity.setIsCurrent(isCurrent);
-        eventEntity.setEventStatus(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
-
-        EventEntity savedEvent = dartsDatabaseSaveStub.save(eventEntity);
-        savedEvent.setCreatedDateTime(timestamp);
-        return dartsDatabaseSaveStub.save(savedEvent);
-    }
-
     public EventEntity createEvent(CourtroomEntity courtroom, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName) {
         return createEvent(courtroom, eventHandlerId, eventTimestamp, eventName, -1);
     }

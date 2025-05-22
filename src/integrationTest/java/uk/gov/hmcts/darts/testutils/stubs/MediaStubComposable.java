@@ -61,22 +61,6 @@ public class MediaStubComposable {
                                  courthouseName, courtroomName, startTime, endTime, channel, "mp2");
     }
 
-    public MediaEntity createMediaEntity(CourthouseStubComposable courthouseStubComposable,
-                                         CourtroomStubComposable courtroomStub,
-                                         String courthouseName, String courtroomName,
-                                         OffsetDateTime startTime, OffsetDateTime endTime,
-                                         int channel, boolean isCurrent) {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(
-            courthouseStubComposable, courthouseName, courtroomName, userAccountRepository.getReferenceById(0)
-        );
-        MediaEntity mediaEntity = PersistableFactory.getMediaTestData()
-            .createMediaWith(courtroom, startTime, endTime, channel, "mp2");
-        mediaEntity.setIsCurrent(isCurrent);
-        return dartsPersistence.save(mediaEntity);
-    }
-
-
-
     public MediaEntity createHiddenMediaEntity(CourthouseStubComposable courthouseStubComposable,
                                                CourtroomStubComposable courtroomStub,
                                                String courthouseName, String courtroomName,
