@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.EventSearchResult;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -86,7 +87,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
              AND (cast(:hearingStartDate as LocalDate) IS NULL OR h.hearingDate >= :hearingStartDate)
              AND (cast(:hearingEndDate as LocalDate) IS NULL OR h.hearingDate <= :hearingEndDate)
              AND e.isCurrent = true
-        ORDER BY e.id DESC
+        ORDER BY ch.displayName ASC, c.name ASC, e.timestamp ASC
         """)
     List<EventSearchResult> searchEventsFilteringOn(
         List<Integer> courthouseIds,
@@ -140,6 +141,14 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
         """)
     List<Long> findDuplicateEventIds(Integer eventId);
 
+    @Query("""
+           SELECT ee FROM EventEntity ee
+           WHERE ee.courtroom.courthouse.courthouseName = upper(trim(:courtHouse))
+           AND ee.courtroom.name = upper(trim(:courtRoomName))
+           AND ee.timestamp between :start AND :end
+           AND ee.isCurrent = true
+        """)
+    List<EventEntity> findByCourthouseAndCourtroomBetweenStartAndEnd(String courtHouse, String courtRoomName, OffsetDateTime start, OffsetDateTime end);
 
     @Transactional
     @Modifying

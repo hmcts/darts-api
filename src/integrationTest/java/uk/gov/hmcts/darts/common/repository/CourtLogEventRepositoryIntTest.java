@@ -22,10 +22,6 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2020-06-20T10:00Z");
 
     private EventEntity eventEntityWithLogEntryTrue;
-    private EventEntity eventEntity2;
-    private EventEntity eventEntity3;
-    private EventEntity eventEntity4;
-    private EventEntity eventEntity5;
     private HearingEntity hearingEntity;
 
     @BeforeEach
@@ -35,10 +31,11 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
 
         eventEntityWithLogEntryTrue = dartsDatabase.createEvent(hearingEntity, 54);
         eventEntityWithLogEntryTrue.setLogEntry(true);
-        eventEntity2 = dartsDatabase.createEvent(hearingEntity, 54);
-        eventEntity3 = dartsDatabase.createEvent(hearingEntity, 32);
-        eventEntity4 = dartsDatabase.createEvent(hearingEntity, 68);
-        eventEntity5 = dartsDatabase.createEvent(hearingEntity, 188);
+        EventEntity eventEntity2 = dartsDatabase.createEvent(hearingEntity, 54);
+        EventEntity eventEntity3 = dartsDatabase.createEvent(hearingEntity, 32);
+        EventEntity eventEntity4 = dartsDatabase.createEvent(hearingEntity, 68);
+        EventEntity eventEntity5 = dartsDatabase.createEvent(hearingEntity, 188);
+        eventEntity5.setIsCurrent(false);
 
         dartsDatabase.saveAll(eventEntityWithLogEntryTrue, eventEntity2, eventEntity3, eventEntity4, eventEntity5);
     }
@@ -58,25 +55,5 @@ class CourtLogEventRepositoryIntTest extends PostgresIntegrationBase {
         assertEquals(1, events.size());
         List.of(eventEntityWithLogEntryTrue);
         eventEntityWithLogEntryTrue.equals(events.getFirst());
-    }
-
-    @Test
-    void findByCourthouseAndCourtroomBetweenStartAndEnd_shouldFindEventEntities() {
-        // when
-        List<EventEntity> resultEvents = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            hearingEntity.getCourtroom().getCourthouse().getCourthouseName(),
-            hearingEntity.getCourtroom().getName(),
-            SOME_DATE_TIME.minusHours(1),
-            SOME_DATE_TIME.plusHours(1)
-        );
-
-        // then
-        assertFalse(resultEvents.isEmpty());
-        assertEquals(resultEvents.size(), 5);
-        List.of(eventEntityWithLogEntryTrue, eventEntity2, eventEntity3, eventEntity4, eventEntity5).forEach(event -> {
-            event.equals(resultEvents.stream().filter(
-                resultEvent -> resultEvent.getId().equals(event.getId())).findFirst().get()
-            );
-        });
     }
 }

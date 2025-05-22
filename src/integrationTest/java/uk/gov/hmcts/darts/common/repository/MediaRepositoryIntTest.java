@@ -469,4 +469,59 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
             .extracting(AdminCaseAudioResponseItem::getChannel)
             .containsExactly(3, 2, 1);
     }
+
+    @Test
+    void findByCaseIdAndIsCurrentTruePageable_ReturnsDistinctPaginatedList_WhereMediaIsLinkedToMultipleHearings() {
+        // given
+        var caseA = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var hearA1 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
+        var hearA2 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
+        var hearA3 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
+        dartsPersistence.saveAll(hearA1, hearA2, hearA3);
+
+        var caseB = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var hearB = PersistableFactory.getHearingTestData().createHearingFor(caseB);
+        dartsPersistence.saveAll(hearB);
+
+        var caseC = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var hearC = PersistableFactory.getHearingTestData().createHearingFor(caseC);
+        dartsPersistence.saveAll(hearC);
+
+        var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        var media3 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        dartsPersistence.save(media1);
+        dartsPersistence.save(media2);
+        dartsPersistence.save(media3);
+
+        hearA1.addMedia(media1);
+        hearA1.addMedia(media2);
+        hearA2.addMedia(media3);
+        hearB.addMedia(media1);
+
+        dartsPersistence.saveAll(hearA1, hearA2, hearA3, hearB, hearC);
+
+        mediaLinkedCaseRepository.save(createMediaLinkedCase(media1, caseA));
+        mediaLinkedCaseRepository.save(createMediaLinkedCase(media2, caseA));
+        mediaLinkedCaseRepository.save(createMediaLinkedCase(media3, caseC));
+
+        Pageable sortedByMediaDesc =
+            PageRequest.of(0, 3, Sort.by("med.id").descending());
+
+        // when
+        Page<AdminCaseAudioResponseItem> pages = mediaRepository.findByCaseIdAndIsCurrentTruePageable(caseA.getId(), sortedByMediaDesc);
+
+        // then
+        assertEquals(3, pages.getTotalElements());
+
+        var results = pages.stream().toList();
+        assertThat(results)
+            .extracting(AdminCaseAudioResponseItem::getId)
+            .containsExactly(media3.getId(), media2.getId(), media1.getId());
+
+        assertThat(results)
+            .extracting(AdminCaseAudioResponseItem::getChannel)
+            .containsExactly(1, 1, 1);
+
+    }
 }

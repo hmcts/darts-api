@@ -83,11 +83,16 @@ def determineDevEnvironmentDeployment() {
   env.DEV_DARTS_GATEWAY_URL = "http://darts-gateway.staging.platform.hmcts.net"
   env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX = "latest"
 
+
+  env.DEV_ENABLE_DARTS_KEDA = false
+
   echo "1 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
   echo "1 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
 
   echo "1 - env.DEV_ENABLE_DARTS_GATEWAY: ${env.DEV_ENABLE_DARTS_GATEWAY}"
   echo "1 - env.DEV_DARTS_GATEWAY_URL: ${env.DEV_DARTS_GATEWAY_URL}"
+
+  echo "1 - env.DEV_ENABLE_DARTS_KEDA: ${env.DEV_ENABLE_DARTS_KEDA}"
 
 
   def githubApi = new GithubAPI(this)
@@ -117,6 +122,12 @@ def determineDevEnvironmentDeployment() {
         }
         echo "Deploying DARTS gateway (${env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX}) instance in PR environment"
       }
+
+      //Gateway
+      if (label ==~ /enable_darts_ats_keda.*/) {
+        env.DEV_ENABLE_DARTS_KEDA = true
+        echo "DARTS KEDA enabled in PR environment"
+      }
     }
   }
 
@@ -124,6 +135,7 @@ def determineDevEnvironmentDeployment() {
   echo "2 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
   echo "2 - env.DEV_ENABLE_DARTS_GATEWAY: ${env.DEV_ENABLE_DARTS_GATEWAY}"
   echo "2 - env.DEV_DARTS_GATEWAY_URL: ${env.DEV_DARTS_GATEWAY_URL}"
+  echo "2 - env.DEV_ENABLE_DARTS_KEDA: ${env.DEV_ENABLE_DARTS_KEDA}"
 }
 
 GradleBuilder builder = new GradleBuilder(this, product)

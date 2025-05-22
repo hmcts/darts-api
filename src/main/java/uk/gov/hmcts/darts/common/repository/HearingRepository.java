@@ -98,7 +98,8 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
             AND (:courtroomName IS NULL OR hearing.courtroom.name ILIKE CONCAT('%', cast(:courtroomName as text), '%'))
             AND (cast(:startDate as LocalDate) IS NULL OR hearing.hearingDate >= :startDate)
             AND (cast(:endDate as LocalDate) IS NULL OR hearing.hearingDate <= :endDate)
-            ORDER BY hearing.hearingDate DESC
+            ORDER BY hearing.courtroom.courthouse.courthouseName ASC, hearing.courtroom.name ASC, 
+                hearing.hearingDate ASC, hearing.courtCase.caseNumber ASC
             LIMIT :numberOfRecords
         """)
     List<HearingEntity> findHearingDetails(List<Integer> courthouseIds, String caseNumber,

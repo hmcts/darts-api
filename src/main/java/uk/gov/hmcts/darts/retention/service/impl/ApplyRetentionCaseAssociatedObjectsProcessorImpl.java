@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
@@ -23,7 +22,6 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
 
     private final CaseRepository caseRepository;
     private final ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
-    private final UserIdentity userIdentity;
 
     @Override
     public void processApplyRetentionToCaseAssociatedObjects(Integer batchSize) {
@@ -38,7 +36,6 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
             }
             CourtCaseEntity courtCase = courtCaseOpt.get();
             courtCase.setRetentionUpdated(false);
-            courtCase.setLastModifiedBy(userIdentity.getUserAccount());
             caseRepository.saveAndFlush(courtCase);
             try {
                 singleCaseProcessor.processApplyRetentionToCaseAssociatedObjects(courtCase.getId());
@@ -46,7 +43,6 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
                 log.error("Error applying retention to case associated objects for case id '{}'", courtCase.getId(), exc);
                 courtCase.setRetentionRetries(courtCase.getRetentionRetries() + 1);
                 courtCase.setRetentionUpdated(true);
-                courtCase.setLastModifiedBy(userIdentity.getUserAccount());
                 caseRepository.saveAndFlush(courtCase);
             }
         }
