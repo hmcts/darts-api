@@ -35,7 +35,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 
 @Slf4j
 @AutoConfigureMockMvc
-class NodeRegistrationControllerTest extends IntegrationBase {
+class NodeRegistrationControllerPostRegisterDevicesTest extends IntegrationBase {
 
     @Autowired
     private transient MockMvc mockMvc;

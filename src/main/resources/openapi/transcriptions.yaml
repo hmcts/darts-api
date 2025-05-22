@@ -1655,7 +1655,7 @@ components:
           maxLength: 32
         courthouse_display_name:
           type: String
-          description: 'The court house display name'
+          description: 'The courthouse display name'
         hearing_date:
           type: date
           description: 'The hearing date'
@@ -1704,7 +1704,7 @@ components:
           properties:
             display_name:
               type: string
-              description: 'The court house display name'
+              description: 'The courthouse display name'
         hearing:
           type: object
           description: 'The hearing details'
