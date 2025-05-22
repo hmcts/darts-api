@@ -12,15 +12,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.noderegistration.http.api.DevicesApi;
+import uk.gov.hmcts.darts.noderegistration.model.GetNodeRegisterManagementResponse;
 import uk.gov.hmcts.darts.noderegistration.model.PostNodeRegistrationResponse;
 import uk.gov.hmcts.darts.noderegistration.service.NodeRegistrationService;
 
+import java.util.List;
 import javax.validation.Valid;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,5 +58,13 @@ public class NodeRegistrationController implements DevicesApi {
         PostNodeRegistrationResponse postRegisterDeviceResponse = new PostNodeRegistrationResponse();
         postRegisterDeviceResponse.setNodeId(nodeId);
         return new ResponseEntity<>(postRegisterDeviceResponse, HttpStatus.OK);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<List<GetNodeRegisterManagementResponse>> adminNodeRegisterManagementGet() {
+        return new ResponseEntity<>(nodeRegistrationService.getNodeRegisterDevices(), HttpStatus.OK);
     }
 }
