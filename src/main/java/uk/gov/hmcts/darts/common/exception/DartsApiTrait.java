@@ -78,6 +78,6 @@ public interface DartsApiTrait extends AdviceTrait {
 
     private static boolean shouldLogException(DartsApiException exception) {
         DartsApiError error = exception.getError();
-        return error != null && error.getHttpStatus() != HttpStatus.UNPROCESSABLE_ENTITY;
+        return error.shouldLogException() && error.getHttpStatus() != HttpStatus.UNPROCESSABLE_ENTITY;
     }
 }

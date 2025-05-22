@@ -51,7 +51,8 @@ public enum TranscriptionApiError implements DartsApiError {
     DUPLICATE_TRANSCRIPTION(
         TranscriptionsErrorCode.DUPLICATE_TRANSCRIPTION.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.DUPLICATE_TRANSCRIPTION.toString()
+        TranscriptionsTitleErrors.DUPLICATE_TRANSCRIPTION.toString(),
+        false
     ),
     FAILED_TO_ATTACH_TRANSCRIPT(
         TranscriptionsErrorCode.FAILED_TO_ATTACH_TRANSCRIPT.getValue(),
@@ -91,7 +92,8 @@ public enum TranscriptionApiError implements DartsApiError {
     TRANSCRIPTION_ALREADY_HIDDEN(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue()
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue(),
+        false
     ),
     TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue(),
@@ -101,7 +103,8 @@ public enum TranscriptionApiError implements DartsApiError {
     TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue(),
         HttpStatus.CONFLICT,
-        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue()
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue(),
+        false
     ),
     TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST.getValue(),
@@ -138,10 +141,20 @@ public enum TranscriptionApiError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean logException;
+
+    TranscriptionApiError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return logException;
     }
 
 }

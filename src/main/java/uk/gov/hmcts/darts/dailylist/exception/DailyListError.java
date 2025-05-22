@@ -49,7 +49,8 @@ public enum DailyListError implements DartsApiError {
     DAILY_LIST_ALREADY_PROCESSING(
         DailyListErrorCode.DAILY_LIST_ALREADY_PROCESSING.getValue(),
         HttpStatus.CONFLICT,
-        DailyListTitleErrors.DAILY_LIST_ALREADY_PROCESSING.getValue()
+        DailyListTitleErrors.DAILY_LIST_ALREADY_PROCESSING.getValue(),
+        false
     );
 
     private static final String ERROR_TYPE_PREFIX = "DAILYLIST";
@@ -57,9 +58,19 @@ public enum DailyListError implements DartsApiError {
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
     private final String title;
+    private final boolean logException;
+
+    DailyListError(String errorTypeNumeric, HttpStatus httpStatus, String title) {
+        this(errorTypeNumeric, httpStatus, title, true);
+    }
 
     @Override
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
+    }
+
+    @Override
+    public boolean shouldLogException() {
+        return logException;
     }
 }
