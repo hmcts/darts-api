@@ -453,10 +453,10 @@ components:
               properties:
                 id:
                   type: integer
-                  description: 'The court house id'
+                  description: 'The courthouse id'
                 display_name:
                   type: string
-                  description: 'The court house display name'
+                  description: 'The courthouse display name'
             defendants:
               type: array
               items:
@@ -482,10 +482,10 @@ components:
           properties:
             id:
               type: integer
-              description: 'The court house id'
+              description: 'The courtroom id'
             name:
               type: string
-              description: 'The court house display name'
+              description: 'The courtroom display name'
         judges:
           type: array
           items:
@@ -530,20 +530,20 @@ components:
           properties:
             id:
               type: integer
-              description: 'The court house id'
+              description: 'The courthouse id'
             display_name:
               type: string
-              description: 'The court house display name'
+              description: 'The courthouse display name'
         courtroom:
           type: object
           description: 'The courtroom related details'
           properties:
             id:
               type: integer
-              description: 'The court room id'
+              description: 'The courtroom id'
             name:
               type: string
-              description: 'The court room display name'
+              description: 'The courtroom display name'
     HearingAuthorisation403ErrorCode:
       type: string
       enum:
