@@ -80,11 +80,17 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     )
     Optional<HearingEntity> findHearing(CourtCaseEntity courtCaseEntity, CourtroomEntity courtroom, LocalDate date);
 
-    @Query("""
-            select exists
-            (select he.id FROM HearingEntity he
-            WHERE he.courtroom.id in (select courtroom.id from CourtroomEntity where courthouse.id = :courthouseId))
-        """)
+    @Query(value = """
+        SELECT EXISTS (
+            SELECT hea.hea_id
+            FROM darts.hearing hea
+            WHERE hea.ctr_id IN (
+                SELECT ctr.ctr_id
+                FROM darts.courtroom ctr
+                WHERE ctr.cth_id = 1002
+            )
+        );
+        """, nativeQuery = true)
     boolean hearingsExistForCourthouse(Integer courthouseId);
 
     @Override
