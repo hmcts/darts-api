@@ -24,6 +24,10 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
     @Override
     @Transactional
     public boolean findAndRemoveDuplicateEvent(Integer eventId) {
+        if (eventId == 0) {
+            //No need to continue if event_id = 0 as this can not have duplicates
+            return false;
+        }
         List<Long> eventEntitiesIds = eventRepository.findDuplicateEventIds(eventId);
         if (eventEntitiesIds.isEmpty() || eventEntitiesIds.size() == 1) {
             //No need to continue if there are no duplicates
