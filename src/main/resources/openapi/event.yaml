@@ -898,15 +898,15 @@ components:
 
     CaseNumber:
       type: string
-      maxLength: 25
+      maxLength: 250
 
     Courthouse:
       type: string
-      maxLength: 50
+      maxLength: 250
 
     Courtroom:
       type: string
-      maxLength: 25
+      maxLength: 250
 
     CourthouseResponseDetails:
       type: object
