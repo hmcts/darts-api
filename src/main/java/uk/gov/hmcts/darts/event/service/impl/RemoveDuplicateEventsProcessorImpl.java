@@ -34,7 +34,9 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
             return false;
         }
         // Keep the first event and delete all future ones
+        Long eveIdToKeep = eventEntitiesIds.get(0);
         List<Long> eventEntitiesIdsToDelete = eventEntitiesIds.subList(1, eventEntitiesIds.size());
+
 
         List<Integer> caseManagementIdsToBeDeleted = caseManagementRetentionRepository.getIdsForEvents(eventEntitiesIdsToDelete);
         caseRetentionRepository.deleteAllByCaseManagementIdsIn(caseManagementIdsToBeDeleted);
@@ -47,7 +49,7 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         eventRepository.deleteAllById(eventEntitiesIdsToDelete);
         eventRepository.flush();
 
-        log.info("Duplicate events found. Removing the following events {}", eventEntitiesIdsToDelete);
+        log.info("Duplicate events found for eveId {}. Removing the following events {}.", eveIdToKeep, eventEntitiesIdsToDelete);
         return true;
     }
 }
