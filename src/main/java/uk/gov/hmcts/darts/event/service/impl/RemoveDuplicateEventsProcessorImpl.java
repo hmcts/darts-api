@@ -34,7 +34,6 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
             return false;
         }
         // Keep the first event and delete all future ones
-        Long eveIdToKeep = eventEntitiesIds.get(0);
         List<Long> eventEntitiesIdsToDelete = eventEntitiesIds.subList(1, eventEntitiesIds.size());
 
 
@@ -48,8 +47,7 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         eventRepository.deleteAllAssociatedHearings(eventEntitiesIdsToDelete);
         eventRepository.deleteAllById(eventEntitiesIdsToDelete);
         eventRepository.flush();
-
-        log.info("Duplicate events found for eveId {}. Removing the following events {}.", eveIdToKeep, eventEntitiesIdsToDelete);
+        log.info("Duplicate events found for eveId {}. Removing the following events {}.", eventEntitiesIds.getFirst(), eventEntitiesIdsToDelete);
         return true;
     }
 }
