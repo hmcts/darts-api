@@ -128,18 +128,12 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
     List<Long> findAllByEventStatusAndNotCourtrooms(Integer statusNumber, List<String> courtroomNumbers, Limit limit);
 
     @Query("""
-                        SELECT e3.id from EventEntity e3
-                        JOIN (                        
-                            SELECT e.eventId as eventId, e.messageId as messageId, e.eventText as eventText
-                            FROM EventEntity e
-                            WHERE e.eventId IS NOT NULL and e.messageId IS NOT NULL and e.eventId = :eventId
-                            GROUP BY e.eventId, e.messageId, e.eventText
-                            HAVING COUNT(e) > 1) e2
-                         ON e2.eventId = e3.eventId and e2.messageId = e3.messageId and e2.eventText = e3.eventText
-                         WHERE e3.eventId = :eventId
-                         ORDER BY e3.createdDateTime ASC  
+        SELECT e3.id from EventEntity e3
+        WHERE e3.eventId = :eventId and e3.messageId = :messageId and e3.eventText = :eventText
+        ORDER BY e3.createdDateTime ASC  
         """)
-    List<Long> findDuplicateEventIds(Integer eventId);
+    List<Long> findDuplicateEventIds(Integer eventId, String messageId, String eventText);
+
 
     @Query("""
            SELECT ee FROM EventEntity ee
