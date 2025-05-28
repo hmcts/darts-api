@@ -44,7 +44,7 @@ public class EventDispatcherImpl implements EventDispatcher {
         if (foundHandler.isPresent()) {
             logEvent(event, foundHandler.get());
             foundHandler.get().handle(event, foundHandlerEntity);
-            asyncEventProcessor.processEvent(NumberUtils.createInteger(event.getEventId()));
+            asyncEventProcessor.processEvent(event);
         } else {
             // Event registered in DB, but no handler defined...just log and return OK.
             log.warn(format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));

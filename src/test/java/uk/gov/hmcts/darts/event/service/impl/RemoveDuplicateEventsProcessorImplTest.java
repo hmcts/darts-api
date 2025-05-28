@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 
 import java.util.ArrayList;
@@ -49,11 +50,15 @@ class RemoveDuplicateEventsProcessorImplTest {
 
     @Test
     void findAndRemoveDuplicateEvent_noDuplicateEvents_nothingHappens() {
-        when(eventRepository.findDuplicateEventIds(any())).thenReturn(List.of());
+        DartsEvent dartsEvent = new DartsEvent();
+        dartsEvent.setEventId("123");
+        dartsEvent.setMessageId("messageId");
+        dartsEvent.setEventText("eventText");
+        when(eventRepository.findDuplicateEventIds(any(), any(), any())).thenReturn(List.of());
 
-        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(123)).isFalse();
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(dartsEvent)).isFalse();
 
-        verify(eventRepository).findDuplicateEventIds(123);
+        verify(eventRepository).findDuplicateEventIds(123, "messageId", "eventText");
         verifyNoMoreInteractions(eventRepository);
         verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository);
     }
@@ -66,19 +71,24 @@ class RemoveDuplicateEventsProcessorImplTest {
         long duplicateEvent3Id = 3;
 
         List<Long> duplicateEvents = new ArrayList<>(List.of(duplicateEvent1Id, duplicateEvent2Id, duplicateEvent3Id));
-        when(eventRepository.findDuplicateEventIds(any())).thenReturn(duplicateEvents);
+        when(eventRepository.findDuplicateEventIds(any(), any(), any())).thenReturn(duplicateEvents);
 
         List<Integer> caseManagementIdsToBeDeleted = List.of(2, 3);
         when(caseManagementRetentionRepository.getIdsForEvents(any()))
             .thenReturn(caseManagementIdsToBeDeleted);
+
+        DartsEvent dartsEvent = new DartsEvent();
+        dartsEvent.setEventId("123");
+        dartsEvent.setMessageId("messageId");
+        dartsEvent.setEventText("eventText");
         //Execution
-        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(123)).isTrue();
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(dartsEvent)).isTrue();
 
 
         //Verification
         List<Long> toBeDeleted = List.of(duplicateEvent2Id, duplicateEvent3Id);
 
-        verify(eventRepository).findDuplicateEventIds(123);
+        verify(eventRepository).findDuplicateEventIds(123, "messageId", "eventText");
 
         verify(caseManagementRetentionRepository).getIdsForEvents(toBeDeleted);
 
