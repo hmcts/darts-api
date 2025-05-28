@@ -136,7 +136,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
                             GROUP BY e.eventId, e.messageId, e.eventText
                             HAVING COUNT(e) > 1) e2
                          ON e2.eventId = e3.eventId and e2.messageId = e3.messageId and e2.eventText = e3.eventText
-                         WHERE e3.eventId >= :eventId
+                         WHERE e3.eventId = :eventId
                          ORDER BY e3.createdDateTime ASC  
         """)
     List<Long> findDuplicateEventIds(Integer eventId);
