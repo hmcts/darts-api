@@ -48,4 +48,17 @@ class AsyncEventProcessorTest {
         verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(dartsEvent);
         verify(cleanupCurrentFlagEventProcessor).processEvent(1);
     }
+
+    @Test
+    void processEvent_noDuplicatesNullEventId() {
+        when(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(any()))
+            .thenReturn(false);
+
+        DartsEvent dartsEvent = new DartsEvent();
+        dartsEvent.setEventId(null);
+        asyncEventProcessor.processEvent(dartsEvent);
+
+        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(dartsEvent);
+        verify(cleanupCurrentFlagEventProcessor).processEvent(null);
+    }
 }

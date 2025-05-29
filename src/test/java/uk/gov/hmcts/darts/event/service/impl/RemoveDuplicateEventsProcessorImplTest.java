@@ -64,8 +64,20 @@ class RemoveDuplicateEventsProcessorImplTest {
     }
 
     @Test
-    void findAndRemoveDuplicateEvent_eventIdIsZero_nothingHappens() {
-        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(0)).isFalse();
+    void findAndRemoveDuplicateEvent_eventIdIsNull_nothingHappens() {
+        DartsEvent dartsEvent = new DartsEvent();
+        dartsEvent.setEventId(null);
+        dartsEvent.messageId("messageId");
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(dartsEvent)).isFalse();
+        verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository, eventRepository);
+    }
+
+    @Test
+    void findAndRemoveDuplicateEvent_messageIdIsZero_nothingHappens() {
+        DartsEvent dartsEvent = new DartsEvent();
+        dartsEvent.setEventId("1");
+        dartsEvent.setMessageId(null);
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(dartsEvent)).isFalse();
         verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository, eventRepository);
     }
 

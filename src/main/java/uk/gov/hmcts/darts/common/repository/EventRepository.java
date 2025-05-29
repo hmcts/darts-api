@@ -129,7 +129,9 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
     @Query("""
         SELECT e3.id from EventEntity e3
-        WHERE e3.eventId = :eventId and e3.messageId = :messageId and e3.eventText = :eventText
+        WHERE e3.eventId = :eventId 
+          and e3.messageId = :messageId 
+          and ((:eventText is null and e3.eventText is null) or (:eventText is not null and e3.eventText = :eventText))
         ORDER BY e3.createdDateTime ASC  
         """)
     List<Long> findDuplicateEventIds(Integer eventId, String messageId, String eventText);
