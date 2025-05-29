@@ -65,6 +65,12 @@ class RemoveDuplicateEventsProcessorImplTest {
     }
 
     @Test
+    void findAndRemoveDuplicateEvent_eventIdIsNull_nothingHappens() {
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(null)).isFalse();
+        verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository, eventRepository);
+    }
+
+    @Test
     void findAndRemoveDuplicateEvent_hasDuplicateEvents_allDuplicatesExcludingTheFirstOneAreDeleted() {
         //Setup
         long duplicateEvent1Id = 1;
