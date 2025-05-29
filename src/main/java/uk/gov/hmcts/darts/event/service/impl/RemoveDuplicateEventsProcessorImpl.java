@@ -53,8 +53,8 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         eventRepository.deleteAllById(eventEntitiesIdsToDelete);
         eventRepository.flush();
 
-        log.info("Duplicate events found for event_id='{}', message_id='{}', event_text='{}'. Removing the following events {}",
-                 event.getEventId(), event.getMessageId(), event.getEventText(), eventEntitiesIdsToDelete);
+        log.info("Duplicate events found for event_id='{}', message_id='{}',. Removing the following events {}",
+                 event.getEventId(), event.getMessageId(), eventEntitiesIdsToDelete);
         return true;
     }
 }
