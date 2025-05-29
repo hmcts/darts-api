@@ -42,20 +42,26 @@ public class DarNotifyAsyncHelper {
         }
         String notificationUrl = MessageFormat.format(notificationUrlFormat, courtroomOpt.get().getIpAddress());
         var darNotifyType = event.getDarNotifyType();
+        var courthouse = dartsEvent.getCourthouse().toUpperCase(Locale.ROOT);
+        var courtroom = dartsEvent.getCourtroom().toUpperCase(Locale.ROOT);
         DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
             .notificationUrl(notificationUrl)
             .notificationType(darNotifyType.getNotificationType())
             .timestamp(dartsEvent.getDateTime())
-            .courthouse(dartsEvent.getCourthouse().toUpperCase(Locale.ROOT))
-            .courtroom(dartsEvent.getCourtroom().toUpperCase(Locale.ROOT))
+            .courthouse(courthouse)
+            .courtroom(courtroom)
             .caseNumbers(openCaseNumbers)
             .build();
 
         try {
+            log.info("About to send a DAR Notify request: event_id={}, notification_url={}, notification_type={}, timestamp={}, courthouse={}, courtroom={}, " +
+                     "caseNumbers={}", dartsEvent.getEventId(), notificationUrl, darNotifyType.getNotificationType(), dartsEvent.getDateTime(),
+                     courthouse, courtroom, openCaseNumbers);
+
             dartsGatewayClient.darNotify(darNotifyEvent);
-            log.info("DarNotify request sent successfully: event_id={}, notification_url={}", event.getDartsEvent().getEventId(), notificationUrl);
+            log.info("DarNotify request sent successfully: event_id={}, notification_url={}", dartsEvent.getEventId(), notificationUrl);
         } catch (Exception ex) {
-            log.error("DarNotify request failed to send: event_id={}, notification_url={}", event.getDartsEvent().getEventId(), notificationUrl, ex);
+            log.error("DarNotify request failed to send: event_id={}, notification_url={}", dartsEvent.getEventId(), notificationUrl, ex);
         }
     }
 }
