@@ -39,3 +39,8 @@ variable "pgsqlstoragemb" {
   type        = number
   default     = 165536
 }
+
+variable "db_max_connections" {
+  description = "Max connections allowed for the PGSql Flexibile instance"
+  default     = 1600
+}
