@@ -90,7 +90,8 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "active": true,
                     "security_group_ids": [ ],
                     "created_at": "",
-                    "last_modified_at": ""
+                    "last_modified_at": "",
+                    "is_system_user":false
                 }
                 """,
             modifyUserResponse.asString(),
@@ -128,7 +129,8 @@ class UserManagementFunctionalTest extends FunctionalTest {
                         "active": true,
                         "security_group_ids": [ ],
                         "created_at": "",
-                        "last_modified_at": ""
+                        "last_modified_at": "",
+                        "is_system_user":false
                     }
                 """,
             firstDoc,
@@ -162,7 +164,8 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "active": true,
                     "security_group_ids": [-1, -2, -3 ],
                     "created_at": "",
-                    "last_modified_at": ""
+                    "last_modified_at": "",
+                    "is_system_user":false 
                 }
                 """,
             getUserByIdResponse.asString(),
