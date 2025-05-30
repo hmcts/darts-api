@@ -282,14 +282,14 @@ class DataUtilTest {
     }
 
     @Test
-    void toBooleanNoDefaultValue_shouldDefaultToFalse(){
+    void toBooleanNoDefaultValue_shouldDefaultToFalse() {
         assertThat(DataUtil.toBoolean(null)).isFalse();
         assertThat(DataUtil.toBoolean(true)).isTrue();
         assertThat(DataUtil.toBoolean(false)).isFalse();
     }
 
     @Test
-    void toBooleanWithDefaultValue_shouldDefaultToValueSpecified(){
+    void toBooleanWithDefaultValue_shouldDefaultToValueSpecified() {
         assertThat(DataUtil.toBoolean(null, false)).isFalse();
         assertThat(DataUtil.toBoolean(null, true)).isTrue();
         assertThat(DataUtil.toBoolean(true)).isTrue();
