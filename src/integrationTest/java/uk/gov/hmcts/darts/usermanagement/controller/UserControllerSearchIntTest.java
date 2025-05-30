@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -152,13 +153,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
             .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
+            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)))
+            .andExpect(jsonPath("$[0].is_system_user").value(false));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
@@ -179,14 +182,91 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(4))
             .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
             .andExpect(jsonPath("$[1].full_name").value("user1FullName"))
             .andExpect(jsonPath("$[2].full_name").value("user2FullName"))
-            .andExpect(jsonPath("$[3].full_name").value("user3FullName"));
+            .andExpect(jsonPath("$[3].full_name").value("user3FullName"))
+            .andExpect(jsonPath("$[0].is_system_user").value(false))
+            .andExpect(jsonPath("$[1].is_system_user").value(false))
+            .andExpect(jsonPath("$[2].is_system_user").value(false))
+            .andExpect(jsonPath("$[3].is_system_user").value(false));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
         verifyNoMoreInteractions(userIdentity);
+    }
+
+    @Test
+    void search_withIncludeSystemUserTrue_shouldReturnSystemUsers() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity nonSystemUser1 = createUser("test_search_nonSystemUser1", false);
+        UserAccountEntity nonSystemUser2 = createUser("test_search_nonSystemUser2", false);
+        UserAccountEntity systemUser1 = createUser("test_search_systemUser1", true);
+
+        UserSearch userSearch = new UserSearch();
+        userSearch.fullName("test_search_");
+        userSearch.includeSystemUsers(true);
+
+
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(3))
+            .andExpect(jsonPath("$[0].id").value(nonSystemUser1.getId()))
+            .andExpect(jsonPath("$[0].is_system_user").value(false))
+            .andExpect(jsonPath("$[1].id").value(nonSystemUser2.getId()))
+            .andExpect(jsonPath("$[1].is_system_user").value(false))
+            .andExpect(jsonPath("$[2].id").value(systemUser1.getId()))
+            .andExpect(jsonPath("$[2].is_system_user").value(true));
+    }
+
+    @Test
+    void search_withIncludeSystemUserFalse_shouldNotReturnSystemUsers() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity nonSystemUser1 = createUser("test_search_nonSystemUser1", false);
+        UserAccountEntity nonSystemUser2 = createUser("test_search_nonSystemUser2", false);
+        UserAccountEntity systemUser1 = createUser("test_search_systemUser1", true);
+
+        UserSearch userSearch = new UserSearch();
+        userSearch.fullName("test_search_");
+        userSearch.includeSystemUsers(false);
+
+
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(2))
+            .andExpect(jsonPath("$[0].id").value(nonSystemUser1.getId()))
+            .andExpect(jsonPath("$[0].is_system_user").value(false))
+            .andExpect(jsonPath("$[1].id").value(nonSystemUser2.getId()))
+            .andExpect(jsonPath("$[1].is_system_user").value(false))
+            .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void search_withIncludeSystemUserNotProvided_shouldNotReturnSystemUsers() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity nonSystemUser1 = createUser("test_search_nonSystemUser1", false);
+        UserAccountEntity nonSystemUser2 = createUser("test_search_nonSystemUser2", false);
+        UserAccountEntity systemUser1 = createUser("test_search_systemUser1", true);
+
+        UserSearch userSearch = new UserSearch();
+        userSearch.fullName("test_search_");
+
+
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(2))
+            .andExpect(jsonPath("$[0].id").value(nonSystemUser1.getId()))
+            .andExpect(jsonPath("$[0].is_system_user").value(false))
+            .andExpect(jsonPath("$[1].id").value(nonSystemUser2.getId()))
+            .andExpect(jsonPath("$[1].is_system_user").value(false))
+            .andDo(MockMvcResultHandlers.print());
     }
 
     @Test
@@ -200,13 +280,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
             .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
+            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)))
+            .andExpect(jsonPath("$[0].is_system_user").value(false));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
@@ -225,13 +307,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
             .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
+            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)))
+            .andExpect(jsonPath("$[0].is_system_user").value(false));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verify(userIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
@@ -257,6 +341,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(2))
             .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserFullName(), inactiveUser.getUserFullName())))
             .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
 
@@ -285,6 +370,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
             .andExpect(jsonPath("$[*].full_name").value(hasItems(inactiveUser.getUserFullName())))
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username2 + "@ex.com")));
@@ -314,6 +400,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
             .andExpect(jsonPath("$[*].full_name").value(hasItems(activeUser.getUserFullName())))
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username1 + "@ex.com")));
@@ -344,5 +431,11 @@ class UserControllerSearchIntTest extends IntegrationBase {
         user.setAccountGuid(UUID.randomUUID().toString());
         user.setIsSystemUser(false);
         return user;
+    }
+
+    private UserAccountEntity createUser(String userFullName, boolean isSystemUser) {
+        UserAccountEntity userAccountEntity = dartsDatabaseStub.getUserAccountStub().createUser(userFullName);
+        userAccountEntity.setIsSystemUser(isSystemUser);
+        return dartsDatabaseStub.save(userAccountEntity);
     }
 }
