@@ -29,6 +29,7 @@ class UserQueryTest extends IntegrationBase {
         assertThat(users).extracting("id")
             .isEqualTo(userIdsDesc(user1, user2, user3));
     }
+
     @Test
     void searchWithOnlyEmailSpecified() {
         UserAccountEntity user1 = minimalUserAccount();
