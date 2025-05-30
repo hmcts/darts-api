@@ -24,12 +24,11 @@ class UserQueryTest extends IntegrationBase {
         UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
-        var users = userManagementQuery.getUsers(null, null);
+        var users = userManagementQuery.getUsers(false, null, null);
 
         assertThat(users).extracting("id")
             .isEqualTo(userIdsDesc(user1, user2, user3));
     }
-
     @Test
     void searchWithOnlyEmailSpecified() {
         UserAccountEntity user1 = minimalUserAccount();
@@ -38,7 +37,7 @@ class UserQueryTest extends IntegrationBase {
         UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
-        var users = userManagementQuery.getUsers(user1.getEmailAddress(), null);
+        var users = userManagementQuery.getUsers(false, user1.getEmailAddress(), null);
 
         assertThat(users).extracting("id").containsExactly(user1.getId());
     }
@@ -50,7 +49,7 @@ class UserQueryTest extends IntegrationBase {
         UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
-        var users = userManagementQuery.getUsers(null, List.of(user1.getId()));
+        var users = userManagementQuery.getUsers(false, null, List.of(user1.getId()));
 
         assertThat(users).extracting("id").containsExactly(user1.getId());
     }
@@ -62,7 +61,7 @@ class UserQueryTest extends IntegrationBase {
         UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
-        var users = userManagementQuery.getUsers(null, List.of(user1.getId(), user3.getId()));
+        var users = userManagementQuery.getUsers(false, null, List.of(user1.getId(), user3.getId()));
 
         assertThat(users).extracting("id")
             .isEqualTo(userIdsDesc(user1, user3));
@@ -76,9 +75,38 @@ class UserQueryTest extends IntegrationBase {
         UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
-        var users = userManagementQuery.getUsers(user1.getEmailAddress(), List.of(user3.getId()));
+        var users = userManagementQuery.getUsers(false, user1.getEmailAddress(), List.of(user3.getId()));
 
         assertThat(users).isEmpty();
+    }
+
+
+    @Test
+    void getUsers_shouldIncludeSystemUsers_whenIncludeSystemUsersIsTrue() {
+        UserAccountEntity user1 = minimalUserAccount();
+        user1.setIsSystemUser(true);
+        UserAccountEntity user2 = minimalUserAccount();
+        UserAccountEntity user3 = minimalUserAccount();
+        dartsDatabase.saveAll(user1, user2, user3);
+
+        var users = userManagementQuery.getUsers(true, null, List.of(user1.getId(), user3.getId()));
+
+        assertThat(users).extracting("id")
+            .isEqualTo(userIdsDesc(user1, user3));
+    }
+
+    @Test
+    void getUsers_shouldIncludeSystemUsers_whenIncludeSystemUsersIsFalse() {
+        UserAccountEntity user1 = minimalUserAccount();
+        user1.setIsSystemUser(true);
+        UserAccountEntity user2 = minimalUserAccount();
+        UserAccountEntity user3 = minimalUserAccount();
+        dartsDatabase.saveAll(user1, user2, user3);
+
+        var users = userManagementQuery.getUsers(false, null, List.of(user1.getId(), user3.getId()));
+
+        assertThat(users).extracting("id")
+            .isEqualTo(userIdsDesc(user3));
     }
 
     private static List<Integer> userIdsDesc(UserAccountEntity... users) {

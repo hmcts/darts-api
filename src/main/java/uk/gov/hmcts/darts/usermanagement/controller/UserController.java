@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.util.List;
 
@@ -32,8 +33,8 @@ public class UserController implements UserApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<List<UserWithIdAndTimestamps>> getUsers(List<Integer> userIds, String emailAddress) {
-        return ResponseEntity.ok(userManagementService.getUsers(emailAddress, userIds));
+    public ResponseEntity<List<UserWithIdAndTimestamps>> getUsers(Boolean includeSystemUsers, List<Integer> userIds, String emailAddress) {
+        return ResponseEntity.ok(userManagementService.getUsers(DataUtil.toBoolean(includeSystemUsers), emailAddress, userIds));
     }
 
     @Override

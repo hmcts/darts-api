@@ -280,4 +280,19 @@ class DataUtilTest {
             return hearingEntity;
         }
     }
+
+    @Test
+    void toBooleanNoDefaultValue_shouldDefaultToFalse(){
+        assertThat(DataUtil.toBoolean(null)).isFalse();
+        assertThat(DataUtil.toBoolean(true)).isTrue();
+        assertThat(DataUtil.toBoolean(false)).isFalse();
+    }
+
+    @Test
+    void toBooleanWithDefaultValue_shouldDefaultToValueSpecified(){
+        assertThat(DataUtil.toBoolean(null, false)).isFalse();
+        assertThat(DataUtil.toBoolean(null, true)).isTrue();
+        assertThat(DataUtil.toBoolean(true)).isTrue();
+        assertThat(DataUtil.toBoolean(false)).isFalse();
+    }
 }

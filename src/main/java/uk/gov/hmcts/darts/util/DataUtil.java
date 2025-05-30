@@ -24,6 +24,7 @@ import java.util.Optional;
 import static java.util.Objects.isNull;
 
 
+@SuppressWarnings("PMD.TooManyMethods")//Utility class with many small methods
 public final class DataUtil {
     private DataUtil() {
 
@@ -115,5 +116,13 @@ public final class DataUtil {
         }
         throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
                                     "Cannot compare ids of type " + id.getClass().getName() + " and " + id1.getClass().getName());
+    }
+
+    public static boolean toBoolean(Boolean value) {
+        return toBoolean(value, false);
+    }
+
+    public static boolean toBoolean(Boolean value, boolean defaultValue) {
+        return Optional.ofNullable(value).orElse(defaultValue);
     }
 }
