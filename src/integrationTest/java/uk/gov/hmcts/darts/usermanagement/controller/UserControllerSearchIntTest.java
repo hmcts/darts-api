@@ -227,7 +227,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
         UserAccountEntity nonSystemUser1 = createUser("test_search_nonSystemUser1", false);
         UserAccountEntity nonSystemUser2 = createUser("test_search_nonSystemUser2", false);
-        UserAccountEntity systemUser1 = createUser("test_search_systemUser1", true);
+        createUser("test_search_systemUser1", true);
 
         UserSearch userSearch = new UserSearch();
         userSearch.fullName("test_search_");
@@ -251,7 +251,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
         UserAccountEntity nonSystemUser1 = createUser("test_search_nonSystemUser1", false);
         UserAccountEntity nonSystemUser2 = createUser("test_search_nonSystemUser2", false);
-        UserAccountEntity systemUser1 = createUser("test_search_systemUser1", true);
+        createUser("test_search_systemUser1", true);
 
         UserSearch userSearch = new UserSearch();
         userSearch.fullName("test_search_");
