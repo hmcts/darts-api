@@ -67,8 +67,8 @@ public class MediaStub {
     @Transactional
     public List<MediaEntity> createAndSaveSomeMedias() {
         return List.of(
-            createMediaEntity("testCourthouse", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 1),
-            createMediaEntity("testCourthouse", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 2),
+            createMediaEntity("testCourthouse\\1", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 1),
+            createMediaEntity("testCourthouse1\ntestCourthouse2", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 2),
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 3),
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 4),
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_2_START_TIME, MEDIA_2_END_TIME, 1),
