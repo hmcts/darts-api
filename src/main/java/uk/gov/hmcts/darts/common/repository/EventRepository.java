@@ -30,6 +30,15 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
         """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
 
+    @Query("""
+           SELECT ee
+           FROM EventEntity ee
+           JOIN ee.hearingEntities he
+           WHERE he.id = :hearingId
+           AND ee.isCurrent = true
+        """)
+    List<EventEntity> findCurrentEventsByHearingId(Integer hearingId);
+
     List<EventEntity> findAllByEventId(Integer eventId);
 
     @Query("""
@@ -45,7 +54,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
            )
            FROM EventEntity ee
            JOIN ee.hearingEntities he
-           LEFT JOIN ee.eventType et        
+           LEFT JOIN ee.eventType et
            WHERE he.courtCase.id = :caseId
            AND ee.isCurrent = true
         """)
