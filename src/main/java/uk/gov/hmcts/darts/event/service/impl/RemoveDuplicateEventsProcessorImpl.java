@@ -24,6 +24,10 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
     @Override
     @Transactional
     public boolean findAndRemoveDuplicateEvent(Integer eventId) {
+        if (eventId == 0) {
+            //No need to continue if event_id = 0 as this cannot have duplicates
+            return false;
+        }
         List<Long> eventEntitiesIds = eventRepository.findDuplicateEventIds(eventId);
         if (eventEntitiesIds.isEmpty() || eventEntitiesIds.size() == 1) {
             //No need to continue if there are no duplicates
@@ -31,6 +35,7 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         }
         // Keep the first event and delete all future ones
         List<Long> eventEntitiesIdsToDelete = eventEntitiesIds.subList(1, eventEntitiesIds.size());
+
 
         List<Integer> caseManagementIdsToBeDeleted = caseManagementRetentionRepository.getIdsForEvents(eventEntitiesIdsToDelete);
         caseRetentionRepository.deleteAllByCaseManagementIdsIn(caseManagementIdsToBeDeleted);
@@ -42,8 +47,7 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         eventRepository.deleteAllAssociatedHearings(eventEntitiesIdsToDelete);
         eventRepository.deleteAllById(eventEntitiesIdsToDelete);
         eventRepository.flush();
-
-        log.info("Duplicate events found. Removing the following events {}", eventEntitiesIdsToDelete);
+        log.info("Duplicate events found for eveId {}. Removing the following events {}.", eventEntitiesIds.getFirst(), eventEntitiesIdsToDelete);
         return true;
     }
 }

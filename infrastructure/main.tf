@@ -124,7 +124,11 @@ module "postgresql_flexible" {
     {
       name  = "random_page_cost"
       value = "1.1"
-    }
+    },
+    {
+      name  = "max_connections"
+      value = var.db_max_connections
+    }    
   ]
   pgsql_version = "16"
 }
