@@ -24,12 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Transactional
-class CurrentItemHelperTest extends IntegrationBase {
+class FindCurrentEntitiesHelperTest extends IntegrationBase {
 
     @Autowired
     private DartsPersistence dartsPersistence;
     @Autowired
-    private CurrentItemHelper currentItemHelper;
+    private FindCurrentEntitiesHelper findCurrentEntitiesHelper;
     @Autowired
     private CaseService caseService;
 
@@ -43,14 +43,12 @@ class CurrentItemHelperTest extends IntegrationBase {
             .hearingEntities(Set.of(hearing))
             .build()
             .getEntity();
-        dartsPersistence.save(eventEntity1);
 
         EventEntity eventEntity2 = PersistableFactory.getEventTestData().someMinimalBuilderHolder()
             .getBuilder()
             .hearingEntities(Set.of(hearing))
             .build()
             .getEntity();
-        dartsPersistence.save(eventEntity2);
 
         EventEntity eventEntity3 = PersistableFactory.getEventTestData().someMinimalBuilderHolder()
             .getBuilder()
@@ -58,7 +56,8 @@ class CurrentItemHelperTest extends IntegrationBase {
             .isCurrent(false)
             .build()
             .getEntity();
-        dartsPersistence.save(eventEntity3);
+
+        dartsPersistence.saveAll(eventEntity1, eventEntity2, eventEntity3);
 
         dartsPersistence.save(hearing);
 
@@ -69,7 +68,7 @@ class CurrentItemHelperTest extends IntegrationBase {
             .getEntity();
         dartsPersistence.getCaseRepository().save(courtCaseEntity);
 
-        List<EventEntity> currentEvents = currentItemHelper.getCurrentEvents(courtCaseEntity);
+        List<EventEntity> currentEvents = findCurrentEntitiesHelper.getCurrentEvents(courtCaseEntity);
         assertEquals(2, currentEvents.size());
         assertTrue(currentEvents.contains(eventEntity1));
         assertTrue(currentEvents.contains(eventEntity2));
@@ -139,7 +138,7 @@ class CurrentItemHelperTest extends IntegrationBase {
             .getEntity();
         dartsPersistence.getCaseRepository().save(courtCaseEntity);
 
-        List<MediaEntity> currentMedia = currentItemHelper.getCurrentMedia(courtCaseEntity);
+        List<MediaEntity> currentMedia = findCurrentEntitiesHelper.getCurrentMedia(courtCaseEntity);
         assertEquals(2, currentMedia.size());
         assertTrue(currentMedia.contains(mediaEntity1));
         assertTrue(currentMedia.contains(mediaEntity2));

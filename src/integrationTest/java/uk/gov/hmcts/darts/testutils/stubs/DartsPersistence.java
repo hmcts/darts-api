@@ -717,6 +717,11 @@ public class DartsPersistence {
     }
 
     @Transactional
+    public void saveAll(EventEntity... events) {
+        stream(events).forEach(this::save);
+    }
+
+    @Transactional
     public void saveAll(AnnotationDocumentEntity... annotationDocuments) {
         stream(annotationDocuments).forEach(this::save);
     }
