@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class CurrentItemHelper {
+public class FindCurrentEntitiesHelper {
 
     private final EventRepository eventRepository;
     private final MediaRepository mediaRepository;

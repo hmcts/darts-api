@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
-import uk.gov.hmcts.darts.cases.helper.CurrentItemHelper;
+import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -78,7 +78,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         private final CaseRetentionRepository caseRetentionRepository;
         private final RetentionApi retentionApi;
         private final RetentionDateHelper retentionDateHelper;
-        private final CurrentItemHelper currentItemHelper;
+        private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
 
         @Value("#{'${darts.retention.close-events}'.split(',')}")
         private List<String> closeEvents;
@@ -90,7 +90,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
 
             log.info("About to close court case id {}", courtCase.getId());
-            List<EventEntity> eventList = currentItemHelper.getCurrentEvents(courtCase);
+            List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
             if (CollectionUtils.isNotEmpty(eventList)) {
                 eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
                 //find latest closed event
@@ -111,7 +111,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                                              userAccount);
             } else {
                 //look for the last audio and use its recorded date
-                List<MediaEntity> mediaList = currentItemHelper.getCurrentMedia(courtCase);
+                List<MediaEntity> mediaList = findCurrentEntitiesHelper.getCurrentMedia(courtCase);
                 if (mediaList.isEmpty()) {
                     //look for the last hearing date and use that
                     courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
