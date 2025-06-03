@@ -59,9 +59,11 @@ public class DarNotifyAsyncHelper {
                      courthouse, courtroom, openCaseNumbers);
 
             dartsGatewayClient.darNotify(darNotifyEvent);
-            log.info("DarNotify request sent successfully: event_id={}, notification_url={}", dartsEvent.getEventId(), notificationUrl);
+            log.info("DarNotify request sent successfully: event_id={}, notification_url={}, notification_type={}", dartsEvent.getEventId(), notificationUrl,
+                     darNotifyType.getNotificationType());
         } catch (Exception ex) {
-            log.error("DarNotify request failed to send: event_id={}, notification_url={}", dartsEvent.getEventId(), notificationUrl, ex);
+            log.error("DarNotify request failed to send: event_id={}, notification_url={}, notification_type={}", dartsEvent.getEventId(), notificationUrl,
+                      darNotifyType.getNotificationType(), ex);
         }
     }
 }
