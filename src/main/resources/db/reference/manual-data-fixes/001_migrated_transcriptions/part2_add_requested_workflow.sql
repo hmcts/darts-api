@@ -112,7 +112,7 @@ AND NOT EXISTS (
     AND trw.trs_id = 1
 );
 
--- disable triggers in the current session, so that inserts into transcription_workflow do not update the transcription.trs_id
+-- exit replication mode to re-enable triggers
 SET session_replication_role = 'origin';
 
 ---------------------
