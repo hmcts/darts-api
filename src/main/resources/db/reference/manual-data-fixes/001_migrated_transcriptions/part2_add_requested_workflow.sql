@@ -18,8 +18,14 @@ WHERE chronicle_id IS NOT NULL;
 -- record this for cross-referencing after the fix is applied
 SELECT count(*) transcriptions_without_requested_workflow
 FROM darts.transcription tra
-WHERE tra.is_current = true
-AND tra.chronicle_id IS NOT NULL;
+WHERE tra.is_current
+AND tra.chronicle_id IS NOT NULL
+AND NOT EXISTS (
+    SELECT 1
+    FROM darts.transcription_workflow trw
+    WHERE trw.tra_id = tra.tra_id
+    AND trw.trs_id = 1
+);
 
 -- this query is used to check the different types of requested workflows that will be created
 -- check the all_total matches the count of "transcriptions_without_requested_workflow" from the query above.
@@ -38,7 +44,7 @@ WITH potential_new_workflows AS (
         tra_v1_0.created_ts workflow_ts
 	FROM darts.transcription tra
 	JOIN darts.transcription tra_v1_0 ON tra_v1_0.chronicle_id = tra.chronicle_id AND tra_v1_0.version_label = '1.0'
-	WHERE tra.is_current = true
+	WHERE tra.is_current
 	AND tra.chronicle_id IS NOT NULL
 	-- no requested workflow exists
 	AND NOT EXISTS (
@@ -96,7 +102,7 @@ SELECT
     tra_v1_0.created_ts workflow_ts
 FROM darts.transcription tra
 JOIN darts.transcription tra_v1_0 ON tra_v1_0.chronicle_id = tra.chronicle_id AND tra_v1_0.version_label = '1.0'
-WHERE tra.is_current = true
+WHERE tra.is_current
 AND tra.chronicle_id IS NOT NULL
 -- no requested workflow exists
 AND NOT EXISTS (
@@ -105,6 +111,9 @@ AND NOT EXISTS (
     WHERE trw.tra_id = tra.tra_id
     AND trw.trs_id = 1
 );
+
+-- disable triggers in the current session, so that inserts into transcription_workflow do not update the transcription.trs_id
+SET session_replication_role = 'origin';
 
 ---------------------
 -- Post-fix checks --
@@ -116,3 +125,15 @@ SELECT count(*) transcriptions_with_requested_workflow
 FROM darts.transcription tra
 JOIN darts.transcription_workflow trw ON trw.tra_id = tra.tra_id AND trw.trs_id = 1
 WHERE chronicle_id IS NOT NULL;
+
+-- we would now expect there to be 0 records without a requested workflow
+SELECT count(*) transcriptions_without_requested_workflow
+FROM darts.transcription tra
+WHERE tra.is_current
+AND tra.chronicle_id IS NOT NULL
+AND NOT EXISTS (
+    SELECT 1
+    FROM darts.transcription_workflow trw
+    WHERE trw.tra_id = tra.tra_id
+    AND trw.trs_id = 1
+);
