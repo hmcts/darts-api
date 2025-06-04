@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 
@@ -10,5 +9,5 @@ public interface OutboundAudioDeleterProcessorSingleElement {
 
     List<TransientObjectDirectoryEntity> markForDeletion(TransformedMediaEntity transformedMedia);
 
-    void markMediaRequestAsExpired(MediaRequestEntity mediaRequest);
+    void markMediaRequestAsExpired(int mediaRequestId);
 }
