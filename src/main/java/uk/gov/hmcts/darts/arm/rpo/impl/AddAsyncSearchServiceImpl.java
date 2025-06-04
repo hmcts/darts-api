@@ -14,8 +14,8 @@ import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
+import uk.gov.hmcts.darts.util.DateTimeHelper;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,7 +31,6 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
-    private final CurrentTimeHelper currentTimeHelper;
 
     @Override
     public String addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
@@ -43,9 +42,9 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
                                                  ArmRpoHelper.inProgressRpoStatus(),
                                                  userAccount);
 
-        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        OffsetDateTime createdDateTime = DateTimeHelper.floorToMinutes(executionDetail.getCreatedDateTime());
         String searchName = "DARTS_RPO_%s".formatted(
-            now.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+            createdDateTime.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
         );
 
         final StringBuilder exceptionMessageBuilder = new StringBuilder(99).append("ARM addAsyncSearch: ");
@@ -57,7 +56,7 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
 
         AddAsyncSearchRequestGenerator requestGenerator;
         try {
-            requestGenerator = createAddAsyncSearchRequestGenerator(searchName, executionDetail, armAutomatedTaskEntity, now);
+            requestGenerator = createAddAsyncSearchRequestGenerator(searchName, executionDetail, armAutomatedTaskEntity, createdDateTime);
         } catch (Exception e) {
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append(ArmRpoUtil.COULD_NOT_CONSTRUCT_API_REQUEST)
                                                                  .append(e)

@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
 import java.time.OffsetDateTime;
@@ -65,20 +64,17 @@ class AddAsyncSearchServiceTest {
         armRpoService = spy(ArmRpoService.class);
         armRpoClient = spy(ArmRpoClient.class);
         armAutomatedTaskRepository = mock(ArmAutomatedTaskRepository.class);
-        var currentTimeHelper = mock(CurrentTimeHelper.class);
-        
+
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         requestCaptor = ArgumentCaptor.forClass(String.class);
 
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
 
         addAsyncSearchService = new AddAsyncSearchServiceImpl(armRpoClient, armRpoService, armRpoUtil,
-                                                              armAutomatedTaskRepository, currentTimeHelper);
+                                                              armAutomatedTaskRepository);
 
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
 
-        when(currentTimeHelper.currentOffsetDateTime())
-            .thenReturn(OffsetDateTime.parse("2024-01-01T12:00:00Z"));
     }
 
     @AfterEach
@@ -112,10 +108,10 @@ class AddAsyncSearchServiceTest {
 
         String jsonRequest = requestCaptor.getValue();
 
-        assertEquals("DARTS_RPO_2024_01_01_12_00_00", parse(jsonRequest)
+        assertEquals("DARTS_RPO_2025_01_02_12_34_00", parse(jsonRequest)
             .read("$.name", String.class));
 
-        assertEquals("DARTS_RPO_2024_01_01_12_00_00", parse(jsonRequest)
+        assertEquals("DARTS_RPO_2025_01_02_12_34_00", parse(jsonRequest)
             .read("$.searchName", String.class));
 
         assertEquals(MATTER_ID, parse(jsonRequest)
@@ -130,10 +126,10 @@ class AddAsyncSearchServiceTest {
         assertEquals(SORTING_FIELD, parse(jsonRequest)
             .read("$.sortingField", String.class));
 
-        assertEquals("2023-12-30T11:00:00Z", parse(jsonRequest)
+        assertEquals("2024-12-31T11:34:00Z", parse(jsonRequest)
             .read("$.queryTree.children[1].field.value[0]", String.class));
 
-        assertEquals("2023-12-31T11:00:00Z", parse(jsonRequest)
+        assertEquals("2025-01-01T11:34:00Z", parse(jsonRequest)
             .read("$.queryTree.children[1].field.value[1]", String.class));
 
         // And verify execution detail status moves to completed as the final operation
@@ -178,6 +174,7 @@ class AddAsyncSearchServiceTest {
         var armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         armRpoExecutionDetailEntity.setMatterId(null);
+        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2025-01-02T12:34:56Z"));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID))
             .thenReturn(armRpoExecutionDetailEntity);
@@ -275,6 +272,7 @@ class AddAsyncSearchServiceTest {
         armRpoExecutionDetailEntity.setEntitlementId(ENTITLEMENT_ID);
         armRpoExecutionDetailEntity.setIndexId(INDEX_ID);
         armRpoExecutionDetailEntity.setSortingField(SORTING_FIELD);
+        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2025-01-02T12:34:56Z"));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID))
             .thenReturn(armRpoExecutionDetailEntity);
