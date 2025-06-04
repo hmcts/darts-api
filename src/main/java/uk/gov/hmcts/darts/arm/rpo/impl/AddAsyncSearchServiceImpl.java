@@ -94,7 +94,7 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
     private AddAsyncSearchRequestGenerator createAddAsyncSearchRequestGenerator(String searchName,
                                                                                 ArmRpoExecutionDetailEntity executionDetail,
                                                                                 ArmAutomatedTaskEntity armAutomatedTaskEntity,
-                                                                                OffsetDateTime now) {
+                                                                                OffsetDateTime createdDateTime) {
         return AddAsyncSearchRequestGenerator.builder()
             .name(searchName)
             .searchName(searchName)
@@ -102,8 +102,8 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
             .entitlementId(executionDetail.getEntitlementId())
             .indexId(executionDetail.getIndexId())
             .sortingField(executionDetail.getSortingField())
-            .startTime(now.minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()))
-            .endTime(now.minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()))
+            .startTime(createdDateTime.minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()))
+            .endTime(createdDateTime.minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()))
             .build();
     }
 
