@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.mapper.EventHandlerMapper;
 import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
@@ -186,6 +187,7 @@ class EventMappingServiceImplTest {
             "Event handler mapping " + EVENT_HANDLER_ID + " cannot be updated because it is inactive.",
             exception.getDetail()
         );
+        assertEquals(EventError.EVENT_HANDLER_MAPPING_INACTIVE_UPDATED, exception.getError());
     }
 
     @Test

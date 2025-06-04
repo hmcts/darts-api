@@ -1075,6 +1075,7 @@ components:
         - "Event mapping not found in database"
         - "Handler name does not exist"
         - "The mapping is inactive, so cannot be deleted"
+        - "The mapping is inactive, so cannot be updated"
         - "The mapping has already processed events, so cannot be deleted"
         - "The search resulted in too many results"
         - "Event id does not exist"
@@ -1086,7 +1087,8 @@ components:
         DUPLICATE_EVENT_MAPPING,
         NO_EVENT_MAPPING,
         INVALID_HANDLER_MAPPING_NAME,
-        MAPPING_INACTIVE,
+        MAPPING_INACTIVE_DELETED,
+        MAPPING_INACTIVE_UPDATED,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
         EVENT_ID_NOT_FOUND,
