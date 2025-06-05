@@ -3,6 +3,9 @@
 -- this script should only be run after part1 which ensures there are no  duplicate transcriptions with is_current=true --
 --------------------------------------------------------------------------------------------------------------------------
 
+begin;
+savepoint dmp5133;
+
 --------------------
 -- Initial checks --
 --------------------
@@ -119,6 +122,14 @@ SET session_replication_role = 'origin';
 -- Post-fix checks --
 ---------------------
 
+-- check that no migrated transcriptions have trs_id = 1, expect 0
+-- anything other than 0 means the trigger was not disabled and the insert should be rolled back
+SELECT count(*)
+FROM darts.transcription tra
+WHERE tra.is_current
+AND tra.chronicle_id IS NOT NULL
+AND tra.trs_id = 1;
+
 -- check that all migrated transcriptions now have a requested workflow
 -- this should equal the "transcriptions_without_requested_workflow" count from the initial checks
 SELECT count(*) transcriptions_with_requested_workflow
@@ -137,3 +148,7 @@ AND NOT EXISTS (
     WHERE trw.tra_id = tra.tra_id
     AND trw.trs_id = 1
 );
+
+-- script is currently configured to rollback, if run end-to-end
+rollback to dmp5133;
+--commit;
