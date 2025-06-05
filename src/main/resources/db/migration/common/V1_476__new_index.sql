@@ -1,1 +1,1 @@
-CREATE INDEX CONCURRENTLY IF NOT EXISTS event_event_id_idx ON darts."event" (event_id,message_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS eve_ei_mi_idx ON darts."event" (event_id,message_id);
