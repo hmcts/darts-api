@@ -152,3 +152,15 @@ AND NOT EXISTS (
 -- script is currently configured to rollback, if run end-to-end
 rollback to dmp5133;
 --commit;
+
+-- should the changes in this script need to be reverted after being committed
+-- the following query can be used to delete the requested workflows that were added
+
+--DELETE FROM darts.transcription_workflow trw
+--WHERE trw.trs_id = 1
+--AND trw.tra_id IN (
+--	SELECT tra_id
+--	FROM darts.transcription
+--	WHERE is_current
+--	AND chronicle_id IS NOT NULL
+--);
