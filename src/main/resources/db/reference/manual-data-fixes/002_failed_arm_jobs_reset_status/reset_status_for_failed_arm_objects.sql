@@ -2,7 +2,7 @@ begin;
 savepoint dmp5130;
 
 --
--- pre-check list of EOD records to be updated to set status to 14 (ARM_RAW_DATA_FAILED) and trasnfer_attempts to 1
+-- pre-check list of EOD records to be updated to set status to 14 (ARM_RAW_DATA_FAILED) and trasnfer_attempts to 1 (expect 3647)
 --
 SELECT count(*) FROM darts.external_object_directory
 WHERE ors_id IN (14, 17);
