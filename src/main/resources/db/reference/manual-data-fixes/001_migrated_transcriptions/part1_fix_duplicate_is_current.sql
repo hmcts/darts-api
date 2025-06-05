@@ -18,7 +18,7 @@ order by a.tra_id;
 --
 -- pre-check list to be actioned on HEARING_TRANSCRIPTION_AE, removing links where transcription is now inactive ( expect 56 )
 --
-select distinct tra_id
+select hea_id,tra_id
 from hearing_transcription_ae
 where tra_id in (
     select a.tra_id
