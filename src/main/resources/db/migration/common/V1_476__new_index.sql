@@ -1,1 +1,1 @@
-CREATE INDEX event_event_id_idx ON darts."event" (event_id,message_id);
+CREATE INDEX IF NOT EXISTS event_event_id_idx ON darts."event" (event_id,message_id);
