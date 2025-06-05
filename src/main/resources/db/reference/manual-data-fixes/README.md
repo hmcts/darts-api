@@ -21,3 +21,15 @@ Script: [part1_fix_duplicate_is_current.sql](../manual-data-fixes/001_migrated_t
 Adding a requested workflow entry for all migrated transcriptions.
 
 Script: [part2_add_requested_workflow.sql](../manual-data-fixes/001_migrated_transcriptions/part2_add_requested_workflow.sql)
+
+## 002 - Reset failed ARM objects status
+This manual data fix applies to failed ARM objects so that they can be pushed again in next execution. This is done by updating the status to 14(ARM_RAW_DATA_FAILED_ and transfer_attempts to 1.
+
+**Fix applied date:** Not yet applied
+
+Scripts available under following location [reset_status_for_failed_arm_objects.sql](../manual-data-fixes/002_failed_arm_jobs_reset_status/reset_status_for_failed_arm_objects.sql)
+
+
+
+
+
