@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
+import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleElement;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -19,11 +20,14 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+//NOTE: When this class is edited it is important we manually test the outbound audio deletion process
+//This is because lazy loading errors are not be detected in integration tests
 public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundAudioDeleterProcessorSingleElement {
 
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
@@ -31,6 +35,7 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final MediaRequestRepository mediaRequestRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final MediaRequestService mediaRequestService;
 
     @Override
     @Transactional
@@ -52,20 +57,25 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
     /**
      * Marks media request as expired if all transformed medias related to the request have an expiry time.
      *
-     * @param mediaRequest media request to be marked as expired.
+     * @param mediaRequestId media request id to be marked as expired.
      */
     @Override
     @Transactional
-    public void markMediaRequestAsExpired(MediaRequestEntity mediaRequest) {
+    public void markMediaRequestAsExpired(int mediaRequestId) {
+        List<TransformedMediaEntity> transformedMedias = transformedMediaRepository.findByMediaRequestId(mediaRequestId);
+        boolean areAllTransformedMediasExpired = transformedMedias
+            .stream()
+            .map(TransformedMediaEntity::getExpiryTime)
+            .allMatch(Objects::nonNull);
 
-        List<TransformedMediaEntity> transformedMedias = transformedMediaRepository.findByMediaRequestId(mediaRequest.getId());
-        boolean areAllTransformedMediasExpired = transformedMedias.stream().allMatch(t -> t.getExpiryTime() != null);
         if (areAllTransformedMediasExpired) {
-            log.debug("Setting media request ID {} to be expired", mediaRequest.getId());
+            log.debug("Setting media request ID {} to be expired", mediaRequestId);
+            MediaRequestEntity mediaRequest = mediaRequestService.getMediaRequestEntityById(mediaRequestId);
             mediaRequest.setStatus(MediaRequestStatus.EXPIRED);
+
             mediaRequestRepository.saveAndFlush(mediaRequest);
         } else {
-            log.debug("Not all transformed media for media request ID {} have an expiry date set", mediaRequest.getId());
+            log.debug("Not all transformed media for media request ID {} have an expiry date set", mediaRequestId);
         }
     }
 
