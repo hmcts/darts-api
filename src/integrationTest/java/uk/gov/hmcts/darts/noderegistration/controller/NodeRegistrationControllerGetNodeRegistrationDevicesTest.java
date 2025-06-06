@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,11 +39,14 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
     private SuperAdminUserStub superAdminUserStub;
 
     private NodeRegisterEntity nodeRegisterEntity;
+    private NodeRegisterEntity nodeRegisterEntity2;
 
     @BeforeEach
     void setupData() {
         var node = PersistableFactory.getNodeRegisterTestData().someMinimal();
+        var node2 = PersistableFactory.getNodeRegisterTestData().someMinimal();
         nodeRegisterEntity = dartsPersistence.save(node);
+        nodeRegisterEntity2 = dartsPersistence.save(node2);
     }
 
     @Test
@@ -68,15 +72,36 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
                     "hostname": "Host1",
                     "mac_address": "00:0a:95:9d:68:21",
                     "node_type": "DAR",
-                    "created_at": "<created_at>",
-                    "created_by": <created_by>
-                    }
-                ]
+                    "created_at": "<created_at1>",
+                    "created_by": <created_by1>
+                },
+                {
+                    "id": <nodeid2>,
+                    "courthouse": {
+                        "id": 2,
+                        "display_name": "Some Courthouse"
+                    },
+                    "courtroom": {
+                        "id": 2,
+                        "name": "<courtroom2>"
+                    },
+                    "ip_address": "192.168.1.3",
+                    "hostname": "Host1",
+                    "mac_address": "00:0a:95:9d:68:21",
+                    "node_type": "DAR",
+                    "created_at": "<created_at2>",
+                    "created_by": <created_by2>
+                }
+            ]
             """
             .replace("<nodeid>", String.valueOf(nodeRegisterEntity.getNodeId()))
             .replace("<courtroom>", nodeRegisterEntity.getCourtroom().getName())
-            .replace("<created_at>", nodeRegisterEntity.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
-            .replace("<created_by>", String.valueOf(nodeRegisterEntity.getCreatedById()));
+            .replace("<created_at1>", nodeRegisterEntity.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT))
+            .replace("<created_by1>", String.valueOf(nodeRegisterEntity.getCreatedById()))
+            .replace("<nodeid2>", String.valueOf(nodeRegisterEntity2.getNodeId()))
+            .replace("<courtroom2>", nodeRegisterEntity2.getCourtroom().getName())
+            .replace("<created_at2>", nodeRegisterEntity2.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT))
+            .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById()));
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
