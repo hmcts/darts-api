@@ -2,12 +2,14 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 
 import java.util.List;
@@ -23,19 +25,22 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
 
     @Override
     @Transactional
-    public boolean findAndRemoveDuplicateEvent(Integer eventId) {
-        if (eventId == 0) {
-            //No need to continue if event_id = 0 as this cannot have duplicates
+    public boolean findAndRemoveDuplicateEvent(DartsEvent event) {
+        if (event.getEventId() == null || event.getMessageId() == null) {
             return false;
         }
-        List<Long> eventEntitiesIds = eventRepository.findDuplicateEventIds(eventId);
+        List<Long> eventEntitiesIds = eventRepository.findDuplicateEventIds(
+            NumberUtils.createInteger(event.getEventId()),
+            event.getMessageId(),
+            event.getEventText()
+        );
+
         if (eventEntitiesIds.isEmpty() || eventEntitiesIds.size() == 1) {
             //No need to continue if there are no duplicates
             return false;
         }
         // Keep the first event and delete all future ones
         List<Long> eventEntitiesIdsToDelete = eventEntitiesIds.subList(1, eventEntitiesIds.size());
-
 
         List<Integer> caseManagementIdsToBeDeleted = caseManagementRetentionRepository.getIdsForEvents(eventEntitiesIdsToDelete);
         caseRetentionRepository.deleteAllByCaseManagementIdsIn(caseManagementIdsToBeDeleted);
@@ -47,7 +52,9 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         eventRepository.deleteAllAssociatedHearings(eventEntitiesIdsToDelete);
         eventRepository.deleteAllById(eventEntitiesIdsToDelete);
         eventRepository.flush();
-        log.info("Duplicate events found for eveId {}. Removing the following events {}.", eventEntitiesIds.getFirst(), eventEntitiesIdsToDelete);
+
+        log.info("Duplicate events found for event_id='{}', message_id='{}',. Removing the following events {}",
+                 event.getEventId(), event.getMessageId(), eventEntitiesIdsToDelete);
         return true;
     }
 }
