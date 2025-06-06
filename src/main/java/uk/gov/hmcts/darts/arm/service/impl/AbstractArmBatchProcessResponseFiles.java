@@ -209,6 +209,28 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
+    OffsetDateTime getCreateRecordProcessTime(ArmResponseCreateRecord armResponseCreateRecord) {
+        try {
+            dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
+            return OffsetDateTime.parse(armResponseCreateRecord.getProcessTime(), dateTimeFormatter);
+        } catch (Exception e) {
+            log.error("Unable to parse timestamp {} from ARM input upload file {}", armResponseCreateRecord.getProcessTime(),
+                      armResponseCreateRecord.getA360RecordId(), e);
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    OffsetDateTime getInvalidLineProcessTime(ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
+        try {
+            dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
+            return OffsetDateTime.parse(armResponseInvalidLineRecord.getProcessTime(), dateTimeFormatter);
+        } catch (Exception e) {
+            log.error("Unable to parse timestamp {} from ARM input upload file {}", armResponseInvalidLineRecord.getProcessTime(),
+                      armResponseInvalidLineRecord.getA360RecordId(), e);
+            throw new IllegalArgumentException(e);
+        }
+    }
+
     private ArmResponseInputUploadFileRecord getResponseInputUploadFileRecordOrDelete(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
                                                                                       String inputUploadFileRecordStr,
                                                                                       List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
@@ -504,6 +526,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
                         armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
                                                                armResponseCreateRecord, createRecordFilenameProcessor);
+                        OffsetDateTime timestamp = getCreateRecordProcessTime(armResponseCreateRecord);
+
+
                     } else {
                         log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} create record {}",
                                  armResponseCreateRecord.getInput(), createRecordFilenameAndPath);
@@ -862,7 +887,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                                        UserAccountEntity userAccount) {
         if (nonNull(externalObjectDirectory)) {
             log.info(
-                "ARM Push updating ARM status from {} to {} for ID {}",
+                "ARM updating ARM status from {} to {} for ID {}",
                 externalObjectDirectory.getStatus().getId(),
                 objectRecordStatus.getId(),
                 externalObjectDirectory.getId()
