@@ -58,7 +58,7 @@ public class NodeRegistrationServiceImpl implements NodeRegistrationService {
             .toList();
     }
 
-    public static GetNodeRegisterManagementResponseCourthouse mapToCourthouse(CourtroomEntity courtroomEntity) {
+    private static GetNodeRegisterManagementResponseCourthouse mapToCourthouse(CourtroomEntity courtroomEntity) {
         if (courtroomEntity == null || courtroomEntity.getCourthouse() == null) {
             return null;
         }
@@ -68,7 +68,7 @@ public class NodeRegistrationServiceImpl implements NodeRegistrationService {
         return courthouse;
     }
 
-    public static GetNodeRegisterManagementResponseCourtroom mapToCourtroom(CourtroomEntity courtroomEntity) {
+    private static GetNodeRegisterManagementResponseCourtroom mapToCourtroom(CourtroomEntity courtroomEntity) {
         if (courtroomEntity == null) {
             return null;
         }
