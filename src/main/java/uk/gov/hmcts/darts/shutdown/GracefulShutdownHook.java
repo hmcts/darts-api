@@ -19,8 +19,8 @@ public class GracefulShutdownHook
     @Override
     public void run() {
         setReadynessToFalse();
-        delayShutdownSpringContext();
-        shutdownSpringContext();
+        delayShutdown();
+        shutdownApplication();
     }
 
     private void setReadynessToFalse() {
@@ -32,7 +32,7 @@ public class GracefulShutdownHook
 
     //Required for graceful shutdown. Health check fails for a short time, so the load balancer stops sending new requests.
     @SuppressWarnings("PMD.DoNotUseThreads")
-    private void delayShutdownSpringContext() {
+    private void delayShutdown() {
         try {
             String waitTimeString = applicationContext.getBeanFactory().resolveEmbeddedValue("${darts.shutdown.wait-time:30s}");
             Duration waitTime = DurationStyle.detectAndParse(waitTimeString);
@@ -43,7 +43,7 @@ public class GracefulShutdownHook
         }
     }
 
-    private void shutdownSpringContext() {
+    private void shutdownApplication() {
         log.info("Shutting down Application");
         //First shutdown the web server, so it stops accepting new connections
         applicationContext.getWebServer().shutDownGracefully(this);
