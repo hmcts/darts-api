@@ -26,12 +26,14 @@ import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.util.CsvFileUtil;
+import uk.gov.hmcts.darts.util.DateTimeHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -122,12 +124,13 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         Pageable pageRequest = PageRequest.of(0, batchSize);
         Page<ExternalObjectDirectoryEntity> pages;
 
+        OffsetDateTime createdDateTime = DateTimeHelper.floorToMinutes(armRpoExecutionDetailEntity.getCreatedDateTime());
         do {
             pages
                 = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
                 armRpoPending,
-                armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
-                armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()),
+                createdDateTime.minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
+                createdDateTime.minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()),
                 pageRequest
             );
             log.info("Found number of elements {}, total elements {}, total pages {} for batch size {}",
