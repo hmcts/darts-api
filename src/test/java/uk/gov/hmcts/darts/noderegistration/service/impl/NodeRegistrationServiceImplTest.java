@@ -5,9 +5,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
+import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity_;
 import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.noderegistration.model.GetNodeRegisterManagementResponse;
 
@@ -59,7 +61,7 @@ class NodeRegistrationServiceImplTest {
         entity2.setMacAddress("00:0a:95:9d:68:17");
         entity2.setCourtroom(courtroomEntity2);
 
-        when(nodeRegisterRepository.findAll()).thenReturn(List.of(entity1, entity2));
+        when(nodeRegisterRepository.findAll(Sort.by(NodeRegisterEntity_.NODE_ID).ascending())).thenReturn(List.of(entity1, entity2));
 
         List<GetNodeRegisterManagementResponse> result = nodeRegistrationService.getNodeRegisterDevices();
 
@@ -87,7 +89,7 @@ class NodeRegistrationServiceImplTest {
 
     @Test
     void getNodeRegisterDevices_shouldReturnEmptyList_whenNoNodeEntitiesExist() {
-        when(nodeRegisterRepository.findAll()).thenReturn(List.of());
+        when(nodeRegisterRepository.findAll(Sort.by(NodeRegisterEntity_.NODE_ID).ascending())).thenReturn(List.of());
 
         List<GetNodeRegisterManagementResponse> result = nodeRegistrationService.getNodeRegisterDevices();
 
@@ -104,7 +106,7 @@ class NodeRegistrationServiceImplTest {
         entity.setMacAddress("00:0a:95:9d:68:16");
         entity.setCourtroom(null);
 
-        when(nodeRegisterRepository.findAll()).thenReturn(List.of(entity));
+        when(nodeRegisterRepository.findAll(Sort.by(NodeRegisterEntity_.NODE_ID).ascending())).thenReturn(List.of(entity));
 
         List<GetNodeRegisterManagementResponse> result = nodeRegistrationService.getNodeRegisterDevices();
 
@@ -128,7 +130,7 @@ class NodeRegistrationServiceImplTest {
         entity.setMacAddress("00:0a:95:9d:68:16");
         entity.setCourtroom(courtroomEntity1);
 
-        when(nodeRegisterRepository.findAll()).thenReturn(List.of(entity));
+        when(nodeRegisterRepository.findAll(Sort.by(NodeRegisterEntity_.NODE_ID).ascending())).thenReturn(List.of(entity));
 
         List<GetNodeRegisterManagementResponse> result = nodeRegistrationService.getNodeRegisterDevices();
 
