@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -9,10 +8,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
+import uk.gov.hmcts.darts.shutdown.GracefulShutdownHook;
 
 import java.util.TimeZone;
 
@@ -32,25 +32,24 @@ public class Application implements CommandLineRunner {
         log.info("Default TimeZone: {}", TimeZone.getDefault().getID());
     }
 
-    @SuppressWarnings({"PMD.CloseResource"})
+    @SuppressWarnings({
+        "PMD.CloseResource",
+        "PMD.DoNotUseThreads"//Required for shutdown hook
+    })
     public static void main(final String[] args) {
         final var application = new SpringApplication(Application.class);
+        application.setRegisterShutdownHook(false);
 
-        application.addListeners((ApplicationListener<ContextClosedEvent>) event -> {
-            log.info("Application is shutting down 1...");
-        });
+        ConfigurableApplicationContext applicationContext = application.run(args);
 
-        final var instance = application.run(args);
+        Thread shutdownHookThread = new Thread(new GracefulShutdownHook((ServletWebServerApplicationContext) applicationContext));
+        shutdownHookThread.setName("GracefulShutdownHook");
+        Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 
         if (System.getenv("ATS_MODE") != null) {
             log.info("ATS_MODE found, closing instance");
-            instance.close();
+            System.exit(0);//Let the shutdown hooks do its job
         }
-    }
-
-    @PreDestroy
-    public void shutdown() {
-        log.info("Application is shutting down 2...");
     }
 
     @Override
