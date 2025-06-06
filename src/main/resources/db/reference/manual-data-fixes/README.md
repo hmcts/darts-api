@@ -8,7 +8,7 @@ This manual data fix applies to migrated transcription data and consists for 2 p
 
 Scripts available under directory [001_migrated_transcriptions](../manual-data-fixes/001_migrated_transcriptions)
 
-**Fix applied date:** Not yet applied 
+**Fix applied date:** 5/6/2025
 
 ### Part 1
 
@@ -25,7 +25,7 @@ Script: [part2_add_requested_workflow.sql](../manual-data-fixes/001_migrated_tra
 ## 002 - Reset failed ARM objects status
 This manual data fix applies to failed ARM objects so that they can be pushed again in next execution. This is done by updating the status to 14(ARM_RAW_DATA_FAILED_ and transfer_attempts to 1.
 
-**Fix applied date:** Not yet applied
+**Fix applied date:** 5/6/2025
 
 Scripts available under following location [reset_status_for_failed_arm_objects.sql](../manual-data-fixes/002_failed_arm_jobs_reset_status/reset_status_for_failed_arm_objects.sql)
 
