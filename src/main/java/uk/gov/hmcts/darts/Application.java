@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 import static java.time.ZoneOffset.UTC;
 
