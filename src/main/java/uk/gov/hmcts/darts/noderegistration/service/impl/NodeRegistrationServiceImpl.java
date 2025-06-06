@@ -2,10 +2,12 @@ package uk.gov.hmcts.darts.noderegistration.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
+import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -42,7 +44,7 @@ public class NodeRegistrationServiceImpl implements NodeRegistrationService {
 
     @Override
     public List<GetNodeRegisterManagementResponse> getNodeRegisterDevices() {
-        return nodeRegisterRepository.findAll().stream()
+        return nodeRegisterRepository.findAll(Sort.by(NodeRegisterEntity_.NODE_ID).ascending()).stream()
             .map(nodeRegisterEntity -> new GetNodeRegisterManagementResponse()
                 .id(nodeRegisterEntity.getNodeId())
                 .nodeType(nodeRegisterEntity.getNodeType())
