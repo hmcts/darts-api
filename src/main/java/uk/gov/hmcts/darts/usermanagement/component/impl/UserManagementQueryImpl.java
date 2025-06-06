@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.usermanagement.component.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -22,11 +23,11 @@ public class UserManagementQueryImpl implements UserManagementQuery {
     private final UserAccountRepository userAccountRepository;
 
     @Override
-    public List<UserAccountEntity> getUsers(String emailAddress, List<Integer> userIds) {
-        return userAccountRepository.findAll(
-            where(notSystemUser())
-                .and(hasEmailAddress(emailAddress))
-                .and(isInIds(userIds)),
-            Sort.by(DESC, "id"));
+    public List<UserAccountEntity> getUsers(boolean includeSystemUSers, String emailAddress, List<Integer> userIds) {
+        Specification<UserAccountEntity> spec = where(hasEmailAddress(emailAddress)).and(isInIds(userIds));
+        if (!includeSystemUSers) {
+            spec = spec.and(notSystemUser());
+        }
+        return userAccountRepository.findAll(spec, Sort.by(DESC, "id"));
     }
 }
