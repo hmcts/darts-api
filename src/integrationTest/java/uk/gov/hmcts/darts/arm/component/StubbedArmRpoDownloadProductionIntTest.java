@@ -9,12 +9,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
@@ -48,21 +45,13 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
     @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
-    @Autowired
-    private ArmAutomatedTaskRepository armAutomatedTaskRepository;
-
     @MockitoBean
     private ArmRpoClient armRpoClient;
 
-    private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
-    private UserAccountEntity userAccountEntity;
 
     @BeforeEach
     void setUp() {
-
-        userAccountEntity = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-
-        armRpoExecutionDetailEntity = dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
+        dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
     }
 
     @Test
@@ -90,15 +79,15 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
             if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
                 // within the time range
                 eod.setCreatedDateTime(ingestionStartDateTime);
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
             } else if (eod.getId() % 3 == 0) {
                 // before the time range
                 eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
             } else {
                 // after the time range
                 eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
             }
         });
         dartsPersistence.saveAll(externalObjectDirectoryEntities);
