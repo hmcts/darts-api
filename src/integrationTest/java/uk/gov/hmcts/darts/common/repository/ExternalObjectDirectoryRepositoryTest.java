@@ -256,7 +256,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllByStatusAndInputUploadProcessedTsBetweenAndLimit_ReturnsResults()
+    void findAllByStatusAndDataIngestionTsBetweenAndLimit_ReturnsResults()
         throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
         OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
@@ -271,15 +271,15 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
                 // within the time range
                 eod.setCreatedDateTime(ingestionStartDateTime);
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
             } else if (eod.getId() % 3 == 0) {
                 // before the time range
                 eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
             } else {
                 // after the time range
                 eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
-                eod.setInputUploadProcessedTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
             }
         });
         dartsPersistence.saveAll(externalObjectDirectoryEntities);
@@ -290,15 +290,15 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         // when
         ingestionEndDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(24);
-        var results = externalObjectDirectoryRepository.findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
+        var results = externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
             EodHelper.armRpoPendingStatus(), ingestionStartDateTime, ingestionEndDateTime,
             Limit.of(20));
 
         // then
         assertEquals(7, results.size(), "Query returned unexpected number of results");
         results.forEach(eod -> {
-            assertTrue(eod.getInputUploadProcessedTs().isAfter(ingestionStartDateTime));
-            assertTrue(eod.getInputUploadProcessedTs().isBefore(ingestionEndDateTime));
+            assertTrue(eod.getDataIngestionTs().isAfter(ingestionStartDateTime));
+            assertTrue(eod.getDataIngestionTs().isBefore(ingestionEndDateTime));
         });
     }
 
@@ -343,7 +343,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findByStatusAndInputUploadProcessedTsWithPaging_ReturnsResults() throws Exception {
+    void findByStatusAndDataIngestionTsWithPaging_ReturnsResults() throws Exception {
         // Given
         OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
         OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(20);
@@ -351,7 +351,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> matchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 11, Optional.of(pastCurrentDateTime1));
         matchingEods.forEach(eod -> {
-            eod.setInputUploadProcessedTs(pastCurrentDateTime1);
+            eod.setDataIngestionTs(pastCurrentDateTime1);
         });
         dartsPersistence.saveAll(matchingEods);
         assertEquals(11, matchingEods.size());
@@ -359,7 +359,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> nonMatchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 4, Optional.of(pastCurrentDateTime2));
         nonMatchingEods.forEach(eod -> {
-            eod.setInputUploadProcessedTs(pastCurrentDateTime2);
+            eod.setDataIngestionTs(pastCurrentDateTime2);
         });
         dartsPersistence.saveAll(nonMatchingEods);
         assertEquals(4, nonMatchingEods.size());
@@ -370,9 +370,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         Pageable pageable = PageRequest.of(0, 10);
         ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
 
-
         // When
-        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
+        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndDataIngestionTsWithPaging(
             status, startDateTime, endDateTime, pageable
         );
 
@@ -382,7 +381,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         assertThat(result.getTotalElements()).isEqualTo(11);
         result.getContent().forEach(entity -> {
             assertThat(entity.getStatus().getId()).isEqualTo(status.getId());
-            assertThat(entity.getInputUploadProcessedTs()).isBetween(startDateTime, endDateTime);
+            assertThat(entity.getDataIngestionTs()).isBetween(startDateTime, endDateTime);
         });
     }
 
@@ -407,6 +406,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             assertThat(entity.getStatus().getId()).isEqualTo(EodHelper.storedStatus().getId());
             assertThat(entity.getTransferAttempts()).isEqualTo(0);
             assertThat(entity.getInputUploadProcessedTs()).isNull();
+            assertThat(entity.getDataIngestionTs()).isNull();
         });
 
     }

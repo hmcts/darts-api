@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
@@ -59,6 +60,8 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
             ExternalLocationTypeEnum.ARM, ARM_REPLAY, 2, Optional.of(validDateTime));
         validEods.forEach(eod -> {
             eod.setTransferAttempts(1);
+            //eod.setDataIngestionTs(validDateTime);
+            //eod.setInputUploadProcessedTs(validDateTime);
             dartsPersistence.getExternalObjectDirectoryRepository().saveAndFlush(eod);
         });
 
@@ -66,6 +69,8 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
             ExternalLocationTypeEnum.ARM, ARM_REPLAY, 2, Optional.of(invalidDateTime));
         invalidEods.forEach(eod -> {
             eod.setTransferAttempts(1);
+            eod.setDataIngestionTs(invalidDateTime);
+            eod.setInputUploadProcessedTs(invalidDateTime);
             dartsPersistence.getExternalObjectDirectoryRepository().saveAndFlush(eod);
         });
 
@@ -78,16 +83,18 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
         var invalidEodResults = dartsPersistence.getExternalObjectDirectoryRepository().findAllById(
             invalidEods.stream().map(eod -> eod.getId()).toList());
 
-
         validEodResults.forEach(eod -> {
             assertEquals(ARM_RAW_DATA_FAILED.getId(), eod.getStatus().getId());
             assertEquals(0, eod.getTransferAttempts());
             assertNull(eod.getInputUploadProcessedTs());
+            assertNull(eod.getDataIngestionTs());
         });
 
         invalidEodResults.forEach(eod -> {
             assertEquals(ARM_REPLAY.getId(), eod.getStatus().getId());
             assertEquals(1, eod.getTransferAttempts());
+            assertNotNull(eod.getInputUploadProcessedTs());
+            assertNotNull(eod.getDataIngestionTs());
         });
     }
 
