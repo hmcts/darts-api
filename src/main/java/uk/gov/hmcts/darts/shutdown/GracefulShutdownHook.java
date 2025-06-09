@@ -18,13 +18,13 @@ public class GracefulShutdownHook
 
     @Override
     public void run() {
-        setReadynessToFalse();
+        setReadinessToFalse();
         delayShutdown();
         shutdownApplication();
     }
 
-    private void setReadynessToFalse() {
-        log.info("Setting readyness for application to false, so the application doesn't receive new connections from now on.");
+    private void setReadinessToFalse() {
+        log.info("Setting readiness for application to false, so the application doesn't receive new connections from now on.");
         GracefulShutdownHealthCheck probeControllers = applicationContext.getBean(
             "DartsGracefulShutdownHealthCheck", GracefulShutdownHealthCheck.class);
         probeControllers.setReady(false);
