@@ -206,17 +206,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private OffsetDateTime getCreateRecordProcessTime(ArmResponseCreateRecord armResponseCreateRecord) {
-        try {
-            dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
-            return OffsetDateTime.parse(armResponseCreateRecord.getProcessTime(), dateTimeFormatter);
-        } catch (Exception e) {
-            log.error("Unable to parse timestamp {} from ARM create record file {}", armResponseCreateRecord.getProcessTime(),
-                      armResponseCreateRecord.getA360RecordId(), e);
-            throw new IllegalArgumentException(e);
-        }
-    }
-
     private OffsetDateTime getUploadFileRecordProcessTime(ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         try {
             dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
@@ -523,7 +512,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
                         Long externalObjectDirectoryId = Long.valueOf(uploadNewFileRecord.getRelationId());
                         armBatchResponses.addResponseBatchData(externalObjectDirectoryId, armResponseCreateRecord, createRecordFilenameProcessor);
-                        //setDataIngestionForCreateRecord(armResponseCreateRecord, externalObjectDirectoryId, createRecordFilenameAndPath);
                     } else {
                         log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} create record {}",
                                  armResponseCreateRecord.getInput(), createRecordFilenameAndPath);
@@ -539,17 +527,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             log.warn("Failed to read create record file {}", createRecordFilenameAndPath);
         }
 
-    }
-
-    private void setDataIngestionForCreateRecord(ArmResponseCreateRecord armResponseCreateRecord, Long externalObjectDirectoryId,
-                                                 String createRecordFilenameAndPath) {
-        try {
-            OffsetDateTime uploadNewFileRecordProcessTime = getCreateRecordProcessTime(armResponseCreateRecord);
-            setEodDataIngestionTimestamp(externalObjectDirectoryId, uploadNewFileRecordProcessTime);
-        } catch (Exception e) {
-            log.error("Unable to set EOD data ingestion timestamp for EOD {} - create record file {}",
-                      externalObjectDirectoryId, createRecordFilenameAndPath, e);
-        }
     }
 
     private void setDataIngestionForUploadFileRecord(ArmResponseUploadFileRecord armResponseUploadFileRecord, Long externalObjectDirectoryId,
