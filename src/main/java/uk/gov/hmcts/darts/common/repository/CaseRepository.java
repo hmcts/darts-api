@@ -109,11 +109,18 @@ public interface CaseRepository
     @Query("""
         select cc.id from CourtCaseEntity cc
         join CaseRetentionEntity cr
-        on cr.courtCase.id = cc.id and cr.currentState = 'COMPLETE'
-        where cc.isDataAnonymised = false
+        on cr.courtCase.id = cc.id
+        where cr.currentState = 'COMPLETE'
+        and cr.createdDateTime = (
+            select MAX(sub_cr.createdDateTime) from CaseRetentionEntity sub_cr
+            where sub_cr.courtCase.id = cc.id
+            and sub_cr.currentState = 'COMPLETE'
+        )
+        and cc.isDataAnonymised = false
         and cr.retainUntil < :maxRetentionDate
         """)
     List<Integer> findCaseIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
+
 
     @Query("""
         SELECT cc
