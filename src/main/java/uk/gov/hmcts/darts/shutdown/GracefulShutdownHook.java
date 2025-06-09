@@ -40,7 +40,7 @@ public class GracefulShutdownHook
             Thread.sleep(waitTime.toMillis());
         } catch (InterruptedException e) {
             log.error("Error while gracefulshutdown Thread.sleep", e);
-            Thread.interrupted();
+            Thread.currentThread().interrupt();
         }
     }
 
