@@ -562,4 +562,52 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
         assertNull(failedEod.getManifestFile());
     }
+
+    @Test
+    void movePendingMediaDataFromUnstructuredToArmStorage_WithSpecialCharacters() {
+
+        //given
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm(5);
+
+        //then
+        List<ExternalObjectDirectoryEntity> armDropZoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.getFirst(), EodHelper.armDropZoneStatus(),
+                                                                                                           EodHelper.armLocation());
+        assertThat(armDropZoneEodsMedia0).hasSize(1);
+        List<ExternalObjectDirectoryEntity> armDropZoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), EodHelper.armDropZoneStatus(),
+                                                                                                           EodHelper.armLocation());
+        assertThat(armDropZoneEodsMedia1).hasSize(1);
+
+        var rawFile0Name = format("%d_%d_1", armDropZoneEodsMedia0.getFirst().getId(), medias.getFirst().getId());
+        var rawFile1Name = format("%d_%d_1", armDropZoneEodsMedia1.getFirst().getId(), medias.get(1).getId());
+
+        verify(armDataManagementApi, times(1)).copyBlobDataToArm(any(), eq(rawFile0Name));
+        verify(armDataManagementApi, times(1)).copyBlobDataToArm(any(), eq(rawFile0Name));
+        verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
+
+        verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
+
+        ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        String manifestFileContent = manifestFileContentCaptor.getValue();
+
+        assertThat(manifestFileContent.lines().count()).isEqualTo(4);
+        assertThat(manifestFileContent)
+            .contains("\"operation\":\"create_record\"",
+                      "\"operation\":\"upload_new_file\"",
+                      "\"dz_file_name\":\"" + rawFile0Name,
+                      "\"dz_file_name\":\"" + rawFile1Name,
+                      "\"bf_019\":\"TESTCOURTHOUSE\\\\1\"",
+                      "\"bf_019\":\"TESTCOURTHOUSE1\\nTESTCOURTHOUSE2\"");
+
+        String manifestFileName = manifestFileNameCaptor.getValue();
+        assertThat(armDropZoneEodsMedia0.getFirst().getManifestFile()).isEqualTo(manifestFileName);
+        assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedById()).isEqualTo(testUser.getId());
+        assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
+        assertThat(armDropZoneEodsMedia1.getFirst().getManifestFile()).isEqualTo(manifestFileName);
+    }
 }

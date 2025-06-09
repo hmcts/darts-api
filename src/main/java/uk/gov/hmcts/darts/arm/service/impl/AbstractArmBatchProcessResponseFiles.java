@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ResponseFilenames;
@@ -680,9 +679,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     private UploadNewFileRecord readInputJson(String input) {
         UploadNewFileRecord uploadNewFileRecord = null;
         if (StringUtils.isNotEmpty(input)) {
-            String unescapedJson = StringEscapeUtils.unescapeJson(input);
             try {
-                uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
+                uploadNewFileRecord = objectMapper.readValue(input, UploadNewFileRecord.class);
             } catch (Exception e) {
                 log.error("Failed to parse the input field {}", input, e);
             }
