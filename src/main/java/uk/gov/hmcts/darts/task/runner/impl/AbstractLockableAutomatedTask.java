@@ -289,9 +289,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                 } catch (TimeoutException e) {
                     setAutomatedTaskStatus(FAILED);
                     log.error("Task: {} timed out after {}ms", getTaskName(), getLockAtMostFor().toMillis());
-                    if (!future.cancel(true)) {
-                        log.error("Failed to cancel task: {}.", getTaskName());
-                    }
+                    future.cancel(true);
                 } catch (ExecutionException e) {
                     setAutomatedTaskStatus(FAILED);
                     log.error("Task: {} execution exception", getTaskName(), e);
