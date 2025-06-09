@@ -3,7 +3,7 @@
     "transaction_id": "f11e1453-27ef-75ec-9322-41af570e6502",
     "relation_id": "<EODID>",
     "a360_record_id": "1cf976c7-cedd-703f-ab70-01588bd56d50",
-    "process_time": "2023-07-11T11:41:27.873000+00:00",
+    "process_time": "2023-07-11T11:39:26.085000+00:00",
     "status": 0,
     "input": "{\"operation\": \"upload_new_file\",\"relation_id\": \"<EODID>\",\"file_metadata\":{\"publisher\": \"A360\",\"dz_file_name\": \"A360230516_TestIngestion_1.docx\",\"file_tag\": \"docx\"}}",
     "exception_description": "Exception Description",
