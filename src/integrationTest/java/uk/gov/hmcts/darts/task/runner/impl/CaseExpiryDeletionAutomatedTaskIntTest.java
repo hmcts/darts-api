@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,7 @@ import static org.assertj.core.api.BDDAssertions.within;
 
 @DisplayName("CaseExpiryDeletionAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SuppressWarnings({"PMD.GodClass"})
 class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     private static final Pattern UUID_REGEX = Pattern.compile(TestUtils.UUID_REGEX);
@@ -67,7 +70,8 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     @Test
     void positiveRetentionDatePassed() {
-        CourtCaseEntity courtCase = createCase(-1, CaseRetentionStatus.COMPLETE);
+        CourtCaseEntity courtCase = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
+
         final int caseId1 = courtCase.getId();
 
         caseExpiryDeletionAutomatedTask.preRunTask();
@@ -79,8 +83,8 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
     @Test
     @DisplayName("Two cases linked to the same event, one case has passed retention date, the other has not. Event should not be anonymised")
     void retentionDatePassedForOneCaseButNotAnotherEventNotAnonymised() {
-        CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
-        CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.PENDING);
+        CourtCaseEntity courtCase1 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
+        CourtCaseEntity courtCase2 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.PENDING)));
 
         EventEntity event = dartsDatabase.getEventLinkedCaseRepository().findAllByCourtCase(courtCase1).getFirst().getEvent();
         eventLinkedCaseStub.createCaseLinkedEvent(event, courtCase2);
@@ -95,8 +99,8 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
     @Test
     @DisplayName("Two cases linked to the same event, both cases have passed retention date. Event should be anonymised")
     void retentionDatePassedForBothCaseLinkedEventsAnonymised() {
-        CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
-        CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
+        CourtCaseEntity courtCase1 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
+        CourtCaseEntity courtCase2 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
 
         EventEntity event = dartsDatabase.getEventLinkedCaseRepository().findAllByCourtCase(courtCase1).getFirst().getEvent();
         eventLinkedCaseStub.createCaseLinkedEvent(event, courtCase2);
@@ -111,7 +115,8 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     @Test
     void positiveRetentionDateNotPassed() {
-        CourtCaseEntity courtCase = createCase(1, CaseRetentionStatus.COMPLETE);
+        CourtCaseEntity courtCase = createCaseWithRetentionRecords(List.of(new RetentionRecordData(1, CaseRetentionStatus.COMPLETE)));
+
         final int caseId1 = courtCase.getId();
 
         caseExpiryDeletionAutomatedTask.preRunTask();
@@ -122,7 +127,8 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     @Test
     void positiveRetentionDatePassedByRetentionNotComplete() {
-        CourtCaseEntity courtCase = createCase(-1, CaseRetentionStatus.PENDING);
+        final CourtCaseEntity courtCase = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.PENDING)));
+
         final int caseId1 = courtCase.getId();
 
         caseExpiryDeletionAutomatedTask.preRunTask();
@@ -133,12 +139,13 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     @Test
     void positiveMultipleToAnonymiseAndSomeNotTo() {
-        final CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
-        final CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
-        final CourtCaseEntity courtCase3 = createCase(-1, CaseRetentionStatus.COMPLETE);
+        final CourtCaseEntity courtCase1 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
+        final CourtCaseEntity courtCase2 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
+        final CourtCaseEntity courtCase3 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
 
-        final CourtCaseEntity courtCase4 = createCase(-1, CaseRetentionStatus.PENDING);
-        final CourtCaseEntity courtCase5 = createCase(1, CaseRetentionStatus.COMPLETE);
+        final CourtCaseEntity courtCase4 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.PENDING)));
+        final CourtCaseEntity courtCase5 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(1, CaseRetentionStatus.COMPLETE)));
+
 
         caseExpiryDeletionAutomatedTask.preRunTask();
         caseExpiryDeletionAutomatedTask.runTask();
@@ -155,8 +162,8 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
     @Test
     @DisplayName("Two cases linked to the same media, one case has passed retention date, the other has not. Media link should not be removed from hearings")
     void retentionDatePassedForOneCaseButNotAnotherMediaLinkNotRemovedFromHearing() {
-        CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
-        CourtCaseEntity courtCase2 = createCase(1, CaseRetentionStatus.COMPLETE);
+        CourtCaseEntity courtCase1 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
+        CourtCaseEntity courtCase2 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(1, CaseRetentionStatus.COMPLETE)));
 
         createMediaForHearing(courtCase1.getHearings().get(0));
         // Link same media to second case
@@ -176,9 +183,9 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     @Test
     @DisplayName("Two cases linked to the same media, both cases have passed retention date. Media link should be removed from hearings")
-    void retentionDatePassedForBothCasesThenMediaLinkRemovedFromHearing() throws InterruptedException {
-        CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
-        CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
+    void retentionDatePassedForBothCasesThenMediaLinkRemovedFromHearing() {
+        CourtCaseEntity courtCase1 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
+        CourtCaseEntity courtCase2 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.COMPLETE)));
         createMediaForHearing(courtCase1.getHearings().get(0));
 
         //Create a second hearing for case 1 to ensure it can handle multiple hearings
@@ -196,6 +203,36 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
             List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findByCaseIdWithMediaList(h.getCourtCase().getId());
             assertThat(mediaEntities).isEmpty();
         });
+    }
+
+    @Test
+    @DisplayName("Case with two Complete retention records. Case should not be anonymised if retention date of latest retention record is in the future.")
+    void runCaseExpiryTaskTask_shouldNotAnonymiseCase_whenMultipleCompleteRetentionRecordsExist_andTheRetentionDateOfTheLatestRetentionRecordIsInTheFuture() {
+        CourtCaseEntity courtCase1 = createCaseWithRetentionRecords(List.of(
+            new RetentionRecordData(-2, CaseRetentionStatus.COMPLETE),
+            new RetentionRecordData(2, CaseRetentionStatus.COMPLETE)));
+
+        final int caseId1 = courtCase1.getId();
+
+        caseExpiryDeletionAutomatedTask.preRunTask();
+        caseExpiryDeletionAutomatedTask.runTask();
+
+        assertCase(caseId1, false);
+    }
+
+    @Test
+    @DisplayName("Case with two Complete retention records. Case should be anonymised if retention date of latest retention record is in the past.")
+    void runCaseExpiryTaskTask_shouldAnonymiseCase_whenMultipleCompleteRetentionRecordsExist_andTheRetentionDateOfTheLatestRetentionRecordIsInThePast() {
+        CourtCaseEntity courtCase1 = createCaseWithRetentionRecords(List.of(
+            new RetentionRecordData(2, CaseRetentionStatus.COMPLETE),
+            new RetentionRecordData(-2, CaseRetentionStatus.COMPLETE)));
+
+        final int caseId1 = courtCase1.getId();
+
+        caseExpiryDeletionAutomatedTask.preRunTask();
+        caseExpiryDeletionAutomatedTask.runTask();
+
+        assertCase(caseId1, true);
     }
 
     private void assertCase(int caseId, boolean isAnonymised, long... excludeEventIds) {
@@ -387,41 +424,57 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
         }
     }
 
-
-    private CourtCaseEntity createCase(final long daysUntilRetention, final CaseRetentionStatus caseRetentionStatus) {
+    private CourtCaseEntity createCaseWithRetentionRecords(List<RetentionRecordData> retentionDetails) {
         return transactionalUtil.executeInTransaction(() -> {
-            caseIndex++;
-            CourtCaseEntity caseEntity = dartsDatabase.createCase("Bristol", "case" + caseIndex);
-            caseEntity.addDefendant(createDefendantEntity(caseEntity));
-            caseEntity.addDefendant(createDefendantEntity(caseEntity));
-            caseEntity.addDefendant(createDefendantEntity(caseEntity));
 
-            caseEntity.addDefence(createDefenceEntity(caseEntity));
-            caseEntity.addDefence(createDefenceEntity(caseEntity));
-            caseEntity.addDefence(createDefenceEntity(caseEntity));
+            CourtCaseEntity caseEntity = createCase();
 
-            caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
-            caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
-            caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
+            retentionDetails.forEach(retentionRecordData -> {
+                createRetention(retentionRecordData, caseEntity);
+            });
 
-            caseEntity = dartsDatabase.getCaseRepository().saveAndFlush(caseEntity);
-            HearingEntity hearing = createHearing(caseEntity);
-            EventEntity event1 = dartsDatabase.getEventStub()
-                .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
-            eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity);
-
-            EventEntity event2 = dartsDatabase.getEventStub()
-                .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
-            eventLinkedCaseStub.createCaseLinkedEvent(event2, caseEntity);
-
-            dartsDatabase.createCaseRetentionObject(
-                caseEntity,
-                OffsetDateTime.now().plusDays(daysUntilRetention),
-                dartsDatabase.getRetentionPolicyTypeEntity(
-                    RetentionPolicyEnum.DEFAULT),
-                caseRetentionStatus.name(), true);
             return dartsDatabase.getCaseRepository().save(caseEntity);
         });
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("PMD.DoNotUseThreads")//Required for test stability
+    private void createRetention(RetentionRecordData retentionRecordData, CourtCaseEntity caseEntity) {
+
+        dartsDatabase.createCaseRetentionObject(
+            caseEntity,
+            OffsetDateTime.now().plusDays(retentionRecordData.getDaysUntilRetention()),
+            dartsDatabase.getRetentionPolicyTypeEntity(RetentionPolicyEnum.DEFAULT), retentionRecordData.getCaseRetentionStatus().name(), true);
+
+        Thread.sleep(10);//Wait 10ms to ensure createdAt and lastModifiedAt times are different to other entities
+    }
+
+    private CourtCaseEntity createCase() {
+        caseIndex++;
+        CourtCaseEntity caseEntity = dartsDatabase.createCase("Bristol", "case" + caseIndex);
+        caseEntity.addDefendant(createDefendantEntity(caseEntity));
+        caseEntity.addDefendant(createDefendantEntity(caseEntity));
+        caseEntity.addDefendant(createDefendantEntity(caseEntity));
+
+        caseEntity.addDefence(createDefenceEntity(caseEntity));
+        caseEntity.addDefence(createDefenceEntity(caseEntity));
+        caseEntity.addDefence(createDefenceEntity(caseEntity));
+
+        caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
+        caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
+        caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
+
+        caseEntity = dartsDatabase.getCaseRepository().saveAndFlush(caseEntity);
+        HearingEntity hearing = createHearing(caseEntity);
+        EventEntity event1 = dartsDatabase.getEventStub()
+            .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
+        eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity);
+
+        EventEntity event2 = dartsDatabase.getEventStub()
+            .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
+        eventLinkedCaseStub.createCaseLinkedEvent(event2, caseEntity);
+
+        return caseEntity;
     }
 
     private HearingEntity createHearing(CourtCaseEntity caseEntity) {
@@ -509,5 +562,16 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     private DefenceEntity createDefenceEntity(CourtCaseEntity caseEntity) {
         return DefenceTestData.createDefenceForCase(caseEntity);
+    }
+
+    @Getter
+    private static class RetentionRecordData {
+        private final long daysUntilRetention;
+        private final CaseRetentionStatus caseRetentionStatus;
+
+        public RetentionRecordData(long daysUntilRetention, CaseRetentionStatus retentionState) {
+            this.daysUntilRetention = daysUntilRetention;
+            this.caseRetentionStatus = retentionState;
+        }
     }
 }
