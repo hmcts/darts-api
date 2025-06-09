@@ -1,0 +1,11 @@
+{
+  "operation": "create_record",
+  "transaction_id": "02b54347-bf86-7098-b836-41af570e6502",
+  "relation_id": "<EODID>",
+  "a360_record_id": "29d8089f-7294-785f-add0-01588bd56d50",
+  "process_time": "2023-07-11T11:39:26.085000+00:00",
+  "status": 1,
+  "input": "{\"operation\":\"create_record\",\"relation_id\":\"<EODID>\",\"record_metadata\":{\"record_class\":\"DARTS\",\"publisher\":\"DARTS\",\"region\":\"GBR\",\"recordDate\":\"2025-05-27T22:13:59.361Z\",\"event_date\":\"2025-05-27T17:05:14.292Z\",\"title\":\"Test User - Test Model Court - Sentencing Remarks - 20200723 Anon.doc\",\"client_identifier\":\"<EODID>\",\"contributor\":\"Guildford & 2\",\"bf_001\":\"Transcription\",\"bf_002\":\"T20202020\",\"bf_003\":\"application/msword\",\"bf_004\":\"2020-07-23T00:00:00.000Z\",\"bf_005\":\"4062456f27d1ab69545027761a6fb244\",\"bf_006\":\"Manual\",\"bf_007\":\"Sentencing remarks\",\"bf_008\":\"Up to 12 working days\",\"bf_009\":\"Test Line 1. \\\\ Test Line 2\\n\",\"bf_010\":\"2025-05-27T17:05:14.292Z\",\"bf_012\":17325,\"bf_013\":58929,\"bf_016\":\"4608\",\"bf_019\":\"Guildford\",\"bf_020\":\"2\"}}",
+  "exception_description": null,
+  "error_status": null
+}
