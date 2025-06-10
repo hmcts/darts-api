@@ -1422,89 +1422,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     }
 
     @Test
-    void batchProcessResponseFiles_WithTranscriptionReturnsSuccess() throws IOException {
-
-        // given
-        authorisationStub.givenTestSchema();
-        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
-
-        final String fileName = "Test Document.docx";
-        final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        final int fileSize = 11_937;
-        final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument()
-            .someMinimalBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
-            .fileSize(fileSize).uploadedBy(testUser).checksum(checksum).build();
-
-        when(userIdentity.getUserAccount()).thenReturn(testUser);
-        transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
-
-        String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = prefix() + "_" + manifest1Uuid + ".a360";
-
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
-            .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
-            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID().toString()).build();
-
-        armEod.setTransferAttempts(1);
-        armEod.setManifestFile(manifestFile1);
-        armEod.setChecksum(checksum);
-        armEod = dartsPersistence.save(armEod);
-
-        List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
-        blobNamesAndPaths.add(blobNameAndPath1);
-
-        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
-            .blobNamesAndPaths(blobNamesAndPaths)
-            .build();
-
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
-        String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
-        String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
-        List<String> hashcodeResponses = getHashcodeResponses(hashcode1, createRecordFilename1, uploadFileFilename1);
-
-        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
-
-        String createRecordFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
-        String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
-
-        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod.getId()));
-        BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(
-            getUploadFileContents(validUploadFileTest1, armEod.getId(), transcriptionDocumentEntity.getChecksum()));
-
-        when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
-        when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
-
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
-
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
-
-        // when
-        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
-
-        // then
-        ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findById(armEod.getId()).orElseThrow();
-        assertEquals(ARM_RPO_PENDING.getId(), foundTranscriptionEod.getStatus().getId());
-        assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundTranscriptionEod.getExternalFileId());
-        assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundTranscriptionEod.getExternalRecordId());
-        assertTrue(foundTranscriptionEod.isResponseCleaned());
-
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken);
-        verify(armDataManagementApi).listResponseBlobs(hashcode1);
-
-        verify(armDataManagementApi).getBlobData(createRecordFilename1);
-        verify(armDataManagementApi).getBlobData(uploadFileFilename1);
-
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
-
-        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
+    void batchProcessResponseFiles_WithNoSpecialCharacterTranscriptionReturnsSuccess() throws IOException {
+        batchProcessResponseFiles_WithTranscriptionReturnsSuccess(
+            "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp");
     }
 
     @NotNull
@@ -2442,6 +2362,103 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity foundEod = externalObjectDirectoryEntities.getFirst();
         assertEquals("2023-06-10T14:08:28.316382Z", foundEod.getInputUploadProcessedTs().toString());
         assertEquals(ARM_MISSING_RESPONSE.getId(), foundEod.getStatus().getId());
+    }
+
+    @Test
+    void batchProcessResponseFiles_WithEndOfLineTranscriptionReturnsSuccess() throws IOException {
+        batchProcessResponseFiles_WithTranscriptionReturnsSuccess(
+            "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecordEndOfLine.rsp");
+    }
+
+    @Test
+    void batchProcessResponseFiles_WithBackSlashTranscriptionReturnsSuccess() throws IOException {
+        batchProcessResponseFiles_WithTranscriptionReturnsSuccess(
+            "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecordBackSlash.rsp");
+    }
+
+    private void batchProcessResponseFiles_WithTranscriptionReturnsSuccess(String testFilePath) throws IOException {
+
+        // given
+        authorisationStub.givenTestSchema();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+
+        final String fileName = "Test Document.docx";
+        final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        final int fileSize = 11_937;
+        final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument()
+            .someMinimalBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+            .fileSize(fileSize).uploadedBy(testUser).checksum(checksum).build();
+
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+        transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifestFile1 = prefix() + "_" + manifest1Uuid + ".a360";
+
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID().toString()).build();
+
+        armEod.setTransferAttempts(1);
+        armEod.setManifestFile(manifestFile1);
+        armEod.setChecksum(checksum);
+        armEod = dartsPersistence.save(armEod);
+
+        List<String> blobNamesAndPaths = new ArrayList<>();
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
+        blobNamesAndPaths.add(blobNameAndPath1);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(blobNamesAndPaths)
+            .build();
+
+        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
+        String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
+        String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
+        List<String> hashcodeResponses = getHashcodeResponses(hashcode1, createRecordFilename1, uploadFileFilename1);
+
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
+
+        String createRecordFileTest1 = testFilePath;
+        String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
+
+        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod.getId()));
+        BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(
+            getUploadFileContents(validUploadFileTest1, armEod.getId(), transcriptionDocumentEntity.getChecksum()));
+
+        when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
+        when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
+
+        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
+
+        // when
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
+
+        // then
+        ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findById(armEod.getId()).orElseThrow();
+            assertEquals(ARM_RPO_PENDING.getId(), foundTranscriptionEod.getStatus().getId());
+        assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundTranscriptionEod.getExternalFileId());
+        assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundTranscriptionEod.getExternalRecordId());
+        assertTrue(foundTranscriptionEod.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken);
+        verify(armDataManagementApi).listResponseBlobs(hashcode1);
+
+        verify(armDataManagementApi).getBlobData(createRecordFilename1);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename1);
+
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+
+        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
 
     protected MediaEntity createMediaEntity(HearingEntity hearing, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
