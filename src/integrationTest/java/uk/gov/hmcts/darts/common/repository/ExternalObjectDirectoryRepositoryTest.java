@@ -1,20 +1,32 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import lombok.AllArgsConstructor;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.lang.reflect.InvocationTargetException;
@@ -536,5 +548,182 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         // assert that the test has inserted the data into the database
         assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+    }
+
+    @Nested
+    @DisplayName("findByExternalLocationTypeAndUpdateRetention")
+    class FindByExternalLocationTypeAndUpdateRetention {
+
+        @ParameterizedTest
+        @EnumSource(EodItemType.class)
+        void shouldReturnEmptyList_whenNoDataMatchingExternalLocationTypeIsFound(EodItemType eodItemType) {
+            ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
+            //Create Eod with non matching external location type
+            createEod(eodItemType, EodHelper.inboundLocation(), OffsetDateTime.now(),
+                      RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+
+            assertThat(
+                externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
+                    externalLocationTypeEntity, true, Limit.of(10))
+            ).isEmpty();
+        }
+
+        @ParameterizedTest
+        @EnumSource(EodItemType.class)
+        void shouldReturnEmptyList_whenRetainUntilTsIsNotSet(EodItemType eodItemType) {
+            ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
+            //Create Eod with retainUntilTs not set
+            createEod(eodItemType, externalLocationTypeEntity, null,
+                      RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+
+            assertThat(
+                externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
+                    externalLocationTypeEntity, true, Limit.of(10))
+            ).isEmpty();
+        }
+
+        @ParameterizedTest
+        @EnumSource(EodItemType.class)
+        void shouldReturnEmptyList_whenRetConfScoreTsIsNotSet(EodItemType eodItemType) {
+            ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
+            //Create Eod with non matching external location type
+            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                      null, true);
+
+            assertThat(
+                externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
+                    externalLocationTypeEntity, true, Limit.of(10))
+            ).isEmpty();
+        }
+
+        @ParameterizedTest
+        @EnumSource(EodItemType.class)
+        void shouldReturnEmptyList_whenUpdateRetentionDoesNotMatch(EodItemType eodItemType) {
+            ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
+            //Create Eod with non matching external location type
+            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                      null, true);
+
+            assertThat(
+                externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
+                    externalLocationTypeEntity, false, Limit.of(10))
+            ).isEmpty();
+        }
+
+        @ParameterizedTest
+        @EnumSource(EodItemType.class)
+        void shouldReturnIds_whenRetainUntilTsAndRetConfScoreIsSet(EodItemType eodItemType) {
+            ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
+            //Create Eod with non matching external location type
+            ExternalObjectDirectoryEntity eod1 =
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+
+            ExternalObjectDirectoryEntity eod2 =
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                          RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, true);
+
+            ExternalObjectDirectoryEntity eod3 =
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+
+            //Create EOD with updateRetention set to false should not be returned
+            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                      RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, false);
+
+            assertThat(
+                externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
+                    externalLocationTypeEntity, true, Limit.of(10))
+            ).hasSize(3)
+                .contains(eod1.getId(), eod2.getId(), eod3.getId());
+        }
+
+        @FunctionalInterface
+        interface CreateAndAssociateToFunction {
+            void createAndAssociateTo(
+                DartsPersistence dartsPersistence,
+                ExternalObjectDirectoryEntity eod,
+                OffsetDateTime retainUntilTs,
+                RetentionConfidenceScoreEnum retConfScore);
+        }
+
+        @AllArgsConstructor
+        enum EodItemType {
+            MEDIA((dartsPersistence, eod, retainUntilTs, retConfScore) -> {
+                MediaEntity media =
+                    dartsPersistence.save(
+                        PersistableFactory.getMediaTestData()
+                            .someMinimalBuilder()
+                            .retainUntilTs(retainUntilTs)
+                            .retConfScore(retConfScore)
+                            .build()
+                            .getEntity()
+                    );
+                eod.setMedia(media);
+            }),
+            TRANSCRIPTION_DOCUMENT((dartsPersistence, eod, retainUntilTs, retConfScore) -> {
+                TranscriptionDocumentEntity transcriptionDocumentEntity =
+                    dartsPersistence.save(
+                        PersistableFactory.getTranscriptionDocument()
+                            .someMinimalBuilder()
+                            .retainUntilTs(retainUntilTs)
+                            .retConfScore(retConfScore)
+                            .build()
+                            .getEntity()
+                    );
+                eod.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
+            }),
+            ANNOTATION_DOCUMENT((dartsPersistence, eod, retainUntilTs, retConfScore) -> {
+                AnnotationDocumentEntity annotationDocument =
+                    dartsPersistence.save(
+                        PersistableFactory.getAnnotationDocumentTestData()
+                            .someMinimalBuilder()
+                            .retainUntilTs(retainUntilTs)
+                            .retConfScore(retConfScore)
+                            .build()
+                            .getEntity()
+                    );
+                eod.setAnnotationDocumentEntity(annotationDocument);
+            }),
+            CASE_DOCUMENT((dartsPersistence, eod, retainUntilTs, retConfScore) -> {
+                CaseDocumentEntity caseDocumentEntity =
+                    dartsPersistence.save(
+                        PersistableFactory.getCaseDocumentTestData()
+                            .someMinimalBuilder()
+                            .retainUntilTs(retainUntilTs)
+                            .retConfScore(retConfScore)
+                            .build()
+                            .getEntity()
+                    );
+                eod.setCaseDocument(caseDocumentEntity);
+            });
+
+            private final CreateAndAssociateToFunction createAndAssociateToFunction;
+
+            public void createAndAssociateTo(
+                DartsPersistence dartsPersistence,
+                ExternalObjectDirectoryEntity eod,
+                OffsetDateTime retainUntilTs,
+                RetentionConfidenceScoreEnum retConfScore) {
+                createAndAssociateToFunction.createAndAssociateTo(dartsPersistence, eod, retainUntilTs, retConfScore);
+            }
+        }
+
+        private ExternalObjectDirectoryEntity createEod(
+            EodItemType type,
+            ExternalLocationTypeEntity externalLocationType,
+            OffsetDateTime retainUntilTs,
+            RetentionConfidenceScoreEnum retConfScore,
+            boolean updateRetention
+        ) {
+            ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
+                .someMinimalBuilder()
+                .externalLocationType(externalLocationType)
+                .updateRetention(updateRetention)
+                .build()
+                .getEntity();
+            type.createAndAssociateTo(dartsPersistence, eod, retainUntilTs, retConfScore);
+            return dartsPersistence.save(eod);
+        }
     }
 }
