@@ -9,14 +9,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -30,15 +28,13 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,10 +63,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     @MockitoBean
     private UserIdentity mockUserIdentity;
-    @MockitoBean
-    private MultipartProperties mockMultipartProperties;
-    @MockitoBean
-    private AuditApi mockAuditApi;
 
     private Long transcriptionId;
     private Integer testUserId;
@@ -118,9 +110,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         UserAccountEntity testUser = authorisationStub.getSeparateIntegrationUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
-
-        doNothing().when(mockAuditApi)
-            .record(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -150,7 +139,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verifyNoInteractions(mockAuditApi);
+        assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
     }
 
     @Test
@@ -178,8 +167,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
-        verifyNoInteractions(mockAuditApi);
+        assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
     }
 
     @Test
@@ -207,8 +195,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
-        verifyNoInteractions(mockAuditApi);
+        assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
     }
 
     @Test
@@ -237,8 +224,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
-        verifyNoInteractions(mockAuditApi);
+        assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
     }
 
     private void setPermissions(UserAccountEntity user) {
@@ -334,8 +320,20 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
         assertTrue(templateList.contains(TRANSCRIPTION_AVAILABLE.toString()));
 
-        verify(mockAuditApi).record(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
-        verify(mockAuditApi).record(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
+        var completeAudits = dartsDatabase.getAuditRepository().getAuditEntitiesByCaseAndActivityForDateRange(
+            transcriptionEntity.getCourtCase().getId(),
+            COMPLETE_TRANSCRIPTION.getId(),
+            OffsetDateTime.now().minusMinutes(1),
+            OffsetDateTime.now().plusMinutes(1)
+        );
+        var importAudits = dartsDatabase.getAuditRepository().getAuditEntitiesByCaseAndActivityForDateRange(
+            transcriptionEntity.getCourtCase().getId(),
+            IMPORT_TRANSCRIPTION.getId(),
+            OffsetDateTime.now().minusMinutes(1),
+            OffsetDateTime.now().plusMinutes(1)
+        );
+        assertEquals(1, completeAudits.size());
+        assertEquals(1, importAudits.size());
     }
 
 }
