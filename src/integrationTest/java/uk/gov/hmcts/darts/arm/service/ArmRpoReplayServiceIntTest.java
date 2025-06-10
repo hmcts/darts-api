@@ -31,7 +31,7 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
     private UserIdentity userIdentity;
 
     private final OffsetDateTime startTs = OffsetDateTime.now().minusMinutes(60);
-    private final OffsetDateTime endTs = OffsetDateTime.now().minusMinutes(10);
+    private final OffsetDateTime endTs = OffsetDateTime.now().minusMinutes(1);
     private ArmAutomatedTaskEntity armAutomatedTaskEntity;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
 
@@ -60,8 +60,6 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
             ExternalLocationTypeEnum.ARM, ARM_REPLAY, 2, Optional.of(validDateTime));
         validEods.forEach(eod -> {
             eod.setTransferAttempts(1);
-            //eod.setDataIngestionTs(validDateTime);
-            //eod.setInputUploadProcessedTs(validDateTime);
             dartsPersistence.getExternalObjectDirectoryRepository().saveAndFlush(eod);
         });
 
