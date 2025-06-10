@@ -523,8 +523,18 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
 
     @Query("""
-        SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+        SELECT eod.id FROM ExternalObjectDirectoryEntity eod        
+        LEFT JOIN eod.media med
+        LEFT JOIN eod.transcriptionDocumentEntity td       
+        LEFT JOIN eod.annotationDocumentEntity ad
+        LEFT JOIN eod.caseDocument cd
         WHERE eod.externalLocationType = :externalLocationTypeEntity
+        AND (
+           (med.retainUntilTs is not null and med.retConfScore is not null) or
+           (td.retainUntilTs is not null and td.retConfScore is not null) or
+           (ad.retainUntilTs is not null and ad.retConfScore is not null) or
+           (cd.retainUntilTs is not null and cd.retConfScore is not null) 
+        )        
         AND eod.updateRetention = :updateRetention
         """)
     List<Long> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
