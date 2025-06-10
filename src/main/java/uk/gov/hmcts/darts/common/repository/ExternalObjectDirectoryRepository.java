@@ -536,6 +536,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
            (cd.retainUntilTs is not null and cd.retConfScore is not null) 
         )        
         AND eod.updateRetention = :updateRetention
+        ORDER BY eod.id
         """)
     List<Long> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
                                                             boolean updateRetention, Limit limit);
