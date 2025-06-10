@@ -638,6 +638,30 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 .contains(eod1.getId(), eod2.getId(), eod3.getId());
         }
 
+        @ParameterizedTest
+        @EnumSource(EodItemType.class)
+        void shouldReturnIds_shouldLimitToBatchSize(EodItemType eodItemType) {
+            ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
+            //Create Eod with non matching external location type
+            ExternalObjectDirectoryEntity eod1 =
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+
+            ExternalObjectDirectoryEntity eod2 =
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+
+            //Should not be returned as outside the limit
+            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
+                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+
+            assertThat(
+                externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
+                    externalLocationTypeEntity, true, Limit.of(2))
+            ).hasSize(2)
+                .contains(eod1.getId(), eod2.getId());
+        }
+
         @FunctionalInterface
         interface CreateAndAssociateToFunction {
             void createAndAssociateTo(
