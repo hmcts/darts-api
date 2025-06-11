@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
@@ -46,8 +47,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Isolated
 class DetsToArmBatchProcessResponseFilesImplTest {
-    public static final String UPLOAD_RESPONSE_TIMESTAMP_FORAMT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]";
+
+    private static final String UPLOAD_RESPONSE_TIMESTAMP_FORAMT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]";
+
     @Mock
     private ArmDataManagementApi armDataManagementApi;
     @Mock
@@ -91,6 +95,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
 
     @BeforeEach
     void setUp() {
+        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+
         detsToArmBatchProcessResponseFilesImpl = new DetsToArmBatchProcessResponseFilesImpl(
             externalObjectDirectoryRepository,
             armDataManagementApi,
@@ -249,7 +255,6 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
         inputUploadFileRecord.setTimestamp(timestamp);
 
-        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
 
         // when
@@ -266,7 +271,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
         inputUploadFileRecord.setTimestamp(invalidTimestamp);
 
-        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+        //when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
 
         // when & then
         assertThrows(IllegalArgumentException.class, () -> {
