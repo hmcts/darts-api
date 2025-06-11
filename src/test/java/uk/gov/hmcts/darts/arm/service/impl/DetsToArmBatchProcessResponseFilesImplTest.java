@@ -271,8 +271,6 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
         inputUploadFileRecord.setTimestamp(invalidTimestamp);
 
-        //when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
-
         // when & then
         assertThrows(IllegalArgumentException.class, () -> {
             detsToArmBatchProcessResponseFilesImpl.getInputUploadFileTimestamp(inputUploadFileRecord);
