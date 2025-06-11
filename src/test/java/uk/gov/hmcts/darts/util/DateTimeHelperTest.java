@@ -2,11 +2,10 @@ package uk.gov.hmcts.darts.util;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -27,7 +26,7 @@ class DateTimeHelperTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideDateTimesForFloorToMinutes")
+    @ValueSource(strings = {"2024-07-31T11:29:56.101701Z", "2024-07-31T11:29:00.00000Z"})
     void floorToMinutes_ReturnsOffsetDateTimeWithSecondsAndNanosZeroed(OffsetDateTime dateTime) {
         OffsetDateTime result = DateTimeHelper.floorToMinutes(dateTime);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
@@ -38,12 +37,5 @@ class DateTimeHelperTest {
     void floorToMinutes_ReturnsNullDateTimeIsHandled() {
         assertNull(DateTimeHelper.floorToMinutes(null));
     }
-
-    static Stream<OffsetDateTime> provideDateTimesForFloorToMinutes() {
-        return Stream.of(
-            OffsetDateTime.parse("2024-07-31T11:29:56.101701Z"),
-            OffsetDateTime.parse("2024-07-31T11:29:00.00000Z")
-        );
-    }
-
+    
 }
