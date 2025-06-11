@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +66,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
     "PMD.CouplingBetweenObjects",
     "PMD.TooManyMethods"
 })
-@RequiredArgsConstructor
 public abstract class AbstractArmBatchProcessResponseFiles implements ArmResponseFilesProcessor {
 
     protected static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
@@ -85,6 +83,24 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected final DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
 
     protected DateTimeFormatter dateTimeFormatter;
+
+    public AbstractArmBatchProcessResponseFiles(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
+                                                FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
+                                                ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper timeHelper,
+                                                ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi,
+                                                DeleteArmResponseFilesHelper deleteArmResponseFilesHelper) {
+        this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
+        this.armDataManagementApi = armDataManagementApi;
+        this.fileOperationService = fileOperationService;
+        this.armDataManagementConfiguration = armDataManagementConfiguration;
+        this.objectMapper = objectMapper;
+        this.userIdentity = userIdentity;
+        this.timeHelper = timeHelper;
+        this.externalObjectDirectoryService = externalObjectDirectoryService;
+        this.logApi = logApi;
+        this.deleteArmResponseFilesHelper = deleteArmResponseFilesHelper;
+        dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
+    }
 
     @Override
     public void processResponseFiles(int batchSize, AsyncTaskConfig asyncTaskConfig) {
@@ -197,7 +213,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     OffsetDateTime getInputUploadFileTimestamp(ArmResponseInputUploadFileRecord inputUploadFileRecord) {
         try {
-            dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
             return OffsetDateTime.parse(inputUploadFileRecord.getTimestamp(), dateTimeFormatter);
         } catch (Exception e) {
             log.error("Unable to parse timestamp {} from ARM input upload file {}", inputUploadFileRecord.getTimestamp(),
@@ -208,7 +223,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     private OffsetDateTime getUploadFileRecordProcessTime(ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         try {
-            dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
             return OffsetDateTime.parse(armResponseUploadFileRecord.getProcessTime(), dateTimeFormatter);
         } catch (Exception e) {
             log.error("Unable to parse timestamp {} from ARM upload file record {}", armResponseUploadFileRecord.getProcessTime(),
