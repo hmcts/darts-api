@@ -336,7 +336,7 @@ class CasesMapperTest {
         CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 1);
         courtCase.setRetentionUpdated(true);
         courtCase.setRetentionRetries(123);
-        courtCase.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
+        courtCase.setRetConfScore(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED);
         courtCase.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         courtCase.setRetConfUpdatedTs(OffsetDateTime.of(2024, 1, 2, 3, 4, 5, 6, UTC));
 
