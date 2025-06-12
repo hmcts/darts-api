@@ -56,12 +56,11 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
            FROM HearingEntity he
            JOIN he.medias me
            WHERE he.id = :hearingId
-           AND me.channel = :channel
            AND me.isHidden = false
            AND me.isCurrent = true
            ORDER BY me.start DESC, me.end DESC
         """)
-    List<MediaEntity> findAllByHearingIdAndChannelAndIsCurrentTrue(Integer hearingId, Integer channel);
+    List<MediaEntity> findAllByHearingIdAndIsCurrentTrue(Integer hearingId);
 
 
     @Query("""

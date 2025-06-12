@@ -23,9 +23,13 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
@@ -54,8 +58,36 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public List<MediaEntity> getMediaEntitiesByHearingAndChannel(Integer hearingId, Integer channel) {
-        return mediaRepository.findAllByHearingIdAndChannelAndIsCurrentTrue(hearingId, channel);
+    public List<MediaEntity> getMediaEntitiesByHearingAndLowestChannel(Integer hearingId) {
+        List<MediaEntity> mediaEntities = mediaRepository.findAllByHearingIdAndIsCurrentTrue(hearingId);
+
+
+        //Create a function to group MediaEntity by courtroom, start time, end time, and total channels
+        Function<MediaEntity, String> getGroupByKey = mediaEntity ->
+            mediaEntity.getCourtroom().getId()
+                + "-" + mediaEntity.getStart().toEpochSecond()
+                + "-" + mediaEntity.getEnd().toEpochSecond()
+                + "-" + mediaEntity.getTotalChannels();
+
+        //Map all MediaEntity to there retrospective channel group
+        Map<String, List<MediaEntity>> mediaChannelGroups = mediaEntities.stream()
+            .collect(Collectors.groupingBy(getGroupByKey::apply, Collectors.toList()));
+
+        //Iterate through the mediaChannelGroups to get the MediaEntity with the lowest channel in each group
+        return mediaChannelGroups.values().stream()
+            // Filter out any empty lists
+            .filter(mediaEntities1 -> !mediaEntities1.isEmpty())
+            //Get the MediaEntity with the lowest channel in each group
+            .map(mediaEntitiesChannelGroup ->
+                     //Sort the group by channel number and return the first one
+                     mediaEntitiesChannelGroup.stream()
+                         .sorted((media1, media2) -> Integer.compare(media1.getChannel(), media2.getChannel()))
+                         .findFirst()
+                         .get()
+            )
+            .sorted(Comparator.comparing(MediaEntity::getStart)
+                        .thenComparing(MediaEntity::getEnd).reversed())
+            .toList();
     }
 
     @Override
@@ -95,11 +127,8 @@ public class AudioServiceImpl implements AudioService {
                 audioBeingProcessedFromArchiveQuery.getResults(hearingId);
 
             for (AudioMetadata audioMetadataItem : audioMetadata) {
-                if (isMediaArchived(audioMetadataItem, archivedArmRecords)) {
-                    audioMetadataItem.setIsArchived(true);
-                } else {
-                    audioMetadataItem.setIsArchived(false);
-                }
+                boolean isArchived = isMediaArchived(audioMetadataItem, archivedArmRecords);
+                audioMetadataItem.setIsArchived(isArchived);
             }
         }
     }
