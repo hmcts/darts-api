@@ -17,4 +17,6 @@ public class BeanConfiguration {
         return new NotificationClient(apiKey);
     }
 
+
+
 }

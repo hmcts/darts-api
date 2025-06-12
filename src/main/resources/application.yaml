@@ -114,6 +114,8 @@ spring:
 darts:
   async:
     enabled: true
+  shutdown:
+    wait-time: ${GRACEFUL_SHUTDOWN_TIMEOUT:30s}
   manual-deletion:
     enabled: ${MANUAL_DELETION_ENABLED:false}
     grace-period: ${MANUAL_DELETION_GRACE_PERIOD:24h}
