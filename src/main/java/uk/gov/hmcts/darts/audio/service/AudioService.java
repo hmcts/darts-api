@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface AudioService {
 
-    List<MediaEntity> getMediaEntitiesByHearingAndChannel(Integer hearingId, Integer channel);
+    List<MediaEntity> getMediaEntitiesByHearingAndLowestChannel(Integer hearingId);
 
     BinaryData encode(Long mediaId);
 
