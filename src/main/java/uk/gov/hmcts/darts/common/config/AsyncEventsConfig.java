@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ApplicationEventMulticaster;
@@ -10,6 +11,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 @EnableAsync
+//Enables us to disable async processing for testing. This should always be true in production.
+@ConditionalOnProperty(prefix = "darts.async", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class AsyncEventsConfig {
 
     @Bean(name = "applicationEventMulticaster")

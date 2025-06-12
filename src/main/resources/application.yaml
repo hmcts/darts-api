@@ -112,6 +112,8 @@ spring:
             loggerLevel: ${FEIGN_LOG_LEVEL:none}
 
 darts:
+  async:
+    enabled: true
   shutdown:
     wait-time: ${GRACEFUL_SHUTDOWN_TIMEOUT:30s}
   manual-deletion:

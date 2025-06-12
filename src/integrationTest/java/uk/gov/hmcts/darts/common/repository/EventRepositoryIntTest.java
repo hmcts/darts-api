@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 class EventRepositoryIntTest extends PostgresIntegrationBase {
     @Autowired
     private EventRepository eventRepository;
@@ -138,12 +140,25 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void findDuplicateEventIds_typical() {
         final EventEntity event1 = EventTestData.someMinimalEvent();
-        final EventEntity event2 = EventTestData.someMinimalEvent();
-        final EventEntity event3 = EventTestData.someMinimalEvent();
-        final EventEntity event4 = EventTestData.someMinimalEvent(); //Not a duplicate
         event1.setEventText("eventText");
         event1.setMessageId("msgId");
         event1.setEventId(1);
+        assertFindDuplicateEventIdsUsingPreBuiltEvent(event1);
+    }
+
+    @Test
+    void findDuplicateEventIds_shouldFindDuplicatesWithNullEventText() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        event1.setEventText(null);
+        event1.setMessageId("msgId");
+        event1.setEventId(1);
+        assertFindDuplicateEventIdsUsingPreBuiltEvent(event1);
+    }
+
+    private void assertFindDuplicateEventIdsUsingPreBuiltEvent(EventEntity event1) {
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        final EventEntity event3 = EventTestData.someMinimalEvent();
+        final EventEntity event4 = EventTestData.someMinimalEvent(); //Not a duplicate
         makeEventsDuplicate(event1, event2);
         makeEventsDuplicate(event1, event3);
         event4.setEventText("Some new text");
@@ -157,13 +172,14 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
         updateCreatedBy(event2, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), event1.getMessageId(), event1.getEventText());
 
         assertThat(duplicates)
             .hasSize(3)
             .anyMatch(eventEntity -> event3.getId().equals(eventEntity))
             .anyMatch(eventEntity -> event1.getId().equals(eventEntity))
             .anyMatch(eventEntity -> event2.getId().equals(eventEntity));
+
     }
 
     @Test
@@ -188,7 +204,7 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), event1.getMessageId(), event1.getEventText());
         assertThat(duplicates).isEmpty();
     }
 
@@ -214,7 +230,7 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+        List<Long> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), event1.getMessageId(), event1.getEventText());
         assertThat(duplicates).isEmpty();
     }
 
