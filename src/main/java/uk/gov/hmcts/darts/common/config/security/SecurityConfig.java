@@ -183,21 +183,21 @@ public class SecurityConfig {
                     if (userAccountEntity.isActive()) {
                         filterChain.doFilter(request, response);
                     } else {
-                        writeError(response);
+                        writeError(response, HttpStatus.FORBIDDEN);
                     }
                 } catch (Exception exception) {
                     log.error("User is invalid", exception);
-                    writeError(response);
+                    writeError(response, HttpStatus.UNAUTHORIZED);
                 }
             }
         }
 
-        private void writeError(HttpServletResponse response) {
+        private void writeError(HttpServletResponse response, HttpStatus httStatus) {
             try {
-                DartsApiTrait.writeErrorResponse(response, mapper);
+                DartsApiTrait.writeErrorResponse(response, mapper, httStatus);
             } catch (IOException ex) {
                 log.error("Problem parsing the problem", ex);
-                response.setStatus(HttpStatus.FORBIDDEN.value());
+                response.setStatus(httStatus.value());
             }
         }
     }
