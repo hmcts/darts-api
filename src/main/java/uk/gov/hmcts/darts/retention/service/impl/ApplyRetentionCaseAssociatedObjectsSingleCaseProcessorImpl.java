@@ -31,7 +31,7 @@ import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsS
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -81,14 +81,8 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     }
 
     private void applyRetentionToMedias(CourtCaseEntity courtCase) {
-        List<MediaEntity> mediaEntities = new ArrayList<>();
-        // get all current media linked to the case
-        mediaEntities.addAll(mediaRepository.findAllByCaseId(courtCase.getId()));
-        // get all media linked to the case via media linked case
-        mediaEntities.addAll(mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(courtCase.getId()));
-        // remove duplicates
-        var allMedia = io.vavr.collection.List.ofAll(mediaEntities).distinctBy(MediaEntity::getId).toJavaList();
-        for (var media : allMedia) {
+        Collection<MediaEntity> mediaEntities = courtCase.getAllAssociatedMedias();
+        for (var media : mediaEntities) {
             List<CourtCaseEntity> cases = media.associatedCourtCases();
             mediaLinkedCaseRepository.findByMedia(media).stream()
                 .map(MediaLinkedCaseEntity::getCourtCase)
@@ -105,7 +99,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private void applyRetentionToAnnotations(CourtCaseEntity courtCase) {
 
-        var annotationDocuments = annotationDocumentRepository.findAllByCaseId(courtCase.getId());
+        var annotationDocuments = courtCase.getAllAssociatedAnnotationDocuments();
 
         for (var annotationDoc : annotationDocuments) {
             var cases = annotationDoc.associatedCourtCases();
@@ -130,7 +124,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     }
 
     private void applyRetentionToCaseDocuments(CourtCaseEntity courtCase) {
-        var caseDocuments = caseDocumentRepository.findByCourtCase(courtCase);
+        var caseDocuments = courtCase.getCaseDocumentEntities();
         for (var caseDocument : caseDocuments) {
             if (allClosed(List.of(courtCase))) {
                 setLongestRetentionDateForCaseDocument(courtCase, caseDocument);
@@ -291,9 +285,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
             var mostRecentRetentionRecordOpt = caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(courtCase);
             if (mostRecentRetentionRecordOpt.isPresent()) {
                 var retention = mostRecentRetentionRecordOpt.get().getRetainUntil();
-                if (longestRetentionDate == null) {
-                    longestRetentionDate = retention;
-                } else if (retention.isAfter(longestRetentionDate)) {
+                if (longestRetentionDate == null || retention.isAfter(longestRetentionDate)) {
                     longestRetentionDate = retention;
                 }
             }

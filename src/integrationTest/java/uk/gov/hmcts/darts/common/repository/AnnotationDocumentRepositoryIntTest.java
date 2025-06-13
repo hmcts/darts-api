@@ -39,29 +39,6 @@ class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    void findsAnnotationDocumentsByCaseId() {
-        // given
-        var courtCaseA = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
-        var courtCaseB = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
-        var annotationDocument1 = createAnnotationDocumentForCases(courtCaseA);
-        var annotationDocument2 = createAnnotationDocumentForCases(courtCaseA);
-        var annotationDocument3 = createAnnotationDocumentForCases(courtCaseA);
-        createAnnotationDocumentForCases(courtCaseB);
-        createAnnotationDocumentForCases(courtCaseB);
-        dartsPersistence.saveAll(annotationDocument1, annotationDocument2, annotationDocument3);
-
-        // when
-        var result = annotationDocumentRepository.findAllByCaseId(courtCaseA.getId());
-
-        // then
-        assertThat(result.stream().map(AnnotationDocumentEntity::getId))
-            .containsExactlyInAnyOrder(
-                annotationDocument1.getId(),
-                annotationDocument2.getId(),
-                annotationDocument3.getId());
-    }
-
-    @Test
     void canGetAssociatedCasesFromAnnotationDocument() {
         var courtCaseA = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         var courtCaseB = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
