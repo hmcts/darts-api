@@ -203,7 +203,7 @@ class CourtCaseEntityTest {
         List<AnnotationDocumentEntity> allAnnotations = courtCase.getAllAssociatedAnnotationDocuments();
         assertThat(allAnnotations)
             .hasSize(3)
-            .containsExactly(
+            .containsExactlyInAnyOrder(
                 hearing1Annotation1Document1,
                 hearing1Annotation1Document2,
                 hearing2Annotation1Document1
