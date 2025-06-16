@@ -59,11 +59,13 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
                 (tm.lastAccessed < :createdAtOrLastAccessedDateTime AND tm.mediaRequest.status = 'COMPLETED')
              OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND  tm.mediaRequest.status <> 'PROCESSING' AND tm.lastAccessed IS NULL)
         )
-        AND upper(tod.status.description) <> 'MARKED FOR DELETION'   
+        AND tod.status.id not in :expiredObjectRecordStatusIds
         AND not exists (SELECT sge from tm.mediaRequest.currentOwner.securityGroupEntities sge 
                where sge.securityRoleEntity.roleName = 'MEDIA_IN_PERPETUITY') 
         """)
-    List<Integer> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime, Limit limit);
+    List<Integer> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime,
+                                                   List<Integer> expiredObjectRecordStatusIds,
+                                                   Limit limit);
 
     @Query("""
         SELECT tm
@@ -86,7 +88,8 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
            ORDER BY tm.id DESC
         """)
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")//Required for JPA
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+//Required for JPA
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,
                                                       String courtHouseDisplayName,

@@ -40,8 +40,8 @@ public class ExternalOutboundDataStoreDeleter extends AbstractExternalDataStoreD
     }
 
     @Override
-    protected void deleteFromRepository(TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
-        super.deleteFromRepository(transientObjectDirectoryEntity);
+    protected void datastoreDeletionCallback(TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
+        super.datastoreDeletionCallback(transientObjectDirectoryEntity);
         if (transientObjectDirectoryEntity.getTransformedMedia() != null) {
             log.debug("Deleting transformed media {} with transient object directory id={}",
                       transientObjectDirectoryEntity.getTransformedMedia().getId(), transientObjectDirectoryEntity.getId());
