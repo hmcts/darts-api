@@ -80,7 +80,7 @@ class EventDispatcherImplTest {
 
         verify(mockEventHandler).handle(any(), any());
         verify(logApi, times(1)).eventReceived(event);
-        verify(asyncEventProcessor, times(1)).processEvent(123);
+        verify(asyncEventProcessor, times(1)).processEvent(event);
     }
 
 

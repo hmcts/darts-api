@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.createEventHandlerWith;
 
 @AutoConfigureMockMvc
+@TestPropertySource(properties = {"darts.async.enabled=false"})
 class EventsControllerPostEventsTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/events");
@@ -183,7 +185,6 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .toList();
 
         Assertions.assertEquals(1, results.size());
-
     }
 
     @Test

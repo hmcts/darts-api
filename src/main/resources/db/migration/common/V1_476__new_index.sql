@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS eve_ei_mi_idx ON darts."event" (event_id,message_id);
