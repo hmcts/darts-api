@@ -30,10 +30,10 @@ public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validato
         Optional<SecurityGroupEntity> securityGroupEntityLst = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
         Set<UserAccountEntity> accountEntities = securityGroupEntityLst.orElseThrow().getUsers();
 
-        // if the super admin group has only 1 user and its the user we are deactivating fail
-        if (accountEntities.size() != 1) {
-            return;
+        if (accountEntities.size() == 0) {
+            throw new DartsApiException(AuthorisationError.UNABLE_TO_DEACTIVATE_USER);
         }
+        // if the super admin group has 0 users and it's the user we are deactivating fail
         Iterator<UserAccountEntity> entity = accountEntities.iterator();
         UserAccountEntity userAccountEntity = entity.next();
         if (userAccountEntity.getId().equals(userPatch.getId())) {
