@@ -524,8 +524,18 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query("""
         SELECT eod.id FROM ExternalObjectDirectoryEntity eod
-        WHERE eod.externalLocationType = :externalLocationTypeEntity
+        LEFT JOIN eod.media m
+        LEFT JOIN eod.transcriptionDocumentEntity td
+        LEFT JOIN eod.caseDocument cd
+        LEFT JOIN eod.annotationDocumentEntity ad        
+        WHERE eod.externalLocationType = :externalLocationTypeEntity                
         AND eod.updateRetention = :updateRetention
+        AND (    
+             m.retainUntilTs is not null or 
+             td.retainUntilTs is not null or 
+             cd.retainUntilTs is not null or 
+             ad.retainUntilTs is not null
+        )
         """)
     List<Long> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
                                                             boolean updateRetention, Limit limit);
