@@ -530,10 +530,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         LEFT JOIN eod.caseDocument cd
         WHERE eod.externalLocationType = :externalLocationTypeEntity
         AND (
-           (med.retainUntilTs is not null and med.retConfScore is not null) or
-           (td.retainUntilTs is not null and td.retConfScore is not null) or
-           (ad.retainUntilTs is not null and ad.retConfScore is not null) or
-           (cd.retainUntilTs is not null and cd.retConfScore is not null) 
+           (med.retainUntilTs is not null) or
+           (td.retainUntilTs is not null) or
+           (ad.retainUntilTs is not null) or
+           (cd.retainUntilTs is not null) 
         )        
         AND eod.updateRetention = :updateRetention
         ORDER BY eod.id
