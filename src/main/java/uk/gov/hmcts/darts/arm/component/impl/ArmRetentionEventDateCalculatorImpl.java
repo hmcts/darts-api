@@ -44,7 +44,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             if (nonNull(retentionDate)) {
                 OffsetDateTime armRetentionDate = retentionDate.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears());
                 if (nonNull(externalObjectDirectory.getEventDateTs())
-                    && armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) == 0) {
+                    && armRetentionDate.truncatedTo(MILLIS).isEqual(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS))) {
                     log.info("Event date found and different when compared to ARM retention date, resetting update retention flag for {} ",
                              externalObjectDirectoryId);
                     externalObjectDirectory.setUpdateRetention(false);
@@ -54,6 +54,8 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                 } else if (ObjectRecordStatusEnum.STORED.getId() == externalObjectDirectory.getStatusId()) {
                     log.info("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
                     return processArmUpdate(externalObjectDirectory, armRetentionDate, userAccount, externalObjectDirectoryId);
+                } else {
+                    log.info("EOD {} is not in STORED status, skipping ARM retention date update", externalObjectDirectoryId);
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
