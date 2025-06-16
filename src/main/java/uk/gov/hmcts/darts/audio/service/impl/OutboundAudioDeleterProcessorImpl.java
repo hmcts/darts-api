@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleElement;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -44,7 +45,10 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(getDeletionDays());
 
-        List<Integer> transformedMediaListIds = transformedMediaRepository.findAllDeletableTransformedMedia(deletionStartDateTime, Limit.of(batchSize));
+        List<Integer> transformedMediaListIds = transformedMediaRepository.findAllDeletableTransformedMedia(
+            deletionStartDateTime,
+            ObjectRecordStatusEnum.getExpiredStatusIds(),
+            Limit.of(batchSize));
 
         if (transformedMediaListIds.isEmpty()) {
             log.debug("No transformed media to be marked for deletion");
