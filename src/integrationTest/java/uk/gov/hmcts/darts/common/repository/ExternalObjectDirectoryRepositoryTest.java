@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
@@ -559,8 +558,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         void shouldReturnEmptyList_whenNoDataMatchingExternalLocationTypeIsFound(EodItemType eodItemType) {
             ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
             //Create Eod with non matching external location type
-            createEod(eodItemType, EodHelper.inboundLocation(), OffsetDateTime.now(),
-                      RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+            createEod(eodItemType, EodHelper.inboundLocation(), OffsetDateTime.now(), true);
 
             assertThat(
                 externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
@@ -573,22 +571,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         void shouldReturnEmptyList_whenRetainUntilTsIsNotSet(EodItemType eodItemType) {
             ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
             //Create Eod with retainUntilTs not set
-            createEod(eodItemType, externalLocationTypeEntity, null,
-                      RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
-
-            assertThat(
-                externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
-                    externalLocationTypeEntity, true, Limit.of(10))
-            ).isEmpty();
-        }
-
-        @ParameterizedTest
-        @EnumSource(EodItemType.class)
-        void shouldReturnEmptyList_whenRetConfScoreTsIsNotSet(EodItemType eodItemType) {
-            ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
-            //Create Eod with non matching external location type
-            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                      null, true);
+            createEod(eodItemType, externalLocationTypeEntity, null, true);
 
             assertThat(
                 externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
@@ -601,8 +584,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         void shouldReturnEmptyList_whenUpdateRetentionDoesNotMatch(EodItemType eodItemType) {
             ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
             //Create Eod with non matching external location type
-            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                      null, true);
+            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(), true);
 
             assertThat(
                 externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
@@ -616,20 +598,16 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
             //Create Eod with non matching external location type
             ExternalObjectDirectoryEntity eod1 =
-                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(), true);
 
             ExternalObjectDirectoryEntity eod2 =
-                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                          RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, true);
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(), true);
 
             ExternalObjectDirectoryEntity eod3 =
-                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(), true);
 
             //Create EOD with updateRetention set to false should not be returned
-            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                      RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, false);
+            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(), false);
 
             assertThat(
                 externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
@@ -644,16 +622,13 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             ExternalLocationTypeEntity externalLocationTypeEntity = EodHelper.armLocation();
             //Create Eod with non matching external location type
             ExternalObjectDirectoryEntity eod1 =
-                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(), true);
 
             ExternalObjectDirectoryEntity eod2 =
-                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+                createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(), true);
 
             //Should not be returned as outside the limit
-            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(),
-                          RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, true);
+            createEod(eodItemType, externalLocationTypeEntity, OffsetDateTime.now(), true);
 
             assertThat(
                 externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
@@ -667,55 +642,50 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             void createAndAssociateTo(
                 DartsPersistence dartsPersistence,
                 ExternalObjectDirectoryEntity eod,
-                OffsetDateTime retainUntilTs,
-                RetentionConfidenceScoreEnum retConfScore);
+                OffsetDateTime retainUntilTs);
         }
 
         @AllArgsConstructor
         enum EodItemType {
-            MEDIA((dartsPersistence, eod, retainUntilTs, retConfScore) -> {
+            MEDIA((dartsPersistence, eod, retainUntilTs) -> {
                 MediaEntity media =
                     dartsPersistence.save(
                         PersistableFactory.getMediaTestData()
                             .someMinimalBuilder()
                             .retainUntilTs(retainUntilTs)
-                            .retConfScore(retConfScore)
                             .build()
                             .getEntity()
                     );
                 eod.setMedia(media);
             }),
-            TRANSCRIPTION_DOCUMENT((dartsPersistence, eod, retainUntilTs, retConfScore) -> {
+            TRANSCRIPTION_DOCUMENT((dartsPersistence, eod, retainUntilTs) -> {
                 TranscriptionDocumentEntity transcriptionDocumentEntity =
                     dartsPersistence.save(
                         PersistableFactory.getTranscriptionDocument()
                             .someMinimalBuilder()
                             .retainUntilTs(retainUntilTs)
-                            .retConfScore(retConfScore)
                             .build()
                             .getEntity()
                     );
                 eod.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
             }),
-            ANNOTATION_DOCUMENT((dartsPersistence, eod, retainUntilTs, retConfScore) -> {
+            ANNOTATION_DOCUMENT((dartsPersistence, eod, retainUntilTs) -> {
                 AnnotationDocumentEntity annotationDocument =
                     dartsPersistence.save(
                         PersistableFactory.getAnnotationDocumentTestData()
                             .someMinimalBuilder()
                             .retainUntilTs(retainUntilTs)
-                            .retConfScore(retConfScore)
                             .build()
                             .getEntity()
                     );
                 eod.setAnnotationDocumentEntity(annotationDocument);
             }),
-            CASE_DOCUMENT((dartsPersistence, eod, retainUntilTs, retConfScore) -> {
+            CASE_DOCUMENT((dartsPersistence, eod, retainUntilTs) -> {
                 CaseDocumentEntity caseDocumentEntity =
                     dartsPersistence.save(
                         PersistableFactory.getCaseDocumentTestData()
                             .someMinimalBuilder()
                             .retainUntilTs(retainUntilTs)
-                            .retConfScore(retConfScore)
                             .build()
                             .getEntity()
                     );
@@ -727,9 +697,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             public void createAndAssociateTo(
                 DartsPersistence dartsPersistence,
                 ExternalObjectDirectoryEntity eod,
-                OffsetDateTime retainUntilTs,
-                RetentionConfidenceScoreEnum retConfScore) {
-                createAndAssociateToFunction.createAndAssociateTo(dartsPersistence, eod, retainUntilTs, retConfScore);
+                OffsetDateTime retainUntilTs) {
+                createAndAssociateToFunction.createAndAssociateTo(dartsPersistence, eod, retainUntilTs);
             }
         }
 
@@ -737,7 +706,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             EodItemType type,
             ExternalLocationTypeEntity externalLocationType,
             OffsetDateTime retainUntilTs,
-            RetentionConfidenceScoreEnum retConfScore,
             boolean updateRetention
         ) {
             ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
@@ -746,7 +714,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 .updateRetention(updateRetention)
                 .build()
                 .getEntity();
-            type.createAndAssociateTo(dartsPersistence, eod, retainUntilTs, retConfScore);
+            type.createAndAssociateTo(dartsPersistence, eod, retainUntilTs);
             return dartsPersistence.save(eod);
         }
     }
