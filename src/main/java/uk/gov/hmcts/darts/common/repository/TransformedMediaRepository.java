@@ -88,8 +88,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
            ORDER BY tm.id DESC
         """)
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
-//Required for JPA
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")//Required for JPA
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,
                                                       String courtHouseDisplayName,
