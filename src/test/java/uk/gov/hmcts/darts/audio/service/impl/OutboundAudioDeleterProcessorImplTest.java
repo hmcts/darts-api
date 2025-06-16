@@ -52,7 +52,7 @@ class OutboundAudioDeleterProcessorImplTest {
         var transformedMedia1 = mock(TransformedMediaEntity.class);
         var transformedMedia2 = mock(TransformedMediaEntity.class);
 
-        when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), eq(Limit.of(1000))))
+        when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), any(), eq(Limit.of(1000))))
             .thenReturn(List.of(1, 2));
         when(transformedMediaRepository.findById(1)).thenReturn(Optional.of(transformedMedia1));
         when(transformedMediaRepository.findById(2)).thenReturn(Optional.of(transformedMedia2));
