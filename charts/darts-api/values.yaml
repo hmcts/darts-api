@@ -1,4 +1,6 @@
 java:
+  readinessPeriod: 5
+  terminationGracePeriodSeconds: 65
   applicationPort: 4550
   image: 'sdshmctspublic.azurecr.io/darts/api:latest'
   ingressHost: darts-api.{{ .Values.global.environment }}.platform.hmcts.net
@@ -118,6 +120,7 @@ java:
     ARM_RPO_POLL_DURATION: 4h
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
+    GRACEFUL_SHUTDOWN_TIMEOUT: '35s'
 
 function:
   scaleType: Job
