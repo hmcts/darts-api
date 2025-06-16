@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -26,4 +27,14 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
         """)
     //Join required to ensure transient media is loaded into session
     List<TransientObjectDirectoryEntity> findByStatus(ObjectRecordStatusEntity status, Limit limit);
+
+
+    @Query("""
+               select tod from TransientObjectDirectoryEntity tod
+               LEFT JOIN tod.transformedMedia tm
+               where tm is null or tm.expiryTime < :maxExpirtyTime 
+               and tod.status.id = :statusId 
+        """)
+    List<TransientObjectDirectoryEntity> findByTransformedMediaIsNullOrExpirtyBeforeMaxExpiryTime(
+        OffsetDateTime maxExpirtyTime, Integer statusId, Limit limit);
 }
