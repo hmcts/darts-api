@@ -30,10 +30,10 @@ public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validato
         Optional<SecurityGroupEntity> securityGroupEntityLst = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
         Set<UserAccountEntity> accountEntities = securityGroupEntityLst.orElseThrow().getUsers();
 
-        if (accountEntities.isEmpty()) {
+        // if the super admin group has only 1 user and its the user we are deactivating fail
+        if (accountEntities.size() != 1) {
             return;
         }
-        // if the super admin group has 0 users and it's the user we are deactivating fail
         Iterator<UserAccountEntity> entity = accountEntities.iterator();
         UserAccountEntity userAccountEntity = entity.next();
         if (userAccountEntity.getId().equals(userPatch.getId())) {
