@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.usermanagement.controller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@Isolated
 class PatchUserIntTest extends IntegrationBase {
 
     private static final String ORIGINAL_USERNAME = "James Smith";
@@ -412,7 +414,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserSameEmailShouldBeOkAndDataShouldRemainUnchanged() throws Exception {
+    void patchUser_ShouldRemainUnchanged_SameEmailShouldBeOkAndData() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -431,7 +433,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserDuplicateEmailShouldFail() throws Exception {
+    void patchUser_DuplicateEmailShouldFail() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         createEnabledUserAccountEntity(user);
@@ -470,7 +472,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldFailIfProvidedUserIsASystemUser() throws Exception {
+    void patchUser_ShouldFailIfProvidedUserIsASystemUser() throws Exception {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = accountStub.getSystemUserAccountEntity();
