@@ -2,4 +2,4 @@
 INSERT INTO object_record_status (ors_id, ors_description)
 VALUES (25, 'Deleted from datastore');
 --Update the sequence to ensure it continues from the last inserted value
-SELECT setval('ors_seq', 25, true); -- next value will be 26
+alter sequence ors_seq restart with 26;
