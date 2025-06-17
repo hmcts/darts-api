@@ -23,9 +23,9 @@ public class UserManagementQueryImpl implements UserManagementQuery {
     private final UserAccountRepository userAccountRepository;
 
     @Override
-    public List<UserAccountEntity> getUsers(boolean includeSystemUSers, String emailAddress, List<Integer> userIds) {
+    public List<UserAccountEntity> getUsers(boolean includeSystemUsers, String emailAddress, List<Integer> userIds) {
         Specification<UserAccountEntity> spec = where(hasEmailAddress(emailAddress)).and(isInIds(userIds));
-        if (!includeSystemUSers) {
+        if (!includeSystemUsers) {
             spec = spec.and(notSystemUser());
         }
         return userAccountRepository.findAll(spec, Sort.by(DESC, "id"));
