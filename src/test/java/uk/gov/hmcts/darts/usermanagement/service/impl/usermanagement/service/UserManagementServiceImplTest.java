@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsVal
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.NotSameUserValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserActivateValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
 
@@ -51,6 +52,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserManagementServiceImplTest {
+
     private static final String EXISTING_EMAIL_ADDRESS = "existing-email@hmcts.net";
     private UserManagementServiceImpl service;
     @Mock
@@ -83,6 +85,9 @@ class UserManagementServiceImplTest {
     @Mock
     private UserActivateValidator userAuthoriseValidator;
 
+    @Mock
+    private NotSameUserValidator notSameUserValidator;
+
     @BeforeEach
     void setUp() {
         UserAccountMapper mapper = new UserAccountMapperImpl();
@@ -110,7 +115,8 @@ class UserManagementServiceImplTest {
             deactivateNotLastSuperAdminValidator,
             transcriptionService,
             auditApi,
-            userAuthoriseValidator
+            userAuthoriseValidator,
+            notSameUserValidator
         );
     }
 
