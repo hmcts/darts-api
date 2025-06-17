@@ -20,7 +20,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
     private final UserDeactivateNotLastInSuperAdminGroupValidator userDeactivateNotLastSuperAdminValidator;
 
-    private SecurityGroupRepository repository;
+    private final SecurityGroupRepository repository;
 
     public UserDeactivateNotLastInSuperAdminGroupValidatorTest() {
         repository = Mockito.mock(SecurityGroupRepository.class);
