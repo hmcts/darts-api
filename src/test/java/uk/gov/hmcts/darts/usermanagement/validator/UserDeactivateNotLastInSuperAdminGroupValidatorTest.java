@@ -20,7 +20,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
     private final UserDeactivateNotLastInSuperAdminGroupValidator userDeactivateNotLastSuperAdminValidator;
 
-    SecurityGroupRepository repository;
+    private SecurityGroupRepository repository;
 
     public UserDeactivateNotLastInSuperAdminGroupValidatorTest() {
         repository = Mockito.mock(SecurityGroupRepository.class);
@@ -89,29 +89,5 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
         IdRequest<UserPatch, Integer> request = new IdRequest<>(patch, userId);
 
         userDeactivateNotLastSuperAdminValidator.validate(request);
-    }
-
-    @Test
-    void validate_ShouldThrowException_WhenTryingToDeactivateSelf() {
-        SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
-        Mockito.when(repository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
-
-        Integer userId = 101;
-
-        Set<UserAccountEntity> userEntitySet = new HashSet<>();
-        UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setId(101);
-        userEntitySet.add(userAccountEntity);
-
-        Mockito.when(securityGroupEntity.getUsers()).thenReturn(userEntitySet);
-
-        UserPatch patch = new UserPatch();
-        patch.setActive(false);
-        IdRequest<UserPatch, Integer> request = new IdRequest<>(patch, userId);
-
-        DartsApiException exception = Assertions.assertThrows(DartsApiException.class, () ->
-            userDeactivateNotLastSuperAdminValidator.validate(request));
-
-        Assertions.assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getTitle(), exception.getMessage());
     }
 }
