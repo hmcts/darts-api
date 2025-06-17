@@ -140,13 +140,14 @@ class UserManagementServiceImplTest {
         userAccountEntities.add(createUserAccount(2, "another-user-email@hmcts.net"));
 
         Integer userId = 1001;
-        Long transcriptionId = 1001L;
         UserPatch patch = new UserPatch();
         patch.setActive(false);
 
         Set<UserAccountEntity> userAccountEntitySet = new HashSet<>(userAccountEntities);
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         when(securityGroupEntity.getUsers()).thenReturn(userAccountEntitySet);
+
+        Long transcriptionId = 1001L;
 
         when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
