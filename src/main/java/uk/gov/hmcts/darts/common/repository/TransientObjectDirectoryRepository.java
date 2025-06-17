@@ -32,9 +32,9 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
     @Query("""
                select tod from TransientObjectDirectoryEntity tod
                LEFT JOIN tod.transformedMedia tm
-               where tm is null or tm.expiryTime < :maxExpirtyTime 
+               where tm is null or tm.expiryTime < :maxExpiryTime 
                and tod.status.id = :statusId 
         """)
     List<TransientObjectDirectoryEntity> findByTransformedMediaIsNullOrExpirtyBeforeMaxExpiryTime(
-        OffsetDateTime maxExpirtyTime, Integer statusId, Limit limit);
+        OffsetDateTime maxExpiryTime, Integer statusId, Limit limit);
 }
