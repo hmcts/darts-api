@@ -198,7 +198,7 @@ class AudioServiceImplTest {
 
     @Test
     void getMediaEntitiesByHearingAndLowestChannel_shouldReturnEmptyListWhenNoMediaFound() {
-        doReturn(List.of()).when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
+        doReturn(List.of()).when(mediaRepository).findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(HEARING_ID);
         List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
         assertThat(mediaEntities).isEmpty();
     }
@@ -209,12 +209,12 @@ class AudioServiceImplTest {
         MediaEntity media2 = mock(MediaEntity.class);
 
         doReturn(List.of(media1, media2))
-            .when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
+            .when(mediaRepository).findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(HEARING_ID);
 
         List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
         assertThat(mediaEntities)
             .hasSize(2)
             .containsExactlyInAnyOrder(media1, media2);
-        verify(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
+        verify(mediaRepository).findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(HEARING_ID);
     }
 }
