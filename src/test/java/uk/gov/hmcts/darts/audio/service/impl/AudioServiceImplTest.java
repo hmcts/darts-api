@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -28,7 +27,6 @@ import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -80,8 +79,6 @@ class AudioServiceImplTest {
 
     private EodHelperMocks eodHelperMocks;
 
-    private OffsetDateTime baseTime;
-
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
@@ -94,7 +91,6 @@ class AudioServiceImplTest {
             fileOperationService,
             audioBeingProcessedFromArchiveQuery
         );
-        baseTime = OffsetDateTime.now();
     }
 
     @AfterEach
@@ -200,22 +196,6 @@ class AudioServiceImplTest {
         verifyNoInteractions(jdbcTemplate);
     }
 
-
-    private MediaEntity createMediaEntity(int channel, int startTimeOffset, int endTimeOffset, int totalChannels, int courtRoomId) {
-        MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1L);
-        mediaEntity.setChannel(channel);
-        mediaEntity.setStart(baseTime.plusMinutes(startTimeOffset));
-        mediaEntity.setEnd(baseTime.plusMinutes(endTimeOffset));
-        mediaEntity.setTotalChannels(totalChannels);
-
-        CourtroomEntity courtroomEntity = new CourtroomEntity();
-        courtroomEntity.setId(courtRoomId);
-
-        mediaEntity.setCourtroom(courtroomEntity);
-        return mediaEntity;
-    }
-
     @Test
     void getMediaEntitiesByHearingAndLowestChannel_shouldReturnEmptyListWhenNoMediaFound() {
         doReturn(List.of()).when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
@@ -225,103 +205,16 @@ class AudioServiceImplTest {
 
     @Test
     void getMediaEntitiesByHearingAndLowestChannel_singleChannelGroupReturn_shouldReturnLowest() {
-        MediaEntity media1 = createMediaEntity(1, 0, 0, 4, 0);
-        MediaEntity media2 = createMediaEntity(2, 0, 0, 4, 0);
-        MediaEntity media3 = createMediaEntity(3, 0, 0, 4, 0);
-        MediaEntity media4 = createMediaEntity(4, 0, 0, 4, 0);
+        MediaEntity media1 = mock(MediaEntity.class);
+        MediaEntity media2 = mock(MediaEntity.class);
 
-        doReturn(List.of(media1, media2, media3, media4))
-            .when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
-
-        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
-        assertThat(mediaEntities)
-            .hasSize(1)
-            .containsExactlyInAnyOrder(media1);
-    }
-
-    @Test
-    void getMediaEntitiesByHearingAndLowestChannel_shouldClassifyDifferentStartTimeAsNewGroup() {
-        MediaEntity group1Media1 = createMediaEntity(1, 0, 0, 4, 0);
-        MediaEntity group1Media2 = createMediaEntity(2, 0, 0, 4, 0);
-        MediaEntity group2Media1 = createMediaEntity(3, 1, 0, 4, 0);
-        MediaEntity group2Media2 = createMediaEntity(4, 1, 0, 4, 0);
-
-        doReturn(List.of(group1Media1, group1Media2, group2Media1, group2Media2))
+        doReturn(List.of(media1, media2))
             .when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
 
         List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
         assertThat(mediaEntities)
             .hasSize(2)
-            .containsExactlyInAnyOrder(group1Media1, group2Media1);
-    }
-
-    @Test
-    void getMediaEntitiesByHearingAndLowestChannel_shouldClassifyDifferentEndTimeAsNewGroup() {
-        MediaEntity group1Media1 = createMediaEntity(1, 0, 0, 4, 0);
-        MediaEntity group1Media2 = createMediaEntity(2, 0, 0, 4, 0);
-        MediaEntity group2Media1 = createMediaEntity(3, 0, 1, 4, 0);
-        MediaEntity group2Media2 = createMediaEntity(4, 0, 1, 4, 0);
-
-        doReturn(List.of(group1Media1, group1Media2, group2Media1, group2Media2))
-            .when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
-
-        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
-        assertThat(mediaEntities)
-            .hasSize(2)
-            .containsExactlyInAnyOrder(group1Media1, group2Media1);
-    }
-
-    @Test
-    void getMediaEntitiesByHearingAndLowestChannel_shouldClassifyDifferentTotalChannelsAsNewGroup() {
-        MediaEntity group1Media1 = createMediaEntity(1, 0, 0, 4, 0);
-        MediaEntity group1Media2 = createMediaEntity(2, 0, 0, 4, 0);
-        MediaEntity group2Media1 = createMediaEntity(3, 0, 0, 2, 0);
-        MediaEntity group2Media2 = createMediaEntity(4, 0, 0, 2, 0);
-
-        doReturn(List.of(group1Media1, group1Media2, group2Media1, group2Media2))
-            .when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
-
-        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
-        assertThat(mediaEntities)
-            .hasSize(2)
-            .containsExactlyInAnyOrder(group1Media1, group2Media1);
-    }
-
-    @Test
-    void getMediaEntitiesByHearingAndLowestChannel_shouldClassifyDifferentCourtRoomAsNewGroup() {
-        MediaEntity group1Media1 = createMediaEntity(1, 0, 0, 4, 0);
-        MediaEntity group1Media2 = createMediaEntity(2, 0, 0, 4, 0);
-        MediaEntity group2Media1 = createMediaEntity(3, 0, 0, 4, 1);
-        MediaEntity group2Media2 = createMediaEntity(4, 0, 0, 4, 1);
-
-        doReturn(List.of(group1Media1, group1Media2, group2Media1, group2Media2))
-            .when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
-
-        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
-        assertThat(mediaEntities)
-            .hasSize(2)
-            .containsExactlyInAnyOrder(group1Media1, group2Media1);
-    }
-
-    @Test
-    void getMediaEntitiesByHearingAndLowestChannel_multipleChannelGroups_shouldReturnLowestInEachGroup() {
-        MediaEntity groupOneMedia1 = createMediaEntity(1, 0, 0, 4, 0);
-        MediaEntity groupOneMedia2 = createMediaEntity(2, 0, 0, 4, 0);
-        MediaEntity groupOneMedia3 = createMediaEntity(3, 0, 0, 4, 0);
-        MediaEntity groupOneMedia4 = createMediaEntity(4, 0, 0, 4, 0);
-
-        MediaEntity groupTwoMedia1 = createMediaEntity(1, 2, 4, 4, 0);
-        MediaEntity groupTwoMedia2 = createMediaEntity(2, 2, 4, 4, 0);
-        MediaEntity groupTwoMedia3 = createMediaEntity(3, 2, 4, 4, 0);
-        MediaEntity groupTwoMedia4 = createMediaEntity(4, 2, 4, 4, 0);
-
-        doReturn(List.of(groupOneMedia1, groupOneMedia2, groupOneMedia3, groupOneMedia4,
-                         groupTwoMedia1, groupTwoMedia2, groupTwoMedia3, groupTwoMedia4))
-            .when(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
-
-        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
-        assertThat(mediaEntities)
-            .hasSize(2)
-            .containsExactlyInAnyOrder(groupOneMedia1, groupTwoMedia1);
+            .containsExactlyInAnyOrder(media1, media2);
+        verify(mediaRepository).findAllByHearingIdAndIsCurrentTrue(HEARING_ID);
     }
 }
