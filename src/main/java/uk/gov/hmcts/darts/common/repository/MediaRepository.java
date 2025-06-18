@@ -70,7 +70,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
            ))  
            ORDER BY me.start DESC, me.end DESC
         """)
-    List<MediaEntity> findAllByHearingIdAndIsCurrentTrue(Integer hearingId);
+    List<MediaEntity> findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(Integer hearingId);
 
 
     @Query("""
