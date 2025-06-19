@@ -139,7 +139,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void downloadTranscriptShouldReturnForbiddenError() throws Exception {
+    void downloadTranscript_shouldReturn401Error_whenUserNotFound() throws Exception {
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
@@ -149,13 +149,13 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             );
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isForbidden())
+            .andExpect(status().isUnauthorized())
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 

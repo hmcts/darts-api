@@ -44,11 +44,20 @@ public interface DartsApiTrait extends AdviceTrait {
         return create(exception, getContentForException(exception), request);
     }
 
-    static void writeErrorResponse(HttpServletResponse servletResponse, ObjectMapper mapper, HttpStatus httpStatus) throws IOException {
+    static boolean isInactiveUserException(Exception exception) {
+        return exception instanceof DartsApiException dartsApiException
+            && dartsApiException.getError() != null
+            && AuthorisationError.USER_NOT_ACTIVE.getType().equals(dartsApiException.getError().getType());
+    }
+
+    static void writeErrorResponse(HttpServletResponse servletResponse, ObjectMapper mapper, Exception exception) throws IOException {
+        HttpStatus httpStatus = isInactiveUserException(exception) ? HttpStatus.FORBIDDEN : HttpStatus.UNAUTHORIZED;
         servletResponse.setStatus(httpStatus.value());
         servletResponse.setHeader("Content-Type", "application/problem+json");
-        servletResponse.getWriter().write(
-            getJsonForProblem(mapper, getContentForException(new DartsApiException(AuthorisationError.USER_DETAILS_INVALID))));
+        var dartsException = exception instanceof DartsApiException
+            ? (DartsApiException) exception
+            : new DartsApiException(AuthorisationError.USER_DETAILS_INVALID);
+        servletResponse.getWriter().write(getJsonForProblem(mapper, getContentForException(dartsException)));
     }
 
     static String getJsonForProblem(ObjectMapper mapper, Problem problem) throws JsonProcessingException {

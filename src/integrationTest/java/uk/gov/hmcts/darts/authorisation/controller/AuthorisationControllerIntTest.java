@@ -465,7 +465,7 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
 
     @Test
     @WithMockSecurityContextWithEmailAddress(emailAddress = EMAIL_ADDRESS)
-    void getUserStateShouldFailWhenUserIsInactive() throws Exception {
+    void getUserState_shouldReturn403Error_whenUserIsInactive() throws Exception {
         // Given
         createAndSaveUser(EMAIL_ADDRESS, false);
 
@@ -478,8 +478,8 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         // Then
         JSONAssert.assertEquals("""
                                     {
-                                      "type": "AUTHORISATION_106",
-                                      "title": "Could not obtain user details",
+                                      "type": "AUTHORISATION_114",
+                                      "title": "User is not active",
                                       "status": 403
                                     }""",
                                 mvcResult.getResponse().getContentAsString(),
@@ -489,14 +489,14 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
 
     @Test
     @WithMockSecurityContextWithEmailAddress(emailAddress = "unknown@test.com")
-    void getUserStateShouldFailWhenUserEmailDoesNotExistInDatabase() throws Exception {
+    void getUserState_shouldReturn401Error_whenUserEmailDoesNotExistInDatabase() throws Exception {
         // Given
         createAndSaveUser(EMAIL_ADDRESS, true);
 
         // When
         MvcResult mvcResult = mockMvc.perform(
                 get(ENDPOINT))
-            .andExpect(status().isForbidden())
+            .andExpect(status().isUnauthorized())
             .andReturn();
 
         // Then
@@ -504,7 +504,7 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
                                     {
                                       "type": "AUTHORISATION_106",
                                       "title": "Could not obtain user details",
-                                      "status": 403
+                                      "status": 401
                                     }""",
                                 mvcResult.getResponse().getContentAsString(),
                                 JSONCompareMode.NON_EXTENSIBLE
