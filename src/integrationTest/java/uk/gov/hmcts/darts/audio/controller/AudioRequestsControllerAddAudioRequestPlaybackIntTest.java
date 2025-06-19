@@ -86,7 +86,7 @@ class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationB
     }
 
     @Test
-    void addAudioRequestPostShouldReturnForbiddenError() throws Exception {
+    void addAudioRequestPost_shouldReturn401Error_whenNoUserAccount() throws Exception {
 
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
@@ -96,7 +96,7 @@ class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationB
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(audioRequestDetails));
 
-        mockMvc.perform(requestBuilder).andExpect(status().isForbidden());
+        mockMvc.perform(requestBuilder).andExpect(status().isUnauthorized());
     }
 
     @Test
