@@ -23,6 +23,9 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
     private final CaseRepository caseRepository;
     private final ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
 
+
+    //Required to prevent duplicate logic with generic exception handling
+    @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
     @Override
     public void processApplyRetentionToCaseAssociatedObjects(Integer batchSize) {
 
@@ -44,6 +47,9 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
                 courtCase.setRetentionRetries(courtCase.getRetentionRetries() + 1);
                 courtCase.setRetentionUpdated(true);
                 caseRepository.saveAndFlush(courtCase);
+                if (exc instanceof InterruptedException) {
+                    return;
+                }
             }
         }
     }
