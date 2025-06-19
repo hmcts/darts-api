@@ -126,7 +126,7 @@ class HearingsGetControllerTest extends IntegrationBase {
     }
 
     @Test
-    void hearingsGetEndpointShouldReturnForbiddenError() throws Exception {
+    void hearingsGet_shouldReturn401Error_whenUserNotFound() throws Exception {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "testCourthouse",
@@ -144,13 +144,13 @@ class HearingsGetControllerTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearing.getId());
 
         MvcResult response = mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isForbidden())
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized())
             .andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
