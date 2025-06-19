@@ -113,7 +113,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void attachTranscript_shouldReturn403Error_whenUserDoesNotHavePermission() throws Exception {
+    void attachTranscript_shouldReturn401Error_whenUserNotFound() throws Exception {
+
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockMultipartFile transcript = new MockMultipartFile(
@@ -128,13 +129,13 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
                     URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
-            .andExpect(status().isForbidden())
+            .andExpect(status().isUnauthorized())
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 

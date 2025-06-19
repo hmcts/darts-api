@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_NOT_ACTIVE;
 
 @Component
 @AllArgsConstructor
@@ -49,8 +50,14 @@ public class UserIdentityImpl implements UserIdentity {
 
     @Override
     public UserAccountEntity getUserAccount(Jwt jwt) {
-        return getUserAccountOptional(jwt)
-            .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
+        var userAccount = getUserAccountOptional(jwt);
+        if (userAccount.isEmpty()) {
+            throw new DartsApiException(USER_DETAILS_INVALID);
+        }
+        if (!userAccount.get().isActive()) {
+            throw new DartsApiException(USER_NOT_ACTIVE);
+        }
+        return userAccount.get();
     }
 
     @Override
@@ -66,9 +73,15 @@ public class UserIdentityImpl implements UserIdentity {
         }
 
         String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
-        return userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true)
-            .stream()
-            .findFirst();
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddressFromToken);
+
+        var activeUserAccount = userAccounts.stream().filter(UserAccountEntity::isActive).findFirst();
+        if (activeUserAccount.isPresent()) {
+            return activeUserAccount;
+        }
+
+        // return remaining inactive user account if no active user account found, else empty optional
+        return userAccounts.stream().findFirst();
     }
 
     @Override

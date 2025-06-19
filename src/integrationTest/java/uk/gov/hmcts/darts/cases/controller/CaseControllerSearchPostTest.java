@@ -503,10 +503,10 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchPostEndpointJudgeNameInactive() throws Exception {
-        user = dartsDatabase.getUserAccountStub().createJudgeUser();
+    void casesSearchPost_shouldReturn403Error_whenUserIsInactive() throws Exception {
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         user.setActive(false);
-        setupUserAccountAndSecurityGroup(swanseaCourthouse);
+        userAccountRepository.save(user);
 
         String requestBody = """
             {
@@ -521,8 +521,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
-            AuthorisationError.USER_DETAILS_INVALID.getType()));
-
+            AuthorisationError.USER_NOT_ACTIVE.getType()));
     }
 
     @Test

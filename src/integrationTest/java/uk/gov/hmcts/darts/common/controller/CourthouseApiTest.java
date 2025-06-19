@@ -289,7 +289,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
-    void courthousesGet_ThreeCourthousesAssignedToUserInactive() throws Exception {
+    void courthousesGet_shouldReturn403Error_whenUserInactive() throws Exception {
         String courthouseName = "courthousetest";
         UserAccountEntity userAccountEntity = userStub.createAuthorisedIntegrationTestUser(false, courthouseName);
         userAccountEntity.setActive(false);
@@ -300,7 +300,7 @@ class CourthouseApiTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
-            AuthorisationError.USER_DETAILS_INVALID.getType()));
+            AuthorisationError.USER_NOT_ACTIVE.getType()));
     }
 
     @Test
