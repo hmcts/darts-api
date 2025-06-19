@@ -114,7 +114,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     @Test
     void attachTranscript_shouldReturn403Error_whenUserDoesNotHavePermission() throws Exception {
-
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockMultipartFile transcript = new MockMultipartFile(
