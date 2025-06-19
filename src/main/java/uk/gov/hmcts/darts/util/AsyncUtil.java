@@ -45,11 +45,9 @@ public final class AsyncUtil {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         //Add authentication to each task as auth is thread local
         List<Callable<Void>> tasksWithAuth = tasks.stream()
-            .map(voidCallable -> {
-                return (Callable<Void>) () -> {
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    return voidCallable.call();
-                };
+            .map(voidCallable -> (Callable<Void>) () -> {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                return voidCallable.call();
             })
             .toList();
 

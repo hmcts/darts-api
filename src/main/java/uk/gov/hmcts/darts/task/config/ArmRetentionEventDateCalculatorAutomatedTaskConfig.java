@@ -9,5 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-public class ArmRetentionEventDateCalculatorAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
+public class ArmRetentionEventDateCalculatorAutomatedTaskConfig extends AbstractAsyncAutomatedTaskConfig {
 }
