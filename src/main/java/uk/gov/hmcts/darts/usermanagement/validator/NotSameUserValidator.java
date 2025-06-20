@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 
+import static java.util.Objects.nonNull;
+
 @Component
 @RequiredArgsConstructor
 public class NotSameUserValidator implements Validator<IdRequest<UserPatch, Integer>> {
@@ -17,12 +19,11 @@ public class NotSameUserValidator implements Validator<IdRequest<UserPatch, Inte
 
     @Override
     public void validate(IdRequest<UserPatch, Integer> userPatch) {
-        if (!(userPatch.getPayload().getActive() != null && !userPatch.getPayload().getActive())) {
-            return;
-        }
-        var currentUser = authorisationApi.getCurrentUser();
-        if (currentUser.getId().equals(userPatch.getId())) {
-            throw new DartsApiException(AuthorisationError.UNABLE_TO_DEACTIVATE_USER);
+        if (nonNull(userPatch.getPayload())) {
+            var currentUser = authorisationApi.getCurrentUser();
+            if (currentUser.getId().equals(userPatch.getId())) {
+                throw new DartsApiException(AuthorisationError.UNABLE_TO_DEACTIVATE_USER);
+            }
         }
     }
 }
