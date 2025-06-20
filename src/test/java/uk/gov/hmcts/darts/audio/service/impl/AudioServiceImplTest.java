@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -29,9 +30,12 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -190,5 +194,27 @@ class AudioServiceImplTest {
         audioService.setIsArchived(null, HEARING_ID);
 
         verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void getMediaEntitiesByHearingAndLowestChannel_shouldReturnEmptyListWhenNoMediaFound() {
+        doReturn(List.of()).when(mediaRepository).findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(HEARING_ID);
+        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
+        assertThat(mediaEntities).isEmpty();
+    }
+
+    @Test
+    void getMediaEntitiesByHearingAndLowestChannel_singleChannelGroupReturn_shouldReturnLowest() {
+        MediaEntity media1 = mock(MediaEntity.class);
+        MediaEntity media2 = mock(MediaEntity.class);
+
+        doReturn(List.of(media1, media2))
+            .when(mediaRepository).findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(HEARING_ID);
+
+        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(HEARING_ID);
+        assertThat(mediaEntities)
+            .hasSize(2)
+            .containsExactlyInAnyOrder(media1, media2);
+        verify(mediaRepository).findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(HEARING_ID);
     }
 }
