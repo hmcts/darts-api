@@ -8,8 +8,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
+import uk.gov.hmcts.darts.shutdown.GracefulShutdownHook;
 
 import java.util.TimeZone;
 
@@ -29,16 +32,24 @@ public class Application implements CommandLineRunner {
         log.info("Default TimeZone: {}", TimeZone.getDefault().getID());
     }
 
-    @SuppressWarnings({"PMD.CloseResource"})
+    @SuppressWarnings({
+        "PMD.CloseResource",
+        "PMD.DoNotUseThreads"//Required for shutdown hook
+    })
     public static void main(final String[] args) {
         final var application = new SpringApplication(Application.class);
-        final var instance = application.run(args);
+        application.setRegisterShutdownHook(false);
+
+        ConfigurableApplicationContext applicationContext = application.run(args);
+
+        Thread shutdownHookThread = new Thread(new GracefulShutdownHook((ServletWebServerApplicationContext) applicationContext));
+        shutdownHookThread.setName("GracefulShutdownHook");
+        Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 
         if (System.getenv("ATS_MODE") != null) {
             log.info("ATS_MODE found, closing instance");
-            instance.close();
+            System.exit(0);//Let the shutdown hooks do its job
         }
-
     }
 
     @Override

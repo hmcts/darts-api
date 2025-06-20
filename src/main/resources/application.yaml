@@ -112,6 +112,10 @@ spring:
             loggerLevel: ${FEIGN_LOG_LEVEL:none}
 
 darts:
+  async:
+    enabled: true
+  shutdown:
+    wait-time: ${GRACEFUL_SHUTDOWN_TIMEOUT:30s}
   manual-deletion:
     enabled: ${MANUAL_DELETION_ENABLED:false}
     grace-period: ${MANUAL_DELETION_GRACE_PERIOD:24h}
@@ -321,10 +325,24 @@ darts:
     allowed-extensions:
       - "docx"
       - "doc"
+      - "txt"
+      - "dot"
+      - "dotx"
+      - "pdf"
+      - "rtf"
+      - "zip"
+      - "odt"
     max-file-size: 10485760
     allowed-content-types:
       - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       - "application/msword"
+      - "text/plain"
+      - "application/vnd.openxmlformats-officedocument.wordprocessingml.template"
+      - "application/pdf"
+      - "application/rtf"
+      - "application/zip"
+      - "application/x-zip-compressed"
+      - "application/vnd.oasis.opendocument.text"
     max-created-by-duration: 30d
     search:
       max-result-size: 500
