@@ -63,7 +63,6 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
         // Root element
         Element root = document.createElement(ANNOTATION_ROOT_ELEMENT_NAME);
         document.appendChild(root);
-
         // Annotation element
         Element annotations = document.createElement(ANNOTATION_ANNOTATION_ELEMENT_NAME);
         root.appendChild(annotations);
