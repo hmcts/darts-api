@@ -29,6 +29,14 @@ This manual data fix applies to failed ARM objects so that they can be pushed ag
 
 Scripts available under following location [reset_status_for_failed_arm_objects.sql](../manual-data-fixes/002_failed_arm_jobs_reset_status/reset_status_for_failed_arm_objects.sql)
 
+## 003 - Reset failed ARM objects status
+This manual data fix applies to failed ARM objects so that they can be pushed again in next execution. This is done by updating the status to 14(ARM_RAW_DATA_FAILED_ and transfer_attempts to 1.
+During the CI/CD deployment to PROD, which restarted the pods, few of the ARM objects were moved to stale status as the execution stopped abruptly.
+
+**Fix applied date:**
+
+Scripts available under following location [reset_failed_arm_objects.sql](../manual-data-fixes/003_reset_failed_arm_objects/reset_failed_arm_objects.sql)
+
 
 
 
