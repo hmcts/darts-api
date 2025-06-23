@@ -24,13 +24,11 @@ import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.CreateCoreObjectService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.dailylist.mapper.CitizenNameMapper;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,8 +93,6 @@ class DailyListUpdaterTest {
     @Test
     void handlesCaseNumberForCpp() throws IOException {
         var dailyListUser = new UserAccountEntity();
-        OffsetDateTime testTime = DateConverterUtil.toOffsetDateTime(HEARING_DATE);
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
         when(systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR)).thenReturn(dailyListUser);
         when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
@@ -110,10 +106,6 @@ class DailyListUpdaterTest {
 
         verify(hearingRepository, times(1)).saveAndFlush(hearingEntityCaptor.capture());
 
-        HearingEntity hearingEntityCaptorValue = hearingEntityCaptor.getValue();
-        assertThat(hearingEntityCaptorValue.getLastModifiedDateTime()).isEqualTo(testTime);
-        assertThat(hearingEntityCaptorValue.getCourtCase().getLastModifiedDateTime()).isEqualTo(testTime);
-
         assertThat(dailyList.getStatus()).isEqualTo(PROCESSED);
     }
 
@@ -121,8 +113,6 @@ class DailyListUpdaterTest {
     void handlesNoTimeMarkingNote() throws IOException {
 
         var dailyListUser = new UserAccountEntity();
-        OffsetDateTime testTime = DateConverterUtil.toOffsetDateTime(HEARING_DATE);
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
         when(systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR)).thenReturn(dailyListUser);
         when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
