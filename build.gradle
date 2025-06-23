@@ -231,7 +231,6 @@ tasks.register('smoke', Test) {
 }
 
 checkstyle {
-  checkstyleMain.exclude '**/uk/gov/hmcts/darts/task/runner/dailylist/**'
   maxWarnings = 0
 }
 
