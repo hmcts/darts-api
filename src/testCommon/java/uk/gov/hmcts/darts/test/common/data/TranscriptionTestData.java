@@ -51,6 +51,8 @@ public final class TranscriptionTestData
     public TranscriptionStatusEntity someTranscriptionStatus() {
         var transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(REQUESTED.getId());
+        transcriptionStatus.setStatusType("REQUESTED");
+        transcriptionStatus.setDisplayName("Requested");
         return transcriptionStatus;
     }
 
