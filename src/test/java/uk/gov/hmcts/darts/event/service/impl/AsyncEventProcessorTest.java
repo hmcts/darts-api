@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -27,10 +28,11 @@ class AsyncEventProcessorTest {
     void processEvent_hasDuplicates() {
         when(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(any()))
             .thenReturn(true);
+        DartsEvent dartsEvent = new DartsEvent();
+        dartsEvent.setEventId("1");
+        asyncEventProcessor.processEvent(dartsEvent);
 
-        asyncEventProcessor.processEvent(1);
-
-        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(1);
+        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(dartsEvent);
         verify(cleanupCurrentFlagEventProcessor, never()).processEvent(any());
     }
 
@@ -39,9 +41,24 @@ class AsyncEventProcessorTest {
         when(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(any()))
             .thenReturn(false);
 
-        asyncEventProcessor.processEvent(1);
+        DartsEvent dartsEvent = new DartsEvent();
+        dartsEvent.setEventId("1");
+        asyncEventProcessor.processEvent(dartsEvent);
 
-        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(1);
+        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(dartsEvent);
         verify(cleanupCurrentFlagEventProcessor).processEvent(1);
+    }
+
+    @Test
+    void processEvent_noDuplicatesNullEventId() {
+        when(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(any()))
+            .thenReturn(false);
+
+        DartsEvent dartsEvent = new DartsEvent();
+        dartsEvent.setEventId(null);
+        asyncEventProcessor.processEvent(dartsEvent);
+
+        verify(removeDuplicateEventsProcessor).findAndRemoveDuplicateEvent(dartsEvent);
+        verify(cleanupCurrentFlagEventProcessor).processEvent(null);
     }
 }

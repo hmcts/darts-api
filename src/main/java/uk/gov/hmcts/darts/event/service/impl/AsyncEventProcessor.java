@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
 @Service
@@ -13,9 +15,9 @@ public class AsyncEventProcessor {
 
 
     @Async("eventTaskExecutor")
-    public void processEvent(Integer eventId) {
-        if (!removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(eventId)) {
-            cleanupCurrentFlagEventProcessor.processEvent(eventId);
+    public void processEvent(DartsEvent event) {
+        if (!removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(event)) {
+            cleanupCurrentFlagEventProcessor.processEvent(NumberUtils.createInteger(event.getEventId()));
         }
     }
 }

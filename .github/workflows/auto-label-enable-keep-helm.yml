@@ -15,6 +15,7 @@ jobs:
     permissions:
       pull-requests: write # Grant write permissions to PRs for adding labels
 
+    if: github.actor != 'renovate[bot]' # Add this condition to skip if the author is Renovate
     steps:
       - name: Add a specific label to all new PRs
         uses: actions/github-script@v6 # Use github-script for direct API interaction
