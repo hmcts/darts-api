@@ -111,7 +111,7 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void findTranscriptionForUserOnOrAfterDate_shouldReturnTranscriptions_whenLinkedHearing() {
+    void findTranscriptionForUserOnOrAfterDateWithOnOrAfterCreatedDateNull_shouldReturnTranscriptions_whenLinkedHearing() {
         setup();
         transcriptionEntityWithHearing = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder()
             .getBuilder()
@@ -124,6 +124,59 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
             List<TranscriptionEntity> transcriptionLst = transcriptionRepository
                 .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
                                                        null);
+            assertEquals(1, transcriptionLst.size());
+            assertEquals(transcriptionEntityWithHearing.getId(), transcriptionLst.getFirst().getId());
+            assertNotNull(transcriptionEntityWithHearing.getHearing().getHearingDate());
+            assertEquals(transcriptionEntityWithHearing.getId(), transcriptionLst.getFirst().getId());
+            assertTrue(transcriptionLst.getFirst().getIsManualTranscription());
+            assertEquals(WITH_TRANSCRIBER.getId(),
+                         transcriptionLst.getFirst().getTranscriptionStatus().getId());
+            assertEquals(transcriptionEntityWithHearing.getCourtCase().getCourthouse().getId(),
+                         transcriptionLst.getFirst().getCourtCase().getCourthouse().getId());
+            assertNotNull(transcriptionEntityWithHearing.getCreatedDateTime());
+        });
+    }
+
+    @Test
+    void findTranscriptionForUserOnOrAfterDateWithOnOrAfterCreatedDateNull_shouldReturnTranscriptions_whenLinkedCase() {
+        setup();
+        transcriptionEntityWithHearing = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .requestedBy(accountEntity)
+            .courtCases(List.of(courtCase))
+            .isManualTranscription(true)
+            .build().getEntity();
+        createTranscriptionWorkflow(accountEntity, OffsetDateTime.now(), WITH_TRANSCRIBER, transcriptionEntityWithHearing);
+        transactionalUtil.executeInTransaction(() -> {
+            List<TranscriptionEntity> transcriptionLst = transcriptionRepository
+                .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
+                                                       null);
+            assertEquals(1, transcriptionLst.size());
+            assertEquals(transcriptionEntityWithHearing.getId(), transcriptionLst.getFirst().getId());
+            assertEquals(transcriptionEntityWithHearing.getId(), transcriptionLst.getFirst().getId());
+            assertTrue(transcriptionLst.getFirst().getIsManualTranscription());
+            assertEquals(WITH_TRANSCRIBER.getId(),
+                         transcriptionLst.getFirst().getTranscriptionStatus().getId());
+            assertEquals(transcriptionEntityWithHearing.getCourtCase().getCourthouse().getId(),
+                         transcriptionLst.getFirst().getCourtCase().getCourthouse().getId());
+            assertNotNull(transcriptionEntityWithHearing.getCreatedDateTime());
+        });
+    }
+
+    @Test
+    void findTranscriptionForUserOnOrAfterDate_shouldReturnTranscriptions_whenLinkedHearing() {
+        setup();
+        transcriptionEntityWithHearing = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .requestedBy(accountEntity)
+            .hearings(List.of(headerEntity))
+            .isManualTranscription(true)
+            .build().getEntity();
+        createTranscriptionWorkflow(accountEntity, OffsetDateTime.now(), WITH_TRANSCRIBER, transcriptionEntityWithHearing);
+        transactionalUtil.executeInTransaction(() -> {
+            List<TranscriptionEntity> transcriptionLst = transcriptionRepository
+                .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
+                                                       transcriptionEntityWithHearing.getCreatedDateTime());
             assertEquals(1, transcriptionLst.size());
             assertEquals(transcriptionEntityWithHearing.getId(), transcriptionLst.getFirst().getId());
             assertNotNull(transcriptionEntityWithHearing.getHearing().getHearingDate());
@@ -150,70 +203,10 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
         transactionalUtil.executeInTransaction(() -> {
             List<TranscriptionEntity> transcriptionLst = transcriptionRepository
                 .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
-                                                       null);
-            assertEquals(1, transcriptionLst.size());
-            assertEquals(transcriptionEntityWithCase.getId(), transcriptionLst.getFirst().getId());
-            assertEquals(transcriptionEntityWithCase.getId(), transcriptionLst.getFirst().getId());
-            assertTrue(transcriptionLst.getFirst().getIsManualTranscription());
-            assertEquals(WITH_TRANSCRIBER.getId(),
-                         transcriptionLst.getFirst().getTranscriptionStatus().getId());
-            assertEquals(transcriptionEntityWithCase.getCourtCase().getCourthouse().getId(),
-                         transcriptionLst.getFirst().getCourtCase().getCourthouse().getId());
-            assertNotNull(transcriptionEntityWithCase.getCreatedDateTime());
-        });
-    }
-
-    @Test
-    void findTranscriptionForUserWithCreatedDateNowAndBeyond_shouldReturnTranscriptions_whenLinkedHearing() {
-        setup();
-        transcriptionEntityWithHearing = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder()
-            .getBuilder()
-            .requestedBy(accountEntity)
-            .hearings(List.of(headerEntity))
-            .isManualTranscription(true)
-            .build().getEntity();
-        createTranscriptionWorkflow(accountEntity, OffsetDateTime.now(), WITH_TRANSCRIBER, transcriptionEntityWithHearing);
-
-        transactionalUtil.executeInTransaction(() -> {
-            List<TranscriptionEntity> transcriptionLst = transcriptionRepository
-                .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
-                                                       transcriptionEntityWithHearing.getCreatedDateTime());
-            assertEquals(1, transcriptionLst.size());
-            assertEquals(transcriptionEntityWithHearing.getId(), transcriptionLst.getFirst().getId());
-            assertNotNull(transcriptionEntityWithHearing.getHearing().getHearingDate());
-            assertEquals(transcriptionEntityWithHearing.getId(), transcriptionLst.getFirst().getId());
-            assertTrue(transcriptionLst.getFirst().getIsManualTranscription());
-            assertEquals(transcriptionEntityWithHearing.getCourtCase().getCaseNumber(),
-                         transcriptionLst.getFirst().getCourtCase().getCaseNumber());
-            assertEquals(WITH_TRANSCRIBER.getId(),
-                         transcriptionLst.getFirst().getTranscriptionStatus().getId());
-            assertEquals(transcriptionEntityWithHearing.getCourtCase().getCourthouse().getId(),
-                         transcriptionLst.getFirst().getCourtCase().getCourthouse().getId());
-            assertNotNull(transcriptionEntityWithHearing.getCreatedDateTime());
-        });
-    }
-
-    @Test
-    void findTranscriptionForUserWithCreatedDateNowAndBeyond_shouldReturnTranscriptions_whenLinkedCase() {
-        setup();
-        transcriptionEntityWithCase = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder()
-            .getBuilder()
-            .requestedBy(accountEntity)
-            .courtCases(List.of(courtCase))
-            .isManualTranscription(true)
-            .build().getEntity();
-        createTranscriptionWorkflow(accountEntity, OffsetDateTime.now(), WITH_TRANSCRIBER, transcriptionEntityWithCase);
-
-        transactionalUtil.executeInTransaction(() -> {
-            List<TranscriptionEntity> transcriptionLst = transcriptionRepository
-                .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
                                                        transcriptionEntityWithCase.getCreatedDateTime());
             assertEquals(1, transcriptionLst.size());
             assertEquals(transcriptionEntityWithCase.getId(), transcriptionLst.getFirst().getId());
-            assertEquals(transcriptionEntityWithCase.getId(), transcriptionLst.getFirst().getId());
             assertTrue(transcriptionLst.getFirst().getIsManualTranscription());
-            assertEquals(transcriptionEntityWithCase.getCourtCase().getCaseNumber(),
-                         transcriptionLst.getFirst().getCourtCase().getCaseNumber());
             assertEquals(WITH_TRANSCRIBER.getId(),
                          transcriptionLst.getFirst().getTranscriptionStatus().getId());
             assertEquals(transcriptionEntityWithCase.getCourtCase().getCourthouse().getId(),
