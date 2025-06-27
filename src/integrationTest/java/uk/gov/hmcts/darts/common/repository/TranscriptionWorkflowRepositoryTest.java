@@ -111,7 +111,7 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void findTranscriptionForUserOnOrAfterDateWithOnOrAfterCreatedDateNull_shouldReturnTranscriptions_whenLinkedHearing() {
+    void findTranscriptionForUserOnOrAfterDate_shouldReturnTranscriptions_whenOnOrAfterCreatedDateNullAndLinkedHearing() {
         setup();
         transcriptionEntityWithHearing = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder()
             .getBuilder()
@@ -138,7 +138,7 @@ class TranscriptionWorkflowRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void findTranscriptionForUserOnOrAfterDateWithOnOrAfterCreatedDateNull_shouldReturnTranscriptions_whenLinkedCase() {
+    void findTranscriptionForUserOnOrAfterDate_shouldReturnTranscriptions_whenOnOrAfterCreatedDateNullAndLinkedCase() {
         setup();
         transcriptionEntityWithHearing = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder()
             .getBuilder()
