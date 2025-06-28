@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleElement;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -25,6 +24,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+//NOTE: When this class is edited it is important we manually test the outbound audio deletion process
+//This is because lazy loading errors are not be detected in integration tests
 public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterProcessor {
     private final UserAccountRepository userAccountRepository;
     private final LastAccessedDeletionDayCalculator deletionDayCalculator;
@@ -49,14 +50,14 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
             log.debug("No transformed media to be marked for deletion");
         } else {
             log.info("Found {} transformed media to be marked for deletion out of batch size {}", transformedMediaListIds.size(), batchSize);
-            Set<MediaRequestEntity> mediaRequests = new HashSet<>();
+            Set<Integer> mediaRequestIds = new HashSet<>();
             for (Integer transformedMediaId : transformedMediaListIds) {
-                MediaRequestEntity mediaRequest = transformedMediaEntityProcessor.process(transformedMediaId, deletedValues);
-                if (mediaRequest != null) {
-                    mediaRequests.add(mediaRequest);
+                Integer mediaRequestId = transformedMediaEntityProcessor.process(transformedMediaId, deletedValues);
+                if (mediaRequestId != null) {
+                    mediaRequestIds.add(mediaRequestId);
                 }
             }
-            mediaRequests.forEach(singleElementProcessor::markMediaRequestAsExpired);
+            mediaRequestIds.forEach(singleElementProcessor::markMediaRequestAsExpired);
         }
         return deletedValues;
     }
@@ -69,7 +70,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
 
         @Transactional
-        public MediaRequestEntity process(Integer transformedMediaId, List<TransientObjectDirectoryEntity> deletedValues) {
+        public Integer process(Integer transformedMediaId, List<TransientObjectDirectoryEntity> deletedValues) {
             try {
                 log.info("Processing transformed media {}", transformedMediaId);
                 Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
@@ -79,7 +80,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
                 }
                 TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
                 deletedValues.addAll(singleElementProcessor.markForDeletion(transformedMedia));
-                return transformedMedia.getMediaRequest();
+                return transformedMedia.getMediaRequest().getId();
             } catch (Exception exception) {
                 log.error("Unable to mark for deletion transformed media {}", transformedMediaId, exception);
             }
