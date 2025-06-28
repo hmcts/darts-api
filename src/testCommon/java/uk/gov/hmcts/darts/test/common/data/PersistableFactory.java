@@ -86,6 +86,10 @@ public final class PersistableFactory {
         return new EventTestData();
     }
 
+    public static NodeRegisterTestData getNodeRegisterTestData() {
+        return new NodeRegisterTestData();
+    }
+
     public static <T> T random(Class<T> clazz) {
         EasyRandomParameters parameters = new EasyRandomParameters()
             .randomize(Integer.class, new IntegerRangeRandomizer(1, 100))
