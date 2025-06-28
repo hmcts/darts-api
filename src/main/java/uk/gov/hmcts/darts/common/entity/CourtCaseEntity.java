@@ -31,11 +31,15 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = CourtCaseEntity.TABLE_NAME)
-@SuppressWarnings({"PMD.ShortClassName"})
+@SuppressWarnings({
+    "PMD.ShortClassName",
+    "PMD.CouplingBetweenObjects"//Database entities naturally have coupling
+})
 @Getter
 @Setter
 @Slf4j
@@ -133,6 +137,10 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
     @OneToMany(mappedBy = MediaLinkedCaseEntity_.COURT_CASE)
     private List<MediaLinkedCaseEntity> mediaLinkedCaseList = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = CaseDocumentEntity_.COURT_CASE)
+    private List<CaseDocumentEntity> caseDocumentEntities = new ArrayList<>();
+
     @Column(name = "is_data_anonymised")
     private boolean isDataAnonymised;
 
@@ -220,5 +228,52 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
         this.setDataAnonymised(true);
         this.setDataAnonymisedBy(userAccount.getId());
         this.setDataAnonymisedTs(OffsetDateTime.now());
+    }
+
+    public List<MediaEntity> getAllAssociatedMedias() {
+        List<MediaEntity> mediaList = new ArrayList<>();
+
+        // get all current media linked to the case
+        if (this.getHearings() != null) {
+            this.getHearings().stream()
+                .filter(Objects::nonNull)// Make sure each hearing returns non-null
+                .map(HearingEntity::getMedias)
+                .filter(Objects::nonNull)// Make sure HearingEntity::getMedias returns non-null
+                .flatMap(Set::stream)
+                .filter(Objects::nonNull)// Make sure each individual MediaEntity is non-null
+                .forEach(mediaList::add);
+        }
+
+        // get all media linked to the case via media linked case
+        if (this.getMediaLinkedCaseList() != null) {
+            this.getMediaLinkedCaseList().stream()
+                .filter(Objects::nonNull)// Make sure each media linked case returns non-null
+                .map(MediaLinkedCaseEntity::getMedia)
+                .filter(Objects::nonNull)// Make sure MediaLinkedCaseEntity::getMedia returns non-null
+                .forEach(mediaList::add);
+        }
+
+        // remove duplicates
+        return io.vavr.collection.List.ofAll(mediaList).distinctBy(MediaEntity::getId).toJavaList();
+    }
+
+    public List<AnnotationDocumentEntity> getAllAssociatedAnnotationDocuments() {
+        List<AnnotationDocumentEntity> annotationDocuments = new ArrayList<>();
+        if (this.getHearings() == null) {
+            return annotationDocuments;
+        }
+        return this.getHearings().stream()
+            //Map to annotations
+            .map(HearingEntity::getAnnotations)
+            .filter(Objects::nonNull)//Make sure HearingEntity::getAnnotations returns non-null
+            .flatMap(Set::stream)
+            .filter(Objects::nonNull)//Make sure each individual AnnotationEntity is non-null
+            //Map to annotation documents
+            .map(AnnotationEntity::getAnnotationDocuments)
+            .filter(Objects::nonNull) //Make sure AnnotationEntity::getAnnotationDocuments returns non-null
+            .flatMap(List::stream)
+            .filter(Objects::nonNull) //Make sure each individual AnnotationDocumentEntity is non-null
+            .distinct()
+            .toList();
     }
 }
