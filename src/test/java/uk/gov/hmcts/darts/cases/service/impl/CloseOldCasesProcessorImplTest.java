@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -42,6 +43,8 @@ class CloseOldCasesProcessorImplTest {
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
     @Mock
+    private FindCurrentEntitiesHelper findCurrentEntitiesHelper;
+    @Mock
     private RetentionApi retentionApi;
     @Mock
     private RetentionDateHelper retentionDateHelper;
@@ -66,7 +69,8 @@ class CloseOldCasesProcessorImplTest {
             caseService,
             caseRetentionRepository,
             retentionApi,
-            retentionDateHelper
+            retentionDateHelper,
+            findCurrentEntitiesHelper
         );
 
         closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseProcessor, caseRepository, authorisationApi);

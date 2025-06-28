@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -28,7 +29,6 @@ import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +78,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         private final CaseRetentionRepository caseRetentionRepository;
         private final RetentionApi retentionApi;
         private final RetentionDateHelper retentionDateHelper;
+        private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
 
         @Value("#{'${darts.retention.close-events}'.split(',')}")
         private List<String> closeEvents;
@@ -88,11 +89,8 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             CourtCaseEntity courtCase = caseService.getCourtCaseById(courtCaseId);
 
 
-            log.debug("About to close court case id {}", courtCase.getId());
-            List<EventEntity> eventList = new ArrayList<>();
-            for (HearingEntity hearingEntity : courtCase.getHearings()) {
-                eventList.addAll(hearingEntity.getEvents());
-            }
+            log.info("About to close court case id {}", courtCase.getId());
+            List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
             if (CollectionUtils.isNotEmpty(eventList)) {
                 eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
                 //find latest closed event
@@ -113,10 +111,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                                              userAccount);
             } else {
                 //look for the last audio and use its recorded date
-                List<MediaEntity> mediaList = new ArrayList<>();
-                for (HearingEntity hearingEntity : courtCase.getHearings()) {
-                    mediaList.addAll(hearingEntity.getMedias());
-                }
+                List<MediaEntity> mediaList = findCurrentEntitiesHelper.getCurrentMedia(courtCase);
                 if (mediaList.isEmpty()) {
                     //look for the last hearing date and use that
                     courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
