@@ -78,7 +78,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     }
 
     @Test
-    void caseHearingsGetEndpointShouldReturnForbidden() throws Exception {
+    void caseHearingsGet_shouldReturn401Error_whenUserNotFound() throws Exception {
         Mockito.reset(authentication);
 
         // a user that does not exist in the db
@@ -90,12 +90,12 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isUnauthorized()).andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -252,7 +252,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
-            AuthorisationError.USER_DETAILS_INVALID.getType()));
+            AuthorisationError.USER_NOT_ACTIVE.getType()));
     }
 
 }
