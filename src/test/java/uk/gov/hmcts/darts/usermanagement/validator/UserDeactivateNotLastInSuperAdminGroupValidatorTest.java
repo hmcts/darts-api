@@ -20,7 +20,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
     private final UserDeactivateNotLastInSuperAdminGroupValidator userDeactivateNotLastSuperAdminValidator;
 
-    SecurityGroupRepository repository;
+    private final SecurityGroupRepository repository;
 
     public UserDeactivateNotLastInSuperAdminGroupValidatorTest() {
         repository = Mockito.mock(SecurityGroupRepository.class);
@@ -28,7 +28,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
     }
 
     @Test
-    void deactivateUserLastSuperAdmin() throws Exception {
+    void deactivateUserLastSuperAdmin() {
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         Mockito.when(repository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
 
@@ -50,7 +50,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
     }
 
     @Test
-    void deactivateUserNotLastSuperAdmin() throws Exception {
+    void deactivateUserNotLastSuperAdmin() {
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         Mockito.when(repository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
 
@@ -71,7 +71,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
     }
 
     @Test
-    void validateSuccessActivate() throws Exception {
+    void validateSuccessActivate() {
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         Mockito.when(repository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
 
