@@ -184,10 +184,10 @@ class ArmRpoServiceImplTest {
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity2);
         Page<ExternalObjectDirectoryEntity> pagedEods = new PageImpl<>(externalObjectDirectoryEntities);
 
-        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
+        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2025-02-02T12:34:56Z"));
         when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
-        when(externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(any(), any(), any(), any()))
+        when(externalObjectDirectoryRepository.findByStatusAndDataIngestionTsWithPaging(any(), any(), any(), any()))
             .thenReturn(pagedEods);
 
         File file = TestUtils.getFile("Tests/arm/rpo/armRpoCsvData.csv");
@@ -199,10 +199,10 @@ class ArmRpoServiceImplTest {
         assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
         assertEquals(EodHelper.armReplayStatus(), externalObjectDirectoryEntity2.getStatus());
 
-        verify(externalObjectDirectoryRepository).findByStatusAndInputUploadProcessedTsWithPaging(
+        verify(externalObjectDirectoryRepository).findByStatusAndDataIngestionTsWithPaging(
             eq(EodHelper.armRpoPendingStatus()),
-            eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_END_HOUR)),
-            eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_START_HOUR)),
+            eq(OffsetDateTime.parse("2025-01-31T11:34Z")),
+            eq(OffsetDateTime.parse("2025-02-01T11:34Z")),
             any());
         verify(externalObjectDirectoryRepository).saveAllAndFlush(externalObjectDirectoryEntities);
     }
@@ -212,7 +212,7 @@ class ArmRpoServiceImplTest {
         // given
         createExternalObjectDirectoryEntity(1L);
 
-        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
+        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2025-01-02T12:34:56Z"));
         when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
         File file = new File("Tests/arm/rpo/noFile.csv");
