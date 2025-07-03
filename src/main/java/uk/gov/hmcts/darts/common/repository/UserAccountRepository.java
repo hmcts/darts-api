@@ -40,16 +40,6 @@ public interface UserAccountRepository extends
     List<UserAccountEntity> findByRoleAndCourthouse(int securityRole, CourthouseEntity courthouse, Set<UserAccountEntity> excludingUsers);
 
     @Query("""
-        SELECT userAccount
-        FROM UserAccountEntity userAccount
-        WHERE userAccount.active = true
-        AND userAccount.isSystemUser = true
-        AND userAccount.accountGuid = :uuid
-        """)
-    UserAccountEntity findSystemUser(String uuid);
-
-
-    @Query("""
         SELECT DISTINCT userAccount
         FROM UserAccountEntity userAccount
         JOIN userAccount.securityGroupEntities securityGroup
@@ -73,6 +63,8 @@ public interface UserAccountRepository extends
     Optional<UserAccountEntity> findByRoleAndUserId(Integer securityRoleId, Integer userId);
 
     List<UserAccountEntity> findByEmailAddressIgnoreCaseAndActive(String emailAddress, Boolean active);
+
+    List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
     @Modifying
     @Query("""
