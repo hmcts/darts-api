@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.controller;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
@@ -104,11 +105,11 @@ class EventsControllerPostEventsTest extends IntegrationBase {
                 .filter(eventEntity -> "ActiveTestType".equals(eventEntity.getEventType().getType()))
                 .toList();
 
-            Assertions.assertEquals(1, results.size());
+            assertEquals(1, results.size());
             EventEntity persistedEvent = results.getFirst();
 
             EventHandlerEntity eventType = persistedEvent.getEventType();
-            Assertions.assertEquals("New Description", eventType.getEventName());
+            assertEquals("New Description", eventType.getEventName());
         });
     }
 
@@ -148,7 +149,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         String content = response.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
-        Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
+        assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
     @Test
@@ -184,7 +185,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
             .toList();
 
-        Assertions.assertEquals(1, results.size());
+        assertEquals(1, results.size());
     }
 
     @Test
@@ -221,9 +222,9 @@ class EventsControllerPostEventsTest extends IntegrationBase {
                 .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
                 .toList();
 
-            Assertions.assertEquals(1, results.size());
-            Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
-            Assertions.assertEquals("12309", results.getFirst().getEventType().getSubType());
+            assertEquals(1, results.size());
+            assertEquals("40750", results.getFirst().getEventType().getType());
+            assertEquals("12309", results.getFirst().getEventType().getSubType());
         });
     }
 
@@ -261,12 +262,12 @@ class EventsControllerPostEventsTest extends IntegrationBase {
                 .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
                 .toList();
 
-            Assertions.assertEquals(1, results.size());
-            Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
-            Assertions.assertNull(results.getFirst().getEventType().getSubType());
+            assertEquals(1, results.size());
+            assertEquals("40750", results.getFirst().getEventType().getType());
+            assertNull(results.getFirst().getEventType().getSubType());
         });
     }
-
+    
     private static EventHandlerEntity getActiveHandler() {
         var activeHandler = getHandlerWithDefaults();
         activeHandler.setActive(true);
