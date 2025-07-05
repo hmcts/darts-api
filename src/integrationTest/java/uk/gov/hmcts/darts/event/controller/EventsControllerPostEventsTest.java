@@ -269,7 +269,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     }
 
     @Test
-    void eventTypeWithCorrectSubType_WithRetention() throws Exception {
+    void postEvent_shouldCreateEventTypeWithCorrectTypeSubTypeAndRetention() throws Exception {
         CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
 
         var courtCase = dartsDatabase.createCase(courthouse.getCourthouseName(), "CASENUMBER");
