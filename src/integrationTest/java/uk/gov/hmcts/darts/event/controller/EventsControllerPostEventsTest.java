@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
@@ -207,7 +208,6 @@ class EventsControllerPostEventsTest extends IntegrationBase {
               "date_time": "2023-06-14T08:37:30.945Z"
             }""";
 
-
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
             .content(requestBody);
@@ -267,7 +267,55 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             assertNull(results.getFirst().getEventType().getSubType());
         });
     }
-    
+
+    @Test
+    void eventTypeWithCorrectSubType_WithRetention() throws Exception {
+        CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
+
+        var courtCase = dartsDatabase.createCase(courthouse.getCourthouseName(), "CASENUMBER");
+
+        String requestBody = """
+            {
+              "message_id": "Archive Case",
+              "type": "40750",
+              "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "case_numbers": [
+                "CASENUMBER"
+              ],
+              "retention_policy": {
+                  "case_retention_fixed_policy": "3",
+                  "case_total_sentence": "9Y0M0D"
+              },
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(requestBody);
+
+        setupExternalUserForCourthouse(courthouse);
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(MockMvcResultMatchers.status().isCreated());
+        transactionalUtil.executeInTransaction(() -> {
+            List<EventEntity> results = dartsDatabase.getAllEvents()
+                .stream()
+                .filter(eventEntity -> "Archive Case".equals(eventEntity.getMessageId()))
+                .toList();
+
+            assertEquals(1, results.size());
+            assertEquals("40750", results.getFirst().getEventType().getType());
+            assertNull(results.getFirst().getEventType().getSubType());
+
+            var caseRetentionEntitiesIds = dartsDatabase.getCaseManagementRetentionRepository().getIdsForEvents(List.of(results.getFirst().getId()));
+            assertEquals(1, caseRetentionEntitiesIds.size());
+            var caseRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findById(caseRetentionEntitiesIds.getFirst());
+            assertThat(caseRetentionEntities.get().getCourtCase().getId()).isEqualTo(courtCase.getId());
+
+        });
+    }
+
     private static EventHandlerEntity getActiveHandler() {
         var activeHandler = getHandlerWithDefaults();
         activeHandler.setActive(true);
