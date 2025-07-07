@@ -419,7 +419,7 @@ darts:
           at-least-for: PT1M
           at-most-for: PT90M
       dets-to-arm:
-        threads: 20
+        threads: 50
         system-user-email: system_DetsToArm@hmcts.net
         lock:
           at-least-for: PT1M
