@@ -224,7 +224,7 @@ class StandardEventHandlerTest extends HandlerTestData {
         "40754",
         "40755"
     })
-    void givenStandardEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenUpdateRetention(String eventType) {
+    void receive_shouldUpdateRetention_WhereStandardEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged(String eventType) {
 
         var retentionPolicy = new DartsEventRetentionPolicy();
         retentionPolicy.setCaseRetentionFixedPolicy(RetentionPolicyEnum.DEFAULT.getPolicyKey());
