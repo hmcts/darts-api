@@ -20,12 +20,12 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
         """)
     List<TransientObjectDirectoryEntity> findByTransformedMediaId(Integer transformedMediaId);
 
+    //Join required to ensure transient media is loaded into session
     @Query("""
         SELECT tod FROM TransientObjectDirectoryEntity tod
         LEFT JOIN FETCH tod.transformedMedia         
         WHERE tod.status = :status
         """)
-    //Join required to ensure transient media is loaded into session
     List<TransientObjectDirectoryEntity> findByStatus(ObjectRecordStatusEntity status, Limit limit);
 
 
@@ -35,6 +35,6 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
                where tm is null or tm.expiryTime < :maxExpiryTime 
                and tod.status.id = :statusId 
         """)
-    List<TransientObjectDirectoryEntity> findByTransformedMediaIsNullOrExpirtyBeforeMaxExpiryTime(
+    List<TransientObjectDirectoryEntity> findByTransformedMediaIsNullOrExpiryBeforeMaxExpiryTime(
         OffsetDateTime maxExpiryTime, Integer statusId, Limit limit);
 }
