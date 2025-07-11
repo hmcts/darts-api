@@ -49,9 +49,14 @@ public class ExternalOutboundDataStoreDeleterWithBuffer extends ExternalOutbound
         OffsetDateTime maxTimeToDelete = currentTimeHelper.currentOffsetDateTime().minus(transientObjectDirectoryDeleteBuffer);
 
         Collection<TransientObjectDirectoryEntity> expiredTransientObjectDirectoryEntities =
-            this.getRepository().findByTransformedMediaIsNullOrExpirtyBeforeMaxExpiryTime(maxTimeToDelete,
-                                                                                          ObjectRecordStatusEnum.DATASTORE_DELETED.getId(),
-                                                                                          Limit.of(batchSize));
+            this.getRepository().findByTransformedMediaIsNullOrExpiryBeforeMaxExpiryTime(maxTimeToDelete,
+                                                                                         ObjectRecordStatusEnum.DATASTORE_DELETED.getId(),
+                                                                                         Limit.of(batchSize));
+
+        if (expiredTransientObjectDirectoryEntities.isEmpty()) {
+            log.info("No expired transient object directories found older than {}. Nothing to delete.", maxTimeToDelete);
+            return;
+        }
 
         if (log.isInfoEnabled()) {
             log.info("Deleting {} expired transient object directories older than {}. Ids: {}",
@@ -65,8 +70,9 @@ public class ExternalOutboundDataStoreDeleterWithBuffer extends ExternalOutbound
             .map(TransientObjectDirectoryEntity::getTransformedMedia)
             .filter(Objects::nonNull)
             .toList();
-        transformedMediaRepository.deleteAll(transformedMediaEntityList);
+
         this.getRepository().deleteAll(expiredTransientObjectDirectoryEntities);
+        transformedMediaRepository.deleteAll(transformedMediaEntityList);
     }
 
     @Override
