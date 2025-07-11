@@ -16,7 +16,7 @@ public interface UserManagementService {
 
     List<UserWithIdAndTimestamps> search(UserSearch userSearch);
 
-    List<UserWithIdAndTimestamps> getUsers(String emailAddress, List<Integer> userIds);
+    List<UserWithIdAndTimestamps> getUsers(boolean includeSystemUsers, String emailAddress, List<Integer> userIds);
 
     UserWithIdAndTimestamps getUserById(Integer userId);
 
