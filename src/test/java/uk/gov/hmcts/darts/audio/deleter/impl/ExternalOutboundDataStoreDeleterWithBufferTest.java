@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalOutboundDataStoreDeleterWithBufferTest {
+
     private static final Duration BUFFER_DURATION = Duration.ofDays(90);
 
     @Mock
@@ -116,35 +117,32 @@ class ExternalOutboundDataStoreDeleterWithBufferTest {
         verify(transientObjectDirectoryRepository)
             .findByStatus(eodHelperMocks.getMarkForDeletionStatus(), Limit.of(10));
 
-        //Checl the status update is saved
-        verify(transientObjectDirectoryRepository)
-            .save(outboundData.get(0));
-        verify(transientObjectDirectoryRepository)
-            .save(outboundData.get(1));
+        //Check the status update is saved
+        verify(transientObjectDirectoryRepository).save(outboundData.get(0));
+        verify(transientObjectDirectoryRepository).save(outboundData.get(1));
         verifyNoMoreInteractions(transientObjectDirectoryRepository, transformedMediaRepository);
     }
-
 
     @Test
     void deleteExpiredTransientObjectEntities_shouldDeleteBothTransformedMediaAndTransientObjectDirectories() {
         //Given
         List<TransientObjectDirectoryEntity> expiredEntities = new ArrayList<>(createTransientObjectDirectoryEntities());
 
-        //Add an entry with a null transformed media to ensure it does not exception
+        // Add an entry with a null transformed media to ensure it does not exception
         TransientObjectDirectoryEntity transientObjectDirectoryEntity3 = new TransientObjectDirectoryEntity();
-        transientObjectDirectoryEntity3.setId(5L);//Esures equality checks are unique
+        transientObjectDirectoryEntity3.setId(5L); // Ensures equality checks are unique
 
         expiredEntities.add(transientObjectDirectoryEntity3);
 
         doReturn(expiredEntities).when(transientObjectDirectoryRepository)
-            .findByTransformedMediaIsNullOrExpirtyBeforeMaxExpiryTime(any(), any(), any());
+            .findByTransformedMediaIsNullOrExpiryBeforeMaxExpiryTime(any(), any(), any());
 
         //When
         deleter.deleteExpiredTransientObjectEntities(10);
 
         //Then
         verify(transientObjectDirectoryRepository)
-            .findByTransformedMediaIsNullOrExpirtyBeforeMaxExpiryTime(
+            .findByTransformedMediaIsNullOrExpiryBeforeMaxExpiryTime(
                 currentTime.minus(BUFFER_DURATION),
                 ObjectRecordStatusEnum.DATASTORE_DELETED.getId(),
                 Limit.of(10)
