@@ -87,7 +87,7 @@ public class AudioController implements AudioApi {
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
-        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndChannel(hearingId, 1);
+        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndLowestChannel(hearingId);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
         audioService.setIsArchived(audioMetadata, hearingId);
         audioService.setIsAvailable(audioMetadata);

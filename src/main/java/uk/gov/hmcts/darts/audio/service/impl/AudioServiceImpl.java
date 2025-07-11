@@ -54,8 +54,8 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public List<MediaEntity> getMediaEntitiesByHearingAndChannel(Integer hearingId, Integer channel) {
-        return mediaRepository.findAllByHearingIdAndChannelAndIsCurrentTrue(hearingId, channel);
+    public List<MediaEntity> getMediaEntitiesByHearingAndLowestChannel(Integer hearingId) {
+        return mediaRepository.findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(hearingId);
     }
 
     @Override
@@ -95,11 +95,8 @@ public class AudioServiceImpl implements AudioService {
                 audioBeingProcessedFromArchiveQuery.getResults(hearingId);
 
             for (AudioMetadata audioMetadataItem : audioMetadata) {
-                if (isMediaArchived(audioMetadataItem, archivedArmRecords)) {
-                    audioMetadataItem.setIsArchived(true);
-                } else {
-                    audioMetadataItem.setIsArchived(false);
-                }
+                boolean isArchived = isMediaArchived(audioMetadataItem, archivedArmRecords);
+                audioMetadataItem.setIsArchived(isArchived);
             }
         }
     }
