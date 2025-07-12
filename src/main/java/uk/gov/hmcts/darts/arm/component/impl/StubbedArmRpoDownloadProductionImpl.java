@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
+import uk.gov.hmcts.darts.util.DateTimeHelper;
 
 import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
@@ -45,10 +46,10 @@ public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduc
         int rpoCsvEndHour = armAutomatedTaskEntity.getRpoCsvEndHour();
 
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
-        OffsetDateTime executionDateTime = armRpoExecutionDetailEntity.getCreatedDateTime();
+        OffsetDateTime executionDateTime = DateTimeHelper.floorToMinutes(armRpoExecutionDetailEntity.getCreatedDateTime());
 
         Limit limit = Limit.of(MAX_EOD_RECORDS);
-        var eods = externalObjectDirectoryRepository.findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
+        var eods = externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
             EodHelper.armRpoPendingStatus(),
             executionDateTime.minusHours(rpoCsvEndHour),
             executionDateTime.minusHours(rpoCsvStartHour),
