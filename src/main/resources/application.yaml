@@ -82,7 +82,7 @@ spring:
       maximum-pool-size: ${DARTS_API_DB_POOL_SIZE:50}
   jpa:
     database: postgresql
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: none
     properties:
