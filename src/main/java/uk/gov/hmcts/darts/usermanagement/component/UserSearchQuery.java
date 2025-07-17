@@ -7,6 +7,6 @@ import java.util.List;
 @FunctionalInterface
 public interface UserSearchQuery {
 
-    List<UserAccountEntity> getUsers(String fullName, String emailAddress, Boolean active);
+    List<UserAccountEntity> getUsers(boolean includeSystemUsers, String fullName, String emailAddress, Boolean active);
 
 }

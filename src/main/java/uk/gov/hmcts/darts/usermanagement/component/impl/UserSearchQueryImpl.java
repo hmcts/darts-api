@@ -29,7 +29,7 @@ public class UserSearchQueryImpl implements UserSearchQuery {
     private final EntityManager em;
 
     @Override
-    public List<UserAccountEntity> getUsers(String fullName, String emailAddress, Boolean active) {
+    public List<UserAccountEntity> getUsers(boolean includeSystemUsers, String fullName, String emailAddress, Boolean active) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<UserAccountEntity> criteriaQuery = criteriaBuilder.createQuery(UserAccountEntity.class);
 
@@ -37,7 +37,9 @@ public class UserSearchQueryImpl implements UserSearchQuery {
         criteriaQuery.select(root);
 
         List<Predicate> wherePredicates = new ArrayList<>();
-        wherePredicates.add(criteriaBuilder.isFalse(root.get(UserAccountEntity_.isSystemUser)));
+        if (!includeSystemUsers) {
+            wherePredicates.add(criteriaBuilder.isFalse(root.get(UserAccountEntity_.isSystemUser)));
+        }
         ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
         ParameterExpression<String> paramFullName = criteriaBuilder.parameter(String.class);
         ParameterExpression<Boolean> paramActive = criteriaBuilder.parameter(Boolean.class);

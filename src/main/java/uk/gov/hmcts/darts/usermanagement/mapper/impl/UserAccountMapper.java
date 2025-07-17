@@ -27,6 +27,7 @@ public interface UserAccountMapper {
     String CREATED_AT = "createdAt";
     String CREATED_DATE_TIME = "createdDateTime";
     String ID = "id";
+    String IS_SYSTEM_USER = "isSystemUser";
 
     @Mappings({
         @Mapping(source = FULL_NAME, target = USER_FULL_NAME),
@@ -53,7 +54,8 @@ public interface UserAccountMapper {
         @Mapping(source = ACTIVE, target = ACTIVE),
         @Mapping(source = LAST_LOGIN_TIME, target = LAST_LOGIN_AT),
         @Mapping(source = LAST_MODIFIED_DATE_TIME, target = LAST_MODIFIED_AT),
-        @Mapping(source = CREATED_DATE_TIME, target = CREATED_AT)
+        @Mapping(source = CREATED_DATE_TIME, target = CREATED_AT),
+        @Mapping(source = IS_SYSTEM_USER, target = IS_SYSTEM_USER)
     })
     UserWithIdAndTimestamps mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
 
