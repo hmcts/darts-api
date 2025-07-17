@@ -1,7 +1,10 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,6 +44,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -90,6 +94,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.task.runner.HasId;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.builder.DbInsertable;
@@ -728,6 +733,11 @@ public class DartsPersistence {
     }
 
     @Transactional
+    public void saveAll(EventEntity... events) {
+        stream(events).forEach(this::save);
+    }
+
+    @Transactional
     public void saveAll(AnnotationDocumentEntity... annotationDocuments) {
         stream(annotationDocuments).forEach(this::save);
     }
@@ -881,7 +891,6 @@ public class DartsPersistence {
         return refresh(judge, userAccountRepository);
     }
 
-
     public CaseRetentionEntity refresh(CaseRetentionEntity caseRetentionEntity) {
         return refresh(caseRetentionEntity, caseRetentionRepository);
     }
@@ -900,5 +909,24 @@ public class DartsPersistence {
             .setParameter("lastModifiedDate", lastModifiedDate)
             .setParameter("id", mediaRequestEntity.getId())
             .executeUpdate();
+    }
+
+    @Transactional
+    public <T extends HasId<?> & CreatedBy> void updateCreatedBy(T object, OffsetDateTime createdDateTime) {
+        Table table = object.getClass().getAnnotation(Table.class);
+
+        entityManager.createNativeQuery("UPDATE darts." + table.name() + " set created_ts = ? where " + getIdColumnName(object) + " = ?")
+            .setParameter(1, createdDateTime)
+            .setParameter(2, object.getId())
+            .executeUpdate();
+    }
+
+    private String getIdColumnName(HasId<?> object) {
+        return stream(object.getClass().getDeclaredFields())
+            .filter(field -> field.getAnnotation(Id.class) != null)
+            .map(field -> field.getAnnotation(Column.class))
+            .findFirst()
+            .orElseThrow()
+            .name();
     }
 }
