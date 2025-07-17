@@ -87,6 +87,26 @@ paths:
                 type: "COMMON_100"
                 title: "Courthouse 'SWANSEA1' not found."
                 status: 400
+  /admin/node-register-management:
+    get:
+      tags:
+        - Devices
+      summary: Get node registration details
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetNodeRegisterManagementResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 components:
   schemas:
     PostNodeRegistrationResponse:
@@ -96,6 +116,45 @@ components:
           description: ID of the registered device.
           type: integer
           example: 42
+
+    GetNodeRegisterManagementResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The node id'
+        courthouse:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: 'The courthouse id'
+            display_name:
+              type: string
+              description: 'The courthouse display name'
+        courtroom:
+          type: object
+          description: 'The courtroom related details'
+          properties:
+            id:
+              type: integer
+              description: 'The courtroom id'
+            name:
+              type: string
+              description: 'The courtroom display name'
+        ip_address:
+          type: string
+        hostname:
+          type: string
+        mac_address:
+          type: string
+        node_type:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: integer
 
     NoDeregistrationErrorCode:
       type: string
