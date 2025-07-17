@@ -478,7 +478,7 @@ dependencies {
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.1'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.20.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.20.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.21.Final'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
   implementation 'com.querydsl:querydsl-core:5.1.0'
