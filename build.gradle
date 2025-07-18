@@ -544,7 +544,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.2.6') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.2.8') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }
