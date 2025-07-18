@@ -53,6 +53,8 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
             hearingAndEvent.getHearingEntity().getCourtCase(),
             dartsEvent.getRetentionPolicy());
 
+        closeCase(dartsEvent, courtCase);
+
         Optional<CaseRetentionEntity> latestCompletedManualRetention = caseRetentionRepository.findLatestCompletedManualRetention(courtCase);
         if (latestCompletedManualRetention.isPresent()) {
             log.info("Ignoring retention for event with id {} because there is an existing manual retention for caseId {}.",
@@ -65,8 +67,6 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
             dartsEvent.getRetentionPolicy().getCaseRetentionFixedPolicy())) {
             dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);
         }
-
-        closeCase(dartsEvent, courtCase);
 
         Optional<PendingRetention> latestPendingRetentionOpt = caseRetentionRepository.findLatestPendingRetention(courtCase);
         if (latestPendingRetentionOpt.isEmpty()) {
