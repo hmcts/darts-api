@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.mapper.EventHandlerMapper;
 import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
@@ -43,6 +44,7 @@ import static org.mockito.Mockito.when;
 class EventMappingServiceImplTest {
 
     private static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 5, 01, 10, 0, 0, 0, ZoneOffset.UTC);
+    private static final Integer EVENT_HANDLER_ID = 123;
     @Mock
     EventHandlerRepository eventHandlerRepository;
 
@@ -102,6 +104,8 @@ class EventMappingServiceImplTest {
     @Test
     void handleRequestToSaveRevisionToEventMappingAndMakePreviousRevisionInactive() {
         setupHandlers();
+        eventHandlerEntity.setId(EVENT_HANDLER_ID);
+        eventMapping.setId(EVENT_HANDLER_ID);
         when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
         when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
 
@@ -143,7 +147,9 @@ class EventMappingServiceImplTest {
 
     @Test
     void handleRequestToSaveEventMappingForHandlerMappingThatAlreadyExistsAndIsRevisionFalse() {
+        setupHandlers();
         when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
+        when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
 
         var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, false));
 
@@ -155,7 +161,9 @@ class EventMappingServiceImplTest {
 
     @Test
     void handleRequestToSaveEventMappingForHandlerMappingThatDoesNotAlreadyExistsAndIsRevisionTrue() {
+        setupHandlers();
         when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(null);
+        when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
 
         var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, true));
 
@@ -163,6 +171,23 @@ class EventMappingServiceImplTest {
             "Event handler mapping does not exist for type: 12345 and subtype: 9876.",
             exception.getDetail()
         );
+    }
+
+    @Test
+    void postEventMapping_shouldError_whenEventHandlerIsInactive() {
+        setupHandlers();
+        eventHandlerEntity.setId(EVENT_HANDLER_ID + 1);
+        eventMapping.setId(EVENT_HANDLER_ID);//Have a different ID to the active mapping
+        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
+        when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
+
+        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, true));
+
+        assertEquals(
+            "Event handler mapping " + EVENT_HANDLER_ID + " cannot be updated because it is inactive.",
+            exception.getDetail()
+        );
+        assertEquals(EventError.EVENT_HANDLER_MAPPING_INACTIVE_UPDATED, exception.getError());
     }
 
     @Test

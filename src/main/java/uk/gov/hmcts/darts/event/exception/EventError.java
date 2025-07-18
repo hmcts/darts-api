@@ -37,10 +37,16 @@ public enum EventError implements DartsApiError {
         HttpStatus.UNPROCESSABLE_ENTITY,
         EventTitleErrors.INVALID_HANDLER_MAPPING_NAME.toString()
     ),
-    EVENT_HANDLER_MAPPING_INACTIVE(
+    EVENT_HANDLER_MAPPING_INACTIVE_DELETED(
         EventErrorCode.MAPPING_INACTIVE.getValue(),
         HttpStatus.CONFLICT,
-        EventTitleErrors.MAPPING_INACTIVE.toString(),
+        EventTitleErrors.MAPPING_INACTIVE_DELETED.toString(),
+        false
+    ),
+    EVENT_HANDLER_MAPPING_INACTIVE_UPDATED(
+        EventErrorCode.MAPPING_INACTIVE.getValue(),
+        HttpStatus.CONFLICT,
+        EventTitleErrors.MAPPING_INACTIVE_UPDATED.toString(),
         false
     ),
     EVENT_HANDLER_MAPPING_IN_USE(
