@@ -25,7 +25,7 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
     @MockitoBean
     private UserIdentity mockUserIdentity;
-    
+
     @Autowired
     private GenerateCaseDocumentProcessor generateCaseDocumentProcessor;
 
@@ -90,26 +90,25 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         generateCaseDocumentProcessor.processGenerateCaseDocument(2);
 
         // then
-        CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().findById(matchingCase1.getId()).get();
-        assertTrue("", courtCaseEntity1.isRetentionUpdated());
-        assertEquals(0, courtCaseEntity1.getRetentionRetries());
-        List<CaseDocumentEntity> caseDocumentEntities1 =
-            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity1);
-        assertEquals(1, caseDocumentEntities1.size());
+        transactionalUtil.executeInTransaction(() -> {
+            CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().findById(matchingCase1.getId()).get();
+            assertTrue("", courtCaseEntity1.isRetentionUpdated());
+            assertEquals(0, courtCaseEntity1.getRetentionRetries());
+            List<CaseDocumentEntity> caseDocumentEntities1 = courtCaseEntity1.getCaseDocumentEntities();
+            assertEquals(1, caseDocumentEntities1.size());
 
-        CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().findById(matchingCase2.getId()).get();
-        assertTrue("", courtCaseEntity2.isRetentionUpdated());
-        assertEquals(0, courtCaseEntity2.getRetentionRetries());
-        List<CaseDocumentEntity> caseDocumentEntities2 =
-            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity2);
-        assertEquals(1, caseDocumentEntities2.size());
+            CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().findById(matchingCase2.getId()).get();
+            assertTrue("", courtCaseEntity2.isRetentionUpdated());
+            assertEquals(0, courtCaseEntity2.getRetentionRetries());
+            List<CaseDocumentEntity> caseDocumentEntities2 = courtCaseEntity2.getCaseDocumentEntities();
+            assertEquals(1, caseDocumentEntities2.size());
 
-        CourtCaseEntity courtCaseEntity3 = dartsDatabase.getCaseRepository().findById(caseClosedButMaxedRetentionRetries.getId()).get();
-        assertTrue("", courtCaseEntity3.isRetentionUpdated());
-        assertEquals(2, courtCaseEntity3.getRetentionRetries());
-        List<CaseDocumentEntity> caseDocumentEntities3 =
-            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity3);
-        assertEquals(0, caseDocumentEntities3.size());
+            CourtCaseEntity courtCaseEntity3 = dartsDatabase.getCaseRepository().findById(caseClosedButMaxedRetentionRetries.getId()).get();
+            assertTrue("", courtCaseEntity3.isRetentionUpdated());
+            assertEquals(2, courtCaseEntity3.getRetentionRetries());
+            List<CaseDocumentEntity> caseDocumentEntities3 = courtCaseEntity3.getCaseDocumentEntities();
+            assertEquals(0, caseDocumentEntities3.size());
+        });
     }
 
     @Test
@@ -154,14 +153,14 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         generateCaseDocumentProcessor.processGenerateCaseDocument(2);
 
         // then
-        CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().findById(recentlyClosedCase.getId()).get();
-        List<CaseDocumentEntity> caseDocumentEntities1 =
-            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity1);
-        assertEquals(0, caseDocumentEntities1.size());
+        transactionalUtil.executeInTransaction(() -> {
+            CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().findById(recentlyClosedCase.getId()).get();
+            List<CaseDocumentEntity> caseDocumentEntities1 = courtCaseEntity1.getCaseDocumentEntities();
+            assertEquals(0, caseDocumentEntities1.size());
 
-        CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().findById(oldClosedCaseWithPendingRetention.getId()).get();
-        List<CaseDocumentEntity> caseDocumentEntities2 =
-            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity2);
-        assertEquals(0, caseDocumentEntities2.size());
+            CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().findById(oldClosedCaseWithPendingRetention.getId()).get();
+            List<CaseDocumentEntity> caseDocumentEntities2 = courtCaseEntity2.getCaseDocumentEntities();
+            assertEquals(0, caseDocumentEntities2.size());
+        });
     }
 }
