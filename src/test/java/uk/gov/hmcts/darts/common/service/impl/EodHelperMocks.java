@@ -36,6 +36,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.DATASTORE_DELETED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -90,6 +91,8 @@ public class EodHelperMocks implements Closeable {
     private ObjectRecordStatusEntity armReplayStatus;
     @Mock
     private ObjectRecordStatusEntity armMissingResponseStatus;
+    @Mock
+    private ObjectRecordStatusEntity datastoreDeletionStatus;
 
 
     private MockedStatic<EodHelper> mockedEodHelper;
@@ -157,6 +160,8 @@ public class EodHelperMocks implements Closeable {
         lenient().when(armMissingResponseStatus.getDescription()).thenReturn("Arm Missing Response");
         lenient().when(armRawDataPushedStatus.getId()).thenReturn(ARM_RAW_DATA_PUSHED.getId());
         lenient().when(armRawDataPushedStatus.getDescription()).thenReturn("Arm Raw Data Pushed");
+        lenient().when(datastoreDeletionStatus.getId()).thenReturn(DATASTORE_DELETED.getId());
+        lenient().when(datastoreDeletionStatus.getDescription()).thenReturn("Deleted from datastore");
 
         lenient().when(unstructuredLocation.getId()).thenReturn(UNSTRUCTURED.getId());
         lenient().when(unstructuredLocation.getDescription()).thenReturn("unstructured");
@@ -185,6 +190,7 @@ public class EodHelperMocks implements Closeable {
         mockedEodHelper.when(EodHelper::armReplayStatus).thenReturn(armReplayStatus);
         mockedEodHelper.when(EodHelper::armMissingResponseStatus).thenReturn(armMissingResponseStatus);
         mockedEodHelper.when(EodHelper::armRawDataPushedStatus).thenReturn(armRawDataPushedStatus);
+        mockedEodHelper.when(EodHelper::datastoreDeletionStatus).thenReturn(datastoreDeletionStatus);
     }
 
     private void setupLocationTypes() {
@@ -231,6 +237,7 @@ public class EodHelperMocks implements Closeable {
         lenient().when(orsRepository.findById(ARM_REPLAY.getId())).thenReturn(Optional.of(armReplayStatus));
         lenient().when(orsRepository.findById(ARM_MISSING_RESPONSE.getId())).thenReturn(Optional.of(armMissingResponseStatus));
         lenient().when(orsRepository.findById(ARM_RAW_DATA_PUSHED.getId())).thenReturn(Optional.of(armRawDataPushedStatus));
+        lenient().when(orsRepository.findById(DATASTORE_DELETED.getId())).thenReturn(Optional.of(datastoreDeletionStatus));
 
         lenient().when(eltRepository.findById(INBOUND.getId())).thenReturn(Optional.of(inboundLocation));
         lenient().when(eltRepository.findById(ARM.getId())).thenReturn(Optional.of(armLocation));

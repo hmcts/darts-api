@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.enums;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +35,8 @@ public enum ObjectRecordStatusEnum {
     ARM_RPO_PENDING(21),
     ARM_REPLAY(22),
     ARM_MISSING_RESPONSE(23),
-    ARM_RAW_DATA_PUSHED(24);
+    ARM_RAW_DATA_PUSHED(24),
+    DATASTORE_DELETED(25);
 
     private static final Map<Integer, ObjectRecordStatusEnum> BY_ID = new ConcurrentHashMap<>();
 
@@ -50,4 +52,8 @@ public enum ObjectRecordStatusEnum {
         return BY_ID.get(id);
     }
 
+    public static List<Integer> getExpiredStatusIds() {
+        return List.of(MARKED_FOR_DELETION.getId(),
+                       DATASTORE_DELETED.getId());
+    }
 }
