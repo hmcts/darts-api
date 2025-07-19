@@ -12,14 +12,13 @@ import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Getter
 @Setter
 public class ArmBatchResponses {
 
-    private Map<Integer, ArmResponseBatchData> armBatchResponseMap = new HashMap<>();
+    private Map<Long, ArmResponseBatchData> armBatchResponseMap = new HashMap<>();
 
-    public void addResponseBatchData(Integer externalObjectDirectoryId,
+    public void addResponseBatchData(Long externalObjectDirectoryId,
                                      ArmResponseCreateRecord armResponseCreateRecord,
                                      CreateRecordFilenameProcessor createRecordFilenameProcessor) {
         createArmBatchResponseIfNotExists(externalObjectDirectoryId);
@@ -28,7 +27,7 @@ public class ArmBatchResponses {
     }
 
 
-    public void addResponseBatchData(Integer externalObjectDirectoryId,
+    public void addResponseBatchData(Long externalObjectDirectoryId,
                                      ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
                                      InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor) {
         createArmBatchResponseIfNotExists(externalObjectDirectoryId);
@@ -37,7 +36,7 @@ public class ArmBatchResponses {
         armBatchResponseMap.get(externalObjectDirectoryId).getInvalidLineFileFilenameProcessors().add(invalidLineFileFilenameProcessor);
     }
 
-    public void addResponseBatchData(Integer externalObjectDirectoryId,
+    public void addResponseBatchData(Long externalObjectDirectoryId,
                                      ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                      UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         createArmBatchResponseIfNotExists(externalObjectDirectoryId);
@@ -45,7 +44,7 @@ public class ArmBatchResponses {
         armBatchResponseMap.get(externalObjectDirectoryId).setUploadFileFilenameProcessor(uploadFileFilenameProcessor);
     }
 
-    private void createArmBatchResponseIfNotExists(Integer externalObjectDirectoryId) {
+    private void createArmBatchResponseIfNotExists(Long externalObjectDirectoryId) {
         if (!armBatchResponseMap.containsKey(externalObjectDirectoryId)) {
             ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
                 .externalObjectDirectoryId(externalObjectDirectoryId)
