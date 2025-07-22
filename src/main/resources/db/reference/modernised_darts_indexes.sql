@@ -17,6 +17,14 @@
 --     add index media.chronicle_id
 --     add index case_overflow.cas_id to support FK, implicitly removed when PK changed
 --v13 removing duplicate indexes or those where col list is exact subset
+--v14 add index on event(event_id,message_id)
+--v15 new indexes following review of production SQL
+--    arm_rpo_execution_detail(created_ts)
+--    automated_task(task_name)
+--    media_request(request_status)
+--    notification(notification_status)
+--    retention_confidence_category_mapper(confidence_category)
+--    retention_policy_type(fixed_policy_key)
 
 
 SET ROLE DARTS_OWNER;
@@ -305,6 +313,21 @@ CREATE INDEX jud_jn_trgm_idx ON judge USING gin (judge_name gin_trgm_ops);
 CREATE INDEX cas_cn_trgm_idx ON court_case USING gin (case_number gin_trgm_ops);
 
 CREATE INDEX ctr_cn_trgm_idx ON courtroom USING gin (courtroom_name gin_trgm_ops);
+
+--v14
+CREATE INDEX eve_ei_mi_idx ON event(event_id,message_id);
+
+--v15
+CREATE INDEX ard_ct_idx  ON arm_rpo_execution_detail(created_ts);
+CREATE INDEX aut_tn_idx  ON automated_task(task_name);
+CREATE INDEX mer_rs_idx  ON media_request(request_status);
+CREATE INDEX not_ns_idx  ON notification(notification_status);
+CREATE INDEX rcc_cc_idx  ON retention_confidence_category_mapper(confidence_category);
+CREATE INDEX rpt_fpk_idx ON retention_policy_type(fixed_policy_key);
+
+
+
+
 
 
 
