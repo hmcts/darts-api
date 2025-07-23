@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +36,9 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final UserAccountRepository userAccountRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
-    @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream"})
+    @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream", "PMD.AvoidInstanceofChecksInCatchClause"})
     @Override
+    @SneakyThrows
     @Transactional
     public void processSingleElement(Long inboundEodEntityId) {
         ExternalObjectDirectoryEntity inboundEodEntity = externalObjectDirectoryRepository.findById(inboundEodEntityId).orElseThrow();
@@ -55,10 +57,15 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
             log.debug("Saved unstructured stored EOD with Id: {}", unstructuredExternalObjectDirectoryEntity.getId());
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
             log.debug("Transfer complete for EOD ID: {}", inboundEodEntity.getId());
+
         } catch (Exception e) {
             log.error("Failed to move file from inbound store to unstructured store. EOD id: {}", inboundEodEntity.getId(), e);
             unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.failureStatus());
             setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            if (e instanceof InterruptedException) {
+                externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+                throw e;
+            }
         } finally {
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
         }
