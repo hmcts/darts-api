@@ -4,26 +4,27 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl;
 import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
-import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,10 +49,16 @@ class InboundToUnstructuredProcessorImplTest {
                                                                                 externalLocationTypeRepository,
                                                                                 singleElementProcessor,
                                                                                 asyncTaskConfig);
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("email", "integrationtest.user@example.com")
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
     @Test
-    void processInboundToUnstructured_ContinuesProcessingNextIterationOnException() {
+    void processInboundToUnstructured_ContinuesProcessingNextIterationOnException() throws InterruptedException {
         when(asyncTaskConfig.getThreads()).thenReturn(20);
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
         // given
@@ -74,8 +81,10 @@ class InboundToUnstructuredProcessorImplTest {
     }
 
     @Test
-    void processInboundToUnstructured_throwsInterruptedException() {
+    void processInboundToUnstructured_shouldStopProcessingAndReturn_WhenThrowingInterruptedExceptionOnSecondItem() throws InterruptedException {
         // given
+        when(asyncTaskConfig.getThreads()).thenReturn(20);
+        when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
         ExternalObjectDirectoryEntity eod1 = new ExternalObjectDirectoryEntity();
         eod1.setId(1L);
         ExternalObjectDirectoryEntity eod2 = new ExternalObjectDirectoryEntity();
@@ -83,17 +92,18 @@ class InboundToUnstructuredProcessorImplTest {
         when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any()))
             .thenReturn(List.of(1L, 2L));
 
-        try (MockedStatic<AsyncUtil> mockedStatic = mockStatic(AsyncUtil.class)) {
-            // Mock the static method call to throw InterruptedException
-            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(InboundToUnstructuredAutomatedTaskConfig.class)))
-                .thenThrow(new InterruptedException("Mocked InterruptedException"));
+        doNothing().when(singleElementProcessor).processSingleElement(1L);
+        // Simulate InterruptedException by wrapping it in a RuntimeException
+        doThrow(new RuntimeException(new InterruptedException("Mocked InterruptedException")))
+            .when(singleElementProcessor).processSingleElement(2L);
 
-            // when
-            inboundToUnstructuredProcessor.processInboundToUnstructured(100);
+        // when
+        inboundToUnstructuredProcessor.processInboundToUnstructured(100);
 
-        } catch (Exception e) {
-            // then
-            assertEquals("Mocked InterruptedException", e.getMessage());
-        }
+        // then
+        verify(singleElementProcessor).processSingleElement(1L);
+        verify(singleElementProcessor).processSingleElement(2L);
+        // Check to ensure that the processor stops processing after the InterruptedException
+        verifyNoMoreInteractions(singleElementProcessor);
     }
 }

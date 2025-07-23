@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
@@ -55,20 +56,20 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
 
     @Override
-    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
+    @SuppressWarnings("PMD.DoNotUseThreads")
     public void processInboundToUnstructured(int batchSize) {
         log.debug("Processing Inbound data store");
         List<Long> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
-                                                                                          getStatus(STORED), getType(UNSTRUCTURED), 3,
-                                                                                          Limit.of(batchSize));
+                                                                                       getStatus(STORED), getType(UNSTRUCTURED), 3,
+                                                                                       Limit.of(batchSize));
 
         log.info("Found {} records to process from Inbound to Unstructured out of batch size {}", inboundList.size(), batchSize);
         AtomicInteger count = new AtomicInteger(1);
 
         List<Callable<Void>> tasks = inboundList.stream()
             .map(inboundObjectId -> (Callable<Void>) () -> {
-                log.debug("Processing Inbound to Unstructured record {} of {} with EOD id {}",
-                          count.getAndIncrement(), inboundList.size(), inboundObjectId);
+                log.info("Processing Inbound to Unstructured record {} of {} with EOD id {}",
+                         count.getAndIncrement(), inboundList.size(), inboundObjectId);
                 processSingleInboundToUnstructured(inboundObjectId);
                 return null;
             }).toList();
@@ -82,11 +83,16 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         }
     }
 
+    @SneakyThrows
+    @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
     private void processSingleInboundToUnstructured(Long inboundObjectId) {
         try {
             singleElementProcessor.processSingleElement(inboundObjectId);
         } catch (Exception exception) {
             log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundObjectId, exception);
+            if (exception instanceof InterruptedException) {
+                throw exception;
+            }
         }
     }
 

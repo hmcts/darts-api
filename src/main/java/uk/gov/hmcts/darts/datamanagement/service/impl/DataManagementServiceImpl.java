@@ -62,7 +62,6 @@ public class DataManagementServiceImpl implements DataManagementService {
     private final AzureCopyUtil azureCopyUtil;
     private final FileContentChecksum fileContentChecksum;
 
-
     /**
      * Note: This implementation is not memory-efficient with large files
      * use an implementation that stores the blob to a temp file instead.
@@ -155,6 +154,7 @@ public class DataManagementServiceImpl implements DataManagementService {
         return client;
     }
 
+    @SneakyThrows
     @Override
     @SuppressWarnings("PMD.UseObjectForClearerAPI")//TODO - refactor to use object for clearer API when this class is next edited
     public void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation) {
@@ -168,7 +168,13 @@ public class DataManagementServiceImpl implements DataManagementService {
 
             log.info("Copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
                      sourceContainerName, destinationContainerName, sourceLocation, destinationLocation);
+
         } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                log.error("Exception copying file from '{}' to '{}'. Source location: {}, destination location: {}",
+                          sourceContainerName, destinationContainerName, sourceLocation, destinationLocation, e);
+                throw e;
+            }
             throw new DartsException(String.format("Exception copying file from '%s' to '%s'. Source location: %s",
                                                    sourceContainerName, destinationContainerName, sourceLocation), e);
         }
