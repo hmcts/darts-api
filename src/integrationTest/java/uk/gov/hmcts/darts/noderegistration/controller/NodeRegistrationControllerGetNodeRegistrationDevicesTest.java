@@ -96,11 +96,11 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
             """
             .replace("<nodeid>", String.valueOf(nodeRegisterEntity.getNodeId()))
             .replace("<courtroom>", nodeRegisterEntity.getCourtroom().getName())
-            .replace("<created_at1>", nodeRegisterEntity.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT))
+            .replace("<created_at1>", nodeRegisterEntity.getCreatedDateTime().format(DateTimeFormatter.ISO_ZONED_DATE_TIME))
             .replace("<created_by1>", String.valueOf(nodeRegisterEntity.getCreatedById()))
             .replace("<nodeid2>", String.valueOf(nodeRegisterEntity2.getNodeId()))
             .replace("<courtroom2>", nodeRegisterEntity2.getCourtroom().getName())
-            .replace("<created_at2>", nodeRegisterEntity2.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT))
+            .replace("<created_at2>", nodeRegisterEntity2.getCreatedDateTime().format(DateTimeFormatter.ISO_ZONED_DATE_TIME))
             .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById()));
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
