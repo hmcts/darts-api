@@ -8,9 +8,12 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.model.YourTranscriptsSummary;
 
 import java.time.OffsetDateTime;
@@ -34,9 +37,7 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
     private UserAccountEntity transcriberUser;
     private UserAccountEntity requesterUser;
     private UserAccountEntity approverUser;
-
     private CourtCaseEntity courtCaseEntity;
-
     private HearingEntity hearingEntity;
 
     @BeforeEach
@@ -50,45 +51,54 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
     }
 
     @Test
-    void getTranscriptRequests_ReturnsTranscriptionSummaryWithMultipleTranscriberWorkflows_WhenWorkflowReversed() {
+    void getTranscriptRequests_shouldReturnTranscriptionSummaryWithReversedWorkflowAndWithMultipleTranscriberWorkflows_whenLinkedHearing() {
         var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
         var reRunRequestedDate = OffsetDateTime.parse("2025-03-20T13:00:00Z");
         // Create a transcription with multiple workflows REQUESTED -> AWAITING_AUTHORISATION
-        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
-            requesterUser, courtCaseEntity, hearingEntity, transcriptionDate, false
-        );
+        var transcriptionEntity = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .hearings(List.of(hearingEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
+
+        createTranscriptionWorkflow(requesterUser, transcriptionDate, REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(transcriberUser, transcriptionDate.plusSeconds(1), AWAITING_AUTHORISATION, transcriptionEntity);
         // Rewind back to REQUESTED
-        var requestedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            transcriptionEntity, reRunRequestedDate, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED)
-        );
-        requestedWorkflow.setWorkflowActor(requesterUser);
-        transcriptionEntity.setTranscriptionStatus(requestedWorkflow.getTranscriptionStatus());
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
-
+        createTranscriptionWorkflow(requesterUser, reRunRequestedDate, REQUESTED, transcriptionEntity);
         // Move workflow to AWAITING_AUTHORISATION
-        var awaitingAuthWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            transcriptionEntity, reRunRequestedDate.plusSeconds(1),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(AWAITING_AUTHORISATION)
-        );
-        awaitingAuthWorkflow.setWorkflowActor(transcriberUser);
-        transcriptionEntity.setTranscriptionStatus(awaitingAuthWorkflow.getTranscriptionStatus());
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
-
-        var approvedDate = OffsetDateTime.parse("2025-03-20T15:00:00Z");
-
+        createTranscriptionWorkflow(transcriberUser, reRunRequestedDate.plusSeconds(1), AWAITING_AUTHORISATION, transcriptionEntity);
         // Move workflow to APPROVED
-        var approvedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            transcriptionEntity, approvedDate, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
-        );
-        approvedWorkflow.setWorkflowActor(approverUser);
-
-        transcriptionEntity.getTranscriptionWorkflowEntities()
-            .addAll(List.of(requestedWorkflow, awaitingAuthWorkflow, approvedWorkflow));
-        transcriptionEntity.setTranscriptionStatus(approvedWorkflow.getTranscriptionStatus());
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+        var approvedDate = OffsetDateTime.parse("2025-03-20T15:00:00Z");
+        createTranscriptionWorkflow(approverUser, approvedDate, APPROVED, transcriptionEntity);
 
         List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getRequesterTranscriptions(approverUser.getId(), false);
+        assertThat(yourTranscriptsSummaries.size()).isEqualTo(1);
+        var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        assertThat(yourTranscriptsSummaries.getFirst().getRequestedTs().format(format)).isEqualTo(transcriptionDate.format(format));
+    }
 
+    @Test
+    void getTranscriptRequests_shouldReturnTranscriptionSummaryWithReversedWorkflowAndWithMultipleTranscriberWorkflows_whenLinkedCase() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+        var reRunRequestedDate = OffsetDateTime.parse("2025-03-20T13:00:00Z");
+        // Create a transcription with multiple workflows REQUESTED -> AWAITING_AUTHORISATION
+        var transcriptionEntity = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .courtCases(List.of(courtCaseEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
+
+        createTranscriptionWorkflow(requesterUser, transcriptionDate, REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(transcriberUser, transcriptionDate.plusSeconds(1), AWAITING_AUTHORISATION, transcriptionEntity);
+        // Rewind back to REQUESTED
+        createTranscriptionWorkflow(requesterUser, reRunRequestedDate, REQUESTED, transcriptionEntity);
+        // Move workflow to AWAITING_AUTHORISATION
+        createTranscriptionWorkflow(transcriberUser, reRunRequestedDate.plusSeconds(1), AWAITING_AUTHORISATION, transcriptionEntity);
+        // Move workflow to APPROVED
+        var approvedDate = OffsetDateTime.parse("2025-03-20T15:00:00Z");
+        createTranscriptionWorkflow(approverUser, approvedDate, APPROVED, transcriptionEntity);
+
+        List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getRequesterTranscriptions(approverUser.getId(), false);
         assertThat(yourTranscriptsSummaries.size()).isEqualTo(1);
         var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         assertThat(yourTranscriptsSummaries.getFirst().getRequestedTs().format(format)).isEqualTo(transcriptionDate.format(format));
@@ -102,68 +112,114 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
     }
 
     @Test
-    void getTranscriptRequests_ExcludesHiddenTranscriptions_WhenIncludeHiddenIsFalse() {
+    void getTranscriptRequestsWithIncludeHiddenIsFalse_ExcludesHiddenTranscriptions_whenLinkedHearing() {
         var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
 
         // Create a hidden transcription
-        TranscriptionEntity hiddenTranscription = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
-            requesterUser, courtCaseEntity, hearingEntity, transcriptionDate, true
-        );
+        var hiddenTranscription = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .hearings(List.of(hearingEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
+
         hiddenTranscription.setHideRequestFromRequestor(true);
-        var approvedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            hiddenTranscription, transcriptionDate.plusHours(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
-        );
-        approvedWorkflow.setWorkflowActor(approverUser);
-        hiddenTranscription.setTranscriptionStatus(approvedWorkflow.getTranscriptionStatus());
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(hiddenTranscription);
-
+        createTranscriptionWorkflow(requesterUser, transcriptionDate.plusHours(1), REQUESTED, hiddenTranscription);
+        createTranscriptionWorkflow(requesterUser, transcriptionDate.plusHours(2), AWAITING_AUTHORISATION, hiddenTranscription);
+        createTranscriptionWorkflow(approverUser, transcriptionDate.plusHours(3), APPROVED, hiddenTranscription);
         List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getRequesterTranscriptions(approverUser.getId(), false);
-
         assertThat(yourTranscriptsSummaries).isEmpty();
     }
 
     @Test
-    void getTranscriptRequests_ReturnsHiddenTranscriptions_WhenIncludeHiddenIsTrue() {
+    void getTranscriptRequestsWithIncludeHiddenIsFalse_ExcludesHiddenTranscriptions_whenLinkedCase() {
         var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
 
         // Create a hidden transcription
-        TranscriptionEntity hiddenTranscription = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
-            requesterUser, courtCaseEntity, hearingEntity, transcriptionDate, true
-        );
-        hiddenTranscription.setHideRequestFromRequestor(true);
-        var approvedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            hiddenTranscription, transcriptionDate.plusHours(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
-        );
-        approvedWorkflow.setWorkflowActor(approverUser);
-        hiddenTranscription.setTranscriptionStatus(approvedWorkflow.getTranscriptionStatus());
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(hiddenTranscription);
+        var hiddenTranscription = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .courtCases(List.of(courtCaseEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
 
+        hiddenTranscription.setHideRequestFromRequestor(true);
+        createTranscriptionWorkflow(requesterUser, transcriptionDate.plusHours(1), REQUESTED, hiddenTranscription);
+        createTranscriptionWorkflow(requesterUser, transcriptionDate.plusHours(2), AWAITING_AUTHORISATION, hiddenTranscription);
+        createTranscriptionWorkflow(approverUser, transcriptionDate.plusHours(3), APPROVED, hiddenTranscription);
+        List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getRequesterTranscriptions(approverUser.getId(), false);
+        assertThat(yourTranscriptsSummaries).isEmpty();
+    }
+
+    @Test
+    void getTranscriptRequestsWithIncludeHiddenIsTrue_IncludesHiddenTranscriptions_whenLinkedHearing() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+
+        // Create a hidden transcription
+        var hiddenTranscription = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .hearings(List.of(hearingEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
+        hiddenTranscription.setHideRequestFromRequestor(true);
+        createTranscriptionWorkflow(requesterUser, transcriptionDate.plusHours(1), REQUESTED, hiddenTranscription);
+        createTranscriptionWorkflow(requesterUser, transcriptionDate.plusHours(2), AWAITING_AUTHORISATION, hiddenTranscription);
+        createTranscriptionWorkflow(approverUser, transcriptionDate.plusHours(3), APPROVED, hiddenTranscription);
         List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getRequesterTranscriptions(approverUser.getId(), true);
 
         assertThat(yourTranscriptsSummaries.size()).isEqualTo(1);
     }
 
     @Test
-    void getTranscriptRequests_ReturnsTranscriptionsWithMultipleActors() {
+    void getTranscriptRequestsWithIncludeHiddenIsTrue_IncludesHiddenTranscriptions_whenLinkedCase() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+
+        // Create a hidden transcription
+        var hiddenTranscription = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .courtCases(List.of(courtCaseEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
+        hiddenTranscription.setHideRequestFromRequestor(true);
+        createTranscriptionWorkflow(requesterUser, transcriptionDate.plusHours(1), REQUESTED, hiddenTranscription);
+        createTranscriptionWorkflow(requesterUser, transcriptionDate.plusHours(2), AWAITING_AUTHORISATION, hiddenTranscription);
+        createTranscriptionWorkflow(approverUser, transcriptionDate.plusHours(3), APPROVED, hiddenTranscription);
+        List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getRequesterTranscriptions(approverUser.getId(), true);
+
+        assertThat(yourTranscriptsSummaries.size()).isEqualTo(1);
+    }
+
+    @Test
+    void getTranscriptRequests_shouldReturnTranscriptionsWithMultipleActors_whenLinkedHearing() {
         var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
 
         // Create a transcription with multiple actors
-        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
-            requesterUser, courtCaseEntity, hearingEntity, transcriptionDate, false
-        );
-        var requestedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            transcriptionEntity, transcriptionDate.plusHours(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED)
-        );
-        requestedWorkflow.setWorkflowActor(requesterUser);
+        var transcriptionEntity = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .hearings(List.of(hearingEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
 
-        var approvedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            transcriptionEntity, transcriptionDate.plusHours(2), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
-        );
-        approvedWorkflow.setWorkflowActor(approverUser);
+        createTranscriptionWorkflow(requesterUser, transcriptionDate, REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(approverUser, transcriptionDate.plusHours(1), APPROVED, transcriptionEntity);
 
-        transcriptionEntity.getTranscriptionWorkflowEntities().addAll(List.of(requestedWorkflow, approvedWorkflow));
-        transcriptionEntity.setTranscriptionStatus(approvedWorkflow.getTranscriptionStatus());
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+        List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getRequesterTranscriptions(approverUser.getId(), false);
+
+        assertThat(yourTranscriptsSummaries.size()).isEqualTo(1);
+        assertThat(yourTranscriptsSummaries.getFirst().getStatus()).isEqualTo("Approved");
+    }
+
+    @Test
+    void getTranscriptRequests_shouldReturnTranscriptionsWithMultipleActors_whenLinkedCase() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+
+        // Create a transcription with multiple actors
+        var transcriptionEntity = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .courtCases(List.of(courtCaseEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
+
+        createTranscriptionWorkflow(requesterUser, transcriptionDate, REQUESTED, transcriptionEntity);
+        createTranscriptionWorkflow(approverUser, transcriptionDate.plusHours(1), APPROVED, transcriptionEntity);
 
         List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getRequesterTranscriptions(approverUser.getId(), false);
 
@@ -249,23 +305,36 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
     }
 
     @Test
-    void getApproverTranscriptions_ExcludesHiddenTranscriptions() {
+    void getApproverTranscriptions_ExcludesHiddenTranscriptions_whenLinkedHearing() {
         var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
 
         // Create a hidden transcription
-        TranscriptionEntity hiddenTranscription = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
-            requesterUser, courtCaseEntity, hearingEntity, transcriptionDate, true
-        );
+        var hiddenTranscription = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .hearings(List.of(hearingEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
         hiddenTranscription.setHideRequestFromRequestor(true);
-        var approvedWorkflow = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
-            hiddenTranscription, transcriptionDate.plusHours(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
-        );
-        approvedWorkflow.setWorkflowActor(approverUser);
-        hiddenTranscription.setTranscriptionStatus(approvedWorkflow.getTranscriptionStatus());
-        dartsDatabase.getTranscriptionRepository().saveAndFlush(hiddenTranscription);
+        createTranscriptionWorkflow(approverUser, transcriptionDate, APPROVED, hiddenTranscription);
 
         List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getApproverTranscriptions(approverUser.getId());
+        assertThat(yourTranscriptsSummaries).isEmpty();
+    }
 
+    @Test
+    void getApproverTranscriptions_ExcludesHiddenTranscriptions_whenLinkedCase() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+
+        // Create a hidden transcription
+        var hiddenTranscription = PersistableFactory.getTranscriptionTestData().someMinimalBuilder()
+            .requestedBy(requesterUser)
+            .courtCases(List.of(courtCaseEntity))
+            .createdDateTime(transcriptionDate)
+            .build().getEntity();
+        hiddenTranscription.setHideRequestFromRequestor(true);
+        createTranscriptionWorkflow(approverUser, transcriptionDate, APPROVED, hiddenTranscription);
+
+        List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getApproverTranscriptions(approverUser.getId());
         assertThat(yourTranscriptsSummaries).isEmpty();
     }
 
@@ -274,5 +343,17 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
         List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getApproverTranscriptions(approverUser.getId());
 
         assertThat(yourTranscriptsSummaries).isEmpty();
+    }
+
+    private void createTranscriptionWorkflow(UserAccountEntity userAccount, OffsetDateTime dateTime, TranscriptionStatusEnum transcriptionStatusEnum,
+                                             TranscriptionEntity transcriptionEntity) {
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity =
+            PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscriptionWithStatus(transcriptionEntity, transcriptionStatusEnum);
+        transcriptionWorkflowEntity.setWorkflowActor(userAccount);
+        transcriptionWorkflowEntity.setWorkflowTimestamp(dateTime);
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
+        transcriptionEntity.setTranscriptionStatus(transcriptionWorkflowEntity.getTranscriptionStatus());
+        dartsPersistence.save(transcriptionWorkflowEntity);
+        dartsPersistence.save(transcriptionEntity);
     }
 }

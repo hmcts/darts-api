@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserActivateValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -127,8 +128,10 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     public List<UserWithIdAndTimestamps> search(UserSearch userSearch) {
         List<UserWithIdAndTimestamps> userWithIdAndLastLoginList = new ArrayList<>();
-
-        userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress(), userSearch.getActive())
+        userSearchQuery.getUsers(DataUtil.toBoolean(userSearch.getIncludeSystemUsers()),
+                                 userSearch.getFullName(),
+                                 userSearch.getEmailAddress(),
+                                 userSearch.getActive())
             .forEach(userAccountEntity -> {
                 UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndUserFullName(userAccountEntity);
                 userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
@@ -138,10 +141,9 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userWithIdAndLastLoginList;
     }
 
-    @SuppressWarnings("Convert2MethodRef")
     @Override
-    public List<UserWithIdAndTimestamps> getUsers(String emailAddress, List<Integer> userIds) {
-        return userManagementQuery.getUsers(emailAddress, userIds).stream()
+    public List<UserWithIdAndTimestamps> getUsers(boolean includeSystemUSers, String emailAddress, List<Integer> userIds) {
+        return userManagementQuery.getUsers(includeSystemUSers, emailAddress, userIds).stream()
             .map(this::toUserWithIdAndTimestamps)
             .toList();
     }

@@ -421,7 +421,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.7'
+  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.9'
 
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.5.0'
 
@@ -437,24 +437,24 @@ dependencies {
   implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.8'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.9'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.2.1'
   implementation 'org.springframework.retry:spring-retry:2.0.12'
 
-    implementation 'net.javacrumbs.shedlock:shedlock-spring:6.6.1'
-    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.6.1'
+    implementation 'net.javacrumbs.shedlock:shedlock-spring:6.9.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.0'
 
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
-    implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.4.0'
+    implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.5.0'
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.1'
 
   //CVE-2023-44487
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
-    implementation platform('com.azure:azure-sdk-bom:1.2.34')
+    implementation platform('com.azure:azure-sdk-bom:1.2.35')
     implementation 'com.azure:azure-storage-blob'
 
     implementation group: 'io.rest-assured', name: 'rest-assured'
@@ -463,7 +463,7 @@ dependencies {
     implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.10'
 
   //database
-  implementation 'org.postgresql:postgresql:42.7.5'
+  implementation 'org.postgresql:postgresql:42.7.7'
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE'
 
@@ -476,9 +476,9 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
-  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.0'
-  implementation 'org.hibernate.orm:hibernate-ant:6.6.15.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.15.Final'
+  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.2'
+  implementation 'org.hibernate.orm:hibernate-ant:6.6.21.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.21.Final'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
   implementation 'com.querydsl:querydsl-core:5.1.0'
@@ -486,7 +486,7 @@ dependencies {
 
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.15.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.21.Final')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
@@ -495,7 +495,7 @@ dependencies {
 
   testImplementation 'org.testcontainers:postgresql:1.21.0'
   testImplementation 'com.h2database:h2:2.3.232'
-  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
+  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.7'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
@@ -503,7 +503,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.2.1'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.6'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.8'
   testImplementation 'org.springframework.security:spring-security-test:6.5.0'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
@@ -522,7 +522,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.2.1.Final') {
+    dependencySet(group: 'io.netty', version: '4.2.3.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
@@ -544,7 +544,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.2.6') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.2.8') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }

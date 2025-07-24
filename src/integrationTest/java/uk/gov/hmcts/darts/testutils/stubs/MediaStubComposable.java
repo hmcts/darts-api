@@ -61,7 +61,6 @@ public class MediaStubComposable {
                                  courthouseName, courtroomName, startTime, endTime, channel, "mp2");
     }
 
-
     public MediaEntity createHiddenMediaEntity(CourthouseStubComposable courthouseStubComposable,
                                                CourtroomStubComposable courtroomStub,
                                                String courthouseName, String courtroomName,

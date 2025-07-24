@@ -483,6 +483,47 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
         });
     }
 
+    @Test
+    void findCurrentEventsByHearingId_shouldFindCurrentEventEntities_whenCurrentandNonCurrentEventsExist() {
+        HearingEntity hearingEntity = PersistableFactory.getHearingTestData().someMinimal();
+        dartsPersistence.saveAll(hearingEntity);
+
+        EventEntity eventEntity1 = PersistableFactory.getEventTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .hearingEntities(Set.of(hearingEntity))
+            .build()
+            .getEntity();
+
+        EventEntity eventEntity2 = PersistableFactory.getEventTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .hearingEntities(Set.of(hearingEntity))
+            .build()
+            .getEntity();
+
+        EventEntity eventEntity3 = PersistableFactory.getEventTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .hearingEntities(Set.of(hearingEntity))
+            .isCurrent(false)
+            .build()
+            .getEntity();
+
+        dartsPersistence.saveAll(eventEntity1, eventEntity2, eventEntity3);
+
+        // when
+        List<EventEntity> resultEvents = eventRepository.findCurrentEventsByHearingId(
+            hearingEntity.getId()
+        );
+
+        // then
+        assertFalse(resultEvents.isEmpty());
+        assertEquals(resultEvents.size(), 2);
+        List.of(eventEntity1, eventEntity2).forEach(event -> {
+            event.equals(resultEvents.stream().filter(
+                resultEvent -> resultEvent.getId().equals(event.getId())).findFirst().get()
+            );
+        });
+    }
+
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
         event.setCreatedDateTime(offsetDateTime);
         dartsDatabase.save(event);
