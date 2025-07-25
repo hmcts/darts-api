@@ -44,7 +44,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             if (nonNull(retentionDate)) {
                 OffsetDateTime armRetentionDate = retentionDate.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears());
                 if (nonNull(externalObjectDirectory.getEventDateTs())
-                    && armRetentionDate.truncatedTo(MILLIS).isEqual(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS))) {
+                    && armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) == 0) {
                     log.info("Event date found and different when compared to ARM retention date, resetting update retention flag for {} ",
                              externalObjectDirectoryId);
                     externalObjectDirectory.setUpdateRetention(false);
