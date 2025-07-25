@@ -82,7 +82,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     }
 
     @Test
-    void processInboundToUnstructuredAnnotation() throws InterruptedException {
+    void processInboundToUnstructuredAnnotation() {
 
         when(externalObjectDirectoryEntityInbound.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
@@ -98,7 +98,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     }
 
     @Test
-    void processInboundToUnstructuredCaseDocument() throws InterruptedException {
+    void processInboundToUnstructuredCaseDocument() {
 
         when(externalObjectDirectoryEntityInbound.getCaseDocument()).thenReturn(caseDocumentEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
