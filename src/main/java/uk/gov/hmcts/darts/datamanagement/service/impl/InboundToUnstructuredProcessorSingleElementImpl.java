@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +37,6 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
     @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream", "PMD.AvoidInstanceofChecksInCatchClause"})
     @Override
-    @SneakyThrows
     @Transactional
     public void processSingleElement(Long inboundEodEntityId) {
         ExternalObjectDirectoryEntity inboundEodEntity = externalObjectDirectoryRepository.findById(inboundEodEntityId).orElseThrow();
