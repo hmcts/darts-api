@@ -57,6 +57,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     @Override
     @SuppressWarnings("PMD.DoNotUseThreads")
+    @SneakyThrows
     public void processInboundToUnstructured(int batchSize) {
         log.debug("Processing Inbound data store");
         List<Long> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
@@ -83,7 +84,6 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         }
     }
 
-    @SneakyThrows
     @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
     private void processSingleInboundToUnstructured(Long inboundObjectId) {
         try {
