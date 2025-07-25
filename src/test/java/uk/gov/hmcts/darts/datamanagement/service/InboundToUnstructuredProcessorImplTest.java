@@ -58,7 +58,7 @@ class InboundToUnstructuredProcessorImplTest {
     }
 
     @Test
-    void processInboundToUnstructured_ContinuesProcessingNextIterationOnException() throws InterruptedException {
+    void processInboundToUnstructured_ContinuesProcessingNextIterationOnException() {
         when(asyncTaskConfig.getThreads()).thenReturn(20);
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
         // given
@@ -77,7 +77,7 @@ class InboundToUnstructuredProcessorImplTest {
     }
 
     @Test
-    void processInboundToUnstructured_shouldStopProcessingAndReturn_WhenThrowingInterruptedExceptionOnSecondItem() throws InterruptedException {
+    void processInboundToUnstructured_shouldStopProcessingAndReturn_WhenThrowingInterruptedExceptionOnSecondItem() {
         // given
         when(asyncTaskConfig.getThreads()).thenReturn(20);
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
