@@ -156,7 +156,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
     @SneakyThrows
     @Override
-    @SuppressWarnings({"PMD.UseObjectForClearerAPI", "PMD.AvoidInstanceofChecksInCatchClause"})
+    @SuppressWarnings({"PMD.UseObjectForClearerAPI", "PMD.AvoidInstanceofChecksInCatchClause", "java:S1193"})
     public void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation) {
         try {
             String sourceContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(sourceContainerName);
