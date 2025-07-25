@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -20,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -62,10 +62,6 @@ class InboundToUnstructuredProcessorImplTest {
         when(asyncTaskConfig.getThreads()).thenReturn(20);
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
         // given
-        ExternalObjectDirectoryEntity eod1 = new ExternalObjectDirectoryEntity();
-        eod1.setId(1L);
-        ExternalObjectDirectoryEntity eod2 = new ExternalObjectDirectoryEntity();
-        eod2.setId(2L);
         when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any()))
             .thenReturn(List.of(1L, 2L));
 
@@ -85,17 +81,14 @@ class InboundToUnstructuredProcessorImplTest {
         // given
         when(asyncTaskConfig.getThreads()).thenReturn(20);
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofMinutes(5));
-        ExternalObjectDirectoryEntity eod1 = new ExternalObjectDirectoryEntity();
-        eod1.setId(1L);
-        ExternalObjectDirectoryEntity eod2 = new ExternalObjectDirectoryEntity();
-        eod2.setId(2L);
         when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any()))
             .thenReturn(List.of(1L, 2L));
 
         doNothing().when(singleElementProcessor).processSingleElement(1L);
-        // Simulate InterruptedException by wrapping it in a RuntimeException
-        doThrow(new RuntimeException(new InterruptedException("Mocked InterruptedException")))
-            .when(singleElementProcessor).processSingleElement(2L);
+        // Simulate InterruptedException
+        doAnswer(invocation -> {
+            throw new InterruptedException("Simulated interruption");
+        }).when(singleElementProcessor).processSingleElement(2L);
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured(100);
