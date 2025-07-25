@@ -447,7 +447,7 @@ class DataManagementServiceImplTest {
     }
 
     @Test
-    void processInboundToUnstructured_shouldStopProcessingAndReturn_WhenThrowingInterruptedExceptionOnSecondItem() throws InterruptedException {
+    void copyBlobData_shouldStopProcessingAndReturn_WhenThrowingInterruptedException() {
         // given
         when(dataManagementConfiguration.getContainerSasUrl("darts-inbound-container"))
             .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
