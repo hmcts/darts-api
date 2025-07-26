@@ -90,7 +90,7 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
         courtCaseEntity.setRetentionUpdated(true);
         courtCaseEntity.setRetentionRetries(0);
         caseRepository.save(courtCaseEntity);
-        log.debug("Updated retention for case id {} due to case document generation", caseId);
+        log.info("Updated retention for case id {} due to case document generation", caseId);
     }
 
     private CaseDocumentEntity createAndSaveCaseDocumentEntity(Integer caseId, String caseDocument, String externalLocation, UserAccountEntity user) {
