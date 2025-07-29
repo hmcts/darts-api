@@ -119,9 +119,24 @@ class UserManagementServiceImplTest {
     void testGetUser() throws IOException {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
-        when(userManagementQuery.getUsers(EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
+        when(userManagementQuery.getUsers(false, EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
 
-        List<UserWithIdAndTimestamps> resultList = service.getUsers(EXISTING_EMAIL_ADDRESS, null);
+        List<UserWithIdAndTimestamps> resultList = service.getUsers(false, EXISTING_EMAIL_ADDRESS, null);
+
+        assertEquals(userAccountEntities.getFirst().getUserFullName(), resultList.getFirst().getFullName());
+        assertEquals(userAccountEntities.getFirst().getEmailAddress(), resultList.getFirst().getEmailAddress());
+        assertEquals(userAccountEntities.getFirst().getLastLoginTime(), resultList.getFirst().getLastLoginAt());
+        assertEquals(userAccountEntities.getFirst().getLastModifiedDateTime(), resultList.getFirst().getLastModifiedAt());
+        assertEquals(userAccountEntities.getFirst().getCreatedDateTime(), resultList.getFirst().getCreatedAt());
+    }
+
+    @Test
+    void testGetUserWithIncludeSystemUser() throws IOException {
+        List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
+
+        when(userManagementQuery.getUsers(true, EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
+
+        List<UserWithIdAndTimestamps> resultList = service.getUsers(true, EXISTING_EMAIL_ADDRESS, null);
 
         assertEquals(userAccountEntities.getFirst().getUserFullName(), resultList.getFirst().getFullName());
         assertEquals(userAccountEntities.getFirst().getEmailAddress(), resultList.getFirst().getEmailAddress());

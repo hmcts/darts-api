@@ -44,7 +44,7 @@ public class NodeRegisterEntity extends CreatedBaseEntity {
     @Column(name = NODE_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = NODE_GENERATOR)
     @SequenceGenerator(name = NODE_GENERATOR, sequenceName = NODE_SEQUENCE, allocationSize = 1)
-    private int nodeId;
+    private Integer nodeId;
 
     @Column(name = HOSTNAME, nullable = false)
     private String hostname;

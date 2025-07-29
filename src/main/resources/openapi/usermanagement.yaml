@@ -18,6 +18,12 @@ paths:
       operationId: getUsers
       parameters:
         - in: query
+          name: include_system_users
+          description: Optional - If set to true, will return system users. If set to false or not set will exclude system users
+          schema:
+            type: boolean
+            default: false
+        - in: query
           name: user_ids
           required: false
           style: form
@@ -50,7 +56,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           $ref: '#/components/responses/BadUserRequest'
   /admin/users/{user_id}:
@@ -83,7 +89,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           $ref: '#/components/responses/BadUserPatchRequest'
         '404':
@@ -105,7 +111,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -155,7 +161,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -213,7 +219,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           $ref: '#/components/responses/SecurityGroupBadRequest'
         '401':
@@ -303,7 +309,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           $ref: '#/components/responses/SecurityGroupBadRequest'
 
@@ -592,6 +598,9 @@ components:
           $ref: '#/components/schemas/UserEmailAddress'
         active:
           $ref: '#/components/schemas/UserActive'
+        include_system_users:
+          type: boolean
+          default: false
     UserWithId:
       type: object
       properties:
@@ -610,6 +619,8 @@ components:
         last_modified_at:
           type: string
           format: date-time
+        is_system_user:
+          type: boolean
         created_at:
           type: string
           format: date-time

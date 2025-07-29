@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -85,6 +86,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .header(EMAIL_ADDRESS, "james.smith@hmcts.net"))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value(ORIGINAL_USERNAME))
             .andExpect(jsonPath("$[0].email_address").value(ORIGINAL_EMAIL_ADDRESS))
@@ -92,13 +94,70 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].last_login_at").value("2023-10-27T22:00:00Z"))
             .andExpect(jsonPath("$[0].last_modified_at").exists())
             .andExpect(jsonPath("$[0].created_at").exists())
-            .andReturn();
+            .andExpect(jsonPath("$[0].is_system_user").value(false));
 
         lenient().when(mockUserIdentity.getUserAccount()).thenReturn(user);
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verify(mockUserIdentity, atLeastOnce()).getUserIdFromJwt();//Called by AuditorRevisionListener
 
         verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void getUsers_includeSystemUsersIsTrue_shouldReturnSystemUsers() throws Exception {
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        UserAccountEntity userAccountEntity1 = createEnabledUserAccountEntity(user);
+        UserAccountEntity userAccountEntity2 = createEnabledUserAccountEntity(user, true);
+
+        mockMvc.perform(get(ENDPOINT_URL)
+                            .queryParam("include_system_users", "true")
+                            .queryParam("user_ids", userAccountEntity1.getId().toString())
+                            .queryParam("user_ids", userAccountEntity2.getId().toString())
+                            .header("Content-Type", "application/json"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(2))
+            .andExpect(jsonPath("$[0].id").value(userAccountEntity2.getId()))
+            .andExpect(jsonPath("$[0].is_system_user").value(true))
+            .andExpect(jsonPath("$[1].id").value(userAccountEntity1.getId()))
+            .andExpect(jsonPath("$[1].is_system_user").value(false));
+    }
+
+    @Test
+    void getUsers_includeSystemUsersIsFalse_shouldNotReturnSystemUsers() throws Exception {
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        UserAccountEntity userAccountEntity1 = createEnabledUserAccountEntity(user);
+        UserAccountEntity userAccountEntity2 = createEnabledUserAccountEntity(user, true);
+
+        mockMvc.perform(get(ENDPOINT_URL)
+                            .queryParam("include_system_users", "false")
+                            .queryParam("user_ids", userAccountEntity1.getId().toString())
+                            .queryParam("user_ids", userAccountEntity2.getId().toString())
+                            .header("Content-Type", "application/json"))
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
+            .andExpect(jsonPath("$[0].id").value(userAccountEntity1.getId()))
+            .andExpect(jsonPath("$[0].is_system_user").value(false));
+    }
+
+    @Test
+    void getUsers_includeSystemUsersIsNotProvided_shouldNotReturnSystemUsers() throws Exception {
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        UserAccountEntity userAccountEntity1 = createEnabledUserAccountEntity(user);
+        UserAccountEntity userAccountEntity2 = createEnabledUserAccountEntity(user, true);
+
+        mockMvc.perform(get(ENDPOINT_URL)
+                            .queryParam("user_ids", userAccountEntity1.getId().toString())
+                            .queryParam("user_ids", userAccountEntity2.getId().toString())
+                            .header("Content-Type", "application/json"))
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
+            .andExpect(jsonPath("$[0].id").value(userAccountEntity1.getId()))
+            .andExpect(jsonPath("$[0].is_system_user").value(false));
     }
 
     @Test
@@ -129,7 +188,12 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         assertEquals(403, response.getResponse().getStatus());
     }
 
+
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
+        return createEnabledUserAccountEntity(user, ORIGINAL_SYSTEM_USER_FLAG);
+    }
+
+    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, boolean isSystemUser) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
@@ -138,7 +202,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
         userAccountEntity.setLastModifiedDateTime(ORIGINAL_LAST_MODIFIED_DATE_TIME);
         userAccountEntity.setCreatedDateTime(ORIGINAL_CREATED_DATE_TIME);
-        userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);
+        userAccountEntity.setIsSystemUser(isSystemUser);
         userAccountEntity.setCreatedBy(user);
         userAccountEntity.setLastModifiedBy(user);
 

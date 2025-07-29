@@ -144,11 +144,11 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
                 }
               ]
             """.formatted(
-                mediaChannel4.getId(),
-                mediaChannel5.getId(),
-                mediaChannel2.getId(),
-                mediaChannel3.getId(),
-                mediaChannel1.getId()
+            mediaChannel4.getId(),
+            mediaChannel5.getId(),
+            mediaChannel2.getId(),
+            mediaChannel3.getId(),
+            mediaChannel1.getId()
         );
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);
     }
@@ -184,7 +184,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     }
 
     @Test
-    void getAudioMetadataGetShouldNotReturnHiddenMediaChannel1() throws Exception {
+    void getAudioMetadata_shouldReturnChannel2IfHiddenMediaChannel1() throws Exception {
         var courtroomEntity = someMinimalCourtRoom();
         var mediaChannel1 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 1);
         mediaChannel1.setIsCurrent(false);
@@ -207,7 +207,18 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals("[]", actualJson, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(
+            """
+                [
+                  {
+                    "id": %s,
+                    "media_start_timestamp": "2023-01-01T12:00:00Z",
+                    "media_end_timestamp": "2023-01-01T13:00:00Z",
+                    "is_archived": false,
+                    "is_available": false
+                  }
+                ]
+                """.formatted(mediaChannel2.getId()), actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     private HearingEntity hearingWithMedias(MediaEntity... mediaEntities) {
