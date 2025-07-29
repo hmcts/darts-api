@@ -470,7 +470,7 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.18'
   implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.18'
 
-  implementation group: 'io.vavr', name: 'vavr', version: '0.10.6'
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.7'
 
   implementation group: 'com.google.guava', name: 'guava', version: '33.4.8-jre'
 
