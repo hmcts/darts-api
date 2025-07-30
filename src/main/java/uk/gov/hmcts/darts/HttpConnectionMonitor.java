@@ -73,14 +73,4 @@ public class HttpConnectionMonitor {
             return null;
         }
     }
-
-    private Double get(String metricName) {
-        try {
-            var gauge = registry.find(metricName).gauge();
-            return (gauge != null) ? gauge.value() : null;
-        } catch (Exception ex) {
-            log.warn("Failed to read metric '{}': {}", metricName, ex.getMessage());
-            return null;
-        }
-    }
 }
