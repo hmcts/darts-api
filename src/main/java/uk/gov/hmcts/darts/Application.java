@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts;
 
+import com.microsoft.applicationinsights.TelemetryClient;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.shutdown.GracefulShutdownHook;
@@ -22,6 +24,7 @@ import static java.time.ZoneOffset.UTC;
 @EnableTransactionManagement
 @Slf4j
 @RequiredArgsConstructor
+@EnableScheduling
 public class Application implements CommandLineRunner {
 
     private final AudioApi audioApi;
@@ -42,7 +45,8 @@ public class Application implements CommandLineRunner {
 
         ConfigurableApplicationContext applicationContext = application.run(args);
 
-        Thread shutdownHookThread = new Thread(new GracefulShutdownHook((ServletWebServerApplicationContext) applicationContext));
+        Thread shutdownHookThread = new Thread(new GracefulShutdownHook((ServletWebServerApplicationContext) applicationContext,
+                                                                        applicationContext.getBean(TelemetryClient.class)));
         shutdownHookThread.setName("GracefulShutdownHook");
         Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 

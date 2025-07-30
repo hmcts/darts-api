@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.shutdown;
 
+import com.microsoft.applicationinsights.TelemetryClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.convert.DurationStyle;
@@ -15,6 +16,7 @@ import java.time.Duration;
 public class GracefulShutdownHook
     implements Runnable, GracefulShutdownCallback {
     private final ServletWebServerApplicationContext applicationContext;
+    private final TelemetryClient telemetryClient;
 
     @Override
     public void run() {
@@ -53,6 +55,9 @@ public class GracefulShutdownHook
 
     @Override
     public void shutdownComplete(GracefulShutdownResult result) {
+        if (telemetryClient != null) {
+            telemetryClient.flush();
+        }
         applicationContext.close();
         log.info("Graceful shutdown complete: {}", result);
     }
