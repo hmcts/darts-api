@@ -3,16 +3,15 @@ package uk.gov.hmcts.darts;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.MeterBinder;
-import jakarta.annotation.PostConstruct;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.management.ManagementFactory;
-import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 @Component
+@Slf4j
 public class TomcatThreadPoolMetricsBinder implements MeterBinder {
 
 
@@ -33,7 +32,7 @@ public class TomcatThreadPoolMetricsBinder implements MeterBinder {
 
         } catch (Exception e) {
             // Log but don't crash application startup
-            System.err.println("Failed to register Tomcat metrics: " + e.getMessage());
+            log.error("Failed to register Tomcat metrics: " + e.getMessage());
         }
     }
 

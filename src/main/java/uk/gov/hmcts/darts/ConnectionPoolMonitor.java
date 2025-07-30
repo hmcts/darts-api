@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts;
 
 import com.zaxxer.hikari.HikariDataSource;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -23,7 +22,7 @@ public class ConnectionPoolMonitor {
         int idle = hikariDataSource.getHikariPoolMXBean().getIdleConnections();
         int pending = hikariDataSource.getHikariPoolMXBean().getThreadsAwaitingConnection();
 
-        double usage = ((double) active / max) * 100;
+        double usage = (double) active / max * 100;
         log.info("[METRIC] [DB POOL] usage: {}/{} active ({}%), pending: {}, idle: {}",
                  active, max, String.format("%.1f", usage), pending, idle);
     }

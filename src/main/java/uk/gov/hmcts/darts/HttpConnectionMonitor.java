@@ -1,15 +1,9 @@
 package uk.gov.hmcts.darts;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.lang.management.ManagementFactory;
-import java.util.Set;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 
 @Slf4j
 @Component
@@ -23,10 +17,6 @@ public class HttpConnectionMonitor {
 
     @Scheduled(fixedDelay = 5000)
     public void logHttpConnectionStats() {
-        Double threadsBusy = get("tomcat.threads.busy");
-        Double threadsMax = get("tomcat.threads.config.max");
-        Double connectionsCurrent = get("tomcat.connections.current");
-
         findAndLog(
             "tomcat.connections.current",
             "http.server.requests",
