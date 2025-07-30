@@ -12,7 +12,7 @@ plugins {
     id 'idea'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.springframework.boot' version '3.4.5'
-    id 'org.owasp.dependencycheck' version '12.1.1'
+    id 'org.owasp.dependencycheck' version '12.1.3'
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'org.sonarqube' version '6.2.0.5505'
     id "io.freefair.lombok" version "8.13.1"
@@ -471,7 +471,7 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.18'
   implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.18'
 
-  implementation group: 'io.vavr', name: 'vavr', version: '0.10.6'
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.7'
 
   implementation group: 'com.google.guava', name: 'guava', version: '33.4.8-jre'
 
@@ -479,7 +479,7 @@ dependencies {
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.1.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.2'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.21.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.21.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.23.Final'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
   implementation 'com.querydsl:querydsl-core:5.1.0'
@@ -487,7 +487,7 @@ dependencies {
 
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.21.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.23.Final')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
