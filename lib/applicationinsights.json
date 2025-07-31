@@ -4,6 +4,7 @@
     "name": "DARTS API"
   },
   "sampling": {
+    "percentage": 100.0,
     "overrides": [
       {
         "telemetryType": "request",

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.shutdown;
 
+import com.microsoft.applicationinsights.TelemetryClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -23,7 +24,7 @@ class GracefulShutdownHookTest {
     @BeforeEach
     void beforeEach() {
         applicationContext = mock(ServletWebServerApplicationContext.class);
-        gracefulShutdownHook = spy(new GracefulShutdownHook(applicationContext));
+        gracefulShutdownHook = spy(new GracefulShutdownHook(applicationContext, mock(TelemetryClient.class)));
     }
 
     @Test
