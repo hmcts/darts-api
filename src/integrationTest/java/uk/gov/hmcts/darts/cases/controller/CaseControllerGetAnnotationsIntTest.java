@@ -208,6 +208,16 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     }
 
     @Test
+    void casesGetAnnotationsEndpoint_shouldReturn401Error_whenUserNotFound() throws Exception {
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
+
+        mockMvc.perform(get("/cases/" + courtCaseEntity.getId() + "/annotations")
+                            .header("user_id", "9999999999"))
+
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void givenUserRequestsNonExistingHearingThenReturn404() throws Exception {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createSuperAdminUser();
