@@ -2,15 +2,20 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
@@ -204,21 +209,60 @@ class StandardEventHandlerTest extends HandlerTestData {
             assertThat(hearingsForCase.size()).isEqualTo(1);
             assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
 
+            var caseRetentionEntitiesIds = dartsDatabase.getCaseManagementRetentionRepository().getIdsForEvents(List.of(persistedEvent.getId()));
+            assertTrue(CollectionUtils.isEmpty(caseRetentionEntitiesIds));
             dartsGateway.verifyDoesntReceiveDarEvent();
         });
     }
 
-    private static DartsEvent someMinimalDartsEvent() {
-        return new DartsEvent()
-            .type("1000")
-            .subType("1002")
-            .courtroom("unknown-room")
-            .courthouse("known-courthouse")
-            .eventId("1")
-            .eventText("some-text")
-            .messageId("some-message-id");
-    }
+    @ParameterizedTest
+    @CsvSource({
+        "40750",
+        "40751",
+        "40752",
+        "40753",
+        "40754",
+        "40755"
+    })
+    void receive_shouldUpdateRetention_WhereStandardEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged(String eventType) {
 
+        var retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy(RetentionPolicyEnum.DEFAULT.getPolicyKey());
+        retentionPolicy.setCaseTotalSentence("20Y2M0D");
+
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .type(eventType)
+                                    .subType(null)
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(HEARING_DATE_ODT)
+                                    .retentionPolicy(retentionPolicy));
+        transactionalUtil.executeInTransaction(() -> {
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
+
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+
+            var persistedEvent = dartsDatabase.getAllEvents().getFirst();
+
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedEvent.isLogEntry()).isEqualTo(false);
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.getFirst().getHearingIsActual()).isEqualTo(true);
+
+            var caseRetentionEntitiesIds = dartsDatabase.getCaseManagementRetentionRepository().getIdsForEvents(List.of(persistedEvent.getId()));
+            var caseRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findById(caseRetentionEntitiesIds.getFirst());
+            assertThat(caseRetentionEntities.get().getCourtCase().getId()).isEqualTo(persistedCase.getId());
+
+            dartsGateway.verifyReceivedNotificationType(3);
+            dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        });
+    }
 
     @Test
     void testSummationWithConcurrency() throws InterruptedException, ExecutionException {
@@ -296,7 +340,7 @@ class StandardEventHandlerTest extends HandlerTestData {
     }
 
     @Test
-    void createsAnEventLinkedCaseWhenCourtroomDoesntExist() {
+    void createsAnEventLinkedCaseWhenCourtroomDoesNotExist() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
@@ -327,6 +371,18 @@ class StandardEventHandlerTest extends HandlerTestData {
                 .containsOnly(idFrom(persistedEvents));
         });
     }
+
+    private static DartsEvent someMinimalDartsEvent() {
+        return new DartsEvent()
+            .type("1000")
+            .subType("1002")
+            .courtroom("unknown-room")
+            .courthouse("known-courthouse")
+            .eventId("1")
+            .eventText("some-text")
+            .messageId("some-message-id");
+    }
+
 
     private Long idFrom(List<EventEntity> eventEntities) {
         return eventEntities.getFirst().getId();
