@@ -54,6 +54,8 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                 } else if (ObjectRecordStatusEnum.STORED.getId() == externalObjectDirectory.getStatusId()) {
                     log.info("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
                     return processArmUpdate(externalObjectDirectory, armRetentionDate, userAccount, externalObjectDirectoryId);
+                } else {
+                    log.info("EOD {} is not in STORED status, skipping ARM retention date update", externalObjectDirectoryId);
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
