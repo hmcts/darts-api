@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@Isolated
 class SecurityGroupControllerIntTest extends IntegrationBase {
 
     public static final String TEST_COURTHOUSE_NAME = "SWANSEA";
