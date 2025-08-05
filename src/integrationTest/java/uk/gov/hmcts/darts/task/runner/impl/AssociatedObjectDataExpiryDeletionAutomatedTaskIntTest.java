@@ -38,9 +38,9 @@ import static org.assertj.core.api.Assertions.within;
 @DisplayName("AssociatedObjectDataExpiryDeletionAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class AssociatedObjectDataExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
+
     private final AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
     private static final int AUTOMATION_USER_ID = -28;
-
 
     @Test
     void positiveTranscriptionDocumentEntityExpired() {
