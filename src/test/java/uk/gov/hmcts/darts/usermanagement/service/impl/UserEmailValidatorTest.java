@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.usermanagement.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -36,8 +38,8 @@ class UserEmailValidatorTest {
     }
 
     @Test
-    void doesNotThrowExceptionIfEmailNotCurrentlyAssociatedWithActiveUser() {
-        when(userAccountRepository.findByEmailAddressIgnoreCaseAndActive(NEW_EMAIL_ADDRESS, true))
+    void validate_doesNotThrowException_whenEmailNotCurrentlyAssociatedWithAnyUser() {
+        when(userAccountRepository.findByEmailAddressIgnoreCase(NEW_EMAIL_ADDRESS))
             .thenReturn(Collections.emptyList());
 
         userEmailValidator.validate(someUserWithEmail(NEW_EMAIL_ADDRESS));
@@ -45,10 +47,13 @@ class UserEmailValidatorTest {
         assertThatNoException().isThrownBy(() -> userEmailValidator.validate(someUserWithEmail(NEW_EMAIL_ADDRESS)));
     }
 
-    @Test
-    void throwsExceptionIfEmailAlreadyAssociatedWithActiveUser() {
-        when(userAccountRepository.findByEmailAddressIgnoreCaseAndActive(EXISTING_EMAIL_ADDRESS, true))
-            .thenReturn(List.of(someUserAccountWithEmail(EXISTING_EMAIL_ADDRESS)));
+    @ParameterizedTest
+    @ValueSource(strings = {"true", "false"})
+    void validate_throwsException_whenEmailAlreadyAssociatedWithExistingUser(boolean isActive) {
+        UserAccountEntity existingUser = someUserAccountWithEmail(EXISTING_EMAIL_ADDRESS);
+        existingUser.setActive(isActive);
+        when(userAccountRepository.findByEmailAddressIgnoreCase(EXISTING_EMAIL_ADDRESS))
+            .thenReturn(List.of(existingUser));
 
         User user = someUserWithEmail(EXISTING_EMAIL_ADDRESS);
         assertThatThrownBy(() -> userEmailValidator.validate(user))
@@ -58,7 +63,7 @@ class UserEmailValidatorTest {
     }
 
     @Test
-    void throwsExceptionIfEmailAddressHasNoDomain() {
+    void validate_throwsException_whenEmailAddressHasNoDomain() {
 
         User user = someUserWithEmail(EMAIL_ADDRESS_NO_DOMAIN);
         assertThatThrownBy(() -> userEmailValidator.validate(user))
@@ -68,7 +73,7 @@ class UserEmailValidatorTest {
     }
 
     @Test
-    void throwsExceptionIfEmailAddressHasNoUser() {
+    void validate_throwsException_whenEmailAddressHasNoUser() {
 
         User user = someUserWithEmail(EMAIL_ADDRESS_NO_USER);
         assertThatThrownBy(() -> userEmailValidator.validate(user))

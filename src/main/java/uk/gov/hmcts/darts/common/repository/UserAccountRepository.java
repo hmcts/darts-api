@@ -62,6 +62,8 @@ public interface UserAccountRepository extends
         """)
     Optional<UserAccountEntity> findByRoleAndUserId(Integer securityRoleId, Integer userId);
 
+    List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
+
     List<UserAccountEntity> findByEmailAddressIgnoreCaseAndActive(String emailAddress, Boolean active);
 
     List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
