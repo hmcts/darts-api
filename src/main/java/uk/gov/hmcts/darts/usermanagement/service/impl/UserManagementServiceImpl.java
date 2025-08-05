@@ -194,7 +194,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         if (active != null) {
             userAccountEntity.setActive(active);
 
-            // if we are disabling the use then disable the transcriptions
+            // if we are disabling the user then disable the transcriptions
             // and remove user from security groups
             if (active.equals(Boolean.FALSE)) {
                 unassignUserFromGroupsTheyArePartOf(userAccountEntity);
