@@ -74,7 +74,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldSucceedWhenProvidedWithValidValuesForMinimumRequiredFields() throws Exception {
+    void createUser_ShouldSucceed_WhenProvidedWithValidValuesForMinimumRequiredFields() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
@@ -120,7 +120,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldSucceedWhenProvidedWithValidValuesForAllFields() throws Exception {
+    void createUser_ShouldSucceed_WhenProvidedWithValidValuesForAllFields() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
@@ -176,7 +176,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldFailWhenRequiredFieldsAreMissing() throws Exception {
+    void createUser_ShouldFail_WhenRequiredFieldsAreMissing() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
@@ -195,7 +195,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldFailWhenProvidedWithAUserEmailAddressThatMatchesAnExistingDisabledAccount() throws Exception {
+    void createUser_ShouldFail_WhenProvidedWithAUserEmailAddressThatMatchesAnExistingDisabledAccount() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = new UserAccountEntity();
@@ -224,7 +224,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldFailWhenProvidedWithASecurityGroupThatDoesntExist() throws Exception {
+    void createUser_ShouldFail_WhenProvidedWithASecurityGroupThatDoesntExist() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
