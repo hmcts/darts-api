@@ -174,30 +174,31 @@ public class SecurityConfig {
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
             Jwt jwt = getJwtFromRequest(request);
-            // if we cant determine the jwt then proxy and let the nimbus library handle the 401
+            // if we can't determine the jwt then proxy and let the nimbus library handle the 401
             if (jwt == null) {
                 filterChain.doFilter(request, response);
             } else {
                 try {
-                    UserAccountEntity userAccountEntity = userIdentity.getUserAccount(jwt);
-                    if (userAccountEntity.isActive()) {
-                        filterChain.doFilter(request, response);
-                    } else {
-                        writeError(response);
-                    }
+                    userIdentity.getUserAccount(jwt);
+                    filterChain.doFilter(request, response);
                 } catch (Exception exception) {
-                    log.error("User is invalid", exception);
-                    writeError(response);
+                    if (DartsApiTrait.isInactiveUserException(exception)) {
+                        writeError(response, exception);
+                    } else {
+                        // Log the exception and return 401 Unauthorized
+                        log.error("User is invalid", exception);
+                        writeError(response, exception);
+                    }
                 }
             }
         }
 
-        private void writeError(HttpServletResponse response) {
+        private void writeError(HttpServletResponse response, Exception exception) {
             try {
-                DartsApiTrait.writeErrorResponse(response, mapper);
+                DartsApiTrait.writeErrorResponse(response, mapper, exception);
             } catch (IOException ex) {
                 log.error("Problem parsing the problem", ex);
-                response.setStatus(HttpStatus.FORBIDDEN.value());
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
         }
     }
