@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.arm.helper.ArmHelper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ConfidenceAware;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -37,7 +36,6 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
     @Transactional
     @Override
     public boolean calculateRetentionEventDate(Long externalObjectDirectoryId) {
-        UserAccountEntity userAccount = userIdentity.getUserAccount();
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow();
             OffsetDateTime retentionDate = getDocumentRetentionDate(externalObjectDirectory);
