@@ -48,12 +48,11 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     log.info("Event date found and different when compared to ARM retention date, resetting update retention flag for {} ",
                              externalObjectDirectoryId);
                     externalObjectDirectory.setUpdateRetention(false);
-                    externalObjectDirectory.setLastModifiedBy(userAccount);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                     return true;
                 } else if (ObjectRecordStatusEnum.STORED.getId() == externalObjectDirectory.getStatusId()) {
                     log.info("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
-                    return processArmUpdate(externalObjectDirectory, armRetentionDate, userAccount, externalObjectDirectoryId);
+                    return processArmUpdate(externalObjectDirectory, armRetentionDate, externalObjectDirectoryId);
                 } else {
                     log.info("EOD {} is not in STORED status, skipping ARM retention date update", externalObjectDirectoryId);
                 }
@@ -66,8 +65,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         return false;
     }
 
-    private boolean processArmUpdate(ExternalObjectDirectoryEntity externalObjectDirectory, OffsetDateTime armRetentionDate,
-                                     UserAccountEntity userAccount, Long externalObjectDirectoryId) {
+    private boolean processArmUpdate(ExternalObjectDirectoryEntity externalObjectDirectory, OffsetDateTime armRetentionDate, Long externalObjectDirectoryId) {
         ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
 
         if (confidenceAware != null) {
@@ -84,7 +82,6 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                 } else {
                     externalObjectDirectory.setEventDateTs(armRetentionDate);
                     externalObjectDirectory.setUpdateRetention(false);
-                    externalObjectDirectory.setLastModifiedBy(userAccount);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                     log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
                     return true;
