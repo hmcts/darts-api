@@ -448,7 +448,7 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
     implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.5.0'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.1'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.14.0'
 
   //CVE-2023-44487
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
