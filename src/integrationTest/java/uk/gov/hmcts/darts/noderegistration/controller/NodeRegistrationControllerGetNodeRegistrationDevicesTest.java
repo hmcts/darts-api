@@ -55,53 +55,58 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            [
-                {
-                    "id": <nodeid>,
-                    "courthouse": {
-                        "id": 1,
-                        "display_name": "Some Courthouse"
-                    },
-                    "courtroom": {
-                        "id": 1,
-                        "name": "<courtroom>"
-                    },
-                    "ip_address": "192.168.1.3",
-                    "hostname": "Host1",
-                    "mac_address": "00:0a:95:9d:68:21",
-                    "node_type": "DAR",
-                    "created_at": "<created_at1>",
-                    "created_by": <created_by1>
-                },
-                {
-                    "id": <nodeid2>,
-                    "courthouse": {
-                        "id": 2,
-                        "display_name": "Some Courthouse"
-                    },
-                    "courtroom": {
-                        "id": 2,
-                        "name": "<courtroom2>"
-                    },
-                    "ip_address": "192.168.1.3",
-                    "hostname": "Host1",
-                    "mac_address": "00:0a:95:9d:68:21",
-                    "node_type": "DAR",
-                    "created_at": "<created_at2>",
-                    "created_by": <created_by2>
-                }
-            ]
-            """
-            .replace("<nodeid>", String.valueOf(nodeRegisterEntity.getNodeId()))
-            .replace("<courtroom>", nodeRegisterEntity.getCourtroom().getName())
-            .replace("<created_at1>", nodeRegisterEntity.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT))
-            .replace("<created_by1>", String.valueOf(nodeRegisterEntity.getCreatedById()))
-            .replace("<nodeid2>", String.valueOf(nodeRegisterEntity2.getNodeId()))
-            .replace("<courtroom2>", nodeRegisterEntity2.getCourtroom().getName())
-            .replace("<created_at2>", nodeRegisterEntity2.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT))
-            .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById()));
+        String actualJson = normalizeTimestamps(mvcResult.getResponse().getContentAsString());
+        String expectedJson = normalizeTimestamps("""
+                                                      [
+                                                          {
+                                                              "id": <nodeid>,
+                                                              "courthouse": {
+                                                                  "id": 1,
+                                                                  "display_name": "Some Courthouse"
+                                                              },
+                                                              "courtroom": {
+                                                                  "id": 1,
+                                                                  "name": "<courtroom>"
+                                                              },
+                                                              "ip_address": "192.168.1.3",
+                                                              "hostname": "Host1",
+                                                              "mac_address": "00:0a:95:9d:68:21",
+                                                              "node_type": "DAR",
+                                                              "created_at": "<created_at1>",
+                                                              "created_by": <created_by1>
+                                                          },
+                                                          {
+                                                              "id": <nodeid2>,
+                                                              "courthouse": {
+                                                                  "id": 2,
+                                                                  "display_name": "Some Courthouse"
+                                                              },
+                                                              "courtroom": {
+                                                                  "id": 2,
+                                                                  "name": "<courtroom2>"
+                                                              },
+                                                              "ip_address": "192.168.1.3",
+                                                              "hostname": "Host1",
+                                                              "mac_address": "00:0a:95:9d:68:21",
+                                                              "node_type": "DAR",
+                                                              "created_at": "<created_at2>",
+                                                              "created_by": <created_by2>
+                                                          }
+                                                      ]
+                                                      """
+                                                      .replace("<nodeid>", String.valueOf(nodeRegisterEntity.getNodeId()))
+                                                      .replace("<courtroom>", nodeRegisterEntity.getCourtroom().getName())
+                                                      .replace("<created_at1>",
+                                                               nodeRegisterEntity.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(
+                                                                   DateTimeFormatter.ISO_INSTANT))
+                                                      .replace("<created_by1>", String.valueOf(nodeRegisterEntity.getCreatedById()))
+                                                      .replace("<nodeid2>", String.valueOf(nodeRegisterEntity2.getNodeId()))
+                                                      .replace("<courtroom2>", nodeRegisterEntity2.getCourtroom().getName())
+                                                      .replace("<created_at2>",
+                                                               nodeRegisterEntity2.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(
+                                                                   DateTimeFormatter.ISO_INSTANT))
+                                                      .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById())));
+
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -119,5 +124,9 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
             {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    private String normalizeTimestamps(String json) {
+        return json.replaceAll("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{5})\\dZ", "$1Z");
     }
 }
