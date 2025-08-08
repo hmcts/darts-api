@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@SuppressWarnings({"PMD.TooManyMethods"})
 @Repository
 public interface UserAccountRepository extends
     RevisionRepository<UserAccountEntity, Integer, Long>,
@@ -71,6 +72,8 @@ public interface UserAccountRepository extends
         AND userAccount.active = true
         """)
     Optional<UserAccountEntity> findByRoleAndUserId(Integer securityRoleId, Integer userId);
+
+    List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
     List<UserAccountEntity> findByEmailAddressIgnoreCaseAndActive(String emailAddress, Boolean active);
 

@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class UserControllerTest extends IntegrationBase {
+class UserControllerIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/users/";
 
@@ -325,8 +325,7 @@ class UserControllerTest extends IntegrationBase {
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-
-
+        
         userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
