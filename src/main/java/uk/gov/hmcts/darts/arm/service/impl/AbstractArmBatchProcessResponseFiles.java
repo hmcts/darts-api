@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +67,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
     "PMD.CouplingBetweenObjects",
     "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
 })
-@RequiredArgsConstructor
 public abstract class AbstractArmBatchProcessResponseFiles implements ArmResponseFilesProcessor {
 
     protected static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
@@ -86,6 +84,24 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected final DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
 
     protected DateTimeFormatter dateTimeFormatter;
+
+    public AbstractArmBatchProcessResponseFiles(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
+                                                FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
+                                                ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper timeHelper,
+                                                ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi,
+                                                DeleteArmResponseFilesHelper deleteArmResponseFilesHelper) {
+        this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
+        this.armDataManagementApi = armDataManagementApi;
+        this.fileOperationService = fileOperationService;
+        this.armDataManagementConfiguration = armDataManagementConfiguration;
+        this.objectMapper = objectMapper;
+        this.userIdentity = userIdentity;
+        this.timeHelper = timeHelper;
+        this.externalObjectDirectoryService = externalObjectDirectoryService;
+        this.logApi = logApi;
+        this.deleteArmResponseFilesHelper = deleteArmResponseFilesHelper;
+        dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
+    }
 
     @Override
     public void processResponseFiles(int batchSize, AsyncTaskConfig asyncTaskConfig) {
@@ -116,7 +132,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             log.error("Unable to find response file for prefix: {}", prefix, e);
         }
 
-
         if (CollectionUtils.isEmpty(inputUploadResponseFiles)) {
             log.warn("No response files found with prefix: {}", prefix);
             return;
@@ -136,13 +151,12 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         runTasksAsync(tasks, asyncTaskConfig);
     }
 
-
     @SuppressWarnings("PMD.DoNotUseThreads")
     void runTasksAsync(List<Callable<Void>> tasks, AsyncTaskConfig asyncTaskConfig) {
         try {
             AsyncUtil.invokeAllAwaitTermination(tasks, asyncTaskConfig);
         } catch (InterruptedException e) {
-            log.error(getClass().getName() + " failed with unexpected exception", e);
+            log.error(getClass().getName() + " failed with unexpected interruption exception", e);
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error(getClass().getName() + " failed with unexpected exception", e);
@@ -172,7 +186,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 OffsetDateTime timestamp = getInputUploadFileTimestamp(inputUploadFileRecord);
 
                 List<ExternalObjectDirectoryEntity> editedExternalObjectDirectoryEntities = externalObjectDirectoryEntities.stream()
-                    .filter(eod -> eod.getInputUploadProcessedTs() == null)
                     .peek(eod -> eod.setInputUploadProcessedTs(timestamp))
                     .toList();
                 if (CollectionUtils.isNotEmpty(editedExternalObjectDirectoryEntities)) {
@@ -201,11 +214,20 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     OffsetDateTime getInputUploadFileTimestamp(ArmResponseInputUploadFileRecord inputUploadFileRecord) {
         try {
-            dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
             return OffsetDateTime.parse(inputUploadFileRecord.getTimestamp(), dateTimeFormatter);
         } catch (Exception e) {
             log.error("Unable to parse timestamp {} from ARM input upload file {}", inputUploadFileRecord.getTimestamp(),
                       inputUploadFileRecord.getFilename(), e);
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private OffsetDateTime getUploadFileRecordProcessTime(ArmResponseUploadFileRecord armResponseUploadFileRecord) {
+        try {
+            return OffsetDateTime.parse(armResponseUploadFileRecord.getProcessTime(), dateTimeFormatter);
+        } catch (Exception e) {
+            log.error("Unable to parse timestamp {} from ARM upload file record {}", armResponseUploadFileRecord.getProcessTime(),
+                      armResponseUploadFileRecord.getA360RecordId(), e);
             throw new IllegalArgumentException(e);
         }
     }
@@ -331,23 +353,23 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     deleteArmResponseFilesHelper.deleteResponseBlobs(armResponseBatchData);
                 } else {
                     log.info("Unable to find response files for external object {}", armResponseBatchData.getExternalObjectDirectoryId());
-                    missingAllResponsesFiles(userAccount, armResponseBatchData);
+                    missingResponsesFiles(userAccount, armResponseBatchData);
                 }
             }
         );
     }
 
-    private void missingAllResponsesFiles(UserAccountEntity userAccount, ArmResponseBatchData armResponseBatchData) {
+    private void missingResponsesFiles(UserAccountEntity userAccount, ArmResponseBatchData armResponseBatchData) {
         logResponsesFound(armResponseBatchData);
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory =
                 getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
 
-            OffsetDateTime minInputUploadProcessedTime = timeHelper.currentOffsetDateTime().minus(
+            OffsetDateTime minDataIngestionTime = timeHelper.currentOffsetDateTime().minus(
                 armDataManagementConfiguration.getArmMissingResponseDuration());
 
-            if (externalObjectDirectory.getInputUploadProcessedTs() != null
-                && externalObjectDirectory.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
+            if (externalObjectDirectory.getDataIngestionTs() != null
+                && externalObjectDirectory.getDataIngestionTs().isBefore(minDataIngestionTime)) {
                 markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
             } else {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus(), userAccount);
@@ -506,15 +528,14 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
                 if (nonNull(uploadNewFileRecord)) {
                     if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                               armResponseCreateRecord, createRecordFilenameProcessor);
+                        Long externalObjectDirectoryId = Long.valueOf(uploadNewFileRecord.getRelationId());
+                        armBatchResponses.addResponseBatchData(externalObjectDirectoryId, armResponseCreateRecord, createRecordFilenameProcessor);
                     } else {
                         log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} create record {}",
                                  armResponseCreateRecord.getInput(), createRecordFilenameAndPath);
                     }
                 } else {
-                    log.warn("Failed to obtain EOD id (relation id) from create record file  {}",
-                             createRecordFilenameAndPath);
+                    log.warn("Failed to obtain EOD id (relation id) from create record file  {}", createRecordFilenameAndPath);
                 }
 
             } catch (Exception e) {
@@ -524,6 +545,25 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             log.warn("Failed to read create record file {}", createRecordFilenameAndPath);
         }
 
+    }
+
+    private void setDataIngestionForUploadFileRecord(ArmResponseUploadFileRecord armResponseUploadFileRecord, Long externalObjectDirectoryId,
+                                                     String uploadFileRecordFilenameAndPath) {
+        try {
+            OffsetDateTime uploadNewFileRecordProcessTime = getUploadFileRecordProcessTime(armResponseUploadFileRecord);
+            setEodDataIngestionTimestamp(externalObjectDirectoryId, uploadNewFileRecordProcessTime);
+        } catch (Exception e) {
+            log.error("Unable to set EOD data ingestion timestamp for EOD {} - upload file {}",
+                      externalObjectDirectoryId, uploadFileRecordFilenameAndPath, e);
+        }
+    }
+
+    private void setEodDataIngestionTimestamp(Long externalObjectDirectoryId, OffsetDateTime uploadNewFileRecordProcessTime) {
+        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
+        if (nonNull(externalObjectDirectory)) {
+            externalObjectDirectory.setDataIngestionTs(uploadNewFileRecordProcessTime);
+            externalObjectDirectoryRepository.save(externalObjectDirectory);
+        }
     }
 
     private ArmResponseCreateRecord getResponseCreateRecordOrDelete(String createRecordFilenameAndPath,
@@ -559,8 +599,10 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
                 if (nonNull(uploadNewFileRecord)) {
                     if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                        Long externalObjectDirectoryId = Long.valueOf(uploadNewFileRecord.getRelationId());
+                        armBatchResponses.addResponseBatchData(externalObjectDirectoryId,
                                                                armResponseUploadFileRecord, uploadFileFilenameProcessor);
+                        setDataIngestionForUploadFileRecord(armResponseUploadFileRecord, externalObjectDirectoryId, uploadFileFilenameAndPath);
                     } else {
                         log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} upload file {}",
                                  armResponseUploadFileRecord.getInput(), uploadFileFilenameAndPath);
@@ -742,7 +784,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 UploadNewFileRecord uploadNewFileRecord = readInputJson(input);
                 if (nonNull(uploadNewFileRecord)) {
                     if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                        armBatchResponses.addResponseBatchData(Long.valueOf(uploadNewFileRecord.getRelationId()),
                                                                armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
 
                     } else {
@@ -866,7 +908,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                                        UserAccountEntity userAccount) {
         if (nonNull(externalObjectDirectory)) {
             log.info(
-                "ARM Push updating ARM status from {} to {} for ID {}",
+                "ARM updating ARM status from {} to {} for ID {}",
                 externalObjectDirectory.getStatus().getId(),
                 objectRecordStatus.getId(),
                 externalObjectDirectory.getId()
