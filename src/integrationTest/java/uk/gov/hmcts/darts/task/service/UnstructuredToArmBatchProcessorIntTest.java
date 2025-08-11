@@ -57,7 +57,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
-    ArgumentCaptor<String> manifestFileNameCaptor = ArgumentCaptor.forClass(String.class);
+    private ArgumentCaptor<String> manifestFileNameCaptor = ArgumentCaptor.forClass(String.class);
 
     @MockitoSpyBean
     private ArmDataManagementApi armDataManagementApi;
@@ -95,7 +95,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void testBatchedQueryEqualsBatchSizeSuccess() {
+    void processUnstructuredToArm_shouldReturnBatchedQueryEqualsBatchSizeSuccess() {
 
         //given
         //batch size is 5
@@ -136,7 +136,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void testBatchedQueryWithBatchSizeGreaterThanManifestConfigSuccess() {
+    void processUnstructuredToArm_ShouldBatchQueryWithBatchSizeGreaterThanManifestConfigSuccess() {
 
         //given
         //batch size is 5 but manifest size is 3
@@ -181,7 +181,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void testBatchedQueryWithBatchSizeLessThanManifestConfigSuccess() {
+    void processUnstructuredToArm_ShouldBatchQueryWithBatchSizeLessThanManifestConfigSuccess() {
 
         //given
         //batch size is 3 but manifest size is 5
@@ -226,7 +226,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void testBatchedQueryWhereSomeFailedToPush() {
+    void processUnstructuredToArm_ShouldBatchQueryWhereSomeFailedToPush() {
 
         //given
         //batch size is 5
@@ -312,7 +312,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void movePendingMediaDataFromUnstructuredToArmStorage() {
+    void processUnstructuredToArm_ShouldMovePendingMediaDataFromUnstructuredToArmStorage() {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -358,7 +358,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void movePreviousArmFailedFromUnstructuredToArmStorage() {
+    void processUnstructuredToArm_ShouldMovePreviousArmFailedFromUnstructuredToArmStorage() {
 
         //given
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(5);
@@ -415,7 +415,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void movePreviousArmFailedWithNoCorrespondingUnstructuredFailsAndProcessingContinues() {
+    void processUnstructuredToArm_ShouldMovePreviousArmFailedWithNoCorrespondingUnstructuredFailsAndProcessingContinues() {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -446,7 +446,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void pushRawDataFails() {
+    void processUnstructuredToArm_ShouldPushRawDataFails() {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -476,7 +476,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void generationOfManifestFileEntryFails() {
+    void processUnstructuredToArm_ShoulGenerationOfManifestFileEntryFails() {
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(5);
@@ -508,7 +508,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void writingManifestFileFails() {
+    void processUnstructuredToArm_ShouldWriteManifestFileFails() {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -537,7 +537,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void pushingManifestFileFails() {
+    void processUnstructuredToArm_ShouldPushManifestFileFails() {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -564,7 +564,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void movePendingMediaDataFromUnstructuredToArmStorage_WithSpecialCharacters() {
+    void processUnstructuredToArm_ShouldMovePendingMediaDataFromUnstructuredToArmStorage_WithSpecialCharacters() {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -609,5 +609,44 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedById()).isEqualTo(testUser.getId());
         assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
         assertThat(armDropZoneEodsMedia1.getFirst().getManifestFile()).isEqualTo(manifestFileName);
+    }
+
+    @Test
+    void processUnstructuredToArm_ShouldThrowInterruptedException() {
+
+        //given
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+
+        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(2), ARM_RAW_DATA_FAILED, ARM);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), ARM_MANIFEST_FAILED, ARM);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_MANIFEST_FAILED, ARM);
+
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_MANIFEST_FAILED, ARM);
+//        when(azureCopyUtil.copyBlobDataToArm(any(), anyString()))
+//            .thenThrow(new InterruptedException("Simulated interruption"));
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm(5);
+
+        //then
+        var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
+            List.of(medias.getFirst().getId(),
+                    medias.get(1).getId(),
+                    medias.get(2).getId(),
+                    medias.get(3).getId(),
+                    medias.get(4).getId(),
+                    medias.get(5).getId()),
+            EodHelper.armDropZoneStatus(),
+            EodHelper.armLocation()
+        );
+        assertThat(foundMediaList.size()).isEqualTo(BATCH_SIZE);
+        assertThat(eodRepository.findMediaIdsByInMediaIdStatusAndType(
+            List.of(medias.getFirst().getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())).hasSize(1);
     }
 }

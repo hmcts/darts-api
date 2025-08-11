@@ -424,7 +424,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     default List<Long> findEodsNotInOtherStorage(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                  ExternalLocationTypeEntity notExistsLocation, Integer limitRecords) {
-        Set<Long> results = new HashSet<>();//Ensures no duplicates
+        Set<Long> results = new HashSet<>(); // Ensures no duplicates
         results.addAll(findEodsNotInOtherStorageOnlyMedia(status.getId(), type.getId(), notExistsLocation.getId(), limitRecords));
         if (results.size() < limitRecords) {
             results.addAll(findEodsNotInOtherStorageExcludingMedia(status.getId(), type.getId(), notExistsLocation.getId(), limitRecords - results.size()));
