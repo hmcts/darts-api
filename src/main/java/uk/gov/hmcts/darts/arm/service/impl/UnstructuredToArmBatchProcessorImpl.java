@@ -48,7 +48,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     @SuppressWarnings({
         "PMD.AvoidInstantiatingObjectsInLoops",
         "PMD.CyclomaticComplexity",
-        "PMD.DoNotUseThreads"//TODO - refactor to avoid using Thread.sleep() when this is next edited
+        "PMD.DoNotUseThreads",
+        "PMD.AvoidInstanceofChecksInCatchClause"
     })
     public void processUnstructuredToArm(int taskBatchSize) {
 
@@ -67,21 +68,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             List<List<Long>> batchesForArm = ListUtils.partition(eodsForTransfer, unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
             AtomicInteger batchCounter = new AtomicInteger(1);
             UserAccountEntity userAccount = userIdentity.getUserAccount();
-            List<Callable<Void>> tasks = batchesForArm
-                .stream()
-                .map(eodsForBatch -> (Callable<Void>) () -> {
-                    int batchNumber = batchCounter.getAndIncrement();
-                    try {
-                        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
-                        log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
-                        createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
-                        log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
-                    } catch (Exception e) {
-                        log.error("Unexpected exception when processing batch {}", batchNumber, e);
-                    }
-                    return null;
-                })
-                .toList();
+            List<Callable<Void>> tasks = getTasks(batchesForArm, batchCounter, userAccount);
 
             try {
                 AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
@@ -95,6 +82,28 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             }
         }
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
+    }
+
+    private List<Callable<Void>> getTasks(List<List<Long>> batchesForArm, AtomicInteger batchCounter, UserAccountEntity userAccount) {
+        List<Callable<Void>> tasks = batchesForArm
+            .stream()
+            .map(eodsForBatch -> (Callable<Void>) () -> {
+                int batchNumber = batchCounter.getAndIncrement();
+                try {
+                    List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
+                    log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
+                    createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
+                    log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
+                } catch (Exception e) {
+                    log.error("Unexpected exception when processing batch {}", batchNumber, e);
+                    if (e instanceof InterruptedException) {
+                        throw e;
+                    }
+                }
+                return null;
+            })
+            .toList();
+        return tasks;
     }
 
     @SuppressWarnings({
@@ -129,6 +138,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             } catch (Exception e) {
                 log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
                 recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
+                if (e instanceof InterruptedException) {
+                    throw e;
+                }
             }
         }
 
@@ -140,6 +152,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         } catch (Exception e) {
             log.error("Error during generation of batch manifest file {}", archiveRecordsFileName, e);
             batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
+            if (e instanceof InterruptedException) {
+                throw e;
+            }
             return;
         }
 
