@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -46,11 +47,11 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
             result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
         } else {
-            throw new DartsException(format("unknown archive record type for EOD %d", externalObjectDirectoryId));
+            throw new DartsException(format("Unknown archive record type for EOD %d", externalObjectDirectoryId));
         }
 
-        if (result == null) {
-            throw new DartsException(format("exception generating archive record for EOD %d", externalObjectDirectoryId));
+        if (isNull(result)) {
+            throw new DartsException(format("Exception generating archive record for EOD %d", externalObjectDirectoryId));
         } else {
             return result;
         }

@@ -33,6 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -116,7 +117,7 @@ class UnstructuredToArmBatchProcessorTest {
     }
 
     @Test
-    void testDartsArmClientConfigInBatchQuery() {
+    void processUnstructuredToArm_ShouldSucceed_WhereDartsArmClientConfigInBatchQuery() {
 
         ExternalObjectDirectoryEntity eod10 = new ExternalObjectDirectoryEntity();
         eod10.setId(10L);
@@ -146,7 +147,7 @@ class UnstructuredToArmBatchProcessorTest {
     }
 
     @Test
-    void testPaginatedBatchQuery() {
+    void processUnstructuredToArm_ShouldSucceed_WherePaginatedBatchQuery() {
         //given
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12L, 34L));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
@@ -223,8 +224,12 @@ class UnstructuredToArmBatchProcessorTest {
         }).when(unstructuredToArmHelper).copyUnstructuredRawDataToArm(any(), any(), any(), any(), any());
 
         // when
-        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
-
+        try {
+            unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
+        } catch (Exception e) {
+            // Fail the test if the exception is not handled
+            fail("InterruptedException was not handled properly");
+        }
         //then
         verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocation(
             any(),
@@ -241,4 +246,54 @@ class UnstructuredToArmBatchProcessorTest {
         verifyNoMoreInteractions(logApi);
 
     }
+
+//    @Test
+//    void processUnstructuredToArm_shouldHandleInterruptedExceptionFromAsyncUtil() throws Exception {
+//        // Mock data
+//        when(unstructuredToArmHelper.getEodEntitiesToSendToArm(any(ExternalLocationTypeEntity.class), any(), anyInt()))
+//            .thenReturn(List.of(1L, 2L, 3L));
+//        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(2);
+//
+//        // Mock AsyncUtil to throw InterruptedException
+//        try (var mockedStatic = mockStatic(AsyncUtil.class)) {
+//            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)))
+//                .thenThrow(new InterruptedException("Mocked InterruptedException"));
+//
+//            // Execute
+//            unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
+//
+//            // Verify
+//            mockedStatic.verify(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)));
+//            verify(logApi, never()).armPushSuccessful(anyLong());
+//        }
+//    }
+//
+//    @Test
+//    void processUnstructuredToArm_shouldHandleInterruptedExceptionFromTask() throws Exception {
+//        // Mock data
+//        when(unstructuredToArmHelper.getEodEntitiesToSendToArm(any(ExternalLocationTypeEntity.class), any(), anyInt()))
+//            .thenReturn(List.of(1L, 2L, 3L));
+//        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(2);
+//
+//        // Mock task to throw InterruptedException
+//        Callable<Void> mockTask = mock(Callable.class);
+//        doThrow(new InterruptedException("Mocked InterruptedException")).when(mockTask).call();
+//
+//        try (var mockedStatic = mockStatic(AsyncUtil.class)) {
+//            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)))
+//                .thenAnswer(invocation -> {
+//                    List<Callable<Void>> tasks = invocation.getArgument(0);
+//                    for (Callable<Void> task : tasks) {
+//                        task.call();
+//                    }
+//                    return null;
+//                });
+//
+//            // Execute
+//            unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
+//
+//            // Verify
+//            verify(logApi, never()).armPushSuccessful(anyLong());
+//        }
+//    }
 }
