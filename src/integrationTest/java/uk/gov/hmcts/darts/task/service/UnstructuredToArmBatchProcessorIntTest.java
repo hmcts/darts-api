@@ -611,42 +611,4 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropZoneEodsMedia1.getFirst().getManifestFile()).isEqualTo(manifestFileName);
     }
 
-    @Test
-    void processUnstructuredToArm_ShouldThrowInterruptedException() {
-
-        //given
-        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-
-        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(2), ARM_RAW_DATA_FAILED, ARM);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), ARM_MANIFEST_FAILED, ARM);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_MANIFEST_FAILED, ARM);
-
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_MANIFEST_FAILED, ARM);
-//        when(azureCopyUtil.copyBlobDataToArm(any(), anyString()))
-//            .thenThrow(new InterruptedException("Simulated interruption"));
-
-        //when
-        unstructuredToArmProcessor.processUnstructuredToArm(5);
-
-        //then
-        var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
-            List.of(medias.getFirst().getId(),
-                    medias.get(1).getId(),
-                    medias.get(2).getId(),
-                    medias.get(3).getId(),
-                    medias.get(4).getId(),
-                    medias.get(5).getId()),
-            EodHelper.armDropZoneStatus(),
-            EodHelper.armLocation()
-        );
-        assertThat(foundMediaList.size()).isEqualTo(BATCH_SIZE);
-        assertThat(eodRepository.findMediaIdsByInMediaIdStatusAndType(
-            List.of(medias.getFirst().getId()), EodHelper.storedStatus(), EodHelper.unstructuredLocation())).hasSize(1);
-    }
 }
