@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
 
+    @SneakyThrows
     @Override
     @SuppressWarnings({"PMD.DoNotUseThreads"})
     public void processUnstructuredToArm(int taskBatchSize) {
@@ -82,9 +84,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             try {
                 AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
             } catch (InterruptedException e) {
-                log.error("Unstructured to arm batch unexpected exception", e);
-                Thread.currentThread().interrupt();
-                return;
+                log.error("Unstructured to arm batch interrupted exception", e);
+                //Thread.currentThread().interrupt();
+                throw e;
             } catch (Exception e) {
                 log.error("Unstructured to arm batch unexpected exception", e);
                 return;
