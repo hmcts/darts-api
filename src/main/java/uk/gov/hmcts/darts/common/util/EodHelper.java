@@ -31,6 +31,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.DATASTORE_DELETED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -82,6 +83,8 @@ public class EodHelper {
     private static ObjectRecordStatusEntity awaitingVerificationStatus;
     @Getter
     private static ObjectRecordStatusEntity armRawDataPushedStatus;
+    @Getter
+    private static ObjectRecordStatusEntity datastoreDeletionStatus;
 
     @Getter
     private static List<ObjectRecordStatusEntity> failedArmStatuses;
@@ -115,8 +118,8 @@ public class EodHelper {
         armReplayStatus = orsRepository.findById(ARM_REPLAY.getId()).orElseThrow();
         armMissingResponseStatus = orsRepository.findById(ARM_MISSING_RESPONSE.getId()).orElseThrow();
         armRawDataPushedStatus = orsRepository.findById(ARM_RAW_DATA_PUSHED.getId()).orElseThrow();
+        datastoreDeletionStatus = orsRepository.findById(DATASTORE_DELETED.getId()).orElseThrow();
         failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, armResponseManifestFailedStatus);
-
     }
 
     public static boolean isEqual(ExternalLocationTypeEntity olt1, ExternalLocationTypeEntity olt2) {

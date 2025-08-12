@@ -29,7 +29,9 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
     @Override
     public boolean delete(T entityToBeDeleted) {
         boolean deletedFromDataStore = deleteFromDataStore(entityToBeDeleted);
-        deleteFromRepository(entityToBeDeleted);
+        if (deletedFromDataStore) {
+            datastoreDeletionCallback(entityToBeDeleted);
+        }
         return deletedFromDataStore;
     }
 
@@ -59,7 +61,7 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
 
     protected abstract Collection<T> findItemsToDelete(int batchSize);
 
-    protected void deleteFromRepository(T entityToBeDeleted) {
+    protected void datastoreDeletionCallback(T entityToBeDeleted) {
         repository.delete(entityToBeDeleted);
     }
 }

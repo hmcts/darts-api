@@ -2,16 +2,22 @@ package uk.gov.hmcts.darts.audio.deleter.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -31,12 +37,47 @@ public class ExternalOutboundDataStoreDeleterWithBuffer extends ExternalOutbound
         this.transientObjectDirectoryDeleteBuffer = transientObjectDirectoryDeleteBuffer;
     }
 
+
     @Override
-    protected void deleteFromRepository(TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
-        TransformedMediaEntity transformedMedia = transientObjectDirectoryEntity.getTransformedMedia();
+    public Collection<TransientObjectDirectoryEntity> delete(Integer batchSize) {
+        Collection<TransientObjectDirectoryEntity> result = super.delete(batchSize);
+        deleteExpiredTransientObjectEntities(batchSize);
+        return result;
+    }
+
+    void deleteExpiredTransientObjectEntities(Integer batchSize) {
         OffsetDateTime maxTimeToDelete = currentTimeHelper.currentOffsetDateTime().minus(transientObjectDirectoryDeleteBuffer);
-        if (transformedMedia == null || maxTimeToDelete.isAfter(transformedMedia.getExpiryTime())) {
-            super.deleteFromRepository(transientObjectDirectoryEntity);
+
+        Collection<TransientObjectDirectoryEntity> expiredTransientObjectDirectoryEntities =
+            this.getRepository().findByTransformedMediaIsNullOrExpiryBeforeMaxExpiryTime(maxTimeToDelete,
+                                                                                         ObjectRecordStatusEnum.DATASTORE_DELETED.getId(),
+                                                                                         Limit.of(batchSize));
+
+        if (expiredTransientObjectDirectoryEntities.isEmpty()) {
+            log.info("No expired transient object directories found older than {}. Nothing to delete.", maxTimeToDelete);
+            return;
         }
+
+        if (log.isInfoEnabled()) {
+            log.info("Deleting {} expired transient object directories older than {}. Ids: {}",
+                     expiredTransientObjectDirectoryEntities.size(), maxTimeToDelete,
+                     expiredTransientObjectDirectoryEntities.stream()
+                         .map(TransientObjectDirectoryEntity::getId)
+                         .toList());
+        }
+        // Delete transformed media entities associated with the expired transient object directories
+        List<TransformedMediaEntity> transformedMediaEntityList = expiredTransientObjectDirectoryEntities.stream()
+            .map(TransientObjectDirectoryEntity::getTransformedMedia)
+            .filter(Objects::nonNull)
+            .toList();
+
+        this.getRepository().deleteAll(expiredTransientObjectDirectoryEntities);
+        transformedMediaRepository.deleteAll(transformedMediaEntityList);
+    }
+
+    @Override
+    public void datastoreDeletionCallback(TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
+        transientObjectDirectoryEntity.setStatus(EodHelper.datastoreDeletionStatus());
+        this.getRepository().save(transientObjectDirectoryEntity);
     }
 }

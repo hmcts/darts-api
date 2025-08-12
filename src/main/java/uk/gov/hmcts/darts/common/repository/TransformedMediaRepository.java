@@ -59,11 +59,13 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
                 (tm.lastAccessed < :createdAtOrLastAccessedDateTime AND tm.mediaRequest.status = 'COMPLETED')
              OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND  tm.mediaRequest.status <> 'PROCESSING' AND tm.lastAccessed IS NULL)
         )
-        AND upper(tod.status.description) <> 'MARKED FOR DELETION'   
+        AND tod.status.id not in :expiredObjectRecordStatusIds
         AND not exists (SELECT sge from tm.mediaRequest.currentOwner.securityGroupEntities sge 
                where sge.securityRoleEntity.roleName = 'MEDIA_IN_PERPETUITY') 
         """)
-    List<Integer> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime, Limit limit);
+    List<Integer> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime,
+                                                   List<Integer> expiredObjectRecordStatusIds,
+                                                   Limit limit);
 
     @Query("""
         SELECT tm
