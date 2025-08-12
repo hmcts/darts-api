@@ -90,7 +90,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     }
 
     @Test
-    void casesGetEventsEndpointShouldReturnForbiddenError() throws Exception {
+    void casesGetEventsEndpoint_shouldReturn401Error_whenNoUserExists() throws Exception {
 
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
@@ -98,7 +98,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             .queryParam("page_number", "1")
             .queryParam("page_size", "1");
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isForbidden());
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
     @Test

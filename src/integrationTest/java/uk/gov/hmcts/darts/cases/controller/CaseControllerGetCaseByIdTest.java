@@ -63,13 +63,13 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchGetEndpointShouldReturnForbiddenError() throws Exception {
+    void casesSearchGetEndpoint_shouldReturn401Error_whenUserNotFound() throws Exception {
         setupData();
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
-        mockMvc.perform(requestBuilder).andExpect(status().isForbidden());
+        mockMvc.perform(requestBuilder).andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -115,7 +115,7 @@ class TokenValidatorTest extends IntegrationBaseWithWiremock {
 
         mockMvc.perform(get(ENDPOINT_URL).header("Authorization", "Bearer " + tokenDetails.getToken()))
             .andExpect(status().isForbidden())
-            .andExpect(content().json("{\"type\":\"AUTHORISATION_106\",\"title\":\"Could not obtain user details\",\"status\":403}"))
+            .andExpect(content().json("{\"type\":\"AUTHORISATION_114\",\"title\":\"User is not active\",\"status\":403}"))
             .andReturn();
     }
 
