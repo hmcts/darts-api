@@ -29,13 +29,12 @@ import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsVal
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
-import uk.gov.hmcts.darts.usermanagement.validator.NotSameUserValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserActivateValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -83,10 +82,6 @@ class UserManagementServiceImplTest {
 
     @Mock
     private UserActivateValidator userAuthoriseValidator;
-
-    @Mock
-    private NotSameUserValidator notSameUserValidator;
-
 
     @BeforeEach
     void setUp() {
