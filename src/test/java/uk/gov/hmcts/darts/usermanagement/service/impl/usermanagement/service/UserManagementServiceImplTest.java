@@ -83,6 +83,10 @@ class UserManagementServiceImplTest {
     @Mock
     private UserActivateValidator userAuthoriseValidator;
 
+    @Mock
+    private NotSameUserValidator notSameUserValidator;
+
+
     @BeforeEach
     void setUp() {
         UserAccountMapper mapper = new UserAccountMapperImpl();
