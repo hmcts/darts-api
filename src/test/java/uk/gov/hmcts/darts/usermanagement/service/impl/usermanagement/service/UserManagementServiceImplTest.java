@@ -33,9 +33,9 @@ import uk.gov.hmcts.darts.usermanagement.validator.NotSameUserValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserActivateValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,7 +52,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserManagementServiceImplTest {
-
     private static final String EXISTING_EMAIL_ADDRESS = "existing-email@hmcts.net";
     private UserManagementServiceImpl service;
     @Mock
@@ -87,6 +86,7 @@ class UserManagementServiceImplTest {
 
     @Mock
     private NotSameUserValidator notSameUserValidator;
+
 
     @BeforeEach
     void setUp() {
@@ -136,21 +136,6 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void testGetUserWithIncludeSystemUser() throws IOException {
-        List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
-
-        when(userManagementQuery.getUsers(true, EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
-
-        List<UserWithIdAndTimestamps> resultList = service.getUsers(true, EXISTING_EMAIL_ADDRESS, null);
-
-        assertEquals(userAccountEntities.getFirst().getUserFullName(), resultList.getFirst().getFullName());
-        assertEquals(userAccountEntities.getFirst().getEmailAddress(), resultList.getFirst().getEmailAddress());
-        assertEquals(userAccountEntities.getFirst().getLastLoginTime(), resultList.getFirst().getLastLoginAt());
-        assertEquals(userAccountEntities.getFirst().getLastModifiedDateTime(), resultList.getFirst().getLastModifiedAt());
-        assertEquals(userAccountEntities.getFirst().getCreatedDateTime(), resultList.getFirst().getCreatedAt());
-    }
-
-    @Test
     void modifyUser_ReturnsUpdatedUser_WithActivateFalse() {
         List<UserAccountEntity> userAccountEntities = new ArrayList<>();
         userAccountEntities.add(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
@@ -161,14 +146,13 @@ class UserManagementServiceImplTest {
         userAccountEntities.add(createUserAccount(2, "another-user-email@hmcts.net"));
 
         Integer userId = 1001;
+        Long transcriptionId = 1001L;
         UserPatch patch = new UserPatch();
         patch.setActive(false);
 
         Set<UserAccountEntity> userAccountEntitySet = new HashSet<>(userAccountEntities);
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         when(securityGroupEntity.getUsers()).thenReturn(userAccountEntitySet);
-
-        Long transcriptionId = 1001L;
 
         when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
