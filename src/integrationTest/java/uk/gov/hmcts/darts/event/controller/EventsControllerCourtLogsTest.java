@@ -44,14 +44,13 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {"darts.async.enabled=false"})
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
 
-    public static final String NEW_CASE = "Case0000001";
-    public static final String END_DATE_TIME = "end_date_time";
-    public static final String START_DATE_TIME = "start_date_time";
-    public static final String CASE_NUMBER = "case_number";
-    public static final String COURTHOUSE = "courthouse";
+    private static final String NEW_CASE = "Case0000001";
+    private static final String END_DATE_TIME = "end_date_time";
+    private static final String START_DATE_TIME = "start_date_time";
+    private static final String CASE_NUMBER = "case_number";
+    private static final String COURTHOUSE = "courthouse";
     private static final URI ENDPOINT = URI.create("/courtlogs");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";

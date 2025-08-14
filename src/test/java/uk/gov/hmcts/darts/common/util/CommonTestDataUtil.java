@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.time.ZoneOffset.UTC;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
-@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @UtilityClass
 public class CommonTestDataUtil {
 

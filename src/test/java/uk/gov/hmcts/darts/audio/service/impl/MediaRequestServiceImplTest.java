@@ -93,7 +93,6 @@ import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTe
 import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulatedInt;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class MediaRequestServiceImplTest {
 
     private static final Integer TEST_REQUESTER = 1234;

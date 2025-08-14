@@ -13,19 +13,11 @@ import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
-import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
-import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,9 +33,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioServiceImplTest {
-    public static final int HEARING_ID = 1;
+
+    private static final int HEARING_ID = 1;
+
     @Mock
     private AudioTransformationService audioTransformationService;
     @Mock
@@ -53,25 +46,9 @@ class AudioServiceImplTest {
     @Mock
     private FileOperationService fileOperationService;
     @Mock
-    private RetrieveCoreObjectService retrieveCoreObjectService;
-    @Mock
-    private HearingRepository hearingRepository;
-    @Mock
-    private UserIdentity userIdentity;
-    @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Mock
-    private DataManagementApi dataManagementApi;
-    @Mock
-    AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
-    @Mock
-    private LogApi logApi;
-    @Mock
-    private TransformedMediaRepository transformedMediaRepository;
+    private AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
     @Mock
     private NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -84,8 +61,6 @@ class AudioServiceImplTest {
         audioService = new AudioServiceImpl(
             audioTransformationService,
             externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
             mediaRepository,
             audioOperationService,
             fileOperationService,

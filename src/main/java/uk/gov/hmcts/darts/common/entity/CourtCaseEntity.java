@@ -35,7 +35,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = CourtCaseEntity.TABLE_NAME)
-@SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
 @Slf4j

@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.ReplaceJavaUtilDate"})
 public class AudioOperationServiceImpl implements AudioOperationService {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
@@ -216,7 +216,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         Date encodeStartDate = new Date();
         systemCommandExecutor.execute(command);
         Date encodeEndDate = new Date();
-        log.debug("**Encoding of audio file with command {} took {}ms", command, encodeEndDate.getTime() - encodeStartDate.getTime());
+        log.debug("Encoding of audio file with command {} took {}ms", command, encodeEndDate.getTime() - encodeStartDate.getTime());
 
         return AudioFileInfo.builder()
             .startTime(audioFileInfo.getStartTime())
@@ -255,6 +255,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return firstChannelNumber.orElseThrow();
     }
 
+    @SuppressWarnings("PMD.ReplaceJavaUtilDate")
     private String generateOutputFilename(AudioConstants.AudioOperationTypes operationType,
                                           Integer channel,
                                           AudioConstants.AudioFileFormats outputFileFormat) {

@@ -10,7 +10,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("PMD.ExcessiveImports")
 class AdminGetAutomatedTaskServiceTest extends IntegrationBase {
 
     @Autowired

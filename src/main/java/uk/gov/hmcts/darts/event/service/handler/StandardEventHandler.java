@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.util.DataUtil;
 
 @Slf4j
 @Service
-@SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
 public class StandardEventHandler extends EventHandlerBase {
 
     public StandardEventHandler(RetrieveCoreObjectService retrieveCoreObjectService,

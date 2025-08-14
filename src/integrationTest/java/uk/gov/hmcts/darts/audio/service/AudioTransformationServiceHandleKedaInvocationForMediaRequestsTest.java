@@ -94,7 +94,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     }
 
     @Test
-    @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForDownload() {
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
@@ -125,7 +124,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     }
 
     @Test
-    @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedOnlyOnce() {
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
@@ -145,7 +143,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     }
 
     @Test
-    @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForPlayback() {
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
@@ -176,7 +173,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     }
 
     @Test
-    @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldResetRequestStatusToOpen() {
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
@@ -200,7 +196,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
-    @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
         AudioRequestType audioRequestType) {
 

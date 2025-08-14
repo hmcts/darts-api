@@ -34,7 +34,7 @@ public class RequestValidator {
     This is to try to calculate if the search terms are too broad. E.g. adding a judge name with just 2 letters is too broad,
     and doesn't get counted.
      */
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
+    @SuppressWarnings({"PMD.NPathComplexity"})
     private static void checkComplexity(GetCasesSearchRequest request) {
         int totalPoints = 0;
         //give a point for every letter more than 3
