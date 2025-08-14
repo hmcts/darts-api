@@ -14,10 +14,8 @@ import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
@@ -36,8 +34,6 @@ public class AudioServiceImpl implements AudioService {
 
     private final AudioTransformationService audioTransformationService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final MediaRepository mediaRepository;
     private final AudioOperationService audioOperationService;
     private final FileOperationService fileOperationService;
@@ -59,10 +55,7 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    @SuppressWarnings({
-        "PMD.ExceptionAsFlowControl",
-        "PMD.DoNotUseThreads"//TODO - refactor to avoid using Thread.sleep() when this is next edited
-    })
+    @SuppressWarnings({"PMD.DoNotUseThreads"})
     public BinaryData encode(Long mediaId) {
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));

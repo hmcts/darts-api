@@ -72,7 +72,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PEN
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @Slf4j
-@SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
+@SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount"})
 abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
     private static final LocalDateTime HEARING_DATETIME = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
@@ -2444,7 +2444,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         // then
         ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
-            assertEquals(ARM_RPO_PENDING.getId(), foundTranscriptionEod.getStatus().getId());
+        assertEquals(ARM_RPO_PENDING.getId(), foundTranscriptionEod.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundTranscriptionEod.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundTranscriptionEod.getExternalRecordId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());

@@ -20,7 +20,6 @@ public class AudioMediaPatchRequestValidator implements Validator<IdRequest<Medi
     private final MediaRequestRepository mediaRequestRepository;
 
     @Override
-    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     public void validate(IdRequest<MediaPatchRequest, Integer> patchRequest) {
         if (patchRequest.getId() == null || !mediaRequestRepository.findById(patchRequest.getId()).isPresent()) {
             throw new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND);

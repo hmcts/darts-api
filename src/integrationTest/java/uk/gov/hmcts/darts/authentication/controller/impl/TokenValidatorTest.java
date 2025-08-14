@@ -132,7 +132,7 @@ class TokenValidatorTest extends IntegrationBaseWithWiremock {
     }
 
     // TODO: We need to enable audience checking in our security layer
-    @SuppressWarnings({"PMD.DetachedTestCase", "PMD.SignatureDeclareThrowsException"})
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
     //@Test
     void testInvalidAudience() throws Exception {
         DartsTokenGenerator token = DartsTokenGenerator.builder().issuer(configurationProperties.getIssuerUri())

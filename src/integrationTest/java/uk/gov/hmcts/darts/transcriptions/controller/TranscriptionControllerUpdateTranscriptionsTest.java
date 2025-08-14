@@ -45,7 +45,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AW
 
 @AutoConfigureMockMvc
 @Transactional
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
 
     @MockitoBean

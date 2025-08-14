@@ -122,7 +122,6 @@ public class AuthorisationAspect {
         }
     }
 
-    @SuppressWarnings("PMD.TooFewBranchesForSwitch")
     private boolean handleRequestBodyAuthorisation(@NotNull String method) {
         return switch (method) {
             case "POST", "PUT", "PATCH" -> true;
@@ -130,7 +129,6 @@ public class AuthorisationAspect {
         };
     }
 
-    @SuppressWarnings("PMD.TooFewBranchesForSwitch")
     private boolean handleRequestParametersAuthorisation(@NotNull String method) {
         return switch (method) {
             case "GET", "POST", "PUT", "PATCH", "DELETE" -> true;
