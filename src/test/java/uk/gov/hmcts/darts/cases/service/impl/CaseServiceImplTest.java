@@ -557,7 +557,6 @@ class CaseServiceImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    //Caused by mockio this can never be incorrect
     void getEventsByCaseIdPaginated_shouldPaginatedCorrectly_whenGivenTypicalData() {
         final int caseId = 123;
         CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
