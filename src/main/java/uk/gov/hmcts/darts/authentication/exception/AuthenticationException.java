@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.authentication.exception;
 
-@SuppressWarnings("PMD.MissingSerialVersionUID")
 public class AuthenticationException extends RuntimeException {
 
     public AuthenticationException(String message) {

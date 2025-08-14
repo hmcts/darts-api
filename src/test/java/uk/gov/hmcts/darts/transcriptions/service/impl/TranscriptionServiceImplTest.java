@@ -83,7 +83,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings({"PMD.LawOfDemeter", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.CouplingBetweenObjects"})
 class TranscriptionServiceImplTest {
 
     private static final String TEST_COMMENT = "Test comment";

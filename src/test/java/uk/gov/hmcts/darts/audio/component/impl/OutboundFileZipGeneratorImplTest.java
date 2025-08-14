@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
-@SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes"})
 @ExtendWith(MockitoExtension.class)
 class OutboundFileZipGeneratorImplTest {
 

@@ -19,7 +19,6 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({MockitoExtension.class})
-@SuppressWarnings("PMD.LawOfDemeter")
 class EventLoggerServiceImplTest {
 
     EventLoggerServiceImpl eventLoggerService;

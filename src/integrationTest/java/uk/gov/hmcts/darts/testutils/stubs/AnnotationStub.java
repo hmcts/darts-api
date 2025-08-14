@@ -40,24 +40,23 @@ public class AnnotationStub {
                                                                               String checksum) {
         return
             annotationStubComposable.createAndSaveAnnotationDocumentEntityWith(
-                annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, null, null);
+                annotationEntity, fileName, fileType, fileSize, uploadedBy, uploadedDateTime, checksum, null, null);
     }
 
     @Transactional
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy,
                                                                    OffsetDateTime uploadedDateTime, String checksum, RetentionConfidenceScoreEnum confScore,
                                                                    String confReason) {
         return annotationStubComposable
-            .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, confScore, confReason);
+            .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy, uploadedDateTime, checksum, confScore, confReason);
     }
 
     @Transactional
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime, String checksum) {
         return annotationStubComposable
-            .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum,
+            .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy, uploadedDateTime, checksum,
                                             RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, "confidence reason");
     }
 

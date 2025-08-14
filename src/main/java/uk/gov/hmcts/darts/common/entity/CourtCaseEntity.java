@@ -36,10 +36,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = CourtCaseEntity.TABLE_NAME)
-@SuppressWarnings({
-    "PMD.ShortClassName",
-    "PMD.CouplingBetweenObjects"//Database entities naturally have coupling
-})
+@SuppressWarnings("PMD.CouplingBetweenObjects") //Database entities naturally have coupling
 @Getter
 @Setter
 @Slf4j

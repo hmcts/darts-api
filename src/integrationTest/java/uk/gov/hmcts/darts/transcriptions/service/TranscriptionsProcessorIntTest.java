@@ -29,7 +29,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
 
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionsProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime CREATED_DATE = OffsetDateTime.parse("2023-07-31T12:00Z");

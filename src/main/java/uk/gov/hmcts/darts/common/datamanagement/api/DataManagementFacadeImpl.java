@@ -43,9 +43,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Service
 @RequiredArgsConstructor
 @SuppressWarnings({
-    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
-    "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited
-    "PMD.GodClass"//TODO - refactor to reduce class size when this class is next edited
+    "PMD.CouplingBetweenObjects",
+    "PMD.TooManyMethods"
 })
 public class DataManagementFacadeImpl implements DataManagementFacade {
 
@@ -209,7 +208,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         throw new FileNotDownloadedException(logBuilder.toString());
     }
 
-    @SuppressWarnings("PMD.CloseResource")//TODO - ensure resource is closed after use to prevent memory leaks
+    @SuppressWarnings("PMD.CloseResource")
     void processUnstructuredData(
         DatastoreContainerType datastoreContainerType,
         DownloadResponseMetaData downloadResponseMetaData,

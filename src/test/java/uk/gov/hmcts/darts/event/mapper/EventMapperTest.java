@@ -129,7 +129,6 @@ class EventMapperTest {
     }
 
     @Test
-    @SuppressWarnings({"PMD.NcssCount"})
     void whenMultipleVersionsForAnEvent_mapsEventVersionToAdminGetEventVersionsResponseResult() {
         // When
         OffsetDateTime now = OffsetDateTime.now();

@@ -263,7 +263,6 @@ public class CourthouseServiceImpl implements CourthouseService {
      * @throws CourthouseCodeNotMatchException when the courtroom is found, but it has a different code that expected.
      */
     @Override
-    @SuppressWarnings("PMD.UselessParentheses")
     public CourthouseEntity retrieveAndUpdateCourtHouse(Integer courthouseCode, String courthouseName)
         throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
         String courthouseNameUpperTrimmed = StringUtils.upperCase(StringUtils.trimToEmpty(courthouseName));

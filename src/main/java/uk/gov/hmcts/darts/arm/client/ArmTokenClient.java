@@ -27,14 +27,12 @@ public interface ArmTokenClient {
     @PostMapping(value = "${darts.storage.arm-api.authentication-url.available-entitlement-profiles-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
-    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     AvailableEntitlementProfile availableEntitlementProfiles(@RequestHeader(AUTHORIZATION) String bearerAuth,
                                                              @RequestBody EmptyRpoRequest emptyRpoRequest);
 
     @PostMapping(value = "${darts.storage.arm-api.authentication-url.select-entitlement-profile-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
-    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     ArmTokenResponse selectEntitlementProfile(@RequestHeader(AUTHORIZATION) String bearerAuth,
                                               @PathVariable("profile_id") String profileId,
                                               @RequestBody EmptyRpoRequest emptyRpoRequest);
