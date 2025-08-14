@@ -6,7 +6,9 @@
   ],
   "timezone": "Europe/London",
   "schedule": [
-    "after 7am and before 9am every weekday",
-    "after 6pm and before 8pm every weekday"
+    "on Monday between 13:00 and 19:30",
+    "on Wednesday between 07:00 and 19:30",
+    "on Thursday between 07:00 and 19:30",
+    "on Friday between 07:00 and 12:00"
   ]
 }
