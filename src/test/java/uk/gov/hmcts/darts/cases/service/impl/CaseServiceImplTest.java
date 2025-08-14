@@ -557,7 +557,6 @@ class CaseServiceImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
-//Caused by mockio this can never be incorrect
     void getEventsByCaseIdPaginated_shouldPaginatedCorrectly_whenGivenTypicalData() {
         final int caseId = 123;
         CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
@@ -605,7 +604,7 @@ class CaseServiceImplTest {
         final int caseId = 123;
         CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
         courtCaseEntity.setDataAnonymised(true);
-        when(caseRepository.findById(caseId)).thenReturn(Optional.ofNullable(courtCaseEntity));
+        when(caseRepository.findById(caseId)).thenReturn(Optional.of(courtCaseEntity));
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> caseService.getEventsByCaseId(caseId, null));
         assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
