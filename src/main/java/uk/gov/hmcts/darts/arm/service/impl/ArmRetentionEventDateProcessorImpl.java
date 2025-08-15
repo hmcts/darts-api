@@ -20,6 +20,7 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
 
     private final ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
 
+    @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
     @Override
     public void calculateEventDates(Integer batchSize) {
         boolean updateRetention = true;
@@ -32,6 +33,9 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
                 armRetentionEventDateCalculator.calculateRetentionEventDate(externalObjectDirectoryId);
             } catch (Exception e) {
                 log.error("Unable to calculate retention date for EOD {}", externalObjectDirectoryId, e);
+                if (e instanceof InterruptedException) {
+                    throw e;
+                }
             }
         }
     }

@@ -100,7 +100,7 @@ public class ArmApiServiceImpl implements ArmApiService {
             throw new FileNotDownloadReadingBodyException(message, e);
         }
 
-        log.debug("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);
+        log.info("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);
         return responseMetaData;
     }
 
