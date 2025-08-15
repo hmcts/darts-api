@@ -66,9 +66,7 @@ public interface UserAccountRepository extends
     List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
     List<UserAccountEntity> findByEmailAddressIgnoreCaseAndActive(String emailAddress, Boolean active);
-
-    List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
-
+    
     @Modifying
     @Query("""
         UPDATE UserAccountEntity
