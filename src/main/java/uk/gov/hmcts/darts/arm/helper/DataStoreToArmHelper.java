@@ -17,10 +17,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -45,18 +42,14 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 public class DataStoreToArmHelper {
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final LogApi logApi;
     private final ArmDataManagementApi armDataManagementApi;
-    private final FileOperationService fileOperationService;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
-
     public List<Long> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
-                                                   ExternalLocationTypeEntity armLocation, int maxResultSize) {
+                                                ExternalLocationTypeEntity armLocation, int maxResultSize) {
 
         List<ObjectRecordStatusEntity> statusEntityList = List.of(
             EodHelper.failedArmRawDataStatus(), EodHelper.failedArmManifestFileStatus(),
@@ -204,6 +197,9 @@ public class DataStoreToArmHelper {
             }
         } catch (Exception e) {
             log.error("Error copying BLOB data for file {}", unstructuredExternalObjectDirectory.getExternalLocation(), e);
+            if (e instanceof InterruptedException) {
+                throw e;
+            }
             return false;
         }
 

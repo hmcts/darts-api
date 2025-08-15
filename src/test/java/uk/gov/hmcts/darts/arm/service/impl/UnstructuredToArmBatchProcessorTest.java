@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.service;
+package uk.gov.hmcts.darts.arm.service.impl;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +12,8 @@ import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
-import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
+import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmBatchProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -114,7 +115,7 @@ class UnstructuredToArmBatchProcessorTest {
     }
 
     @Test
-    void testDartsArmClientConfigInBatchQuery() {
+    void processUnstructuredToArm_ShouldSucceed_WhereDartsArmClientConfigInBatchQuery() {
 
         ExternalObjectDirectoryEntity eod10 = new ExternalObjectDirectoryEntity();
         eod10.setId(10L);
@@ -144,7 +145,7 @@ class UnstructuredToArmBatchProcessorTest {
     }
 
     @Test
-    void testPaginatedBatchQuery() {
+    void processUnstructuredToArm_ShouldSucceed_WherePaginatedBatchQuery() {
         //given
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12L, 34L));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
@@ -203,4 +204,6 @@ class UnstructuredToArmBatchProcessorTest {
             verifyNoMoreInteractions(logApi);
         }
     }
+
+
 }
