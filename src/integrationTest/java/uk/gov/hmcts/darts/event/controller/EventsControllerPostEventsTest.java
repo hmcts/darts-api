@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.controller;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
@@ -104,11 +106,11 @@ class EventsControllerPostEventsTest extends IntegrationBase {
                 .filter(eventEntity -> "ActiveTestType".equals(eventEntity.getEventType().getType()))
                 .toList();
 
-            Assertions.assertEquals(1, results.size());
+            assertEquals(1, results.size());
             EventEntity persistedEvent = results.getFirst();
 
             EventHandlerEntity eventType = persistedEvent.getEventType();
-            Assertions.assertEquals("New Description", eventType.getEventName());
+            assertEquals("New Description", eventType.getEventName());
         });
     }
 
@@ -148,7 +150,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         String content = response.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
-        Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
+        assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
     @Test
@@ -184,7 +186,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
             .toList();
 
-        Assertions.assertEquals(1, results.size());
+        assertEquals(1, results.size());
     }
 
     @Test
@@ -206,7 +208,6 @@ class EventsControllerPostEventsTest extends IntegrationBase {
               "date_time": "2023-06-14T08:37:30.945Z"
             }""";
 
-
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
             .content(requestBody);
@@ -221,9 +222,9 @@ class EventsControllerPostEventsTest extends IntegrationBase {
                 .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
                 .toList();
 
-            Assertions.assertEquals(1, results.size());
-            Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
-            Assertions.assertEquals("12309", results.getFirst().getEventType().getSubType());
+            assertEquals(1, results.size());
+            assertEquals("40750", results.getFirst().getEventType().getType());
+            assertEquals("12309", results.getFirst().getEventType().getSubType());
         });
     }
 
@@ -261,9 +262,57 @@ class EventsControllerPostEventsTest extends IntegrationBase {
                 .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
                 .toList();
 
-            Assertions.assertEquals(1, results.size());
-            Assertions.assertEquals("40750", results.getFirst().getEventType().getType());
-            Assertions.assertNull(results.getFirst().getEventType().getSubType());
+            assertEquals(1, results.size());
+            assertEquals("40750", results.getFirst().getEventType().getType());
+            assertNull(results.getFirst().getEventType().getSubType());
+        });
+    }
+
+    @Test
+    void postEvent_shouldCreateEventTypeWithCorrectTypeSubTypeAndRetention() throws Exception {
+        CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
+
+        var courtCase = dartsDatabase.createCase(courthouse.getCourthouseName(), "CASENUMBER");
+
+        String requestBody = """
+            {
+              "message_id": "Archive Case",
+              "type": "40750",
+              "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "case_numbers": [
+                "CASENUMBER"
+              ],
+              "retention_policy": {
+                  "case_retention_fixed_policy": "3",
+                  "case_total_sentence": "9Y0M0D"
+              },
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(requestBody);
+
+        setupExternalUserForCourthouse(courthouse);
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(MockMvcResultMatchers.status().isCreated());
+        transactionalUtil.executeInTransaction(() -> {
+            List<EventEntity> results = dartsDatabase.getAllEvents()
+                .stream()
+                .filter(eventEntity -> "Archive Case".equals(eventEntity.getMessageId()))
+                .toList();
+
+            assertEquals(1, results.size());
+            assertEquals("40750", results.getFirst().getEventType().getType());
+            assertNull(results.getFirst().getEventType().getSubType());
+
+            var caseRetentionEntitiesIds = dartsDatabase.getCaseManagementRetentionRepository().getIdsForEvents(List.of(results.getFirst().getId()));
+            assertEquals(1, caseRetentionEntitiesIds.size());
+            var caseRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findById(caseRetentionEntitiesIds.getFirst());
+            assertThat(caseRetentionEntities.get().getCourtCase().getId()).isEqualTo(courtCase.getId());
+
         });
     }
 

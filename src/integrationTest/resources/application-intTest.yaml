@@ -50,6 +50,14 @@ darts:
   hearings:
     admin-search:
       max-results: 5
+  events:
+    standard-event-types-with-retention:
+      - "40750"
+      - "40751"
+      - "40752"
+      - "40753"
+      - "40754"
+      - "40755"
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   gateway:
