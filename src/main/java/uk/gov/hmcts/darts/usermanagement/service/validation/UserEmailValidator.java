@@ -24,7 +24,7 @@ public class UserEmailValidator implements Validator<User> {
                 String.format("Invalid email format {%s}", user.getEmailAddress()));
         }
 
-        userAccountRepository.findByEmailAddressIgnoreCaseAndActive(user.getEmailAddress(), true)
+        userAccountRepository.findByEmailAddressIgnoreCase(user.getEmailAddress())
             .stream().findFirst()
             .ifPresent(existingUser -> {
                 throw new DartsApiException(
