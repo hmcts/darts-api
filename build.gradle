@@ -147,6 +147,14 @@ sourceSets {
     }
     resources.srcDir file('src/test/resources')
   }
+
+  tasks.named('test', Test) {
+    maxParallelForks = 2
+  }
+
+  tasks.named('integration', Test) {
+    maxParallelForks = 2
+  }
 }
 
 idea {
