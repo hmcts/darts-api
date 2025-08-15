@@ -230,6 +230,10 @@ tasks.register('smoke', Test) {
   classpath = sourceSets.smokeTest.runtimeClasspath
 }
 
+tasks.named('integration', Test) {
+  maxParallelForks = 2
+}
+
 checkstyle {
   checkstyleMain.exclude '**/uk/gov/hmcts/darts/task/runner/dailylist/**'
   maxWarnings = 0
