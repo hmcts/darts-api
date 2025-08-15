@@ -147,14 +147,6 @@ sourceSets {
     }
     resources.srcDir file('src/test/resources')
   }
-
-  tasks.named('test', Test) {
-    maxParallelForks = 2
-  }
-
-  tasks.named('integrationTest', Test) {
-    maxParallelForks = 2
-  }
 }
 
 idea {
@@ -236,6 +228,10 @@ tasks.register('smoke', Test) {
   description = "Runs Smoke Tests"
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
   classpath = sourceSets.smokeTest.runtimeClasspath
+}
+
+tasks.named('integration', Test) {
+  maxParallelForks = 2
 }
 
 checkstyle {
