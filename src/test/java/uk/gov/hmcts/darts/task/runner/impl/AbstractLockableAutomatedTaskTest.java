@@ -51,16 +51,14 @@ public class AbstractLockableAutomatedTaskTest {
     @Mock
     private LockService lockService;
 
-
     @Nested
     @ExtendWith(OutputCaptureExtension.class)
     @SuppressWarnings("PMD.SystemPrintln") // System.out.println is used to ensure runnable is executed
     @Isolated
     class LockedTaskTest {
 
-
         @Test
-        void lockedTaskRun_shouldBeSuccessfull_whenTaskCompletesWithinLockAtMostFor(CapturedOutput output) {
+        void lockedTaskRun_shouldBeSuccessful_whenTaskCompletesWithinLockAtMostFor(CapturedOutput output) {
             Runnable task = () -> {
                 System.out.println("LockedTaskTest: Task is running");
             };
@@ -114,7 +112,6 @@ public class AbstractLockableAutomatedTaskTest {
 
             doNothing().when(lockedTask).assertLocked();
 
-
             lockedTask.run();
 
             //Ensure task is run
@@ -125,6 +122,7 @@ public class AbstractLockableAutomatedTaskTest {
                              "Timeout waiting for task status to be FAILED", 10);
             verify(abstractLockableAutomatedTask, atLeastOnce()).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             verify(lockedTask).assertLocked();
+            verify(logApi).taskFailed(any(), any());
         }
 
         @Test
@@ -145,7 +143,6 @@ public class AbstractLockableAutomatedTaskTest {
 
             doNothing().when(lockedTask).assertLocked();
 
-
             lockedTask.run();
 
             //Ensure task is run
@@ -158,6 +155,7 @@ public class AbstractLockableAutomatedTaskTest {
             verify(abstractLockableAutomatedTask, atLeastOnce()).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             verify(abstractLockableAutomatedTask).handleException(exception);
             verify(lockedTask).assertLocked();
+            verify(logApi).taskFailed(any(), any());
         }
 
         @Test
@@ -182,7 +180,6 @@ public class AbstractLockableAutomatedTaskTest {
                 lock.setAtMostFor(Duration.ofSeconds(10));
                 when(abstractAutomatedTaskConfig.getLock()).thenReturn(lock);
 
-
                 AbstractLockableAutomatedTask<AbstractAutomatedTaskConfig> abstractLockableAutomatedTask = spy(createAbstractLockableAutomatedTask(() -> {
                 }));
 
@@ -198,6 +195,7 @@ public class AbstractLockableAutomatedTaskTest {
                                  "Timeout waiting for task status to be FAILED", 10);
                 verify(abstractLockableAutomatedTask, atLeastOnce()).setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
                 verify(lockedTask).assertLocked();
+                verify(logApi).taskFailed(any(), any());
             }
         }
 
