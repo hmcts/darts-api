@@ -57,10 +57,8 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 
 @TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=false"})
 @Slf4j
-@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CloseResource"})
 class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
-    private static final String BEARER_TOKEN = "BearerToken";
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
     private static final String PRODUCTION_ID = " b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";

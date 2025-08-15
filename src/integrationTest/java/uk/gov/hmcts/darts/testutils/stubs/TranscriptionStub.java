@@ -21,19 +21,15 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
-import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -58,18 +54,15 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 @Component
 @RequiredArgsConstructor
 @Deprecated
-@SuppressWarnings({"PMD.GodClass", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.GodClass"})
 public class TranscriptionStub {
 
     public static final byte[] TRANSCRIPTION_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
 
     private final TranscriptionRepository transcriptionRepository;
-    private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
-    private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
@@ -78,7 +71,6 @@ public class TranscriptionStub {
     private final TranscriptionStubComposable transcriptionStubComposable;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
     private final UserAccountRepository userAccountRepository;
-    private final TransactionalUtil transactionalUtil;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -567,7 +559,6 @@ public class TranscriptionStub {
     }
 
     @Transactional
-    @SuppressWarnings({"PMD.ExcessiveParameterList", "PMD.UseObjectForClearerAPI"})
     public TranscriptionDocumentEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
                                                                        String fileName,
                                                                        String fileType,
@@ -607,13 +598,6 @@ public class TranscriptionStub {
     }
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
-                                                                                int fileSize, UserAccountEntity testUser, String checksum) {
-        return createTranscriptionDocumentEntity(transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, null, null);
-    }
-
-
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize,
                                                                                 UserAccountEntity testUser,
                                                                                 String checksum, RetentionConfidenceScoreEnum confScore, String confReason) {
@@ -631,18 +615,6 @@ public class TranscriptionStub {
 
         return transcriptionDocumentEntity;
     }
-
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
-                                                                                int fileSize, UserAccountEntity testUser, String checksum,
-                                                                                OffsetDateTime uploadedDateTime) {
-        TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED,
-            "confidence reason");
-        transcriptionDocumentEntity.setUploadedDateTime(uploadedDateTime);
-        return transcriptionDocumentEntity;
-    }
-
 
     public TranscriptionStatusEntity getTranscriptionStatusByEnum(TranscriptionStatusEnum transcriptionStatusEnum) {
         return transcriptionStatusRepository.getReferenceById(transcriptionStatusEnum.getId());

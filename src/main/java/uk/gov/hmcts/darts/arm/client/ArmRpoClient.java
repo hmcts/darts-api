@@ -125,7 +125,6 @@ public interface ArmRpoClient {
 
     @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}",
         produces = APPLICATION_OCTET_STREAM_VALUE)
-    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth,
                                       @PathVariable("productionExportFileID") String productionExportFileId);
 
@@ -135,7 +134,6 @@ public interface ArmRpoClient {
      */
     @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}",
         produces = APPLICATION_OCTET_STREAM_VALUE)
-    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth,
                                       @RequestHeader("EOD_IDS") String eodIds,
                                       @PathVariable("productionExportFileID") String productionExportFileId);

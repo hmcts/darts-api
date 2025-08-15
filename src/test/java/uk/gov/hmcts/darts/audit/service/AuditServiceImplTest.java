@@ -29,23 +29,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.LawOfDemeter")
 class AuditServiceImplTest {
-    @Mock
-    AuditActivityRepository auditActivityRepository;
-    @Mock
-    AuditRepository auditRepository;
-    @Mock
-    UserAccountRepository userAccountRepository;
-    @Mock
-    HearingRepository hearingRepository;
+    
+    private static final String APP_SERVER = "APP_SERVER";
 
-    AuditServiceImpl auditServiceImpl;
+    @Mock
+    private AuditActivityRepository auditActivityRepository;
+    @Mock
+    private AuditRepository auditRepository;
+    @Mock
+    private UserAccountRepository userAccountRepository;
+    @Mock
+    private HearingRepository hearingRepository;
+
+    private AuditServiceImpl auditServiceImpl;
 
     @Captor
-    ArgumentCaptor<AuditEntity> auditEntityArgumentCaptor;
-
-    private static final String APP_SERVER = "APP_SERVER";
+    private ArgumentCaptor<AuditEntity> auditEntityArgumentCaptor;
 
     @BeforeEach
     void setUp() {

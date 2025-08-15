@@ -36,8 +36,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,8 +49,8 @@ import static org.springframework.http.HttpStatus.valueOf;
 @RequiredArgsConstructor
 @SuppressWarnings({
     "checkstyle:SummaryJavadoc",
-    "PMD.CouplingBetweenObjects",//TODO - refactor to reduce coupling when this class is next edited
-    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+    "PMD.CouplingBetweenObjects",
+    "PMD.TooManyMethods"
 })
 public class DataManagementServiceImpl implements DataManagementService {
 
@@ -76,10 +76,12 @@ public class DataManagementServiceImpl implements DataManagementService {
             log.error(BLOB_DOES_NOT_EXIST_IN_CONTAINER, blobId, containerName);
         }
 
-        Date downloadStartDate = new Date();
+        LocalDateTime downloadStartDate = LocalDateTime.now();
         BinaryData binaryData = blobClient.downloadContent();
-        Date downloadEndDate = new Date();
-        log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+        LocalDateTime downloadEndDate = LocalDateTime.now();
+        Duration downloadDuration = Duration.between(downloadStartDate, downloadEndDate);
+
+        log.debug("Downloading of blob data guid {}, took {}ms", blobId, downloadDuration.toMillis());
 
         return binaryData;
     }
@@ -202,11 +204,12 @@ public class DataManagementServiceImpl implements DataManagementService {
         }
 
         try (OutputStream downloadOS = downloadResponse.getOutputStream(dataManagementConfiguration)) {
-            Date downloadStartDate = new Date();
+            LocalDateTime downloadStartDate = LocalDateTime.now();
             blobClient.downloadStream(downloadOS);
 
-            Date downloadEndDate = new Date();
-            log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+            LocalDateTime downloadEndDate = LocalDateTime.now();
+            Duration downloadDuration = Duration.between(downloadStartDate, downloadEndDate);
+            log.debug("Downloading of guid {}, took {}ms", blobId, downloadDuration.toMillis());
 
             downloadResponse.setContainerTypeUsedToDownload(type);
         } catch (IOException e) {

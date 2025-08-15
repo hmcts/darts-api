@@ -45,11 +45,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
 
     @Override
-    @SuppressWarnings({
-        "PMD.AvoidInstantiatingObjectsInLoops",
-        "PMD.CyclomaticComplexity",
-        "PMD.DoNotUseThreads"//TODO - refactor to avoid using Thread.sleep() when this is next edited
-    })
+    @SuppressWarnings({"PMD.DoNotUseThreads"})
     public void processUnstructuredToArm(int taskBatchSize) {
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
@@ -97,11 +93,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
-    @SuppressWarnings({
-        "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
-        "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
-        "PMD.AvoidInstantiatingObjectsInLoops"//TODO - refactor to avoid instantiating objects in loops when this is next edited
-    })
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private void createAndSendBatchFile(List<ExternalObjectDirectoryEntity> eodsForBatch, UserAccountEntity userAccount) {
         String archiveRecordsFileName = unstructuredToArmHelper.getArchiveRecordsFileName(armDataManagementConfiguration.getManifestFilePrefix());
         var batchItems = new ArmBatchItems();

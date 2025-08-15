@@ -45,8 +45,7 @@ import static java.util.Locale.UK;
 @Service
 public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGeneratorHelper {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG)
-        .withLocale(UK);
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG).withLocale(UK);
     private static final String DATE_TIME_ATTRIBUTE = "%d";
     private static final String INVALID_PLAYLIST_INFORMATION = "Invalid playlist information";
     public static final String PLAYLIST_XML_FILENAME = "playlist.xml";
@@ -113,14 +112,13 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
         }
     }
 
-    @SuppressWarnings({"PMD.AvoidFileStream"})
     @Override
     public String generateReadme(ViqMetaData viqMetaData, String fileLocation) {
         File readmeFile = new File(fileLocation, README_TXT_FILENAME);
         log.debug("Writing readme to {}", readmeFile.getAbsoluteFile());
 
         try (BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
-            PrintWriter printWriter = new PrintWriter(fileWriter)) {
+             PrintWriter printWriter = new PrintWriter(fileWriter)) {
 
             printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
             printWriter.println(format(
