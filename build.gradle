@@ -152,7 +152,7 @@ sourceSets {
     maxParallelForks = 2
   }
 
-  tasks.named('integration', Test) {
+  tasks.named('integrationTest', Test) {
     maxParallelForks = 2
   }
 }
