@@ -35,6 +35,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.AvoidInstanceofChecksInCatchClause"})
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
 
     private final ArchiveRecordService archiveRecordService;
@@ -50,8 +51,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     @SuppressWarnings({
         "PMD.AvoidInstantiatingObjectsInLoops",
         "PMD.CyclomaticComplexity",
-        "PMD.DoNotUseThreads",
-        "PMD.AvoidInstanceofChecksInCatchClause"
+        "PMD.DoNotUseThreads"
     })
     public void processUnstructuredToArm(int taskBatchSize) {
 
@@ -87,7 +87,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     }
 
     private List<Callable<Void>> getTasks(List<List<Long>> batchesForArm, AtomicInteger batchCounter, UserAccountEntity userAccount) {
-        List<Callable<Void>> tasks = batchesForArm
+        return batchesForArm
             .stream()
             .map(eodsForBatch -> (Callable<Void>) () -> {
                 int batchNumber = batchCounter.getAndIncrement();
@@ -105,7 +105,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 return null;
             })
             .toList();
-        return tasks;
     }
 
     @SuppressWarnings({
