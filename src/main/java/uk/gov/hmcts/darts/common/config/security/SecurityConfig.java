@@ -207,7 +207,6 @@ public class SecurityConfig {
         try {
             String authHeader = request.getHeader("Authorization");
             //TODO: Remove this log statement in production code, as it may expose sensitive information
-            log.info("Authorization header: {}", authHeader);
             String token = authHeader.replace(TOKEN_BEARER_PREFIX, "").trim();
             String issuer = JWTParser.parse(token).getJWTClaimsSet().getIssuer();
 
