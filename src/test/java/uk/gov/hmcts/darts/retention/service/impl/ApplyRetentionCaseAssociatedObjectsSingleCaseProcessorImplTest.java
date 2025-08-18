@@ -45,7 +45,9 @@ import java.util.Set;
 import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseRetention;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createRetentionPolicyType;
@@ -56,7 +58,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getExternal
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-@SuppressWarnings({"checkstyle:LineLength", "PMD.NcssCount"})
+@SuppressWarnings("PMD.NcssCount")
 class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
     private static final OffsetDateTime DATETIME_2025 = OffsetDateTime.of(2025, 1, 1, 10, 10, 0, 0, UTC);
@@ -122,7 +124,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
             caseDocumentRepository, transcriptionDocumentRepository, caseRetentionConfidenceReasonMapper,
             currentTimeHelper, objectMapper, mediaLinkedCaseRepository);
 
-        case1PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 101);
+        case1PerfectlyClosed = spy(CommonTestDataUtil.createCaseWithId("case1", 101));
         case1PerfectlyClosed.setRetentionUpdated(true);
         case1PerfectlyClosed.setRetentionRetries(1);
         case1PerfectlyClosed.setClosed(true);
@@ -131,7 +133,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case1PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case1PerfectlyClosed, 1, 3);
 
-        case2PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 102);
+        case2PerfectlyClosed = spy(CommonTestDataUtil.createCaseWithId("case1", 102));
         case2PerfectlyClosed.setRetentionUpdated(true);
         case2PerfectlyClosed.setRetentionRetries(2);
         case2PerfectlyClosed.setClosed(true);
@@ -140,7 +142,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case2PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case2PerfectlyClosed, 1, 1);
 
-        case3NotPerfectlyClosed = CommonTestDataUtil.createCaseWithId("case3", 103);
+        case3NotPerfectlyClosed = spy(CommonTestDataUtil.createCaseWithId("case3", 103));
         case3NotPerfectlyClosed.setRetentionUpdated(true);
         case3NotPerfectlyClosed.setRetentionRetries(1);
         case3NotPerfectlyClosed.setClosed(true);
@@ -149,7 +151,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case3NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case3NotPerfectlyClosed, 1, 3);
 
-        case4NotPerfectlyClosed = CommonTestDataUtil.createCaseWithId("case4", 104);
+        case4NotPerfectlyClosed = spy(CommonTestDataUtil.createCaseWithId("case4", 104));
         case4NotPerfectlyClosed.setRetentionUpdated(true);
         case4NotPerfectlyClosed.setRetentionRetries(2);
         case4NotPerfectlyClosed.setClosed(true);
@@ -158,7 +160,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         case4NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
         CommonTestDataUtil.createHearingsForCase(case4NotPerfectlyClosed, 1, 1);
 
-        case5PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case5", 105);
+        case5PerfectlyClosed = spy(CommonTestDataUtil.createCaseWithId("case5", 105));
         case5PerfectlyClosed.setRetentionUpdated(true);
         case5PerfectlyClosed.setRetentionRetries(1);
         case5PerfectlyClosed.setClosed(true);
@@ -230,7 +232,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
-        when(mediaRepository.findAllByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaA1, mediaA2, mediaB1));
+        doReturn(List.of(mediaA1, mediaA2, mediaB1)).when(case1PerfectlyClosed).getAllAssociatedMedias();
 
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case2PerfectlyClosed)).thenReturn(Optional.of(caseRetentionB1));
@@ -273,9 +275,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
-        when(mediaRepository.findAllByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaA1, mediaA2, mediaB1));
-
-        when(mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaC1));
+        doReturn(List.of(mediaA1, mediaA2, mediaB1, mediaC1)).when(case1PerfectlyClosed).getAllAssociatedMedias();
 
         var mediaC1LinkedToCase1 = createMediaLinkedCase(mediaC1, case5PerfectlyClosed);
         //Adding mediaLinkedWithNull case (refering legacy data that has courtroom/casenumber but could not be linked to a case correctly)
@@ -323,7 +323,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         when(caseService.getCourtCaseById(case3NotPerfectlyClosed.getId())).thenReturn(case3NotPerfectlyClosed);
 
-        when(mediaRepository.findAllByCaseId(case3NotPerfectlyClosed.getId())).thenReturn(List.of(mediaA1, mediaA2, mediaB1));
+        doReturn(List.of(mediaA1, mediaA2, mediaB1)).when(case3NotPerfectlyClosed).getAllAssociatedMedias();
 
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case3NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionC1));
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionD1));
@@ -339,14 +339,20 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         // then
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaA1.getRetConfScore());
-        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\",\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case3\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\",\"ret_conf_reason\":\"AGED_CASE\"}]}";
+        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case3\"," +
+            "\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\",\"ret_conf_reason\":\"AGED_CASE\"}]}";
         JSONAssert.assertEquals(expectedResult, StringEscapeUtils.unescapeJson(mediaA1.getRetConfReason()), JSONCompareMode.NON_EXTENSIBLE);
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaA2.getRetConfScore());
         JSONAssert.assertEquals(expectedResult, StringEscapeUtils.unescapeJson(mediaA2.getRetConfReason()), JSONCompareMode.NON_EXTENSIBLE);
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaB1.getRetConfScore());
-        String expectedResult2 = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\",\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case3\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\",\"ret_conf_reason\":\"AGED_CASE\"},{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\",\"ret_conf_reason\":\"AGED_CASE\"}]}";
+        String expectedResult2 = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case3\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"ret_conf_reason\":\"AGED_CASE\"}," +
+            "{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"ret_conf_reason\":\"AGED_CASE\"}]}";
         JSONAssert.assertEquals(expectedResult2, StringEscapeUtils.unescapeJson(mediaB1.getRetConfReason()), JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -365,8 +371,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaB1);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
-
-        when(mediaRepository.findAllByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaA1, mediaA2, mediaB1));
+        doReturn(List.of(mediaA1, mediaA2, mediaB1)).when(case1PerfectlyClosed).getAllAssociatedMedias();
 
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionD1));
@@ -386,7 +391,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         assertEquals(CASE_PERFECTLY_CLOSED, mediaA2.getRetConfScore());
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, mediaB1.getRetConfScore());
-        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\",\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\",\"ret_conf_reason\":\"AGED_CASE\"}]}";
+        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"ret_conf_reason\":\"AGED_CASE\"}]}";
         JSONAssert.assertEquals(expectedResult, StringEscapeUtils.unescapeJson(mediaB1.getRetConfReason()), JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -411,7 +418,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
-        when(annotationDocumentRepository.findAllByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(annotationDocumentA1, annotationDocumentB1));
+        doReturn(List.of(annotationDocumentA1, annotationDocumentB1)).when(case1PerfectlyClosed).getAllAssociatedAnnotationDocuments();
 
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionD1));
@@ -428,7 +435,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         assertEquals(CASE_PERFECTLY_CLOSED, annotationDocumentA1.getRetConfScore());
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, annotationDocumentB1.getRetConfScore());
-        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\",\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\",\"ret_conf_reason\":\"AGED_CASE\"}]}";
+        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"ret_conf_reason\":\"AGED_CASE\"}]}";
         JSONAssert.assertEquals(expectedResult, StringEscapeUtils.unescapeJson(annotationDocumentB1.getRetConfReason()), JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -472,7 +481,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         assertEquals(CASE_PERFECTLY_CLOSED, transcriptionDocumentA1.getRetConfScore());
 
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, transcriptionDocumentB1.getRetConfScore());
-        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\",\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\",\"ret_conf_reason\":\"AGED_CASE\"}]}";
+        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"ret_conf_reason\":\"AGED_CASE\"}]}";
         JSONAssert.assertEquals(expectedResult, StringEscapeUtils.unescapeJson(transcriptionDocumentB1.getRetConfReason()), JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -484,7 +495,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         var eod = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
-        when(caseDocumentRepository.findByCourtCase(case1PerfectlyClosed)).thenReturn(List.of(caseDocument));
+        doReturn(List.of(caseDocument)).when(case1PerfectlyClosed).getCaseDocumentEntities();
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
         when(eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation())).thenReturn(List.of(eod));
 
@@ -505,7 +516,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         var eod = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
 
         when(caseService.getCourtCaseById(case4NotPerfectlyClosed.getId())).thenReturn(case4NotPerfectlyClosed);
-        when(caseDocumentRepository.findByCourtCase(case4NotPerfectlyClosed)).thenReturn(List.of(caseDocument));
+        doReturn(List.of(caseDocument)).when(case4NotPerfectlyClosed).getCaseDocumentEntities();
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
         when(eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation())).thenReturn(List.of(eod));
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(RETENTION_UPDATED_DATE);
@@ -515,7 +526,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         // then
         assertEquals(CASE_NOT_PERFECTLY_CLOSED, caseDocument.getRetConfScore());
-        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\",\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\",\"ret_conf_reason\":\"AGED_CASE\"}]}";
+        String expectedResult = "{\"ret_conf_applied_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"cases\":[{\"courthouse\":\"CASE_COURTHOUSE\",\"case_number\":\"case4\",\"ret_conf_updated_ts\":\"2024-06-20T10:00:00.000Z\"," +
+            "\"ret_conf_reason\":\"AGED_CASE\"}]}";
         JSONAssert.assertEquals(expectedResult, StringEscapeUtils.unescapeJson(caseDocument.getRetConfReason()), JSONCompareMode.NON_EXTENSIBLE);
     }
 
