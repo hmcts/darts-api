@@ -378,6 +378,8 @@ darts:
           at-most-for: PT90M
       arm-retention-event-date-calculator:
         system-user-email: system_ArmRetentionEventDateCalculator@hmcts.net
+        threads: 20
+        async-timeout: 110M
         lock:
           at-least-for: PT1M
           at-most-for: PT120M
