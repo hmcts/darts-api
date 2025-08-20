@@ -231,7 +231,8 @@ tasks.register('smoke', Test) {
 }
 
 tasks.named('integration', Test) {
-  maxParallelForks = 4
+  maxParallelForks = 2
+  forkEvery = 5
 }
 
 checkstyle {
