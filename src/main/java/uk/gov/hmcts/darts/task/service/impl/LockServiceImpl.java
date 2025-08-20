@@ -18,6 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.ReplaceJavaUtilDate")
 public class LockServiceImpl implements LockService {
 
     private static final Duration DEFAULT_LOCK_AT_MOST = Duration.ofMinutes(300);

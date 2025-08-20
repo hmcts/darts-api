@@ -185,7 +185,6 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    @SuppressWarnings("PMD.CloseResource")
     void downloadTranscriptShouldReturnOkWithMicrosoftWordNew() throws Exception {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";

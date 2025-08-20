@@ -26,7 +26,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.W
 
 @Slf4j
 @Service
-@SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
 public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase {
 
     private final TranscriptionsApi transcriptionsApi;

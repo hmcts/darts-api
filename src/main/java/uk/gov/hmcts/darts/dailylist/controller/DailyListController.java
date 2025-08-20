@@ -81,7 +81,6 @@ public class DailyListController implements DailyListsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public ResponseEntity<PostDailyListResponse> dailylistsPost(PostDailyListRequest postDailyListRequest) {
         DailyListPostRequestInternal internalRequest = dailyListPostRequestMapper.map(postDailyListRequest);
         DailyListPostValidator.validate(internalRequest);

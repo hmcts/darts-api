@@ -26,7 +26,6 @@ import static java.lang.String.format;
 import static java.lang.String.join;
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 
-@SuppressWarnings({"PMD.TooManyMethods"})
 @Slf4j
 @AllArgsConstructor
 public abstract class EventHandlerBase implements EventHandler {
@@ -40,7 +39,6 @@ public abstract class EventHandlerBase implements EventHandler {
     protected ApplicationEventPublisher eventPublisher;
     private LogApi logApi;
     private EventPersistenceService eventPersistenceService;
-
 
     @Override
     public boolean isHandlerFor(String handlerName) {
