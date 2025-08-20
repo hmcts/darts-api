@@ -53,7 +53,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestTestData;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
-class ExternalDataStoreDeleterTest extends IntegrationBase {
+class ExternalDataStoreDeleterIntTest extends IntegrationBase {
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
     @Autowired

@@ -98,7 +98,7 @@ import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10Second
 
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
-class AutomatedTaskServiceTest extends IntegrationBase {
+class AutomatedTaskServiceIntTest extends IntegrationBase {
 
     @Autowired
     private AutomatedTaskService automatedTaskService;
