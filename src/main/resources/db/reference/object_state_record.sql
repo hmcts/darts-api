@@ -15,6 +15,7 @@
 --v11   remove 4 indexes
 --v12   add sequence revinfo_seq
 --v13   amend eol_id and arm_eod_id to bigint
+--v14   add 2 indexes on (eod_id) and (arm_eod_id)
 
 
 CREATE TABLE object_state_record
@@ -66,6 +67,8 @@ CREATE INDEX osr_storage_id_data_ticket                 ON object_state_record(s
 
 CREATE INDEX osr_id_clip                                ON object_state_record(id_clip) TABLESPACE pg_default;
 
+CREATE INDEX osr_arm_eod_id_idx                         ON object_state_record(arm_eod_id) TABLESPACE pg_default;
+CREATE INDEX osr_eod_id_idx                             ON object_state_record(eod_id) TABLESPACE pg_default;
 
 CREATE TABLE revinfo
 (rev                           INT4                       NOT NULL
