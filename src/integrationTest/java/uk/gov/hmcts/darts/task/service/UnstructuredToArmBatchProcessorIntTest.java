@@ -476,7 +476,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processUnstructuredToArm_ShoulGenerationOfManifestFileEntryFails() {
+    void processUnstructuredToArm_ShouldGenerationOfManifestFileEntryFails() {
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(5);

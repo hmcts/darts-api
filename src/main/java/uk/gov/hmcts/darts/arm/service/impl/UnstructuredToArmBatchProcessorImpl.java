@@ -56,9 +56,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<Long> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                                                       EodHelper.armLocation(),
-                                                                                       taskBatchSize);
+        List<Long> eodsForTransfer =
+            unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation, EodHelper.armLocation(), taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
@@ -72,7 +71,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
             } catch (InterruptedException e) {
                 log.error("Unstructured to arm batch interrupted exception", e);
-                //Thread.currentThread().interrupt();
                 throw e;
             } catch (Exception e) {
                 log.error("Unstructured to arm batch unexpected exception", e);
@@ -216,10 +214,11 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             logApi.armPushFailed(batchItem.getArmEod().getId());
             batchItem.undoManifestFileChange();
             if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
-                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(
+                    batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
             } else {
-                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmManifestFileStatus(),
-                                                                                    userAccount);
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(
+                    batchItem.getArmEod(), EodHelper.failedArmManifestFileStatus(), userAccount);
             }
         }
     }
