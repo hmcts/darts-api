@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS audlnk;
+DROP TABLE IF EXISTS audlnkjan24_13;
+DROP TABLE IF EXISTS audlnkjan24_13_s;
+DROP TABLE IF EXISTS audlnkjan24_nobuf_13;
+DROP TABLE IF EXISTS audlnkjan24_nobuf_13_s;
