@@ -179,6 +179,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .useGuidsForFields(false)
             .build();
         verify(armApiClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+
     }
 
     @Test
