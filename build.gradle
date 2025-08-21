@@ -229,13 +229,6 @@ tasks.register('serialIntegration', Test) {
   group = "verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
-
-  useJUnitPlatform {
-    includeTags 'serial'
-  }
-
-  // Run serially to avoid flakiness
-  maxParallelForks = 1
 }
 
 tasks.register('smoke', Test) {
@@ -249,6 +242,13 @@ tasks.named('integration', Test) {
     excludeTags 'serial'
   }
   maxParallelForks = 2
+}
+
+tasks.named('serialIntegration', Test) {
+  useJUnitPlatform {
+    includeTags 'serial'
+  }
+  maxParallelForks = 1
 }
 
 checkstyle {
