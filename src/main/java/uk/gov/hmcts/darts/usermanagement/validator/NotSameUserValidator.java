@@ -22,7 +22,7 @@ public class NotSameUserValidator implements Validator<IdRequest<UserPatch, Inte
         if (nonNull(userPatch.getPayload())) {
             var currentUser = authorisationApi.getCurrentUser();
             if (currentUser.getId().equals(userPatch.getId())) {
-                throw new DartsApiException(AuthorisationError.UNABLE_TO_DEACTIVATE_USER);
+                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_TO_MODIFY_OWN_ACCOUNT);
             }
         }
     }

@@ -50,7 +50,7 @@ class NotSameUserValidatorTest {
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class, () ->
             notSameUserValidator.validate(request));
 
-        Assertions.assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getTitle(), exception.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_MODIFY_OWN_ACCOUNT.getTitle(), exception.getMessage());
     }
 
     @Test
