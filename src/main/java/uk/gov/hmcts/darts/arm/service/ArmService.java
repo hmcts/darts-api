@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import java.util.List;
 
 public interface ArmService {
+
     String saveBlobData(String containerName, String filename, BinaryData binaryData);
 
     String saveBlobData(String containerName, BinaryData binaryData, String blobPathAndName);
