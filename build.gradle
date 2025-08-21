@@ -237,20 +237,6 @@ tasks.register('smoke', Test) {
   classpath = sourceSets.smokeTest.runtimeClasspath
 }
 
-tasks.named('integration', Test) {
-  useJUnitPlatform {
-    excludeTags 'serial'
-  }
-  maxParallelForks = 2
-}
-
-tasks.named('serialIntegration', Test) {
-  useJUnitPlatform {
-    includeTags 'serial'
-  }
-  maxParallelForks = 1
-}
-
 checkstyle {
   checkstyleMain.exclude '**/uk/gov/hmcts/darts/task/runner/dailylist/**'
   maxWarnings = 0
@@ -360,7 +346,7 @@ tasks.jacocoTestCoverageVerification {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 tasks.named('check').configure {
-  finalizedBy 'integration', 'serialIntegration'
+  finalizedBy 'integration'
 }
 
 jacocoTestReport.dependsOn check
