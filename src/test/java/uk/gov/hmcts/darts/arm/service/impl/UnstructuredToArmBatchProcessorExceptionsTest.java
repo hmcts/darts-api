@@ -17,8 +17,6 @@ import uk.gov.hmcts.darts.arm.service.UnstructuredToArmBatchProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.AsyncUtil;
@@ -49,13 +47,9 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Mock
     private UserIdentity userIdentity;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @Mock
-    private FileOperationService fileOperationService;
     @Mock
     private ArchiveRecordService archiveRecordService;
 
@@ -151,8 +145,7 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
                     }
                     return null;
                 });
-
-
+            
             // When
             unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
 
@@ -160,4 +153,5 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
             verify(logApi, never()).armPushSuccessful(anyLong());
         }
     }
+
 }
