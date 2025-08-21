@@ -298,9 +298,9 @@ class PatchUserIntTest extends IntegrationBase {
                          """);
         mockMvc.perform(request)
             .andExpect(status().is4xxClientError())
-            .andExpect(jsonPath("$.type").value("AUTHORISATION_112"))
-            .andExpect(jsonPath("$.title").value("Failed to deactivate user"))
-            .andExpect(jsonPath("$.status").value(409));
+            .andExpect(jsonPath("$.type").value("AUTHORISATION_115"))
+            .andExpect(jsonPath("$.title").value("User is not authorised to modify own account"))
+            .andExpect(jsonPath("$.status").value(403));
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
