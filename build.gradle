@@ -224,6 +224,20 @@ tasks.register('integration', Test) {
   classpath = sourceSets.integrationTest.runtimeClasspath
 }
 
+tasks.register('serialIntegration', Test) {
+  description = "Runs integration tests tagged with @serial"
+  group = "verification"
+  testClassesDirs = sourceSets.integrationTest.output.classesDirs
+  classpath = sourceSets.integrationTest.runtimeClasspath
+
+  useJUnitPlatform {
+    includeTags 'serial'
+  }
+
+  // Run serially to avoid flakiness
+  maxParallelForks = 1
+}
+
 tasks.register('smoke', Test) {
   description = "Runs Smoke Tests"
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
@@ -231,7 +245,10 @@ tasks.register('smoke', Test) {
 }
 
 tasks.named('integration', Test) {
-  maxParallelForks = 1
+  useJUnitPlatform {
+    excludeTags 'serial'
+  }
+  maxParallelForks = 2
 }
 
 checkstyle {
@@ -341,7 +358,10 @@ tasks.jacocoTestCoverageVerification {
 }
 
 project.tasks['sonarqube'].dependsOn jacocoTestReport
-project.tasks['check'].finalizedBy integration
+
+tasks.named('check').configure {
+  finalizedBy 'integration', 'serialIntegration'
+}
 
 jacocoTestReport.dependsOn check
 jacocoTestCoverageVerification.dependsOn jacocoTestReport
