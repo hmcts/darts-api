@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.NotSameUserValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserActivateValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
 import uk.gov.hmcts.darts.util.DataUtil;
@@ -65,6 +66,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final TranscriptionService transcriptionService;
     private final AuditApi auditApi;
     private final UserActivateValidator authoriseValidator;
+    private final NotSameUserValidator notSameUserValidator;
 
     @Override
     @Transactional
@@ -102,8 +104,10 @@ public class UserManagementServiceImpl implements UserManagementService {
         userAccountExistsValidator.validate(userId);
         userTypeValidator.validate(userId);
         userActivationPermissionsValidator.validate(userPatch);
-        userNotLastSuperAdminValidator.validate(new IdRequest<>(userPatch, userId));
-        authoriseValidator.validate(new IdRequest<>(userPatch, userId));
+        IdRequest<UserPatch, Integer> request = new IdRequest<>(userPatch, userId);
+        userNotLastSuperAdminValidator.validate(request);
+        authoriseValidator.validate(request);
+        notSameUserValidator.validate(request);
 
         var userAccountEntity = userAccountRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("No value present"));
