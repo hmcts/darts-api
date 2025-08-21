@@ -401,7 +401,7 @@ repositories {
 }
 
 ext {
-  log4JVersion = "2.24.3"
+  log4JVersion = "2.25.1"
   tomcatEmbedVersion = "11.0.10"
 }
 
@@ -544,7 +544,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.2.8') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.2.9') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }
