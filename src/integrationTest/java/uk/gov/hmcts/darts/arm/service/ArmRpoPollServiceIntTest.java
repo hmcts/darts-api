@@ -60,7 +60,6 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CloseResource"})
 class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
-    private static final String BEARER_TOKEN = "BearerToken";
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
     private static final String PRODUCTION_ID = " b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";
@@ -88,7 +87,6 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     private String uniqueProductionName;
     private final Duration pollDuration = Duration.ofHours(4);
     private int batchSize = 10;
-
 
     @Autowired
     private ArmRpoPollServiceImpl armRpoPollService;

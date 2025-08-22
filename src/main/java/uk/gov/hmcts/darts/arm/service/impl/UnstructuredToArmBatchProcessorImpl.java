@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.AvoidInstanceofChecksInCatchClause"})
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
 
     private final ArchiveRecordService archiveRecordService;
@@ -44,11 +46,12 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
 
+    @SneakyThrows
     @Override
     @SuppressWarnings({
         "PMD.AvoidInstantiatingObjectsInLoops",
         "PMD.CyclomaticComplexity",
-        "PMD.DoNotUseThreads"//TODO - refactor to avoid using Thread.sleep() when this is next edited
+        "PMD.DoNotUseThreads"
     })
     public void processUnstructuredToArm(int taskBatchSize) {
 
@@ -57,9 +60,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<Long> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                                                       EodHelper.armLocation(),
-                                                                                       taskBatchSize);
+        List<Long> eodsForTransfer =
+            unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation, EodHelper.armLocation(), taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
@@ -67,34 +69,40 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             List<List<Long>> batchesForArm = ListUtils.partition(eodsForTransfer, unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
             AtomicInteger batchCounter = new AtomicInteger(1);
             UserAccountEntity userAccount = userIdentity.getUserAccount();
-            List<Callable<Void>> tasks = batchesForArm
-                .stream()
-                .map(eodsForBatch -> (Callable<Void>) () -> {
-                    int batchNumber = batchCounter.getAndIncrement();
-                    try {
-                        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
-                        log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
-                        createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
-                        log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
-                    } catch (Exception e) {
-                        log.error("Unexpected exception when processing batch {}", batchNumber, e);
-                    }
-                    return null;
-                })
-                .toList();
+            List<Callable<Void>> tasks = getTasks(batchesForArm, batchCounter, userAccount);
 
             try {
                 AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration);
             } catch (InterruptedException e) {
-                log.error("Unstructured to arm batch unexpected exception", e);
-                Thread.currentThread().interrupt();
-                return;
+                log.error("Unstructured to arm batch interrupted exception", e);
+                throw e;
             } catch (Exception e) {
                 log.error("Unstructured to arm batch unexpected exception", e);
                 return;
             }
         }
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
+    }
+
+    private List<Callable<Void>> getTasks(List<List<Long>> batchesForArm, AtomicInteger batchCounter, UserAccountEntity userAccount) {
+        return batchesForArm
+            .stream()
+            .map(eodsForBatch -> (Callable<Void>) () -> {
+                int batchNumber = batchCounter.getAndIncrement();
+                try {
+                    List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
+                    log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
+                    createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
+                    log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
+                } catch (Exception e) {
+                    log.error("Unexpected exception when processing batch {}", batchNumber, e);
+                    if (e instanceof InterruptedException) {
+                        throw e;
+                    }
+                }
+                return null;
+            })
+            .toList();
     }
 
     @SuppressWarnings({
@@ -129,6 +137,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             } catch (Exception e) {
                 log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
                 recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
+                if (e instanceof InterruptedException) {
+                    throw e;
+                }
             }
         }
 
@@ -140,6 +151,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         } catch (Exception e) {
             log.error("Error during generation of batch manifest file {}", archiveRecordsFileName, e);
             batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
+            if (e instanceof InterruptedException) {
+                throw e;
+            }
             return;
         }
 
@@ -208,10 +222,11 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             logApi.armPushFailed(batchItem.getArmEod().getId());
             batchItem.undoManifestFileChange();
             if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
-                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(
+                    batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
             } else {
-                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmManifestFileStatus(),
-                                                                                    userAccount);
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(
+                    batchItem.getArmEod(), EodHelper.failedArmManifestFileStatus(), userAccount);
             }
         }
     }
