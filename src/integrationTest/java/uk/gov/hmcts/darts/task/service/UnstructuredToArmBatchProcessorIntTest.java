@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmBatchProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -21,12 +23,17 @@ import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -47,12 +54,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_PUSHED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
 @Slf4j
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
@@ -609,6 +618,59 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedById()).isEqualTo(testUser.getId());
         assertThat(armDropZoneEodsMedia0.getFirst().getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
         assertThat(armDropZoneEodsMedia1.getFirst().getManifestFile()).isEqualTo(manifestFileName);
+    }
+
+    @Test
+    void processUnstructuredToArm_ShouldMoveAnnotationDocumentFromUnstructuredToArmStorage() {
+        TestAnnotationEntity.TestAnnotationEntityRetrieve annotationEntityRetrieve
+            = PersistableFactory.getAnnotationTestData().someMinimalBuilderHolder();
+
+        AnnotationEntity annotation = annotationEntityRetrieve.getBuilder().text("TestAnnotation").build().getEntity();
+
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "123";
+        final String confidenceReason = "reason";
+        final RetentionConfidenceScoreEnum confidenceScore = CASE_PERFECTLY_CLOSED;
+        final String externalRecordId = "recordId";
+
+        AnnotationDocumentEntity annotationDocument = PersistableFactory
+            .getAnnotationDocumentTestData().someMinimalBuilder().annotation(annotation)
+            .fileName(fileName)
+            .fileType(fileType)
+            .fileSize(fileSize)
+            .lastModifiedById(testUser.getId())
+            .lastModifiedTimestamp(uploadedDateTime)
+            .checksum(checksum)
+            .retConfScore(confidenceScore)
+            .retConfReason(confidenceReason).build().getEntity();
+
+        dartsPersistence.save(annotationDocument);
+
+        ExternalObjectDirectoryEntity unstructuredEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().annotationDocumentEntity(annotationDocument).media(null)
+            .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED))
+            .externalLocation(UUID.randomUUID().toString()).build().getEntity();
+
+        unstructuredEod.setExternalRecordId(externalRecordId);
+        unstructuredEod.setUpdateRetention(true);
+        dartsPersistence.save(unstructuredEod);
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm(5);
+
+        //then
+        List<ExternalObjectDirectoryEntity> armEods = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(
+            annotationDocument, EodHelper.armLocation());
+
+        assertThat(armEods).hasSize(1);
+        ExternalObjectDirectoryEntity armEod = armEods.get(0);
+        assertThat(armEod.getStatus().getId()).isEqualTo(ARM_DROP_ZONE.getId());
+
     }
 
 }

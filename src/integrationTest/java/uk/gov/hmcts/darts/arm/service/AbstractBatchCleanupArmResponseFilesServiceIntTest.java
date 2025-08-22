@@ -213,7 +213,6 @@ abstract class AbstractBatchCleanupArmResponseFilesServiceIntTest extends Integr
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
-
         getCleanupArmResponseFilesService().cleanupResponseFiles(100);
 
         ExternalObjectDirectoryEntity foundChildEod1 = dartsDatabase.getExternalObjectDirectoryRepository().findById(eodEntry1.getId())
