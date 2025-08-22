@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
@@ -107,27 +108,6 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
     }
 
     @Test
-    void processUnstructuredToArm_shouldHandleInterruptedExceptionFromAsyncUtil() {
-        // Given
-        when(unstructuredToArmHelper.getEodEntitiesToSendToArm(any(), any(), anyInt()))
-            .thenReturn(List.of(1L, 2L, 3L));
-        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(2);
-
-        // Mock AsyncUtil to throw InterruptedException
-        try (var mockedStatic = mockStatic(AsyncUtil.class)) {
-            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)))
-                .thenThrow(new InterruptedException("Mocked InterruptedException"));
-
-            // When
-            assertThrows(InterruptedException.class, () -> unstructuredToArmBatchProcessor.processUnstructuredToArm(5));
-
-            // Then
-            mockedStatic.verify(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)));
-            verify(logApi, never()).armPushSuccessful(anyLong());
-        }
-    }
-
-    @Test
     void processUnstructuredToArm_shouldHandleInterruptedExceptionFromTask() {
         // Given
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
@@ -145,7 +125,7 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
                     }
                     return null;
                 });
-            
+
             // When
             unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
 
@@ -154,4 +134,55 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
         }
     }
 
+    @Test
+    void processUnstructuredToArm_shouldHandleInterruptedExceptionFromAsyncUtil() {
+        // Given
+        when(unstructuredToArmHelper.getEodEntitiesToSendToArm(any(), any(), anyInt()))
+            .thenReturn(List.of(1L, 2L, 3L));
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(2);
+
+        // Mock AsyncUtil to throw InterruptedException
+        try (var mockedStatic = mockStatic(AsyncUtil.class)) {
+            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)))
+                .thenThrow(new InterruptedException("Mocked InterruptedException"));
+
+            // When & Then
+            InterruptedException exception = assertThrows(InterruptedException.class,
+                                                          () -> unstructuredToArmBatchProcessor.processUnstructuredToArm(5));
+
+            // Verify the exception message
+            assertEquals("Mocked InterruptedException", exception.getMessage());
+
+            // Verify logging and method behavior
+            mockedStatic.verify(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)));
+            verify(logApi, never()).armPushSuccessful(anyLong());
+        }
+    }
+
+    @Test
+    void processUnstructuredToArm_shouldHandleRuntimeExceptionFromTask() {
+        // Given
+        when(unstructuredToArmHelper.getEodEntitiesToSendToArm(any(), any(), anyInt()))
+            .thenReturn(List.of(1L, 2L, 3L));
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(2);
+
+        // Mock task to throw RuntimeException
+        try (var mockedStatic = mockStatic(AsyncUtil.class)) {
+            mockedStatic.when(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)))
+                .thenAnswer(invocation -> {
+                    List<Callable<Void>> tasks = invocation.getArgument(0);
+                    for (Callable<Void> task : tasks) {
+                        throw new RuntimeException("Mocked RuntimeException");
+                    }
+                    return null;
+                });
+
+            // When
+            unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
+
+            // Then
+            mockedStatic.verify(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any(UnstructuredToArmProcessorConfiguration.class)));
+            verify(logApi, never()).armPushSuccessful(anyLong());
+        }
+    }
 }
