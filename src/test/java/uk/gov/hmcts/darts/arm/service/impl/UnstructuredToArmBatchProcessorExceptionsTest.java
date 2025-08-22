@@ -159,6 +159,7 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
         }
     }
 
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     @Test
     void processUnstructuredToArm_shouldHandleRuntimeExceptionFromTask() {
         // Given
@@ -172,7 +173,7 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
                 .thenAnswer(invocation -> {
                     List<Callable<Void>> tasks = invocation.getArgument(0);
                     for (Callable<Void> task : tasks) {
-                        throw new RuntimeException("Mocked RuntimeException");
+                        throw new RuntimeException("Mocked RuntimeException: " + task);
                     }
                     return null;
                 });
