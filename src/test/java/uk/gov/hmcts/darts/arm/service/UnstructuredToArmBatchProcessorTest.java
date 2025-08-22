@@ -34,6 +34,7 @@ import static java.util.Collections.emptyList;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -134,7 +135,7 @@ class UnstructuredToArmBatchProcessorTest {
             EodHelper.armLocation(), 199
         );
 
-        //verify(logApi).armPushFailed(anyLong());
+        verify(logApi).armPushFailed(anyLong());
     }
 
     @Test
