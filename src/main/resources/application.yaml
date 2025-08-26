@@ -184,6 +184,13 @@ darts:
       clear-up-window: ${DUPLICATE_EVENTS_CLEAR_UP_WINDOW_DAYS:2}
     admin-search:
       max-results: 1000
+    standard-event-types-with-retention:
+      - "40750"
+      - "40751"
+      - "40752"
+      - "40753"
+      - "40754"
+      - "40755"
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
