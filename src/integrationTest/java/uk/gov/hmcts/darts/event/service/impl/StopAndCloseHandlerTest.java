@@ -95,7 +95,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     }
 
     @BeforeEach
-    public void setupStubs() {
+    public void setup() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 

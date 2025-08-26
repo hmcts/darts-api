@@ -128,7 +128,15 @@ module "postgresql_flexible" {
     {
       name  = "max_connections"
       value = var.db_max_connections
-    }    
+    },
+    {
+      name  = "pg_qs.retention_period_in_days"
+      value = "30"
+    },
+    {
+      name  = "pg_qs.store_query_plans"
+      value = "on"
+    }
   ]
   pgsql_version = "16"
 }
