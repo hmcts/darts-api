@@ -17,8 +17,6 @@ import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,16 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class DetsDataManagementServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
-
-    private final List<String> armSubmissionBlobsToBeDeleted = new ArrayList<>();
-
-    private final List<String> armBlobsWithPathToBeDeleted = new ArrayList<>();
 
     @Autowired
     private DetsApiServiceImpl dataManagementService;
@@ -48,8 +41,7 @@ class DetsDataManagementServiceTest {
     private String armContainerName;
     @Value("${darts.storage.arm.folders.submission}")
     private String armSubmissionDropZone;
-
-
+    
     @SneakyThrows
     @Test
     void fetchBinaryDataFromBlobStorage() {
@@ -96,5 +88,5 @@ class DetsDataManagementServiceTest {
                      () -> dataManagementService.copyDetsBlobDataToArm(uuid, blobPathAndName));
 
     }
-    
+
 }

@@ -45,7 +45,7 @@ public class BatchInputUploadFileFilenameProcessor {
                 throw new IllegalArgumentException("Invalid batch input upload filename " + batchMetadataFilenameAndPath);
             }
         } else {
-            log.error("Batch ARM pull expected input upload filename to contain extension ", batchMetadataFilenameAndPath);
+            log.error("Batch ARM pull expected input upload filename to contain extension {}", batchMetadataFilenameAndPath);
             throw new IllegalArgumentException("Invalid batch input upload filename " + batchMetadataFilenameAndPath);
         }
     }

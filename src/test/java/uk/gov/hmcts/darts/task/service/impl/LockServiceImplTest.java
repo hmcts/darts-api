@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.ReplaceJavaUtilDate")
 class LockServiceImplTest {
 
     private LockServiceImpl lockService;

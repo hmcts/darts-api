@@ -38,7 +38,6 @@ public final class AsyncUtil {
         invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
 
-    @SuppressWarnings("PMD.UnnecessaryCast")//Required for correct mapping
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
         log.info("Starting {} tasks with {} threads", tasks.size(), threads);

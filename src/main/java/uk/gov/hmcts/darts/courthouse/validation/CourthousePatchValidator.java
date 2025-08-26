@@ -33,11 +33,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    @SuppressWarnings({
-        "PMD.CyclomaticComplexity",
-        "PMD.UnnecessaryAnnotationValueElement",
-        "PMD.NPathComplexity"//TODO - refactor to reduce complexity when this class is next edited
-    })
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     public void validate(CourthousePatch patch, Integer id) {
         patch.setCourthouseName(StringUtils.toRootUpperCase(StringUtils.trimToNull(patch.getCourthouseName())));
         var courthouseEntity = repository.findById(id)

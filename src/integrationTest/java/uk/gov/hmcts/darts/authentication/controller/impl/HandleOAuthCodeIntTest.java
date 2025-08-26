@@ -54,7 +54,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @AutoConfigureMockMvc
-@SuppressWarnings("PMD.ExcessiveImports")
 class HandleOAuthCodeIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE =

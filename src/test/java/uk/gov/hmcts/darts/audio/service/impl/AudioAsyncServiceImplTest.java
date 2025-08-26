@@ -33,7 +33,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioAsyncServiceImplTest {
 
     public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);

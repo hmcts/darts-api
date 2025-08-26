@@ -149,7 +149,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.createEve
 @Service
 @AllArgsConstructor
 @SuppressWarnings({
-    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
+    "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
