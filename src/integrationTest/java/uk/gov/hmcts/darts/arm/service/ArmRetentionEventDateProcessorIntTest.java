@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.task.config.ArmRetentionEventDateCalculatorAutomatedTaskConfig;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
@@ -90,6 +91,9 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @Autowired
     private ArmApiConfigurationProperties armApiConfigurationProperties;
 
+    @Autowired
+    private ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
+
     @MockitoBean
     private ArmApiClient armApiClient;
 
@@ -100,7 +104,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @BeforeEach
     void setupData() {
         armRetentionEventDateProcessor = new ArmRetentionEventDateProcessorImpl(externalObjectDirectoryRepository,
-                                                                                armRetentionEventDateCalculator);
+                                                                                armRetentionEventDateCalculator,
+                                                                                automatedTaskConfigurationProperties);
 
         String bearerToken = "bearer";
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder()

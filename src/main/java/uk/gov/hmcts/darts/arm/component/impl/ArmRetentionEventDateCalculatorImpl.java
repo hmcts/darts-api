@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.arm.helper.ArmHelper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ConfidenceAware;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -37,23 +36,23 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
     @Transactional
     @Override
     public boolean calculateRetentionEventDate(Long externalObjectDirectoryId) {
-        UserAccountEntity userAccount = userIdentity.getUserAccount();
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow();
             OffsetDateTime retentionDate = getDocumentRetentionDate(externalObjectDirectory);
             if (nonNull(retentionDate)) {
                 OffsetDateTime armRetentionDate = retentionDate.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears());
                 if (nonNull(externalObjectDirectory.getEventDateTs())
-                    && armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) == 0) {
+                    && armRetentionDate.truncatedTo(MILLIS).isEqual(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS))) {
                     log.info("Event date found and different when compared to ARM retention date, resetting update retention flag for {} ",
                              externalObjectDirectoryId);
                     externalObjectDirectory.setUpdateRetention(false);
-                    externalObjectDirectory.setLastModifiedBy(userAccount);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                     return true;
                 } else if (ObjectRecordStatusEnum.STORED.getId() == externalObjectDirectory.getStatusId()) {
                     log.info("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
-                    return processArmUpdate(externalObjectDirectory, armRetentionDate, userAccount, externalObjectDirectoryId);
+                    return processArmUpdate(externalObjectDirectory, armRetentionDate, externalObjectDirectoryId);
+                } else {
+                    log.info("EOD {} is not in STORED status, skipping ARM retention date update", externalObjectDirectoryId);
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
@@ -64,8 +63,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         return false;
     }
 
-    private boolean processArmUpdate(ExternalObjectDirectoryEntity externalObjectDirectory, OffsetDateTime armRetentionDate,
-                                     UserAccountEntity userAccount, Long externalObjectDirectoryId) {
+    private boolean processArmUpdate(ExternalObjectDirectoryEntity externalObjectDirectory, OffsetDateTime armRetentionDate, Long externalObjectDirectoryId) {
         ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
 
         if (confidenceAware != null) {
@@ -82,7 +80,6 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                 } else {
                     externalObjectDirectory.setEventDateTs(armRetentionDate);
                     externalObjectDirectory.setUpdateRetention(false);
-                    externalObjectDirectory.setLastModifiedBy(userAccount);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                     log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
                     return true;
