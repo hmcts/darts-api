@@ -44,8 +44,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.TooFewBranchesForASwitchStatement", "PMD.SingularField", "PMD.CyclomaticComplexity",
-    "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
 public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final AutomatedTaskRepository automatedTaskRepository;

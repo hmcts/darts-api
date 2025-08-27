@@ -59,7 +59,7 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.searchBytePattern;
 import static uk.gov.hmcts.darts.test.common.TestUtils.unmarshalXmlFile;
 
 
-@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand", "PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.AssignmentInOperand"})
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class OutboundFileZipGeneratorHelperImplTest {

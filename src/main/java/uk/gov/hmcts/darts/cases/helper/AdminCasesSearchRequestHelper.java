@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-@SuppressWarnings({"PMD.TooManyMethods"})
 @RequiredArgsConstructor
 @Slf4j
 public class AdminCasesSearchRequestHelper {

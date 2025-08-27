@@ -49,20 +49,18 @@ import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGr
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Autowired
-    SecurityGroupRepository securityGroupRepository;
+    private SecurityGroupRepository securityGroupRepository;
     @Autowired
-    UserAccountRepository userAccountRepository;
+    private UserAccountRepository userAccountRepository;
     @Autowired
     private transient MockMvc mockMvc;
     private CourthouseEntity swanseaCourthouse;
     private CourthouseEntity myCourthouseWithDifferentDisplayName;
     private UserAccountEntity user;
-
-
+    
     @BeforeEach
     void setupData() {
         swanseaCourthouse = createCourthouseWithName("SWANSEA");

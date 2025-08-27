@@ -40,7 +40,6 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProse
 
 @AutoConfigureMockMvc
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/playback");

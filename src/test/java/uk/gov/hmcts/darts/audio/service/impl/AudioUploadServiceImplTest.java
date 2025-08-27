@@ -67,7 +67,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioUploadServiceImplTest {
 
     public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
@@ -113,7 +112,7 @@ class AudioUploadServiceImplTest {
             logApi,
             audioAsyncService,
             applyAdminActionComponent
-            ));
+        ));
         ReflectionTestUtils.setField(audioService, "smallFileSizeMaxLength", Duration.ofSeconds(2));
         ReflectionTestUtils.setField(audioService, "smallFileSize", 1024);
 

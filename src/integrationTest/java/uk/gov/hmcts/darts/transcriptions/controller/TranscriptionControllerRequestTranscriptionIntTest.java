@@ -62,7 +62,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AW
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.ExcessiveImports"})
 @Transactional
 class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase {
 

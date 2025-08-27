@@ -29,11 +29,9 @@ public class AccessTokenClient {
     private final String clientId;
     private final String clientSecret;
 
-
     @Setter
     private boolean enableAccessTokenCache;
     private String cachedAccessToken;
-
 
     @SneakyThrows
     public String getAccessToken() {
@@ -63,7 +61,6 @@ public class AccessTokenClient {
         return cachedAccessToken;
     }
 
-    @SuppressWarnings("PMD.LawOfDemeter")
     private BodyPublisher encode(Map<String, String> params) {
         String urlEncoded = params.entrySet()
             .stream()

@@ -63,10 +63,9 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
 @SuppressWarnings({
-    "PMD.GodClass",
     "PMD.CyclomaticComplexity",
     "PMD.CouplingBetweenObjects",
-    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+    "PMD.TooManyMethods"
 })
 @RequiredArgsConstructor
 public abstract class AbstractArmBatchProcessResponseFiles implements ArmResponseFilesProcessor {
@@ -293,9 +292,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    @SuppressWarnings({
-        "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
-    })
     protected void processBatchResponseFiles(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
                                              ArmBatchResponses armBatchResponses,
                                              UserAccountEntity userAccount) {

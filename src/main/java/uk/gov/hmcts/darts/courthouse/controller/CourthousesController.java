@@ -33,7 +33,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 @RestController
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class CourthousesController implements CourthousesApi {
 
     private final CourthouseService courthouseService;

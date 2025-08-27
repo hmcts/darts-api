@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
@@ -42,19 +41,15 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithN
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-@SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.NcssCount"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
     @Autowired
-    SecurityGroupRepository securityGroupRepository;
+    private SecurityGroupRepository securityGroupRepository;
     @Autowired
-    UserAccountRepository userAccountRepository;
-    @Autowired
-    CaseService service;
-    CourthouseEntity swanseaCourthouse;
-    CourthouseEntity londonCourthouse;
-    UserAccountEntity user;
-    CourtroomEntity courtroom1;
-    CourtroomEntity courtroomLondon;
+    private CaseService service;
+    private CourthouseEntity swanseaCourthouse;
+    private CourthouseEntity londonCourthouse;
+    private UserAccountEntity user;
 
     @BeforeEach
     void setupData() {
@@ -98,7 +93,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         case10.setCaseNumber("case10");
 
         JudgeEntity judge = createJudgeWithName("aJudge");
-        courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
+        CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
         HearingEntity hearing1a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 20), judge);
 
         HearingEntity hearing1b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 21), judge);
@@ -144,7 +139,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         HearingEntity hearing7b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 23), judge);
         HearingEntity hearing8 = PersistableFactory.getHearingTestData().createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
 
-        courtroomLondon = createCourtRoomWithNameAtCourthouse(londonCourthouse, "courtroomLondon");
+        CourtroomEntity courtroomLondon = createCourtRoomWithNameAtCourthouse(londonCourthouse, "courtroomLondon");
         HearingEntity hearing9 = PersistableFactory.getHearingTestData().createHearingWithDefaults(case9, courtroomLondon, LocalDate.of(2023, 5, 20), judge3a);
 
         CourtroomEntity courtroom4 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom4");
@@ -191,7 +186,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void getWithCaseNumberWithoutAccess() throws IOException {
+    void getWithCaseNumberWithoutAccess() {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber("sE1")
@@ -411,7 +406,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void getWithCourtroomWithoutAccess() throws IOException {
+    void getWithCourtroomWithoutAccess() {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courtroom("COURTROOM2")

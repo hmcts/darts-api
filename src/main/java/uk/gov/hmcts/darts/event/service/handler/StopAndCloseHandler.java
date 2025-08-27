@@ -27,8 +27,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
 
     private final DarNotifyServiceImpl darNotifyService;
     private final CloseCaseWithRetentionServiceImpl closeCaseWithRetentionServiceImpl;
-
-    @SuppressWarnings({"PMD.ExcessiveParameterList"})
+    
     public StopAndCloseHandler(RetrieveCoreObjectService retrieveCoreObjectService,
                                EventRepository eventRepository,
                                HearingRepository hearingRepository,

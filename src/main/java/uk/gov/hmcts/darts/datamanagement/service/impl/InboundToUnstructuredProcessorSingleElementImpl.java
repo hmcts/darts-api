@@ -35,7 +35,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final UserAccountRepository userAccountRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
-    @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream", "PMD.AvoidInstanceofChecksInCatchClause"})
+    @SuppressWarnings({"java:S4790", "PMD.AvoidInstanceofChecksInCatchClause"})
     @Override
     @Transactional
     public void processSingleElement(Long inboundEodEntityId) {

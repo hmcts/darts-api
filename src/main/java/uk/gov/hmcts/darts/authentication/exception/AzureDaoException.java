@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.authentication.exception;
 
 import lombok.Getter;
 
-@SuppressWarnings("PMD.MissingSerialVersionUID")
 @Getter
 public class AzureDaoException extends Exception {
 
