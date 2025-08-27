@@ -56,9 +56,17 @@ public class UnstructuredDataHelper {
         try {
             blobId = dataManagementService.saveBlobData(dataManagementConfiguration.getUnstructuredContainerName(), inputStream)
                 .getBlobName();
-            log.debug("Completed upload to unstructured data store for EOD {}. Successfully uploaded with blobId: {}", eodEntity.getId(), blobId);
+            log.debug(
+                "Completed upload to unstructured data store for EOD {}. Successfully uploaded with blobId: {}",
+                eodEntity.getId(),
+                blobId
+            );
         } catch (Exception e) {
-            log.error("Upload to unstructured data store failed for EOD {}.", eodEntity.getId(), e);
+            log.error(
+                "Upload to unstructured data store failed for EOD {}.",
+                eodEntity.getId(),
+                e
+            );
         }
         return blobId;
     }
