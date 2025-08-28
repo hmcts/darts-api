@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
+@SuppressWarnings("PMD.TooManyMethods")//Repository class so low complexity in this case
 public interface UserAccountRepository extends
     RevisionRepository<UserAccountEntity, Integer, Long>,
     JpaRepository<UserAccountEntity, Integer>,
@@ -73,4 +75,14 @@ public interface UserAccountRepository extends
     void updateLastLoginTime(Integer userId, OffsetDateTime now);
 
     List<UserAccountEntity> findByIdInAndActive(List<Integer> userIds, Boolean active);
+
+    @Query("""
+        select u
+        from UserAccountEntity u
+        where (:includeSystemUsers = true or u.isSystemUser = false)
+          and (:emailAddress is null or u.emailAddress = :emailAddress)
+          and ( :#{#userIds == null || #userIds.isEmpty()} = true or u.id in :userIds )
+        """)
+    List<UserAccountEntity> findUsers(boolean includeSystemUsers, String emailAddress, List<Integer> userIds, Sort sort
+    );
 }
