@@ -50,7 +50,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 
 @AutoConfigureMockMvc
 @Transactional
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     private static final String URL_TEMPLATE = "/transcriptions/{transcription_id}/document";

@@ -321,7 +321,6 @@ class AutomatedTaskServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     void taskFailedToBeStartedMovesToFailedStatus() {
         when(mockAutomatedTaskConfigurationProperties.getSystemUserEmail()).thenReturn("system@darts.test");
         UserAccountEntity userAccount = new UserAccountEntity();

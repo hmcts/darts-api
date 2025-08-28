@@ -30,7 +30,6 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
-@SuppressWarnings({"PMD.LawOfDemeter", "PMD.AvoidDuplicateLiterals"})
 class GovNotifyServiceTest {
 
     public static final String EMAIL_ADDRESS = "test@test.com";
@@ -73,7 +72,7 @@ class GovNotifyServiceTest {
         assertEquals("A new transcript is ready for you to authorise", emailResponse.getSubject());
         compare("""
                     There is a new transcript available for you to authorise for case ID TheCaseId at TheCourthouse.
-
+                    
                     [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
@@ -84,7 +83,7 @@ class GovNotifyServiceTest {
         assertEquals("New DARTS transcription request", emailResponse.getSubject());
         compare("""
                     You have received a new transcription request from the DARTS Portal for case ID TheCaseId at TheCourthouse.
-
+                    
                     [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
@@ -96,9 +95,9 @@ class GovNotifyServiceTest {
         compare(
             """
                 The audio recording for case ID TheCaseId at TheCourthouse is ready.
-
+                
                 [Sign into the DARTS Portal](ThePortalURL) to access it.
-
+                
                 The recording will expire in 2 working days (this does not include Saturdays and Sundays) but you can extend it by opening the file.""",
             emailResponse
         );
@@ -110,7 +109,7 @@ class GovNotifyServiceTest {
         assertEquals("Your transcript is available", emailResponse.getSubject());
         compare("""
                     Your transcript request for case ID TheCaseId at TheCourthouse has been completed and is available for download.
-
+                    
                     To access the transcript, [sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
     }
 
@@ -120,7 +119,7 @@ class GovNotifyServiceTest {
         assertEquals("Your transcript request was approved", emailResponse.getSubject());
         compare("""
                     Your transcript request for case ID TheCaseId at TheCourthouse has been approved.
-
+                    
                     We’ll notify you when it’s available to download.""", emailResponse);
     }
 
@@ -137,7 +136,7 @@ class GovNotifyServiceTest {
         compare(
             """
                 Your transcript request for case ID TheCaseId at TheCourthouse has been rejected due to TheRejectionReason.
-
+                
                 You can resubmit your request, but take into account the reason for the original request's rejection.""",
             emailResponse
         );
@@ -149,9 +148,9 @@ class GovNotifyServiceTest {
         assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
                     We have received your audio recording order for case ID TheCaseId at TheCourthouse and it's currently being processed.
-
+                    
                     We'll notify you when it's ready and available for use.
-
+                    
                     Alternatively, you can visit the Your audio section in the DARTS Portal to check its progress.""", emailResponse);
     }
 
@@ -161,11 +160,11 @@ class GovNotifyServiceTest {
         assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
                     We have received your audio recording order for case ID TheCaseId at TheCourthouse.
-
+                    
                     Processing your order may take a little longer as it must be retrieved from the archives.
-
+                    
                     We'll notify you when it is ready and available for use.
-
+                    
                     Alternatively, you can visit the Your audio section of the DARTS Portal to check its progress.""", emailResponse);
     }
 
@@ -186,23 +185,23 @@ class GovNotifyServiceTest {
         compare(
             """
                 Your audio recording order for case ID TheCaseId at TheCourthouse has failed.
-
+                
                 Due to unforeseen errors, your audio recording order has failed.
-
+                
                 To resolve this issue, email DTS-ITServiceDesk@justice.gov.uk quoting TheRequestID, and provide them with the following information:
-
+                
                 ## Case details
-
+                
                 Case ID: TheCaseId
                 Courthouse: TheCourthouse
                 Defendants: Defendant1,Defendant2
-
+                
                 ## Audio details
-
+                
                 Hearing date: TheHearingDate
                 Requested start time: TheStartTime
                 Requested end time: TheEndTime
-
+                
                 They will raise a Service Now ticket to process this issue.""",
             emailResponse
         );

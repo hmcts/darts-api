@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@SuppressWarnings({"PMD.DoNotUseThreads", "PMD.AvoidInstantiatingObjectsInLoops", "PMD.AvoidThrowingRawExceptionTypes"})
+@SuppressWarnings({"PMD.DoNotUseThreads", "PMD.AvoidThrowingRawExceptionTypes"})
 class AudioControllerAddAudioMetaDataNoSessionIntTest extends IntegrationBase {
 
     @Value("${local.server.port}")
@@ -132,8 +132,8 @@ class AudioControllerAddAudioMetaDataNoSessionIntTest extends IntegrationBase {
     }
 
     private AddAudioMetadataRequestWithStorageGUID createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
-                                                          String courthouse, String courtroom, String filetype, Path audioBinaryPayload,
-                                                          String... casesList) throws IOException {
+                                                                         String courthouse, String courtroom, String filetype, Path audioBinaryPayload,
+                                                                         String... casesList) throws IOException {
 
         AddAudioMetadataRequestWithStorageGUID addAudioMetadataRequest = new AddAudioMetadataRequestWithStorageGUID();
         addAudioMetadataRequest.startedAt(startedAt);

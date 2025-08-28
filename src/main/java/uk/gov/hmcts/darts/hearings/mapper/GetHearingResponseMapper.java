@@ -16,7 +16,6 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.TooManyMethods"})
 public class GetHearingResponseMapper {
 
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
@@ -41,7 +40,7 @@ public class GetHearingResponseMapper {
 
         if (hearing.getCourtCase().getReportingRestrictions() != null && restrictions.isEmpty()) {
             getHearingResponse.addCaseReportingRestrictionsItem(
-                    reportingRestrictionWithName(hearing.getCourtCase().getReportingRestrictions().getEventName()));
+                reportingRestrictionWithName(hearing.getCourtCase().getReportingRestrictions().getEventName()));
         }
 
         return getHearingResponse;
