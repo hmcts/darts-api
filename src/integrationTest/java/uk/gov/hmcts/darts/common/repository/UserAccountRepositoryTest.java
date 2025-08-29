@@ -27,6 +27,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
 
     private UserAccountEntity userAccountEntity2;
 
+    private UserAccountEntity userAccountEntity3;
 
     @BeforeEach
     void setUpData() {
@@ -45,6 +46,15 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
         dartsPersistence.save(user2);
 
         userAccountEntity2 = user2;
+
+        UserAccountEntity user3 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
+            .emailAddress("some-user-email-3")
+            .isSystemUser(true)
+            .build()
+            .getEntity();
+        dartsPersistence.save(user3);
+
+        userAccountEntity3 = user3;
 
     }
 
@@ -123,5 +133,15 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
             userAccountEntity2.getId(),
             -99  // migration user added by flyway
         ));
+    }
+
+    @Test
+    void findUsers_shouldReturnSystemUser_WhenIdProvided() {
+        List<UserAccountEntity> users = userAccountRepository.findUsers(
+            true, null, List.of(userAccountEntity3.getId()), null
+        );
+
+        assertThat(users, Matchers.hasSize(1));
+        assertThat(users.get(0).getId(), equalTo(userAccountEntity3.getId()));
     }
 }
