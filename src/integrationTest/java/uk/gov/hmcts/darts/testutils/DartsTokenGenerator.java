@@ -50,9 +50,11 @@ public class DartsTokenGenerator {
 
     /**
      * builds an official jwt token that can be used to test the darts api end to end.
+     *
      * @return The token as well as the jwks key payload to validate the token.
      * @throws JOSEException Any problems fetching a token.
      */
+    @SuppressWarnings("PMD.ReplaceJavaUtilDate")
     public DartsTokenAndJwksKey fetchToken() throws JOSEException {
         if (issuer == null || email == null || audience == null) {
             throw new ValidationException("Required inputs not supplied");

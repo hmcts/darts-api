@@ -41,11 +41,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings({
-    "PMD.GodClass",
-    "PMD.CyclomaticComplexity",
-    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
-})
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class CaseArchiveRecordMapperImpl extends BaseArchiveRecordMapper implements CaseArchiveRecordMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;

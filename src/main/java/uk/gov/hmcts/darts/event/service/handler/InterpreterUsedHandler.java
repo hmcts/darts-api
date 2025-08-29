@@ -17,7 +17,6 @@ import uk.gov.hmcts.darts.util.DataUtil;
 
 @Slf4j
 @Service
-@SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
 public class InterpreterUsedHandler extends EventHandlerBase {
 
     public InterpreterUsedHandler(RetrieveCoreObjectService retrieveCoreObjectService,

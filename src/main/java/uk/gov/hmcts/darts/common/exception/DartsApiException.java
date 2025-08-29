@@ -8,7 +8,6 @@ import java.util.Map;
 
 @Slf4j
 @Getter
-@SuppressWarnings("PMD.NullAssignment")
 public class DartsApiException extends RuntimeException {
 
     private static final String EXCEPTION_MESSAGE_FORMAT = "%s. %s";

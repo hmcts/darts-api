@@ -24,10 +24,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioTransformationServiceTest extends IntegrationBase {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
+
     @Autowired
     private AudioTransformationService audioTransformationService;
 
@@ -38,7 +38,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     private AudioTransformationServiceGivenBuilder given;
 
     @MockitoBean
-    FileOperationService mockFileOperationService;
+    private FileOperationService mockFileOperationService;
 
     @Autowired
     DartsPersistence dartsPersistence;

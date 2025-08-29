@@ -66,8 +66,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-@SuppressWarnings({
-    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
+@SuppressWarnings({"PMD.CouplingBetweenObjects"})
 @Getter
 @Slf4j
 @Deprecated

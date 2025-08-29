@@ -35,9 +35,10 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PEN
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
 @TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
-@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CloseResource"})
+@SuppressWarnings({"PMD.CloseResource"})
 @Slf4j
 class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
+
     @Autowired
     private ArmRpoDownloadProduction stubbedArmRpoDownloadProduction;
 

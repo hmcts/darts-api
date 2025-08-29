@@ -15,7 +15,6 @@ import java.util.function.BiConsumer;
 
 @SuppressWarnings({
     "PMD.AvoidAccessibilityAlteration",
-    "PMD.AvoidThrowingRawExceptionTypes",
     "PMD.AvoidCatchingThrowable",
     "PMD.AvoidThrowingRawExceptionTypes"})
 public final class EntityIdPopulator {

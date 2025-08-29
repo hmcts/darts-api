@@ -18,8 +18,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -45,23 +43,18 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getCourtCas
 @TestPropertySource(properties = {
     "darts.cases.admin-search.max-results=20"
 })
-@SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.NcssCount"})
 class CaseServiceAdminSearchTest extends IntegrationBase {
 
     @Autowired
-    SecurityGroupRepository securityGroupRepository;
+    private CaseService service;
     @Autowired
-    UserAccountRepository userAccountRepository;
-    @Autowired
-    CaseService service;
-    @Autowired
-    CourtCaseStub courtCaseStub;
-    CourthouseEntity swanseaCourthouse;
-    CourthouseEntity londonCourthouse;
-    UserAccountEntity user;
-    CourtroomEntity courtroom1;
-    CourtroomEntity courtroomLondon;
-
+    private CourtCaseStub courtCaseStub;
+    private CourthouseEntity swanseaCourthouse;
+    private CourthouseEntity londonCourthouse;
+    private UserAccountEntity user;
+    private CourtroomEntity courtroom1;
+    
     @BeforeEach
     void setupData() {
         swanseaCourthouse = someMinimalCourthouse();
@@ -91,7 +84,7 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
         CourtCaseEntity case6 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case6.setCaseNumber("case6");
 
-        CourtCaseEntity case7 = getCourtCaseTestData(). createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case7 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case7.setCaseNumber("case7");
 
         CourtCaseEntity case8 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
@@ -150,11 +143,11 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
         HearingEntity hearing7b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 23), judge);
         HearingEntity hearing8 = PersistableFactory.getHearingTestData().createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
 
-        courtroomLondon = createCourtRoomWithNameAtCourthouse(londonCourthouse, "courtroomLondon");
+        CourtroomEntity courtroomLondon = createCourtRoomWithNameAtCourthouse(londonCourthouse, "courtroomLondon");
         HearingEntity hearing9 = PersistableFactory.getHearingTestData().createHearingWithDefaults(case9, courtroomLondon, LocalDate.of(2023, 5, 20), judge3a);
 
         CourtroomEntity courtroom4 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom4");
-        HearingEntity hearing10a =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
+        HearingEntity hearing10a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,

@@ -128,7 +128,7 @@ public class HearingCommonServiceImpl implements HearingCommonService {
             );
 
         if (hearingEntityOptional.isEmpty()) {
-            log.info("Can not link hearing to {} {} as no hearings could be found for cas_id {}, ctr_id {}, and Date {}",
+            log.info("Can not link hearing to {} as no hearings could be found for cas_id {}, ctr_id {}, and Date {}",
                      type,
                      courtCaseEntity.getId(),
                      courtroom.getId(),
