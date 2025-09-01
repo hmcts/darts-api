@@ -35,7 +35,6 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.AvoidInstanceofChecksInCatchClause"})
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
 
     private final ArchiveRecordService archiveRecordService;
@@ -135,6 +134,10 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             }
         }
 
+        copyMetadataOrRecover(userAccount, batchItems, archiveRecordsFileName);
+    }
+
+    private void copyMetadataOrRecover(UserAccountEntity userAccount, ArmBatchItems batchItems, String archiveRecordsFileName) {
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
                 String manifestFileContents = unstructuredToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
