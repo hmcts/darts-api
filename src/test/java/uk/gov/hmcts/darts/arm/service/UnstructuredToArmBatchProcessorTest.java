@@ -36,9 +36,11 @@ import static java.util.Collections.emptyList;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -202,5 +204,41 @@ class UnstructuredToArmBatchProcessorTest {
 
             verifyNoMoreInteractions(logApi);
         }
+    }
+
+    @Test
+    void processUnstructuredToArm_shouldThrowInterruptedException() {
+        //given
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(12L, 34L));
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(2);
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+        when(unstructuredToArmHelper.getEodEntitiesToSendToArm(any(), any(), anyInt()))
+            .thenReturn(List.of(1L, 2L, 3L));
+        //when(externalObjectDirectoryRepository.findAllById(any())).thenReturn(emptyList());
+
+        // Simulate InterruptedException
+        doAnswer(invocation -> {
+            throw new InterruptedException("Simulated interruption");
+        }).when(unstructuredToArmHelper).copyUnstructuredRawDataToArm(any(), any(), any(), any(), any());
+
+        // when
+        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
+
+        //then
+        verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocation(
+            any(),
+            any(ExternalLocationTypeEntity.class),
+            eq(3),
+            eq(Pageable.ofSize(5000)));
+
+        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
+            EodHelper.storedStatus(),
+            EodHelper.unstructuredLocation(),
+            EodHelper.armLocation(), 4998
+        );
+
+        verifyNoMoreInteractions(logApi);
+
     }
 }
