@@ -149,7 +149,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     private ArmRpoPollService armRpoPollService;
     @Autowired
-    UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
+    private UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
 
     @MockitoBean
     private UserIdentity userIdentity;
