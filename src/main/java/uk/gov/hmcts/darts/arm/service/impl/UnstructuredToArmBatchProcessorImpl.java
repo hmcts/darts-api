@@ -35,6 +35,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.AvoidInstanceofChecksInCatchClause"})
 public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
 
     private final ArchiveRecordService archiveRecordService;
@@ -47,7 +48,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     @SneakyThrows
     @Override
-    @SuppressWarnings({"PMD.DoNotUseThreads"})
     public void processUnstructuredToArm(int taskBatchSize) {
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
