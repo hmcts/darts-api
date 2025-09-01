@@ -1,7 +1,3 @@
---
--- flyway for retention validation
---
-
 CREATE TABLE IF NOT EXISTS wk_case_best_values_p1
 (cas_id                         INTEGER
 ,eve_id                         BIGINT
