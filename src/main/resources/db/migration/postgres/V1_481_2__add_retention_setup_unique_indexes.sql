@@ -1,7 +1,3 @@
---
--- flyway unique indexes for retention preparation
---
-
 CREATE UNIQUE INDEX IF NOT EXISTS cc_dets_pk ON cc_dets(cas_id) TABLESPACE pg_default;
 ALTER TABLE IF EXISTS cc_dets ADD PRIMARY KEY USING INDEX cc_dets_pk;
 

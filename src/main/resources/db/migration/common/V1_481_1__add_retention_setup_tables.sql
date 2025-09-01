@@ -1,7 +1,3 @@
---
--- flyway for retention preparation
---
-
 CREATE TABLE IF NOT EXISTS cc_dets
 (cas_id                        INTEGER
 ,case_object_id                CHARACTER VARYING(16)

@@ -1,7 +1,3 @@
---
--- flyway unique indexes for retention validation
---
-
 CREATE UNIQUE INDEX IF NOT EXISTS wk_case_best_values_p1_pk ON wk_case_best_values_p1(cas_id) TABLESPACE pg_default;
 ALTER TABLE IF EXISTS wk_case_best_values_p1 ADD PRIMARY KEY USING INDEX wk_case_best_values_p1_pk;
 
