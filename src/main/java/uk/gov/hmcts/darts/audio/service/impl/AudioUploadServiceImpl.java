@@ -77,14 +77,16 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @Override
     public void addAudio(String blodId, AddAudioMetadataRequest addAudioMetadataRequest) {
+        log.info("Starting to add audio metadata for blob with guid {}", blodId);
         String incomingChecksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, blodId);
         if (!incomingChecksum.equals(addAudioMetadataRequest.getChecksum())) {
+            log.info("About to delete the uploaded audio as checksums do not match");
             deleteUploadedAudio(blodId);
             throw new DartsApiException(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA,
                                         String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
                                                       incomingChecksum, addAudioMetadataRequest.getChecksum()));
         }
-        log.info("Adding audio using metadata {}", addAudioMetadataRequest);
+        log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
         //remove duplicate cases as they can appear more than once, e.g. if they broke for lunch.
         List<String> distinctCaseList = addAudioMetadataRequest.getCases().stream().distinct().toList();
@@ -97,7 +99,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             try {
                 dataManagementApi.deleteBlobDataFromInboundContainer(blodId);
             } catch (AzureDeleteBlobException e) {
-                log.error("Failed to delete blob from inbound container with guid: {}", blodId, e);
+                log.error("Failed to delete blob from inbound container with guid: ", blodId, e);
             }
 
             if (log.isInfoEnabled()) {
