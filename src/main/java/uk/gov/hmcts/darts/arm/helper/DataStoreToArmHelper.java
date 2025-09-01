@@ -38,7 +38,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidInstanceofChecksInCatchClause"})//TODO - refactor to reduce methods when this class is next edited
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidInstanceofChecksInCatchClause"})
 public class DataStoreToArmHelper {
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
@@ -282,7 +282,6 @@ public class DataStoreToArmHelper {
             }
         }
     }
-
 
     public void copyMetadataToArm(String manifestFileContents, String archiveRecordsFileName) {
         try {
