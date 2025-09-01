@@ -57,7 +57,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
-    private ArgumentCaptor<String> manifestFileNameCaptor = ArgumentCaptor.forClass(String.class);
+    private final ArgumentCaptor<String> manifestFileNameCaptor = ArgumentCaptor.forClass(String.class);
 
     @MockitoSpyBean
     private ArmDataManagementApi armDataManagementApi;
