@@ -29,17 +29,18 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,7 +97,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void getEodEntitiesToSendToArm_success() {
+    void getEodEntitiesToSendToArm_ShouldSucceed() {
         // given
         ExternalLocationTypeEntity sourceLocation = EodHelper.unstructuredLocation();
         ExternalLocationTypeEntity armLocation = EodHelper.armLocation();
@@ -114,7 +115,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void testGetExternalObjectDirectoryEntity() {
+    void getExternalObjectDirectoryEntity_ShouldSucceed() {
         // given
         ExternalLocationTypeEntity eodSourceLocation = mock(ExternalLocationTypeEntity.class);
         ObjectRecordStatusEntity status = mock(ObjectRecordStatusEntity.class);
@@ -131,7 +132,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void testUpdateExternalObjectDirectoryStatusToFailed() {
+    void updateExternalObjectDirectoryStatusToFailed_ShouldSucceed() {
         // given
         ObjectRecordStatusEntity objectRecordStatus = mock(ObjectRecordStatusEntity.class);
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
@@ -144,7 +145,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void testUpdateExternalObjectDirectoryStatus() {
+    void updateExternalObjectDirectoryStatus_ShouldSucceed() {
         // given
         ObjectRecordStatusEntity armStatus = mock(ObjectRecordStatusEntity.class);
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
@@ -157,9 +158,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void generateRawFilename() {
-        // given
-
+    void generateRawFilename_ShouldSucceed() {
         // when
         String result = dataStoreToArmHelper.generateRawFilename(externalObjectDirectoryEntity);
 
@@ -168,7 +167,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void copyUnstructuredRawDataToArm() {
+    void copyUnstructuredRawDataToArm_ShouldSucceed() {
         // given
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
         ExternalObjectDirectoryEntity armExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
@@ -185,7 +184,27 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void updateExternalObjectDirectoryFailedTransferAttempts() {
+    void copyUnstructuredRawDataToArm_ShouldReturnFalse_WhenRuntimeExceptionOccurs() {
+        // given
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
+        ExternalObjectDirectoryEntity armExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
+        String filename = "testfile";
+        ObjectRecordStatusEntity previousStatus = EodHelper.armIngestionStatus();
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+
+        doThrow(new RuntimeException("Simulated exception"))
+            .when(armDataManagementApi).copyBlobDataToArm(any(), any());
+
+        // when
+        boolean result = dataStoreToArmHelper.copyUnstructuredRawDataToArm(
+            unstructuredExternalObjectDirectory, armExternalObjectDirectory, filename, previousStatus, userAccount);
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    void updateExternalObjectDirectoryFailedTransferAttempts_ShouldSucceed() {
         // given
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
@@ -197,7 +216,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void writeManifestFile() {
+    void writeManifestFile_ShouldSucceed() {
         // given
         ArmBatchItems batchItems = mock(ArmBatchItems.class);
         ArchiveRecord archiveRecord = mock(ArchiveRecord.class);
@@ -212,7 +231,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void getArchiveRecordsFileName_typical() throws IOException {
+    void getArchiveRecordsFileName__ShouldSucceed() {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         String name = dataStoreToArmHelper.getArchiveRecordsFileName("DARTS");
 
