@@ -56,7 +56,7 @@ public class DataStoreToArmHelper {
 
 
     public List<Long> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
-                                                   ExternalLocationTypeEntity armLocation, int maxResultSize) {
+                                                ExternalLocationTypeEntity armLocation, int maxResultSize) {
 
         List<ObjectRecordStatusEntity> statusEntityList = List.of(
             EodHelper.failedArmRawDataStatus(), EodHelper.failedArmManifestFileStatus(),
@@ -204,6 +204,9 @@ public class DataStoreToArmHelper {
             }
         } catch (Exception e) {
             log.error("Error copying BLOB data for file {}", unstructuredExternalObjectDirectory.getExternalLocation(), e);
+            if (e instanceof InterruptedException) {
+                throw e;
+            }
             return false;
         }
 
