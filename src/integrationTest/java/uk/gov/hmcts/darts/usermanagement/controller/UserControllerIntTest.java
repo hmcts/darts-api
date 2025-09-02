@@ -88,14 +88,11 @@ class UserControllerIntTest extends IntegrationBase {
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
         userAccountEntity = userAccountRepository.save(userAccountEntity);
 
-
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
 
-
         userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
-
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
@@ -325,7 +322,7 @@ class UserControllerIntTest extends IntegrationBase {
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        
+
         userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 

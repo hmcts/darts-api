@@ -29,12 +29,13 @@ import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsVal
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.NotSameUserValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserActivateValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,37 +52,41 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserManagementServiceImplTest {
+
     private static final String EXISTING_EMAIL_ADDRESS = "existing-email@hmcts.net";
-    UserManagementServiceImpl service;
+    private UserManagementServiceImpl service;
     @Mock
-    UserAccountRepository userAccountRepository;
+    private UserAccountRepository userAccountRepository;
 
     @Mock
-    SecurityGroupRepository securityGroupRepository;
+    private SecurityGroupRepository securityGroupRepository;
 
     @Mock
-    AuthorisationApi authorisationApi;
+    private AuthorisationApi authorisationApi;
 
     @Mock
-    UserSearchQuery userSearchQuery;
+    private UserSearchQuery userSearchQuery;
 
     @Mock
-    UserManagementQuery userManagementQuery;
+    private UserManagementQuery userManagementQuery;
 
     @Mock
-    SecurityGroupIdMapper securityGroupIdMapper;
+    private SecurityGroupIdMapper securityGroupIdMapper;
 
     @Mock
-    TranscriptionService transcriptionService;
+    private TranscriptionService transcriptionService;
 
     @Mock
-    UserIdentity userIdentity;
+    private UserIdentity userIdentity;
 
     @Mock
-    AuditApi auditApi;
+    private AuditApi auditApi;
 
     @Mock
-    UserActivateValidator userAuthoriseValidator;
+    private UserActivateValidator userAuthoriseValidator;
+
+    @Mock
+    private NotSameUserValidator notSameUserValidator;
 
     @BeforeEach
     void setUp() {
@@ -110,13 +115,13 @@ class UserManagementServiceImplTest {
             deactivateNotLastSuperAdminValidator,
             transcriptionService,
             auditApi,
-            userAuthoriseValidator
+            userAuthoriseValidator,
+            notSameUserValidator
         );
     }
 
-
     @Test
-    void testGetUser() throws IOException {
+    void getUsers_ShouldReturnsUsers() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
         when(userManagementQuery.getUsers(false, EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
@@ -131,7 +136,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void testGetUserWithIncludeSystemUser() throws IOException {
+    void testGetUserWithIncludeSystemUser() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
         when(userManagementQuery.getUsers(true, EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
@@ -146,22 +151,31 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void testModifyUserWithDeactivate() throws IOException {
-        List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
+    void modifyUser_ReturnsUpdatedUser_WithActivateFalse() {
+        List<UserAccountEntity> userAccountEntities = new ArrayList<>();
+        userAccountEntities.add(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
+
         userAccountEntities.getFirst().setActive(false);
         userAccountEntities.getFirst().setIsSystemUser(false);
 
+        userAccountEntities.add(createUserAccount(2, "another-user-email@hmcts.net"));
+
         Integer userId = 1001;
-        Long transcriptionId = 1001L;
         UserPatch patch = new UserPatch();
         patch.setActive(false);
 
+        Set<UserAccountEntity> userAccountEntitySet = new HashSet<>(userAccountEntities);
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
+        when(securityGroupEntity.getUsers()).thenReturn(userAccountEntitySet);
+
+        Long transcriptionId = 1001L;
+
         when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
         when(userAccountRepository.existsById(userId)).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.getFirst()));
         when(transcriptionService.rollbackUserTranscriptions(userAccountEntities.getFirst())).thenReturn(Arrays.asList(transcriptionId));
+        when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
 
         UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);
 
@@ -170,7 +184,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void testModifyUserWithoutActivation() throws IOException {
+    void modifyUser_ReturnsUpdatedUser_WithoutActiveSet() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
         userAccountEntities.getFirst().setIsSystemUser(false);
 
@@ -212,7 +226,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void testModifyUserWithActivate() throws IOException {
+    void modifyUser_ReturnsUpdatedUser_WithActiveTrue() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
         userAccountEntities.getFirst().setIsSystemUser(false);
 

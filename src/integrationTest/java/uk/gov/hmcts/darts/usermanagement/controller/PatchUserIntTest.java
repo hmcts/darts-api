@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.usermanagement.controller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@Isolated
 class PatchUserIntTest extends IntegrationBase {
 
     private static final String ORIGINAL_USERNAME = "James Smith";
@@ -73,7 +75,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldSucceedWhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
+    void patchUser_ShouldSucceed_WhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -121,7 +123,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldSucceedWhenProvidedWithValidValuesForAllAllowableFields() throws Exception {
+    void patchUser_ShouldSucceed_WhenProvidedWithValidValuesForAllAllowableFields() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -168,7 +170,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     // Regression test to cover bug DMP-2459
     @Test
-    void patchUserShouldSucceedWhenAnExistingDescriptionIsRemoved() throws Exception {
+    void patchUser_ShouldSucceed_WhenAnExistingDescriptionIsRemoved() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -215,7 +217,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldFailIfChangeWithInvalidDataIsAttempted() throws Exception {
+    void patchUser_ShouldFail_IfChangeWithInvalidDataIsAttempted() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -234,7 +236,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldFailIfProvidedUserIdDoesNotExistInDB() throws Exception {
+    void patchUser_ShouldFail_IfProvidedUserIdDoesNotExistInDB() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest(818_231)
@@ -249,7 +251,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldSucceedAndClearSecurityGroupsWhenAccountGetsDisabledAndNoSecurityGroupsAreExplicitlyProvided() throws Exception {
+    void patchUser_ShouldSucceedAndClearSecurityGroups_WhenAccountGetsDisabledAndNoSecurityGroupsAreExplicitlyProvided() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -283,7 +285,37 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldSucceedWhenAccountGetsEnabled() throws Exception {
+    void patchUser_ShouldFail_WhenAccountGetsDeactivatedBySameUser() throws Exception {
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
+
+        Integer userId = user.getId();
+
+        MockHttpServletRequestBuilder request = buildRequest(userId)
+            .content("""
+                         {
+                           "active": false
+                         }
+                         """);
+        mockMvc.perform(request)
+            .andExpect(status().is4xxClientError())
+            .andExpect(jsonPath("$.type").value("AUTHORISATION_115"))
+            .andExpect(jsonPath("$.title").value("User is not authorised to modify own account"))
+            .andExpect(jsonPath("$.status").value(403));
+
+        transactionTemplate.execute(status -> {
+            UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
+                .findById(userId)
+                .orElseThrow();
+
+            assertEquals(true, latestUserAccountEntity.isActive());
+            assertThat(getSecurityGroupIds(latestUserAccountEntity).size(), greaterThan(0));
+
+            return null;
+        });
+    }
+
+    @Test
+    void patchUser_ShouldSucceed_WhenAccountGetsEnabled() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createDisabledUserAccountEntity(user);
@@ -317,7 +349,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldSucceedWhenSecurityGroupsAreUpdated() throws Exception {
+    void patchUser_ShouldSucceed_WhenSecurityGroupsAreUpdated() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -361,7 +393,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldSucceedIfEmailAddressChangeDifferent() throws Exception {
+    void patchUser_ShouldSucceed_IfEmailAddressChangeDifferent() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -382,7 +414,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserSameEmailShouldBeOkAndDataShouldRemainUnchanged() throws Exception {
+    void patchUser_ShouldRemainUnchanged_SameEmailShouldBeOkAndData() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -401,7 +433,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserDuplicateEmailShouldFail() throws Exception {
+    void patchUser_DuplicateEmailShouldFail() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         createEnabledUserAccountEntity(user);
@@ -440,7 +472,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchUserShouldFailIfProvidedUserIsASystemUser() throws Exception {
+    void patchUser_ShouldFailIfProvidedUserIsASystemUser() throws Exception {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = accountStub.getSystemUserAccountEntity();
