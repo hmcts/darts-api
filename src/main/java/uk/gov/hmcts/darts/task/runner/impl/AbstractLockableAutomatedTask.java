@@ -129,13 +129,13 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
             }
         } catch (Exception exception) {
             log.error("Task: {} exception while attempting to start the task", getTaskName(), exception);
-            logTaskFailed(exception, executionId);
+            logTaskFailed(executionId);
         } finally {
             postRunTask();
         }
     }
 
-    private void logTaskFailed(Exception exception, ThreadLocal<UUID> executionId) {
+    private void logTaskFailed(ThreadLocal<UUID> executionId) {
         UUID executionUuid = null;
         if (executionId != null && executionId.get() != null) {
             executionUuid = executionId.get();
@@ -296,16 +296,16 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                     future.get(getLockAtMostFor().toMillis(), TimeUnit.MILLISECONDS);
                 } catch (TimeoutException e) {
                     log.error("Task: {} timed out after {}ms", getTaskName(), getLockAtMostFor().toMillis());
-                    logTaskFailed(e, executionId);
+                    logTaskFailed(executionId);
                     if (!future.cancel(true)) {
                         log.error("Failed to cancel task: {}.", getTaskName());
                     }
                 } catch (ExecutionException e) {
                     log.error("Task: {} execution exception", getTaskName(), e);
-                    logTaskFailed(e, executionId);
+                    logTaskFailed(executionId);
                 } catch (InterruptedException e) {
                     log.error("Task: {} interrupted", getTaskName(), e);
-                    logTaskFailed(e, executionId);
+                    logTaskFailed(executionId);
                     Thread.currentThread().interrupt();
                 }
                 executor.shutdown();
