@@ -128,12 +128,20 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                 }
             }
         } catch (Exception exception) {
-            logApi.taskFailed(executionId.get(), getTaskName());
-            setAutomatedTaskStatus(FAILED);
             log.error("Task: {} exception while attempting to start the task", getTaskName(), exception);
+            logTaskFailed(exception, executionId);
         } finally {
             postRunTask();
         }
+    }
+
+    private void logTaskFailed(Exception exception, ThreadLocal<UUID> executionId) {
+        UUID executionUuid = null;
+        if (executionId != null && executionId.get() != null) {
+            executionUuid = executionId.get();
+        }
+        logApi.taskFailed(executionUuid, getTaskName());
+        setAutomatedTaskStatus(FAILED);
     }
 
     LockedTask createLockableTask() {
@@ -287,17 +295,17 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
                 try {
                     future.get(getLockAtMostFor().toMillis(), TimeUnit.MILLISECONDS);
                 } catch (TimeoutException e) {
-                    setAutomatedTaskStatus(FAILED);
                     log.error("Task: {} timed out after {}ms", getTaskName(), getLockAtMostFor().toMillis());
+                    logTaskFailed(e, executionId);
                     if (!future.cancel(true)) {
                         log.error("Failed to cancel task: {}.", getTaskName());
                     }
                 } catch (ExecutionException e) {
-                    setAutomatedTaskStatus(FAILED);
                     log.error("Task: {} execution exception", getTaskName(), e);
+                    logTaskFailed(e, executionId);
                 } catch (InterruptedException e) {
-                    setAutomatedTaskStatus(FAILED);
                     log.error("Task: {} interrupted", getTaskName(), e);
+                    logTaskFailed(e, executionId);
                     Thread.currentThread().interrupt();
                 }
                 executor.shutdown();
