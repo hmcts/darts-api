@@ -13,12 +13,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -72,7 +74,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldSucceedWhenProvidedWithValidValuesForMinimumRequiredFields() throws Exception {
+    void createUser_ShouldSucceed_WhenProvidedWithValidValuesForMinimumRequiredFields() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
@@ -118,7 +120,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldSucceedWhenProvidedWithValidValuesForAllFields() throws Exception {
+    void createUser_ShouldSucceed_WhenProvidedWithValidValuesForAllFields() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
@@ -174,7 +176,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldFailWhenRequiredFieldsAreMissing() throws Exception {
+    void createUser_ShouldFail_WhenRequiredFieldsAreMissing() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
@@ -193,7 +195,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     @Test
-    void createUserShouldSucceedWhenProvidedWithAUserEmailAddressThatMatchesAnExistingDisabledAccount() throws Exception {
+    void createUser_ShouldFail_WhenProvidedWithAUserEmailAddressThatMatchesAnExistingDisabledAccount() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = new UserAccountEntity();
@@ -211,12 +213,18 @@ class PostUserIntTest extends IntegrationBase {
                            "email_address": "james.smith@hmcts.net"
                          }
                          """);
-        mockMvc.perform(request)
-            .andExpect(status().isCreated());
+        MvcResult mvcResult = mockMvc.perform(request)
+            .andExpect(status().isConflict()).andReturn();
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        Problem problem = objectMapper.readValue(actualJson, Problem.class);
+        assertEquals(UserManagementError.DUPLICATE_EMAIL.getType(), problem.getType().toString());
+        assertEquals(UserManagementError.DUPLICATE_EMAIL.getTitle(), problem.getTitle());
+        assertEquals("User with email james.smith@hmcts.net already exists", problem.getDetail());
     }
 
     @Test
-    void createUserShouldFailWhenProvidedWithASecurityGroupThatDoesntExist() throws Exception {
+    void createUser_ShouldFail_WhenProvidedWithASecurityGroupThatDoesntExist() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
