@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
@@ -62,9 +63,12 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
 
         String expectedResponse = getContentsFromFile(
             "tests/audio/AudioControllerGetAdminMediaVersionsByIdIntTest/expectedResponseTypical.json")
-            .replace("<created_at_current>", currentMediaEntity.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
-            .replace("<versioned_at_current_1>", versionedMediaEntity2.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
-            .replace("<versioned_at_current_2>", versionedMediaEntity1.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+            .replace("<created_at_current>",
+                     currentMediaEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<versioned_at_current_1>",
+                     versionedMediaEntity2.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<versioned_at_current_2>",
+                     versionedMediaEntity1.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME));
         JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
@@ -86,9 +90,12 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
 
         String expectedResponse = getContentsFromFile(
             "tests/audio/AudioControllerGetAdminMediaVersionsByIdIntTest/expectedResponseTypical.json")
-            .replace("<created_at_current>", currentMediaEntity.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
-            .replace("<versioned_at_current_1>", versionedMediaEntity2.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
-            .replace("<versioned_at_current_2>", versionedMediaEntity1.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+            .replace("<created_at_current>", currentMediaEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<versioned_at_current_1>", versionedMediaEntity2.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<versioned_at_current_2>", versionedMediaEntity1.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_DATE_TIME));
         JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
@@ -108,7 +115,8 @@ class AudioControllerGetAdminMediaVersionsByIdIntTest extends IntegrationBase {
 
         String expectedResponse = getContentsFromFile(
             "tests/audio/AudioControllerGetAdminMediaVersionsByIdIntTest/expectedResponseNoVersions.json")
-            .replace("<created_at_current>", currentMediaEntity.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+            .replace("<created_at_current>", currentMediaEntity.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_DATE_TIME));
         JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 

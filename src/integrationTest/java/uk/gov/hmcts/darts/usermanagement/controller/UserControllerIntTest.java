@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -43,6 +44,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@Isolated
 class UserControllerIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/users/";
@@ -88,14 +90,11 @@ class UserControllerIntTest extends IntegrationBase {
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
         userAccountEntity = userAccountRepository.save(userAccountEntity);
 
-
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
 
-
         userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
-
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
@@ -325,7 +324,7 @@ class UserControllerIntTest extends IntegrationBase {
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        
+
         userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 

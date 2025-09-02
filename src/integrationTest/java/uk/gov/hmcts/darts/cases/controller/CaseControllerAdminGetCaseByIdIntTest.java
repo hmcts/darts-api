@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,8 +135,10 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/testCaseOpen/expectedResponse.json");
-        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
-        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME));
+        expectedResponse = expectedResponse.replace("<CREATED_AT>", courtCase.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC)
+            .format(DateTimeFormatter.ISO_DATE_TIME));
+        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC)
+            .format(DateTimeFormatter.ISO_DATE_TIME));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -248,8 +251,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/expectedResponse_isDeleted.json");
         expectedResponse = expectedResponse
-            .replace("<CREATED_AT>", courtCase.getCreatedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
-            .replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<CREATED_AT>", courtCase.getCreatedDateTime().atZoneSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME))
+            .replace("<LAST_MODIFIED_AT>", courtCase.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME))
             .replace("<CASE_DELETED_BY>", String.valueOf(deletedBy.getId()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
