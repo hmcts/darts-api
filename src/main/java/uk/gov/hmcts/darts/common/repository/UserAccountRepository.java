@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@SuppressWarnings({"PMD.TooManyMethods"})
 @Repository
 public interface UserAccountRepository extends
     RevisionRepository<UserAccountEntity, Integer, Long>,
