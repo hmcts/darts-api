@@ -99,7 +99,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             try {
                 dataManagementApi.deleteBlobDataFromInboundContainer(blodId);
             } catch (AzureDeleteBlobException e) {
-                log.error("Failed to delete blob from inbound container with guid: ", blodId, e);
+                log.error("Failed to delete blob from inbound container with guid: {}", blodId, e);
             }
 
             if (log.isInfoEnabled()) {
