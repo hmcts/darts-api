@@ -38,18 +38,15 @@ public final class AsyncUtil {
         invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
 
-    @SuppressWarnings("PMD.UnnecessaryCast")//Required for correct mapping
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
         log.info("Starting {} tasks with {} threads", tasks.size(), threads);
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         //Add authentication to each task as auth is thread local
         List<Callable<Void>> tasksWithAuth = tasks.stream()
-            .map(voidCallable -> {
-                return (Callable<Void>) () -> {
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    return voidCallable.call();
-                };
+            .map(voidCallable -> (Callable<Void>) () -> {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                return voidCallable.call();
             })
             .toList();
 

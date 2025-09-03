@@ -71,19 +71,21 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
         // when
         processor.processGenerateCaseDocument(courtCase.getId());
-
         // then
-        List<CaseDocumentEntity> caseDocumentEntities = caseDocumentRepository.findByCourtCase(courtCase);
-        assertThat(caseDocumentEntities.size()).isEqualTo(1);
-        CaseDocumentEntity caseDocument = caseDocumentEntities.getFirst();
-        assertThat(caseDocument.getCourtCase().getId()).isEqualTo(courtCase.getId());
+        transactionalUtil.executeInTransaction(() -> {
+            CourtCaseEntity courtCaseToAssert = caseRepository.findById(courtCase.getId()).orElseThrow();
+            List<CaseDocumentEntity> caseDocumentEntities = courtCaseToAssert.getCaseDocumentEntities();
+            assertThat(caseDocumentEntities).hasSize(1);
+            CaseDocumentEntity caseDocument = caseDocumentEntities.getFirst();
+            assertThat(caseDocument.getCourtCase().getId()).isEqualTo(courtCaseToAssert.getId());
 
-        List<ExternalObjectDirectoryEntity> eodCaseDocument = eodRepository.findByCaseDocument(caseDocument);
-        assertThat(eodCaseDocument.size()).isEqualTo(1);
+            List<ExternalObjectDirectoryEntity> eodCaseDocument = eodRepository.findByCaseDocument(caseDocument);
+            assertThat(eodCaseDocument).hasSize(1);
 
-        CourtCaseEntity courtCaseEntity = caseRepository.findById(caseDocument.getCourtCase().getId()).orElseThrow();
-        assertThat(courtCaseEntity.isRetentionUpdated()).isTrue();
-        assertThat(courtCaseEntity.getRetentionRetries()).isEqualTo(0);
+            CourtCaseEntity courtCaseEntity = caseRepository.findById(caseDocument.getCourtCase().getId()).orElseThrow();
+            assertThat(courtCaseEntity.isRetentionUpdated()).isTrue();
+            assertThat(courtCaseEntity.getRetentionRetries()).isZero();
+        });
     }
 
 }

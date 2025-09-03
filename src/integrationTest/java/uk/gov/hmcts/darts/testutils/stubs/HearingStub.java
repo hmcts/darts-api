@@ -47,7 +47,7 @@ public class HearingStub {
     }
 
     public HearingEntity createHearingWithMedia(String courthouseName, String courtroomName, String caseNumber,
-                                       LocalDateTime hearingDate, MediaEntity mediaEntity) {
+                                                LocalDateTime hearingDate, MediaEntity mediaEntity) {
         courthouseStub.createCourthouseUnlessExists(courthouseName);
         return retrieveCoreObjectService.retrieveOrCreateHearingWithMedia(
             courthouseName,
@@ -72,10 +72,10 @@ public class HearingStub {
      * Unique case number with unique case number for each hearing record.
      * See {@link HearingSubStringQueryEnum} for prefix and postfix
      * Unique hearing date starting with today with an incrementing day for each subsequent hearing record
-     * @param count  The number of hearing objects that are to be generated
+     *
+     * @param count The number of hearing objects that are to be generated
      * @return The list of generated hearings in chronological order
      */
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     @Transactional
     public List<HearingEntity> generateHearings(int count) {
         List<HearingEntity> retHearingList = new ArrayList<>();

@@ -23,7 +23,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -105,7 +106,6 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation) {
         logStubUsageWarning();
 
@@ -152,10 +152,11 @@ public class DataManagementServiceStubImpl implements DataManagementService {
             }
         }
         try (OutputStream downloadOS = fileBasedDownloadResponseMetaData.getOutputStream(dataManagementConfiguration)) {
-            Date downloadStartDate = new Date();
+            LocalDateTime downloadStartDate = LocalDateTime.now();
             downloadOS.write(audio);
-            Date downloadEndDate = new Date();
-            log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+            LocalDateTime downloadEndDate = LocalDateTime.now();
+            Duration downloadDuration = Duration.between(downloadStartDate, downloadEndDate);
+            log.debug("Downloading of guid {}, took {}ms", blobId, downloadDuration.toMillis());
         }
         return fileBasedDownloadResponseMetaData;
     }

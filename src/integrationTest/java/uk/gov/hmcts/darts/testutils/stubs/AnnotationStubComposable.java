@@ -7,7 +7,6 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -20,7 +19,6 @@ import java.time.OffsetDateTime;
 public class AnnotationStubComposable {
 
     private final AnnotationRepository annotationRepository;
-    private final AnnotationDocumentRepository annotationDocumentRepository;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
@@ -64,7 +62,6 @@ public class AnnotationStubComposable {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntityWith(AnnotationEntity annotationEntity,
                                                                               String fileName,
                                                                               String fileType,
@@ -93,7 +90,6 @@ public class AnnotationStubComposable {
     }
 
     @Transactional
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
                                                                    String checksum, RetentionConfidenceScoreEnum confScore,

@@ -47,7 +47,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestTestData;
 
-@SuppressWarnings("PMD.ExcessiveImports")
 class OutboundAudioDeleterProcessorIntTest extends IntegrationBase {
     private static final String USER_EMAIL_ADDRESS = "system_OutboundAudioDeleter@hmcts.net";
     private UserAccountEntity userAccount;

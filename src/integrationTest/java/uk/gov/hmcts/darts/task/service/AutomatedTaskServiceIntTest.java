@@ -97,7 +97,6 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
 class AutomatedTaskServiceIntTest extends IntegrationBase {
 
     @Autowired

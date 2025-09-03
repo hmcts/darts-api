@@ -30,7 +30,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.VariableDeclarationUsageDistance"})
 class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/audio-requests/transformed_media/{transformed_media_id}";

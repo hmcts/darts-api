@@ -3,7 +3,10 @@ package uk.gov.hmcts.darts.audio.model;
 import lombok.Value;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
+import static uk.gov.hmcts.darts.common.util.DateConverterUtil.EUROPE_LONDON_ZONE;
+
 
 @Value
 public class ViqHeader {
@@ -36,12 +39,15 @@ public class ViqHeader {
 
     public ViqHeader(Instant instant) {
 
+        ZonedDateTime londonTime = instant.atZone(EUROPE_LONDON_ZONE);
+
         viqHeaderBytes = new byte[VIQ_HEADER_SIZE];
-        viqHeaderBytes[DAY_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getDayOfMonth();
-        viqHeaderBytes[MONTH_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getMonthValue();
-        viqHeaderBytes[MINUTE_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getMinute();
-        viqHeaderBytes[HOUR_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getHour();
-        viqHeaderBytes[SECONDS_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getSecond();
+        viqHeaderBytes[DAY_OFFSET] = (byte) londonTime.getDayOfMonth();
+        viqHeaderBytes[MONTH_OFFSET] = (byte) londonTime.getMonthValue();
+        viqHeaderBytes[MINUTE_OFFSET] = (byte) londonTime.getMinute();
+        viqHeaderBytes[HOUR_OFFSET] = (byte) londonTime.getHour();
+        viqHeaderBytes[SECONDS_OFFSET] = (byte) londonTime.getSecond();
+
         viqHeaderBytes[VERIFY_OFFSET_0] = (byte) VERIFY_OFFSET_VALUE_0;
         viqHeaderBytes[VERIFY_OFFSET_1] = (byte) VERIFY_OFFSET_VALUE_1;
         viqHeaderBytes[VERIFY_OFFSET_2] = (byte) VERIFY_OFFSET_VALUE_2;

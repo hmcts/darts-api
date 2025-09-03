@@ -54,7 +54,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.ExcessiveImports"})
 @ActiveProfiles("blobTest")
 class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 

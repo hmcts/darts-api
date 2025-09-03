@@ -35,6 +35,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.ReplaceJavaUtilDate")
 public class DetsApiServiceImpl implements DetsApiService {
 
     private final DataManagementAzureClientFactory blobServiceFactory;
@@ -46,7 +47,6 @@ public class DetsApiServiceImpl implements DetsApiService {
     private final AzureCopyUtil azureCopyUtil;
 
     @Override
-    @SuppressWarnings({"PMD.CloseResource"})
     public DownloadResponseMetaData downloadData(String blobId) throws FileNotDownloadedException {
         DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());
