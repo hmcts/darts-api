@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.helper;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Pageable;
@@ -169,7 +170,7 @@ public class DataStoreToArmHelper {
         return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
     }
 
-
+    @SneakyThrows
     public boolean copyUnstructuredRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
                                                 ExternalObjectDirectoryEntity armExternalObjectDirectory,
                                                 String filename,
