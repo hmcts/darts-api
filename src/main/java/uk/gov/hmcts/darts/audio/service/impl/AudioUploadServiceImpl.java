@@ -86,7 +86,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                                         String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
                                                       incomingChecksum, addAudioMetadataRequest.getChecksum()));
         }
-        log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
+        log.info("Adding audio using metadata {}", addAudioMetadataRequest);
 
         //remove duplicate cases as they can appear more than once, e.g. if they broke for lunch.
         List<String> distinctCaseList = addAudioMetadataRequest.getCases().stream().distinct().toList();
