@@ -222,6 +222,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     @Override
     @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")//TODO - refactor to avoid deeply nested if statements when this class is next edited
     public String getChecksum(String containerName, String blobId) {
+        log.info("Getting checksum for blob '{}' in container '{}'", blobId, containerName);
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
@@ -246,12 +247,14 @@ public class DataManagementServiceImpl implements DataManagementService {
             throw new DartsApiException(CommonApiError.NOT_FOUND,
                                         String.format("Blob '%s' does exist in container '%s' but does not contain a checksum.", blobId, containerName));
         }
+        log.info("Finished getting checksum for blob '{}' in container '{}'", blobId, containerName);
         return fileContentChecksum.encodeToString(checksumByte);
     }
 
 
     @Override
     public Response<Boolean> deleteBlobData(String containerName, String blobId) throws AzureDeleteBlobException {
+        log.info("About to delete blob id {} from container {}", blobId, containerName);
         try {
             BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
             BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);

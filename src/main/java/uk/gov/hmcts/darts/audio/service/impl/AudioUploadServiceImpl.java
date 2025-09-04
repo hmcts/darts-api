@@ -77,8 +77,10 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @Override
     public void addAudio(String blodId, AddAudioMetadataRequest addAudioMetadataRequest) {
+        log.info("Starting to add audio metadata for blob with guid {}", blodId);
         String incomingChecksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, blodId);
         if (!incomingChecksum.equals(addAudioMetadataRequest.getChecksum())) {
+            log.info("About to delete the uploaded audio as checksums do not match");
             deleteUploadedAudio(blodId);
             throw new DartsApiException(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA,
                                         String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
