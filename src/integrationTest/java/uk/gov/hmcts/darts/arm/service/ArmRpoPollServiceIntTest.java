@@ -87,7 +87,6 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     private final Duration pollDuration = Duration.ofHours(4);
     private int batchSize = 10;
 
-
     @Autowired
     private ArmRpoPollServiceImpl armRpoPollService;
 
