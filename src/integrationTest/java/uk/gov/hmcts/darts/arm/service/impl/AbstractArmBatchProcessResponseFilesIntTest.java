@@ -185,7 +185,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod2.setTransferAttempts(1);
         armEod2.setManifestFile(manifestFile1);
         OffsetDateTime armEod2InputUploadProcessedTs = OffsetDateTime.parse("2027-06-10T13:30:00Z");
-        armEod2.setInputUploadProcessedTs(armEod2InputUploadProcessedTs);
+        armEod2.setDataIngestionTs(armEod2InputUploadProcessedTs);
         armEod2.setChecksum("7017013d05bcc5032e142049081821d6");
         armEod2.setVerificationAttempts(1);
         armEod2 = dartsPersistence.save(armEod2);
@@ -337,8 +337,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         assertEquals(1, foundMediaList2.size());
         ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
-        //Make sure the inputUploadProcessedTs is not updated if already set
-        assertEquals(armEod2InputUploadProcessedTs, foundMedia2.getInputUploadProcessedTs());
+        assertEquals("2027-06-10T13:30Z", foundMedia2.getDataIngestionTs().toString());
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia2.getStatus().getId());
         assertEquals(2, foundMedia2.getVerificationAttempts());
         assertEquals(1, foundMedia2.getTransferAttempts());
@@ -349,7 +348,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         assertEquals(1, foundMediaList3.size());
         ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.getFirst();
-        assertEquals("2023-06-10T14:08:28.316382Z", foundMedia3.getInputUploadProcessedTs().toString());
+        assertEquals("2023-07-11T11:39:26.085Z", foundMedia3.getDataIngestionTs().toString());
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia3.getStatus().getId());
         assertEquals(2, foundMedia3.getVerificationAttempts());
         assertEquals(1, foundMedia3.getTransferAttempts());
@@ -360,7 +359,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         assertEquals(1, foundMediaList4.size());
         ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.getFirst();
-        assertEquals("2023-06-10T14:08:28.316382Z", foundMedia4.getInputUploadProcessedTs().toString());
+        assertNull(foundMedia4.getDataIngestionTs());
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia4.getStatus().getId());
         assertEquals(2, foundMedia4.getVerificationAttempts());
         assertEquals(1, foundMedia4.getTransferAttempts());
@@ -375,7 +374,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         assertEquals(1, foundMediaList5.size());
         ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.getFirst();
-        assertEquals("2023-06-10T14:08:28.316382Z", foundMedia5.getInputUploadProcessedTs().toString());
+        assertNull(foundMedia5.getDataIngestionTs());
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
         assertEquals(1, foundMedia5.getVerificationAttempts());
         assertEquals(1, foundMedia5.getTransferAttempts());
