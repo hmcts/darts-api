@@ -97,7 +97,7 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
-class AutomatedTaskServiceTest extends IntegrationBase {
+class AutomatedTaskServiceIntTest extends IntegrationBase {
 
     @Autowired
     private AutomatedTaskService automatedTaskService;
@@ -288,6 +288,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
+    @SuppressWarnings("PMD.LawOfDemeter")
     void givenExistingAutomatedTaskNameAndInvalidCronExpressionThrowsDartsApiException() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
             automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
