@@ -44,6 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -442,6 +444,31 @@ class DataManagementServiceImplTest {
         verify(blobProperties, times(1)).getMetadata();
         verify(blobProperties, times(1)).getContentMd5();
         verify(fileContentChecksum, never()).encodeToString(any());
+    }
+
+    @Test
+    void copyBlobData_shouldStopProcessingAndReturn_WhenThrowingInterruptedException() {
+        // given
+        when(dataManagementConfiguration.getContainerSasUrl("darts-inbound-container"))
+            .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
+        when(dataManagementConfiguration.getContainerSasUrl("darts-unstructured"))
+            .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
+
+        // Simulate InterruptedException
+        doAnswer(invocation -> {
+            throw new InterruptedException("Simulated interruption");
+        }).when(azureCopyUtil).copy(anyString(), anyString());
+
+        String uuid1 = UUID.randomUUID().toString();
+        String uuid2 = UUID.randomUUID().toString();
+
+        // when
+        assertThrows(InterruptedException.class, () ->
+            dataManagementService.copyBlobData(
+                "darts-inbound-container",
+                "darts-unstructured",
+                uuid1,
+                uuid2));
     }
 
     private void assertGetChecksumNotFound(Boolean exists) {
