@@ -23,11 +23,9 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
-@SuppressWarnings("PMD.ExcessiveImports")
 class InboundAudioDeleterProcessorIntTest extends IntegrationBase {
 
     private static final String USER_EMAIL_ADDRESS = "system_InboundAudioDeleter@hmcts.net";
-    private UserAccountEntity userAccount;
     public static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
 
     @Autowired
