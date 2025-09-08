@@ -17,7 +17,8 @@ import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
+@SuppressWarnings("PMD.ExcessiveImports")
+class AdminUpdateAutomatedTaskServiceIntTest extends IntegrationBase {
 
     @Autowired
     private AdminAutomatedTaskService adminAutomatedTaskService;

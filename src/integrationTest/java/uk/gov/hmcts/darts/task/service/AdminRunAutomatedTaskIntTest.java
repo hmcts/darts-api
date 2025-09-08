@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
-class AdminRunAutomatedTaskTest extends IntegrationBase {
+class AdminRunAutomatedTaskIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/admin/automated-tasks/1/run");
     private static final URI ENDPOINT_WITH_NON_EXISTING_TASK_ID = URI.create("/admin/automated-tasks/-1/run");

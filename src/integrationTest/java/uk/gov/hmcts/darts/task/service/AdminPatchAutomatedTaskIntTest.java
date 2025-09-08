@@ -23,7 +23,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
-class AdminPatchAutomatedTaskTest extends IntegrationBase {
+class AdminPatchAutomatedTaskIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/admin/automated-tasks/");
 

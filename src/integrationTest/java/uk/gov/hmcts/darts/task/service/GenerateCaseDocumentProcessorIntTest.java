@@ -29,22 +29,22 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
 
     @MockitoSpyBean
-    CaseRepository caseRepository;
+    private CaseRepository caseRepository;
     @MockitoSpyBean
-    CaseDocumentRepository caseDocumentRepository;
+    private CaseDocumentRepository caseDocumentRepository;
     @MockitoSpyBean
-    ExternalObjectDirectoryRepository eodRepository;
+    private ExternalObjectDirectoryRepository eodRepository;
     @Autowired
-    UserAccountRepository userAccountRepository;
+    private UserAccountRepository userAccountRepository;
     @Autowired
-    AnnotationRepository annotationRepository;
+    private AnnotationRepository annotationRepository;
     @Autowired
-    GenerateCaseDocumentSingleCaseProcessor processor;
+    private GenerateCaseDocumentSingleCaseProcessor processor;
     @Autowired
-    HearingRepository hearingRepository;
+    private HearingRepository hearingRepository;
 
     @Test
-    void testGenerateCaseDocument() {
+    void generateCaseDocument_ShouldGenerateCaseDocument() {
         // given
         givenBearerTokenExists("darts.global.user@hmcts.net");
 
