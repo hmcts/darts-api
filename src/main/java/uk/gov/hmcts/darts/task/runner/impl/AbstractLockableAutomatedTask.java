@@ -45,6 +45,7 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.LOCK_FAILED;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @Slf4j
 public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedTaskConfig> implements AutomatedTask, AutoloadingAutomatedTask {
 
