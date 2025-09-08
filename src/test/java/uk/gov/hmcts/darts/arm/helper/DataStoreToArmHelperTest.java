@@ -37,10 +37,12 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -274,6 +276,26 @@ class DataStoreToArmHelperTest {
 
         // then
         assertFalse(result);
+    }
+
+    @Test
+    void copyUnstructuredRawDataToArm_ShouldReturnFalse_WhenInterruptedExceptionOccurs() {
+        // given
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
+        ExternalObjectDirectoryEntity armExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
+        String filename = "testfile";
+        ObjectRecordStatusEntity previousStatus = EodHelper.armIngestionStatus();
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+
+        doAnswer(invocation -> {
+            throw new InterruptedException("Simulated interruption");
+        }).when(armDataManagementApi).copyBlobDataToArm(any(), any());
+
+        // when
+        assertThrows(InterruptedException.class, () -> dataStoreToArmHelper.copyUnstructuredRawDataToArm(
+            unstructuredExternalObjectDirectory, armExternalObjectDirectory, filename, previousStatus, userAccount));
+
+
     }
 
     @Test
