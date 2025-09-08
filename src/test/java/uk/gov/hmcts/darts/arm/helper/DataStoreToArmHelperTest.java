@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
 
 import java.io.File;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 
@@ -79,16 +81,19 @@ class DataStoreToArmHelperTest {
 
     @BeforeEach
     void setUp() {
-        MediaEntity mediaEntity1 = new MediaEntity();
+
+        MediaEntity mediaEntity1 = PersistableFactory.getMediaTestData().someMinimal();
+        mediaEntity1.setId(456L);
         externalObjectDirectoryEntity = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
             mediaEntity1,
             ARM,
             ARM_INGESTION,
             UUID.randomUUID().toString());
-        externalObjectDirectoryEntity.setId(345L);
-        externalObjectDirectoryEntity.setStatus(EodHelper.armIngestionStatus());
+        externalObjectDirectoryEntity.setId(123L);
+        externalObjectDirectoryEntity.setStatus(EOD_HELPER_MOCKS.getArmIngestionStatus());
         externalObjectDirectoryEntity.setOsrUuid(1234L);
-        externalObjectDirectoryEntity.getStatus().setDescription(ARM_INGESTION.name());
+        externalObjectDirectoryEntity.setTransferAttempts(1);
+
     }
 
     @AfterAll
@@ -99,8 +104,9 @@ class DataStoreToArmHelperTest {
     @Test
     void getEodEntitiesToSendToArm_ShouldSucceed() {
         // given
-        ExternalLocationTypeEntity sourceLocation = EodHelper.unstructuredLocation();
-        ExternalLocationTypeEntity armLocation = EodHelper.armLocation();
+        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+        ExternalLocationTypeEntity sourceLocation = EOD_HELPER_MOCKS.getUnstructuredLocation();
+        ExternalLocationTypeEntity armLocation = EOD_HELPER_MOCKS.getArmLocation();
 
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(anyList(), any(), anyInt(), any(Pageable.class)))
             .thenReturn(List.of(123L));
@@ -134,7 +140,8 @@ class DataStoreToArmHelperTest {
     @Test
     void updateExternalObjectDirectoryStatusToFailed_ShouldSucceed() {
         // given
-        ObjectRecordStatusEntity objectRecordStatus = mock(ObjectRecordStatusEntity.class);
+        ObjectRecordStatusEntity objectRecordStatus = EOD_HELPER_MOCKS.getArmResponseManifestFailedStatus();
+        externalObjectDirectoryEntity.setStatus(EOD_HELPER_MOCKS.getArmIngestionStatus());
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
@@ -147,8 +154,9 @@ class DataStoreToArmHelperTest {
     @Test
     void updateExternalObjectDirectoryStatus_ShouldSucceed() {
         // given
-        ObjectRecordStatusEntity armStatus = mock(ObjectRecordStatusEntity.class);
+        ObjectRecordStatusEntity armStatus = EOD_HELPER_MOCKS.getArmDropZoneStatus();
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        externalObjectDirectoryEntity.setStatus(EOD_HELPER_MOCKS.getArmIngestionStatus());
 
         // when
         dataStoreToArmHelper.updateExternalObjectDirectoryStatus(externalObjectDirectoryEntity, armStatus, userAccount);
@@ -158,12 +166,77 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void generateRawFilename_ShouldSucceed() {
+    void generateRawFilename_ShouldSucceed_WithMedia() {
         // when
         String result = dataStoreToArmHelper.generateRawFilename(externalObjectDirectoryEntity);
 
         // then
-        assertNotNull(result);
+        assertEquals("Filenames don't match", "123_456_1", result);
+    }
+
+    @Test
+    void generateRawFilename_ShouldSucceed_WithAnnotationDocument() {
+        // given
+        var annotationDocument = PersistableFactory.getAnnotationDocumentTestData()
+            .someMinimalBuilder()
+            .id(456L)
+            .build();
+        var eod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder()
+            .annotationDocumentEntity(annotationDocument)
+            .media(null)
+            .id(123L)
+            .transferAttempts(1)
+            .build();
+
+        // when
+        String result = dataStoreToArmHelper.generateRawFilename(eod);
+
+        // then
+        assertEquals("Filenames don't match", "123_456_1", result);
+    }
+
+    @Test
+    void generateRawFilename_ShouldSucceed_WithCaseDocument() {
+        // given
+        var caseDocument = PersistableFactory.getCaseDocumentTestData().someMinimalBuilder()
+            .id(456L)
+            .build();
+        var eod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder()
+            .caseDocument(caseDocument)
+            .media(null)
+            .id(123L)
+            .transferAttempts(1)
+            .build();
+
+        // when
+        String result = dataStoreToArmHelper.generateRawFilename(eod);
+
+        // then
+        assertEquals("Filenames don't match", "123_456_1", result);
+    }
+
+    @Test
+    void generateRawFilename_ShouldSucceed_WithTranscriptionDocument() {
+        // given
+        var transcriptionDocument = PersistableFactory.getTranscriptionDocument()
+            .someMinimalBuilder()
+            .id(456L)
+            .build();
+        var eod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder()
+            .transcriptionDocumentEntity(transcriptionDocument)
+            .media(null)
+            .id(123L)
+            .transferAttempts(1)
+            .build();
+
+        // when
+        String result = dataStoreToArmHelper.generateRawFilename(eod);
+
+        // then
+        assertEquals("Filenames don't match", "123_456_1", result);
     }
 
     @Test
@@ -213,6 +286,7 @@ class DataStoreToArmHelperTest {
 
         // then
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntity);
+        verify(logApi).armPushFailed(123L);
     }
 
     @Test
@@ -237,4 +311,5 @@ class DataStoreToArmHelperTest {
 
         assertThat(name).matches("DARTS_.+\\.a360");
     }
+
 }
