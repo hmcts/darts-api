@@ -24,7 +24,7 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
     private final ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
     private final ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
 
-    @SuppressWarnings({"PMD.AvoidInstanceofChecksInCatchClause", "PMD.DoNotUseThreads"})
+    @SuppressWarnings({"PMD.DoNotUseThreads"})
     @Override
     public void calculateEventDates(Integer batchSize) {
         final boolean updateRetention = true;
