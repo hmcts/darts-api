@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,7 +36,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
 
     private UserAccountEntity userAccountEntity3;
 
-    @BeforeEach
+    @BeforeAll
     void setUpData() {
         UserAccountEntity user1 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
             .emailAddress("some.user.email@example.net")
