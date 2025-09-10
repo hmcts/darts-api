@@ -29,10 +29,6 @@ public class Application implements CommandLineRunner {
         log.info("Default TimeZone: {}", TimeZone.getDefault().getID());
     }
 
-    @SuppressWarnings({
-        "PMD.CloseResource",
-        "PMD.DoNotUseThreads"//Required for shutdown hook
-    })
     public static void main(final String[] args) {
         final var application = new SpringApplication(Application.class);
         application.run(args);
