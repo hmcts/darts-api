@@ -38,13 +38,13 @@ public class Application implements CommandLineRunner {
     })
     public static void main(final String[] args) {
         final var application = new SpringApplication(Application.class);
-        application.setRegisterShutdownHook(false);
+//        application.setRegisterShutdownHook(false);
 
         ConfigurableApplicationContext applicationContext = application.run(args);
 
-        Thread shutdownHookThread = new Thread(new GracefulShutdownHook((ServletWebServerApplicationContext) applicationContext));
-        shutdownHookThread.setName("GracefulShutdownHook");
-        Runtime.getRuntime().addShutdownHook(shutdownHookThread);
+//        Thread shutdownHookThread = new Thread(new GracefulShutdownHook((ServletWebServerApplicationContext) applicationContext));
+//        shutdownHookThread.setName("GracefulShutdownHook");
+//        Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 
         if (System.getenv("ATS_MODE") != null) {
             log.info("ATS_MODE found, closing instance");
