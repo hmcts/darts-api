@@ -159,7 +159,7 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
         }
     }
 
-    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
+    @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "java:S1751"})
     @Test
     void processUnstructuredToArm_shouldHandleRuntimeExceptionFromTask() {
         // Given
@@ -186,5 +186,5 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
             verify(logApi, never()).armPushSuccessful(anyLong());
         }
     }
-    
+
 }
