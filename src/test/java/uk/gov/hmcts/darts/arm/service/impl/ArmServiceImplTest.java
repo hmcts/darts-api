@@ -209,13 +209,8 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testListResponseBlobsWithMarker() {
-        //Iterator mockIterator = mock(Iterator.class);
-        //when(mockIterator.hasNext()).thenReturn(true, false);
-        //when(mockIterator.next()).thenReturn(new BlobItem());
-
+    void listResponseBlobsWithMarker_ShouldReturnToken() {
         PagedIterable mockPagedTableEntities = mock(PagedIterable.class);
-        //when(mockPagedTableEntities.iterator()).thenReturn(mockIterator);
         when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(mockPagedTableEntities);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
 
