@@ -38,12 +38,14 @@ class ArmServiceImplTest {
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     private static final String TEST_DROP_ZONE = "dummy/dropzone/";
+
     @Mock
     private ArmDataManagementDao armDataManagementDao;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @InjectMocks
     private ArmServiceImpl armService;
+
     private BlobContainerClient blobContainerClient;
     private BlobClient blobClient;
 
@@ -187,16 +189,9 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testListSubmissionBlobsWithMarker() {
-        //iterableByPage().iterator()
-        //Iterator mockIterator = mock(Iterator.class);
-        //when(mockIterator.hasNext()).thenReturn(true, false);
-        //when(mockIterator.next()).thenReturn(new BlobItem());
+    void listSubmissionBlobsWithMarker_ShouldSucceed() {
 
-        //BlobItem blobItem = new BlobItem();
         PagedIterable mockPagedIterable = mock(PagedIterable.class);
-
-        //when(mockPagedIterable.iterator()).thenReturn(mockIterator);
 
         when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(mockPagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
