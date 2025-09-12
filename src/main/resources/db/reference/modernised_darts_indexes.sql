@@ -25,6 +25,9 @@
 --    notification(notification_status)
 --    retention_confidence_category_mapper(confidence_category)
 --    retention_policy_type(fixed_policy_key)
+--v16 cc_dets(category_type)
+--    wk_case_correction(category_type)
+--v17 wk_case_activity_data(case_closed_type)
 
 
 SET ROLE DARTS_OWNER;
@@ -324,6 +327,14 @@ CREATE INDEX mer_rs_idx  ON media_request(request_status);
 CREATE INDEX not_ns_idx  ON notification(notification_status);
 CREATE INDEX rcc_cc_idx  ON retention_confidence_category_mapper(confidence_category);
 CREATE INDEX rpt_fpk_idx ON retention_policy_type(fixed_policy_key);
+
+--v16
+CREATE INDEX ccd_ct_idx ON cc_dets(category_type);
+CREATE INDEX wcc_ct_idx ON wk_case_correction(category_type);
+
+--v17
+CREATE INDEX wca_cdt_idx ON wk_case_activity_data(closed_date_type);
+
 
 
 
