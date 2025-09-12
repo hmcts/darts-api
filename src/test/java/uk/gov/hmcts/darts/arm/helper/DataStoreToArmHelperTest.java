@@ -279,7 +279,7 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void copyUnstructuredRawDataToArm_ShouldReturnFalse_WhenInterruptedExceptionOccurs() {
+    void copyUnstructuredRawDataToArm_ShouldThrowException_WhenInterruptedExceptionOccurs() {
         // given
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
         ExternalObjectDirectoryEntity armExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
@@ -294,8 +294,6 @@ class DataStoreToArmHelperTest {
         // when
         assertThrows(InterruptedException.class, () -> dataStoreToArmHelper.copyUnstructuredRawDataToArm(
             unstructuredExternalObjectDirectory, armExternalObjectDirectory, filename, previousStatus, userAccount));
-
-
     }
 
     @Test
