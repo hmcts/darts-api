@@ -54,7 +54,7 @@ public class AssociatedObjectDataExpiryDeleterServiceImpl implements AssociatedO
     @Value("${darts.storage.arm.event-date-adjustment-years}")
     Integer eventDateAdjustmentYears;
 
-    @SuppressWarnings("PMD.ExcessiveParameterList")//TODO - refactor to reduce excessive parameter list when this class is next edited
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public AssociatedObjectDataExpiryDeleterServiceImpl(UserIdentity userIdentity,
                                                         CurrentTimeHelper currentTimeHelper,
                                                         TranscriptionDocumentRepository transcriptionDocumentRepository,
