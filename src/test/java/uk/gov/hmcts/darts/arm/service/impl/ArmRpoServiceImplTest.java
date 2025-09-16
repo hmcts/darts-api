@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -130,14 +129,14 @@ class ArmRpoServiceImplTest {
     @Test
     void updateArmRpoStateAndStatus_ShouldUpdateStateAndStatus() {
         // given
-        ArmRpoStateEntity armRpoStateEntity = ArmRpoHelper.addAsyncSearchRpoState();
-        ArmRpoStatusEntity armRpoStatusEntity = ArmRpoHelper.completedRpoStatus();
-        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
+        ArmRpoStateEntity armRpoStateEntity = ARM_RPO_HELPER_MOCKS.getAddAsyncSearchRpoState();
+        ArmRpoStatusEntity armRpoStatusEntity = ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus();
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
 
         // when
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
                                                  armRpoStateEntity,
-                                                 ArmRpoHelper.completedRpoStatus(), userAccountEntity);
+                                                 ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus(), userAccountEntity);
 
         // then
         assertEquals(armRpoStateEntity, armRpoExecutionDetailEntity.getArmRpoState());
@@ -148,10 +147,10 @@ class ArmRpoServiceImplTest {
     @Test
     void updateArmRpoStatus_ShouldUpdateStatus() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
 
         // when
-        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccountEntity);
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccountEntity);
 
         // then
         assertEquals(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), armRpoExecutionDetailEntity.getArmRpoStatus());
@@ -187,7 +186,7 @@ class ArmRpoServiceImplTest {
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2025-02-02T12:34:56Z"));
         when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
-        when(externalObjectDirectoryRepository.findByStatusAndDataIngestionTsWithPaging(any(), any(), any(), any()))
+        when(externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(any(), any(), any(), any()))
             .thenReturn(pagedEods);
 
         File file = TestUtils.getFile("Tests/arm/rpo/armRpoCsvData.csv");
@@ -199,7 +198,7 @@ class ArmRpoServiceImplTest {
         assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
         assertEquals(EodHelper.armReplayStatus(), externalObjectDirectoryEntity2.getStatus());
 
-        verify(externalObjectDirectoryRepository).findByStatusAndDataIngestionTsWithPaging(
+        verify(externalObjectDirectoryRepository).findByStatusAndInputUploadProcessedTsWithPaging(
             eq(EodHelper.armRpoPendingStatus()),
             eq(OffsetDateTime.parse("2025-01-31T11:34Z")),
             eq(OffsetDateTime.parse("2025-02-01T11:34Z")),
