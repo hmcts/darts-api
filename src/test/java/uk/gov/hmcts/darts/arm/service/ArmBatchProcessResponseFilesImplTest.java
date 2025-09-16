@@ -400,7 +400,7 @@ class ArmBatchProcessResponseFilesImplTest {
         Duration armMissingResponseDuration = Duration.ofHours(24);
         when(armDataManagementConfiguration.getArmMissingResponseDuration()).thenReturn(armMissingResponseDuration);
 
-        when(externalObjectDirectoryEntity.getDataIngestionTs()).thenReturn(currentTime.minus(armMissingResponseDuration).minusMinutes(1));
+        when(externalObjectDirectoryEntity.getInputUploadProcessedTs()).thenReturn(currentTime.minus(armMissingResponseDuration).minusMinutes(1));
 
         doNothing().when(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(any(), any(), any());
 
@@ -445,7 +445,7 @@ class ArmBatchProcessResponseFilesImplTest {
         Duration armMissingResponseDuration = Duration.ofHours(24);
         when(armDataManagementConfiguration.getArmMissingResponseDuration()).thenReturn(armMissingResponseDuration);
 
-        when(externalObjectDirectoryEntity.getDataIngestionTs())
+        when(externalObjectDirectoryEntity.getInputUploadProcessedTs())
             .thenReturn(currentTime.minusHours(23));
         doNothing().when(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(any(), any(), any());
 
@@ -484,7 +484,7 @@ class ArmBatchProcessResponseFilesImplTest {
             .build();
 
         when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(BATCH_SIZE * 2);
-        
+
         when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
 
         try (MockedStatic<AsyncUtil> mockedStatic = mockStatic(AsyncUtil.class)) {

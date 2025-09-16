@@ -163,14 +163,14 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     private void processInputUploadBlob(String inputUploadBlob, UserAccountEntity userAccount) {
-        log.debug("Found ARM Input Upload file {}", inputUploadBlob);
+        log.debug("Found ARM Input Upload (IU) file {}", inputUploadBlob);
         BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = null;
         try {
             batchUploadFileFilenameProcessor = new BatchInputUploadFileFilenameProcessor(inputUploadBlob);
             String manifestName = generateManifestName(batchUploadFileFilenameProcessor.getUuidString());
 
             String inputUploadFileRecordStr = armDataManagementApi.getBlobData(inputUploadBlob).toString();
-            log.info("Contents of ARM Input Upload file: '{}' '{}", inputUploadBlob, inputUploadFileRecordStr);
+            log.info("Contents of ARM Input Upload (IU) file: '{}' '{}", inputUploadBlob, inputUploadFileRecordStr);
 
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
@@ -215,7 +215,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         try {
             return OffsetDateTime.parse(inputUploadFileRecord.getTimestamp(), dateTimeFormatter);
         } catch (Exception e) {
-            log.error("Unable to parse timestamp {} from ARM input upload file {}", inputUploadFileRecord.getTimestamp(),
+            log.error("Unable to parse timestamp {} from ARM input upload (IU) file {}", inputUploadFileRecord.getTimestamp(),
                       inputUploadFileRecord.getFilename(), e);
             throw new IllegalArgumentException(e);
         }
@@ -225,7 +225,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         try {
             return OffsetDateTime.parse(armResponseUploadFileRecord.getProcessTime(), dateTimeFormatter);
         } catch (Exception e) {
-            log.error("Unable to parse timestamp {} from ARM upload file record {}", armResponseUploadFileRecord.getProcessTime(),
+            log.error("Unable to parse timestamp {} from ARM upload file (UF) record {}", armResponseUploadFileRecord.getProcessTime(),
                       armResponseUploadFileRecord.getA360RecordId(), e);
             throw new IllegalArgumentException(e);
         }
@@ -238,7 +238,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         try {
             return objectMapper.readValue(inputUploadFileRecordStr, ArmResponseInputUploadFileRecord.class);
         } catch (Exception e) {
-            log.error("Unable to read ARM response input upload file {} - About to delete ",
+            log.error("Unable to read ARM response input upload (IU) file {} - About to delete ",
                       batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
             deleteArmResponseFilesHelper.deleteDanglingResponses(batchUploadFileFilenameProcessor);
             externalObjectDirectoryService.updateStatus(
@@ -361,11 +361,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             ExternalObjectDirectoryEntity externalObjectDirectory =
                 getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
 
-            OffsetDateTime minDataIngestionTime = timeHelper.currentOffsetDateTime().minus(
+            OffsetDateTime minIngestionTime = timeHelper.currentOffsetDateTime().minus(
                 armDataManagementConfiguration.getArmMissingResponseDuration());
 
-            if (externalObjectDirectory.getDataIngestionTs() != null
-                && externalObjectDirectory.getDataIngestionTs().isBefore(minDataIngestionTime)) {
+            if (externalObjectDirectory.getInputUploadProcessedTs() != null
+                && externalObjectDirectory.getInputUploadProcessedTs().isBefore(minIngestionTime)) {
                 markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
             } else {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus(), userAccount);
@@ -919,7 +919,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 && externalObjectDirectory.getVerificationAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
                 logApi.archiveToArmFailed(externalObjectDirectory.getId());
             } else if (ARM_MISSING_RESPONSE.equals(status)) {
-                //Log used for DynaTrace monitoring
+                //Log used for Dynatrace monitoring
                 logApi.logArmMissingResponse(armDataManagementConfiguration.getArmMissingResponseDuration(), externalObjectDirectory.getId());
             }
             externalObjectDirectory.setStatus(objectRecordStatus);
