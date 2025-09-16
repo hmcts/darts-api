@@ -37,6 +37,7 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
     }
 
     @SneakyThrows
+    @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
     protected boolean deleteFromDataStore(T entityToBeDeleted) {
         String externalLocation = entityToBeDeleted.getLocation();
         Long entityId = entityToBeDeleted.getId();

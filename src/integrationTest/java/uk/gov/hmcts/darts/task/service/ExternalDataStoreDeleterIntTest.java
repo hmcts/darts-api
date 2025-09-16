@@ -7,7 +7,6 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDetsDataStoreDeleter;
@@ -44,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -52,7 +52,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestTestData;
 
-class ExternalDataStoreDeleterTest extends IntegrationBase {
+class ExternalDataStoreDeleterIntTest extends IntegrationBase {
+
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
     @Autowired
@@ -75,8 +76,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
     @MockitoBean
     private DetsApiService detsApiService;
-
-
+    
     private UserAccountEntity requestor;
     private HearingEntity hearing;
 
@@ -122,9 +122,9 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Test
     void deleteMarkedForDeletionDataFromDataStores() {
         audioBuilder.setupTest();
-        Mockito.when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
-        Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
-        Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
+        when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
         MediaRequestEntity currentMediaRequest = getMediaRequestTestData().createCurrentMediaRequest(
             hearing,
@@ -169,9 +169,9 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Test
     void dontDeleteWhenStatusIsNotMarkedForDeletionDataFromDataStores() {
         audioBuilder.setupTest();
-        Mockito.when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
-        Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
-        Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
+        when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
         MediaRequestEntity currentMediaRequest = getMediaRequestTestData().createCurrentMediaRequest(
             hearing,
