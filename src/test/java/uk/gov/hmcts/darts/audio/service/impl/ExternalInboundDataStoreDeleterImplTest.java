@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -46,8 +45,7 @@ class ExternalInboundDataStoreDeleterImplTest {
 
     @Mock
     private DataManagementApi dataManagementApi;
-    @Mock
-    private TransformedMediaRepository transformedMediaRepository;
+
     private EodHelperMocks eodHelperMocks;
 
     @BeforeEach
