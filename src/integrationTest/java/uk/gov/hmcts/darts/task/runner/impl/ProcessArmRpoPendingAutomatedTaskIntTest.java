@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,10 +26,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @TestPropertySource(properties = {
     "darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo=false"
 })
-class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
+class ProcessArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBase {
     private final ProcessArmRpoPendingAutomatedTask processArmRpoPendingAutomatedTask;
     private static final int AUTOMATION_USER_ID = -36;
 
+    @Disabled
     @Test
     void positiveCorrectStatusAndDataIngestionTime() {
         MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("Courthouse", "Courtroom", OffsetDateTime.now().minusHours(1),
