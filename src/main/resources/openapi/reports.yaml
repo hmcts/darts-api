@@ -1,0 +1,51 @@
+openapi: 3.0.1
+
+info:
+
+  version: ${version}
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+paths:
+  /admin/reports:
+    get:
+      tags:
+        - Reports
+      summary: Get admin reports
+      operationId: getAdminReports
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReportsResponseItem'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+components:
+  schemas:
+
+    AdminReportsResponseItem:
+      type: object
+      properties:
+        reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Report'
+
+    Report:
+      type: object
+      properties:
+        reportName:
+          type: string
+          example: "Monthly Report"
+
