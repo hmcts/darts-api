@@ -11,8 +11,9 @@ import uk.gov.hmcts.darts.reports.service.ReportsAdminService;
 @Slf4j
 public class ReportsAdminServiceImpl implements ReportsAdminService {
 
+    @Override
     public AdminReportsResponseItem getAdminReports() {
         return null;
     }
-    
+
 }

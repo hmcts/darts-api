@@ -32,10 +32,10 @@ class ReportsControllerGetAdminReportsIntTest extends IntegrationBase {
 
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_URL))
+        mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_URL))
             .andExpect(status().isNotImplemented())
             .andReturn();
-        
+
     }
 
     @ParameterizedTest
