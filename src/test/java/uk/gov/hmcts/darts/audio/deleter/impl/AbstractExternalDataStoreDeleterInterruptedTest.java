@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.DoNotUseThreads"})
 class AbstractExternalDataStoreDeleterInterruptedTest {
 
     @Mock
@@ -49,10 +50,10 @@ class AbstractExternalDataStoreDeleterInterruptedTest {
 
         @Override
         protected Collection<ExternalObjectDirectoryEntity> findItemsToDelete(int batchSize) {
-            ExternalObjectDirectoryEntity e = new ExternalObjectDirectoryEntity();
-            e.setStatus(eodHelperMocks.getMarkForDeletionStatus());
-            e.setExternalLocation(eodHelperMocks.getInboundLocation().getDescription());
-            return List.of(e);
+            ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+            externalObjectDirectoryEntity.setStatus(eodHelperMocks.getMarkForDeletionStatus());
+            externalObjectDirectoryEntity.setExternalLocation(eodHelperMocks.getInboundLocation().getDescription());
+            return List.of(externalObjectDirectoryEntity);
         }
     }
 
