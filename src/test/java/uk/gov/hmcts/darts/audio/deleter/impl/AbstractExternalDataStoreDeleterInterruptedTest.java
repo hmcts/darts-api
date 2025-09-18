@@ -30,6 +30,11 @@ class AbstractExternalDataStoreDeleterInterruptedTest {
         eodHelperMocks = new EodHelperMocks();
     }
 
+    @AfterEach
+    void tearDown() {
+        eodHelperMocks.close();
+    }
+
     // Minimal concrete for testing the base-class behaviour
     private static class TestDeleter extends AbstractExternalDataStoreDeleter<ExternalObjectDirectoryEntity, ExternalObjectDirectoryRepository> {
         TestDeleter(ExternalObjectDirectoryRepository repository) {
