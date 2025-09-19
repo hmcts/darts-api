@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("PMD.DoNotUseThreads")//Required for async processing
 public final class AsyncUtil {
     private AsyncUtil() {
-
+        // Empty constructor to prevent instantiation
     }
 
     public static void shutdownAndAwaitTermination(ExecutorService executorService, long timeout, TimeUnit unit) {

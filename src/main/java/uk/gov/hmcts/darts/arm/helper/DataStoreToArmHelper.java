@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.helper;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +18,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -41,22 +39,18 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidInstanceofChecksInCatchClause"})
 public class DataStoreToArmHelper {
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final LogApi logApi;
     private final ArmDataManagementApi armDataManagementApi;
-    private final FileOperationService fileOperationService;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
-
     public List<Long> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
-                                                   ExternalLocationTypeEntity armLocation, int maxResultSize) {
+                                                ExternalLocationTypeEntity armLocation, int maxResultSize) {
 
         List<ObjectRecordStatusEntity> statusEntityList = List.of(
             EodHelper.failedArmRawDataStatus(), EodHelper.failedArmManifestFileStatus(),
@@ -176,6 +170,7 @@ public class DataStoreToArmHelper {
         return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
     }
 
+    @SneakyThrows
     public boolean copyUnstructuredRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
                                                 ExternalObjectDirectoryEntity armExternalObjectDirectory,
                                                 String filename,
@@ -204,6 +199,9 @@ public class DataStoreToArmHelper {
             }
         } catch (Exception e) {
             log.error("Error copying BLOB data for file {}", unstructuredExternalObjectDirectory.getExternalLocation(), e);
+            if (e instanceof InterruptedException) {
+                throw e;
+            }
             return false;
         }
 
@@ -285,7 +283,6 @@ public class DataStoreToArmHelper {
             }
         }
     }
-
 
     public void copyMetadataToArm(String manifestFileContents, String archiveRecordsFileName) {
         try {
