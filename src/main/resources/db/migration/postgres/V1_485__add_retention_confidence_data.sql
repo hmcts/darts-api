@@ -51,7 +51,7 @@ ALTER TABLE IF EXISTS wk_crah_is_current_by_creation ADD PRIMARY KEY USING INDEX
 -- WK_CRAH_IS_CURRENT_BY_LOGIC
 CREATE TABLE IF NOT EXISTS wk_crah_is_current_by_logic
 (
-cas_id                         INTEGER
+cas_id                          INTEGER
 ,rah_id                         INTEGER
 ,rpt_id                         INTEGER
 ,c_policy_type                  CHARACTER VARYING(20)
@@ -71,7 +71,7 @@ ALTER TABLE IF EXISTS wk_crah_is_current_by_logic ADD PRIMARY KEY USING INDEX wk
 -- WK_RR_IS_CURRENT_BY_CREATION
 CREATE TABLE IF NOT EXISTS wk_rr_is_current_by_creation
 (
-cas_id                         INTEGER
+cas_id                          INTEGER
 ,rpr_id                         INTEGER
 ,rpt_id                         INTEGER
 ,case_object_id                 CHARACTER VARYING(16)
