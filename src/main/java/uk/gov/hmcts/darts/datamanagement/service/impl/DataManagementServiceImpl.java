@@ -257,7 +257,6 @@ public class DataManagementServiceImpl implements DataManagementService {
         return fileContentChecksum.encodeToString(checksumByte);
     }
 
-
     @Override
     public Response<Boolean> deleteBlobData(String containerName, String blobId) throws AzureDeleteBlobException {
         log.info("About to delete blob id {} from container {}", blobId, containerName);

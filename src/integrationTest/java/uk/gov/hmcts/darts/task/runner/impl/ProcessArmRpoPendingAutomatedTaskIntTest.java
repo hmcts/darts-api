@@ -25,7 +25,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @TestPropertySource(properties = {
     "darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo=false"
 })
-class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
+class ProcessArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBase {
     private final ProcessArmRpoPendingAutomatedTask processArmRpoPendingAutomatedTask;
     private static final int AUTOMATION_USER_ID = -36;
 
