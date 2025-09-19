@@ -33,6 +33,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ArmHelper armHelper;
 
+    @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
     @Transactional
     @Override
     public boolean calculateRetentionEventDate(Long externalObjectDirectoryId) {
@@ -59,6 +60,9 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             }
         } catch (Exception e) {
             log.error("Unable to calculate ARM retention date for EOD {}", externalObjectDirectoryId, e);
+            if (e instanceof InterruptedException) {
+                throw e;
+            }
         }
         return false;
     }
