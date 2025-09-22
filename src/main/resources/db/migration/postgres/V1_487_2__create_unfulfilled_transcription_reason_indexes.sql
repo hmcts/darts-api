@@ -1,5 +1,0 @@
-CREATE UNIQUE INDEX IF NOT EXISTS unfulfilled_transcription_reason_pk ON unfulfilled_transcription_reason(utr_id);
-ALTER TABLE unfulfilled_transcription_reason ADD PRIMARY KEY USING INDEX unfulfilled_transcription_reason_pk;
-
-ALTER TABLE transcription ADD CONSTRAINT transcription_unfulfilled_transcription_reason_fk
-FOREIGN KEY (utr_id) REFERENCES unfulfilled_transcription_reason(utr_id);
