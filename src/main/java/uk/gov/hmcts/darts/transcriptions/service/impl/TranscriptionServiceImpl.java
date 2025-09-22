@@ -312,7 +312,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             throw new DartsApiException(TRANSCRIPTION_WORKFLOW_ACTION_INVALID);
         }
 
-        if (REJECTED.equals(desiredTargetTranscriptionStatus)
+        if ((REJECTED.equals(desiredTargetTranscriptionStatus)
+            || UNFULFILLED.equals(desiredTargetTranscriptionStatus))
             && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
         }
