@@ -50,9 +50,6 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
     @MockitoBean
     private UserIdentity mockUserIdentity;
 
-    private TranscriptionEntity transcriptionEntity;
-    private UserAccountEntity testUser;
-
     private Long transcriptionId;
     private Integer testUserId;
 
@@ -60,7 +57,7 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
     void beforeEach() {
         authorisationStub.givenTestSchema();
 
-        transcriptionEntity = authorisationStub.getTranscriptionEntity();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
         TranscriptionStub transcriptionStub = dartsDatabase.getTranscriptionStub();
         TranscriptionStatusEntity withTranscriberTranscriptionStatus = transcriptionStub.getTranscriptionStatusByEnum(WITH_TRANSCRIBER);
@@ -82,7 +79,7 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
 
         transcriptionId = transcriptionEntity.getId();
 
-        testUser = authorisationStub.getTestUser();
+        UserAccountEntity testUser = authorisationStub.getTestUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
