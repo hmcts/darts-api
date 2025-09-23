@@ -9,6 +9,8 @@ DROP TABLE IF EXISTS case_retention_extra;
 
 -- CR_DETS
 ALTER TABLE IF EXISTS cr_dets ALTER COLUMN retention_object_id TYPE CHARACTER VARYING(16);
+ALTER TABLE IF EXISTS cr_dets RENAME COLUMN latest_event_by_event_ts_ts TO latest_event_by_event_ts;
+ALTER TABLE IF EXISTS cr_dets RENAME COLUMN cas_retention_fixed TO case_retention_fixed;
 
 -- WK_CASE_ACTIVITY_DATA
 ALTER TABLE IF EXISTS wk_case_activity_data DROP COLUMN rownum;
