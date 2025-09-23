@@ -21,7 +21,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 
 @Component
 @Slf4j
-@SuppressWarnings({"PMD.NcssCount"})
 public class WorkflowValidator {
 
     private final Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> manualWorkflowTransitionRules =
