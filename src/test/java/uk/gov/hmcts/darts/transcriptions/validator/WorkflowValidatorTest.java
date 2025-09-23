@@ -30,6 +30,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.OTHE
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.NcssCount"})
 class WorkflowValidatorTest {
 
     private final WorkflowValidator workflowValidator = new WorkflowValidator();
@@ -37,7 +38,7 @@ class WorkflowValidatorTest {
     @ParameterizedTest
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateManualChangeToWorkflowStatusRequestedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
-
+        
         assertFalse(
             workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, REQUESTED, false)
         );
