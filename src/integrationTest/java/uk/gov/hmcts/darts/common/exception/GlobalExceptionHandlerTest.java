@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.common.exception.ExceptionHandlerTest.MockController;
+import uk.gov.hmcts.darts.common.exception.GlobalExceptionHandlerTest.MockController;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @Import(MockController.class)
-class ExceptionHandlerTest extends IntegrationBase {
+class GlobalExceptionHandlerTest extends IntegrationBase {
 
     private static final String ENDPOINT = "/test";
 

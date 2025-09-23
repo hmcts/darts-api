@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -48,6 +49,7 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithN
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGroupForRole;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
+@Slf4j
 @AutoConfigureMockMvc
 class CaseControllerSearchPostTest extends IntegrationBase {
 
@@ -537,6 +539,37 @@ class CaseControllerSearchPostTest extends IntegrationBase {
             .content(requestBody);
         mockMvc.perform(requestBuilder)
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void casesSearchPost_shouldReturn400_whenUnknownField() throws Exception {
+        setupUserAndSecurityGroupForCourthouses(List.of(swanseaCourthouse));
+        String requestBody = """
+            {
+              "courtroom": "1",
+              "date_from": "2023-05-19",
+              "date_to": "2023-05-20",
+              "test": "test unknown field"
+            }""";
+
+        String expectedResponse = """
+            {
+              "status": 400,
+              "title": "Bad Request",
+              "detail": "JSON parse error"
+            }
+            """;
+
+        MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+
+        var result = mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = result.getResponse().getContentAsString();
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
