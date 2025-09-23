@@ -37,11 +37,11 @@ import static org.assertj.core.api.Assertions.within;
 
 @DisplayName("AssociatedObjectDataExpiryDeletionAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
+class AssociatedObjectDataExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
     private final AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
     private static final int AUTOMATION_USER_ID = -28;
 
-    
+
     @Test
     void positiveTranscriptionDocumentEntityExpired() {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
