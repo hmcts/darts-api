@@ -206,7 +206,7 @@ class DetsToArmBatchPushProcessorImplTest {
 
     }
 
-    @Disabled("This test is failing randomly. Ticket raised to fix this issue - DMP-4750")
+    @Disabled("This test is failing randomly. Ticket DMP-5260 raised to fix this issue")
     @Test
     void processDetsToArm_noEodsForTransfer(CapturedOutput output) {
         // given
@@ -219,7 +219,7 @@ class DetsToArmBatchPushProcessorImplTest {
         LogUtil.assertOutputHasMessage(output, "No DETS EODs to process", 10);
     }
 
-    @Disabled("This test is failing randomly. Ticket raised to fix this issue - DMP-4750")
+    @Disabled("This test is failing randomly. Ticket DMP-5260 raised to fix this issue")
     @Test
     void processDetsToArm_emptyList(CapturedOutput output) {
         // given
