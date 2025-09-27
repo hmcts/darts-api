@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
@@ -591,9 +592,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionD1));
 
         List<ExternalLocationTypeEntity> externalLocationTypes = List.of(eodHelperMocks.getArmLocation(), eodHelperMocks.getDetsLocation());
-        when(eodRepository.findByTranscriptionDocumentIdAndExternalLocationTypes(transcriptionDocumentA1.getId(), externalLocationTypes)).thenReturn(
+        when(eodRepository.findByTranscriptionDocumentIdAndExternalLocationTypes(eq(transcriptionDocumentA1.getId()), eq(externalLocationTypes))).thenReturn(
             List.of(eodA1));
-        when(eodRepository.findByTranscriptionDocumentIdAndExternalLocationTypes(transcriptionDocumentB1.getId(), externalLocationTypes)).thenReturn(
+        when(eodRepository.findByTranscriptionDocumentIdAndExternalLocationTypes(eq(transcriptionDocumentB1.getId()), eq(externalLocationTypes))).thenReturn(
             List.of(eodB1));
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(RETENTION_UPDATED_DATE);
