@@ -43,7 +43,6 @@ public class TranscriptionNotifications {
     private final NotificationApi notificationApi;
     private final AuditApi auditApi;
 
-
     @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault", "PMD.CyclomaticComplexity"})
     public void handleNotificationsAndAudit(UserAccountEntity userAccountEntity,
                                             TranscriptionEntity transcriptionEntity,
@@ -93,7 +92,6 @@ public class TranscriptionNotifications {
             }
         }
     }
-
 
     public void notifyRequestor(TranscriptionEntity transcription, String templateName, Map<String, String> templateParams) {
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
@@ -145,6 +143,5 @@ public class TranscriptionNotifications {
             .build();
         notificationApi.scheduleNotification(request);
     }
-
-
+    
 }
