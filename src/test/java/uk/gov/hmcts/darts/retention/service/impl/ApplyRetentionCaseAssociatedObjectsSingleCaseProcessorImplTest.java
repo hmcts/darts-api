@@ -480,7 +480,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
                                         case4NotPerfectlyClosed.getHearings().getFirst()));
 
         var annotationDocumentA1 = annotationA1.getAnnotationDocuments().getFirst();
+        annotationDocumentA1.setId(444L);
         var annotationDocumentB1 = annotationB1.getAnnotationDocuments().getFirst();
+        annotationDocumentB1.setId(555L);
         annotationDocumentA1.setAnnotation(annotationA1);
         annotationDocumentB1.setAnnotation(annotationB1);
 
@@ -577,14 +579,18 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
                                            case4NotPerfectlyClosed.getHearings().getFirst()));
 
         var transcriptionDocumentA1 = transcriptionA1.getTranscriptionDocumentEntities().getFirst();
+        transcriptionDocumentA1.setId(123L);
         var transcriptionDocumentB1 = transcriptionB1.getTranscriptionDocumentEntities().getFirst();
+        transcriptionDocumentB1.setId(456L);
         transcriptionDocumentA1.setTranscription(transcriptionA1);
         transcriptionDocumentB1.setTranscription(transcriptionB1);
 
         var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
                                                                                                                  transcriptionDocumentA1);
+        eodA1.setId(100L);
         var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
                                                                                                                  transcriptionDocumentB1);
+        eodB1.setId(200L);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
