@@ -141,7 +141,6 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
         verify(notificationApi).scheduleNotification(any());
-
         verify(mockAuditApi).record(UNFULFILLED_TRANSCRIPTION, testUser, unfulfilledTranscriptionEntity.getCourtCase());
     }
 
@@ -164,6 +163,7 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
             {"type":"TRANSCRIPTION_103","title":"The workflow comment is required for this transcription update","status":422}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+        verifyNoInteractions(notificationApi);
         verifyNoInteractions(mockAuditApi);
     }
 
@@ -185,6 +185,7 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
             {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+        verifyNoInteractions(notificationApi);
         verifyNoInteractions(mockAuditApi);
     }
 
@@ -245,6 +246,8 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
             {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
+        verifyNoInteractions(notificationApi);
         verifyNoInteractions(mockAuditApi);
     }
 
@@ -291,6 +294,9 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
         );
         assertEquals(1, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
+
+        verify(notificationApi).scheduleNotification(any());
+
         verify(mockAuditApi).record(UNFULFILLED_TRANSCRIPTION, testUser, withTranscriberTranscriptionEntity.getCourtCase());
 
     }

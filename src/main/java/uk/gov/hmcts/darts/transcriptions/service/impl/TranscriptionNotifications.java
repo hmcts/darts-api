@@ -44,7 +44,7 @@ public class TranscriptionNotifications {
     private final AuditApi auditApi;
 
 
-    @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault"})
+    @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault", "PMD.CyclomaticComplexity"})
     public void handleNotificationsAndAudit(UserAccountEntity userAccountEntity,
                                             TranscriptionEntity transcriptionEntity,
                                             TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscriptionRequest updateTranscription) {
