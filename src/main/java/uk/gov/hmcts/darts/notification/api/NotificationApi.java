@@ -19,7 +19,8 @@ public interface NotificationApi {
         REQUEST_TO_TRANSCRIBER("request_to_transcriber"),
         TRANSCRIPTION_AVAILABLE("transcription_available"),
         TRANSCRIPTION_REQUEST_APPROVED("transcription_request_approved"),
-        TRANSCRIPTION_REQUEST_REJECTED("transcription_request_rejected");
+        TRANSCRIPTION_REQUEST_REJECTED("transcription_request_rejected"),
+        TRANSCRIPTION_REQUEST_UNFULFILLED("transcription_request_unfulfilled");
 
         private final String text;
 

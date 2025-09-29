@@ -14,12 +14,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -30,9 +32,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.UNFULFILLED_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.UNFULFILLED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -49,9 +56,14 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
 
     @MockitoBean
     private UserIdentity mockUserIdentity;
+    @MockitoBean
+    private AuditApi mockAuditApi;
+    @MockitoBean
+    private NotificationApi notificationApi;
 
     private Long transcriptionId;
     private Integer testUserId;
+    private UserAccountEntity testUser;
 
     @BeforeEach
     void beforeEach() {
@@ -79,10 +91,12 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
 
         transcriptionId = transcriptionEntity.getId();
 
-        UserAccountEntity testUser = authorisationStub.getTestUser();
+        testUser = authorisationStub.getTestUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
+        doNothing().when(mockAuditApi)
+            .record(UNFULFILLED_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @ParameterizedTest
@@ -126,6 +140,9 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
         assertEquals(1, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
+        verify(notificationApi).scheduleNotification(any());
+
+        verify(mockAuditApi).record(UNFULFILLED_TRANSCRIPTION, testUser, unfulfilledTranscriptionEntity.getCourtCase());
     }
 
     @Test
@@ -147,7 +164,7 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
             {"type":"TRANSCRIPTION_103","title":"The workflow comment is required for this transcription update","status":422}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -168,7 +185,7 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
             {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -202,7 +219,6 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
             {"type":"TRANSCRIPTION_105","title":"Transcription workflow action is not permitted","status":409}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
     }
 
     @Test
@@ -229,7 +245,7 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
             {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -275,6 +291,7 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
         );
         assertEquals(1, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
+        verify(mockAuditApi).record(UNFULFILLED_TRANSCRIPTION, testUser, withTranscriberTranscriptionEntity.getCourtCase());
 
     }
 
