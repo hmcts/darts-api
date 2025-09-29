@@ -176,7 +176,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private void updateRetentionForArm(List<ExternalObjectDirectoryEntity> armOrDetsEodList, String errorMessage) {
         // There should be either 1 or 2 EODs (ARM and/or DETS)
-        if (armOrDetsEodList.size() < 1 || armOrDetsEodList.size() > 2) {
+        if (armOrDetsEodList.isEmpty() || armOrDetsEodList.size() > 2) {
             throw new DartsException(errorMessage);
         }
         // Get only ARM EOD. If EOD is ARM, update EOD retention, if EOD is DETS do nothing DMP-5264

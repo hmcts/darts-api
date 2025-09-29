@@ -486,8 +486,10 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM,
                                                                                                               annotationDocumentA1);
+        eodA1.setId(111L);
         var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM,
                                                                                                               annotationDocumentB1);
+        eodB1.setId(222L);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
