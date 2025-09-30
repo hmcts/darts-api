@@ -15,4 +15,4 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner:
+  owner: dcd_darts
