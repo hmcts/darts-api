@@ -549,8 +549,6 @@ class ArmBatchProcessResponseFilesImplTest {
         ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
         inputUploadFileRecord.setTimestamp(invalidTimestamp);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
-
         // when
         assertThrows(IllegalArgumentException.class,
                      () -> armBatchProcessResponse.getInputUploadFileTimestamp(inputUploadFileRecord));
@@ -598,8 +596,6 @@ class ArmBatchProcessResponseFilesImplTest {
         String invalidTimestamp = "2023-06-10T14:08:28+00:00Z";
         ArmResponseUploadFileRecord armResponseUploadFileRecord = new ArmResponseUploadFileRecord();
         armResponseUploadFileRecord.setProcessTime(invalidTimestamp);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
 
         // when
         assertThrows(IllegalArgumentException.class,
