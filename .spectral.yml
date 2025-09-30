@@ -1,0 +1,98 @@
+extends: [ "spectral:oas" ]
+rules:
+  strings-need-bounds:
+    description: Strings must be bounded unless they already use format/enum/pattern
+    given:
+      - "$.components.schemas.*"
+      - "$.paths.*.*.parameters[*].schema"
+      - "$.paths.*.*.requestBody.content.*.schema"
+      - "$.paths.*.*.responses.*.content.*.schema"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          if:
+            properties: { type: { const: string } }
+            required: [ type ]
+          then:
+            anyOf:
+              - required: [ maxLength ]
+              - required: [ enum ]
+              - required: [ pattern ]
+              - required: [ format ]
+    severity: warn
+
+  arrays-need-maxitems:
+    given:
+      - "$.components.schemas.*"
+      - "$.paths.*.*.parameters[*].schema"
+      - "$.paths.*.*.requestBody.content.*.schema"
+      - "$.paths.*.*.responses.*.content.*.schema"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          if:
+            properties: { type: { const: array } }
+            required: [ type ]
+          then:
+            required: [ maxItems ]
+    severity: warn
+
+  objects-should-forbid-unknown:
+    description:
+      Request objects should set additionalProperties: false
+    given:
+      - "$.paths.*.*.requestBody.content.*.schema"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          if:
+            properties: { type: { const: object } }
+            required: [ type ]
+          then:
+            required: [ additionalProperties ]
+            properties: { additionalProperties: { const: false } }
+    severity: warn
+
+  path-string-params-need-format-or-pattern:
+    given:
+      - "$.paths.*.*.parameters[?(@.in=='path')].schema"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          if:
+            properties: { type: { const: string } }
+            required: [ type ]
+          then:
+            anyOf:
+              - required: [ format ]
+              - required: [ pattern ]
+    severity: warn
+
+  param-id-needs-format-or-pattern:
+    given:
+      - "$.paths.*.*.parameters[?(@.name=='id')].schema"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          anyOf:
+            - required: [ format ]
+            - required: [ pattern ]
+    severity: warn
+
+  schema-id-prop-needs-format-or-pattern:
+    given:
+      - "$.components.schemas.*.properties.id"
+      - "$.paths.*.*.requestBody.content.*.schema.properties.id"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          anyOf:
+            - required: [ format ]
+            - required: [ pattern ]
+    severity: warn
