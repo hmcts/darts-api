@@ -585,11 +585,11 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         transcriptionDocumentA1.setTranscription(transcriptionA1);
         transcriptionDocumentB1.setTranscription(transcriptionB1);
 
-        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
-                                                                                                                 transcriptionDocumentA1);
+        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(
+            ExternalLocationTypeEnum.ARM, transcriptionDocumentA1);
         eodA1.setId(100L);
-        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
-                                                                                                                 transcriptionDocumentB1);
+        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(
+            ExternalLocationTypeEnum.ARM, transcriptionDocumentB1);
         eodB1.setId(200L);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
