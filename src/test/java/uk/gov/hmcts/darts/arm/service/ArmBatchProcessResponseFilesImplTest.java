@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.arm.model.blobs.ArmBatchResponses;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInputUploadFileRecord;
+import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -44,6 +46,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
@@ -507,18 +510,7 @@ class ArmBatchProcessResponseFilesImplTest {
     @Test
     void getInputUploadFileTimestamp_shouldReturnParsedOffsetDateTime_WithMilliseconds() {
         // given
-        ArmBatchProcessResponseFilesImpl armBatchProcessResponse = new ArmBatchProcessResponseFilesImpl(
-            externalObjectDirectoryRepository,
-            armDataManagementApi,
-            fileOperationService,
-            armDataManagementConfiguration,
-            objectMapper,
-            userIdentity,
-            currentTimeHelper,
-            externalObjectDirectoryService,
-            logApi,
-            deleteArmResponseFilesHelper
-        );
+        ArmBatchProcessResponseFilesImpl armBatchProcessResponse = getArmBatchProcessResponseFiles();
         String timestamp = "2023-06-10T14:08:28.316382+00:00";
         ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
         inputUploadFileRecord.setTimestamp(timestamp);
@@ -535,18 +527,7 @@ class ArmBatchProcessResponseFilesImplTest {
     @Test
     void getInputUploadFileTimestamp_shouldReturnParsedOffsetDateTime_WithoutMilliseconds() {
         // given
-        ArmBatchProcessResponseFilesImpl armBatchProcessResponse = new ArmBatchProcessResponseFilesImpl(
-            externalObjectDirectoryRepository,
-            armDataManagementApi,
-            fileOperationService,
-            armDataManagementConfiguration,
-            objectMapper,
-            userIdentity,
-            currentTimeHelper,
-            externalObjectDirectoryService,
-            logApi,
-            deleteArmResponseFilesHelper
-        );
+        ArmBatchProcessResponseFilesImpl armBatchProcessResponse = getArmBatchProcessResponseFiles();
         String timestamp = "2023-06-10T14:08:28+00:00";
         ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
         inputUploadFileRecord.setTimestamp(timestamp);
@@ -558,6 +539,87 @@ class ArmBatchProcessResponseFilesImplTest {
 
         // then
         assertEquals(OffsetDateTime.parse(timestamp, formatter), result);
+    }
+
+    @Test
+    void getInputUploadFileTimestamp_shouldThrowException_WhereDateIsInvalid() {
+        // given
+        ArmBatchProcessResponseFilesImpl armBatchProcessResponse = getArmBatchProcessResponseFiles();
+        String invalidTimestamp = "2023-06-10T14:08:28+00:00Z";
+        ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
+        inputUploadFileRecord.setTimestamp(invalidTimestamp);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+
+        // when
+        assertThrows(IllegalArgumentException.class,
+                     () -> armBatchProcessResponse.getInputUploadFileTimestamp(inputUploadFileRecord));
+
+    }
+
+    @Test
+    void getUploadFileRecordProcessTime_shouldReturnParsedOffsetDateTime_WithMilliseconds() {
+        // given
+        ArmBatchProcessResponseFilesImpl armBatchProcessResponse = getArmBatchProcessResponseFiles();
+        String timestamp = "2023-06-10T14:08:28.316382+00:00";
+        ArmResponseUploadFileRecord armResponseUploadFileRecord = new ArmResponseUploadFileRecord();
+        armResponseUploadFileRecord.setProcessTime(timestamp);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+
+        // when
+        OffsetDateTime result = armBatchProcessResponse.getUploadFileRecordProcessTime(armResponseUploadFileRecord);
+
+        // then
+        assertEquals(OffsetDateTime.parse(timestamp, formatter), result);
+    }
+
+    @Test
+    void getUploadFileRecordProcessTime_shouldReturnParsedOffsetDateTime_WithoutMilliseconds() {
+        // given
+        ArmBatchProcessResponseFilesImpl armBatchProcessResponse = getArmBatchProcessResponseFiles();
+        String timestamp = "2023-06-10T14:08:28+00:00";
+        ArmResponseUploadFileRecord armResponseUploadFileRecord = new ArmResponseUploadFileRecord();
+        armResponseUploadFileRecord.setProcessTime(timestamp);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+
+        // when
+        OffsetDateTime result = armBatchProcessResponse.getUploadFileRecordProcessTime(armResponseUploadFileRecord);
+
+        // then
+        assertEquals(OffsetDateTime.parse(timestamp, formatter), result);
+    }
+
+    @Test
+    void getUploadFileRecordProcessTime_shouldThrowException_WhereDateIsInvalid() {
+        // given
+        ArmBatchProcessResponseFilesImpl armBatchProcessResponse = getArmBatchProcessResponseFiles();
+        String invalidTimestamp = "2023-06-10T14:08:28+00:00Z";
+        ArmResponseUploadFileRecord armResponseUploadFileRecord = new ArmResponseUploadFileRecord();
+        armResponseUploadFileRecord.setProcessTime(invalidTimestamp);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
+
+        // when
+        assertThrows(IllegalArgumentException.class,
+                     () -> armBatchProcessResponse.getUploadFileRecordProcessTime(armResponseUploadFileRecord));
+
+    }
+
+    private @NotNull ArmBatchProcessResponseFilesImpl getArmBatchProcessResponseFiles() {
+        return new ArmBatchProcessResponseFilesImpl(
+            externalObjectDirectoryRepository,
+            armDataManagementApi,
+            fileOperationService,
+            armDataManagementConfiguration,
+            objectMapper,
+            userIdentity,
+            currentTimeHelper,
+            externalObjectDirectoryService,
+            logApi,
+            deleteArmResponseFilesHelper
+        );
     }
 
     class ArmBatchProcessResponseFilesImplProtectedMethodSupport extends ArmBatchProcessResponseFilesImpl {
