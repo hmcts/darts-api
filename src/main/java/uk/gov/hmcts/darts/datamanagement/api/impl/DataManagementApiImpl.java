@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.datamanagement.api.impl;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -54,6 +55,7 @@ public class DataManagementApiImpl implements DataManagementApi {
         dataManagementService.deleteBlobData(getOutboundContainerName(), blobId);
     }
 
+    @SneakyThrows
     @Override
     public void deleteBlobDataFromInboundContainer(String blobId) throws AzureDeleteBlobException {
         dataManagementService.deleteBlobData(getInboundContainerName(), blobId);
