@@ -10,7 +10,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AdminGetAutomatedTaskServiceTest extends IntegrationBase {
+class AdminGetAutomatedTaskServiceIntTest extends IntegrationBase {
 
     @Autowired
     private AdminAutomatedTaskService adminAutomatedTaskService;
