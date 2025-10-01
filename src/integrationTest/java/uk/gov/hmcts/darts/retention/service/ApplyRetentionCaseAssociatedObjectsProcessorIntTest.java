@@ -24,7 +24,6 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.retention.service.impl.ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl;
-import uk.gov.hmcts.darts.test.common.MediaIdMatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AnnotationStub;
 import uk.gov.hmcts.darts.testutils.stubs.CaseDocumentStub;
@@ -39,17 +38,19 @@ import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
+@SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount"})
 class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
@@ -60,50 +61,51 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     private UserAccountEntity testUser;
 
     @Autowired
-    CaseRepository caseRepository;
+    private CaseRepository caseRepository;
     @Autowired
-    HearingRepository hearingRepository;
+    private HearingRepository hearingRepository;
     @Autowired
-    CaseRetentionStub caseRetentionStub;
+    private CaseRetentionStub caseRetentionStub;
     @Autowired
-    CaseRetentionRepository caseRetentionRepository;
+    private CaseRetentionRepository caseRetentionRepository;
     @Autowired
-    MediaRepository mediaRepository;
+    private MediaRepository mediaRepository;
     @Autowired
-    ExternalObjectDirectoryStub eodStub;
+    private ExternalObjectDirectoryStub eodStub;
     @MockitoSpyBean
-    ExternalObjectDirectoryRepository eodRepository;
+    private ExternalObjectDirectoryRepository eodRepository;
     @Autowired
-    AnnotationStub annotationStub;
+    private AnnotationStub annotationStub;
     @Autowired
-    TranscriptionStub transcriptionStub;
+    private TranscriptionStub transcriptionStub;
     @Autowired
-    AnnotationRepository annotationRepository;
+    private AnnotationRepository annotationRepository;
     @Autowired
-    AnnotationDocumentRepository annotationDocumentRepository;
+    private AnnotationDocumentRepository annotationDocumentRepository;
     @Autowired
-    TranscriptionRepository transcriptionRepository;
+    private TranscriptionRepository transcriptionRepository;
     @Autowired
-    TranscriptionDocumentRepository transcriptionDocumentRepository;
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
     @Autowired
-    CourtCaseStub caseStub;
+    private CourtCaseStub caseStub;
     @Autowired
-    CaseDocumentStub caseDocumentStub;
+    private CaseDocumentStub caseDocumentStub;
     @Autowired
-    CaseDocumentRepository caseDocumentRepository;
+    private CaseDocumentRepository caseDocumentRepository;
     @MockitoSpyBean
-    ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
+    private ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
     @MockitoBean
-    UserIdentity userIdentity;
+    private UserIdentity userIdentity;
 
     @Autowired
-    ApplyRetentionCaseAssociatedObjectsProcessor processor;
+    private ApplyRetentionCaseAssociatedObjectsProcessor processor;
 
-    List<MediaEntity> medias;
-    CourtCaseEntity caseA;
-    CourtCaseEntity caseB;
-    CourtCaseEntity caseC;
-
+    private List<MediaEntity> medias;
+    private CourtCaseEntity caseA;
+    private CourtCaseEntity caseB;
+    private CourtCaseEntity caseC;
+    private CourtCaseEntity caseD;
+    private CourtCaseEntity caseE;
 
     @BeforeEach
     void setup() {
@@ -120,6 +122,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         media 1 -> hearing A1 -> case A
         media 2 -> hearing A2 -> case A
         media 3 -> hearing C  -> case C
+        media 4 -> hearing D  -> case D
         */
 
         // given
@@ -138,6 +141,16 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         caseC.setRetentionRetries(2);
         caseC.setClosed(true);
 
+        caseD = caseStub.createAndSaveCourtCaseWithHearings();
+        caseD.setRetentionUpdated(true);
+        caseD.setRetentionRetries(1);
+        caseD.setClosed(true);
+
+        caseE = caseStub.createAndSaveCourtCaseWithHearings();
+        caseE.setRetentionUpdated(true);
+        caseE.setRetentionRetries(1);
+        caseE.setClosed(true);
+
         medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
 
         var hearA1 = caseA.getHearings().getFirst();
@@ -145,28 +158,40 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         var hearA3 = caseA.getHearings().get(2);
         var hearB = caseB.getHearings().getFirst();
         var hearC = caseC.getHearings().getFirst();
+        var hearD = caseD.getHearings().getFirst();
+        var hearE = caseE.getHearings().getFirst();
+
         hearA1.addMedia(medias.getFirst());
         hearA1.addMedia(medias.get(1));
         hearA2.addMedia(medias.get(2));
         hearB.addMedia(medias.getFirst());
         hearC.addMedia(medias.get(3));
+        hearD.addMedia(medias.get(4));
+        hearE.addMedia(medias.get(5));
 
         hearingRepository.save(hearA3);
         hearingRepository.save(hearA2);
         hearingRepository.save(hearA1);
         hearingRepository.save(hearB);
         hearingRepository.save(hearC);
+        hearingRepository.save(hearD);
+        hearingRepository.save(hearE);
 
         caseRetentionStub.createCaseRetentionObject(caseA, DT_2025);
         caseRetentionStub.createCaseRetentionObject(caseA, DT_2026);
         caseRetentionStub.createCaseRetentionObject(caseB, DT_2027);
         caseRetentionStub.createCaseRetentionObject(caseB, DT_2028);
         caseRetentionStub.createCaseRetentionObject(caseC, DT_2028);
+        caseRetentionStub.createCaseRetentionObject(caseD, DT_2025);
+        caseRetentionStub.createCaseRetentionObject(caseE, DT_2025);
 
         eodStub.createAndSaveEod(medias.getFirst(), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
         eodStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
         eodStub.createAndSaveEod(medias.get(2), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
         eodStub.createAndSaveEod(medias.get(3), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
+        eodStub.createAndSaveEod(medias.get(4), ARM_DROP_ZONE, DETS, eod -> eod.setUpdateRetention(false));
+        eodStub.createAndSaveEod(medias.get(5), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
+        eodStub.createAndSaveEod(medias.get(5), ARM_DROP_ZONE, DETS, eod -> eod.setUpdateRetention(false));
 
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -174,10 +199,12 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         caseRepository.save(caseA);
         caseRepository.save(caseB);
         caseRepository.save(caseC);
+        caseRepository.save(caseD);
+        caseRepository.save(caseE);
     }
 
     @Test
-    void testSuccessfullyApplyRetentionToCaseMedias() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSuccessfullyApplyRetentionToCaseMedias() {
 
         // when
         processor.processApplyRetentionToCaseAssociatedObjects(1000);
@@ -203,7 +230,46 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    void testSuccessfullyApplyRetentionToCaseMediasIncludingLinkedMedias() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSuccessfullyApplyRetentionToCaseMediasInDets() {
+
+        // when
+        processor.processApplyRetentionToCaseAssociatedObjects(1000);
+
+        // then
+        var media4 = mediaRepository.findById(medias.get(4).getId()).get();
+        assertThat(media4.getRetainUntilTs()).isEqualTo(DT_2025);
+
+        var actualCaseD = caseRepository.findById(caseD.getId());
+        assertThat(actualCaseD.get().isRetentionUpdated()).isFalse();
+        assertThat(actualCaseD.get().getRetentionRetries()).isEqualTo(1);
+
+        var detsEodsMedia4 = eodRepository.findByMediaStatusAndType(media4, EodHelper.armDropZoneStatus(), EodHelper.detsLocation());
+        assertThat(detsEodsMedia4.getFirst().isUpdateRetention()).isFalse();
+    }
+
+    @Test
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSuccessfullyApplyRetentionToCaseMediasInArmAndDets() {
+
+        // when
+        processor.processApplyRetentionToCaseAssociatedObjects(1000);
+
+        // then
+        var media5 = mediaRepository.findById(medias.get(5).getId()).get();
+        assertThat(media5.getRetainUntilTs()).isEqualTo(DT_2025);
+
+        var actualCaseE = caseRepository.findById(caseE.getId());
+        assertThat(actualCaseE.get().isRetentionUpdated()).isFalse();
+        assertThat(actualCaseE.get().getRetentionRetries()).isEqualTo(1);
+
+        var armEodsMedia5 = eodRepository.findByMediaStatusAndType(media5, EodHelper.armDropZoneStatus(), EodHelper.armLocation());
+        assertThat(armEodsMedia5.getFirst().isUpdateRetention()).isTrue();
+        var detsEodsMedia5 = eodRepository.findByMediaStatusAndType(media5, EodHelper.armDropZoneStatus(), EodHelper.detsLocation());
+        assertThat(detsEodsMedia5.getFirst().isUpdateRetention()).isFalse();
+
+    }
+
+    @Test
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSuccessfullyApplyRetentionToCaseMediasIncludingLinkedMedias() {
         // given
         MediaLinkedCaseEntity mediaLinkedCase1 = createMediaLinkedCase(medias.get(3), caseA);
         dartsDatabase.getMediaLinkedCaseRepository().save(mediaLinkedCase1);
@@ -241,10 +307,8 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    void testSuccessfullyApplyRetentionToCaseAnnotations() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSuccessfullyApplyRetentionToCaseAnnotations() {
         /*
-        Test data setup:
-
         case A -> hearing 1A -> annotation1A -> annotationDoc1, annotationDoc2
         case A -> hearing 1A -> annotation2A -> annotationDoc3
         case A -> hearing 2A -> annotation2A -> annotationDoc3
@@ -294,13 +358,13 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         // then
         var actualAnnotationDoc1 = annotationDocumentRepository.findById(annotationDoc1.getId()).get();
         assertThat(actualAnnotationDoc1.getRetainUntilTs()).isEqualTo(DT_2028);
-        var eodsAnnotationDoc1 = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(
-            annotationDoc1, EodHelper.armLocation());
+        var eodsAnnotationDoc1 = eodRepository.findByAnnotationDocumentIdAndExternalLocationTypes(
+            annotationDoc1.getId(), List.of(EodHelper.armLocation()));
         assertThat(eodsAnnotationDoc1.getFirst().isUpdateRetention()).isTrue();
         var actualAnnotationDoc3 = annotationDocumentRepository.findById(annotationDoc3.getId()).get();
         assertThat(actualAnnotationDoc3.getRetainUntilTs()).isEqualTo(DT_2026);
-        var eodsAnnotationDoc3 = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(
-            annotationDoc3, EodHelper.armLocation());
+        var eodsAnnotationDoc3 = eodRepository.findByAnnotationDocumentIdAndExternalLocationTypes(
+            annotationDoc3.getId(), List.of(EodHelper.armLocation()));
         assertThat(eodsAnnotationDoc3.getFirst().isUpdateRetention()).isTrue();
         var actualAnnotationDoc4 = annotationDocumentRepository.findById(annotationDoc4.getId()).get();
         assertThat(actualAnnotationDoc4.getRetainUntilTs()).isEqualTo(DT_2026);
@@ -316,15 +380,12 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    void testSuccessfullyApplyRetentionToCaseTranscriptionDocuments() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSuccessfullyApplyRetentionToCaseTranscriptionDocuments() {
         /*
-        Test data setup:
-
         case A -> hearing 1 -> transcription1 -> transcriptionDoc1, transcriptionDoc2
         case A -> hearing 1 -> transcription2 -> transcriptionDoc3
         case A -> hearing 2 -> transcription2 -> transcriptionDoc3
         case B -> hearing 3 -> transcription1 -> transcriptionDoc1, transcriptionDoc2
-
         */
 
         // given
@@ -378,7 +439,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    void testSuccessfullyApplyRetentionToCaseDocuments() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSuccessfullyApplyRetentionToCaseDocuments() {
         /*
         Test data setup:
 
@@ -415,11 +476,11 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    void testExceptionOnOneObjectCausesRollbackOfAllChangesToAllObjectsAndProcessingOfOtherCasesContinues() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldFail_WhenOneObjectCausesRollbackToAllObjectsAndProcessingOfOtherCasesContinues() {
 
         // given
-        doThrow(RuntimeException.class).when(eodRepository).findByMediaAndExternalLocationType(argThat(
-            new MediaIdMatcher(medias.getFirst().getId())), refEq(EodHelper.armLocation()));
+        doThrow(RuntimeException.class).when(eodRepository).findByMediaIdAndExternalLocationTypes(
+            eq(medias.getFirst().getId()), refEq(List.of(EodHelper.armLocation(), EodHelper.detsLocation())));
 
         // when
         processor.processApplyRetentionToCaseAssociatedObjects(1000);
@@ -442,7 +503,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    void testRetentionIsNotAppliedIfAssociatedCasesAreNotAllClosed() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSetRetentionIsNotAppliedIfAssociatedCasesAreNotAllClosed() {
 
         // given
         caseB.setClosed(false);
@@ -464,7 +525,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    void testRetentionIsNotAppliedIfMissingArmEod() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSetRetentionIsNotAppliedIfMissingArmEod() {
 
         // given
         eodRepository.deleteAll();
@@ -489,7 +550,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    void testRetentionIsNotAppliedIfNoRetentionsFoundOnMediaCases() {
+    void processApplyRetentionToCaseAssociatedObjects_ShouldSetRetentionIsNotAppliedIfNoRetentionsFoundOnMediaCases() {
 
         // given
         caseRetentionRepository.deleteAll();

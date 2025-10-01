@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -137,11 +138,11 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var longestRetentionDate = findLongestRetentionDate(cases);
         if (longestRetentionDate != null) {
             media.setRetainUntilTs(longestRetentionDate);
-            var armEods = eodRepository.findByMediaAndExternalLocationType(media, EodHelper.armLocation());
-            updateArmEodRetention(
-                armEods,
-                format("Expecting one arm EOD for media '%s' but found zero or more than one", media.getId())
-            );
+            var armOrDetsEodList = eodRepository.findByMediaIdAndExternalLocationTypes(
+                media.getId(), List.of(EodHelper.armLocation(), EodHelper.detsLocation()));
+
+            String errorMessage = format("Unexpected number of EODs {} for media '%s'", armOrDetsEodList.size(), media.getId());
+            updateRetentionForArm(armOrDetsEodList, errorMessage);
         } else {
             throw new DartsException(format("No retentions found on cases for media '%s'", media.getId()));
         }
@@ -151,11 +152,10 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var longestRetentionDate = findLongestRetentionDate(cases);
         if (longestRetentionDate != null) {
             annotationDoc.setRetainUntilTs(longestRetentionDate);
-            var armEods = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(annotationDoc, EodHelper.armLocation());
-            updateArmEodRetention(
-                armEods,
-                format("Expecting one arm EOD for annotationDocument '%s' but found zero or more than one", annotationDoc.getId())
-            );
+            var armOrDetsEodList = eodRepository.findByAnnotationDocumentIdAndExternalLocationTypes(
+                annotationDoc.getId(), List.of(EodHelper.armLocation(), EodHelper.detsLocation()));
+            String errorMessage = format("Unexpected number of EODs {} for annotation document '%s'", armOrDetsEodList.size(), annotationDoc.getId());
+            updateRetentionForArm(armOrDetsEodList, errorMessage);
         } else {
             throw new DartsException(format("No retentions found on cases for annotationDocument '%s'", annotationDoc.getId()));
         }
@@ -165,13 +165,29 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var longestRetentionDate = findLongestRetentionDate(cases);
         if (longestRetentionDate != null) {
             transcriptionDoc.setRetainUntilTs(longestRetentionDate);
-            var armEods = eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(transcriptionDoc, EodHelper.armLocation());
-            updateArmEodRetention(
-                armEods,
-                format("Expecting one arm EOD for transcriptionDocument '%s' but found zero or more than one", transcriptionDoc.getId())
-            );
+            var armOrDetsEodList = eodRepository.findByTranscriptionDocumentIdAndExternalLocationTypes(
+                transcriptionDoc.getId(), List.of(EodHelper.armLocation(), EodHelper.detsLocation()));
+            String errorMessage = format("Unexpected number of EODs {} for transcription document '%s'", armOrDetsEodList.size(), transcriptionDoc.getId());
+            updateRetentionForArm(armOrDetsEodList, errorMessage);
         } else {
             throw new DartsException(format("No retentions found on cases for transcriptionDocument '%s'", transcriptionDoc.getId()));
+        }
+    }
+
+    private void updateRetentionForArm(List<ExternalObjectDirectoryEntity> armOrDetsEodList, String errorMessage) {
+        // There should be either 1 or 2 EODs (ARM and/or DETS)
+        if (armOrDetsEodList.isEmpty() || armOrDetsEodList.size() > 2) {
+            throw new DartsException(errorMessage);
+        }
+        // Get only ARM EOD. If EOD is ARM, update EOD retention, if EOD is DETS do nothing DMP-5264
+        List<ExternalObjectDirectoryEntity> armEodList = armOrDetsEodList.stream().filter(
+            eod ->
+                EodHelper.armLocation().getId().equals(
+                    eod.getExternalLocationType().getId())
+        ).toList();
+
+        if (CollectionUtils.isNotEmpty(armEodList)) {
+            updateArmEodRetention(armEodList, errorMessage);
         }
     }
 
@@ -179,11 +195,10 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var longestRetentionDate = findLongestRetentionDate(List.of(courtCase));
         if (longestRetentionDate != null) {
             caseDocument.setRetainUntilTs(longestRetentionDate);
-            var armEods = eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation());
-            updateArmEodRetention(
-                armEods,
-                format("Expecting one arm EOD for caseDocument '%s' but found zero or more than one", caseDocument.getId())
-            );
+            var armOrDetsEodList = eodRepository.findByCaseDocumentIdAndExternalLocationTypes(
+                caseDocument.getId(), List.of(EodHelper.armLocation(), EodHelper.detsLocation()));
+            String errorMessage = format("Unexpected number of EODs {} for case document '%s'", armOrDetsEodList.size(), caseDocument.getId());
+            updateRetentionForArm(armOrDetsEodList, errorMessage);
         } else {
             throw new DartsException(format("No retentions found on courtCase for caseDocument '%s'", caseDocument.getId()));
         }
