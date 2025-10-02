@@ -77,6 +77,7 @@ class ArmBatchProcessResponseFilesImplTest {
     private static final Integer BATCH_SIZE = 2;
     private static final String DATETIMEKEY = "<datetimekey>";
     private static final String INPUT_UPLOAD_RESPONSE_DATETIME = "2021-08-01T10:08:28.316382+00:00";
+    private static final String UPLOAD_RESPONSE_TIMESTAMP_FORAMT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]";
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -110,6 +111,8 @@ class ArmBatchProcessResponseFilesImplTest {
 
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
+
+        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn(UPLOAD_RESPONSE_TIMESTAMP_FORAMT);
 
         armBatchProcessResponseFiles = spy(new ArmBatchProcessResponseFilesImplProtectedMethodSupport(
             externalObjectDirectoryRepository,
@@ -146,7 +149,6 @@ class ArmBatchProcessResponseFilesImplTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
-        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]");
 
         BinaryData binaryData = mock(BinaryData.class);
         when(armDataManagementApi.getBlobData(any())).thenReturn(binaryData);
@@ -208,7 +210,6 @@ class ArmBatchProcessResponseFilesImplTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
-        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]");
 
         BinaryData binaryData = mock(BinaryData.class);
         when(armDataManagementApi.getBlobData(any())).thenReturn(binaryData);
@@ -278,7 +279,6 @@ class ArmBatchProcessResponseFilesImplTest {
 
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
-        when(armDataManagementConfiguration.getInputUploadResponseTimestampFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]");
 
         BinaryData binaryData1 = mock(BinaryData.class);
         BinaryData binaryData2 = mock(BinaryData.class);
@@ -317,8 +317,6 @@ class ArmBatchProcessResponseFilesImplTest {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = mock(ExternalObjectDirectoryEntity.class);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = mock(ExternalObjectDirectoryEntity.class);
-        OffsetDateTime inputUploadProcessedTs2 = OffsetDateTime.parse(dateTime2);
-        when(externalObjectDirectoryEntity2.getInputUploadProcessedTs()).thenReturn(inputUploadProcessedTs2);
 
         when(externalObjectDirectoryRepository.findAllByStatusAndManifestFile(any(), any()))
             .thenReturn(List.of(externalObjectDirectoryEntity1), List.of(externalObjectDirectoryEntity2));
@@ -335,10 +333,10 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
         verify(armDataManagementApi).getBlobData(blobNameAndPath2);
 
-        verify(externalObjectDirectoryEntity2, never()).setInputUploadProcessedTs(any());
+        verify(externalObjectDirectoryEntity2, never()).setDataIngestionTs(any());
 
         verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryEntity1));
-        verify(externalObjectDirectoryRepository).saveAll(any());
+        verify(externalObjectDirectoryRepository, times(2)).saveAll(any());
         verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verifyNoMoreInteractions(logApi);
     }
@@ -381,7 +379,7 @@ class ArmBatchProcessResponseFilesImplTest {
     @SuppressWarnings("unchecked")
     void processBatchResponseFiles_unableToFindResponseFiles_responseProcessingFailedStatus_outsideAllowedTime() {
         ArmBatchResponses armBatchResponses = mock(ArmBatchResponses.class);
-        Map<Integer, ArmResponseBatchData> armBatchResponseMap = mock(Map.class);
+        Map<Long, ArmResponseBatchData> armBatchResponseMap = mock(Map.class);
         when(armBatchResponses.getArmBatchResponseMap()).thenReturn(armBatchResponseMap);
 
         List<ArmResponseBatchData> armResponseBatchDataList = new ArrayList<>();
@@ -402,8 +400,7 @@ class ArmBatchProcessResponseFilesImplTest {
         Duration armMissingResponseDuration = Duration.ofHours(24);
         when(armDataManagementConfiguration.getArmMissingResponseDuration()).thenReturn(armMissingResponseDuration);
 
-        when(externalObjectDirectoryEntity.getInputUploadProcessedTs())
-            .thenReturn(currentTime.minus(armMissingResponseDuration).minusMinutes(1));
+        when(externalObjectDirectoryEntity.getInputUploadProcessedTs()).thenReturn(currentTime.minus(armMissingResponseDuration).minusMinutes(1));
 
         doNothing().when(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(any(), any(), any());
 
@@ -414,7 +411,6 @@ class ArmBatchProcessResponseFilesImplTest {
 
         verify(armBatchResponses).getArmBatchResponseMap();
         verify(armBatchResponseMap).values();
-        verify(externalObjectDirectoryEntity, times(2)).getInputUploadProcessedTs();
         verify(externalObjectDirectoryEntity, never()).getObjectStateRecordEntity();
         verify(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123L);
         verify(currentTimeHelper).currentOffsetDateTime();
@@ -428,7 +424,7 @@ class ArmBatchProcessResponseFilesImplTest {
     @SuppressWarnings("unchecked")
     void processBatchResponseFiles_unableToFindResponseFiles_responseProcessingFailedStatus_insideAllowedTime() {
         ArmBatchResponses armBatchResponses = mock(ArmBatchResponses.class);
-        Map<Integer, ArmResponseBatchData> armBatchResponseMap = mock(Map.class);
+        Map<Long, ArmResponseBatchData> armBatchResponseMap = mock(Map.class);
         when(armBatchResponses.getArmBatchResponseMap()).thenReturn(armBatchResponseMap);
 
         List<ArmResponseBatchData> armResponseBatchDataList = new ArrayList<>();
@@ -468,7 +464,6 @@ class ArmBatchProcessResponseFilesImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void processResponseFiles_throwsInterruptedException() {
 
         // given
@@ -489,6 +484,7 @@ class ArmBatchProcessResponseFilesImplTest {
             .build();
 
         when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(BATCH_SIZE * 2);
+
         when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
 
         try (MockedStatic<AsyncUtil> mockedStatic = mockStatic(AsyncUtil.class)) {

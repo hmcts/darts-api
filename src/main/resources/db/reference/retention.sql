@@ -54,18 +54,43 @@
 --     add c_case_id, c_courthouse, c_type, c_upload_priority, c_reporting_restrictions,
 --     case_object_name, r_folder_path, c_interpreter_used to case_overflow
 --v21  remove caching from sequences
+--v22  adding 4 tables ( cc_dets, cmr_dets, cr_dets, wk_case_correction ) to support retention preparation
+--v23  adding 3 tables ( wk_case_best_values_p1, wk_case_best_values_post_p1,wk_case_activity_data) to support validation
+--v24  adding 1 table, wk_case_confidence_level
+--v25  amend cr_dets.retention_object_id to char(16)
+--     adding wk_crah_is_current_by_creation, wk_rr_is_current_by_creation
+--     adding wk_crah_is_current_by_logic,    wk_rr_is_current_by_logic
+--     adding single column to wk_case_correction and wk_case_activity_data
+--v26  remove rownum column from wk_case_activity_data
+--v27  remove table case_retention_extra
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
 
 --List of Table Aliases
--- case_management_retention              CMR
--- rps_retainer                           RPR
 -- case_retention                         CAR  
--- retention_confidence_category_mapper   RCC
--- retention_policy_type                  RPT
+-- case_management_retention              CMR
 -- case_retention_audit_heritage          RAH
+-- retention_confidence_category_mapper   RCC
 -- retention_policy_type_heritage_mapping RHM
+-- rps_retainer                           RPR
+-- retention_policy_type                  RPT
+
+-- cc_dets                                CCD
+-- cmr_dets                               CMD
+-- cr_dets                                CRD
+-- wk_case_correction                     WCC
+
+--wk_case_best_values_p1                  WBV
+--wk_case_best_values_post_p1             WBP
+--wk_case_activity_data                   WCA
+--wk_case_confidence_level                WCL
+
+--wk_crah_is_current_by_creation          CBC
+--wk_crah_is_current_by_logic             CBL
+--wk_rr_is_current_by_creation            RBC
+--wk_rr_is_current_by_logic               RBL
+
 
 
 CREATE TABLE case_management_retention
@@ -225,49 +250,6 @@ CREATE TABLE case_overflow
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE pg_default;
 
-CREATE TABLE case_retention_extra
-(cas_id                        INTEGER    NOT NULL
-,current_rah_id                INTEGER
-,current_rah_rpt_id            INTEGER
-,current_rpr_id                INTEGER
-,current_rpr_rpt_id            INTEGER
-,retention_fixed_rpt_id        INTEGER
-,case_total_sentence           CHARACTER VARYING
-,case_retention_fixed          CHARACTER VARYING
-,end_of_sentence_date_ts       TIMESTAMP WITH TIME ZONE
-,manual_retention_override     INTEGER
-,actual_case_closed_flag       INTEGER
-,actual_case_closed_ts         TIMESTAMP WITH TIME ZONE
-,actual_retain_until_ts        TIMESTAMP WITH TIME ZONE
-,actual_case_created_ts        TIMESTAMP WITH TIME ZONE
-,submitted_by                  INTEGER
-,rps_retainer_object_id        CHARACTER VARYING
-,case_closed_eve_id            INTEGER
-,case_closed_event_ts          TIMESTAMP WITH TIME ZONE
-,max_event_ts                  TIMESTAMP WITH TIME ZONE
-,max_media_ts                  TIMESTAMP WITH TIME ZONE
-,closure_method_type           CHARACTER VARYING
-,best_case_closed_ts           TIMESTAMP WITH TIME ZONE
-,best_case_closed_type         CHARACTER VARYING
-,best_retainer_retain_until_ts TIMESTAMP WITH TIME ZONE
-,best_audit_retain_until_ts    TIMESTAMP WITH TIME ZONE
-,retention_aged_policy_name     CHARACTER VARYING
-,case_closed_diff_in_days      INTEGER
-,r_retain_until_diff_in_days   INTEGER
-,a_retain_until_diff_in_days   INTEGER
-,validation_error_1            CHARACTER VARYING
-,validation_error_2            CHARACTER VARYING
-,validation_error_3            CHARACTER VARYING
-,validation_error_4            CHARACTER VARYING
-,validation_error_5            CHARACTER VARYING
-,ret_conf_score                INTEGER
-,ret_conf_reason               CHARACTER VARYING
-,ret_conf_updated_ts           TIMESTAMP WITH TIME ZONE
-,validated_ts                  TIMESTAMP WITH TIME ZONE
-,created_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_ts              TIMESTAMP WITH TIME ZONE      NOT NULL
-,migrated_ts                    TIMESTAMP WITH TIME ZONE
-) TABLESPACE pg_default;
 
 CREATE TABLE  retention_policy_type_heritage_mapping
 (rhm_id                        INTEGER                       NOT NULL
@@ -276,6 +258,217 @@ CREATE TABLE  retention_policy_type_heritage_mapping
 ,modernised_rpt_id             INTEGER                       NOT NULL
 ) TABLESPACE pg_default;
 
+CREATE TABLE cc_dets
+(cas_id                        INTEGER
+,case_object_id                CHARACTER VARYING(16)
+,c_courthouse                  CHARACTER VARYING(64)
+,c_case_id                     CHARACTER VARYING(32)
+,c_closed_pre_live             INTEGER
+,c_case_closed_date_pre_live   TIMESTAMP WITH TIME ZONE
+,c_case_closed_date_crah       TIMESTAMP WITH TIME ZONE
+,case_created_ts               TIMESTAMP WITH TIME ZONE
+,case_retention_fixed           CHARACTER VARYING(16)
+,case_total_sentence           CHARACTER VARYING(16)
+,retention_applies_from_ts     TIMESTAMP WITH TIME ZONE
+,end_of_sentence_date_ts       TIMESTAMP WITH TIME ZONE
+,manual_retention_override     INTEGER
+,retain_until_ts               TIMESTAMP WITH TIME ZONE
+,audio_folder_object_id        CHARACTER VARYING(16)
+,case_closed_event_event_ts_by_pre_live_closed_date           TIMESTAMP WITH TIME ZONE
+,case_closed_event_event_ts_eve_id_by_pre_live_closed_date    INTEGER
+,case_closed_event_created_ts_by_pre_live_closed_date         TIMESTAMP WITH TIME ZONE
+,case_closed_event_created_ts_eve_id_by_pre_live_closed_date  INTEGER
+,case_closed_event_event_ts_by_audit_closed_date              TIMESTAMP WITH TIME ZONE
+,case_closed_event_event_ts_eve_id_by_audit_closed_date       INTEGER
+,case_closed_event_created_ts_by_audit_closed_date            TIMESTAMP WITH TIME ZONE
+,case_closed_event_created_ts_eve_id_by_audit_closed_date     INTEGER
+,case_closed_event_event_ts_case_closed_event_latest          TIMESTAMP WITH TIME ZONE
+,case_closed_event_event_ts_eve_id_case_closed_event_latest   INTEGER
+,case_closed_event_created_ts_case_closed_event_latest        TIMESTAMP WITH TIME ZONE
+,case_closed_event_created_ts_eve_id_case_closed_event_latest INTEGER
+,latest_event_by_event_ts                                     TIMESTAMP WITH TIME ZONE
+,latest_event_by_event_ts_eve_id                              INTEGER
+,latest_event_by_created_ts                                   TIMESTAMP WITH TIME ZONE
+,latest_event_by_created_ts_eve_id                            INTEGER
+,latest_hearing_ended_event_by_event_ts                       TIMESTAMP WITH TIME ZONE
+,latest_hearing_ended_event_by_event_ts_eve_id                INTEGER
+,latest_hearing_ended_event_by_created_ts                     TIMESTAMP WITH TIME ZONE
+,latest_hearing_ended_event_by_created_ts_eve_id              INTEGER
+,latest_log_event_by_event_ts                                 TIMESTAMP WITH TIME ZONE
+,latest_log_event_by_event_ts_eve_id                          INTEGER
+,latest_log_event_by_created_ts                               TIMESTAMP WITH TIME ZONE
+,latest_log_event_by_created_ts_eve_id                        INTEGER
+,latest_sentencing_event_by_event_ts                          TIMESTAMP WITH TIME ZONE
+,latest_sentencing_event_by_event_ts_eve_id                   INTEGER
+,latest_sentencing_event_by_created_ts                        TIMESTAMP WITH TIME ZONE
+,latest_sentencing_event_by_created_ts_eve_id                 INTEGER
+,latest_sentencing_271_event_by_event_ts                      TIMESTAMP WITH TIME ZONE
+,latest_sentencing_271_event_by_event_ts_eve_id               INTEGER
+,latest_sentencing_271_event_by_created_ts                    TIMESTAMP WITH TIME ZONE
+,latest_sentencing_271_event_by_created_ts_eve_id             INTEGER
+,latest_media_by_created_ts                                   TIMESTAMP WITH TIME ZONE
+,latest_media_by_created_ts_eve_id                            INTEGER
+,latest_media_by_start_ts                                     TIMESTAMP WITH TIME ZONE
+,latest_media_by_start_ts_eve_id                              INTEGER
+,latest_media_by_end_ts                                       TIMESTAMP WITH TIME ZONE
+,latest_media_by_end_ts_eve_id                                INTEGER
+,latest_warrant_event_by_event_ts                             TIMESTAMP WITH TIME ZONE
+,latest_warrant_event_by_event_ts_eve_id                      INTEGER
+,latest_warrant_event_by_created_ts                           TIMESTAMP WITH TIME ZONE
+,latest_warrant_event_by_created_ts_eve_id                    INTEGER
+,ret_conf_score                                               INTEGER
+,ret_conf_reason                                              CHARACTER VARYING(64)
+,ret_conf_updated_ts                                          TIMESTAMP WITH TIME ZONE
+,category_type                                                CHARACTER VARYING(32)
+,latest_activity_period                                       CHARACTER VARYING(5)
+) TABLESPACE pg_default;
+
+CREATE TABLE cmr_dets
+(cmd_id                        SERIAL
+,cas_id                        INTEGER
+,rpt_id                        INTEGER
+,eve_id                        BIGINT
+,total_sentence                CHARACTER VARYING(32)
+) TABLESPACE pg_default;
+
+CREATE TABLE cr_dets
+(crd_id                        SERIAL
+,cas_id                        INTEGER
+,rpt_id                        INTEGER
+,cmd_id                        INTEGER
+,total_sentence                CHARACTER VARYING(32)
+,retain_until_ts               TIMESTAMP WITH TIME ZONE
+,retain_until_applied_on_ts    TIMESTAMP WITH TIME ZONE
+,current_state                 CHARACTER VARYING(32)
+,comments                      CHARACTER VARYING(150)
+,confidence_category           INTEGER
+,retention_object_id           CHARACTER VARYING(16)   
+,submitted_by                  INTEGER
+,created_ts                    TIMESTAMP WITH TIME ZONE
+,created_by                    INTEGER         
+,last_modified_ts              TIMESTAMP WITH TIME ZONE    
+,last_modified_by              INTEGER             
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_case_correction
+(cas_id                        INTEGER
+,category_type                 CHARACTER VARYING(32)
+,case_closed_date_corr         BOOLEAN
+,case_closed_corr              BOOLEAN
+,retain_until_ts_corr          BOOLEAN
+,new_case_closed               BOOLEAN
+,new_closed_date_ts            TIMESTAMP WITH TIME ZONE
+,case_old_closed_date_ts       TIMESTAMP WITH TIME ZONE
+,case_audit_old_closed_date_ts TIMESTAMP WITH TIME ZONE
+,closed_date_type              CHARACTER VARYING(50)
+,eve_id                        BIGINT
+,cmr_eve_id                    BIGINT
+,current_logic_rpt_id          INTEGER
+,current_creation_rpt_id       INTEGER
+,case_total_sentence           CHARACTER VARYING(16)
+,new_retain_until_ts           TIMESTAMP WITH TIME ZONE
+,retain_until_applied_on_ts    TIMESTAMP WITH TIME ZONE
+,current_state                 CHARACTER VARYING(16)
+,old_state                     CHARACTER VARYING(16)
+,retention_object_id           CHARACTER VARYING(16)
+,latest_activity_period        CHARACTER VARYING(5)
+,best_closed_date_period       CHARACTER VARYING(5)
+,adjusted_closed_date_ts       TIMESTAMP WITH TIME ZONE
+,adjusted_closed_date_type     CHARACTER VARYING(50)
+,adjusted_eve_id               BIGINT
+,has_warrant                   BOOLEAN
+,warrant_before_sentencing     BOOLEAN
+,case_closed_before_sentencing BOOLEAN
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_case_best_values_p1
+(cas_id                         INTEGER
+,eve_id                         BIGINT
+,evh_id                         INTEGER
+,closed_date_ts                 TIMESTAMP WITH TIME ZONE
+,closed_date_type               CHARACTER VARYING(50)
+,rownum                         INTEGER
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_case_best_values_post_p1
+(cas_id                         INTEGER
+,eve_id                         BIGINT
+,evh_id                         INTEGER
+,closed_date_ts                 TIMESTAMP WITH TIME ZONE
+,closed_date_type               CHARACTER VARYING(50)
+,rownum                         INTEGER
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_case_activity_data
+(cas_id                         INTEGER                    NOT NULL
+,eve_id                         BIGINT
+,evh_id                         INTEGER
+,closed_date_ts                 TIMESTAMP WITH TIME ZONE
+,closed_date_type               CHARACTER VARYING(100)
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_case_confidence_level
+(cas_id                         INTEGER                    NOT NULL
+,confidence_level               INTEGER
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_crah_is_current_by_creation
+(cas_id                         INTEGER
+,rah_id                         INTEGER
+,rpt_id                         INTEGER
+,c_policy_type                  CHARACTER VARYING(20)
+,c_courthouse                   CHARACTER VARYING(64)
+,c_case_id                      CHARACTER VARYING(32)
+,r_creation_date                TIMESTAMP WITH TIME ZONE
+,r_modify_date                  TIMESTAMP WITH TIME ZONE
+,c_status                       CHARACTER VARYING(32)
+,c_username                     INTEGER
+,case_retention_audit_object_id CHARACTER VARYING(16)
+,ready_retain_until_date        TIMESTAMP WITH TIME ZONE
+,is_current                     BOOLEAN
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_crah_is_current_by_logic
+(cas_id                         INTEGER
+,rah_id                         INTEGER
+,rpt_id                         INTEGER
+,c_policy_type                  CHARACTER VARYING(20)
+,c_courthouse                   CHARACTER VARYING(64)
+,c_case_id                      CHARACTER VARYING(32)
+,r_creation_date                TIMESTAMP WITH TIME ZONE
+,c_status                       CHARACTER VARYING(32)
+,c_username                     INTEGER
+,case_retention_audit_object_id CHARACTER VARYING(16)
+,ready_retain_until_date        TIMESTAMP WITH TIME ZONE
+,is_current                     BOOLEAN
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_rr_is_current_by_creation
+(cas_id                         INTEGER
+,rpr_id                         INTEGER
+,rpt_id                         INTEGER
+,case_object_id                 CHARACTER VARYING(16)
+,dm_retainer_root_id            CHARACTER VARYING(16)
+,dms_object_name                CHARACTER VARYING(64)
+,created_ts                     TIMESTAMP WITH TIME ZONE
+,last_modified_ts               TIMESTAMP WITH TIME ZONE
+,rps_retainer_object_id         CHARACTER VARYING(16)
+,dm_retention_date              TIMESTAMP WITH TIME ZONE
+,is_current                     BOOLEAN
+) TABLESPACE pg_default;
+
+CREATE TABLE wk_rr_is_current_by_logic
+(cas_id                         INTEGER
+,rpr_id                         INTEGER
+,rpt_id                         INTEGER
+,case_object_id                 CHARACTER VARYING(16)
+,dm_retainer_root_id            CHARACTER VARYING(16)
+,dms_object_name                CHARACTER VARYING(64)
+,created_ts                     TIMESTAMP WITH TIME ZONE
+,rps_retainer_object_id         CHARACTER VARYING(16)
+,dm_retention_date              TIMESTAMP WITH TIME ZONE
+,is_current                     BOOLEAN
+) TABLESPACE pg_default;
 
 CREATE UNIQUE INDEX case_management_retention_pk ON case_management_retention(cmr_id) TABLESPACE pg_default;
 ALTER TABLE case_management_retention ADD PRIMARY KEY USING INDEX case_management_retention_pk;
@@ -295,15 +488,48 @@ ALTER TABLE rps_retainer ADD PRIMARY KEY USING INDEX rps_retainer_pk;
 CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cof_id) TABLESPACE pg_default; 
 ALTER TABLE case_overflow ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
-CREATE UNIQUE INDEX case_retention_extra_pk ON case_retention_extra(cas_id) TABLESPACE pg_default; 
-ALTER TABLE case_retention_extra ADD PRIMARY KEY USING INDEX case_retention_extra_pk;
-
 
 CREATE UNIQUE INDEX case_retention_audit_heritage_pk ON case_retention_audit_heritage(rah_id) TABLESPACE pg_default; 
 ALTER TABLE case_retention_audit_heritage ADD PRIMARY KEY USING INDEX case_retention_audit_heritage_pk;
 
 CREATE UNIQUE INDEX retention_policy_type_heritage_mapping_pk ON retention_policy_type_heritage_mapping(rhm_id) TABLESPACE pg_default; 
 ALTER TABLE retention_policy_type_heritage_mapping ADD PRIMARY KEY USING INDEX retention_policy_type_heritage_mapping_pk;
+
+CREATE UNIQUE INDEX cc_dets_pk ON cc_dets(cas_id) TABLESPACE pg_default;
+ALTER TABLE cc_dets ADD PRIMARY KEY USING INDEX cc_dets_pk;
+
+CREATE UNIQUE INDEX cmr_dets_pk ON cmr_dets(cmd_id) TABLESPACE pg_default;
+ALTER TABLE cmr_dets ADD PRIMARY KEY USING INDEX cmr_dets_pk;
+
+CREATE UNIQUE INDEX cr_dets_pk ON cr_dets(crd_id) TABLESPACE pg_default;
+ALTER TABLE cr_dets ADD PRIMARY KEY USING INDEX cr_dets_pk;
+
+CREATE UNIQUE INDEX wk_case_correction_pk ON wk_case_correction(cas_id) TABLESPACE pg_default;
+ALTER TABLE wk_case_correction ADD PRIMARY KEY USING INDEX wk_case_correction_pk;
+
+CREATE UNIQUE INDEX wk_case_best_values_p1_pk ON wk_case_best_values_p1(cas_id) TABLESPACE pg_default;
+ALTER TABLE wk_case_best_values_p1 ADD PRIMARY KEY USING INDEX wk_case_best_values_p1_pk;
+
+CREATE UNIQUE INDEX wk_case_best_values_post_p1_pk ON wk_case_best_values_post_p1(cas_id) TABLESPACE pg_default;
+ALTER TABLE wk_case_best_values_post_p1 ADD PRIMARY KEY USING INDEX wk_case_best_values_post_p1_pk;
+
+CREATE UNIQUE INDEX wk_case_activity_data_pk ON wk_case_activity_data(cas_id,closed_date_type) TABLESPACE pg_default;
+ALTER TABLE wk_case_activity_data ADD PRIMARY KEY USING INDEX wk_case_activity_data_pk;
+
+CREATE UNIQUE INDEX wk_case_confidence_level_pk ON wk_case_confidence_level(cas_id) TABLESPACE pg_default;
+ALTER TABLE wk_case_confidence_level ADD PRIMARY KEY USING INDEX wk_case_confidence_level_pk;
+
+CREATE UNIQUE INDEX wk_crah_is_current_by_creation_pk ON wk_crah_is_current_by_creation(cas_id) TABLESPACE pg_default;
+ALTER TABLE wk_crah_is_current_by_creation ADD PRIMARY KEY USING INDEX wk_crah_is_current_by_creation_pk;
+
+CREATE UNIQUE INDEX wk_crah_is_current_by_logic_pk ON wk_crah_is_current_by_logic(cas_id) TABLESPACE pg_default;
+ALTER TABLE wk_crah_is_current_by_logic ADD PRIMARY KEY USING INDEX wk_crah_is_current_by_logic_pk;
+
+CREATE UNIQUE INDEX wk_rr_is_current_by_creation_pk ON wk_rr_is_current_by_creation(cas_id) TABLESPACE pg_default;
+ALTER TABLE wk_rr_is_current_by_creation ADD PRIMARY KEY USING INDEX wk_rr_is_current_by_creation_pk;
+
+CREATE UNIQUE INDEX wk_rr_is_current_by_logic_pk ON wk_rr_is_current_by_logic(cas_id) TABLESPACE pg_default;
+ALTER TABLE wk_rr_is_current_by_logic ADD PRIMARY KEY USING INDEX wk_rr_is_current_by_logic_pk;
 
 CREATE SEQUENCE cmr_seq CACHE 1;
 CREATE SEQUENCE rpr_seq CACHE 1;
@@ -411,9 +637,6 @@ ALTER TABLE case_overflow
 ADD CONSTRAINT case_overflow_retention_policy_type_fk
 FOREIGN KEY (rpt_id) REFERENCES retention_policy_type(rpt_id);
 
-ALTER TABLE case_retention_extra                     
-ADD CONSTRAINT case_retention_extra_court_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_management_retention TO darts_user;
@@ -422,7 +645,6 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON retention_confidence_category_mapper TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON retention_policy_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_overflow TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention_extra TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON retention_policy_type_heritage_mapping TO darts_user;
 
 GRANT SELECT,UPDATE ON  cmr_seq TO darts_user;

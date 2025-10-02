@@ -105,7 +105,7 @@ class ProcessArmRpoPendingAutomatedTaskTest {
         processArmRpoPendingAutomatedTask.runTask();
 
         verify(externalObjectDirectoryRepository)
-            .updateByStatusEqualsAndDataIngestionTsBefore(
+            .updateByStatusEqualsAndInputUploadProcessedTsBefore(
                 objectRecordStatusEntityPending,
                 currentTime.minus(Duration.ofHours(1)),
                 objectRecordStatusEntityStored,
@@ -141,7 +141,7 @@ class ProcessArmRpoPendingAutomatedTaskTest {
         processArmRpoPendingAutomatedTask.runTask();
 
         verify(externalObjectDirectoryRepository)
-            .updateByStatusEqualsAndDataIngestionTsBefore(
+            .updateByStatusEqualsAndInputUploadProcessedTsBefore(
                 objectRecordStatusEntityPending,
                 currentTime.minus(Duration.ofHours(24)),
                 objectRecordStatusEntityStored,

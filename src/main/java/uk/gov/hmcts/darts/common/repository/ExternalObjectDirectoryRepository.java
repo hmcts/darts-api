@@ -639,6 +639,21 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                       Integer currentUser,
                                                       Limit limit);
 
+    @Modifying
+    @Query("""
+        update ExternalObjectDirectoryEntity eod
+        set eod.status = :newStatus,
+            eod.lastModifiedById = :currentUser,
+            eod.lastModifiedDateTime = current_timestamp
+        where eod.status = :currentStatus
+        and eod.inputUploadProcessedTs <= :maxInputUploadProcessedTs
+        """)
+    @Transactional
+    void updateByStatusEqualsAndInputUploadProcessedTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxInputUploadProcessedTs,
+                                                             ObjectRecordStatusEntity newStatus,
+                                                             Integer currentUser,
+                                                             Limit limit);
+
     @Modifying(clearAutomatically = true)
     @Query(
         """
@@ -647,13 +662,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 eod.transferAttempts = :transferAttempts,
                 eod.lastModifiedById = :currentUser,
                 eod.lastModifiedDateTime = current_timestamp,
-                eod.inputUploadProcessedTs = null
+                eod.inputUploadProcessedTs = null,
+                eod.dataIngestionTs = null
             where eod.id in :idsToUpdate
             """
     )
     void updateEodStatusAndTransferAttemptsWhereIdIn(ObjectRecordStatusEntity newStatus, Integer transferAttempts, Integer currentUser,
                                                      List<Long> idsToUpdate);
-
 
     @Query(
         """
@@ -667,12 +682,35 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                         OffsetDateTime rpoCsvEndTime,
                                                                                         Pageable pageable);
 
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status 
+            AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
+            """
+    )
+    Page<ExternalObjectDirectoryEntity> findByStatusAndDataIngestionTsWithPaging(ObjectRecordStatusEntity status,
+                                                                                 OffsetDateTime rpoCsvStartTime,
+                                                                                 OffsetDateTime rpoCsvEndTime,
+                                                                                 Pageable pageable);
+
     @Query("""
         SELECT eod FROM ExternalObjectDirectoryEntity eod
         WHERE eod.status = :status
         AND eod.inputUploadProcessedTs BETWEEN :ingestionStartDateTime AND :ingestionEndDateTime
         """)
     List<ExternalObjectDirectoryEntity> findAllByStatusAndInputUploadProcessedTsBetweenAndLimit(
+        @Param("status") ObjectRecordStatusEntity status,
+        @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
+        @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
+        Limit limit);
+
+    @Query("""
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
+        WHERE eod.status = :status
+        AND eod.dataIngestionTs BETWEEN :ingestionStartDateTime AND :ingestionEndDateTime
+        """)
+    List<ExternalObjectDirectoryEntity> findAllByStatusAndDataIngestionTsBetweenAndLimit(
         @Param("status") ObjectRecordStatusEntity status,
         @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
         @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,

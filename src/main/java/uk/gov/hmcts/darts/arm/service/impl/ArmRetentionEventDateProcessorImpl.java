@@ -24,8 +24,8 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
     private final ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
     private final ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
 
+    @SuppressWarnings({"PMD.DoNotUseThreads"})
     @Override
-    @SuppressWarnings("PMD.DoNotUseThreads")//Required to handle InterruptedException
     public void calculateEventDates(Integer batchSize) {
         final boolean updateRetention = true;
         List<Long> externalObjectDirectoryEntitiesIds =

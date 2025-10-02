@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -25,7 +24,6 @@ import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
-import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.io.File;
@@ -68,16 +66,20 @@ class ArmRpoServiceImplTest {
     @InjectMocks
     private ArmRpoServiceImpl armRpoService;
 
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
-    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
     private static final int RPO_CSV_START_HOUR = 25;
     private static final int RPO_CSV_END_HOUR = 49;
+
+    private EodHelperMocks eodHelperMocks;
+    private ArmRpoHelperMocks armRpoHelperMocks;
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccountEntity;
 
     @BeforeEach
     void setUp() {
+        eodHelperMocks = new EodHelperMocks();
+        armRpoHelperMocks = new ArmRpoHelperMocks();
+
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         userAccountEntity = new UserAccountEntity();
         userAccountEntity.setId(123);
@@ -130,14 +132,14 @@ class ArmRpoServiceImplTest {
     @Test
     void updateArmRpoStateAndStatus_ShouldUpdateStateAndStatus() {
         // given
-        ArmRpoStateEntity armRpoStateEntity = ArmRpoHelper.addAsyncSearchRpoState();
-        ArmRpoStatusEntity armRpoStatusEntity = ArmRpoHelper.completedRpoStatus();
-        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
+        ArmRpoStateEntity armRpoStateEntity = armRpoHelperMocks.getAddAsyncSearchRpoState();
+        ArmRpoStatusEntity armRpoStatusEntity = armRpoHelperMocks.getCompletedRpoStatus();
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getInProgressRpoStatus());
 
         // when
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
                                                  armRpoStateEntity,
-                                                 ArmRpoHelper.completedRpoStatus(), userAccountEntity);
+                                                 armRpoHelperMocks.getCompletedRpoStatus(), userAccountEntity);
 
         // then
         assertEquals(armRpoStateEntity, armRpoExecutionDetailEntity.getArmRpoState());
@@ -148,13 +150,13 @@ class ArmRpoServiceImplTest {
     @Test
     void updateArmRpoStatus_ShouldUpdateStatus() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getInProgressRpoStatus());
 
         // when
-        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccountEntity);
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccountEntity);
 
         // then
-        assertEquals(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), armRpoExecutionDetailEntity.getArmRpoStatus());
+        assertEquals(armRpoHelperMocks.getFailedRpoStatus(), armRpoExecutionDetailEntity.getArmRpoStatus());
         assertEquals(userAccountEntity.getId(), armRpoExecutionDetailEntity.getLastModifiedById());
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
     }
@@ -179,12 +181,16 @@ class ArmRpoServiceImplTest {
         // given
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = createExternalObjectDirectoryEntity(1L);
+        externalObjectDirectoryEntity1.setStatus(eodHelperMocks.getArmRpoPendingStatus());
+
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = createExternalObjectDirectoryEntity(2L);
+        externalObjectDirectoryEntity2.setStatus(eodHelperMocks.getArmRpoPendingStatus());
+
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity1);
         externalObjectDirectoryEntities.add(externalObjectDirectoryEntity2);
         Page<ExternalObjectDirectoryEntity> pagedEods = new PageImpl<>(externalObjectDirectoryEntities);
 
-        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
+        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2025-02-02T12:34:56Z"));
         when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
         when(externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(any(), any(), any(), any()))
@@ -196,13 +202,13 @@ class ArmRpoServiceImplTest {
         armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), BATCH_SIZE);
 
         // then
-        assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
-        assertEquals(EodHelper.armReplayStatus(), externalObjectDirectoryEntity2.getStatus());
+        assertEquals(eodHelperMocks.getStoredStatus(), externalObjectDirectoryEntity1.getStatus());
+        assertEquals(eodHelperMocks.getArmReplayStatus(), externalObjectDirectoryEntity2.getStatus());
 
         verify(externalObjectDirectoryRepository).findByStatusAndInputUploadProcessedTsWithPaging(
-            eq(EodHelper.armRpoPendingStatus()),
-            eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_END_HOUR)),
-            eq(armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_START_HOUR)),
+            eq(eodHelperMocks.getArmRpoPendingStatus()),
+            eq(OffsetDateTime.parse("2025-01-31T11:34Z")),
+            eq(OffsetDateTime.parse("2025-02-01T11:34Z")),
             any());
         verify(externalObjectDirectoryRepository).saveAllAndFlush(externalObjectDirectoryEntities);
     }
@@ -212,7 +218,7 @@ class ArmRpoServiceImplTest {
         // given
         createExternalObjectDirectoryEntity(1L);
 
-        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
+        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2025-01-02T12:34:56Z"));
         when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
         File file = new File("Tests/arm/rpo/noFile.csv");
@@ -240,9 +246,9 @@ class ArmRpoServiceImplTest {
         return armAutomatedTaskEntity;
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
-        EOD_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
+        eodHelperMocks.close();
     }
 }
