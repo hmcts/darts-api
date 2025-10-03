@@ -83,6 +83,7 @@ def determineDevEnvironmentDeployment() {
   env.DEV_DARTS_GATEWAY_URL = "http://darts-gateway.staging.platform.hmcts.net"
   env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX = "latest"
 
+  env.NOTIFICATION_SCHEDULER_ENABLED = false
 
   env.DEV_ENABLE_DARTS_KEDA = false
 
@@ -97,6 +98,15 @@ def determineDevEnvironmentDeployment() {
 
   def githubApi = new GithubAPI(this)
   if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_keep_helm")) {
+    if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_notify")) {
+      env.NOTIFICATION_SCHEDULER_ENABLED = true
+      env.AUTOMATED_TASK_MODE = false
+
+      echo "1 - env.NOTIFICATION_SCHEDULER_ENABLED: ${env.NOTIFICATION_SCHEDULER_ENABLED}"
+      echo "1 - env.AUTOMATED_TASK_MODE: ${env.AUTOMATED_TASK_MODE}"
+      echo "Notification scheduler enabled in PR environment"
+    }
+
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "enable_darts_")) {
 
       //Portal

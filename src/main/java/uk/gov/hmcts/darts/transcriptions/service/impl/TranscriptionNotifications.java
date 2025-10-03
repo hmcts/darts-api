@@ -23,13 +23,16 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.ACCEPT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUTHORISE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REJECT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.UNFULFILLED_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REJECTION_REASON;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.UNFULFILLED_REASON;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_UNFULFILLED;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -40,8 +43,7 @@ public class TranscriptionNotifications {
     private final NotificationApi notificationApi;
     private final AuditApi auditApi;
 
-
-    @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault"})
+    @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault", "PMD.CyclomaticComplexity"})
     public void handleNotificationsAndAudit(UserAccountEntity userAccountEntity,
                                             TranscriptionEntity transcriptionEntity,
                                             TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscriptionRequest updateTranscription) {
@@ -76,12 +78,20 @@ public class TranscriptionNotifications {
                 }
                 auditApi.record(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
+            case UNFULFILLED -> {
+                Map<String, String> templateParams = new HashMap<>();
+                templateParams.put(UNFULFILLED_REASON, updateTranscription.getWorkflowComment());
+
+                if (Boolean.TRUE.equals(transcriptionEntity.getIsManualTranscription())) {
+                    notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_UNFULFILLED.toString(), templateParams);
+                }
+                auditApi.record(UNFULFILLED_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            }
             default -> {
                 // Do nothing for unmatched status
             }
         }
     }
-
 
     public void notifyRequestor(TranscriptionEntity transcription, String templateName, Map<String, String> templateParams) {
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
@@ -133,6 +143,5 @@ public class TranscriptionNotifications {
             .build();
         notificationApi.scheduleNotification(request);
     }
-
-
+    
 }

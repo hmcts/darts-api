@@ -16,7 +16,8 @@ public enum TranscriptionStatusEnum {
     REJECTED(4),
     WITH_TRANSCRIBER(5),
     COMPLETE(6),
-    CLOSED(7);
+    CLOSED(7),
+    UNFULFILLED(8);
 
     private final Integer id;
 
