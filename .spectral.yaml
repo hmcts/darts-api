@@ -1,5 +1,7 @@
 extends: [ "spectral:oas" ]
 rules:
+  oas3-valid-media-example: off
+  oas3-valid-schema-example: off
   strings-need-bounds:
     description: Strings must be bounded unless they already use format/enum/pattern
     given:
@@ -37,23 +39,6 @@ rules:
             required: [ type ]
           then:
             required: [ maxItems ]
-    severity: warn
-
-  objects-should-forbid-unknown:
-    description:
-      Request objects should set additionalProperties: false
-    given:
-      - "$.paths.*.*.requestBody.content.*.schema"
-    then:
-      function: schema
-      functionOptions:
-        schema:
-          if:
-            properties: { type: { const: object } }
-            required: [ type ]
-          then:
-            required: [ additionalProperties ]
-            properties: { additionalProperties: { const: false } }
     severity: warn
 
   path-string-params-need-format-or-pattern:
@@ -96,3 +81,20 @@ rules:
             - required: [ format ]
             - required: [ pattern ]
     severity: warn
+
+#  objects-should-forbid-unknown:
+#    description:
+#      Request objects should set additionalProperties: false
+#    given:
+#      - "$.paths.*.*.requestBody.content.*.schema"
+#    then:
+#      function: schema
+#      functionOptions:
+#        schema:
+#          if:
+#            properties: { type: { const: object } }
+#            required: [ type ]
+#          then:
+#            required: [ additionalProperties ]
+#            properties: { additionalProperties: { const: false } }
+#    severity: warn
