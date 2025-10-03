@@ -1,11 +1,11 @@
 package uk.gov.hmcts.darts.notification.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +15,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -32,12 +40,6 @@ import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
 import uk.gov.hmcts.darts.notification.service.GovNotifyService;
 import uk.gov.hmcts.darts.notification.service.NotificationService;
 import uk.gov.service.notify.NotificationClientException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -157,6 +159,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendNotificationToGovNotify() {
         if (notificationsEnabled && !automatedTasksMode) {
             sendNotificationToGovNotifyNow();
+        } else {
+            log.trace("Notification scheduler is disabled.");
         }
     }
 

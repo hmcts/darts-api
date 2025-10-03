@@ -101,6 +101,9 @@ def determineDevEnvironmentDeployment() {
     if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_notify")) {
       env.NOTIFICATION_SCHEDULER_ENABLED = true
       env.AUTOMATED_TASK_MODE = false
+
+      echo "1 - env.NOTIFICATION_SCHEDULER_ENABLED: ${env.NOTIFICATION_SCHEDULER_ENABLED}"
+      echo "1 - env.AUTOMATED_TASK_MODE: ${env.AUTOMATED_TASK_MODE}"
       echo "Notification scheduler enabled in PR environment"
     }
 
