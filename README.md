@@ -395,7 +395,7 @@ This repo contains overrides for the default dev environment configuration, cont
 
 ## OpenAPI Specification and Data Schema Validation
 
-This repository spectral to validate OpenAPI specifications. To validate the OpenAPI specification:
+This repository uses spectral to validate OpenAPI specifications. To validate the OpenAPI specification:
 
 ```bash
 spectral lint "src/main/resources/openapi/**/*.{yml,yaml}"
