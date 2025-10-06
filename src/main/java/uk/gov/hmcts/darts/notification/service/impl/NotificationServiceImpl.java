@@ -157,6 +157,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendNotificationToGovNotify() {
         if (notificationsEnabled && !automatedTasksMode) {
             sendNotificationToGovNotifyNow();
+        } else {
+            log.trace("Notification scheduler is disabled.");
         }
     }
 
