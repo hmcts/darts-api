@@ -398,7 +398,7 @@ This repo contains overrides for the default dev environment configuration, cont
 This repository uses spectral to validate OpenAPI specifications. To validate the OpenAPI specification:
 
 ```bash
-spectral lint "src/main/resources/openapi/**/*.{yml,yaml}"
+spectral lint --verbose "src/main/resources/openapi/**/*.{yml,yaml}"
 ```
 
 Documentation: https://stoplight.io/open-source/spectral
