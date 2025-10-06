@@ -186,5 +186,4 @@ class UnstructuredToArmBatchProcessorExceptionsTest {
             verify(logApi, never()).armPushSuccessful(anyLong());
         }
     }
-
 }
