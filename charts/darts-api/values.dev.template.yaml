@@ -14,12 +14,12 @@ java:
   keyVaults:
     "darts":
       secrets:
+        - name: GovukNotifyApiKey
+          alias: GOVUK_NOTIFY_API_KEY
         - name: GovukNotifyTestApiKey
           alias: GOVUK_NOTIFY_API_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
-        - name: GovukNotifyTestApiKey
-          alias: GOVUK_NOTIFY_API_KEY
         - name: api-POSTGRES-USER
           alias: DARTS_API_DB_USERNAME
         - name: api-POSTGRES-PASS
