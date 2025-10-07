@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.client;
+package uk.gov.hmcts.darts.arm.client.version.fivetwo;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
+import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
@@ -144,7 +146,6 @@ public interface ArmApiBaseClient {
     feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth,
                                       @PathVariable("productionExportFileID") String productionExportFileId);
 
-
     /**
      * Download production that should only be used in lower environments for testing purposes.
      */
@@ -153,4 +154,18 @@ public interface ArmApiBaseClient {
     feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth,
                                       @RequestHeader("EOD_IDS") String eodIds,
                                       @PathVariable("productionExportFileID") String productionExportFileId);
+
+    @PostMapping(value = "${darts.storage.arm-api.version5-2.api.available-entitlement-profiles-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE)
+    AvailableEntitlementProfile availableEntitlementProfiles(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                                             @RequestBody EmptyRpoRequest emptyRpoRequest);
+
+    @PostMapping(value = "${darts.storage.arm-api.version5-2.api.select-entitlement-profile-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE)
+    ArmTokenResponse selectEntitlementProfile(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                              @PathVariable("profile_id") String profileId,
+                                              @RequestBody EmptyRpoRequest emptyRpoRequest);
+
 }

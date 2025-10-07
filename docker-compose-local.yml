@@ -57,6 +57,8 @@ services:
       - DARTS_UNSTRUCTURED_STORAGE_SAS_URL
       - ARM_SERVICE_ENTITLEMENT
       - ARM_STORAGE_ACCOUNT_NAME
+      - ARM_AUTH_URL
+      - ARM_API_URL
     build:
       context: .
       dockerfile: Dockerfile
