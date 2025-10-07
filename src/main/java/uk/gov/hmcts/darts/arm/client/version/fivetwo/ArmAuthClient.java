@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.client;
+package uk.gov.hmcts.darts.arm.client.version.fivetwo;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

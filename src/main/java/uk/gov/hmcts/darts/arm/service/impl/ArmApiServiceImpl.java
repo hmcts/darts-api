@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.client.ArmApiClient;
-import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
@@ -17,6 +15,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -36,9 +35,8 @@ import static java.util.Objects.nonNull;
 public class ArmApiServiceImpl implements ArmApiService {
 
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
-    private final ArmTokenClient armTokenClient;
-    private final ArmApiClient armApiClient;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final ArmClientService armClientService;
 
     @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId,
@@ -59,7 +57,7 @@ public class ArmApiServiceImpl implements ArmApiService {
             .build();
 
         try {
-            return armApiClient.updateMetadata(getArmBearerToken(), armUpdateMetadataRequest);
+            return armClientService.updateMetadata(getArmBearerToken(), armUpdateMetadataRequest);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error("Error during ARM update metadata: Detail: {}", e.contentUTF8(), e);
@@ -72,7 +70,7 @@ public class ArmApiServiceImpl implements ArmApiService {
     public DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException {
         FileBasedDownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
 
-        feign.Response response = armApiClient.downloadArmData(
+        feign.Response response = armClientService.downloadArmData(
             getArmBearerToken(),
             armApiConfigurationProperties.getCabinetId(),
             externalRecordId,
@@ -105,7 +103,7 @@ public class ArmApiServiceImpl implements ArmApiService {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")//TODO - refactor to avoid deeply nested if statements when this class is next edited
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public String getArmBearerToken() {
         log.debug("Get ARM Bearer Token with Username: {}, Password: {}", armApiConfigurationProperties.getArmUsername(),
                   armApiConfigurationProperties.getArmPassword());
@@ -116,13 +114,13 @@ public class ArmApiServiceImpl implements ArmApiService {
             .password(armApiConfigurationProperties.getArmPassword())
             .build();
 
-        ArmTokenResponse armTokenResponse = armTokenClient.getToken(armTokenRequest);
+        ArmTokenResponse armTokenResponse = armClientService.getToken(armTokenRequest);
 
         if (StringUtils.isNotEmpty(armTokenResponse.getAccessToken())) {
             String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
             log.debug("Fetched ARM Bearer Token from /token: {}", bearerToken);
             EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-            AvailableEntitlementProfile availableEntitlementProfile = armTokenClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest);
+            AvailableEntitlementProfile availableEntitlementProfile = armClientService.availableEntitlementProfiles(bearerToken, emptyRpoRequest);
             if (!availableEntitlementProfile.isError()) {
                 Optional<String> profileId = availableEntitlementProfile.getProfiles().stream()
                     .filter(p -> armApiConfigurationProperties.getArmServiceProfile().equalsIgnoreCase(p.getProfileName()))
@@ -130,7 +128,7 @@ public class ArmApiServiceImpl implements ArmApiService {
                     .findAny();
                 if (profileId.isPresent()) {
                     log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
-                    ArmTokenResponse tokenResponse = armTokenClient.selectEntitlementProfile(bearerToken, profileId.get(), emptyRpoRequest);
+                    ArmTokenResponse tokenResponse = armClientService.selectEntitlementProfile(bearerToken, profileId.get(), emptyRpoRequest);
                     accessToken = tokenResponse.getAccessToken();
                 }
             }
