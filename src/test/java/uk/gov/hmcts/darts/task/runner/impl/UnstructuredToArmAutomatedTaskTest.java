@@ -31,7 +31,7 @@ class UnstructuredToArmAutomatedTaskTest {
     @Mock
     private LockService lockService;
     @Mock
-    UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
+    private UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
 
     @Test
     void runTask() {
@@ -63,17 +63,19 @@ class UnstructuredToArmAutomatedTaskTest {
         automatedTask.setTaskName("UnstructuredToArmDataStore");
         automatedTask.setBatchSize(10);
 
+        UnstructuredToArmAutomatedTaskConfig config = mock(UnstructuredToArmAutomatedTaskConfig.class);
+
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                mock(UnstructuredToArmAutomatedTaskConfig.class),
+                config,
                 unstructuredToArmBatchProcessor,
                 logApi,
                 lockService
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
-
+        
         unstructuredToArmAutomatedTask.runTask();
 
         //then
