@@ -11,6 +11,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     name = "arm-auth-client",
     url = "${darts.storage.arm-api.version5-2.authentication.auth-base-url}"
 )
+@FunctionalInterface
 public interface ArmAuthClient {
 
     @PostMapping(value = "${darts.storage.arm-api.version5-2.authentication.token-path}",

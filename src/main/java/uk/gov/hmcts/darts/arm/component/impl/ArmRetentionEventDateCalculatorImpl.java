@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.helper.ArmHelper;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ConfidenceAware;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -29,7 +28,6 @@ import static java.util.Objects.nonNull;
 public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDateCalculator {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementApi armDataManagementApi;
-    private final UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ArmHelper armHelper;
 
