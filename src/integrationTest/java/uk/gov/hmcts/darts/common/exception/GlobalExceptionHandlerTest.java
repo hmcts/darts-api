@@ -11,12 +11,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.common.exception.ExceptionHandlerTest.MockController;
+import uk.gov.hmcts.darts.common.exception.GlobalExceptionHandlerTest.MockController;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @Import(MockController.class)
-class ExceptionHandlerTest extends IntegrationBase {
+class GlobalExceptionHandlerTest extends IntegrationBase {
 
     private static final String ENDPOINT = "/test";
 
@@ -127,6 +128,28 @@ class ExceptionHandlerTest extends IntegrationBase {
                 "title":"Internal Server Error",
                 "status":500,
                 "detail":"A runtime exception occurred"
+            }
+            """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void handleMessageNotReadableHandler_shouldReturnBadRequestProblem_whenHttpMessageNotReadableExceptionIsThrown() throws Exception {
+        Mockito.when(mockController.test())
+            .thenThrow(new HttpMessageNotReadableException("JSON parse error"));
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+            {
+                "detail":"JSON parse error",
+                "title":"Bad Request",
+                "status":400
             }
             """;
 
