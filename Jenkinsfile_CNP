@@ -84,6 +84,7 @@ def determineDevEnvironmentDeployment() {
   env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX = "latest"
 
   env.NOTIFICATION_SCHEDULER_ENABLED = false
+  env.AUTOMATED_TASK_MODE = true
 
   env.DEV_ENABLE_DARTS_KEDA = false
 
@@ -99,7 +100,10 @@ def determineDevEnvironmentDeployment() {
   def githubApi = new GithubAPI(this)
   if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_keep_helm")) {
     if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_notify")) {
-      echo "enable_notify label detected; scheduler will be enabled AFTER DB migration"
+      echo "enable_notify label detected; scheduler enabled in PR environment"
+
+      env.NOTIFICATION_SCHEDULER_ENABLED = true
+      env.AUTOMATED_TASK_MODE = false
     }
 
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "enable_darts_")) {
@@ -294,36 +298,6 @@ withPipeline(type, product, component) {
       sh("./bin/ci/db-stg-to-pr.sh")
       // run flyway migrate on PR DB
       sh("./bin/ci/run-flyway-pr-db.sh")
-
-      def githubApi = new GithubAPI(this)
-      boolean keepHelm = githubApi.checkForLabel(env.BRANCH_NAME, "enable_keep_helm")
-      boolean enableNotify = githubApi.checkForLabel(env.BRANCH_NAME, "enable_notify")
-
-      def envName = sh(
-        returnStdout: true,
-        script: """
-          set -e
-          helm get values ${env.RELEASE_NAME} -n ${env.NAMESPACE} -o yaml \
-            | awk '/^global:/{f=1} f&&/environment:/{print \$2; exit}'
-        """
-      ).trim()
-
-      echo "Post-DB: release=${env.RELEASE_NAME}, ns=${env.NAMESPACE}, envName=${envName}, keepHelm=${keepHelm}, enableNotify=${enableNotify}"
-
-      if (envName == "dev" && enableNotify && keepHelm) {
-        echo "Enabling notification scheduler post-DB-migration for PR ${env.CHANGE_ID}"
-
-        sh("""
-          set -e
-          helm upgrade ${env.RELEASE_NAME} charts/darts-api \
-            --namespace ${env.NAMESPACE} \
-            --reuse-values \
-            --atomic --wait \
-            --set java.environment.NOTIFICATION_SCHEDULER_ENABLED=true \
-            --set java.environment.AUTOMATED_TASK_MODE=false
-        """)
-        echo "Notification scheduler enabled in PR environment"
-      }
     }
   }
 }
