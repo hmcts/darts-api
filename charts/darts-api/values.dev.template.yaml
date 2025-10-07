@@ -319,6 +319,8 @@ function:
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    ARM_AUTH_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    ARM_API_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
     ARM_RPO_THREAD_SLEEP_DURATION: 60s

@@ -297,7 +297,7 @@ darts:
           auth-base-url: ${ARM_AUTH_URL}
           token-path: /account/token
         api:
-          api-base-url: ${ARM_API_URL:}
+          api-base-url: ${ARM_API_URL}
           available-entitlement-profiles-path: /v1/availableEntitlementProfiles
           select-entitlement-profile-path: /v1/selectEntitlementProfile/{profile_id}
           update-metadata-path: /v3/UpdateMetadata

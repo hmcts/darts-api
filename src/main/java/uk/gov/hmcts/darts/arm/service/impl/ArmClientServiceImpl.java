@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import feign.Response;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
@@ -42,7 +41,7 @@ import uk.gov.hmcts.darts.arm.service.ArmClientService;
 @ConditionalOnProperty(prefix = "darts.storage.arm.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "false")
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UseObjectForClearerAPI"})
 public class ArmClientServiceImpl implements ArmClientService {
 
     private final ArmTokenClient armTokenClient;
@@ -75,8 +74,8 @@ public class ArmClientServiceImpl implements ArmClientService {
     }
 
     @Override
-    public MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(String bearerAuth,
-                                                                                              MasterIndexFieldByRecordClassSchemaRequest masterIndexFieldByRecordClassSchemaRequest) {
+    public MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(
+        String bearerAuth, MasterIndexFieldByRecordClassSchemaRequest masterIndexFieldByRecordClassSchemaRequest) {
         return armRpoClient.getMasterIndexFieldByRecordClassSchema(bearerAuth, masterIndexFieldByRecordClassSchemaRequest);
     }
 
