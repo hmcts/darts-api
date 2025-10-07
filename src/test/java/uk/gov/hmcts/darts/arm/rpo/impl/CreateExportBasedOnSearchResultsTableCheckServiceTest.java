@@ -11,7 +11,9 @@ import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -54,9 +56,10 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         createExportBasedOnSearchResultsTableService = new CreateExportBasedOnSearchResultsTableServiceImpl(
-            armRpoClient, armRpoService, armRpoUtil, currentTimeHelper, objectMapper);
+            armClientService, armRpoService, armRpoUtil, currentTimeHelper, objectMapper);
 
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
