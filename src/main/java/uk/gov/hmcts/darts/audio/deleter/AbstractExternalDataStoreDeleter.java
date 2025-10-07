@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.deleter;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectory;
@@ -35,7 +36,8 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
         return deletedFromDataStore;
     }
 
-
+    @SneakyThrows
+    @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
     protected boolean deleteFromDataStore(T entityToBeDeleted) {
         String externalLocation = entityToBeDeleted.getLocation();
         Long entityId = entityToBeDeleted.getId();
@@ -52,6 +54,9 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
                 "Failed to delete storage data with externalLocation={} for entityId={} and statusId={}",
                 externalLocation, entityId, statusId, e
             );
+            if (e instanceof InterruptedException) {
+                throw e;
+            }
         }
         return false;
     }
