@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import feign.FeignException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -30,13 +29,21 @@ import java.util.Optional;
 import static java.util.Objects.nonNull;
 
 @Service
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Slf4j
 public class ArmApiServiceImpl implements ArmApiService {
 
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ArmClientService armClientService;
+
+    public ArmApiServiceImpl(ArmApiConfigurationProperties armApiConfigurationProperties,
+                             ArmDataManagementConfiguration armDataManagementConfiguration,
+                             ArmClientService armClientService) {
+        this.armApiConfigurationProperties = armApiConfigurationProperties;
+        this.armDataManagementConfiguration = armDataManagementConfiguration;
+        this.armClientService = armClientService;
+    }
 
     @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId,
