@@ -37,11 +37,8 @@ import uk.gov.hmcts.darts.arm.service.ArmClientService;
  * Post ARM version 5.2 implementation of the ArmClientService.
  * This implementation is activated when the property 'darts.storage.arm.arm-api.enable-arm-v5' is set to true.
  */
-//@Component
-//@ConditionalOnProperty(prefix = "darts.storage.arm", name = "is-mock-arm-rpo-download-csv", havingValue = "false")
-//@AllArgsConstructor
 @Component
-@ConditionalOnProperty(prefix = "darts.storage.arm.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 @AllArgsConstructor
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UseObjectForClearerAPI"})
 public class ArmClientServiceWrapper implements ArmClientService {
