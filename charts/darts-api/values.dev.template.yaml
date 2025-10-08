@@ -124,6 +124,7 @@ java:
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
     APPLICATIONINSIGHTS_ROLE_NAME: "DARTS API PR-${CHANGE_ID}"
+    ENABLE_ARM_V5_2_UPGRADE: true
 
   secrets:
     DARTS_API_DB_PASSWORD:
@@ -327,6 +328,7 @@ function:
     ARM_RPO_POLL_DURATION: 4h
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
+    ENABLE_ARM_V5_2_UPGRADE: true
 
   secrets:
     DARTS_API_DB_PASSWORD:

@@ -85,6 +85,15 @@ darts:
       url: http://localhost:${wiremock.server.port}
       arm-service-entitlement: some-entitlement
       arm-storage-account-name: some-account-name
+
+      enable-arm-v5-2-upgrade: false
+
+      version5-2:
+        authentication:
+          auth-base-url: http://localhost:${wiremock.server.port}
+        api:
+          api-base-url: http://localhost:${wiremock.server.port}
+
     arm:
       temp-blob-workspace: ${java.io.tmpdir}/armworkspace
       max-continuation-batch-size: 10

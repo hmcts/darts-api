@@ -43,8 +43,7 @@ class ArmApiServiceImplTest {
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-
-
+    
     private ArmApiServiceImpl armApiService;
 
     @BeforeEach
