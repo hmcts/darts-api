@@ -123,6 +123,7 @@ java:
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
     GRACEFUL_SHUTDOWN_TIMEOUT: '35s'
+    ENABLE_ARM_V5_2_UPGRADE: false
 
 function:
   scaleType: Job
@@ -244,6 +245,7 @@ function:
     ARM_RPO_POLL_DURATION: 4h
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
+    ENABLE_ARM_V5_2_UPGRADE: false
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:
