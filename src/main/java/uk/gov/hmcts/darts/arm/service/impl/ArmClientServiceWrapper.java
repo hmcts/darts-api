@@ -1,9 +1,9 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import feign.Response;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
@@ -37,9 +37,12 @@ import uk.gov.hmcts.darts.arm.service.ArmClientService;
  * Post ARM version 5.2 implementation of the ArmClientService.
  * This implementation is activated when the property 'darts.storage.arm.arm-api.enable-arm-v5' is set to true.
  */
-@Service
+//@Component
+//@ConditionalOnProperty(prefix = "darts.storage.arm", name = "is-mock-arm-rpo-download-csv", havingValue = "false")
+//@AllArgsConstructor
+@Component
 @ConditionalOnProperty(prefix = "darts.storage.arm.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
-@RequiredArgsConstructor
+@AllArgsConstructor
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UseObjectForClearerAPI"})
 public class ArmClientServiceWrapper implements ArmClientService {
 
