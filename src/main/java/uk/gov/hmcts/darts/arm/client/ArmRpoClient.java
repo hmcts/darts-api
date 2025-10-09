@@ -57,9 +57,8 @@ public interface ArmRpoClient {
         consumes = APPLICATION_JSON_VALUE, //NOSONAR
         produces = APPLICATION_JSON_VALUE //NOSONAR
     ) //NOSONAR
-    MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema( //NOSONAR
-                                                                                        @RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
-                                                                                        @RequestBody MasterIndexFieldByRecordClassSchemaRequest  //NOSONAR
+    MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
+                                                                                       @RequestBody MasterIndexFieldByRecordClassSchemaRequest  //NOSONAR
                                                                                             masterIndexFieldByRecordClassSchemaRequest); //NOSONAR
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-profile-entitlements-path}", //NOSONAR
@@ -107,9 +106,9 @@ public interface ArmRpoClient {
         consumes = APPLICATION_JSON_VALUE, //NOSONAR
         produces = APPLICATION_JSON_VALUE //NOSONAR
     ) //NOSONAR
-    CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable( //NOSONAR
-                                                                                         @RequestHeader(AUTHORIZATION) String bearerToken,
-                                                                                         @RequestBody CreateExportBasedOnSearchResultsTableRequest request); //NOSONAR
+    CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
+                                                                                        @RequestBody 
+                                                                                            CreateExportBasedOnSearchResultsTableRequest request); //NOSONAR
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.remove-production-path}", //NOSONAR
         consumes = APPLICATION_JSON_VALUE, //NOSONAR
