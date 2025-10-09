@@ -27,7 +27,7 @@ class ArmAuthClientIntTest extends IntegrationBaseWithWiremock {
     private static final String TOKEN_PATH = "/account/token";
 
     @Test
-    void getTokenShouldSucceedIfServerReturns200Success() {
+    void getToken_ShouldSucceed_IfServerReturns200Success() {
         // Given
         stubFor(
             WireMock.post(urlEqualTo(TOKEN_PATH))
@@ -61,7 +61,7 @@ class ArmAuthClientIntTest extends IntegrationBaseWithWiremock {
 
     @Test
     @SuppressWarnings("PMD.DoNotUseThreads")
-    void getTokenShouldThrowExceptionIfServerReturns403Forbidden() throws InterruptedException {
+    void getToken_ShouldThrowException_IfServerReturns403Forbidden() throws InterruptedException {
         // Given
         stubFor(
             WireMock.post(urlEqualTo(TOKEN_PATH))
