@@ -208,7 +208,7 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    void downloadProduction_serverReturns200Success_ShouldSucceed() throws IOException {
+    void downloadProduction_Returns200Success_ShouldSucceed() throws IOException {
         String url = "downloadProduction/1234/false";
         String suffix = "downloadProduction";
         stubFor(
