@@ -42,9 +42,7 @@ class GetExtendedProductionsByMatterServiceTest {
     private ArmRpoService armRpoService;
 
     private GetExtendedProductionsByMatterServiceImpl getExtendedProductionsByMatterService;
-
-    private ArmClientService armClientService;
-
+    
     private UserAccountEntity userAccount;
     private static final Integer EXECUTION_ID = 1;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
