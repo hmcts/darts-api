@@ -14,12 +14,10 @@ java:
   keyVaults:
     "darts":
       secrets:
-        - name: GovukNotifyTestApiKey
+        - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
-        - name: GovukNotifyTestApiKey
-          alias: GOVUK_NOTIFY_API_KEY
         - name: api-POSTGRES-USER
           alias: DARTS_API_DB_USERNAME
         - name: api-POSTGRES-PASS
@@ -119,7 +117,8 @@ java:
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: ${DEV_DARTS_GATEWAY_URL}
     DARTS_PORTAL_URL: ${DEV_DARTS_PORTAL_URL}
-    AUTOMATED_TASK_MODE: true
+    NOTIFICATION_SCHEDULER_ENABLED: ${NOTIFICATION_SCHEDULER_ENABLED}
+    AUTOMATED_TASK_MODE: ${AUTOMATED_TASK_MODE}
     API_MODE: true
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
@@ -313,7 +312,6 @@ function:
     DARTS_API_DB_USERNAME: "hmcts"
     ATS_MODE: true
     API_MODE: false
-    NOTIFICATION_SCHEDULER_ENABLED: false
     AUTOMATED_TASK_MODE: false
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
