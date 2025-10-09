@@ -395,7 +395,11 @@ This repo contains overrides for the default dev environment configuration, cont
 
 ## OpenAPI Specification and Data Schema Validation
 
-This repository uses spectral to validate OpenAPI specifications. To validate the OpenAPI specification:
+This repository uses spectral to validate OpenAPI specifications. To install spectral, you can use npm or yarn:
+
+https://docs.stoplight.io/docs/spectral/b8391e051b7d8-installation
+
+To validate the OpenAPI specification:
 
 ```bash
 spectral lint --verbose "src/main/resources/openapi/**/*.{yml,yaml}"
