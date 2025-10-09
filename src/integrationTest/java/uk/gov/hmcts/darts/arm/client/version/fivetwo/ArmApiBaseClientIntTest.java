@@ -208,7 +208,7 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    void downloadProduction_serverReturns200Success_ShouldSucceed() throws IOException {
+    void downloadProduction_Returns200Success_ShouldSucceed() throws IOException {
         String url = "downloadProduction/1234/false";
         String suffix = "downloadProduction";
         stubFor(
@@ -232,7 +232,7 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    void getRecordManagementMatter_ShouldSucceedIfServerReturns200Success_WithEmptyRequest() throws Exception {
+    void getRecordManagementMatter_ShouldSucceed_IfServerReturns200Success_WithEmptyRequest() throws Exception {
         // Given
         var bearerAuth = "Bearer some-token";
         EmptyRpoRequest request = EmptyRpoRequest.builder().build();
@@ -252,6 +252,49 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
         verify(postRequestedFor(urlEqualTo("/v1/getRecordManagementMatter"))
                    .withHeader(AUTHORIZATION, equalTo(bearerAuth))
                    .withRequestBody(equalTo("{}"))
+                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+        );
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ShouldSucceed_WithFullRequest() throws Exception {
+        // Given
+        var bearerAuth = "Bearer some-token";
+        CreateExportBasedOnSearchResultsTableRequest request = CreateExportBasedOnSearchResultsTableRequest.builder()
+            .core("some-core")
+            .formFields("some-form-fields")
+            .searchId("some-search-id")
+            .searchitemsCount(1)
+            .headerColumns(
+                List.of(CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
+                            .masterIndexField("some-master-index-field")
+                            .displayName("some-display-name")
+                            .propertyName("some-property-name")
+                            .propertyType("some-property-type")
+                            .isMasked(true)
+                            .build())
+            )
+            .productionName("some-production-name")
+            .storageAccountId("some-storage-account-id")
+            .onlyForCurrentUser(Boolean.FALSE)
+            .exportType(32)
+            .build();
+
+        stubFor(
+            WireMock.post(urlEqualTo("/v1/CreateExportBasedOnSearchResultsTable"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-type", "application/json")
+                        .withBody(TestUtils.getContentsFromFile(MOCK_RESPONSE_DIRECTORY + "CreateExportBasedOnSearchResultsTable.json"))
+                        .withStatus(200)));
+
+        // When
+        armApiBaseClient.createExportBasedOnSearchResultsTable(bearerAuth, request);
+
+        // Then
+        verify(postRequestedFor(urlEqualTo("/v1/CreateExportBasedOnSearchResultsTable"))
+                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+                   .withRequestBody(matchingJsonPath("$.productionName", equalTo("some-production-name")))
                    .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
         );
     }

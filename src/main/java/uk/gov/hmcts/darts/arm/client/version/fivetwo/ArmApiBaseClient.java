@@ -119,7 +119,7 @@ public interface ArmApiBaseClient {
     ProductionOutputFilesResponse getProductionOutputFiles(@RequestHeader(AUTHORIZATION) String bearerToken,
                                                            @RequestBody ProductionOutputFilesRequest productionOutputFilesRequest);
 
-    @PostMapping(value = "${darts.storage.arm-api.version5-2.api.rpo-url.create-export-based-on-search-results-table-path}",
+    @PostMapping(value = "${darts.storage.arm-api.version5-2.api.create-export-based-on-search-results-table-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
@@ -127,7 +127,7 @@ public interface ArmApiBaseClient {
         @RequestHeader(AUTHORIZATION) String bearerToken, @RequestBody CreateExportBasedOnSearchResultsTableRequest request);
 
 
-    @PostMapping(value = "${darts.storage.arm-api.version5-2.api.rpo-url.remove-production-path}",
+    @PostMapping(value = "${darts.storage.arm-api.version5-2.api.remove-production-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
