@@ -1,0 +1,15 @@
+{
+  "isValid": false,
+  "status": 422,
+  "demoMode": false,
+  "isError": true,
+  "responseStatus": 2,
+  "responseStatusMessages": [
+    {
+      "message": "createExportBasedOnSearchResultsTable: The search is still running and cannot export as csv. Please check the search page for its status",
+      "isError": true
+    }
+  ],
+  "exception": null,
+  "message": "createExportBasedOnSearchResultsTable: The search is still running and cannot export as csv. Please check the search page for its status"
+}
