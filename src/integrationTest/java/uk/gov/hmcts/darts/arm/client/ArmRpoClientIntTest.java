@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import lombok.AllArgsConstructor;
@@ -56,9 +55,6 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private ArmRpoClient armRpoClient;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     private static Stream<Arguments> genericArmRpoClientTestArguments() {
         return Stream.of(
             Arguments.of("getRecordManagementMatter", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
@@ -112,28 +108,29 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                     .build();
                 return new ClientCallable(request, armRpoClient.getProductionOutputFiles(bearerAuth, request));
             }),
-            Arguments.of("CreateExportBasedOnSearchResultsTable", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
-                CreateExportBasedOnSearchResultsTableRequest request = CreateExportBasedOnSearchResultsTableRequest.builder()
-                    .core("some-core")
-                    .formFields("some-form-fields")
-                    .searchId("some-search-id")
-                    .searchitemsCount(1)
-                    .headerColumns(
-                        List.of(CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
-                                    .masterIndexField("some-master-index-field")
-                                    .displayName("some-display-name")
-                                    .propertyName("some-property-name")
-                                    .propertyType("some-property-type")
-                                    .isMasked(true)
-                                    .build())
-                    )
-                    .productionName("some-production-name")
-                    .storageAccountId("some-storage-account-id")
-                    .onlyForCurrentUser(Boolean.FALSE)
-                    .exportType(32)
-                    .build();
-                return new ClientCallable(request, armRpoClient.createExportBasedOnSearchResultsTable(bearerAuth, request));
-            }),
+            Arguments.of("CreateExportBasedOnSearchResultsTable",
+                         (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
+                             CreateExportBasedOnSearchResultsTableRequest request = CreateExportBasedOnSearchResultsTableRequest.builder()
+                                 .core("some-core")
+                                 .formFields("some-form-fields")
+                                 .searchId("some-search-id")
+                                 .searchitemsCount(1)
+                                 .headerColumns(
+                                     List.of(CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
+                                                 .masterIndexField("some-master-index-field")
+                                                 .displayName("some-display-name")
+                                                 .propertyName("some-property-name")
+                                                 .propertyType("some-property-type")
+                                                 .isMasked(true)
+                                                 .build())
+                                 )
+                                 .productionName("some-production-name")
+                                 .storageAccountId("some-storage-account-id")
+                                 .onlyForCurrentUser(Boolean.FALSE)
+                                 .exportType(32)
+                                 .build();
+                             return new ClientCallable(request, armRpoClient.createExportBasedOnSearchResultsTable(bearerAuth, request));
+                         }),
             Arguments.of("removeProduction", (BiFunction<ArmRpoClient, String, ClientCallable>) (armRpoClient, bearerAuth) -> {
                 RemoveProductionRequest request = RemoveProductionRequest.builder()
                     .productionId("some-production-id")
