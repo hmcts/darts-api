@@ -328,12 +328,12 @@ There is no need to remove postgres and java or similar core images.
 The following Spring Profiles are defined. "External Components" are defined as any service upon which the application
 is dependent, such as database servers, web services etc.
 
-| Profile          | Config Location                                                | Purpose                                                                                        | External Components                                                                                                                                                                                                             |
-|------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `local`          | `src/main/resources/application-local.yaml`                    | For running the application locally as a docker compose stack with `docker-compose-local.yml`. | Provided as needed by `docker-compose-local.yml`. No external connectivity permitted outside the network boundary of the stack.                                                                                                 |
+| Profile          | Config Location                                                | Purpose                                                                                        | External Components                                                                                                                                                                                                               |
+|------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `local`          | `src/main/resources/application-local.yaml`                    | For running the application locally as a docker compose stack with `docker-compose-local.yml`. | Provided as needed by `docker-compose-local.yml`. No external connectivity permitted outside the network boundary of the stack.                                                                                                   |
 | `intTest`        | `src/integrationTest/resources/application-intTest.yaml`       | For running integration tests under `src/integrationTest`.                                     | No interaction required or permitted, all external calls are mocked via embedded wiremock (for HTTP requests), an embedded database (for db queries) or `@MockitoBean` for anything else. Spring Security is explicitly disabled. |
-| `functionalTest` | `src/functionalTest/resources/application-functionalTest.yaml` | For running functional tests under `src/functionalTest`.                                       | Functional tests execute API calls against the application deployed in the PR environment. That application is deployed with the `dev` profile (see below).                                                                     |
-| `dev`            | `src/main/resources/application-dev.yaml`                      | For running the application in the Pull Request (dev) environment.                             | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
+| `functionalTest` | `src/functionalTest/resources/application-functionalTest.yaml` | For running functional tests under `src/functionalTest`.                                       | Functional tests execute API calls against the application deployed in the PR environment. That application is deployed with the `dev` profile (see below).                                                                       |
+| `dev`            | `src/main/resources/application-dev.yaml`                      | For running the application in the Pull Request (dev) environment.                             | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                               |
 
 ## Automated Tasks
 
@@ -392,6 +392,33 @@ _Disclaimer: The script has been written to work using `bash`._
 Please see the separate [Dev environment](https://tools.hmcts.net/confluence/display/DMP/Dev+environment) page on confluence for details.
 
 This repo contains overrides for the default dev environment configuration, controlled by PR labels.
+
+## OpenAPI Specification and Data Schema Validation
+
+This repository uses spectral to validate OpenAPI specifications. To install spectral, you can use npm or yarn:
+
+https://docs.stoplight.io/docs/spectral/b8391e051b7d8-installation
+
+To validate the OpenAPI specification using spectral, run the following command from the root of the repository:
+
+```bash
+spectral lint --verbose "src/main/resources/openapi/**/*.{yml,yaml}"
+```
+
+Documentation: https://stoplight.io/open-source/spectral
+
+## OpenAPI Validation
+
+The application uses OpenAPI validation to ensure that incoming requests and outgoing responses conform to the OpenAPI specification.
+To enable OpenAPI validation, the following properties are set in the application configuration:
+
+```bash
+lint-openapi -c lint-openapi-config.yaml "src/main/resources/openapi/**/*.yaml"
+```
+
+For more information on OpenAPI validation with IBM openapi validator, see the [openapi validator](https://github.com/IBM/openapi-validator).
+
+Validate the data payload JSON Schemas:
 
 ### Supported labels
 
