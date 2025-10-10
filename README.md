@@ -403,13 +403,24 @@ This repository uses spectral to validate OpenAPI specifications. To install spe
 
 https://docs.stoplight.io/docs/spectral/b8391e051b7d8-installation
 
-To validate the OpenAPI specification:
+To validate the OpenAPI specification using spectral, run the following command from the root of the repository:
 
 ```bash
 spectral lint --verbose "src/main/resources/openapi/**/*.{yml,yaml}"
 ```
 
 Documentation: https://stoplight.io/open-source/spectral
+
+## OpenAPI Validation
+
+The application uses OpenAPI validation to ensure that incoming requests and outgoing responses conform to the OpenAPI specification.
+To enable OpenAPI validation, the following properties are set in the application configuration:
+
+```bash
+lint-openapi -c lint-openapi-config.yaml "src/main/resources/openapi/**/*.yaml"
+```
+
+For more information on OpenAPI validation with IBM openapi validator, see the [openapi validator](https://github.com/IBM/openapi-validator).
 
 Validate the data payload JSON Schemas:
 
