@@ -33,5 +33,10 @@
     "id": 7,
     "type": "Closed",
     "display_name": "Closed"
+  },
+  {
+    "id": 8,
+    "type": "Unfulfilled",
+    "display_name": "Unfulfilled"
   }
 ]

@@ -16,6 +16,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CL
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.UNFULFILLED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
 @Component
@@ -39,29 +40,33 @@ public class WorkflowValidator {
         manualWorkflowTransitionRules.put(AWAITING_AUTHORISATION, Set.of(APPROVED, REJECTED, CLOSED));
         manualWorkflowTransitionRules.put(APPROVED, Set.of(WITH_TRANSCRIBER, CLOSED));
         manualWorkflowTransitionRules.put(REJECTED, Collections.emptySet());
-        manualWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(COMPLETE, CLOSED));
+        manualWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(COMPLETE, CLOSED, UNFULFILLED));
         manualWorkflowTransitionRules.put(COMPLETE, Collections.emptySet());
         manualWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
+        manualWorkflowTransitionRules.put(UNFULFILLED, Collections.emptySet());
 
         manualWorkflowTransitionRulesAdmin.put(REQUESTED, Set.of(CLOSED));
         manualWorkflowTransitionRulesAdmin.put(AWAITING_AUTHORISATION, Set.of(REQUESTED, CLOSED));
         manualWorkflowTransitionRulesAdmin.put(APPROVED, Set.of(CLOSED));
         manualWorkflowTransitionRulesAdmin.put(REJECTED, Collections.emptySet());
-        manualWorkflowTransitionRulesAdmin.put(WITH_TRANSCRIBER, Set.of(APPROVED, CLOSED));
+        manualWorkflowTransitionRulesAdmin.put(WITH_TRANSCRIBER, Set.of(APPROVED, CLOSED, UNFULFILLED));
         manualWorkflowTransitionRulesAdmin.put(COMPLETE, Collections.emptySet());
         manualWorkflowTransitionRulesAdmin.put(CLOSED, Collections.emptySet());
+        manualWorkflowTransitionRulesAdmin.put(UNFULFILLED, Collections.emptySet());
 
         automaticWorkflowTransitionRules.put(REQUESTED, Set.of(APPROVED, CLOSED));
         automaticWorkflowTransitionRules.put(APPROVED, Set.of(WITH_TRANSCRIBER, CLOSED));
-        automaticWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(COMPLETE, CLOSED));
+        automaticWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(COMPLETE, CLOSED, UNFULFILLED));
         automaticWorkflowTransitionRules.put(COMPLETE, Collections.emptySet());
         automaticWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
+        automaticWorkflowTransitionRules.put(UNFULFILLED, Collections.emptySet());
 
         automaticWorkflowTransitionRulesAdmin.put(REQUESTED, Set.of(CLOSED));
         automaticWorkflowTransitionRulesAdmin.put(APPROVED, Set.of(CLOSED));
-        automaticWorkflowTransitionRulesAdmin.put(WITH_TRANSCRIBER, Set.of(APPROVED, COMPLETE, CLOSED));
+        automaticWorkflowTransitionRulesAdmin.put(WITH_TRANSCRIBER, Set.of(APPROVED, COMPLETE, CLOSED, UNFULFILLED));
         automaticWorkflowTransitionRulesAdmin.put(COMPLETE, Collections.emptySet());
         automaticWorkflowTransitionRulesAdmin.put(CLOSED, Collections.emptySet());
+        automaticWorkflowTransitionRulesAdmin.put(UNFULFILLED, Collections.emptySet());
     }
 
     public boolean validateChangeToWorkflowStatus(boolean isManual, TranscriptionTypeEnum transcriptionTypeEnum,
