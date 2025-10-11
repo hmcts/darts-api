@@ -30,7 +30,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
-import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +63,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
         """
 })
 @Slf4j
-class ArmRpoPollServiceUpgradeFiveTwoIntTest extends PostgresIntegrationBase {
+class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
 
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
