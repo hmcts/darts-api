@@ -163,7 +163,7 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
             feign.Response.builder()
                 .status(200)
                 .reason("OK")
-                .headers(java.util.Collections.emptyMap()) // Fix: use empty map instead of null
+                .headers(java.util.Collections.emptyMap())
                 .body(binaryData)
                 .request(feign.Request.create(
                     feign.Request.HttpMethod.GET,
@@ -198,10 +198,6 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
             .tokenType("Bearer")
             .expiresIn("3600")
             .build();
-    }
-
-    private String getDownloadPath(String downloadPath, String cabinetId, String recordId, String fileId) {
-        return downloadPath.replace("{cabinet_id}", cabinetId).replace("{record_id}", recordId).replace("{file_id}", fileId);
     }
 
     private String formatDateTime(OffsetDateTime offsetDateTime) {
