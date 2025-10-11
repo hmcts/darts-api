@@ -69,6 +69,8 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 | ACTIVE_DIRECTORY_B2C_BASE_URI | https://hmctsstgextid.b2clogin.com                               |
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 | ARM_URL                       |                                                                  |  
+| ARM_AUTH_URL                  |                                                                  |
+| ARM_API_URL                   |                                                                  |
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
@@ -143,6 +145,8 @@ export AZURE_AD_FUNCTIONAL_TEST_USERNAME=
 export AZURE_AD_FUNCTIONAL_TEST_PASSWORD=
 export ARM_SAS_ENDPOINT=
 export ARM_URL=
+export ARM_AUTH_URL=
+export ARM_API_URL=
 export ARM_USERNAME=
 export ARM_PASSWORD=
 export DARTS_INBOUND_STORAGE_SAS_URL=
@@ -328,12 +332,12 @@ There is no need to remove postgres and java or similar core images.
 The following Spring Profiles are defined. "External Components" are defined as any service upon which the application
 is dependent, such as database servers, web services etc.
 
-| Profile          | Config Location                                                | Purpose                                                                                        | External Components                                                                                                                                                                                                             |
-|------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `local`          | `src/main/resources/application-local.yaml`                    | For running the application locally as a docker compose stack with `docker-compose-local.yml`. | Provided as needed by `docker-compose-local.yml`. No external connectivity permitted outside the network boundary of the stack.                                                                                                 |
+| Profile          | Config Location                                                | Purpose                                                                                        | External Components                                                                                                                                                                                                               |
+|------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `local`          | `src/main/resources/application-local.yaml`                    | For running the application locally as a docker compose stack with `docker-compose-local.yml`. | Provided as needed by `docker-compose-local.yml`. No external connectivity permitted outside the network boundary of the stack.                                                                                                   |
 | `intTest`        | `src/integrationTest/resources/application-intTest.yaml`       | For running integration tests under `src/integrationTest`.                                     | No interaction required or permitted, all external calls are mocked via embedded wiremock (for HTTP requests), an embedded database (for db queries) or `@MockitoBean` for anything else. Spring Security is explicitly disabled. |
-| `functionalTest` | `src/functionalTest/resources/application-functionalTest.yaml` | For running functional tests under `src/functionalTest`.                                       | Functional tests execute API calls against the application deployed in the PR environment. That application is deployed with the `dev` profile (see below).                                                                     |
-| `dev`            | `src/main/resources/application-dev.yaml`                      | For running the application in the Pull Request (dev) environment.                             | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
+| `functionalTest` | `src/functionalTest/resources/application-functionalTest.yaml` | For running functional tests under `src/functionalTest`.                                       | Functional tests execute API calls against the application deployed in the PR environment. That application is deployed with the `dev` profile (see below).                                                                       |
+| `dev`            | `src/main/resources/application-dev.yaml`                      | For running the application in the Pull Request (dev) environment.                             | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                               |
 
 ## Automated Tasks
 

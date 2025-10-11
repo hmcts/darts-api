@@ -8,12 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.CreateExportBasedOnSearchResultsTableService;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -36,7 +36,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
     private static final int CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_IN_PROGRESS_STATUS = 2;
     private static final String AND_RESPONSE = " and response - ";
 
-    private final ArmRpoClient armRpoClient;
+    private final ArmClientService armClientService;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
     private final CurrentTimeHelper currentTimeHelper;
@@ -72,7 +72,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
         }
         BaseRpoResponse baseRpoResponse;
         try {
-            baseRpoResponse = armRpoClient.createExportBasedOnSearchResultsTable(bearerToken, request);
+            baseRpoResponse = armClientService.createExportBasedOnSearchResultsTable(bearerToken, request);
         } catch (FeignException feignException) {
             baseRpoResponse = processCreateExportBasedOnSearchResultsTableResponseFeignException(userAccount, feignException, errorMessage,
                                                                                                  armRpoExecutionDetailEntity);

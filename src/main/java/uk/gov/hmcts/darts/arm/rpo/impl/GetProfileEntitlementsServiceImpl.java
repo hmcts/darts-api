@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.GetProfileEntitlementsService;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -22,7 +22,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 @Slf4j
 public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlementsService {
 
-    private final ArmRpoClient armRpoClient;
+    private final ArmClientService armClientService;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
@@ -40,7 +40,7 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
         ProfileEntitlementResponse profileEntitlementResponse;
         try {
             EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-            profileEntitlementResponse = armRpoClient.getProfileEntitlementResponse(bearerToken, emptyRpoRequest);
+            profileEntitlementResponse = armClientService.getProfileEntitlementResponse(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
                                                                  .append(e)
