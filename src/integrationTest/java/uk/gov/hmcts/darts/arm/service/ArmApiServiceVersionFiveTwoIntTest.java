@@ -38,7 +38,7 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
     private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
     private static final String BINARY_CONTENT = "some binary content";
-    
+
     @Autowired
     private ArmApiService armApiService;
 
