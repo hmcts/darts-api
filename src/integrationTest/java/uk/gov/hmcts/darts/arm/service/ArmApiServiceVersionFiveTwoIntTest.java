@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -38,18 +37,8 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
     private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
-    private static final String CABINET_ID = "100";
-    private static final String ARM_ERROR_BODY = """
-        { "itemId": "00000000-0000-0000-0000-000000000000", "cabinetId": 0, ...}
-        """;
     private static final String BINARY_CONTENT = "some binary content";
-
-    @Value("${darts.storage.arm-api.version5-2.api.download-data-path}")
-    private String downloadPath;
-
-    @Value("${darts.storage.arm-api.version5-2.api.update-metadata-path}")
-    private String uploadPath;
-
+    
     @Autowired
     private ArmApiService armApiService;
 
