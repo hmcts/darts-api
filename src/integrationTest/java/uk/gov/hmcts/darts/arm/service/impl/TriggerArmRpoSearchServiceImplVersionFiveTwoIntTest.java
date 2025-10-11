@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -35,11 +34,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-@Slf4j
 @TestPropertySource(properties = {
     "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
 })
-class TriggerArmRpoSearchServiceImplUpgradeFiveTwoIntTest extends PostgresIntegrationBase {
+class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBase {
 
     @MockitoBean
     private UserIdentity userIdentity;
