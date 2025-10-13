@@ -67,7 +67,7 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
 
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
-    private static final String PRODUCTION_ID = " b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";
+    private static final String PRODUCTION_ID = "b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";
     private static final String SEARCH_ID = "8271f101-8c14-4c41-8865-edc5d8baed99";
     private static final String MATTER_ID = "cb70c7fa-8972-4400-af1d-ff5dd76d2104";
     private static final String STORAGE_ACCOUNT_ID = "StorageAccountId";
