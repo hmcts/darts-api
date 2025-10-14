@@ -50,7 +50,7 @@ import static org.mockito.Mockito.when;
 @Isolated
 class DetsToArmBatchProcessResponseFilesImplTest {
 
-    private static final String UPLOAD_RESPONSE_TIMESTAMP_FORAMT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]";
+    private static final String UPLOAD_RESPONSE_TIMESTAMP_FORAMT = "yyyy-MM-dd'T'HH:mm:ss[.SSSSSS][XXXX][XXXXX]";
 
     @Mock
     private ArmDataManagementApi armDataManagementApi;
