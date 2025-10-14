@@ -364,6 +364,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+            maximum: 9223372036854775807
       responses:
         '200':
           description: OK
