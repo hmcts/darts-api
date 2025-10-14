@@ -221,7 +221,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    protected OffsetDateTime getUploadFileRecordProcessTime(ArmResponseUploadFileRecord armResponseUploadFileRecord) {
+    public OffsetDateTime getUploadFileRecordProcessTime(ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         try {
             return OffsetDateTime.parse(armResponseUploadFileRecord.getProcessTime(), dateTimeFormatter);
         } catch (Exception e) {
