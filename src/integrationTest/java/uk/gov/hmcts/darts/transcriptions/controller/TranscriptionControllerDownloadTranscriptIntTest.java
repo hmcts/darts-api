@@ -163,7 +163,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void downloadTranscriptShouldReturnNotFoundError() throws Exception {
+    void downloadTranscript_ShouldReturnNotFoundError() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
                 "accept",
@@ -185,7 +185,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void downloadTranscriptShouldReturnOkWithMicrosoftWordNew() throws Exception {
+    void downloadTranscript_ShouldReturnOk_WithMicrosoftWordNew() throws Exception {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
@@ -257,7 +257,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
     @Test
     @SuppressWarnings("PMD.CloseResource")
-    void downloadTranscriptShouldReturnOkWithMicrosoftWordOld() throws Exception {
+    void downloadTranscript_ShouldReturnOk_WithMicrosoftWordOld() throws Exception {
         final String fileName = "Test Document.doc";
         final String fileType = "application/msword";
         final int fileSize = 22_528;
@@ -319,4 +319,25 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
     }
 
+    @Test
+    void downloadTranscript_ShouldReturnError_WhenNegativeTranscriptionIdUsed() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/transcriptions/-123/document")
+            .header(
+                "accept",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            );
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+
+        String expectedResponse = """
+            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+        verifyNoInteractions(mockAuditApi);
+    }
 }
