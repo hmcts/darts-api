@@ -2422,10 +2422,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
 
-        String createRecordFileTest1 = testFilePath;
         String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
 
-        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod.getId()));
+        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(testFilePath, armEod.getId()));
         BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(
             getUploadFileContents(validUploadFileTest1, armEod.getId(), transcriptionDocumentEntity.getChecksum()));
 
