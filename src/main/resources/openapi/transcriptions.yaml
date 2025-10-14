@@ -358,6 +358,7 @@ paths:
       operationId: downloadTranscript
       parameters:
         - name: transcription_id
+          description: Transcription ID
           in: path
           required: true
           schema:
@@ -371,14 +372,17 @@ paths:
           content:
             application/*:
               schema:
+                description: Any non Microsoft Word file type
                 type: string
                 format: binary
             application/msword:
               schema:
+                description: Microsoft Word Document
                 type: string
                 format: binary
             application/vnd.openxmlformats-officedocument.wordprocessingml.document:
               schema:
+                description: Microsoft Word Open XML Document
                 type: string
                 format: binary
         '422':
