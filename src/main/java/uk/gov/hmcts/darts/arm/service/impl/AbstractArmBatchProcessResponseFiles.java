@@ -211,7 +211,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    OffsetDateTime getInputUploadFileTimestamp(ArmResponseInputUploadFileRecord inputUploadFileRecord) {
+    public OffsetDateTime getInputUploadFileTimestamp(ArmResponseInputUploadFileRecord inputUploadFileRecord) {
         try {
             return OffsetDateTime.parse(inputUploadFileRecord.getTimestamp(), dateTimeFormatter);
         } catch (Exception e) {
@@ -221,12 +221,12 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private OffsetDateTime getUploadFileRecordProcessTime(ArmResponseUploadFileRecord armResponseUploadFileRecord) {
+    protected OffsetDateTime getUploadFileRecordProcessTime(ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         try {
             return OffsetDateTime.parse(armResponseUploadFileRecord.getProcessTime(), dateTimeFormatter);
         } catch (Exception e) {
-            log.error("Unable to parse timestamp {} from ARM upload file (UF) record {}", armResponseUploadFileRecord.getProcessTime(),
-                      armResponseUploadFileRecord.getA360RecordId(), e);
+            log.warn("Unable to parse timestamp {} from ARM upload file (UF) record {}", armResponseUploadFileRecord.getProcessTime(),
+                     armResponseUploadFileRecord.getA360RecordId(), e);
             throw new IllegalArgumentException(e);
         }
     }
@@ -450,7 +450,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     deleteArmResponseFilesHelper.deleteResponseBlobs(invalidResponseFiles);
                 }
             } else {
-
                 log.warn("Unable to find external object directory with ID {} for ARM batch responses with first IL file {}, second IL file {}",
                          armResponseBatchData.getExternalObjectDirectoryId(),
                          invalidLineFileFilenameProcessor1.getInvalidLineFileFilenameAndPath(),
@@ -464,7 +463,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         } catch (Exception e) {
             log.error("Unable to update invalid line responses", e);
         }
-
     }
 
     private void setInvalidLineErrorDescription(ArmResponseInvalidLineRecord record1, ArmResponseInvalidLineRecord record2,
