@@ -406,7 +406,7 @@ https://docs.stoplight.io/docs/spectral/b8391e051b7d8-installation
 To validate the OpenAPI specification:
 
 ```bash
-spectral lint "src/main/resources/openapi/**/*.{yml,yaml}"
+spectral lint --verbose "src/main/resources/openapi/**/*.{yml,yaml}"
 ```
 
 Documentation: https://stoplight.io/open-source/spectral
