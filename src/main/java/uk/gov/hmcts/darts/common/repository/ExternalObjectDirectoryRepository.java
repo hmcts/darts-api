@@ -180,6 +180,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                     ExternalLocationTypeEntity externalLocationType,
                                                                                     ObjectRecordStatusEntity status);
 
+    List<ExternalObjectDirectoryEntity> findByAnnotationDocumentEntityAndExternalLocationType(AnnotationDocumentEntity annotationDocument,
+                                                                                              ExternalLocationTypeEntity externalLocationType);
+
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
