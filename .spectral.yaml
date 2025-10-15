@@ -81,4 +81,3 @@ rules:
             - required: [ format ]
             - required: [ pattern ]
     severity: warn
-
