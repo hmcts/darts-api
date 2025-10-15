@@ -428,7 +428,7 @@ https://github.com/IBM/openapi-validator?tab=readme-ov-file#installation
 To enable OpenAPI validation, the following properties are set in the application configuration:
 
 ```bash
-lint-openapi -c lint-openapi-config.yaml "src/main/resources/openapi/**/*.yaml"
+lint-openapi "src/main/resources/openapi/**/*.yaml"
 ```
 
 For more information on OpenAPI validation with IBM openapi validator, see the [openapi validator](https://github.com/IBM/openapi-validator).
