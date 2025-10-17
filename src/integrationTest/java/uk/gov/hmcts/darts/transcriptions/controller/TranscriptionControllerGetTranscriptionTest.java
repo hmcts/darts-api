@@ -287,11 +287,11 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     }
 
     @Test
-    void getTranscriptionNotFound() throws Exception {
+    void getTranscriptionBadRequest() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, -999);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
