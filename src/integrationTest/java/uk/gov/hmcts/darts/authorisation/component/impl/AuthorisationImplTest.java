@@ -29,7 +29,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.hearings.exception.HearingApiError.HEARING_NOT_FOUND;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_ID;
 
 class AuthorisationImplTest extends IntegrationBase {
 
@@ -222,8 +222,8 @@ class AuthorisationImplTest extends IntegrationBase {
                 -1L, Set.of(JUDICIARY))
         );
 
-        assertEquals(TRANSCRIPTION_NOT_FOUND.getTitle(), exception.getMessage());
-        assertEquals(TRANSCRIPTION_NOT_FOUND, exception.getError());
+        assertEquals(BAD_REQUEST_TRANSCRIPTION_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_TRANSCRIPTION_ID, exception.getError());
     }
 
     @Test

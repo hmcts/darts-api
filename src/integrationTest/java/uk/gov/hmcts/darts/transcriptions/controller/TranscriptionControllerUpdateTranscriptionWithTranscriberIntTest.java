@@ -142,12 +142,12 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotFound())
+            .andExpect(status().isBadRequest())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
+            {"type":"TRANSCRIPTION_124","title":"Invalid transcription id","status":400}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 

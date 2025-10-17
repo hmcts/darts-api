@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +38,7 @@ import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQ
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND;
 import static uk.gov.hmcts.darts.cases.exception.CaseApiError.CASE_NOT_FOUND;
 import static uk.gov.hmcts.darts.hearings.exception.HearingApiError.HEARING_NOT_FOUND;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @Component
@@ -115,6 +118,9 @@ public class AuthorisationImpl implements Authorisation {
     @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
     public void authoriseByTranscriptionId(Long transcriptionId, Set<SecurityRoleEnum> securityRoles) {
         try {
+            if (!DataUtil.isWithinBounds(transcriptionId, 1L, 9_223_372_036_854_775_807L)) {
+                throw new BadRequestException();
+            }
             final List<CourthouseEntity> courthouses = getCourthousesFromTranscription(transcriptionId);
             if (CollectionUtils.isEmpty(courthouses)) {
                 throw new EntityNotFoundException();
@@ -123,6 +129,9 @@ public class AuthorisationImpl implements Authorisation {
         } catch (EntityNotFoundException ex) {
             log.error("Unable to find Transcription-Courtroom-Courthouse for checkAuthorisation. TranscriptionId={}", transcriptionId, ex);
             throw new DartsApiException(TRANSCRIPTION_NOT_FOUND, ex);
+        } catch (BadRequestException ex) {
+            log.error("TranscriptionId is out of accepted range. TranscriptionId={}", transcriptionId, ex);
+            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID, ex);
         }
     }
 
