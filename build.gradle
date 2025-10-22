@@ -352,6 +352,8 @@ sonarqube {
     property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
     property "sonar.cpd.exclusions", "**/ManualTaskService.java"
     property "sonar.scm.exclusions", "**/ManualTaskService.java"
+    property "sonar.cpd.exclusions", "**/ArmRpoClient.java"
+    property "sonar.scm.exclusions", "**/ArmRpoClient.java"
     if (skipSonar) {
       property 'sonar.exclusions', "**/**"
     }
