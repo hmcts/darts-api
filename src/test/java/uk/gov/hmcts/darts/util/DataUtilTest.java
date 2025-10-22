@@ -295,4 +295,15 @@ class DataUtilTest {
         assertThat(DataUtil.toBoolean(true)).isTrue();
         assertThat(DataUtil.toBoolean(false)).isFalse();
     }
+
+    @Test
+    void isWithinBounds_shouldReturnTrue_WhenValueIsWithinBounds() {
+        assertThat(DataUtil.isWithinBounds(5L, 1L, 10L)).isTrue();
+    }
+
+    @Test
+    void isWithinBounds_shouldReturnFalse_WhenValueIsBelowMin() {
+        assertThat(DataUtil.isWithinBounds(0L, 1L, 10L)).isFalse();
+    }
+
 }

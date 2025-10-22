@@ -5,6 +5,7 @@ import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.SimpleRequest;
 import com.atlassian.oai.validator.report.ValidationReport;
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.darts.util.ValidationConstants;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,15 +33,20 @@ class TranscriptionOpenApiContractTest {
 
     @Test
     void openApi_ShouldReturnError_WhenAboveMaximumTranscriptionIdUsed() {
+        String maxTranscriptionId = ValidationConstants.MaxValues.MAX_LONG_VALUE.toString();
+        String exceededTranscriptionId = maxTranscriptionId + "99";
         Request request = SimpleRequest.Builder
-            .get("/transcriptions/922337203685477580799/document")
+            .get("/transcriptions/" + exceededTranscriptionId + "/document")
             .build();
 
         ValidationReport report = VALIDATOR.validateRequest(request);
 
-        assertTrue(report.getMessages().stream()
-                       .anyMatch(m -> m.getMessage().contains("Numeric instance is greater than the required" +
-                                                                  " maximum (maximum: 9223372036854775807, found: 922337203685477580799)")));
+        String expectedSubstring = "Numeric instance is greater than the required maximum (maximum: "
+            + maxTranscriptionId + ", found: " + exceededTranscriptionId + ")";
+
+        assertTrue(
+            report.getMessages().stream().anyMatch(m -> m.getMessage().equals(expectedSubstring))
+        );
     }
 
     @Test
