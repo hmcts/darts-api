@@ -515,7 +515,7 @@ dependencies {
 
   testImplementation group: 'org.jeasy', name: 'easy-random-core', version: '5.0.0'
 
-  integrationTestImplementation 'com.atlassian.oai:swagger-request-validator-core:2.46.0'
+  testImplementation 'com.atlassian.oai:swagger-request-validator-core:2.46.0'
 
   compileJava.dependsOn = openApiGenerateTaskList
 }

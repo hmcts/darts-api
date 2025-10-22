@@ -287,7 +287,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     }
 
     @Test
-    void getTranscriptionBadRequest() throws Exception {
+    void getTranscription_ShouldReturnBadRequest_WhenNegativeTranscriptionId() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, -999);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();

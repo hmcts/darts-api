@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.util.DataUtil;
+import uk.gov.hmcts.darts.util.ValidationConstants;
 
 import java.util.Collections;
 import java.util.List;
@@ -118,7 +119,7 @@ public class AuthorisationImpl implements Authorisation {
     @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
     public void authoriseByTranscriptionId(Long transcriptionId, Set<SecurityRoleEnum> securityRoles) {
         try {
-            if (!DataUtil.isWithinBounds(transcriptionId, 1L, 9_223_372_036_854_775_807L)) {
+            if (!DataUtil.isWithinBounds(transcriptionId, 1L, ValidationConstants.MaxValues.MAX_LONG_VALUE)) {
                 throw new BadRequestException();
             }
             final List<CourthouseEntity> courthouses = getCourthousesFromTranscription(transcriptionId);

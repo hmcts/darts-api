@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.transcriptions.api;
+package uk.gov.hmcts.darts.openapi;
 
 import com.atlassian.oai.validator.OpenApiInteractionValidator;
 import com.atlassian.oai.validator.model.Request;
