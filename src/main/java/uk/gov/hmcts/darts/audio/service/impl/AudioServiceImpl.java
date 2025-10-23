@@ -94,8 +94,8 @@ public class AudioServiceImpl implements AudioService {
         }
     }
 
-    /*
-    Set the isAvailable flag if the media is available in the unstructured datastore.
+    /**
+     * Set the isAvailable flag if the media is available in the unstructured datastore.
      */
     @Override
     public void setIsAvailable(List<AudioMetadata> audioMetadataList) {
