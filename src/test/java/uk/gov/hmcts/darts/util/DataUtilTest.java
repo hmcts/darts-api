@@ -306,4 +306,24 @@ class DataUtilTest {
         assertThat(DataUtil.isWithinBounds(0L, 1L, 10L)).isFalse();
     }
 
+    @Test
+    void isWithinBounds_shouldReturnFalse_WhenValueIsAboveMax() {
+        assertThat(DataUtil.isWithinBounds(11L, 1L, 10L)).isFalse();
+    }
+
+    @Test
+    void isWithinBounds_shouldReturnTrue_WhenValueIsEqualToMin() {
+        assertThat(DataUtil.isWithinBounds(1L, 1L, 10L)).isTrue();
+    }
+
+    @Test
+    void isWithinBounds_shouldReturnTrue_WhenValueIsEqualToMax() {
+        assertThat(DataUtil.isWithinBounds(10L, 1L, 10L)).isTrue();
+    }
+
+    @Test
+    void isWithinBounds_shouldReturnFalseWhenValueIsNull() {
+        assertThat(DataUtil.isWithinBounds(null, 1L, 10L)).isFalse();
+    }
+
 }
