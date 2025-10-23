@@ -54,6 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -320,7 +321,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void downloadTranscript_ShouldReturnError_WhenNegativeTranscriptionIdUsed() throws Exception {
+    void downloadTranscript_ShouldReturnBadRequest_WhenNegativeTranscriptionIdUsed() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/transcriptions/-123/document")
             .header(
                 "accept",
@@ -333,9 +334,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
-        String expectedResponse = """
-            {"type":"TRANSCRIPTION_124","title":"Invalid transcription id","status":400}
-            """;
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
