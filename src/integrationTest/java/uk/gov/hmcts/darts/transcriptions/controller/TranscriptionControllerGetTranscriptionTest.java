@@ -295,6 +295,31 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void getTranscription_ShouldReturnNotFound_WhenTranscriptDoesNotExist() throws Exception {
+        TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().getFirst();
+            TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription.setStartTime(SOME_DATE_TIME);
+            transcription.setEndTime(SOME_DATE_TIME);
+            transcription = dartsDatabase.save(transcription);
+            UserAccountEntity userAccount = dartsDatabase.getUserAccountRepository().findById(transcription.getCreatedById()).orElseThrow();
+
+            addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+            addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
+            transcription.getCourtroom().getCourthouse().getCourthouseName();
+            transcription.getRequestedBy().getUserName();
+            return transcription;
+        });
+        dartsDatabase.updateCreatedBy(transcriptionEntity, OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId() + 1);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+        String actualResponse = response.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     private void addCommentToWorkflow(TranscriptionWorkflowEntity workflowEntity, String comment, UserAccountEntity userAccount) {
         addComment(workflowEntity.getTranscription(), workflowEntity, comment, userAccount);
     }

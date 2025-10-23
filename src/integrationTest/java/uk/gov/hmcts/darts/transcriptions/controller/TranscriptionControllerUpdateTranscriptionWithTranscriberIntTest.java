@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ACCEPT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -133,7 +134,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
     }
 
     @Test
-    void updateTranscriptionShouldReturnTranscriptionNotFoundError() throws Exception {
+    void updateTranscription_ShouldReturnBadRequest_WhenInvalidTranscriptionId() throws Exception {
         UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
@@ -146,9 +147,28 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {"type":"TRANSCRIPTION_124","title":"Invalid transcription id","status":400}
-            """;
+        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
+        verifyNoInteractions(mockAuditApi);
+    }
+
+    @Test
+    void updateTranscription_ShouldReturnNotFound_WhenTranscriptionDoesNotExist() throws Exception {
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
+        updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
+
+        MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
+            String.format("/transcriptions/%d", transcriptionId + 1)))
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(updateTranscription));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
+
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
