@@ -125,4 +125,15 @@ public final class DataUtil {
     public static boolean toBoolean(Boolean value, boolean defaultValue) {
         return Optional.ofNullable(value).orElse(defaultValue);
     }
+
+    public static boolean isWithinBounds(Long value, Long min, Long max) {
+        if (value == null) {
+            return false;
+        }
+        if (min != null && value < min) {
+            return false;
+        }
+        return max == null || value <= max;
+    }
+
 }

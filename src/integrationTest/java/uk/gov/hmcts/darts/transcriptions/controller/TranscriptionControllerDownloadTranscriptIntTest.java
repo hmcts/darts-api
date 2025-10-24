@@ -54,6 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -163,7 +164,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void downloadTranscriptShouldReturnNotFoundError() throws Exception {
+    void downloadTranscript_ShouldReturnNotFoundError() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
                 "accept",
@@ -185,7 +186,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void downloadTranscriptShouldReturnOkWithMicrosoftWordNew() throws Exception {
+    void downloadTranscript_ShouldReturnOk_WithMicrosoftWordNew() throws Exception {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
@@ -257,7 +258,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
     @Test
     @SuppressWarnings("PMD.CloseResource")
-    void downloadTranscriptShouldReturnOkWithMicrosoftWordOld() throws Exception {
+    void downloadTranscript_ShouldReturnOk_WithMicrosoftWordOld() throws Exception {
         final String fileName = "Test Document.doc";
         final String fileType = "application/msword";
         final int fileSize = 22_528;
@@ -319,4 +320,23 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
     }
 
+    @Test
+    void downloadTranscript_ShouldReturnBadRequest_WhenNegativeTranscriptionIdUsed() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/transcriptions/-123/document")
+            .header(
+                "accept",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            );
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+        verifyNoInteractions(mockAuditApi);
+    }
 }
