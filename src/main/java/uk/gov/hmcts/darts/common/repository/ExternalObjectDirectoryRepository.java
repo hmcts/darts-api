@@ -72,6 +72,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationType(TranscriptionDocumentEntity transcriptionDocument,
                                                                                                  ExternalLocationTypeEntity externalLocationType);
 
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.transcriptionDocumentEntity.id = :transcriptionDocumentId
+            AND eod.externalLocationType IN :externalLocationTypes
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentIdAndExternalLocationTypes(Long transcriptionDocumentId,
+                                                                                              List<ExternalLocationTypeEntity> externalLocationTypes);
 
     List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(
         TranscriptionDocumentEntity transcriptionDocument,
@@ -110,22 +119,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.externalLocationType = :location
-            AND (eod.media = :media
-            or eod.transcriptionDocumentEntity = :transcription
-            or eod.annotationDocumentEntity = :annotation
-            or eod.caseDocument = :caseDocument)
-            """
-    )
-    List<ExternalObjectDirectoryEntity> findExternalObjectDirectoryByLocation(ExternalLocationTypeEntity location,
-                                                                              MediaEntity media,
-                                                                              TranscriptionDocumentEntity transcription,
-                                                                              AnnotationDocumentEntity annotation,
-                                                                              CaseDocumentEntity caseDocument);
-
-    @Query(
-        """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status in :failedStatuses
             AND eod.externalLocationType = :type
@@ -152,7 +145,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                           Integer transferAttempts,
                                                                           Limit limit);
 
-
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
@@ -160,16 +152,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<ExternalObjectDirectoryEntity> findByStatusAndType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
-
-    @Query(
-        """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status.id in :statusList
-            AND eod.externalLocationType = :type
-            """
-    )
-    List<ExternalObjectDirectoryEntity> findByStatusIdInAndType(List<Integer> statusList,
-                                                                ExternalLocationTypeEntity type);
 
     @Query(
         """
@@ -184,6 +166,16 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
 
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.media.id = :mediaId
+            AND eod.externalLocationType IN :externalLocationTypes
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findByMediaIdAndExternalLocationTypes(Long mediaId,
+                                                                              List<ExternalLocationTypeEntity> externalLocationTypes);
+
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationTypeAndStatus(MediaEntity media,
                                                                                     ExternalLocationTypeEntity externalLocationType,
                                                                                     ObjectRecordStatusEntity status);
@@ -191,8 +183,29 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByAnnotationDocumentEntityAndExternalLocationType(AnnotationDocumentEntity annotationDocument,
                                                                                               ExternalLocationTypeEntity externalLocationType);
 
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.annotationDocumentEntity.id = :annotationDocumentId
+            AND eod.externalLocationType IN :externalLocationTypes
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findByAnnotationDocumentIdAndExternalLocationTypes(Long annotationDocumentId,
+                                                                                           List<ExternalLocationTypeEntity> externalLocationTypes
+    );
+
     List<ExternalObjectDirectoryEntity> findByCaseDocumentAndExternalLocationType(CaseDocumentEntity caseDocument,
                                                                                   ExternalLocationTypeEntity externalLocationTypeEntity);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.caseDocument.id = :caseDocumentId
+            AND eod.externalLocationType IN :externalLocationTypes
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findByCaseDocumentIdAndExternalLocationTypes(Long caseDocumentId,
+                                                                                     List<ExternalLocationTypeEntity> externalLocationTypes);
 
 
     List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
@@ -207,8 +220,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
             WHERE
-            ((:externalObjectDirectoryQueryTypeEnumIndex=1 AND eod.media = eod2.media) OR                 
-            (:externalObjectDirectoryQueryTypeEnumIndex=2 
+            ((:externalObjectDirectoryQueryTypeEnumIndex=1 AND eod.media = eod2.media) OR
+            (:externalObjectDirectoryQueryTypeEnumIndex=2
             AND (eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity OR eod.annotationDocumentEntity=eod2.annotationDocumentEntity)))
             AND eod.status = :status1
             AND eod2.status = :status2
@@ -331,26 +344,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         boolean responseCleaned,
         String manifestFilename);
 
-
-    @Query(
-        """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status in :statuses
-            AND eod.externalLocationType = :locationType
-            AND eod.responseCleaned = :responseCleaned
-            AND eod.lastModifiedDateTime < :lastModifiedBefore
-            and (eod.manifestFile is null
-            or eod.manifestFile not like ':manifestFileBatchPrefix%')
-            order by eod.lastModifiedDateTime
-            """
-    )
-    List<ExternalObjectDirectoryEntity> findSingleArmResponseFiles(
-        List<ObjectRecordStatusEntity> statuses,
-        ExternalLocationTypeEntity locationType,
-        boolean responseCleaned,
-        OffsetDateTime lastModifiedBefore,
-        String manifestFileBatchPrefix);
-
     @Modifying(clearAutomatically = true)
     @Query(
         """
@@ -407,7 +400,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status
             AND eod.externalLocationType = :type
-            AND eod.media is null            
+            AND eod.media is null
             AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
             where (eod2.status = :notExistsStatus or eod2.transferAttempts >= :maxTransferAttempts)
             AND eod2.externalLocationType = :notExistsType
@@ -469,7 +462,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                     (eod1.cad_id IS NOT NULL AND eod1.cad_id = eod2.cad_id)
                 )
             )
-            fetch first :limitRecords rows only            
+            fetch first :limitRecords rows only
             """,
         nativeQuery = true
     )
@@ -515,7 +508,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status = :status 
+            WHERE eod.status = :status
             AND eod.manifestFile = :manifestFile
             ORDER BY eod.lastModifiedDateTime
             """
@@ -523,9 +516,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
 
     @Query("""
-        SELECT eod.id FROM ExternalObjectDirectoryEntity eod        
+        SELECT eod.id FROM ExternalObjectDirectoryEntity eod
         LEFT JOIN eod.media med
-        LEFT JOIN eod.transcriptionDocumentEntity td       
+        LEFT JOIN eod.transcriptionDocumentEntity td
         LEFT JOIN eod.annotationDocumentEntity ad
         LEFT JOIN eod.caseDocument cd
         WHERE eod.externalLocationType = :externalLocationTypeEntity
@@ -533,8 +526,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
            (med.retainUntilTs is not null) or
            (td.retainUntilTs is not null) or
            (ad.retainUntilTs is not null) or
-           (cd.retainUntilTs is not null) 
-        )        
+           (cd.retainUntilTs is not null)
+        )
         AND eod.updateRetention = :updateRetention
         ORDER BY eod.id
         """)
@@ -673,7 +666,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status = :status 
+            WHERE eod.status = :status
             AND eod.inputUploadProcessedTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
@@ -685,7 +678,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status = :status 
+            WHERE eod.status = :status
             AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
