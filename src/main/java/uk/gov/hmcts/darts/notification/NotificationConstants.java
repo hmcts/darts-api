@@ -12,6 +12,7 @@ public class NotificationConstants {
         public static final String HEARING_DATE = "hearing_date";
         public static final String AUDIO_START_TIME = "start_time";
         public static final String AUDIO_END_TIME = "end_time";
+        public static final String UNFULFILLED_REASON = "unfulfilled_reason";
 
     }
 }

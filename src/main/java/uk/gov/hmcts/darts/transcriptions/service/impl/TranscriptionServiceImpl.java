@@ -102,6 +102,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CL
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.UNFULFILLED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
@@ -311,7 +312,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             throw new DartsApiException(TRANSCRIPTION_WORKFLOW_ACTION_INVALID);
         }
 
-        if (REJECTED.equals(desiredTargetTranscriptionStatus)
+        if ((REJECTED.equals(desiredTargetTranscriptionStatus)
+            || UNFULFILLED.equals(desiredTargetTranscriptionStatus))
             && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
         }
@@ -570,6 +572,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionStatuses.add(getTranscriptionStatusById(CLOSED.getId()));
         transcriptionStatuses.add(getTranscriptionStatusById(COMPLETE.getId()));
         transcriptionStatuses.add(getTranscriptionStatusById(REJECTED.getId()));
+        transcriptionStatuses.add(getTranscriptionStatusById(UNFULFILLED.getId()));
         return transcriptionStatuses;
     }
 
