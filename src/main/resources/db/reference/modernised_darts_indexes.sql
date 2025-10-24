@@ -28,6 +28,7 @@
 --v16 cc_dets(category_type)
 --    wk_case_correction(category_type)
 --v17 wk_case_activity_data(case_closed_type)
+--v18 add index on  cr_dets(rpt_id)
 
 
 SET ROLE DARTS_OWNER;
@@ -334,6 +335,9 @@ CREATE INDEX wcc_ct_idx ON wk_case_correction(category_type);
 
 --v17
 CREATE INDEX wca_cdt_idx ON wk_case_activity_data(closed_date_type);
+
+--v18
+CREATE INDEX crd_rpt_idx ON cr_dets(rpt_id);
 
 
 
