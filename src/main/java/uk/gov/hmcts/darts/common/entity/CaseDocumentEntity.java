@@ -83,5 +83,4 @@ public class CaseDocumentEntity extends CreatedModifiedBaseEntity
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.CASE_DOCUMENT)
     private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
-
 }
