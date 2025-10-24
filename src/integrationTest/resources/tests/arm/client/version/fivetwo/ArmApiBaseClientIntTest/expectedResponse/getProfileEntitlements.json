@@ -1,0 +1,13 @@
+{
+  "itemsCount": 1,
+  "status": 200,
+  "demoMode": false,
+  "isError": false,
+  "responseStatus": 0,
+  "entitlements": [
+    {
+      "name": "SRV-DARTS-RW-E",
+      "entitlementID": "96293900-5082-4051-bbad-c961fb22091d"
+    }
+  ]
+}

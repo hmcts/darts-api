@@ -115,12 +115,15 @@ java:
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    ARM_AUTH_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    ARM_API_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
     ARM_RPO_THREAD_SLEEP_DURATION: 60s
     ARM_RPO_POLL_DURATION: 4h
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
     GRACEFUL_SHUTDOWN_TIMEOUT: '35s'
+    ENABLE_ARM_V5_2_UPGRADE: false
 
 function:
   scaleType: Job
@@ -234,12 +237,15 @@ function:
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    ARM_AUTH_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    ARM_API_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
     ARM_RPO_THREAD_SLEEP_DURATION: 60s
     ARM_RPO_POLL_DURATION: 4h
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
+    ENABLE_ARM_V5_2_UPGRADE: false
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:
