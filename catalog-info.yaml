@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "darts-api"
+  annotations:
+    # This must match folder-name/job-name in Jenkins.
+    jenkins.io/job-full-name: sds:HMCTS/darts-api
+    github.com/project-slug: hmcts/darts-api
+  tags:
+    - java
+  links:
+    - url: https://hmcts-reform.slack.com/app_redirect?channel=darts-modernisation
+      title: "#darts-modernisation on Slack"
+      icon: chat
+spec:
+  type: service
+  lifecycle: production
+  owner: dcd_darts
