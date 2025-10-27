@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS retention_process_log
 );
 
 ALTER TABLE case_management_retention ALTER COLUMN eve_id type bigint;
-
 ALTER TABLE cmr_dets ADD COLUMN cmr_id INTEGER;
 
 CREATE UNIQUE INDEX IF NOT EXISTS wk_cr_dets_aligned_pk ON wk_cr_dets_aligned(wcda_id);
