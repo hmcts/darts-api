@@ -274,7 +274,7 @@ CREATE TABLE cc_dets
 ,c_case_closed_date_pre_live   TIMESTAMP WITH TIME ZONE
 ,c_case_closed_date_crah       TIMESTAMP WITH TIME ZONE
 ,case_created_ts               TIMESTAMP WITH TIME ZONE
-,cas_retention_fixed           CHARACTER VARYING(16)
+,case_retention_fixed           CHARACTER VARYING(16)
 ,case_total_sentence           CHARACTER VARYING(16)
 ,retention_applies_from_ts     TIMESTAMP WITH TIME ZONE
 ,end_of_sentence_date_ts       TIMESTAMP WITH TIME ZONE
@@ -293,7 +293,7 @@ CREATE TABLE cc_dets
 ,case_closed_event_event_ts_eve_id_case_closed_event_latest   INTEGER
 ,case_closed_event_created_ts_case_closed_event_latest        TIMESTAMP WITH TIME ZONE
 ,case_closed_event_created_ts_eve_id_case_closed_event_latest INTEGER
-,latest_event_by_event_ts_ts                                  TIMESTAMP WITH TIME ZONE
+,latest_event_by_event_ts                                     TIMESTAMP WITH TIME ZONE
 ,latest_event_by_event_ts_eve_id                              INTEGER
 ,latest_event_by_created_ts                                   TIMESTAMP WITH TIME ZONE
 ,latest_event_by_created_ts_eve_id                            INTEGER
