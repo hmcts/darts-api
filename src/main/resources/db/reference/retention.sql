@@ -68,6 +68,7 @@
 --v29  adding cmr_id to cmr_dets
 --v30  add car_id to wk_cr_dets_aligned ( whilst also adding the table !)
 
+
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
 
