@@ -63,6 +63,10 @@
 --     adding single column to wk_case_correction and wk_case_activity_data
 --v26  remove rownum column from wk_case_activity_data
 --v27  remove table case_retention_extra
+--v28  amending a number of INT to BIGINT
+--          eve_id(case_management_retention)
+--v29  adding cmr_id to cmr_dets
+--v30  add car_id to wk_cr_dets_aligned ( whilst also adding the table !)
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -91,13 +95,15 @@ SET SEARCH_PATH TO darts;
 --wk_rr_is_current_by_creation            RBC
 --wk_rr_is_current_by_logic               RBL
 
+--wk_cr_dets_aligned                      WCDA
+
 
 
 CREATE TABLE case_management_retention
 (cmr_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,rpt_id                      INTEGER                       NOT NULL
-,eve_id                      INTEGER                       NOT NULL                
+,eve_id                      BIGINT                        NOT NULL                
 ,total_sentence              CHARACTER VARYING                       -- < is this integer or the nYnMnD >
 ) TABLESPACE pg_default;
 
@@ -325,6 +331,7 @@ CREATE TABLE cc_dets
 
 CREATE TABLE cmr_dets
 (cmd_id                        SERIAL
+,cmr_id                        INTEGER
 ,cas_id                        INTEGER
 ,rpt_id                        INTEGER
 ,eve_id                        BIGINT
@@ -470,6 +477,35 @@ CREATE TABLE wk_rr_is_current_by_logic
 ,is_current                     BOOLEAN
 ) TABLESPACE pg_default;
 
+CREATE TABLE wk_cr_dets_aligned
+(wcda_id                        INTEGER
+,car_id                         INTEGER
+,cas_id                         INTEGER
+,rpt_id                         INTEGER
+,cmd_id                         INTEGER
+,total_sentence                 CHARACTER VARYING(32)
+,retain_until_ts                TIMESTAMP WITH TIME ZONE
+,retain_until_applied_on_ts     TIMESTAMP WITH TIME ZONE
+,current_state                  CHARACTER VARYING(32)
+,comments                       CHARACTER VARYING(150)
+,confidence_category            INTEGER
+,retention_object_id            CHARACTER VARYING(16)
+,submitted_by                   INTEGER
+,created_ts                     TIMESTAMP WITH TIME ZONE
+,created_by                     INTEGER
+,last_modified_ts               TIMESTAMP WITH TIME ZONE
+,last_modified_by               INTEGER
+) TABLESPACE pg_default;
+
+CREATE TABLE retention_process_log
+(cas_id                         INTEGER
+,cr_row_count                   INTEGER
+,cmr_row_count                  INTEGER
+,processed_ts                   TIMESTAMP WITH TIME ZONE
+,status                         CHARACTER VARYING(10)
+,message                        CHARACTER VARYING
+) TABLESPACE pg_default;
+
 CREATE UNIQUE INDEX case_management_retention_pk ON case_management_retention(cmr_id) TABLESPACE pg_default;
 ALTER TABLE case_management_retention ADD PRIMARY KEY USING INDEX case_management_retention_pk;
 
@@ -530,6 +566,12 @@ ALTER TABLE wk_rr_is_current_by_creation ADD PRIMARY KEY USING INDEX wk_rr_is_cu
 
 CREATE UNIQUE INDEX wk_rr_is_current_by_logic_pk ON wk_rr_is_current_by_logic(cas_id) TABLESPACE pg_default;
 ALTER TABLE wk_rr_is_current_by_logic ADD PRIMARY KEY USING INDEX wk_rr_is_current_by_logic_pk;
+
+CREATE UNIQUE INDEX wk_cr_dets_aligned_pk ON wk_cr_dets_aligned(wcda_id) TABLESPACE pg_default;
+ALTER TABLE wk_cr_dets_aligned ADD PRIMARY KEY USING INDEX wk_cr_dets_aligned_pk;
+
+CREATE UNIQUE INDEX retention_process_log_pk ON retention_process_log(cas_id) TABLESPACE pg_default;
+ALTER TABLE retention_process_log ADD PRIMARY KEY USING INDEX retention_process_log_pk;
 
 CREATE SEQUENCE cmr_seq CACHE 1;
 CREATE SEQUENCE rpr_seq CACHE 1;
