@@ -79,6 +79,8 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         applyRetentionToAnnotations(courtCase);
         applyRetentionToTranscriptions(courtCase);
         applyRetentionToCaseDocuments(courtCase);
+
+        log.info("completed applying retention to associated objects for case id '{}'", caseId);
     }
 
     private void applyRetentionToMedias(CourtCaseEntity courtCase) {
