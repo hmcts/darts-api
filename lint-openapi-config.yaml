@@ -1,0 +1,5 @@
+errorsOnly: false
+limits:
+  warnings: 100
+outputFormat: 'json'
+summaryOnly: true
