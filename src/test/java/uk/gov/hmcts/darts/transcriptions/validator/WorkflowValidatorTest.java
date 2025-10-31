@@ -21,6 +21,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CL
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.UNFULFILLED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.COURT_LOG;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.INCLUDING_VERDICT;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.OTHE
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.NcssCount"})
 class WorkflowValidatorTest {
 
     private final WorkflowValidator workflowValidator = new WorkflowValidator();
@@ -36,7 +38,7 @@ class WorkflowValidatorTest {
     @ParameterizedTest
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateManualChangeToWorkflowStatusRequestedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
-
+        
         assertFalse(
             workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, REQUESTED, false)
         );
@@ -52,6 +54,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(REQUESTED, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(REQUESTED, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(REQUESTED, CLOSED, true));
+        listOfChecks.add(new StatusTransitionCheck(REQUESTED, UNFULFILLED, false));
 
         listOfChecks.add(new StatusTransitionCheck(AWAITING_AUTHORISATION, REQUESTED, true));
         listOfChecks.add(new StatusTransitionCheck(AWAITING_AUTHORISATION, AWAITING_AUTHORISATION, false));
@@ -60,6 +63,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(AWAITING_AUTHORISATION, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(AWAITING_AUTHORISATION, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(AWAITING_AUTHORISATION, CLOSED, true));
+        listOfChecks.add(new StatusTransitionCheck(AWAITING_AUTHORISATION, UNFULFILLED, false));
 
         listOfChecks.add(new StatusTransitionCheck(APPROVED, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(APPROVED, AWAITING_AUTHORISATION, false));
@@ -68,6 +72,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(APPROVED, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(APPROVED, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(APPROVED, CLOSED, true));
+        listOfChecks.add(new StatusTransitionCheck(APPROVED, UNFULFILLED, false));
 
         listOfChecks.add(new StatusTransitionCheck(REJECTED, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(REJECTED, AWAITING_AUTHORISATION, false));
@@ -76,6 +81,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(REJECTED, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(REJECTED, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(REJECTED, CLOSED, false));
+        listOfChecks.add(new StatusTransitionCheck(REJECTED, UNFULFILLED, false));
 
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, AWAITING_AUTHORISATION, false));
@@ -84,6 +90,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, CLOSED, true));
+        listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, UNFULFILLED, true));
 
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, AWAITING_AUTHORISATION, false));
@@ -92,6 +99,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, CLOSED, false));
+        listOfChecks.add(new StatusTransitionCheck(COMPLETE, UNFULFILLED, false));
 
         listOfChecks.add(new StatusTransitionCheck(CLOSED, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(CLOSED, AWAITING_AUTHORISATION, false));
@@ -100,6 +108,16 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(CLOSED, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(CLOSED, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(CLOSED, CLOSED, false));
+        listOfChecks.add(new StatusTransitionCheck(CLOSED, UNFULFILLED, false));
+
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, REQUESTED, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, AWAITING_AUTHORISATION, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, APPROVED, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, REJECTED, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, WITH_TRANSCRIBER, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, COMPLETE, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, CLOSED, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, UNFULFILLED, false));
 
         for (StatusTransitionCheck check : listOfChecks) {
             assertEquals(check.isShouldBeAllowed(),
@@ -118,6 +136,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(REQUESTED, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(REQUESTED, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(REQUESTED, CLOSED, true));
+        listOfChecks.add(new StatusTransitionCheck(REQUESTED, UNFULFILLED, false));
 
         listOfChecks.add(new StatusTransitionCheck(APPROVED, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(APPROVED, AWAITING_AUTHORISATION, false));
@@ -126,6 +145,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(APPROVED, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(APPROVED, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(APPROVED, CLOSED, true));
+        listOfChecks.add(new StatusTransitionCheck(APPROVED, UNFULFILLED, false));
 
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, AWAITING_AUTHORISATION, false));
@@ -134,6 +154,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, COMPLETE, true));
         listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, CLOSED, true));
+        listOfChecks.add(new StatusTransitionCheck(WITH_TRANSCRIBER, UNFULFILLED, true));
 
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, AWAITING_AUTHORISATION, false));
@@ -142,6 +163,7 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(COMPLETE, CLOSED, false));
+        listOfChecks.add(new StatusTransitionCheck(COMPLETE, UNFULFILLED, false));
 
         listOfChecks.add(new StatusTransitionCheck(CLOSED, REQUESTED, false));
         listOfChecks.add(new StatusTransitionCheck(CLOSED, AWAITING_AUTHORISATION, false));
@@ -150,6 +172,16 @@ class WorkflowValidatorTest {
         listOfChecks.add(new StatusTransitionCheck(CLOSED, WITH_TRANSCRIBER, false));
         listOfChecks.add(new StatusTransitionCheck(CLOSED, COMPLETE, false));
         listOfChecks.add(new StatusTransitionCheck(CLOSED, CLOSED, false));
+        listOfChecks.add(new StatusTransitionCheck(CLOSED, UNFULFILLED, false));
+
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, REQUESTED, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, AWAITING_AUTHORISATION, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, APPROVED, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, REJECTED, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, WITH_TRANSCRIBER, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, COMPLETE, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, CLOSED, false));
+        listOfChecks.add(new StatusTransitionCheck(UNFULFILLED, UNFULFILLED, false));
 
         for (StatusTransitionCheck check : listOfChecks) {
             assertEquals(check.isShouldBeAllowed(),
@@ -159,7 +191,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateAutomaticChangeToWorkflowStatusRequestedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -176,7 +208,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateManualChangeToWorkflowStatusAwaitingAuthorisationReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
         assertFalse(
             workflowValidator.validateChangeToWorkflowStatus(true, SENTENCING_REMARKS, currentTranscriptionStatus, AWAITING_AUTHORISATION, false)
@@ -184,7 +216,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateAutomaticChangeToWorkflowStatusAwaitingAuthorisationReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -207,7 +239,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"REQUESTED", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"REQUESTED", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateManualChangeToApprovedWorkflowStatusReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -216,7 +248,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateAutomaticChangeToApprovedWorkflowStatusReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -233,7 +265,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"REQUESTED", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"REQUESTED", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateManualChangeToWorkflowStatusRejectedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -242,7 +274,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateAutomaticChangeToWorkflowStatusRejectedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -297,7 +329,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateManualChangeToWorkflowStatusCompleteReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -306,7 +338,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED"})
+    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED", "UNFULFILLED"})
     void validateAutomaticChangeToWorkflowStatusCompleteReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -329,7 +361,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"REJECTED", "CLOSED"})
+    @EnumSource(names = {"REJECTED", "CLOSED", "UNFULFILLED", "COMPLETE"})
     void validateManualChangeToWorkflowStatusClosedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -338,7 +370,7 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"REJECTED", "CLOSED"})
+    @EnumSource(names = {"REJECTED", "CLOSED", "UNFULFILLED", "COMPLETE"})
     void validateAutomaticChangeToWorkflowStatusClosedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
@@ -346,4 +378,36 @@ class WorkflowValidatorTest {
         );
     }
 
+
+    @ParameterizedTest
+    @EnumSource(names = {"WITH_TRANSCRIBER"})
+    void validateManualChangeToWorkflowStatusUnfulfilledSuccess(TranscriptionStatusEnum currentTranscriptionStatus) {
+
+        assertTrue(workflowValidator.validateChangeToWorkflowStatus(true, MITIGATION, currentTranscriptionStatus, UNFULFILLED, false));
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = {"WITH_TRANSCRIBER"})
+    void validateAutomaticChangeToWorkflowStatusUnfulfilledSuccess(TranscriptionStatusEnum currentTranscriptionStatus) {
+
+        assertTrue(workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, UNFULFILLED, false));
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED", "UNFULFILLED"})
+    void validateManualChangeToWorkflowStatusUnfulfilledReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
+
+        assertFalse(
+            workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, UNFULFILLED, false)
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED", "UNFULFILLED"})
+    void validateAutomaticChangeToWorkflowStatusUnfulfilledReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
+
+        assertFalse(
+            workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, UNFULFILLED, false)
+        );
+    }
 }

@@ -211,6 +211,7 @@ darts:
         transcription_available: 3adfe57d-094a-47e8-a4f0-1a234466b8ce
         transcription_request_approved: 2e0a929b-6939-4d26-99d2-01cdb7454065
         transcription_request_rejected: 9b48d057-5dda-4e36-8727-81a01e3a39ec
+        transcription_request_unfulfilled: c19da6f7-9304-445a-9f30-3827f7c74103
   retention:
     overridable-fixed-policy-keys: 3
     close-open-cases-older-than-years: 6
@@ -244,7 +245,7 @@ darts:
       transcription-record-properties-file: properties/arm/transcription-record.properties
       annotation-record-properties-file: properties/arm/annotation-record.properties
       case-record-properties-file: properties/arm/case-record.properties
-      input-upload-response-timestamp-format: yyyy-MM-dd'T'HH:mm:ss.SSSSSS[XXXX][XXXXX]
+      input-upload-response-timestamp-format: yyyy-MM-dd'T'HH:mm:ss[.SSSSSS][XXXX][XXXXX]
 
       response-cleanup-buffer-days: 0
       batch-response-cleanup:

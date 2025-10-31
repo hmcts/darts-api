@@ -206,19 +206,20 @@ class DetsToArmBatchPushProcessorImplTest {
 
     }
 
-    @Disabled("This test is failing randomly. Ticket raised to fix this issue - DMP-4750")
+    @Disabled("This test is failing randomly. Ticket DMP-5260 raised to fix this issue")
     @Test
     void processDetsToArm_noEodsForTransfer(CapturedOutput output) {
+        // given
         EOD_HELPER_MOCKS.simulateInitWithMockedData();
         detsToArmBatchPushProcessor = spy(detsToArmBatchPushProcessor);
         doReturn(new ArrayList<>()).when(detsToArmBatchPushProcessor).getDetsEodEntitiesToSendToArm(any(), any(), anyInt());
-        // given
-        detsToArmBatchPushProcessor.processDetsToArm(5);
         // when
-        LogUtil.assertOutputHasMessage(output, "No DETS EODs to process", 5);
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+        // then
+        LogUtil.assertOutputHasMessage(output, "No DETS EODs to process", 10);
     }
 
-    @Disabled("This test is failing randomly. Ticket raised to fix this issue - DMP-4750")
+    @Disabled("This test is failing randomly. Ticket DMP-5260 raised to fix this issue")
     @Test
     void processDetsToArm_emptyList(CapturedOutput output) {
         // given

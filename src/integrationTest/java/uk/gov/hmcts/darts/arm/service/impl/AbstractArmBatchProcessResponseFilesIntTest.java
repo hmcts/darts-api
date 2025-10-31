@@ -127,7 +127,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     protected AsyncTaskConfig asyncTaskConfig;
 
     @BeforeEach
-    void commonSetup() {
+    void setup() {
         asyncTaskConfig = mock(AsyncTaskConfig.class);
         when(asyncTaskConfig.getThreads()).thenReturn(1);
         when(asyncTaskConfig.getAsyncTimeout()).thenReturn(Duration.ofSeconds(10));
@@ -359,7 +359,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         assertEquals(1, foundMediaList4.size());
         ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.getFirst();
-        assertNull(foundMedia4.getDataIngestionTs());
+        assertEquals("2023-06-10T14:08:28.316382Z", foundMedia4.getInputUploadProcessedTs().toString());
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia4.getStatus().getId());
         assertEquals(2, foundMedia4.getVerificationAttempts());
         assertEquals(1, foundMedia4.getTransferAttempts());
@@ -374,7 +374,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         assertEquals(1, foundMediaList5.size());
         ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.getFirst();
-        assertNull(foundMedia5.getDataIngestionTs());
+        assertEquals("2023-06-10T14:08:28.316382Z", foundMedia5.getInputUploadProcessedTs().toString());
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
         assertEquals(1, foundMedia5.getVerificationAttempts());
         assertEquals(1, foundMedia5.getTransferAttempts());
@@ -2422,10 +2422,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
 
-        String createRecordFileTest1 = testFilePath;
         String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
 
-        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod.getId()));
+        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(testFilePath, armEod.getId()));
         BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(
             getUploadFileContents(validUploadFileTest1, armEod.getId(), transcriptionDocumentEntity.getChecksum()));
 
