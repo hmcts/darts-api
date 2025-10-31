@@ -106,7 +106,7 @@ paths:
             type: string
           description: "Range header, required for streaming audio."
       responses:
-        200:
+        '200':
           description: OK
           content:
             audio/mpeg:
@@ -149,7 +149,7 @@ paths:
                 type: "AUDIO_102"
                 title: "The requested media cannot be found"
                 status: 404
-        500:
+        '500':
           description: The requested data cannot be located
           content:
             application/json+problem:
@@ -172,15 +172,15 @@ paths:
             schema:
               $ref: '#/components/schemas/AddAudioMetadataRequestWithStorageGUID'
       responses:
-        200:
+        '200':
           description: Audio metadata accepted
-        400:
+        '400':
           description: Bad request
           content:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
-        500:
+        '500':
           description: Internal server error
           content:
             application/json+problem:
@@ -201,7 +201,7 @@ paths:
             type: integer
           required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
