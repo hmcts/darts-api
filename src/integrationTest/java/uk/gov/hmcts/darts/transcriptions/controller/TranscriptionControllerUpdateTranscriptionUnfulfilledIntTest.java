@@ -40,6 +40,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UNFULFILLED_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.UNFULFILLED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -168,12 +169,11 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
     }
 
     @Test
-    void updateTranscription_ShouldReturnTranscriptionNotFoundError() throws Exception {
+    void updateTranscription_ShouldReturnTranscriptionNotFoundError_WhenTranscriptionDoesNotExist() throws Exception {
         UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(UNFULFILLED.getId());
-
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
-            String.format("/transcriptions/%d", -1)))
+            String.format("/transcriptions/%d", transcriptionId + 1)))
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -184,6 +184,27 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
         String expectedJson = """
             {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
             """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+        verifyNoInteractions(notificationApi);
+        verifyNoInteractions(mockAuditApi);
+    }
+
+    @Test
+    void updateTranscription_ShouldReturnTranscriptionBadRequestError_WhenNegativeTranscriptionIdUsed() throws Exception {
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
+        updateTranscription.setTranscriptionStatusId(UNFULFILLED.getId());
+
+        MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
+            String.format("/transcriptions/%d", -1)))
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(updateTranscription));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
+
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
         verifyNoInteractions(notificationApi);
         verifyNoInteractions(mockAuditApi);
