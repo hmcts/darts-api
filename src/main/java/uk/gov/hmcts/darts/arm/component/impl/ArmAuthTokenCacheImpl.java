@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import java.time.Duration;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_KEY;
 import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
@@ -90,6 +91,7 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
         }
     }
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private String fetchFreshBearerToken(ArmTokenRequest armTokenRequest) {
         try {
             ArmTokenResponse initial = armClientService.getToken(armTokenRequest);
@@ -150,8 +152,9 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
                 ArmTokenResponse tokenResponse = armClientService.getToken(armTokenRequest);
                 String access = tokenResponse != null ? tokenResponse.getAccessToken() : null;
 
-                if (!isNotEmpty(access)) {
-                    throw new IllegalStateException("ARM token returned empty access token during profiles retry");
+                if (isEmpty(access)) {
+                    log.warn("ARM token returned empty access token during profiles retry");
+                    throw ex;
                 }
 
                 String freshBearer = "Bearer " + access;

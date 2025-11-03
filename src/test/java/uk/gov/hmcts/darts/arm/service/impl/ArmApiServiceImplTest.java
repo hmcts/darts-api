@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
-import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.component.ArmAuthTokenCache;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
@@ -108,10 +107,9 @@ class ArmApiServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
 
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder().username(username).password(password).build();
-        ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
 
         when(armAuthTokenClient.getToken(tokenRequest)).thenReturn(bearerToken);
-        
+
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
