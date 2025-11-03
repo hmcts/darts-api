@@ -91,6 +91,7 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
             ArmTokenResponse armTokenResponse = armClientService.getToken(armTokenRequest);
             if (isNotEmpty(armTokenResponse.getAccessToken())) {
                 String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
+                //TODO REMOVE ONCE TESTED
                 log.debug("Fetched ARM Bearer Token from token: {}", bearerToken);
                 EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
 
@@ -107,7 +108,7 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
                     }
                 }
             }
-
+            //TODO REMOVE ONCE TESTED
             log.debug("Fetched ARM Bearer Token : {}", accessToken);
             return String.format("Bearer %s", accessToken);
         } catch (RestClientException ex) {
