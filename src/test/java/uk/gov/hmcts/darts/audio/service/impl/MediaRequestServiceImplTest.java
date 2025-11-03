@@ -194,7 +194,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void countNonAccessedAudioForUser() {
-        when(mockMediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(
+        when(mockMediaRequestRepository.countTransformedEntitiesByCurrentOwnerIdAndStatusNotAccessed(
             any(),
             eq(COMPLETED)
         )).thenReturn(10L);

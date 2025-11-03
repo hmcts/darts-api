@@ -43,13 +43,14 @@ public interface MediaRequestRepository extends
     Integer updateAndRetrieveMediaRequestToProcessing(int userModifiedId, List<Integer> mediaRequestIdsToIgnore);
 
     @Query("""
-        SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
-        WHERE tm.mediaRequest = mr
-        AND mr.requestor.id = :userId
-        AND tm.lastAccessed is null
-        AND mr.status = :status
-        """)
-    long countTransformedEntitiesByRequestorIdAndStatusNotAccessed(Integer userId, MediaRequestStatus status);
+    SELECT count(distinct tm.id)
+    FROM MediaRequestEntity mr
+    JOIN TransformedMediaEntity tm ON tm.mediaRequest = mr
+    WHERE mr.currentOwner.id = :userId
+      AND tm.lastAccessed IS NULL
+      AND mr.status = :status
+    """)
+    long countTransformedEntitiesByCurrentOwnerIdAndStatusNotAccessed(Integer userId, MediaRequestStatus status);
 
     @Query("""
         SELECT mr
