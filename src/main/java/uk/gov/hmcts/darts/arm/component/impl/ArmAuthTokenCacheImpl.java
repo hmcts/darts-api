@@ -22,8 +22,8 @@ import java.time.Duration;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static uk.gov.hmcts.darts.common.util.RedisConstants.ARM_TOKEN_CACHE;
-import static uk.gov.hmcts.darts.common.util.RedisConstants.ARM_TOKEN_CACHE_KEY;
+import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_KEY;
+import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
 @Component
 @RequiredArgsConstructor
@@ -39,13 +39,24 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
 
     /**
+     * Allows callers to dump a bad token (e.g. after 401) so next call will refresh.
+     */
+    @Override
+    public void evictToken() {
+        Cache cache = cacheManager.getCache(ARM_TOKEN_CACHE_NAME);
+        if (cache != null) {
+            cache.evict(ARM_TOKEN_CACHE_KEY);
+        }
+    }
+
+    /**
      * Returns a cached token when present; otherwise refreshes it under a short Redis lock.
      */
     @Override
     public String getToken(ArmTokenRequest armTokenRequest) {
-        Cache cache = cacheManager.getCache(ARM_TOKEN_CACHE);
+        Cache cache = cacheManager.getCache(ARM_TOKEN_CACHE_NAME);
         if (cache == null) {
-            return fetchFreshToken(armTokenRequest);
+            return fetchFreshBearerToken(armTokenRequest); // fail-open: no cache manager
         }
 
         String cached = cache.get(ARM_TOKEN_CACHE_KEY, String.class);
@@ -53,6 +64,11 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
             return cached;
         }
 
+        return lockAndRetryGetToken(armTokenRequest, cache);
+    }
+
+    private String lockAndRetryGetToken(ArmTokenRequest armTokenRequest, Cache cache) {
+        String cached;
         boolean locked = tryAcquireLock();
         try {
             // Re-check after obtaining the lock to avoid duplicate refreshes across pods
@@ -61,11 +77,12 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
                 return cached;
             }
 
-            String fresh = fetchFreshToken(armTokenRequest);
-            if (StringUtils.hasText(fresh)) {
-                cache.put(ARM_TOKEN_CACHE_KEY, fresh);
+            String freshBearer = fetchFreshBearerToken(armTokenRequest);
+            // Only cache if truly valid (non-blank and not "Bearer null")
+            if (StringUtils.hasText(freshBearer) && !"Bearer null".equals(freshBearer)) {
+                cache.put(ARM_TOKEN_CACHE_KEY, freshBearer);
             }
-            return fresh;
+            return freshBearer;
         } finally {
             if (locked) {
                 releaseLock();
@@ -73,63 +90,72 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
         }
     }
 
-    /**
-     * Allows callers to dump a bad token (e.g. after 401) so next call will refresh.
-     */
-    @Override
-    public void evictToken() {
-        Cache cache = cacheManager.getCache(ARM_TOKEN_CACHE);
-        if (cache != null) {
-            cache.evict(ARM_TOKEN_CACHE_KEY);
-        }
-    }
-
-    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
-    private String fetchFreshToken(ArmTokenRequest armTokenRequest) {
-        String accessToken = null;
+    private String fetchFreshBearerToken(ArmTokenRequest armTokenRequest) {
         try {
-            ArmTokenResponse armTokenResponse = armClientService.getToken(armTokenRequest);
-            if (isNotEmpty(armTokenResponse.getAccessToken())) {
-                String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
-                //TODO REMOVE ONCE TESTED
-                log.debug("Fetched ARM Bearer Token from token: {}", bearerToken);
-                EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            ArmTokenResponse initial = armClientService.getToken(armTokenRequest);
+            String firstAccessToken = initial != null ? initial.getAccessToken() : null;
 
-                AvailableEntitlementProfile availableEntitlementProfile = getAvailableEntitlementProfile(bearerToken, emptyRpoRequest, armTokenRequest);
-                if (!availableEntitlementProfile.isError()) {
-                    Optional<String> profileId = availableEntitlementProfile.getProfiles().stream()
-                        .filter(p -> armApiConfigurationProperties.getArmServiceProfile().equalsIgnoreCase(p.getProfileName()))
-                        .map(AvailableEntitlementProfile.Profiles::getProfileId)
-                        .findAny();
-                    if (profileId.isPresent()) {
-                        log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
-                        ArmTokenResponse tokenResponse = armClientService.selectEntitlementProfile(bearerToken, profileId.get(), emptyRpoRequest);
-                        accessToken = tokenResponse.getAccessToken();
-                    }
-                }
+            if (!isNotEmpty(firstAccessToken)) {
+                throw new IllegalStateException("ARM token returned empty access token");
             }
+
             //TODO REMOVE ONCE TESTED
-            log.debug("Fetched ARM Bearer Token : {}", accessToken);
-            return String.format("Bearer %s", accessToken);
+            log.debug("Fetched ARM Bearer Token from token: {}", firstAccessToken);
+            String firstBearer = String.format("Bearer %s", firstAccessToken);
+
+            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+            AvailableEntitlementProfile profiles = getAvailableEntitlementProfile(firstBearer, emptyRpoRequest, armTokenRequest);
+
+            if (profiles == null || profiles.isError() || profiles.getProfiles() == null) {
+                throw new IllegalStateException("ARM entitlement profiles unavailable or error returned");
+            }
+
+            Optional<String> profileId = profiles.getProfiles().stream()
+                .filter(p -> armApiConfigurationProperties.getArmServiceProfile().equalsIgnoreCase(p.getProfileName()))
+                .map(AvailableEntitlementProfile.Profiles::getProfileId)
+                .findFirst();
+
+            if (profileId.isEmpty()) {
+                throw new IllegalStateException("ARM service profile not found: " + armApiConfigurationProperties.getArmServiceProfile());
+            }
+
+            log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
+            ArmTokenResponse selected = armClientService.selectEntitlementProfile(firstBearer, profileId.get(), emptyRpoRequest);
+            String finalAccessToken = selected != null ? selected.getAccessToken() : null;
+
+            if (!isNotEmpty(finalAccessToken)) {
+                throw new IllegalStateException("ARM selectEntitlementProfile returned empty access token");
+            }
+
+            //TODO REMOVE ONCE TESTED
+            log.debug("Fetched ARM Bearer Token : {}", finalAccessToken);
+            return String.format("Bearer %s", finalAccessToken);
+
         } catch (RestClientException ex) {
-            log.error("Unable to fetch ARM auth token {}", ex.getMessage());
+            log.error("Unable to fetch ARM auth token: {}", ex.getMessage());
             throw ex;
         }
     }
 
-    private AvailableEntitlementProfile getAvailableEntitlementProfile(String bearerToken, EmptyRpoRequest emptyRpoRequest, ArmTokenRequest armTokenRequest) {
+    private AvailableEntitlementProfile getAvailableEntitlementProfile(
+        String bearerToken, EmptyRpoRequest emptyRpoRequest, ArmTokenRequest armTokenRequest) {
+
         try {
             return armClientService.availableEntitlementProfiles(bearerToken, emptyRpoRequest);
         } catch (HttpClientErrorException ex) {
             int sc = ex.getStatusCode().value();
             if (sc == HttpStatus.UNAUTHORIZED.value() || sc == HttpStatus.FORBIDDEN.value()) {
+                // Evict and retry once with a brand new bearer token
                 evictToken();
                 ArmTokenResponse tokenResponse = armClientService.getToken(armTokenRequest);
-                if (isNotEmpty(tokenResponse.getAccessToken())) {
-                    String accessToken = String.format("Bearer %s", tokenResponse.getAccessToken());
-                    return armClientService.availableEntitlementProfiles(accessToken, emptyRpoRequest);
+                String access = tokenResponse != null ? tokenResponse.getAccessToken() : null;
+
+                if (!isNotEmpty(access)) {
+                    throw new IllegalStateException("ARM token returned empty access token during profiles retry");
                 }
-                throw ex;
+
+                String freshBearer = "Bearer " + access;
+                return armClientService.availableEntitlementProfiles(freshBearer, emptyRpoRequest);
             }
             throw ex;
         }
