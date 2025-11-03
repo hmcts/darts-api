@@ -36,6 +36,16 @@ public class MediaRequestStub {
     }
 
     @Transactional
+    public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity owner,
+                                                              UserAccountEntity requestor, AudioRequestType audioRequestType,
+                                                              MediaRequestStatus status) {
+        return createAndLoadMediaRequestEntity(owner, requestor, audioRequestType, status, "NEWCASTLE", "2",
+                                               LocalDateTime.of(2023, 6, 10, 10, 0, 0),
+                                               OffsetDateTime.parse("2023-06-26T13:00:00Z"), OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                                               OffsetDateTime.now());
+    }
+
+    @Transactional
     public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity requestor,
                                                               HearingEntity hearing,
                                                               AudioRequestType audioRequestType,
