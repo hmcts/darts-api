@@ -2,15 +2,12 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
-import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
-import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
-import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
+import uk.gov.hmcts.darts.arm.component.ArmAuthTokenCache;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
@@ -24,7 +21,6 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 
@@ -35,13 +31,15 @@ public class ArmApiServiceImpl implements ArmApiService {
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ArmClientService armClientService;
+    private final ArmAuthTokenCache armAuthTokenCache;
 
     public ArmApiServiceImpl(ArmApiConfigurationProperties armApiConfigurationProperties,
                              ArmDataManagementConfiguration armDataManagementConfiguration,
-                             ArmClientService armClientService) {
+                             ArmClientService armClientService, ArmAuthTokenCache armAuthTokenCache) {
         this.armApiConfigurationProperties = armApiConfigurationProperties;
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.armClientService = armClientService;
+        this.armAuthTokenCache = armAuthTokenCache;
     }
 
     @Override
@@ -109,39 +107,17 @@ public class ArmApiServiceImpl implements ArmApiService {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public String getArmBearerToken() {
-        log.debug("Get ARM Bearer Token with Username: {}, Password: {}", armApiConfigurationProperties.getArmUsername(),
+        log.debug("Get ARM Bearer Token with Username: {}, Password: {}",
+                  armApiConfigurationProperties.getArmUsername(),
                   armApiConfigurationProperties.getArmPassword());
-        String accessToken = null;
 
         ArmTokenRequest armTokenRequest = ArmTokenRequest.builder()
             .username(armApiConfigurationProperties.getArmUsername())
             .password(armApiConfigurationProperties.getArmPassword())
             .build();
 
-        ArmTokenResponse armTokenResponse = armClientService.getToken(armTokenRequest);
-
-        if (StringUtils.isNotEmpty(armTokenResponse.getAccessToken())) {
-            String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
-            log.debug("Fetched ARM Bearer Token from /token: {}", bearerToken);
-            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-            AvailableEntitlementProfile availableEntitlementProfile = armClientService.availableEntitlementProfiles(bearerToken, emptyRpoRequest);
-            if (!availableEntitlementProfile.isError()) {
-                Optional<String> profileId = availableEntitlementProfile.getProfiles().stream()
-                    .filter(p -> armApiConfigurationProperties.getArmServiceProfile().equalsIgnoreCase(p.getProfileName()))
-                    .map(AvailableEntitlementProfile.Profiles::getProfileId)
-                    .findAny();
-                if (profileId.isPresent()) {
-                    log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
-                    ArmTokenResponse tokenResponse = armClientService.selectEntitlementProfile(bearerToken, profileId.get(), emptyRpoRequest);
-                    accessToken = tokenResponse.getAccessToken();
-                }
-            }
-        }
-
-        log.debug("Fetched ARM Bearer Token : {}", armTokenResponse.getAccessToken());
-        return String.format("Bearer %s", accessToken);
+        return armAuthTokenCache.getToken(armTokenRequest);
     }
 
     String formatDateTime(OffsetDateTime offsetDateTime) {

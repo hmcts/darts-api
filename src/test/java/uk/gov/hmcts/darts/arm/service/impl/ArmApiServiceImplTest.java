@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
+import uk.gov.hmcts.darts.arm.component.ArmAuthTokenCache;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
@@ -43,13 +44,14 @@ class ArmApiServiceImplTest {
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    
+
     private ArmApiServiceImpl armApiService;
+    private ArmAuthTokenCache armAuthTokenClient;
 
     @BeforeEach
     void setUp() {
         ArmClientService armClientService = new ArmClientServiceImpl(armTokenClient, armApiClient, null);
-        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armDataManagementConfiguration, armClientService);
+        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armDataManagementConfiguration, armClientService, armAuthTokenClient);
     }
 
     @Test
