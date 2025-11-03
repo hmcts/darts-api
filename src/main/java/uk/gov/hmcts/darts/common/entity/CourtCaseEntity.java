@@ -181,7 +181,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
 
     public void addDefendant(DefendantEntity defendant) {
         if (defendantList.stream().noneMatch(defendantEntity -> defendantEntity.getName().equalsIgnoreCase(defendant.getName()))) {
-            defendantList.add(defendant); 
+            defendantList.add(defendant);  
         }
     }
 
