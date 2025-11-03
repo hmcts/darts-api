@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "PMD.DoNotUseThreads", "PMD.CloseResource"})
 @ExtendWith(MockitoExtension.class)
 class ArmAuthTokenCacheImplTest {
 
@@ -48,9 +48,7 @@ class ArmAuthTokenCacheImplTest {
 
     private ConcurrentMapCacheManager cacheManager;
     private StringRedisTemplate redisTemplate;
-    private ValueOperations<String, String> valueOps;
     private ArmClientService armClientService;
-    private ArmApiConfigurationProperties armApiConfigurationProperties;
     private ArmAuthTokenCache cache;
 
     private final ArmTokenRequest armTokenRequest = ArmTokenRequest.builder()
@@ -62,11 +60,11 @@ class ArmAuthTokenCacheImplTest {
     void setUp() {
         cacheManager = new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
         redisTemplate = mock(StringRedisTemplate.class);
-        valueOps = mock(ValueOperations.class);
+        ValueOperations<String, String> valueOps = mock(ValueOperations.class);
         when(redisTemplate.opsForValue()).thenReturn(valueOps);
 
         armClientService = mock(ArmClientService.class);
-        armApiConfigurationProperties = mock(ArmApiConfigurationProperties.class);
+        ArmApiConfigurationProperties armApiConfigurationProperties = mock(ArmApiConfigurationProperties.class);
         when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(SERVICE_PROFILE);
 
         cache = new ArmAuthTokenCacheImpl(cacheManager, redisTemplate, armClientService, armApiConfigurationProperties);
@@ -169,10 +167,10 @@ class ArmAuthTokenCacheImplTest {
         when(armClientService.availableEntitlementProfiles(anyString(), any(EmptyRpoRequest.class)))
             .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "unauth", new byte[0], StandardCharsets.UTF_8))
             .thenAnswer(inv -> {
-                AvailableEntitlementProfile.Profiles p = profilesWith(SERVICE_PROFILE, "PID-123").getProfiles().get(0);
+                AvailableEntitlementProfile.Profiles profiles = profilesWith(SERVICE_PROFILE, "PID-123").getProfiles().get(0);
                 AvailableEntitlementProfile profs = mock(AvailableEntitlementProfile.class);
                 when(profs.isError()).thenReturn(false);
-                when(profs.getProfiles()).thenReturn(List.of(p));
+                when(profs.getProfiles()).thenReturn(List.of(profiles));
                 return profs;
             });
 
