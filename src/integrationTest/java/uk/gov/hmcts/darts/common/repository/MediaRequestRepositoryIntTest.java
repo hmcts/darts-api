@@ -3,9 +3,13 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
+import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
+import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -23,6 +27,12 @@ class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
     MediaRequestRepository mediaRequestRepository;
+    
+    @Autowired
+    UserAccountStub userAccountStub;
+    
+    @Autowired
+    TransformedMediaStub transformedMediaStub;
 
 
     @Test
@@ -87,6 +97,27 @@ class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
                                                                                                    List.of(0));
 
         assertThat(updatedMediaRequest).isNull();
+    }
+    
+    @Test
+    void countTransformedEntitiesByCurrentOwnerIdAndStatusNotAccessed_ReturnsNotAccessedCount_WhenUserOwnsTransformedMedia() {
+        UserAccountEntity owner = userAccountStub.createIntegrationUser(null,"Test Owner",  "testowner@gmail.com", true);
+        UserAccountEntity requestor = userAccountStub.createIntegrationUser(null, "Test Requestor",  "testrequestor@gmail.com", true);
+
+        MediaRequestEntity mediaRequestEntity1 = mediaRequestStub.createAndLoadMediaRequestEntity(requestor, requestor, AudioRequestType.DOWNLOAD, COMPLETED);
+        MediaRequestEntity mediaRequestEntity2 = mediaRequestStub.createAndLoadMediaRequestEntity(owner, requestor, AudioRequestType.DOWNLOAD, COMPLETED);
+        MediaRequestEntity mediaRequestEntity3 = mediaRequestStub.createAndLoadMediaRequestEntity(owner, requestor, AudioRequestType.DOWNLOAD, COMPLETED);
+
+        transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity1, "test file 1", OffsetDateTime.now().plusDays(2), null);
+        transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity2, "test file 2", OffsetDateTime.now().plusDays(2), null);
+        transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity3, "test file 3", OffsetDateTime.now().plusDays(2), null);
+        
+        long notAccessedCount = mediaRequestRepository.countTransformedEntitiesByCurrentOwnerIdAndStatusNotAccessed(
+            owner.getId(),
+            COMPLETED
+        );
+        
+        assertThat(notAccessedCount).isEqualTo(2);
     }
 
 }
