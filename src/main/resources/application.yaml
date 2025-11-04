@@ -291,7 +291,7 @@ darts:
         download-production-path: /api/v1/downloadProduction/{productionExportFileID}/false
 
         enable-arm-v5-2-upgrade: ${ENABLE_ARM_V5_2_UPGRADE:false}
-        
+
         version5-2:
           authentication:
             auth-base-url: ${ARM_AUTH_URL:}
