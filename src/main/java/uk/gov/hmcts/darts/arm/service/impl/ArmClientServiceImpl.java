@@ -1,9 +1,11 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import feign.Response;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
@@ -38,9 +40,11 @@ import uk.gov.hmcts.darts.arm.service.ArmClientService;
  * Pre ARM version 5.2 implementation of the ArmClientService.
  * This implementation is activated when the property 'darts.storage.arm.arm-api.enable-arm-v5' is set to false.
  */
+@ConditionalOnProperty(prefix = "darts.storage.arm.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "false")
+@RequiredArgsConstructor
+@Slf4j
 @Component
-@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "false")
-@AllArgsConstructor
+//@AllArgsConstructor
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UseObjectForClearerAPI"})
 public class ArmClientServiceImpl implements ArmClientService {
 

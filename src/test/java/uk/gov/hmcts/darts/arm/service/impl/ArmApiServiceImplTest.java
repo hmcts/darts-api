@@ -41,14 +41,17 @@ class ArmApiServiceImplTest {
     @Mock
     private ArmApiClient armApiClient;
 
+    private ArmClientService armClientService;
+
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    
+
+
     private ArmApiServiceImpl armApiService;
 
     @BeforeEach
     void setUp() {
-        ArmClientService armClientService = new ArmClientServiceImpl(armTokenClient, armApiClient, null);
+        armClientService = new ArmClientServiceImpl(armTokenClient, armApiClient, null);
         armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armDataManagementConfiguration, armClientService);
     }
 

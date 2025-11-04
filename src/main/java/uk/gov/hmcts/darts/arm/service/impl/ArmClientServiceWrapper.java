@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import feign.Response;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -39,7 +39,7 @@ import uk.gov.hmcts.darts.arm.service.ArmClientService;
  */
 @Component
 @ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
-@AllArgsConstructor
+@RequiredArgsConstructor
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UseObjectForClearerAPI"})
 public class ArmClientServiceWrapper implements ArmClientService {
 
