@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -44,9 +46,15 @@ class ArmApiServiceImplTest {
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-
-    private ArmApiServiceImpl armApiService;
+    @Mock
+    private CacheManager cacheManager;
+    @Mock
+    private StringRedisTemplate redis;
+    @Mock
+    private ArmClientService armClientService;
+    @Mock
     private ArmAuthTokenCache armAuthTokenClient;
+    private ArmApiServiceImpl armApiService;
 
     @BeforeEach
     void setUp() {
@@ -74,7 +82,7 @@ class ArmApiServiceImplTest {
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder().username(username).password(password).build();
         ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
 
-        when(armTokenClient.getToken(tokenRequest)).thenReturn(response);
+        when(armAuthTokenClient.getToken(tokenRequest)).thenReturn(bearerToken);
 
         AvailableEntitlementProfile.Profiles profiles = AvailableEntitlementProfile.Profiles.builder().profileId(armProfileId).profileName(armProfile).build();
         AvailableEntitlementProfile profile = Mockito.mock(AvailableEntitlementProfile.class);
@@ -117,7 +125,7 @@ class ArmApiServiceImplTest {
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder().username(username).password(password).build();
         ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
 
-        when(armTokenClient.getToken(tokenRequest)).thenReturn(response);
+        when(armAuthTokenClient.getToken(tokenRequest)).thenReturn(bearerToken);
 
         AvailableEntitlementProfile.Profiles profiles = AvailableEntitlementProfile.Profiles.builder().profileId(armProfileId).profileName(armProfile).build();
         AvailableEntitlementProfile profile = Mockito.mock(AvailableEntitlementProfile.class);

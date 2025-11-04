@@ -14,18 +14,18 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 
-import static uk.gov.hmcts.darts.common.util.RedisConstants.ARM_TOKEN_CACHE;
+import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
 @Configuration
 @EnableCaching
 @Profile("!in-memory-caching")
-public class ArmTokenCacheConfig {
+public class ArmRedisCacheConfiguration {
 
     @Value("${darts.storage.arm.arm-token-cache-expiry}")
     private Duration armTokenCacheExpiry;
 
     @Bean
-    public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
+    public CacheManager armRedisCacheManager(RedisConnectionFactory connectionFactory) {
         var keySerializer = new StringRedisSerializer();
         var valueSerializer = new StringRedisSerializer(); // token is a String
 
@@ -34,12 +34,12 @@ public class ArmTokenCacheConfig {
             .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(keySerializer))
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer))
             .disableCachingNullValues()
-            .prefixCacheNameWith("darts:")
+            //.prefixCacheNameWith("darts:")
             .entryTtl(armTokenCacheExpiry);
 
         return RedisCacheManager.builder(connectionFactory)
             .cacheDefaults(baseConfig)
-            .withCacheConfiguration(ARM_TOKEN_CACHE, baseConfig)
+            .withCacheConfiguration(ARM_TOKEN_CACHE_NAME, baseConfig)
             .build();
     }
 
