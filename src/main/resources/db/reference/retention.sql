@@ -67,6 +67,15 @@
 --          eve_id(case_management_retention)
 --v29  adding cmr_id to cmr_dets
 --v30  add car_id to wk_cr_dets_aligned ( whilst also adding the table !)
+--     add retention_process_log
+--v31  amend two columns in cc_dets, amend cas_retention.. to case_retention..
+--     amend _ts_ts to just _ts
+--v32  additional columns to 3 tables, based on JW email 29/10/25
+--     wk_case_best_values_p1.subtype 
+--     wk_case_best_values_post_p1.subtype
+--     wk_case_correction.closed_date_subtype
+--     remove rownum from wk_case_best_values_p1 & wk_case_best_values_post_p1
+
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -273,7 +282,7 @@ CREATE TABLE cc_dets
 ,c_case_closed_date_pre_live   TIMESTAMP WITH TIME ZONE
 ,c_case_closed_date_crah       TIMESTAMP WITH TIME ZONE
 ,case_created_ts               TIMESTAMP WITH TIME ZONE
-,case_retention_fixed           CHARACTER VARYING(16)
+,case_retention_fixed          CHARACTER VARYING(16)
 ,case_total_sentence           CHARACTER VARYING(16)
 ,retention_applies_from_ts     TIMESTAMP WITH TIME ZONE
 ,end_of_sentence_date_ts       TIMESTAMP WITH TIME ZONE
@@ -368,6 +377,7 @@ CREATE TABLE wk_case_correction
 ,case_old_closed_date_ts       TIMESTAMP WITH TIME ZONE
 ,case_audit_old_closed_date_ts TIMESTAMP WITH TIME ZONE
 ,closed_date_type              CHARACTER VARYING(50)
+,closed_date_subtype           CHARACTER VARYING(30)
 ,eve_id                        BIGINT
 ,cmr_eve_id                    BIGINT
 ,current_logic_rpt_id          INTEGER
@@ -394,7 +404,7 @@ CREATE TABLE wk_case_best_values_p1
 ,evh_id                         INTEGER
 ,closed_date_ts                 TIMESTAMP WITH TIME ZONE
 ,closed_date_type               CHARACTER VARYING(50)
-,rownum                         INTEGER
+,subtype                        CHARACTER VARYING(30)
 ) TABLESPACE pg_default;
 
 CREATE TABLE wk_case_best_values_post_p1
@@ -403,7 +413,7 @@ CREATE TABLE wk_case_best_values_post_p1
 ,evh_id                         INTEGER
 ,closed_date_ts                 TIMESTAMP WITH TIME ZONE
 ,closed_date_type               CHARACTER VARYING(50)
-,rownum                         INTEGER
+,subtype                        CHARACTER VARYING(30)
 ) TABLESPACE pg_default;
 
 CREATE TABLE wk_case_activity_data
