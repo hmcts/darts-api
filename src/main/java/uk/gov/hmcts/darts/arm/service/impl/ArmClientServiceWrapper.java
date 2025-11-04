@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import feign.Response;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
