@@ -62,6 +62,9 @@ class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegr
     @MockitoBean
     private ArmTokenClient armTokenClient;
 
+    //@Autowired
+    //private ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
+
     @Autowired
     private ArmRetentionEventDateCalculatorAutomatedTask armRetentionEventDateCalculatorAutomatedTask;
 

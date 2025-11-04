@@ -26,7 +26,8 @@ class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
 
     @Autowired
     private SaveBackgroundSearchService saveBackgroundSearchService;
-    
+
+
     @Test
     void saveBackgroundSearchSuccess() {
 

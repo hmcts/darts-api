@@ -290,32 +290,6 @@ darts:
         get-extended-productions-by-matter: /api/v1/getExtendedProductionsByMatter
         download-production-path: /api/v1/downloadProduction/{productionExportFileID}/false
 
-      enable-arm-v5-2-upgrade: ${ENABLE_ARM_V5_2_UPGRADE:false}
-
-      version5-2:
-        authentication:
-          auth-base-url: ${ARM_AUTH_URL:}
-          token-path: /account/token
-        api:
-          api-base-url: ${ARM_API_URL:}
-          available-entitlement-profiles-path: /v1/availableEntitlementProfiles
-          select-entitlement-profile-path: /v1/selectEntitlementProfile/{profile_id}
-          update-metadata-path: /v3/UpdateMetadata
-          download-data-path: /v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
-          get-record-management-matter-path: /v1/getRecordManagementMatter
-          get-storage-accounts-path: /v1/getStorageAccounts
-          get-indexes-by-matter-id-path: /v1/getIndexesByMatterId
-          get-master-index-field-by-record-class-schema-path: /v1/getMasterIndexFieldByRecordClassSchema
-          get-profile-entitlements-path: /v1/getProfileEntitlements
-          add-async-search-path: /v1/addAsyncSearchRM
-          save-background-search-path: /v1/SaveBackgroundSearch
-          create-export-based-on-search-results-table-path: /v1/CreateExportBasedOnSearchResultsTable
-          get-extended-searches-by-matter-path: /v1/getExtendedSearchesByMatter
-          get-production-output-files-path: /v1/getProductionOutputFiles
-          remove-production-path: /v1/removeProduction
-          get-extended-productions-by-matter: /v1/getExtendedProductionsByMatter
-          download-production-path: /v1/downloadProduction/{productionExportFileID}/false
-
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration

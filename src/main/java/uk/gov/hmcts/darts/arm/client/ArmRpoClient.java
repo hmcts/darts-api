@@ -37,105 +37,105 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 )
 public interface ArmRpoClient {
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-record-management-matter-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
-                                                             @RequestBody EmptyRpoRequest emptyRpoRequest); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-record-management-matter-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                                             @RequestBody EmptyRpoRequest emptyRpoRequest);
 
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-storage-accounts-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    StorageAccountResponse getStorageAccounts(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                              @RequestBody StorageAccountRequest storageAccountRequest); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-storage-accounts-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    StorageAccountResponse getStorageAccounts(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                              @RequestBody StorageAccountRequest storageAccountRequest);
 
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-master-index-field-by-record-class-schema-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
-                                                                                       @RequestBody MasterIndexFieldByRecordClassSchemaRequest  //NOSONAR
-                                                                                            masterIndexFieldByRecordClassSchemaRequest); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-master-index-field-by-record-class-schema-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(
+        @RequestHeader(AUTHORIZATION) String bearerAuth, @RequestBody MasterIndexFieldByRecordClassSchemaRequest masterIndexFieldByRecordClassSchemaRequest);
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-profile-entitlements-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    ProfileEntitlementResponse getProfileEntitlementResponse(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
-                                                             @RequestBody EmptyRpoRequest emptyRpoRequest); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-profile-entitlements-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    ProfileEntitlementResponse getProfileEntitlementResponse(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                                             @RequestBody EmptyRpoRequest emptyRpoRequest);
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.add-async-search-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    ArmAsyncSearchResponse addAsyncSearch(@RequestHeader(AUTHORIZATION) String bearerAuth, @RequestBody String body); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.add-async-search-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    ArmAsyncSearchResponse addAsyncSearch(@RequestHeader(AUTHORIZATION) String bearerAuth, @RequestBody String body);
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-indexes-by-matter-id-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    IndexesByMatterIdResponse getIndexesByMatterId(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                                   @RequestBody IndexesByMatterIdRequest indexesByMatterIdRequest); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-indexes-by-matter-id-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    IndexesByMatterIdResponse getIndexesByMatterId(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                   @RequestBody IndexesByMatterIdRequest indexesByMatterIdRequest);
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.save-background-search-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    SaveBackgroundSearchResponse saveBackgroundSearch(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                                      @RequestBody SaveBackgroundSearchRequest saveBackgroundSearchRequest); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.save-background-search-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    SaveBackgroundSearchResponse saveBackgroundSearch(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                      @RequestBody SaveBackgroundSearchRequest saveBackgroundSearchRequest);
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-extended-searches-by-matter-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    ExtendedSearchesByMatterResponse getExtendedSearchesByMatter(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                                                 @RequestBody String body); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-extended-searches-by-matter-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    ExtendedSearchesByMatterResponse getExtendedSearchesByMatter(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                                 @RequestBody String body);
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-production-output-files-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    ProductionOutputFilesResponse getProductionOutputFiles(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                                           @RequestBody ProductionOutputFilesRequest productionOutputFilesRequest); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-production-output-files-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    ProductionOutputFilesResponse getProductionOutputFiles(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                           @RequestBody ProductionOutputFilesRequest productionOutputFilesRequest);
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.create-export-based-on-search-results-table-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                                                                        @RequestBody 
-                                                                                            CreateExportBasedOnSearchResultsTableRequest request); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.create-export-based-on-search-results-table-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable(
+        @RequestHeader(AUTHORIZATION) String bearerToken, @RequestBody CreateExportBasedOnSearchResultsTableRequest request);
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.remove-production-path}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    RemoveProductionResponse removeProduction(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                              @RequestBody RemoveProductionRequest removeProductionRequest); //NOSONAR
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-extended-productions-by-matter}", //NOSONAR
-        consumes = APPLICATION_JSON_VALUE, //NOSONAR
-        produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
-    ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                                                       @RequestBody String body); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.remove-production-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    RemoveProductionResponse removeProduction(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                              @RequestBody RemoveProductionRequest removeProductionRequest);
 
-    @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}", //NOSONAR
-        produces = APPLICATION_OCTET_STREAM_VALUE) //NOSONAR
-    feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
-                                      @PathVariable("productionExportFileID") String productionExportFileId); //NOSONAR
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-extended-productions-by-matter}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                                       @RequestBody String body);
+
+    @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}",
+        produces = APPLICATION_OCTET_STREAM_VALUE)
+    feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                      @PathVariable("productionExportFileID") String productionExportFileId);
+
 
     /**
      * Download production that should only be used in lower environments for testing purposes.
      */
-    @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}", //NOSONAR
-        produces = APPLICATION_OCTET_STREAM_VALUE) //NOSONAR
-    feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
-                                      @RequestHeader("EOD_IDS") String eodIds, //NOSONAR
-                                      @PathVariable("productionExportFileID") String productionExportFileId); //NOSONAR
+    @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}",
+        produces = APPLICATION_OCTET_STREAM_VALUE)
+    feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                      @RequestHeader("EOD_IDS") String eodIds,
+                                      @PathVariable("productionExportFileID") String productionExportFileId);
 
 }

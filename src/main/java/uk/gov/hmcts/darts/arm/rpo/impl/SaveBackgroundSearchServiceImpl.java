@@ -4,11 +4,11 @@ import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.SaveBackgroundSearchService;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 @Slf4j
 public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchService {
 
-    private final ArmClientService armClientService;
+    private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
 
@@ -34,7 +34,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
         try {
             SaveBackgroundSearchRequest saveBackgroundSearchRequest =
                 createSaveBackgroundSearchRequest(searchName, armRpoExecutionDetailEntity.getSearchId());
-            saveBackgroundSearchResponse = armClientService.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
+            saveBackgroundSearchResponse = armRpoClient.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
         } catch (FeignException e) {
             log.error(errorMessage.append("Unable to save background search").append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);

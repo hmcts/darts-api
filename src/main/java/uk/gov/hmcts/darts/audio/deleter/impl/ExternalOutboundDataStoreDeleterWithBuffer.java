@@ -36,7 +36,8 @@ public class ExternalOutboundDataStoreDeleterWithBuffer extends ExternalOutbound
         this.currentTimeHelper = currentTimeHelper;
         this.transientObjectDirectoryDeleteBuffer = transientObjectDirectoryDeleteBuffer;
     }
-    
+
+
     @Override
     public Collection<TransientObjectDirectoryEntity> delete(Integer batchSize) {
         Collection<TransientObjectDirectoryEntity> result = super.delete(batchSize);

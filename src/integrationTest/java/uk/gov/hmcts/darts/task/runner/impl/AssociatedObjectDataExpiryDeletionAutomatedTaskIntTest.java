@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.shaded.org.apache.commons.lang3.function.TriFunction;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -38,9 +37,6 @@ import static org.assertj.core.api.Assertions.within;
 
 @DisplayName("AssociatedObjectDataExpiryDeletionAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@TestPropertySource(properties = {
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=false"
-})
 class AssociatedObjectDataExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     private final AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
@@ -180,6 +176,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskIntTest extends PostgresInt
         assertAnnotationDocument(annotationDocuments.annotationDocumentEntity3, true);
     }
 
+
     @Test
     void positiveAnnotationDocumentEntityExpiredButDoesNotHaveArm() {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
@@ -219,7 +216,8 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskIntTest extends PostgresInt
     }
 
     //Case Document
-    
+
+
     @Test
     void positiveCaseDocumentEntityExpired() {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");

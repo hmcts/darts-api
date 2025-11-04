@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
@@ -23,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,16 +38,15 @@ class ArmApiServiceImplTest {
     private ArmTokenClient armTokenClient;
     @Mock
     private ArmApiClient armApiClient;
-
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    
+
+
     private ArmApiServiceImpl armApiService;
 
     @BeforeEach
     void setUp() {
-        ArmClientService armClientService = new ArmClientServiceImpl(armTokenClient, armApiClient, null);
-        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armDataManagementConfiguration, armClientService);
+        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armTokenClient, armApiClient, armDataManagementConfiguration);
     }
 
     @Test
@@ -160,12 +157,12 @@ class ArmApiServiceImplTest {
     void formatDateTime_ShouldReturnNull_WhenOffsetDateTimeIsNull() {
         // given
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-
+        
         // when
         String formattedDateTime = armApiService.formatDateTime(null);
 
         // then
-        assertNull(formattedDateTime);
+        assertEquals(null, formattedDateTime);
     }
 
     private String formatDateTime(OffsetDateTime offsetDateTime) {

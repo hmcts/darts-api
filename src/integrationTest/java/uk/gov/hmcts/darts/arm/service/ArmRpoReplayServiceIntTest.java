@@ -38,6 +38,7 @@ class ArmRpoReplayServiceIntTest extends PostgresIntegrationBase {
     @Autowired
     private ArmRpoReplayService armRpoReplayService;
 
+
     @BeforeEach
     void setUp() {
         UserAccountEntity userAccountEntity = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();

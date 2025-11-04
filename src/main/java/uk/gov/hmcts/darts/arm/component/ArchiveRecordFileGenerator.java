@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.List;
 
 public interface ArchiveRecordFileGenerator {
-
     boolean generateArchiveRecord(ArchiveRecord archiveRecord, File archiveRecordFile, ArchiveRecordType archiveRecordType);
 
     String generateArchiveRecords(String archiveFileName, List<ArchiveRecord> archiveRecords);

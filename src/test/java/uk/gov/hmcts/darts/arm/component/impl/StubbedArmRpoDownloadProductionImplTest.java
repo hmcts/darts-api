@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.component.impl;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,9 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -59,13 +56,6 @@ class StubbedArmRpoDownloadProductionImplTest {
 
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
-
-    @BeforeEach
-    void setUp() {
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
-        stubbedArmRpoDownloadProduction = new StubbedArmRpoDownloadProductionImpl(
-            armClientService, armAutomatedTaskRepository, externalObjectDirectoryRepository, armRpoService);
-    }
 
     @Test
     void downloadProduction_shouldThrowException_whenAutomatedTaskNotFound() {

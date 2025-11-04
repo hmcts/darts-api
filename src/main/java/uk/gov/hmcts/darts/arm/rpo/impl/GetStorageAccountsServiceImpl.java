@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.GetStorageAccountsService;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -24,7 +24,7 @@ import java.util.List;
 @Slf4j
 public class GetStorageAccountsServiceImpl implements GetStorageAccountsService {
 
-    private final ArmClientService armClientService;
+    private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
@@ -39,7 +39,7 @@ public class GetStorageAccountsServiceImpl implements GetStorageAccountsService 
         StorageAccountResponse storageAccountResponse;
         try {
             StorageAccountRequest storageAccountRequest = createStorageAccountRequest();
-            storageAccountResponse = armClientService.getStorageAccounts(bearerToken, storageAccountRequest);
+            storageAccountResponse = armRpoClient.getStorageAccounts(bearerToken, storageAccountRequest);
 
         } catch (FeignException e) {
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);

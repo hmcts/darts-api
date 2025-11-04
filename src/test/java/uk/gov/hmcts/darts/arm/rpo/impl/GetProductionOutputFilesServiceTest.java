@@ -17,9 +17,7 @@ import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.rpo.GetProductionOutputFilesService;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -65,9 +63,8 @@ class GetProductionOutputFilesServiceTest {
         armRpoService = spy(ArmRpoService.class);
         armRpoClient = spy(ArmRpoClient.class);
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
-        getProductionOutputFilesService = new GetProductionOutputFilesServiceImpl(armClientService, armRpoService, armRpoUtil);
+        getProductionOutputFilesService = new GetProductionOutputFilesServiceImpl(armRpoClient, armRpoService, armRpoUtil);
 
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
     }

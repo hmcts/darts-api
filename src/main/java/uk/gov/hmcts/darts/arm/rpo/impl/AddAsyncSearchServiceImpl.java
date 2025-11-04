@@ -4,11 +4,11 @@ import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.AddAsyncSearchService;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
@@ -27,7 +27,7 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
 
     private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
 
-    private final ArmClientService armClientService;
+    private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
@@ -66,7 +66,7 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
 
         ArmAsyncSearchResponse armAsyncSearchResponse;
         try {
-            armAsyncSearchResponse = armClientService.addAsyncSearch(bearerToken, requestGenerator.getJsonRequest());
+            armAsyncSearchResponse = armRpoClient.addAsyncSearch(bearerToken, requestGenerator.getJsonRequest());
         } catch (FeignException e) {
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(e).toString(),
                                                              executionDetail, userAccount);

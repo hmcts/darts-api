@@ -69,8 +69,6 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 | ACTIVE_DIRECTORY_B2C_BASE_URI | https://hmctsstgextid.b2clogin.com                               |
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 | ARM_URL                       |                                                                  |  
-| ARM_AUTH_URL                  |                                                                  |
-| ARM_API_URL                   |                                                                  |
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
@@ -145,8 +143,6 @@ export AZURE_AD_FUNCTIONAL_TEST_USERNAME=
 export AZURE_AD_FUNCTIONAL_TEST_PASSWORD=
 export ARM_SAS_ENDPOINT=
 export ARM_URL=
-export ARM_AUTH_URL=
-export ARM_API_URL=
 export ARM_USERNAME=
 export ARM_PASSWORD=
 export DARTS_INBOUND_STORAGE_SAS_URL=

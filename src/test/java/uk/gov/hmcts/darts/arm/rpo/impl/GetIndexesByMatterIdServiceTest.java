@@ -14,9 +14,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -66,9 +64,7 @@ class GetIndexesByMatterIdServiceTest {
         userAccount = new UserAccountEntity();
         armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
-
-        getIndexesByMatterIdService = new GetIndexesByMatterIdServiceImpl(armClientService, armRpoService, armRpoUtil);
+        getIndexesByMatterIdService = new GetIndexesByMatterIdServiceImpl(armRpoClient, armRpoService, armRpoUtil);
     }
 
     @Test

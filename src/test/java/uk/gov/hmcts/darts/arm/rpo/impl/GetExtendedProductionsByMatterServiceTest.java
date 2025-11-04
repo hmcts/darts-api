@@ -11,9 +11,7 @@ import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -42,7 +40,7 @@ class GetExtendedProductionsByMatterServiceTest {
     private ArmRpoService armRpoService;
 
     private GetExtendedProductionsByMatterServiceImpl getExtendedProductionsByMatterService;
-    
+
     private UserAccountEntity userAccount;
     private static final Integer EXECUTION_ID = 1;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
@@ -56,8 +54,7 @@ class GetExtendedProductionsByMatterServiceTest {
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
-        getExtendedProductionsByMatterService = new GetExtendedProductionsByMatterServiceImpl(armClientService, armRpoService, armRpoUtil);
+        getExtendedProductionsByMatterService = new GetExtendedProductionsByMatterServiceImpl(armRpoClient, armRpoService, armRpoUtil);
     }
 
     @Test

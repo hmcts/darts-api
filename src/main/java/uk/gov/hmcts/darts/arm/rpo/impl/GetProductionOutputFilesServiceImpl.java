@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.GetProductionOutputFilesService;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -29,7 +29,7 @@ import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS
 @Slf4j
 public class GetProductionOutputFilesServiceImpl implements GetProductionOutputFilesService {
 
-    private final ArmClientService armClientService;
+    private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
 
@@ -53,7 +53,7 @@ public class GetProductionOutputFilesServiceImpl implements GetProductionOutputF
 
         ProductionOutputFilesResponse productionOutputFilesResponse;
         try {
-            productionOutputFilesResponse = armClientService.getProductionOutputFiles(bearerToken, createProductionOutputFilesRequest(productionId));
+            productionOutputFilesResponse = armRpoClient.getProductionOutputFiles(bearerToken, createProductionOutputFilesRequest(productionId));
         } catch (FeignException e) {
             throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(e).toString(),
                                                              executionDetail, userAccount);

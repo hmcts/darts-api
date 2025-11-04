@@ -16,9 +16,7 @@ import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.rpo.GetProfileEntitlementsService;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -57,15 +55,14 @@ class GetProfileEntitlementsServiceTest {
         armRpoService = spy(ArmRpoService.class);
         armRpoClient = mock(ArmRpoClient.class);
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
-
+        
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
         armApiConfigurationProperties.setArmServiceEntitlement(ENTITLEMENT_NAME);
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
-        getProfileEntitlementsService = new GetProfileEntitlementsServiceImpl(armClientService, armRpoService, armRpoUtil, armApiConfigurationProperties);
+        getProfileEntitlementsService = new GetProfileEntitlementsServiceImpl(armRpoClient, armRpoService, armRpoUtil, armApiConfigurationProperties);
     }
 
     @AfterEach

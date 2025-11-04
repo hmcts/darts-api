@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.GetIndexesByMatterIdService;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -25,7 +25,7 @@ import static java.util.Objects.isNull;
 @Slf4j
 public class GetIndexesByMatterIdServiceImpl implements GetIndexesByMatterIdService {
 
-    private final ArmClientService armClientService;
+    private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
 
@@ -39,7 +39,7 @@ public class GetIndexesByMatterIdServiceImpl implements GetIndexesByMatterIdServ
         StringBuilder errorMessage = new StringBuilder(151).append("Failure during ARM RPO get indexes by matter ID: ");
         IndexesByMatterIdResponse indexesByMatterIdResponse;
         try {
-            indexesByMatterIdResponse = armClientService.getIndexesByMatterId(bearerToken, createIndexesByMatterIdRequest(matterId));
+            indexesByMatterIdResponse = armRpoClient.getIndexesByMatterId(bearerToken, createIndexesByMatterIdRequest(matterId));
         } catch (FeignException e) {
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);

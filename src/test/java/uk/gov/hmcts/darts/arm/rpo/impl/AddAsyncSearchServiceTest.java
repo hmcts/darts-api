@@ -13,9 +13,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.rpo.AddAsyncSearchService;
-import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -71,9 +69,8 @@ class AddAsyncSearchServiceTest {
         requestCaptor = ArgumentCaptor.forClass(String.class);
 
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
-        addAsyncSearchService = new AddAsyncSearchServiceImpl(armClientService, armRpoService, armRpoUtil,
+        addAsyncSearchService = new AddAsyncSearchServiceImpl(armRpoClient, armRpoService, armRpoUtil,
                                                               armAutomatedTaskRepository);
 
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
