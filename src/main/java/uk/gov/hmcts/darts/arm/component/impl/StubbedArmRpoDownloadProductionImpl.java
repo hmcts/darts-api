@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduction {
 
     public static final int MAX_EOD_RECORDS = 10;
-    private final ArmRpoClient armRpoClient;
+    private final ArmClientService armClientService;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmRpoService armRpoService;
@@ -60,7 +60,7 @@ public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduc
         }
 
         String eodIds = eods.stream().map(eod -> eod.getId().toString()).collect(Collectors.joining(", "));
-        return armRpoClient.downloadProduction(bearerToken, eodIds, productionExportFileId);
+        return armClientService.downloadProduction(bearerToken, eodIds, productionExportFileId);
 
     }
 }

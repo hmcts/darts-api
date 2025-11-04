@@ -12,7 +12,9 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -35,7 +37,7 @@ class SaveBackgroundSearchServiceTest {
 
     @Mock
     private ArmRpoService armRpoService;
-    
+
     private SaveBackgroundSearchServiceImpl saveBackgroundSearchService;
 
     private UserAccountEntity userAccount;
@@ -51,7 +53,8 @@ class SaveBackgroundSearchServiceTest {
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
 
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
-        saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armRpoClient, armRpoService, armRpoUtil);
+        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armClientService, armRpoService, armRpoUtil);
     }
 
     @Test

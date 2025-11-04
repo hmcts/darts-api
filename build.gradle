@@ -352,6 +352,8 @@ sonarqube {
     property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
     property "sonar.cpd.exclusions", "**/ManualTaskService.java"
     property "sonar.scm.exclusions", "**/ManualTaskService.java"
+    property "sonar.cpd.exclusions", "**/ArmRpoClient.java"
+    property "sonar.scm.exclusions", "**/ArmRpoClient.java"
     if (skipSonar) {
       property 'sonar.exclusions', "**/**"
     }
@@ -440,26 +442,26 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.0'
   implementation 'org.springframework.retry:spring-retry:2.0.12'
 
-    implementation 'net.javacrumbs.shedlock:shedlock-spring:6.9.2'
-    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.2'
+  implementation 'net.javacrumbs.shedlock:shedlock-spring:6.9.2'
+  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.2'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
   implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.5.0'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.14.0'
+  implementation group: 'org.apache.commons', name: 'commons-text', version: '1.14.0'
 
   //CVE-2023-44487
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
-    implementation platform('com.azure:azure-sdk-bom:1.2.37')
+  implementation platform('com.azure:azure-sdk-bom:1.2.37')
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-    implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.11.0'
-    implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.11.0'
-    implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.10.3'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.11.0'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.11.0'
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.10.3'
 
   //database
   implementation 'org.postgresql:postgresql:42.7.7'
@@ -500,7 +502,7 @@ dependencies {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.3.0'
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.2.1'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.9'
   testImplementation 'org.springframework.security:spring-security-test:6.5.2'
