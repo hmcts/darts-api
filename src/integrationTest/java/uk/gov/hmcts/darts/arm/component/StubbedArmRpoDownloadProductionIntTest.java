@@ -48,7 +48,6 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
     @MockitoBean
     private ArmRpoClient armRpoClient;
 
-
     @BeforeEach
     void setUp() {
         dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
