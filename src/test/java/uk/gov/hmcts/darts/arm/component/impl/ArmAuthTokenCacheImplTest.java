@@ -46,7 +46,6 @@ class ArmAuthTokenCacheImplTest {
     private static final String USERNAME = "test.user@justice.gov.uk";
     private static final String PASSWORD = "secret";
 
-    private ConcurrentMapCacheManager cacheManager;
     private StringRedisTemplate redisTemplate;
     private ArmClientService armClientService;
     private ArmAuthTokenCache cache;
@@ -58,7 +57,7 @@ class ArmAuthTokenCacheImplTest {
 
     @BeforeEach
     void setUp() {
-        cacheManager = new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
+        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
         redisTemplate = mock(StringRedisTemplate.class);
         ValueOperations<String, String> valueOps = mock(ValueOperations.class);
         when(redisTemplate.opsForValue()).thenReturn(valueOps);
