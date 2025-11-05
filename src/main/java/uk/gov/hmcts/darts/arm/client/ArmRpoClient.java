@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
@@ -43,6 +45,7 @@ public interface ArmRpoClient {
     RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
                                                              @RequestBody EmptyRpoRequest emptyRpoRequest); //NOSONAR
 
+
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-storage-accounts-path}", //NOSONAR
         consumes = APPLICATION_JSON_VALUE, //NOSONAR
         produces = APPLICATION_JSON_VALUE //NOSONAR
@@ -50,6 +53,7 @@ public interface ArmRpoClient {
         //NOSONAR
     StorageAccountResponse getStorageAccounts(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
                                               @RequestBody StorageAccountRequest storageAccountRequest); //NOSONAR
+
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-master-index-field-by-record-class-schema-path}", //NOSONAR
         consumes = APPLICATION_JSON_VALUE, //NOSONAR
@@ -107,23 +111,33 @@ public interface ArmRpoClient {
     ProductionOutputFilesResponse getProductionOutputFiles(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
                                                            @RequestBody ProductionOutputFilesRequest productionOutputFilesRequest); //NOSONAR
 
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.create-export-based-on-search-results-table-path}", //NOSONAR
+        consumes = APPLICATION_JSON_VALUE, //NOSONAR
+        produces = APPLICATION_JSON_VALUE)
+//NOSONAR
+    CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable(
+        @RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
+        @RequestBody CreateExportBasedOnSearchResultsTableRequest request); //NOSONAR
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.remove-production-path}", //NOSONAR
         consumes = APPLICATION_JSON_VALUE, //NOSONAR
         produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
+    )
+        //NOSONAR
     RemoveProductionResponse removeProduction(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
                                               @RequestBody RemoveProductionRequest removeProductionRequest); //NOSONAR
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-extended-productions-by-matter}", //NOSONAR
         consumes = APPLICATION_JSON_VALUE, //NOSONAR
         produces = APPLICATION_JSON_VALUE //NOSONAR
-    ) //NOSONAR
+    )
+        //NOSONAR
     ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
                                                                        @RequestBody String body); //NOSONAR
 
     @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}", //NOSONAR
-        produces = APPLICATION_OCTET_STREAM_VALUE) //NOSONAR
+        produces = APPLICATION_OCTET_STREAM_VALUE)
+        //NOSONAR
     feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
                                       @PathVariable("productionExportFileID") String productionExportFileId); //NOSONAR
 
@@ -131,7 +145,8 @@ public interface ArmRpoClient {
      * Download production that should only be used in lower environments for testing purposes.
      */
     @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}", //NOSONAR
-        produces = APPLICATION_OCTET_STREAM_VALUE) //NOSONAR
+        produces = APPLICATION_OCTET_STREAM_VALUE)
+    //NOSONAR
     feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
                                       @RequestHeader("EOD_IDS") String eodIds, //NOSONAR
                                       @PathVariable("productionExportFileID") String productionExportFileId); //NOSONAR

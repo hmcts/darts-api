@@ -233,20 +233,16 @@ class ArmClientServiceImplTest {
         service.getProductionOutputFiles("Bearer token", request);
 
         verify(armRpoClient).getProductionOutputFiles("Bearer token", request);
-
     }
 
     @Test
     void getExtendedProductionsByMatter_returnsResponse() {
-
         service.getExtendedProductionsByMatter("Bearer token", "body");
         verify(armRpoClient).getExtendedProductionsByMatter("Bearer token", "body");
-
     }
 
     @Test
     void downloadProduction_returnsResponse() {
-
         service.downloadProduction("Bearer token", "productionExportFileId");
         verify(armRpoClient).downloadProduction("Bearer token", "productionExportFileId");
     }
