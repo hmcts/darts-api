@@ -2,7 +2,8 @@
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 ARG APP_INSIGHTS_AGENT_VERSION=3.7.3
 
-FROM hmctspublic.azurecr.io/base/java:21-distroless AS build-env
+FROM --platform=linux/arm64 mcr.microsoft.com/openjdk/jdk:21-azurelinux AS build
+
 WORKDIR /usr/local/bin
 # Linux Static Builds (http://www.ffmpeg.org/download.html#build-linux)
 # https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
@@ -14,8 +15,9 @@ RUN cp -p azcopy*/azcopy /usr/bin
 RUN chmod 777 /usr/bin/azcopy
 
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-COPY --from=build-env /usr/bin/ffmpeg /usr/bin
-COPY --from=build-env /usr/bin/azcopy /usr/bin
+FROM hmctspublic.azurecr.io/base/java:21-distroless
+COPY --from=build /usr/bin/ffmpeg /usr/bin
+COPY --from=build /usr/bin/azcopy /usr/bin
 
 COPY lib/applicationinsights.json /opt/app/
 COPY build/libs/darts-api.jar /opt/app/
