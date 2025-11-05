@@ -3,7 +3,6 @@
 ARG APP_INSIGHTS_AGENT_VERSION=3.7.3
 
 FROM mcr.microsoft.com/openjdk/jdk:21-azurelinux AS build
-#FROM --platform=linux/arm64 mcr.microsoft.com/openjdk/jdk:21-azurelinux AS build
 
 WORKDIR /usr/local/bin
 # Linux Static Builds (http://www.ffmpeg.org/download.html#build-linux)
