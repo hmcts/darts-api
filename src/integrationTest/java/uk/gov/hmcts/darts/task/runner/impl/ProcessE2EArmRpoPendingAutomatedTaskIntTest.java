@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
@@ -14,6 +13,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
@@ -32,7 +32,8 @@ import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
     "darts.storage.arm-api.arm-storage-account-name=SOME ARM STORAGE ACCOUNT NAME",
-    "darts.storage.arm-api.arm-service-entitlement=SOME ENTITLEMENT NAME"
+    "darts.storage.arm-api.arm-service-entitlement=SOME ENTITLEMENT NAME",
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
 })
 class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBase {
 
@@ -43,7 +44,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
     private ArmApiService armApiService;
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     private static final String BEARER_TOKEN = "SOME BEARER TOKEN";
     private static final String MATTER_ID = "SOME MATTER ID";
@@ -105,7 +106,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         var response = new RecordManagementMatterResponse();
         response.setIsError(true);
         response.setStatus(400);
-        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN), any()))
+        when(armApiBaseClient.getRecordManagementMatter(eq(BEARER_TOKEN), any()))
             .thenReturn(response);
 
         // When
@@ -129,7 +130,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         saveBackgroundSearchResponse.setStatus(200);
         saveBackgroundSearchResponse.setIsError(false);
 
-        when(armRpoClient.saveBackgroundSearch(eq(BEARER_TOKEN), any()))
+        when(armApiBaseClient.saveBackgroundSearch(eq(BEARER_TOKEN), any()))
             .thenReturn(saveBackgroundSearchResponse);
     }
 
@@ -139,7 +140,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         response.setIsError(false);
         response.setSearchId(SEARCH_ID);
 
-        when(armRpoClient.addAsyncSearch(eq(BEARER_TOKEN), anyString()))
+        when(armApiBaseClient.addAsyncSearch(eq(BEARER_TOKEN), anyString()))
             .thenReturn(response);
     }
 
@@ -153,7 +154,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         response.setStatus(200);
         response.setIsError(false);
 
-        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), any()))
+        when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), any()))
             .thenReturn(response);
     }
 
@@ -166,7 +167,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         response.setStatus(200);
         response.setIsError(false);
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armRpoClient.getProfileEntitlementResponse(BEARER_TOKEN, emptyRpoRequest))
+        when(armApiBaseClient.getProfileEntitlementResponse(BEARER_TOKEN, emptyRpoRequest))
             .thenReturn(response);
     }
 
@@ -180,7 +181,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         response.setIsError(false);
         response.setStatus(200);
 
-        when(armRpoClient.getStorageAccounts(eq(BEARER_TOKEN), any()))
+        when(armApiBaseClient.getStorageAccounts(eq(BEARER_TOKEN), any()))
             .thenReturn(response);
     }
 
@@ -196,7 +197,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         response.setIsError(false);
         response.setStatus(200);
 
-        when(armRpoClient.getIndexesByMatterId(eq(BEARER_TOKEN), any()))
+        when(armApiBaseClient.getIndexesByMatterId(eq(BEARER_TOKEN), any()))
             .thenReturn(response);
     }
 
@@ -209,7 +210,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         response.setIsError(false);
         response.setStatus(200);
 
-        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN), any())).thenReturn(response);
+        when(armApiBaseClient.getRecordManagementMatter(eq(BEARER_TOKEN), any())).thenReturn(response);
     }
 
 }
