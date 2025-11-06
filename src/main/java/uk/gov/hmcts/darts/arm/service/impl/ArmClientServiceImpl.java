@@ -39,7 +39,7 @@ import uk.gov.hmcts.darts.arm.service.ArmClientService;
  * This implementation is activated when the property 'darts.storage.arm.arm-api.enable-arm-v5' is set to false.
  */
 @Component
-@ConditionalOnProperty(prefix = "darts.storage.arm.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "false")
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "false")
 @AllArgsConstructor
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UseObjectForClearerAPI"})
 public class ArmClientServiceImpl implements ArmClientService {
