@@ -2,10 +2,11 @@ package uk.gov.hmcts.darts.arm.rpo;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -27,10 +28,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 
 @SuppressWarnings("checkstyle:linelength")
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class GetProductionOutputFilesServiceIntTest extends PostgresIntegrationBase {
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private GetProductionOutputFilesService getProductionOutputFilesService;
@@ -44,7 +46,7 @@ class GetProductionOutputFilesServiceIntTest extends PostgresIntegrationBase {
     void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenSuccessResponseIsReturnedFromArmWithSingularProductionExportFile() {
         // Given
         var productionOutputFilesResponse = createProductionOutputFilesResponse(PRODUCTION_EXPORT_FILE_ID1);
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(productionOutputFilesResponse);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -70,7 +72,7 @@ class GetProductionOutputFilesServiceIntTest extends PostgresIntegrationBase {
     void getProductionOutputFiles_shouldSucceedAndReturnMultipleItems_whenSuccessResponseIsReturnedFromArmWithSingularProductionExportFile() {
         // Given
         var productionOutputFilesResponse = createMultipleProductionOutputFilesResponse(PRODUCTION_EXPORT_FILE_ID1, PRODUCTION_EXPORT_FILE_ID2);
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(productionOutputFilesResponse);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -96,7 +98,7 @@ class GetProductionOutputFilesServiceIntTest extends PostgresIntegrationBase {
     void getProductionOutputFiles_shouldThrowException_whenArmReturnsNoProductionExportFiles() {
         // Given
         var productionOutputFilesResponse = createProductionOutputFilesResponse(null);
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(productionOutputFilesResponse);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();

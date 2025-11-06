@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -25,12 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
-    "darts.storage.arm-api.arm-service-entitlement=SRV-DARTS-RW-E"
+    "darts.storage.arm-api.arm-service-entitlement=SRV-DARTS-RW-E",
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
 })
 class GetProfileEntitlementsServiceIntTest extends PostgresIntegrationBase {
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private GetProfileEntitlementsService getProfileEntitlementsService;
@@ -107,7 +108,7 @@ class GetProfileEntitlementsServiceIntTest extends PostgresIntegrationBase {
         response.setIsError(false);
         response.setEntitlements(profileEntitlements);
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armRpoClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
+        when(armApiBaseClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
             .thenReturn(response);
     }
 

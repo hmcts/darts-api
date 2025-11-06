@@ -3,9 +3,10 @@ package uk.gov.hmcts.darts.arm.rpo;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -19,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class GetRecordManagementMatterServiceIntTest extends IntegrationBase {
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private GetRecordManagementMatterService getRecordManagementMatterService;
@@ -38,7 +39,7 @@ class GetRecordManagementMatterServiceIntTest extends IntegrationBase {
         response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
         response.getRecordManagementMatter().setMatterId("some-matter-id");
-        when(armRpoClient.getRecordManagementMatter(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getRecordManagementMatter(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -67,7 +68,7 @@ class GetRecordManagementMatterServiceIntTest extends IntegrationBase {
         response.setStatus(200);
         response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
-        when(armRpoClient.getRecordManagementMatter(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getRecordManagementMatter(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -92,7 +93,7 @@ class GetRecordManagementMatterServiceIntTest extends IntegrationBase {
     void getRecordManagementMatterFailsWhenClientReturns400Error() {
 
         // given
-        when(armRpoClient.getRecordManagementMatter(any(), any())).thenThrow(FeignException.BadRequest.class);
+        when(armApiBaseClient.getRecordManagementMatter(any(), any())).thenThrow(FeignException.BadRequest.class);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
