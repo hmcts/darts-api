@@ -5,15 +5,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmApiClient;
-import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRetentionEventDateProcessorImpl;
@@ -61,6 +62,7 @@ import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CA
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @Slf4j
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DOCUMENT_RETENTION_DATE_TIME =
@@ -86,16 +88,15 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     private AuthorisationStub authorisationStub;
 
     @MockitoBean
-    private ArmTokenClient armTokenClient;
+    private ArmAuthClient armAuthClient;
+    @MockitoBean
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @Autowired
     private ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
-
-    @MockitoBean
-    private ArmApiClient armApiClient;
 
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
@@ -115,15 +116,15 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         ArmTokenResponse tokenResponse = ArmTokenResponse.builder().accessToken(bearerToken).build();
         String armProfileId = "profileId";
 
-        when(armTokenClient.getToken(tokenRequest)).thenReturn(tokenResponse);
+        when(armAuthClient.getToken(tokenRequest)).thenReturn(tokenResponse);
 
         AvailableEntitlementProfile.Profiles profiles
             = AvailableEntitlementProfile.Profiles.builder().profileId(armProfileId).profileName(armApiConfigurationProperties.getArmServiceProfile()).build();
         AvailableEntitlementProfile profile = Mockito.mock(AvailableEntitlementProfile.class);
         when(profile.getProfiles()).thenReturn(List.of(profiles));
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
+        when(armApiBaseClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
+        when(armApiBaseClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
 
     }
 
@@ -164,7 +165,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
-        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+        when(armApiBaseClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
         armRetentionEventDateProcessor.calculateEventDates(1000);
@@ -183,7 +184,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                           .build())
             .useGuidsForFields(false)
             .build();
-        verify(armApiClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
 
     }
 
@@ -280,7 +281,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         dartsPersistence.save(armEod);
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
-        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+        when(armApiBaseClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
         armRetentionEventDateProcessor.calculateEventDates(1000);
@@ -299,7 +300,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                           .build())
             .useGuidsForFields(false)
             .build();
-        verify(armApiClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
 
     }
 
@@ -351,7 +352,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         dartsPersistence.save(armEod);
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
-        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+        when(armApiBaseClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
         armRetentionEventDateProcessor.calculateEventDates(1000);
@@ -371,7 +372,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                           .build())
             .useGuidsForFields(false)
             .build();
-        verify(armApiClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
     }
 
     @Test
@@ -404,7 +405,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         dartsPersistence.save(armEod);
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
-        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+        when(armApiBaseClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
         armRetentionEventDateProcessor.calculateEventDates(1000);
@@ -424,7 +425,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .useGuidsForFields(false)
             .build();
 
-        verify(armApiClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
     }
 
     @Test
@@ -459,7 +460,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         dartsPersistence.save(armEod);
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
-        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+        when(armApiBaseClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
         armRetentionEventDateProcessor.calculateEventDates(EVENT_DATE_ADJUSTMENT_YEARS);
@@ -468,7 +469,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
         assertTrue(persistedEod.isUpdateRetention());
 
-        verify(armApiClient, times(0)).updateMetadata(notNull(), notNull());
+        verify(armApiBaseClient, times(0)).updateMetadata(notNull(), notNull());
     }
 
     @Test
@@ -500,7 +501,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         dartsPersistence.save(armEod);
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
-        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+        when(armApiBaseClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
         armRetentionEventDateProcessor.calculateEventDates(EVENT_DATE_ADJUSTMENT_YEARS);
@@ -509,7 +510,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
         assertTrue(persistedEod.isUpdateRetention());
 
-        verify(armApiClient, times(0)).updateMetadata(notNull(), notNull());
+        verify(armApiBaseClient, times(0)).updateMetadata(notNull(), notNull());
     }
 
     @Test
@@ -552,7 +553,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
         assertNull(persistedEod.getEventDateTs());
         assertTrue(persistedEod.isUpdateRetention());
-        verify(armApiClient, times(0)).updateMetadata(any(), any());
+        verify(armApiBaseClient, times(0)).updateMetadata(any(), any());
     }
 
     private String formatDateTime(OffsetDateTime offsetDateTime) {

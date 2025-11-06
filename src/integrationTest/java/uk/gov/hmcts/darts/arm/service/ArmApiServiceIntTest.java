@@ -6,17 +6,20 @@ import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import feign.FeignException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -40,6 +43,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {
+    "darts.storage.arm-api.version5-2.api.api-base-url=http://localhost:${wiremock.server.port}",
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+})
 class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
@@ -56,12 +63,14 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     private ArmApiService armApiService;
 
     @MockitoBean
-    private ArmTokenClient armTokenClient;
+    private ArmAuthClient armAuthClient;
+    @MockitoBean
+    private ArmApiBaseClient armApiBaseClient;
 
-    @Value("${darts.storage.arm-api.api-url.download-data-path}")
+    @Value("${darts.storage.arm-api.version5-2.api.download-data-path}")
     private String downloadPath;
 
-    @Value("${darts.storage.arm-api.api-url.update-metadata-path}")
+    @Value("${darts.storage.arm-api.version5-2.api.update-metadata-path}")
     private String uploadPath;
 
     @Autowired
@@ -75,16 +84,17 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
             .build();
         ArmTokenResponse armTokenResponse = getArmTokenResponse();
         String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
-        when(armTokenClient.getToken(armTokenRequest))
+        when(armAuthClient.getToken(armTokenRequest))
             .thenReturn(armTokenResponse);
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armTokenClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest))
+        when(armApiBaseClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest))
             .thenReturn(getAvailableEntitlementProfile());
-        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id", emptyRpoRequest))
+        when(armApiBaseClient.selectEntitlementProfile(bearerToken, "some-profile-id", emptyRpoRequest))
             .thenReturn(armTokenResponse);
     }
 
     @Test
+    @Order(1)
     void updateMetadata_WithNanoSeconds() throws Exception {
 
         // Given
@@ -126,7 +136,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        verify(armTokenClient).getToken(armTokenRequest);
+        verify(armAuthClient).getToken(armTokenRequest);
 
         WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
                             .withHeader("Authorization", new RegexPattern(bearerAuth))
@@ -136,6 +146,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
+    @Order(2)
     void updateMetadata_WithZeroTimes() throws Exception {
 
         // Given
@@ -177,7 +188,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        verify(armTokenClient).getToken(armTokenRequest);
+        verify(armAuthClient).getToken(armTokenRequest);
 
         WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
                             .withHeader("Authorization", new RegexPattern(bearerAuth))
@@ -187,6 +198,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
+    @Order(3)
     void updateMetadataFailureResultsInAnExceptionBeingThrown() throws Exception {
 
         // Given
@@ -219,6 +231,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     @Test
     @SneakyThrows
+    @Order(4)
     void downloadArmData() {
         // Given
         byte[] binaryData = BINARY_CONTENT.getBytes();
@@ -233,7 +246,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         try (DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
             // Then
-            verify(armTokenClient).getToken(armTokenRequest);
+            verify(armAuthClient).getToken(armTokenRequest);
 
             WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
                                 .withHeader("Authorization", new RegexPattern("Bearer some-token")));
@@ -244,6 +257,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     @Test
     @SneakyThrows
+    @Order(5)
     void downloadFailureExceptionFromFeign() {
         // Given
         stubFor(
@@ -255,7 +269,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
             = assertThrows(FileNotDownloadedException.class, () -> armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID));
 
         // Then
-        verify(armTokenClient).getToken(armTokenRequest);
+        verify(armAuthClient).getToken(armTokenRequest);
         assertTrue(exception.getMessage().contains(CABINET_ID));
         assertTrue(exception.getMessage().contains(EXTERNAL_RECORD_ID));
         assertTrue(exception.getMessage().contains(EXTERNAL_FILE_ID));

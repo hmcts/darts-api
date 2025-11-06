@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
@@ -98,9 +99,19 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // then
+        assertEquals(updateMetadataResponse, responseToTest);
+
         verify(armAuthClient).getToken(any());
 
-        assertEquals(updateMetadataResponse, responseToTest);
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+
+        verify(armApiBaseClient).availableEntitlementProfiles(bearerAuth, emptyRpoRequest);
+        verify(armApiBaseClient).selectEntitlementProfile(bearerAuth, "some-profile-id", emptyRpoRequest);
+        verify(armApiBaseClient).updateMetadata(bearerAuth, updateMetadataRequest);
+
+        verifyNoMoreInteractions(armAuthClient);
+        verifyNoMoreInteractions(armApiBaseClient);
+
     }
 
     @Test
@@ -138,7 +149,9 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        verify(armAuthClient).getToken(any());
+        verify(armApiBaseClient).updateMetadata(bearerAuth, updateMetadataRequest);
+        verifyNoMoreInteractions(armAuthClient);
+        verifyNoMoreInteractions(armApiBaseClient);
 
         assertEquals(updateMetadataResponse, responseToTest);
     }
@@ -163,7 +176,9 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
         try (DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
             // Then
-            verify(armAuthClient).getToken(any());
+            verify(armApiBaseClient).downloadArmData(any(), any(), any(), any());
+            verifyNoMoreInteractions(armAuthClient);
+            verifyNoMoreInteractions(armApiBaseClient);
 
             assertThat(downloadResponseMetaData.getResource().getInputStream().readAllBytes()).isEqualTo(binaryData);
         }
