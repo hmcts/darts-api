@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import feign.FeignException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,7 +94,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    @Order(1)
     void updateMetadata_WithNanoSeconds() throws Exception {
 
         // Given
@@ -146,7 +145,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    @Order(2)
     void updateMetadata_WithZeroTimes() throws Exception {
 
         // Given
@@ -188,7 +186,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        verify(armAuthClient).getToken(armTokenRequest);
+        verify(armApiBaseClient).updateMetadata(bearerAuth, updateMetadataRequest);
 
         WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
                             .withHeader("Authorization", new RegexPattern(bearerAuth))
@@ -198,7 +196,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     }
 
     @Test
-    @Order(3)
     void updateMetadataFailureResultsInAnExceptionBeingThrown() throws Exception {
 
         // Given
@@ -231,7 +228,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     @Test
     @SneakyThrows
-    @Order(4)
     void downloadArmData() {
         // Given
         byte[] binaryData = BINARY_CONTENT.getBytes();
@@ -246,7 +242,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         try (DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
             // Then
-            verify(armAuthClient).getToken(armTokenRequest);
+            verify(armApiBaseClient).downloadArmData(anyString(), anyString(), anyString(), anyString());
 
             WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
                                 .withHeader("Authorization", new RegexPattern("Bearer some-token")));
@@ -257,7 +253,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     @Test
     @SneakyThrows
-    @Order(5)
     void downloadFailureExceptionFromFeign() {
         // Given
         stubFor(
@@ -269,7 +264,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
             = assertThrows(FileNotDownloadedException.class, () -> armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID));
 
         // Then
-        verify(armAuthClient).getToken(armTokenRequest);
         assertTrue(exception.getMessage().contains(CABINET_ID));
         assertTrue(exception.getMessage().contains(EXTERNAL_RECORD_ID));
         assertTrue(exception.getMessage().contains(EXTERNAL_FILE_ID));
