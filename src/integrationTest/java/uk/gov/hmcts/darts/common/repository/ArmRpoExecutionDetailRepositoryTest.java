@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
+import java.time.OffsetDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum.GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY;
 import static uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum.GET_PRODUCTION_OUTPUT_FILES;
@@ -16,6 +18,7 @@ import static uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum.REMOVE_PRODUCTION;
 import static uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH;
 import static uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum.COMPLETED;
 import static uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum.FAILED;
+import static uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum.IN_PROGRESS;
 import static uk.gov.hmcts.darts.test.common.data.ArmRpoStateEntityTestData.stateOf;
 import static uk.gov.hmcts.darts.test.common.data.ArmRpoStatusEntityTestData.statusOf;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
@@ -31,6 +34,7 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity4;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity5;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity6;
+    private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity7;
 
 
     @BeforeEach
@@ -46,7 +50,15 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity5 = dartsPersistence.save(createArmRpoExecutionDetailEntity(COMPLETED, SAVE_BACKGROUND_SEARCH));
         dartsPersistence.save(createArmRpoExecutionDetailEntity(FAILED, GET_PRODUCTION_OUTPUT_FILES));
         armRpoExecutionDetailEntity6 = dartsPersistence.save(createArmRpoExecutionDetailEntity(COMPLETED, GET_PRODUCTION_OUTPUT_FILES));
+        armRpoExecutionDetailEntity7 = dartsPersistence.save(createArmRpoExecutionDetailEntity(IN_PROGRESS, SAVE_BACKGROUND_SEARCH));
 
+        // update automatically set lastModifiedDateTime for test purposes. This defaults to now() on save
+        dartsPersistence.getArmRpoExecutionDetailRepository()
+            .updateLastModifiedDateTimeById(
+                armRpoExecutionDetailEntity7.getId(),
+                OffsetDateTime.now().minusDays(10)
+            );
+        
     }
 
     @Test
@@ -56,7 +68,7 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
             var result = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDesc();
 
             // then
-            assertThat(result.get()).isEqualTo(armRpoExecutionDetailEntity6);
+            assertThat(result.get()).isEqualTo(armRpoExecutionDetailEntity7);
         });
     }
 
@@ -86,6 +98,54 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
             assertThat(result6.get()).isEqualTo(armRpoExecutionDetailEntity6);
         });
 
+    }
+    
+    @Test
+    void findIdsByStatusAndLastModifiedDateTimeAfter_ShouldReturnIds_WhenEntitiesMatchCriteria() {
+        transactionalUtil.executeInTransaction(() -> {
+            // when
+            var result = armRpoExecutionDetailRepository.findIdsByStatusAndLastModifiedDateTimeAfter(
+                statusOf(IN_PROGRESS),
+                OffsetDateTime.now().minusDays(5)
+            );
+
+            // then
+            assertThat(result).contains(armRpoExecutionDetailEntity7.getId());
+            assertThat(result.size()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void findIdsByStatusAndLastModifiedDateTimeAfter_ShouldReturnNoIds_WhenEntitiesDontMatchCriteria() {
+        transactionalUtil.executeInTransaction(() -> {
+            // when
+            var result = armRpoExecutionDetailRepository.findIdsByStatusAndLastModifiedDateTimeAfter(
+                statusOf(COMPLETED),
+                OffsetDateTime.now().minusDays(11)
+            );
+
+            // then
+            assertThat(result.size()).isEqualTo(0);
+        });
+    }
+
+    @Test
+    void updateLastModifiedDateTimeById_ShouldUpdateLastModifiedDateTime_WhenIdExists() {
+        transactionalUtil.executeInTransaction(() -> {
+            // given
+            var newLastModifiedDateTime = OffsetDateTime.now().minusDays(20);
+
+            // when
+            armRpoExecutionDetailRepository.updateLastModifiedDateTimeById(
+                armRpoExecutionDetailEntity7.getId(),
+                newLastModifiedDateTime
+            );
+
+            // then
+            var updatedEntity = armRpoExecutionDetailRepository.findById(armRpoExecutionDetailEntity7.getId());
+            assertThat(updatedEntity.isPresent()).isTrue();
+            assertThat(updatedEntity.get().getLastModifiedDateTime()).isEqualTo(newLastModifiedDateTime);
+        });
     }
 
     private static @NotNull ArmRpoExecutionDetailEntity createArmRpoExecutionDetailEntity(ArmRpoStatusEnum status, ArmRpoStateEnum state) {
