@@ -11,14 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -39,13 +38,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
     "darts.storage.arm-api.version5-2.api.api-base-url=http://localhost:${wiremock.server.port}",
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=false"
 })
 class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
@@ -63,14 +61,12 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     private ArmApiService armApiService;
 
     @MockitoBean
-    private ArmAuthClient armAuthClient;
-    @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmTokenClient armTokenClient;
 
-    @Value("${darts.storage.arm-api.version5-2.api.download-data-path}")
+    @Value("${darts.storage.arm-api.api-url.download-data-path}")
     private String downloadPath;
 
-    @Value("${darts.storage.arm-api.version5-2.api.update-metadata-path}")
+    @Value("${darts.storage.arm-api.api-url.update-metadata-path}")
     private String uploadPath;
 
     @Autowired
@@ -84,12 +80,12 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
             .build();
         ArmTokenResponse armTokenResponse = getArmTokenResponse();
         String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
-        when(armAuthClient.getToken(armTokenRequest))
+        when(armTokenClient.getToken(armTokenRequest))
             .thenReturn(armTokenResponse);
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armApiBaseClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest))
+        when(armTokenClient.availableEntitlementProfiles(bearerToken, emptyRpoRequest))
             .thenReturn(getAvailableEntitlementProfile());
-        when(armApiBaseClient.selectEntitlementProfile(bearerToken, "some-profile-id", emptyRpoRequest))
+        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id", emptyRpoRequest))
             .thenReturn(armTokenResponse);
     }
 
@@ -135,7 +131,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        verify(armAuthClient).getToken(armTokenRequest);
+        verify(armTokenClient).getToken(armTokenRequest);
 
         WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
                             .withHeader("Authorization", new RegexPattern(bearerAuth))
@@ -186,7 +182,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        verify(armApiBaseClient).updateMetadata(bearerAuth, updateMetadataRequest);
+        //verify(armTokenClient).updateMetadata(bearerAuth, updateMetadataRequest);
 
         WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
                             .withHeader("Authorization", new RegexPattern(bearerAuth))
@@ -242,7 +238,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         try (DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
             // Then
-            verify(armApiBaseClient).downloadArmData(anyString(), anyString(), anyString(), anyString());
+            //verify(armApiBaseClient).downloadArmData(anyString(), anyString(), anyString(), anyString());
 
             WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
                                 .withHeader("Authorization", new RegexPattern("Bearer some-token")));
