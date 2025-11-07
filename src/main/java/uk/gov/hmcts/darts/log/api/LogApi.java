@@ -78,4 +78,10 @@ public interface LogApi {
 
     void addAudioSmallFileWithLongDuration(String courthouse, String courtroom, OffsetDateTime startDate, OffsetDateTime finishDate,
                                            Long medId, Long fileSize);
+    
+    void removeOldArmRpoProductionsSuccessful(Integer executionId);
+    
+    void removeOldArmRpoProductionsFailed();
+
+    void removeOldArmRpoProductionsFailed(Integer executionId);
 }

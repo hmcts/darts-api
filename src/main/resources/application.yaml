@@ -552,6 +552,9 @@ darts:
           at-most-for: PT90M
         threads: 20
         async-timeout: 80M
+      remove-old-arm-rpo-productions:
+        duration: 30d
+        system-user-email: system_RemoveOldArmRpoProductions@hmcts.net
       unstructured-transcription-annotation-deleter:
         system-user-email: system_UnstructuredTranscriptionAnnotationDeleter@hmcts.net
         lock:
