@@ -96,7 +96,6 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
         try {
             ArmTokenResponse initial = armClientService.getToken(armTokenRequest);
             String firstAccessToken = initial != null ? initial.getAccessToken() : null;
-
             if (!isNotEmpty(firstAccessToken)) {
                 throw new IllegalStateException("ARM token returned empty access token");
             }
