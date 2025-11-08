@@ -182,8 +182,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        //verify(armTokenClient).updateMetadata(bearerAuth, updateMetadataRequest);
-
         WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
                             .withHeader("Authorization", new RegexPattern(bearerAuth))
                             .withRequestBody(equalToJson(dummyRequest)));
@@ -238,8 +236,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         try (DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
             // Then
-            //verify(armApiBaseClient).downloadArmData(anyString(), anyString(), anyString(), anyString());
-
             WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
                                 .withHeader("Authorization", new RegexPattern("Bearer some-token")));
 
