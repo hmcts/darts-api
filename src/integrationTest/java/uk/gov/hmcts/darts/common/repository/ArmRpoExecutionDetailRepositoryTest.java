@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum.GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY;
@@ -143,8 +144,9 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
 
             // then
             var updatedEntity = armRpoExecutionDetailRepository.findById(armRpoExecutionDetailEntity7.getId());
+            var expected = newLastModifiedDateTime.truncatedTo(ChronoUnit.MICROS); // Truncate to micros to match DB precision
             assertThat(updatedEntity.isPresent()).isTrue();
-            assertThat(updatedEntity.get().getLastModifiedDateTime()).isEqualTo(newLastModifiedDateTime);
+            assertThat(updatedEntity.get().getLastModifiedDateTime()).isEqualTo(expected);
         });
     }
 
