@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -8,8 +9,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
@@ -17,6 +16,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.component.ArmAuthTokenCache;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -97,7 +98,8 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
             ArmTokenResponse initial = armClientService.getToken(armTokenRequest);
             String firstAccessToken = initial != null ? initial.getAccessToken() : null;
             if (!isNotEmpty(firstAccessToken)) {
-                throw new IllegalStateException("ARM token returned empty access token");
+                throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
+                                            "ARM token returned empty access token");
             }
 
             //TODO REMOVE ONCE TESTED
@@ -108,7 +110,8 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
             AvailableEntitlementProfile profiles = getAvailableEntitlementProfile(firstBearer, emptyRpoRequest, armTokenRequest);
 
             if (profiles == null || profiles.isError() || profiles.getProfiles() == null) {
-                throw new IllegalStateException("ARM entitlement profiles unavailable or error returned");
+                throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
+                                            "ARM entitlement profiles unavailable or error returned");
             }
 
             Optional<String> profileId = profiles.getProfiles().stream()
@@ -117,7 +120,8 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
                 .findFirst();
 
             if (profileId.isEmpty()) {
-                throw new IllegalStateException("ARM service profile not found: " + armApiConfigurationProperties.getArmServiceProfile());
+                throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
+                                            "ARM service profile not found: " + armApiConfigurationProperties.getArmServiceProfile());
             }
 
             log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
@@ -125,14 +129,15 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
             String finalAccessToken = selected != null ? selected.getAccessToken() : null;
 
             if (!isNotEmpty(finalAccessToken)) {
-                throw new IllegalStateException("ARM selectEntitlementProfile returned empty access token");
+                throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
+                                            "ARM selectEntitlementProfile returned empty access token");
             }
 
             //TODO REMOVE ONCE TESTED
             log.debug("Fetched ARM Bearer Token : {}", finalAccessToken);
             return String.format("Bearer %s", finalAccessToken);
 
-        } catch (RestClientException ex) {
+        } catch (FeignException ex) {
             log.error("Unable to fetch ARM auth token: {}", ex.getMessage());
             throw ex;
         }
@@ -143,9 +148,9 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
 
         try {
             return armClientService.availableEntitlementProfiles(bearerToken, emptyRpoRequest);
-        } catch (HttpClientErrorException ex) {
-            int sc = ex.getStatusCode().value();
-            if (sc == HttpStatus.UNAUTHORIZED.value() || sc == HttpStatus.FORBIDDEN.value()) {
+        } catch (FeignException ex) {
+            int status = ex.status();
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
                 // Evict and retry once with a brand new bearer token
                 evictToken();
                 ArmTokenResponse tokenResponse = armClientService.getToken(armTokenRequest);

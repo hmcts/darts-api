@@ -82,7 +82,6 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         }
     }
 
-
     private void setDefaultPolicyIfNotDefined(DartsEvent dartsEvent) {
         if (dartsEvent.getRetentionPolicy() == null) {
             DartsEventRetentionPolicy defaultRetentionPolicy = new DartsEventRetentionPolicy();

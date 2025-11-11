@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
+@SuppressWarnings("PMD.TooManyMethods")
 public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEntity, Integer> {
+
     List<CaseRetentionEntity> findAllByCourtCase(CourtCaseEntity courtCase);
 
     List<CaseRetentionEntity> findByCourtCaseId(Integer courtCaseId);
@@ -73,7 +74,7 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
         SELECT new uk.gov.hmcts.darts.event.model.stopandclosehandler.PendingRetention (
         cr,
         e.timestamp)
-
+        
         FROM CaseRetentionEntity cr, CaseManagementRetentionEntity cmr, EventEntity e
         WHERE cr.caseManagementRetention = cmr
         and cmr.eventEntity = e
