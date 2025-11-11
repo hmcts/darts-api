@@ -48,6 +48,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
+@SuppressWarnings({"unchecked", "PMD.DoNotUseThreads", "PMD.CloseResource"})
 @ExtendWith(MockitoExtension.class)
 class ArmAuthTokenCacheImplFailuresTest {
 
