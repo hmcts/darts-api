@@ -39,8 +39,8 @@ class ArmAuthTokenCacheIntTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         ArmTokenRequest armTokenRequest = ArmTokenRequest.builder()
-            .username("some-username")
-            .password("some-password")
+            .username(armApiConfigurationProperties.getArmUsername())
+            .password(armApiConfigurationProperties.getArmPassword())
             .build();
         ArmTokenResponse armTokenResponse = getArmTokenResponse();
         String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
