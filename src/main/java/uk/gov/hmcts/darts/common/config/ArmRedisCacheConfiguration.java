@@ -34,7 +34,6 @@ public class ArmRedisCacheConfiguration {
             .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(keySerializer))
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer))
             .disableCachingNullValues()
-            //.prefixCacheNameWith("darts:")
             .entryTtl(armTokenCacheExpiry);
 
         return RedisCacheManager.builder(connectionFactory)
