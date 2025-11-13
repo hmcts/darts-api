@@ -3,9 +3,10 @@ package uk.gov.hmcts.darts.arm.rpo;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -23,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class GetStorageAccountsServiceIntTest extends IntegrationBase {
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private GetStorageAccountsService getStorageAccountsService;
@@ -50,7 +51,7 @@ class GetStorageAccountsServiceIntTest extends IntegrationBase {
         storageAccountResponse.setDataDetails(List.of(dataDetails1, dataDetails2));
 
         var bearerAuth = "Bearer some-token";
-        when(armRpoClient.getStorageAccounts(any(), any())).thenReturn(storageAccountResponse);
+        when(armApiBaseClient.getStorageAccounts(any(), any())).thenReturn(storageAccountResponse);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -75,7 +76,7 @@ class GetStorageAccountsServiceIntTest extends IntegrationBase {
         StorageAccountResponse response = new StorageAccountResponse();
         response.setStatus(200);
         response.setIsError(false);
-        when(armRpoClient.getStorageAccounts(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getStorageAccounts(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -103,7 +104,7 @@ class GetStorageAccountsServiceIntTest extends IntegrationBase {
     void getStorageAccountsFailsWhenClientThrowsFeignException() {
 
         // given
-        when(armRpoClient.getStorageAccounts(any(), any())).thenThrow(FeignException.BadRequest.class);
+        when(armApiBaseClient.getStorageAccounts(any(), any())).thenThrow(FeignException.BadRequest.class);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();

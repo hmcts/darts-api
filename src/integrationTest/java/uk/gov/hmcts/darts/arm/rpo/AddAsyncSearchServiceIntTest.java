@@ -3,9 +3,10 @@ package uk.gov.hmcts.darts.arm.rpo;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -24,10 +25,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class AddAsyncSearchServiceIntTest extends PostgresIntegrationBase {
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private AddAsyncSearchService addAsyncSearchService;
@@ -63,7 +65,7 @@ class AddAsyncSearchServiceIntTest extends PostgresIntegrationBase {
         ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> requestCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(armRpoClient).addAsyncSearch(tokenCaptor.capture(), requestCaptor.capture());
+        verify(armApiBaseClient).addAsyncSearch(tokenCaptor.capture(), requestCaptor.capture());
 
         assertEquals(TOKEN, tokenCaptor.getValue());
         assertThat(requestCaptor.getValue(), containsString(MATTER_ID));
@@ -106,7 +108,7 @@ class AddAsyncSearchServiceIntTest extends PostgresIntegrationBase {
         ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> requestCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(armRpoClient).addAsyncSearch(tokenCaptor.capture(), requestCaptor.capture());
+        verify(armApiBaseClient).addAsyncSearch(tokenCaptor.capture(), requestCaptor.capture());
 
         assertEquals(TOKEN, tokenCaptor.getValue());
         assertThat(requestCaptor.getValue(), containsString(MATTER_ID));
@@ -162,7 +164,7 @@ class AddAsyncSearchServiceIntTest extends PostgresIntegrationBase {
         response.setIsError(false);
         response.setSearchId(SEARCH_ID);
 
-        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString()))
+        when(armApiBaseClient.addAsyncSearch(eq(TOKEN), anyString()))
             .thenReturn(response);
     }
 

@@ -4,9 +4,10 @@ import feign.FeignException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
@@ -25,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class GetMasterIndexFieldByRecordClassSchemaServiceIntTest extends IntegrationBase {
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private GetMasterIndexFieldByRecordClassSchemaService getMasterIndexFieldByRecordClassSchemaService;
@@ -41,7 +42,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceIntTest extends IntegrationBa
         MasterIndexFieldByRecordClassSchemaResponse response = getMasterIndexFieldByRecordClassSchemaResponse("propertyName", "ingestionDate");
         response.setStatus(200);
         response.setIsError(false);
-        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -78,7 +79,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceIntTest extends IntegrationBa
         MasterIndexFieldByRecordClassSchemaResponse response = getMasterIndexFieldByRecordClassSchemaResponse("bf_018", "propertyName");
         response.setStatus(200);
         response.setIsError(false);
-        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -108,7 +109,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceIntTest extends IntegrationBa
         response.setMasterIndexFields(List.of());
         response.setStatus(200);
         response.setIsError(false);
-        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -134,7 +135,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceIntTest extends IntegrationBa
     void getMasterIndexFieldByRecordClassSchemaFailsWhenClientReturns400Error() {
 
         // given
-        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenThrow(FeignException.BadRequest.class);
+        when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenThrow(FeignException.BadRequest.class);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();

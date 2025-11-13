@@ -109,8 +109,9 @@ public class ArmClientServiceWrapper implements ArmClientService {
     }
 
     @Override
-    public CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable(String bearerToken,
-                                                                                               CreateExportBasedOnSearchResultsTableRequest request) {
+    public CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable(
+        String bearerToken, CreateExportBasedOnSearchResultsTableRequest request) {
+
         return armApiBaseClient.createExportBasedOnSearchResultsTable(bearerToken, request);
     }
 
