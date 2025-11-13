@@ -133,7 +133,12 @@ public enum TranscriptionApiError implements DartsApiError {
     TOO_MANY_RESULTS(
         TranscriptionsErrorCode.TOO_MANY_RESULTS.getValue(),
         HttpStatus.UNPROCESSABLE_ENTITY,
-        TranscriptionsTitleErrors.TOO_MANY_RESULTS.getValue());
+        TranscriptionsTitleErrors.TOO_MANY_RESULTS.getValue()
+    ),
+    BAD_REQUEST_TRANSCRIPTION_ID(
+        TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_ID.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.BAD_REQUEST_TRANSCRIPTION_ID.getValue());
 
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";

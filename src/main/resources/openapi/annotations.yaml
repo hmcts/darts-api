@@ -32,7 +32,7 @@ paths:
                 annotation:
                   $ref: '#/components/schemas/annotation'
       responses:
-        201:
+        '201':
           description: CREATED
           content:
             application/json:
@@ -43,7 +43,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -78,7 +78,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
@@ -132,7 +132,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: Bad Request Error
           content:
