@@ -80,7 +80,6 @@ class ArmAuthTokenCacheIntTest extends IntegrationBase {
         verify(armAuthClient).getToken(armTokenRequest);
         verify(armApiBaseClient).availableEntitlementProfiles("Bearer some-token", emptyRpoRequest);
         verify(armApiBaseClient).selectEntitlementProfile("Bearer some-token", "some-profile-id", emptyRpoRequest);
-
         verifyNoMoreInteractions(armAuthClient);
         verifyNoMoreInteractions(armApiBaseClient);
     }
