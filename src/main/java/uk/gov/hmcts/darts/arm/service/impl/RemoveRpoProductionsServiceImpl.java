@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.RemoveRpoProductionsService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
@@ -43,13 +42,6 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
         String bearerToken;
         UserAccountEntity userAccount;
         try {
-            List<ArmRpoExecutionDetailEntity> allArdIds = armRpoExecutionDetailRepository.findAll();
-            for (var ard : allArdIds) {
-                log.debug("ARM RPO Execution Detail: ard_id={}, status={}, lastModified={}",
-                          ard.getId(),
-                          ard.getArmRpoStatus().getDescription(),
-                          ard.getLastModifiedDateTime());
-            }
             ardIdsToRemove = armRpoExecutionDetailRepository.findIdsByStatusAndLastModifiedDateTimeAfter(
                 statusOf(FAILED), OffsetDateTime.now().minus(duration)
             );
