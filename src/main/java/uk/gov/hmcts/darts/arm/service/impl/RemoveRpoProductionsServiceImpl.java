@@ -19,7 +19,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.util.Objects.isNull;
-import static uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum.FAILED;
+import static uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum.FAILED; 
 
 @Service
 @AllArgsConstructor
