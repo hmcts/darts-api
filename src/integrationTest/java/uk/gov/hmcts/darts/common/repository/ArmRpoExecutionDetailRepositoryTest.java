@@ -139,12 +139,12 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
             // when
             armRpoExecutionDetailRepository.updateLastModifiedDateTimeById(
                 armRpoExecutionDetailEntity7.getId(),
-                newLastModifiedDateTime
+                newLastModifiedDateTime.truncatedTo(ChronoUnit.MICROS)
             );
 
             // then
             var updatedEntity = armRpoExecutionDetailRepository.findById(armRpoExecutionDetailEntity7.getId());
-            var expected = newLastModifiedDateTime.truncatedTo(ChronoUnit.MICROS); // Truncate to micros to match DB precision
+            var expected = newLastModifiedDateTime.truncatedTo(ChronoUnit.MICROS); 
             assertThat(updatedEntity.isPresent()).isTrue();
             assertThat(updatedEntity.get().getLastModifiedDateTime()).isEqualTo(expected);
         });
