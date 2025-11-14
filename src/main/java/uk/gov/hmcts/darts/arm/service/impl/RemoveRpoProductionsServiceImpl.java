@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
