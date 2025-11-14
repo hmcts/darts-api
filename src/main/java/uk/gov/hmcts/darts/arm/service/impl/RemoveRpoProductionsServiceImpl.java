@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
+import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.RemoveRpoProductionsService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
@@ -30,6 +31,7 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
     private final LogApi logApi;
     private final ArmRpoApi armRpoApi;
     private final UserIdentity userIdentity;
+    private final ArmRpoService armRpoService;
 
 
     @Override
@@ -40,7 +42,8 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
         String bearerToken;
         UserAccountEntity userAccount;
         try {
-            ardIdsToRemove = armRpoExecutionDetailRepository.findIdsByStatusAndLastModifiedDateTimeAfter(
+            log.info("Finding ARM RPO executions with status FAILED older than: {}", duration);
+            ardIdsToRemove = armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
                 statusOf(FAILED), OffsetDateTime.now().minus(duration)
             );
             if (ardIdsToRemove.isEmpty()) {
