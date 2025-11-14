@@ -33,7 +33,6 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
     private final UserIdentity userIdentity;
 
 
-    @SneakyThrows
     @Override
     public void removeOldArmRpoProductions(boolean isManualRun, Duration duration, int batchSize) {
         log.info("Removing ARM RPO productions - isManualRun: {}, duration: {}, batchSize: {}",
