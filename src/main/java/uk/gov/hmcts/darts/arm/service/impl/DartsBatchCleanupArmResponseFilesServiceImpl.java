@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 @Service
 public class DartsBatchCleanupArmResponseFilesServiceImpl extends BatchCleanupArmResponseFilesServiceCommon {
 
-
     public DartsBatchCleanupArmResponseFilesServiceImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                         ObjectRecordStatusRepository objectRecordStatusRepository,
                                                         ExternalLocationTypeRepository externalLocationTypeRepository,
