@@ -458,6 +458,28 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             FROM darts.external_object_directory eod1
             WHERE eod1.ors_id = :status
             AND eod1.elt_id = :type
+            AND eod1.med_id IS NOT NULL
+            AND EXISTS (
+                SELECT 1
+                FROM darts.external_object_directory eod2
+                WHERE eod2.elt_id = :existsLocation
+                AND eod1.med_id = eod2.med_id
+                AND eod2.ors_id = :status
+                AND eod2.lastModifiedDateTime < :lastModifiedBefore
+            )
+            FETCH FIRST :limitRecords rows only
+            """,
+        nativeQuery = true
+    )
+    List<Long> findEodIdsInOtherStorageForMediaLastModifiedBefore(Integer status, Integer type, Integer existsLocation, OffsetDateTime lastModifiedBefore,
+                                                                  Integer limitRecords);
+
+    @Query(
+        value = """
+            SELECT eod1.eod_id
+            FROM darts.external_object_directory eod1
+            WHERE eod1.ors_id = :status
+            AND eod1.elt_id = :type
             AND eod1.med_id IS NULL
             AND NOT EXISTS (
                 SELECT 1
@@ -475,6 +497,32 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     List<Long> findEodsNotInOtherStorageExcludingMedia(Integer status, Integer type,
                                                        Integer notExistsLocation, Integer limitRecords);
+
+    @Query(
+        value = """
+            SELECT eod1.eod_id
+            FROM darts.external_object_directory eod1
+            WHERE eod1.ors_id = :status
+            AND eod1.elt_id = :type
+            AND eod1.med_id IS NULL
+            AND EXISTS (
+                SELECT 1
+                FROM darts.external_object_directory eod2
+                WHERE eod2.elt_id = :existsLocation
+                AND eod2.ors_id = :status
+                AND (
+                    (eod1.trd_id IS NOT NULL AND eod1.trd_id = eod2.trd_id) OR
+                    (eod1.ado_id IS NOT NULL AND eod1.ado_id = eod2.ado_id) OR
+                    (eod1.cad_id IS NOT NULL AND eod1.cad_id = eod2.cad_id)
+                )
+                AND eod2.lastModifiedDateTime < :lastModifiedBefore
+            )
+            fetch first :limitRecords rows only
+            """,
+        nativeQuery = true
+    )
+    List<Long> findEodIdsInOtherStorageExcludingMediaLastModifiedBefore(Integer status, Integer type,
+                                                                        Integer existsLocation, OffsetDateTime lastModifiedBefore, Integer limitRecords);
 
     @Query(
         """
@@ -728,5 +776,17 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                         @Param("locationType") ExternalLocationTypeEntity locationType,
                                                                         Limit limit);
 
-
+    default List<Long> findEodsNotInOtherStorageLastModifiedBefore(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+                                                                   ExternalLocationTypeEntity existsLocation, OffsetDateTime lastModifiedBefore,
+                                                                   Integer limitRecords) {
+        Set<Long> results = new HashSet<>(); // Ensures no duplicates
+        results.addAll(
+            findEodIdsInOtherStorageForMediaLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore, limitRecords));
+        if (results.size() < limitRecords) {
+            results.addAll(
+                findEodIdsInOtherStorageExcludingMediaLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore,
+                                                                         limitRecords - results.size()));
+        }
+        return new ArrayList<>(results);
+    }
 }
