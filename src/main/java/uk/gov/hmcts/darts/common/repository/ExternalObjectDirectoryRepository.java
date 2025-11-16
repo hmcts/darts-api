@@ -465,13 +465,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 WHERE eod2.elt_id = :existsLocation
                 AND eod1.med_id = eod2.med_id
                 AND eod2.ors_id = :status
-                AND eod2.lastModifiedDateTime < :lastModifiedBefore
+                AND eod2.last_modified_ts < :lastModifiedBefore
             )
             FETCH FIRST :limitRecords rows only
             """,
         nativeQuery = true
     )
-    List<Long> findEodIdsInOtherStorageForMediaLastModifiedBefore(Integer status, Integer type, Integer existsLocation, OffsetDateTime lastModifiedBefore,
+    List<Long> findEodIdsInOtherStorageForMediaLastModifiedBefore(Integer status, Integer type,
+                                                                  Integer existsLocation,
+                                                                  OffsetDateTime lastModifiedBefore,
                                                                   Integer limitRecords);
 
     @Query(
@@ -515,7 +517,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                     (eod1.ado_id IS NOT NULL AND eod1.ado_id = eod2.ado_id) OR
                     (eod1.cad_id IS NOT NULL AND eod1.cad_id = eod2.cad_id)
                 )
-                AND eod2.lastModifiedDateTime < :lastModifiedBefore
+                AND eod2.last_modified_ts < :lastModifiedBefore
             )
             fetch first :limitRecords rows only
             """,
@@ -776,7 +778,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                         @Param("locationType") ExternalLocationTypeEntity locationType,
                                                                         Limit limit);
 
-    default List<Long> findEodsNotInOtherStorageLastModifiedBefore(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+    default List<Long> findEodsIdsInOtherStorageLastModifiedBefore(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                                    ExternalLocationTypeEntity existsLocation, OffsetDateTime lastModifiedBefore,
                                                                    Integer limitRecords) {
         Set<Long> results = new HashSet<>(); // Ensures no duplicates

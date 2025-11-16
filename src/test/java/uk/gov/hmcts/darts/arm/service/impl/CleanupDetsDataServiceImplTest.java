@@ -56,7 +56,7 @@ class CleanupDetsDataServiceImplTest {
         int batchSize = 10;
         Duration inArm = Duration.ofDays(7);
         var lastModifiedBefore = now.minus(inArm);
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorageLastModifiedBefore(
+        when(externalObjectDirectoryRepository.findEodsIdsInOtherStorageLastModifiedBefore(
             any(), any(), any(), eq(lastModifiedBefore), eq(batchSize)
         )).thenReturn(List.of(1L, 2L, 3L));
 
@@ -64,7 +64,7 @@ class CleanupDetsDataServiceImplTest {
         cleanupDetsDataService.cleanupDetsData(batchSize, inArm);
 
         // then
-        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorageLastModifiedBefore(
+        verify(externalObjectDirectoryRepository).findEodsIdsInOtherStorageLastModifiedBefore(
             any(), any(), any(), eq(lastModifiedBefore), eq(batchSize)
         );
         verify(cleanupDetsEodTransactionalService, times(3)).cleanupDetsEod(anyLong());
@@ -77,7 +77,7 @@ class CleanupDetsDataServiceImplTest {
     @Test
     void cleanupDetsData_whenNoIdsFound_doesNothingFurther() {
         // given
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorageLastModifiedBefore(
+        when(externalObjectDirectoryRepository.findEodsIdsInOtherStorageLastModifiedBefore(
             any(), any(), any(), any(), anyInt()
         )).thenReturn(List.of());
 
