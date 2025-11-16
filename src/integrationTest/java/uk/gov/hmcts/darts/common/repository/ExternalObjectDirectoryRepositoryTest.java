@@ -998,17 +998,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     }
 
-    private CaseDocumentEntity createCaseDocumentEntity() {
-        CaseDocumentEntity caseDocument =
-            dartsPersistence.save(
-                PersistableFactory.getCaseDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
-        return caseDocument;
-    }
-
     @Test
     void findEodsIdsInOtherStorageLastModifiedBefore_ReturnsExpectedResults() {
         // given
@@ -1071,15 +1060,22 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         );
     }
 
+    private CaseDocumentEntity createCaseDocumentEntity() {
+        return dartsPersistence.save(
+            PersistableFactory.getCaseDocumentTestData()
+                .someMinimalBuilder()
+                .build()
+                .getEntity()
+        );
+    }
+
     private TranscriptionDocumentEntity createTranscriptionDocumentEntity() {
-        TranscriptionDocumentEntity transcriptionDocumentArm =
-            dartsPersistence.save(
-                PersistableFactory.getTranscriptionDocument()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
-        return transcriptionDocumentArm;
+        return dartsPersistence.save(
+            PersistableFactory.getTranscriptionDocument()
+                .someMinimalBuilder()
+                .build()
+                .getEntity()
+        );
     }
 
     private AnnotationDocumentEntity createAnnotationDocument() {
