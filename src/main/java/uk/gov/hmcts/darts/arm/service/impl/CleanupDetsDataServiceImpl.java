@@ -33,7 +33,7 @@ public class CleanupDetsDataServiceImpl implements CleanupDetsDataService {
 
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(durationInArmStorage);
 
-        List<Long> detsEods = externalObjectDirectoryRepository.findEodsNotInOtherStorageLastModifiedBefore(EodHelper.storedStatus(),
+        List<Long> detsEods = externalObjectDirectoryRepository.findEodsIdsInOtherStorageLastModifiedBefore(EodHelper.storedStatus(),
                                                                                                             EodHelper.detsLocation(),
                                                                                                             EodHelper.armLocation(),
                                                                                                             lastModifiedBefore,
