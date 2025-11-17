@@ -26,8 +26,9 @@ import java.util.Set;
 
 @Repository
 @SuppressWarnings({
-    "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited,
-    "PMD.ExcessivePublicCount"//TODO - refactor to reduce public methods when this class is next edited
+    "PMD.TooManyMethods",
+    "PMD.ExcessivePublicCount",
+    "PMD.AvoidDuplicateLiterals"
 })
 public interface ExternalObjectDirectoryRepository extends JpaRepository<ExternalObjectDirectoryEntity, Long> {
 
