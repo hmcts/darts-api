@@ -12,7 +12,10 @@ java:
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: http://darts-gateway.staging.platform.hmcts.net
     ARM_URL: http://darts-stub-services.staging.platform.hmcts.net
+    ARM_AUTH_URL: http://darts-stub-services.staging.platform.hmcts.net
+    ARM_API_URL: http://darts-stub-services.staging.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
     IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
+    ENABLE_ARM_V5_2_UPGRADE: true

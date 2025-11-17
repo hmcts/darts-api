@@ -45,5 +45,10 @@ darts:
       url: ${ARM_URL:http://localhost:4551}
       arm-service-entitlement: some-entitlement
       arm-storage-account-name: some-account-name
+      version5-2:
+        authentication:
+          auth-base-url: ${ARM_AUTH_URL:http://localhost:4551}
+        api:
+          api-base-url: ${ARM_API_URL:http://localhost:4551}
   automated-tasks-pod: true
   api-pod: true

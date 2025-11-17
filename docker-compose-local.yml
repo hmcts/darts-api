@@ -49,6 +49,8 @@ services:
       - ARM_PASSWORD
       - ARM_SERVICE_PROFILE
       - ARM_URL=http://darts-stub-services:4551
+      - ARM_AUTH_URL=http://darts-stub-services:4551
+      - ARM_API_URL=http://darts-stub-services:4551
       - ACTIVE_DIRECTORY_B2C_BASE_URI=https://hmctsstgextid.b2clogin.com
       - ACTIVE_DIRECTORY_B2C_AUTH_URI=https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
       - MAX_FILE_UPLOAD_SIZE_MEGABYTES=350

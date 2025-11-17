@@ -1,0 +1,114 @@
+{
+  "data": [
+    {
+      "id": "aeb01bc8-9292-47a7-88a3-8fc89ebc3e10",
+      "displayName": "a360c2x2555blob",
+      "name": "a360c2x2555blob",
+      "replication": {
+        "id": 0,
+        "display": "Locally redundant storage (LRS)"
+      },
+      "location": "",
+      "kind": {
+        "id": 1,
+        "display": "StorageV2 (general purpose v2)"
+      },
+      "tier": {
+        "id": 0,
+        "display": "Standard"
+      },
+      "accessTier": null,
+      "isApplication": false,
+      "useEncryption": false,
+      "useForOffice365Export": false,
+      "useForAuditArchive": false,
+      "existing": false,
+      "keyType": {
+        "id": 3,
+        "display": "Key Vault Access Key"
+      },
+      "key": "********\t",
+      "capacity": "501.92 GB",
+      "defaultForBlob": false,
+      "defaultForJson": false,
+      "defaultForExport": false,
+      "streams": [
+        {
+          "streamID": 100,
+          "blobStorageAccountID": "aeb01bc8-9292-47a7-88a3-8fc89ebc3e10",
+          "jsonStorageAccountID": "df29511c-76c4-46d4-80c1-9d7f108eb551",
+          "name": "rm",
+          "description": "rm",
+          "compliance": false,
+          "encyptedStream": false,
+          "updateDate": "2022-12-16T09:26:30.863724+00:00",
+          "createdDate": "2022-12-16T09:26:30.863724+00:00",
+          "lastActivity": "2024-08-13T16:22:53.1744311+00:00",
+          "retentionCategoryID": 1,
+          "rawIngestion": false,
+          "disable": false,
+          "isIngestionDisabled": false,
+          "isCleaning": false,
+          "isUsedForRM": true
+        }
+      ]
+    },
+    {
+      "id": "df29511c-76c4-46d4-80c1-9d7f108eb551",
+      "displayName": "a360c2x2555json",
+      "name": "a360c2x2555json",
+      "replication": {
+        "id": 1,
+        "display": "Geo-redundant storage (GRS)"
+      },
+      "location": null,
+      "kind": {
+        "id": 1,
+        "display": "StorageV2 (general purpose v2)"
+      },
+      "tier": null,
+      "accessTier": null,
+      "isApplication": false,
+      "useEncryption": false,
+      "useForOffice365Export": false,
+      "useForAuditArchive": false,
+      "existing": true,
+      "keyType": {
+        "id": 3,
+        "display": "Key Vault Access Key"
+      },
+      "key": "********\t",
+      "capacity": "62.46 GB",
+      "defaultForBlob": false,
+      "defaultForJson": false,
+      "defaultForExport": true,
+      "streams": [
+        {
+          "streamID": 100,
+          "blobStorageAccountID": "aeb01bc8-9292-47a7-88a3-8fc89ebc3e10",
+          "jsonStorageAccountID": "df29511c-76c4-46d4-80c1-9d7f108eb551",
+          "name": "rm",
+          "description": "rm",
+          "compliance": false,
+          "encyptedStream": false,
+          "updateDate": "2022-12-16T09:26:30.863724+00:00",
+          "createdDate": "2022-12-16T09:26:30.863724+00:00",
+          "lastActivity": "2024-08-13T16:22:53.1744311+00:00",
+          "retentionCategoryID": 1,
+          "rawIngestion": false,
+          "disable": false,
+          "isIngestionDisabled": false,
+          "isCleaning": false,
+          "isUsedForRM": true
+        }
+      ]
+    }
+  ],
+  "status": 200,
+  "demoMode": false,
+  "isError": false,
+  "responseStatus": 0,
+  "responseStatusMessages": null,
+  "exception": null,
+  "message": null
+}

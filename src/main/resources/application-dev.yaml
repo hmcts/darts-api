@@ -22,6 +22,11 @@ darts:
       arm-password: ${ARM_PASSWORD:dev-password}
       arm-service-profile: ${ARM_SERVICE_PROFILE:dev-profile}
       url: ${ARM_URL:http://localhost:4551}
+      version5-2:
+        authentication:
+          auth-base-url: ${ARM_AUTH_URL:http://localhost:4551}
+        api:
+          api-base-url: ${ARM_API_URL:http://localhost:4551}
 
 logging:
   level:

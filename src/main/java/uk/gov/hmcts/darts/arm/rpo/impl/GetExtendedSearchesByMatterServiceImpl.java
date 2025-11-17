@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedSearchesByMatterRequestGenerator;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.GetExtendedSearchesByMatterService;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -26,7 +26,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 public class GetExtendedSearchesByMatterServiceImpl implements GetExtendedSearchesByMatterService {
 
-    private final ArmRpoClient armRpoClient;
+    private final ArmClientService armClientService;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
 
@@ -48,7 +48,7 @@ public class GetExtendedSearchesByMatterServiceImpl implements GetExtendedSearch
 
         ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse;
         try {
-            extendedSearchesByMatterResponse = armRpoClient.getExtendedSearchesByMatter(bearerToken, requestGenerator.getJsonRequest());
+            extendedSearchesByMatterResponse = armClientService.getExtendedSearchesByMatter(bearerToken, requestGenerator.getJsonRequest());
         } catch (FeignException e) {
             log.error(errorMessage.append("Unable to get ARM RPO response {}").append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);

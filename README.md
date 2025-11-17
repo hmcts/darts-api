@@ -69,6 +69,8 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 | ACTIVE_DIRECTORY_B2C_BASE_URI | https://hmctsstgextid.b2clogin.com                               |
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 | ARM_URL                       |                                                                  |  
+| ARM_AUTH_URL                  |                                                                  |
+| ARM_API_URL                   |                                                                  |
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
@@ -143,6 +145,8 @@ export AZURE_AD_FUNCTIONAL_TEST_USERNAME=
 export AZURE_AD_FUNCTIONAL_TEST_PASSWORD=
 export ARM_SAS_ENDPOINT=
 export ARM_URL=
+export ARM_AUTH_URL=
+export ARM_API_URL=
 export ARM_USERNAME=
 export ARM_PASSWORD=
 export DARTS_INBOUND_STORAGE_SAS_URL=
@@ -393,28 +397,33 @@ Please see the separate [Dev environment](https://tools.hmcts.net/confluence/dis
 
 This repo contains overrides for the default dev environment configuration, controlled by PR labels.
 
-## OpenAPI Specification and Data Schema Validation
-
-This repository uses spectral to validate OpenAPI specifications. To install spectral, you can use npm or yarn:
-
-https://docs.stoplight.io/docs/spectral/b8391e051b7d8-installation
-
-To validate the OpenAPI specification:
-
-```bash
-spectral lint --verbose "src/main/resources/openapi/**/*.{yml,yaml}"
-```
-
-Documentation: https://stoplight.io/open-source/spectral
-
-Validate the data payload JSON Schemas:
-
 ### Supported labels
 
 | Label                  | Usages                                                                                           |
 |------------------------|--------------------------------------------------------------------------------------------------|
 | enable_darts_portal    | Deploys a DARTS portal instance alongside the API in the dev environment                         |
 | enable_darts_fullstack | Not yet supported, but will deploy the full DARTS stack alongside the API in the dev environment |
+
+## OpenAPI Validation
+
+The application uses OpenAPI validation to ensure that incoming requests and outgoing responses conform to the OpenAPI specification. To install the IBM OpenAPI
+validator, you can use npm or yarn:
+
+https://github.com/IBM/openapi-validator?tab=readme-ov-file#installation
+
+To enable OpenAPI validation, the following properties are set in the application configuration:
+
+```bash
+lint-openapi "src/main/resources/openapi/**/*.yaml"
+```
+
+For more information on OpenAPI validation with IBM openapi validator, see the [openapi validator](https://github.com/IBM/openapi-validator).
+
+This OpenAPI validation uses spectral ruleset to validate. To install spectral, you can use npm or yarn:
+
+https://docs.stoplight.io/docs/spectral/b8391e051b7d8-installation
+
+Documentation: https://stoplight.io/open-source/spectral
 
 ## License
 
