@@ -459,13 +459,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             WHERE eod1.ors_id = :status
             AND eod1.elt_id = :type
             AND eod1.med_id IS NOT NULL
-            AND EXISTS (
-                SELECT 1
+            AND eod1.eod_id in (
+                SELECT eod2.eod_id
                 FROM darts.external_object_directory eod2
                 WHERE eod2.elt_id = :existsLocation
                 AND eod1.med_id = eod2.med_id
                 AND eod2.ors_id = :status
-                AND eod2.last_modified_ts < :lastModifiedBefore
+                AND eod2.last_modified_ts <= :lastModifiedBefore
             )
             FETCH FIRST :limitRecords rows only
             """,
@@ -475,6 +475,32 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                   Integer existsLocation,
                                                                   OffsetDateTime lastModifiedBefore,
                                                                   Integer limitRecords);
+
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE (
+                (:externalObjectDirectoryQueryTypeEnumIndex=1 AND eod.media = eod2.media)
+                OR
+                (:externalObjectDirectoryQueryTypeEnumIndex=2 AND (
+                    eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity
+            	    OR eod.annotationDocumentEntity=eod2.annotationDocumentEntity
+            	    OR eod.caseDocument=eod2.caseDocument
+            	))
+            )
+            AND eod.status.id = :status
+            AND eod2.status.id = :status
+            AND eod.externalLocationType.id = :type
+            AND eod2.externalLocationType.id = :existsLocation
+            AND eod2.lastModifiedDateTime <= :lastModifiedBefore
+            """
+    )
+    List<Long> findEodIdsInOtherStorageLastModifiedBefore(@Param("status") Integer status,
+                                                          @Param("type") Integer type,
+                                                          @Param("existsLocation") Integer existsLocation,
+                                                          @Param("lastModifiedBefore") OffsetDateTime lastModifiedBefore,
+                                                          @Param("externalObjectDirectoryQueryTypeEnumIndex") Integer externalObjectDirectoryQueryTypeEnumIndex,
+                                                          Limit limitRecords);
 
     @Query(
         value = """
@@ -507,8 +533,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             WHERE eod1.ors_id = :status
             AND eod1.elt_id = :type
             AND eod1.med_id IS NULL
-            AND EXISTS (
-                SELECT 1
+            AND eod1.eod_id in (
+                SELECT eod2.eod_id
                 FROM darts.external_object_directory eod2
                 WHERE eod2.elt_id = :existsLocation
                 AND eod2.ors_id = :status
@@ -517,14 +543,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                     (eod1.ado_id IS NOT NULL AND eod1.ado_id = eod2.ado_id) OR
                     (eod1.cad_id IS NOT NULL AND eod1.cad_id = eod2.cad_id)
                 )
-                AND eod2.last_modified_ts < :lastModifiedBefore
+                AND eod2.last_modified_ts <= :lastModifiedBefore
             )
             fetch first :limitRecords rows only
             """,
         nativeQuery = true
     )
     List<Long> findEodIdsInOtherStorageExcludingMediaLastModifiedBefore(Integer status, Integer type,
-                                                                        Integer existsLocation, OffsetDateTime lastModifiedBefore, Integer limitRecords);
+                                                                        Integer existsLocation, OffsetDateTime lastModifiedBefore,
+                                                                        Integer limitRecords);
 
     @Query(
         """
@@ -783,11 +810,19 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                    Integer limitRecords) {
         Set<Long> results = new HashSet<>(); // Ensures no duplicates
         results.addAll(
-            findEodIdsInOtherStorageForMediaLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore, limitRecords));
+            //findEodIdsInOtherStorageForMediaLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore, limitRecords)
+            findEodIdsInOtherStorageLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore, 1,
+                                                       Limit.of(limitRecords))
+        );
         if (results.size() < limitRecords) {
+            int limitForExcludingMedia = limitRecords - results.size();
             results.addAll(
-                findEodIdsInOtherStorageExcludingMediaLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore,
-                                                                         limitRecords - results.size()));
+//                findEodIdsInOtherStorageExcludingMediaLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore,
+//                                                                         limitRecords - results.size())
+                findEodIdsInOtherStorageLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore, 2,
+                                                           Limit.of(limitForExcludingMedia))
+            );
+
         }
         return new ArrayList<>(results);
     }
