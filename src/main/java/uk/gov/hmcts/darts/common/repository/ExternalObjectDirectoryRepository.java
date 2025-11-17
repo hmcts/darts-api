@@ -485,9 +485,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 OR
                 (:externalObjectDirectoryQueryTypeEnumIndex=2 AND (
                     eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity
-            	    OR eod.annotationDocumentEntity=eod2.annotationDocumentEntity
-            	    OR eod.caseDocument=eod2.caseDocument
-            	))
+                    OR eod.annotationDocumentEntity=eod2.annotationDocumentEntity
+                    OR eod.caseDocument=eod2.caseDocument
+                ))
             )
             AND eod.status.id = :status
             AND eod2.status.id = :status
@@ -818,8 +818,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         if (results.size() < limitRecords) {
             int limitForExcludingMedia = limitRecords - results.size();
             results.addAll(
-//                findEodIdsInOtherStorageExcludingMediaLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore,
-//                                                                         limitRecords - results.size())
+                //findEodIdsInOtherStorageExcludingMediaLastModifiedBefore(
+                // status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore, limitRecords - results.size())
                 findEodIdsInOtherStorageLastModifiedBefore(status.getId(), type.getId(), existsLocation.getId(), lastModifiedBefore, 2,
                                                            Limit.of(limitForExcludingMedia))
             );
