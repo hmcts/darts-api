@@ -492,7 +492,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                           @Param("type") Integer type,
                                                           @Param("existsLocation") Integer existsLocation,
                                                           @Param("lastModifiedBefore") OffsetDateTime lastModifiedBefore,
-                                                          Limit limitRecords);
+                                                          Limit limit);
 
     @Query(
         value = """
@@ -531,7 +531,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     ExternalObjectDirectoryEntity findByIdsAndFailure(Long mediaId, Long caseDocumentId, Long annotationDocumentId, Long transcriptionDocumentId,
                                                       List<Integer> failureStatesList);
-    
+
     @Query(
         """
             SELECT COUNT(eod) > 0

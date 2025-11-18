@@ -1041,7 +1041,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             EodHelper.detsLocation().getId(),
             EodHelper.armLocation().getId(),
             lastModifiedDateTime,
-            Limit.of(10));
+            Limit.of(5)
+        );
 
         // then
         assertEquals(4, results.size());
@@ -1103,7 +1104,9 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              OffsetDateTime lastModifiedDateTime) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+                                                                              OffsetDateTime lastModifiedDateTime)
+
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(externalLocationTypeEntity)
@@ -1118,7 +1121,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(AnnotationDocumentEntity annotationDocumentEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              OffsetDateTime lastModifiedDateTime) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+                                                                              OffsetDateTime lastModifiedDateTime)
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(externalLocationTypeEntity)
@@ -1133,7 +1137,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(CaseDocumentEntity caseDocumentEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              OffsetDateTime lastModifiedDateTime) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+                                                                              OffsetDateTime lastModifiedDateTime)
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(externalLocationTypeEntity)
