@@ -44,7 +44,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.GodClass")
 @Getter
 public class ExternalObjectDirectoryStub {
 
