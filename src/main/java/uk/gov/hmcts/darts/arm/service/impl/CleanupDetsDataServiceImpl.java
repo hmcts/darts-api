@@ -38,7 +38,8 @@ public class CleanupDetsDataServiceImpl implements CleanupDetsDataService {
                                                                                                            EodHelper.detsLocation().getId(),
                                                                                                            EodHelper.armLocation().getId(),
                                                                                                            lastModifiedBefore,
-                                                                                                           Limit.of(batchsize));
+                                                                                                           Limit.of(batchsize)
+        );
         for (Long detsEodId : detsEods) {
             cleanupDetsEodTransactionalService.cleanupDetsEod(detsEodId);
         }
