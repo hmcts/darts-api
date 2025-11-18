@@ -11,7 +11,9 @@ import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -48,7 +50,8 @@ class GetRecordManagementMatterServiceTest {
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
-        getRecordManagementMatterService = new GetRecordManagementMatterServiceImpl(armRpoClient, armRpoService, armRpoUtil);
+        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        getRecordManagementMatterService = new GetRecordManagementMatterServiceImpl(armClientService, armRpoService, armRpoUtil);
     }
 
     @Test

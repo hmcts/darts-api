@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.GetRecordManagementMatterService;
+import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -23,7 +23,7 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
 
     private static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
 
-    private final ArmRpoClient armRpoClient;
+    private final ArmClientService armClientService;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
 
@@ -38,7 +38,7 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
         RecordManagementMatterResponse recordManagementMatterResponse;
         try {
             EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-            recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken, emptyRpoRequest);
+            recordManagementMatterResponse = armClientService.getRecordManagementMatter(bearerToken, emptyRpoRequest);
         } catch (FeignException e) {
             log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw armRpoUtil.handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount, e);
