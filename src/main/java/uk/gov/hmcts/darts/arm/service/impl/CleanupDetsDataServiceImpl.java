@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.service.CleanupDetsDataService;
@@ -33,11 +34,11 @@ public class CleanupDetsDataServiceImpl implements CleanupDetsDataService {
 
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(durationInArmStorage);
 
-        List<Long> detsEods = externalObjectDirectoryRepository.findEodsIdsInOtherStorageLastModifiedBefore(EodHelper.storedStatus(),
-                                                                                                            EodHelper.detsLocation(),
-                                                                                                            EodHelper.armLocation(),
-                                                                                                            lastModifiedBefore,
-                                                                                                            batchsize);
+        List<Long> detsEods = externalObjectDirectoryRepository.findEodIdsInOtherStorageLastModifiedBefore(EodHelper.storedStatus().getId(),
+                                                                                                           EodHelper.detsLocation().getId(),
+                                                                                                           EodHelper.armLocation().getId(),
+                                                                                                           lastModifiedBefore,
+                                                                                                           Limit.of(batchsize));
         for (Long detsEodId : detsEods) {
             cleanupDetsEodTransactionalService.cleanupDetsEod(detsEodId);
         }

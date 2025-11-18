@@ -999,7 +999,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findEodsIdsInOtherStorageLastModifiedBefore_ReturnsExpectedResults() {
+    void findEodsIdsInOtherStorageLastModifiedBefore_ReturnsExpectedResults() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
         OffsetDateTime lastModifiedDateTimeInScope = OffsetDateTime.now().minusDays(8);
         MediaEntity media1 = getMediaEntity();
@@ -1036,12 +1036,12 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         OffsetDateTime lastModifiedDateTime = OffsetDateTime.now().minusDays(7);
 
         // when
-        List<Long> results = externalObjectDirectoryRepository.findEodsIdsInOtherStorageLastModifiedBefore(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
+        List<Long> results = externalObjectDirectoryRepository.findEodIdsInOtherStorageLastModifiedBefore(
+            EodHelper.storedStatus().getId(),
+            EodHelper.detsLocation().getId(),
+            EodHelper.armLocation().getId(),
             lastModifiedDateTime,
-            10);
+            Limit.of(10));
 
         // then
         assertEquals(4, results.size());
@@ -1087,21 +1087,23 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         );
     }
 
-    private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(MediaEntity media, ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              OffsetDateTime lastModifiedDateTime) {
+    private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(MediaEntity media,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              OffsetDateTime lastModifiedDateTime)
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(externalLocationTypeEntity)
             .media(media)
-            .lastModifiedDateTime(lastModifiedDateTime)
             .build()
             .getEntity();
-        return dartsPersistence.save(eod);
+        var savedEod = dartsPersistence.save(eod);
+        return externalObjectDirectoryStub.applyLastModifiedDate(savedEod, lastModifiedDateTime);
     }
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              OffsetDateTime lastModifiedDateTime) {
+                                                                              OffsetDateTime lastModifiedDateTime) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(externalLocationTypeEntity)
@@ -1109,12 +1111,14 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .lastModifiedDateTime(lastModifiedDateTime)
             .build()
             .getEntity();
-        return dartsPersistence.save(eod);
+        var savedEod = dartsPersistence.save(eod);
+
+        return externalObjectDirectoryStub.applyLastModifiedDate(savedEod, lastModifiedDateTime);
     }
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(AnnotationDocumentEntity annotationDocumentEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              OffsetDateTime lastModifiedDateTime) {
+                                                                              OffsetDateTime lastModifiedDateTime) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(externalLocationTypeEntity)
@@ -1122,12 +1126,14 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .lastModifiedDateTime(lastModifiedDateTime)
             .build()
             .getEntity();
-        return dartsPersistence.save(eod);
+        var savedEod = dartsPersistence.save(eod);
+
+        return externalObjectDirectoryStub.applyLastModifiedDate(savedEod, lastModifiedDateTime);
     }
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(CaseDocumentEntity caseDocumentEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              OffsetDateTime lastModifiedDateTime) {
+                                                                              OffsetDateTime lastModifiedDateTime) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(externalLocationTypeEntity)
@@ -1135,7 +1141,9 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .lastModifiedDateTime(lastModifiedDateTime)
             .build()
             .getEntity();
-        return dartsPersistence.save(eod);
+        var savedEod = dartsPersistence.save(eod);
+
+        return externalObjectDirectoryStub.applyLastModifiedDate(savedEod, lastModifiedDateTime);
     }
 
     private MediaEntity getMediaEntity() {
