@@ -23,16 +23,16 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
-    MediaRequestStub mediaRequestStub;
+    private MediaRequestStub mediaRequestStub;
 
     @Autowired
-    MediaRequestRepository mediaRequestRepository;
+    private MediaRequestRepository mediaRequestRepository;
     
     @Autowired
-    UserAccountStub userAccountStub;
+    private UserAccountStub userAccountStub;
     
     @Autowired
-    TransformedMediaStub transformedMediaStub;
+    private TransformedMediaStub transformedMediaStub;
 
 
     @Test
