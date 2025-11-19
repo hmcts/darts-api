@@ -130,7 +130,7 @@ paths:
       description: "Retention Policy Types"
       parameters: [ ]
       responses:
-        "200":
+        '200':
           description: "OK"
           content:
             application/json:
@@ -251,7 +251,7 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml' 
+                $ref: './problem.yaml'
         '400':
           description: "Bad request"
           content:
@@ -453,7 +453,7 @@ components:
                          NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
                          NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,
                          POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND, LIVE_POLICIES_CANNOT_BE_EDITED,
-                         TARGET_POLICY_HAS_PENDING_REVISION, CASE_RETENTION_PASSED]
+                         TARGET_POLICY_HAS_PENDING_REVISION, CASE_RETENTION_PASSED ]
 
     RetentionTitleErrors:
       type: string
@@ -481,4 +481,4 @@ components:
                          NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
                          NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,
                          POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND, LIVE_POLICIES_CANNOT_BE_EDITED,
-                         TARGET_POLICY_HAS_PENDING_REVISION, CASE_RETENTION_PASSED]
+                         TARGET_POLICY_HAS_PENDING_REVISION, CASE_RETENTION_PASSED ]
