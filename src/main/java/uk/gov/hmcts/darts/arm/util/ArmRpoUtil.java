@@ -2,11 +2,13 @@ package uk.gov.hmcts.darts.arm.util;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -27,9 +29,10 @@ public class ArmRpoUtil {
     private static final String AND_RESPONSE = " and response - ";
 
     private final ArmRpoService armRpoService;
+    private final ArmApiService armApiService;
 
     public String generateUniqueProductionName(String productionName) {
-        return productionName + "_" + UUID.randomUUID().toString() + CREATE_EXPORT_CSV_EXTENSION;
+        return productionName + "_" + UUID.randomUUID() + CREATE_EXPORT_CSV_EXTENSION;
     }
 
     public ArmRpoException handleFailureAndCreateException(String message,
@@ -46,7 +49,7 @@ public class ArmRpoUtil {
         return new ArmRpoException(message, cause);
     }
 
-    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     public void handleResponseStatus(UserAccountEntity userAccount, BaseRpoResponse baseRpoResponse, StringBuilder errorMessage,
                                      ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         if (isNull(baseRpoResponse)
@@ -66,5 +69,30 @@ public class ArmRpoUtil {
             log.error(errorMessage.append("ARM RPO API response status is invalid - ").append(baseRpoResponse).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount, e);
         }
+    }
+
+    public String getBearerToken(String endpointName) {
+        try {
+            var bearerToken = armApiService.getArmBearerToken();
+            if (StringUtils.isEmpty(bearerToken)) {
+                log.warn("Unable to get bearer token for {}", endpointName);
+                bearerToken = retryGetBearerToken(endpointName);
+            }
+
+            return bearerToken;
+        } catch (Exception e) {
+            log.error("Exception occurred while getting bearer token for {}", endpointName, e);
+            throw new ArmRpoException("Exception occurred while getting bearer token for " + endpointName, e);
+        }
+    }
+
+    private String retryGetBearerToken(String endpointName) {
+        String bearerToken;
+        armApiService.evictToken();
+        bearerToken = armApiService.getArmBearerToken();
+        if (StringUtils.isEmpty(bearerToken)) {
+            throw new ArmRpoException("Unable to get bearer token for " + endpointName + " after retrying");
+        }
+        return bearerToken;
     }
 }

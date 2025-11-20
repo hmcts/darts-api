@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
@@ -44,7 +45,8 @@ class GetStorageAccountsServiceTest {
 
     @Mock
     private ArmRpoClient armRpoClient;
-
+    @Mock
+    private ArmApiService armApiService;
     @Mock
     private ArmRpoService armRpoService;
 
@@ -62,7 +64,6 @@ class GetStorageAccountsServiceTest {
     private static final Integer EXECUTION_ID = 1;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
 
-
     @BeforeEach
     void setUp() {
         userAccount = new UserAccountEntity();
@@ -72,7 +73,7 @@ class GetStorageAccountsServiceTest {
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
 
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
         getStorageAccountsService = new GetStorageAccountsServiceImpl(armClientService, armRpoService, armRpoUtil, armApiConfigurationProperties);
     }

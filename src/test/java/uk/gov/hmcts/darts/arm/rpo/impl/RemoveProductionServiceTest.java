@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
@@ -40,7 +41,8 @@ class RemoveProductionServiceTest {
 
     @Mock
     private ArmRpoClient armRpoClient;
-
+    @Mock
+    private ArmApiService armApiService;
     @Mock
     private ArmRpoService armRpoService;
 
@@ -60,7 +62,7 @@ class RemoveProductionServiceTest {
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         userAccount = new UserAccountEntity();
         armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
         removeProductionService = new RemoveProductionServiceImpl(armClientService, armRpoService, armRpoUtil);
     }

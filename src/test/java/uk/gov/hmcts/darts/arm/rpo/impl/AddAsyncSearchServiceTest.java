@@ -7,12 +7,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.rpo.AddAsyncSearchService;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
@@ -42,6 +44,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AddAsyncSearchServiceTest {
 
+    @Mock
+    private ArmApiService armApiService;
+
     private ArmRpoService armRpoService;
     private ArmRpoClient armRpoClient;
     private ArmAutomatedTaskRepository armAutomatedTaskRepository;
@@ -70,7 +75,7 @@ class AddAsyncSearchServiceTest {
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         requestCaptor = ArgumentCaptor.forClass(String.class);
 
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         addAsyncSearchService = new AddAsyncSearchServiceImpl(armClientService, armRpoService, armRpoUtil,

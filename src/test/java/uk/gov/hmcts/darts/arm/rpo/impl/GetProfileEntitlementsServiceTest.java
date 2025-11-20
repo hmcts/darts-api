@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.rpo.GetProfileEntitlementsService;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
@@ -42,6 +44,9 @@ class GetProfileEntitlementsServiceTest {
 
     private GetProfileEntitlementsService getProfileEntitlementsService;
 
+    @Mock
+    private ArmApiService armApiService;
+
     private ArmRpoService armRpoService;
     private ArmRpoClient armRpoClient;
 
@@ -62,7 +67,7 @@ class GetProfileEntitlementsServiceTest {
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
         armApiConfigurationProperties.setArmServiceEntitlement(ENTITLEMENT_NAME);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         getProfileEntitlementsService = new GetProfileEntitlementsServiceImpl(armClientService, armRpoService, armRpoUtil, armApiConfigurationProperties);

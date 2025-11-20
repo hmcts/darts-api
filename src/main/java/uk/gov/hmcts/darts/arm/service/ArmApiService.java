@@ -17,4 +17,6 @@ public interface ArmApiService {
     DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException;
 
     String getArmBearerToken();
+
+    void evictToken();
 }

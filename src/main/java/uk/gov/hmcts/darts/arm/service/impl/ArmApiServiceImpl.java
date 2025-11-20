@@ -108,6 +108,7 @@ public class ArmApiServiceImpl implements ArmApiService {
 
     @Override
     public String getArmBearerToken() {
+        // TODO: Remove logging of username and password once testing is complete
         log.debug("Get ARM Bearer Token with Username: {}, Password: {}",
                   armApiConfigurationProperties.getArmUsername(),
                   armApiConfigurationProperties.getArmPassword());
@@ -118,6 +119,11 @@ public class ArmApiServiceImpl implements ArmApiService {
             .build();
 
         return armAuthTokenCache.getToken(armTokenRequest);
+    }
+
+    @Override
+    public void evictToken() {
+        armAuthTokenCache.evictToken();
     }
 
     String formatDateTime(OffsetDateTime offsetDateTime) {

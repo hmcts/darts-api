@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.util;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,11 +13,14 @@ class ArmRpoUtilTest {
     @Mock
     private ArmRpoService armRpoService;
 
+    @Mock
+    private ArmApiService armApiService;
+
     private ArmRpoUtil armRpoUtil;
 
     @BeforeEach
     void setUp() {
-        armRpoUtil = new ArmRpoUtil(armRpoService);
+        armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
     }
 
     @Test

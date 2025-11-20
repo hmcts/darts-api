@@ -9,7 +9,6 @@ import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
-import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
@@ -37,7 +36,6 @@ import static uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum.GET_EXTENDED_PRODU
 public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     private final ArmRpoApi armRpoApi;
-    private final ArmApiService armApiService;
     private final ArmRpoService armRpoService;
     private final UserIdentity userIdentity;
     private final FileOperationService fileOperationService;
@@ -65,12 +63,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             }
             executionId = armRpoExecutionDetailEntity.getId();
 
-            var bearerToken = armApiService.getArmBearerToken();
-            if (isNull(bearerToken)) {
-                log.warn("Unable to get bearer token to poll ARM RPO");
-                logApi.armRpoPollingFailed(executionId);
-                return;
-            }
+            // make sure we have a valid bearer token before proceeding
+            armRpoUtil.getBearerToken("ArmRpoPoll");
 
             var userAccount = userIdentity.getUserAccount();
 
@@ -82,23 +76,23 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 uniqueProductionName = armRpoExecutionDetailEntity.getProductionName();
             } else {
                 // step to call ARM RPO API to get the extended searches by matter
-                productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
+                productionName = armRpoApi.getExtendedSearchesByMatter(armRpoUtil.getBearerToken("getExtendedSearchesByMatter"),
+                                                                       executionId, userAccount);
 
                 uniqueProductionName = armRpoUtil.generateUniqueProductionName(productionName);
 
                 // step to call ARM RPO API to get the master index field by record class schema
                 List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
-                    bearerToken, executionId,
-                    ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
-                    userAccount);
+                    armRpoUtil.getBearerToken("getMasterIndexFieldByRecordClassSchema"),
+                    executionId, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(), userAccount);
 
                 // step to call ARM RPO API to create export based on search results table
                 createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(
-                    bearerToken, executionId, headerColumns, uniqueProductionName, pollDuration, userAccount);
+                    armRpoUtil.getBearerToken("createExportBasedOnSearchResultsTable"),
+                    executionId, headerColumns, uniqueProductionName, pollDuration, userAccount);
             }
             if (createExportBasedOnSearchResultsTable) {
-                processProductions(bearerToken, executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity,
-                                   batchSize);
+                processProductions(executionId, uniqueProductionName, userAccount, armRpoExecutionDetailEntity, batchSize);
             } else {
                 log.warn("ARM RPO Polling is still in-progress for createExportBasedOnSearchResultsTable");
             }
@@ -121,20 +115,22 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         return false;
     }
 
-    private void processProductions(String bearerToken, Integer executionId, String productionName, UserAccountEntity userAccount,
+    private void processProductions(Integer executionId, String productionName, UserAccountEntity userAccount,
                                     ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, int batchSize) throws IOException {
         // step to call ARM RPO API to get the extended productions by matter
-        boolean getExtendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, productionName, userAccount);
+        boolean getExtendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(
+            armRpoUtil.getBearerToken("getExtendedProductionsByMatter"), executionId, productionName, userAccount);
         if (getExtendedProductionsByMatter) {
             // step to call ARM RPO API to get the production output files
-            var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
+            var productionOutputFiles = armRpoApi.getProductionOutputFiles(
+                armRpoUtil.getBearerToken("getProductionOutputFiles"), executionId, userAccount);
 
             for (var productionExportFileId : productionOutputFiles) {
-                processProductionFiles(productionExportFileId, bearerToken, executionId, userAccount);
+                processProductionFiles(productionExportFileId, executionId, userAccount);
             }
             if (CollectionUtils.isNotEmpty(tempProductionFiles)) {
                 // step to call ARM RPO API to remove the production
-                armRpoApi.removeProduction(bearerToken, executionId, userAccount);
+                armRpoApi.removeProduction(armRpoUtil.getBearerToken("removeProduction"), executionId, userAccount);
                 log.debug("About to reconcile production files");
                 armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles, batchSize);
             } else {
@@ -146,11 +142,12 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         }
     }
 
-    private void processProductionFiles(String productionExportFileId, String bearerToken, Integer executionId,
+    private void processProductionFiles(String productionExportFileId, Integer executionId,
                                         UserAccountEntity userAccount) throws IOException {
         String productionExportFilename = generateTempProductionExportFilename(productionExportFileId);
         // step to call ARM RPO API to download the production export file
-        try (var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount)) {
+        try (var inputStream =
+                 armRpoApi.downloadProduction(armRpoUtil.getBearerToken("downloadProduction"), executionId, productionExportFileId, userAccount)) {
             log.info("About to save production export file to temp workspace {}", productionExportFilename);
             Path tempProductionFile = fileOperationService.saveFileToTempWorkspace(
                 inputStream,

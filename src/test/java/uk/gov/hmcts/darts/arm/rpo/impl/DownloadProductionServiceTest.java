@@ -13,6 +13,7 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -43,6 +44,8 @@ class DownloadProductionServiceTest {
 
     @Mock
     private ArmRpoService armRpoService;
+    @Mock
+    private ArmApiService armApiService;
 
     @Mock
     private ArmRpoDownloadProduction armRpoDownloadProduction;
@@ -57,14 +60,13 @@ class DownloadProductionServiceTest {
 
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
 
-
     @BeforeEach
     void setUp() {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         userAccount = new UserAccountEntity();
         armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
         downloadProductionService = new DownloadProductionServiceImpl(armRpoService, armRpoUtil, armRpoDownloadProduction);
     }
 

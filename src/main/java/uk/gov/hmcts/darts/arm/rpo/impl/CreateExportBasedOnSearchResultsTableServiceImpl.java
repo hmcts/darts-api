@@ -109,7 +109,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
         return baseRpoResponse;
     }
 
-    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private boolean processCreateExportBasedOnSearchResultsTableResponse(UserAccountEntity userAccount,
                                                                          BaseRpoResponse baseRpoResponse,
                                                                          StringBuilder errorMessage,

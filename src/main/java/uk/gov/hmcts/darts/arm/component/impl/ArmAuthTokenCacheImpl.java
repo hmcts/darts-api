@@ -41,7 +41,7 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
 
     /**
-     * Allows callers to dump a bad token (e.g. after 401) so next call will refresh.
+     * Allows callers to dump a bad token so next call will refresh.
      */
     @Override
     public void evictToken() {

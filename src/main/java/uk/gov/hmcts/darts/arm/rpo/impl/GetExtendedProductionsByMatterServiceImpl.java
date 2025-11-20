@@ -57,7 +57,7 @@ public class GetExtendedProductionsByMatterServiceImpl implements GetExtendedPro
                                                           armRpoExecutionDetailEntity);
     }
 
-    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private boolean processExtendedProductionsByMatterResponse(String productionName, UserAccountEntity userAccount,
                                                                ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse,
                                                                StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {

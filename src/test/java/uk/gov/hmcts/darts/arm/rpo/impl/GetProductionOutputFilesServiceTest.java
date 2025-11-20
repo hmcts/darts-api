@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.rpo.GetProductionOutputFilesService;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
@@ -52,6 +54,9 @@ class GetProductionOutputFilesServiceTest {
     private ArmRpoService armRpoService;
     private ArmRpoClient armRpoClient;
 
+    @Mock
+    private ArmApiService armApiService;
+
     private ArmRpoHelperMocks armRpoHelperMocks;
 
     private static final Integer EXECUTION_ID = 1;
@@ -64,7 +69,7 @@ class GetProductionOutputFilesServiceTest {
     void setUp() {
         armRpoService = spy(ArmRpoService.class);
         armRpoClient = spy(ArmRpoClient.class);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         getProductionOutputFilesService = new GetProductionOutputFilesServiceImpl(armClientService, armRpoService, armRpoUtil);
