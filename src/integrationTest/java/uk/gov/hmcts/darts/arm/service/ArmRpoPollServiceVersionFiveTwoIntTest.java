@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
@@ -84,7 +85,7 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
     private ArmApiBaseClient armApiBaseClient;
     @MockitoBean
     private ArmAuthClient armAuthClient;
-    @MockitoBean
+    @MockitoSpyBean
     private ArmRpoUtil armRpoUtil;
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
