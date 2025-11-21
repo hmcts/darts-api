@@ -86,7 +86,7 @@ public class ArmRpoUtil {
         }
     }
 
-    private String retryGetBearerToken(String endpointName) {
+    public String retryGetBearerToken(String endpointName) {
         String bearerToken;
         armApiService.evictToken();
         bearerToken = armApiService.getArmBearerToken();
