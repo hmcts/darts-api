@@ -1,1 +1,0 @@
-update court_case set ret_conf_score = null, ret_conf_reason = null, ret_conf_updated_ts = null;
