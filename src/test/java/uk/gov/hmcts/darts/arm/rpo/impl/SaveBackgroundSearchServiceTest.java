@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
+import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
@@ -40,12 +42,17 @@ class SaveBackgroundSearchServiceTest {
 
     private SaveBackgroundSearchServiceImpl saveBackgroundSearchService;
 
+    private ObjectMapper objectMapper;
+
     private UserAccountEntity userAccount;
     private static final Integer EXECUTION_ID = 1;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
 
     @BeforeEach
     void setUp() {
+        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+        ObjectMapper objectMapper = objectMapperConfig.objectMapper();
+
         userAccount = new UserAccountEntity();
 
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -54,7 +61,7 @@ class SaveBackgroundSearchServiceTest {
 
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
-        saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armClientService, armRpoService, armRpoUtil);
+        saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armClientService, armRpoService, armRpoUtil, objectMapper);
     }
 
     @Test
