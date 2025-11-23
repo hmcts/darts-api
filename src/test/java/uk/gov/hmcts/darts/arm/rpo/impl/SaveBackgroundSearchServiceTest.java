@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.nio.charset.StandardCharsets;
 
+import static java.util.Collections.emptyMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -230,8 +231,8 @@ class SaveBackgroundSearchServiceTest {
             feign.Response.builder()
                 .status(400)
                 .reason("Bad Request")
-                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Collections.emptyMap(), null, null, null))
-                .body("Search with no results", java.nio.charset.StandardCharsets.UTF_8)
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .body("Search with no results", StandardCharsets.UTF_8)
                 .build()
         );
         when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
@@ -260,7 +261,7 @@ class SaveBackgroundSearchServiceTest {
             feign.Response.builder()
                 .status(400)
                 .reason("Bad Request")
-                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Collections.emptyMap(), null, null, null))
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
                 .body(jsonResponse, StandardCharsets.UTF_8)
                 .build()
         );
