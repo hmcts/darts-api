@@ -26,9 +26,9 @@ class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
 
     @Autowired
     private SaveBackgroundSearchService saveBackgroundSearchService;
-    
+
     @Test
-    void saveBackgroundSearchSuccess() {
+    void saveBackgroundSearch_ReturnsSuccess() {
 
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
@@ -55,7 +55,7 @@ class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void saveBackgroundSearchReturnsResponseWithInvalidStatus() {
+    void saveBackgroundSearch_ReturnsResponseWithInvalidStatus() {
 
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
@@ -87,7 +87,7 @@ class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void saveBackgroundSearchReturnsResponseWithNullStatus() {
+    void saveBackgroundSearch_ReturnsResponseWithNullStatus() {
 
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
