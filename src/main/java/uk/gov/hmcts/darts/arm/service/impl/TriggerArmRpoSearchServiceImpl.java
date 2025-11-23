@@ -46,40 +46,26 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
             // armBearerToken may be null, but we'll let the lower level service methods deal with that by handling the resultant HTTP exception
             final String armBearerToken = armApiService.getArmBearerToken();
 
-            armRpoApi.getRecordManagementMatter(armBearerToken,
-                                                executionId,
-                                                userAccountEntity);
+            armRpoApi.getRecordManagementMatter(armBearerToken, executionId, userAccountEntity);
 
             // We expect getRecordManagementMatter() to populate the matter id as a side effect, so refresh the entity to get the updated value
             final String matterId = armRpoService.getArmRpoExecutionDetailEntity(executionId).getMatterId();
 
-            armRpoApi.getIndexesByMatterId(armBearerToken,
-                                           executionId,
-                                           matterId,
-                                           userAccountEntity);
+            armRpoApi.getIndexesByMatterId(armBearerToken, executionId, matterId, userAccountEntity);
 
-            armRpoApi.getStorageAccounts(armBearerToken,
-                                         executionId,
-                                         userAccountEntity);
+            armRpoApi.getStorageAccounts(armBearerToken, executionId, userAccountEntity);
 
-            armRpoApi.getProfileEntitlements(armBearerToken,
-                                             executionId,
-                                             userAccountEntity);
+            armRpoApi.getProfileEntitlements(armBearerToken, executionId, userAccountEntity);
 
             armRpoApi.getMasterIndexFieldByRecordClassSchema(armBearerToken,
                                                              executionId,
                                                              ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(),
                                                              userAccountEntity);
 
-            String searchName = armRpoApi.addAsyncSearch(armBearerToken,
-                                                         executionId,
-                                                         userAccountEntity);
+            String searchName = armRpoApi.addAsyncSearch(armBearerToken, executionId, userAccountEntity);
             sleep(threadSleepDuration);
 
-            armRpoApi.saveBackgroundSearch(armBearerToken,
-                                           executionId,
-                                           searchName,
-                                           userAccountEntity);
+            armRpoApi.saveBackgroundSearch(armBearerToken, executionId, searchName, userAccountEntity);
 
             log.info("ARM RPO search flow completed successfully");
             logApi.armRpoSearchSuccessful(executionId);
@@ -90,7 +76,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
     }
 
     // Added method to fix sonar complaint
-    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
+    @SuppressWarnings("PMD.DoNotUseThreads")
     void sleep(Duration threadSleepDuration) {
         try {
             Thread.sleep(threadSleepDuration);

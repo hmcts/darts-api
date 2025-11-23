@@ -21,6 +21,8 @@ import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -65,7 +67,7 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
-    void saveBackgroundSearchReturnsSuccess() {
+    void saveBackgroundSearch_ReturnsSuccess() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
@@ -85,7 +87,7 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
-    void saveBackgroundSearchReturnsInvalidStatus() {
+    void saveBackgroundSearch_ReturnsInvalidStatus() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(400);
@@ -109,7 +111,7 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
-    void saveBackgroundSearchThrowsFeignException() {
+    void saveBackgroundSearch_ThrowsFeignException() {
         // given
         when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
             .thenThrow(FeignException.class);
@@ -131,7 +133,7 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
-    void getStorageAccountsReturnsNullResponse() {
+    void saveBackgroundSearch_ReturnsNullResponse() {
         // given
         when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
 
@@ -152,7 +154,7 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
-    void getStorageAccountsReturnsNullStatusHttpResponse() {
+    void saveBackgroundSearch_ReturnsNullStatusHttpResponse() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setIsError(true);
@@ -175,7 +177,7 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
-    void getStorageAccountsReturnsNullIsErrorResponse() {
+    void saveBackgroundSearch_ReturnsNullIsErrorResponse() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
@@ -198,7 +200,7 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
-    void getStorageAccountsReturnsInvalidHttpStatusResponse() {
+    void saveBackgroundSearch_ReturnsInvalidHttpStatusResponse() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(-1);
@@ -218,6 +220,74 @@ class SaveBackgroundSearchServiceTest {
                                                          any());
         verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void saveBackgroundSearch_ThrowsFeignBadRequestExceptionWithMessage() {
+        // given
+        FeignException feignException = FeignException.errorStatus(
+            "saveBackgroundSearch",
+            feign.Response.builder()
+                .status(400)
+                .reason("Bad Request")
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Collections.emptyMap(), null, null, null))
+                .body("Search with no results", java.nio.charset.StandardCharsets.UTF_8)
+                .build()
+        );
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+            .thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount)
+        );
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString("Search with no results"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void saveBackgroundSearch_ThrowsFeignBadRequestExceptionWithJsonMessage() {
+        // given
+        String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results\"}";
+        FeignException feignException = FeignException.errorStatus(
+            "saveBackgroundSearch",
+            feign.Response.builder()
+                .status(400)
+                .reason("Bad Request")
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Collections.emptyMap(), null, null, null))
+                .body(jsonResponse, StandardCharsets.UTF_8)
+                .build()
+        );
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+            .thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount)
+        );
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString("Search with no results"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    private SaveBackgroundSearchResponse createResponse(int status, boolean isError, int responseStatus, String message) {
+        SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
+        response.setStatus(status);
+        response.setIsError(isError);
+        response.setResponseStatus(responseStatus);
+        response.setMessage(message);
+        return response;
     }
 
     @AfterAll

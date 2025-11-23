@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -76,6 +77,8 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
         return baseRpoResponse;
     }
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    @SneakyThrows
     private void processSaveBackgroundSearchException(UserAccountEntity userAccount,
                                                       FeignException feignException, StringBuilder errorMessage,
                                                       ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
@@ -94,7 +97,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
                                                                      .append(AND_RESPONSE).append(baseRpoResponse).toString(),
                                                                  armRpoExecutionDetailEntity, userAccount);
             }
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("ARM RPO API baseRpoResponse status is invalid - ")
                                                                  .append(baseRpoResponse).toString(),
                                                              armRpoExecutionDetailEntity, userAccount, e);
