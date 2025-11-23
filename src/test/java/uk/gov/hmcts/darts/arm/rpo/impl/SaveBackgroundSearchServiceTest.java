@@ -255,7 +255,7 @@ class SaveBackgroundSearchServiceTest {
     @Test
     void saveBackgroundSearch_ThrowsFeignBadRequestExceptionWithJsonMessage() {
         // given
-        String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results\"}";
+        String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results cannot be saved\"}";
         FeignException feignException = FeignException.errorStatus(
             "saveBackgroundSearch",
             feign.Response.builder()
@@ -281,16 +281,7 @@ class SaveBackgroundSearchServiceTest {
         verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
-
-    private SaveBackgroundSearchResponse createResponse(int status, boolean isError, int responseStatus, String message) {
-        SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
-        response.setStatus(status);
-        response.setIsError(isError);
-        response.setResponseStatus(responseStatus);
-        response.setMessage(message);
-        return response;
-    }
-
+    
     @AfterAll
     static void close() {
         ARM_RPO_HELPER_MOCKS.close();
