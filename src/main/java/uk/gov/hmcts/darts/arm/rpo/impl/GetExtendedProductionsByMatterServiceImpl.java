@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedProductionsByMatterRequestGenerator;
@@ -35,7 +36,8 @@ public class GetExtendedProductionsByMatterServiceImpl implements GetExtendedPro
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedProductionsByMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO Extended Productions By Matter: ");
+        StringBuilder errorMessage = new StringBuilder(84);
+        errorMessage.append("Failure during ARM RPO Extended Productions By Matter: ");
 
         GetExtendedProductionsByMatterRequestGenerator requestGenerator;
         try {
@@ -48,16 +50,29 @@ public class GetExtendedProductionsByMatterServiceImpl implements GetExtendedPro
         ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse;
         try {
             extendedProductionsByMatterResponse = armClientService.getExtendedProductionsByMatter(bearerToken, requestGenerator.getJsonRequest());
-        } catch (FeignException e) {
-            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        } catch (FeignException feignException) {
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("getExtendedProductionsByMatter");
+                    extendedProductionsByMatterResponse = armClientService.getExtendedProductionsByMatter(refreshedBearer, requestGenerator.getJsonRequest());
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
+                                                                     armRpoExecutionDetailEntity, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException).toString(),
+                                                                 armRpoExecutionDetailEntity, userAccount);
+            }
         }
         log.info("ARM RPO Response - ExtendedProductionsByMatterResponse: {}", extendedProductionsByMatterResponse);
         return processExtendedProductionsByMatterResponse(uniqueProductionName, userAccount, extendedProductionsByMatterResponse, errorMessage,
                                                           armRpoExecutionDetailEntity);
     }
 
-    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private boolean processExtendedProductionsByMatterResponse(String productionName, UserAccountEntity userAccount,
                                                                ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse,
                                                                StringBuilder errorMessage, ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
@@ -40,9 +41,22 @@ public class GetIndexesByMatterIdServiceImpl implements GetIndexesByMatterIdServ
         IndexesByMatterIdResponse indexesByMatterIdResponse;
         try {
             indexesByMatterIdResponse = armClientService.getIndexesByMatterId(bearerToken, createIndexesByMatterIdRequest(matterId));
-        } catch (FeignException e) {
-            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        } catch (FeignException feignException) {
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("getIndexesByMatterId");
+                    indexesByMatterIdResponse = armClientService.getIndexesByMatterId(refreshedBearer, createIndexesByMatterIdRequest(matterId));
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
+                                                                     armRpoExecutionDetailEntity, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException).toString(),
+                                                                 armRpoExecutionDetailEntity, userAccount);
+            }
         }
         log.info("ARM RPO Response - IndexesByMatterIdResponse: {}", indexesByMatterIdResponse);
         processIndexesByMatterIdResponse(matterId, userAccount, indexesByMatterIdResponse, errorMessage, armRpoExecutionDetailEntity);

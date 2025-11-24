@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
@@ -30,15 +31,29 @@ public class RemoveProductionServiceImpl implements RemoveProductionService {
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.removeProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO removeProduction: ");
+        StringBuilder errorMessage = new StringBuilder(70);
+        errorMessage.append("Failure during ARM RPO removeProduction: ");
         RemoveProductionResponse removeProductionResponse;
+        RemoveProductionRequest request = createRemoveProductionRequest(armRpoExecutionDetailEntity);
         try {
-            RemoveProductionRequest request = createRemoveProductionRequest(armRpoExecutionDetailEntity);
             removeProductionResponse = armClientService.removeProduction(bearerToken, request);
-        } catch (FeignException e) {
+        } catch (FeignException feignException) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("removeProduction");
+                    removeProductionResponse = armClientService.removeProduction(refreshedBearer, request);
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
+                                                                     armRpoExecutionDetailEntity, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException).toString(),
+                                                                 armRpoExecutionDetailEntity, userAccount);
+            }
         }
         log.info("ARM RPO Response - removeProduction response: {}", removeProductionResponse);
         armRpoUtil.handleResponseStatus(userAccount, removeProductionResponse, errorMessage, armRpoExecutionDetailEntity);

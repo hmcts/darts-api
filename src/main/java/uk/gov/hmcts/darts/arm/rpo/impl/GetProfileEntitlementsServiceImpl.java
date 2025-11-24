@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
@@ -38,14 +39,24 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
 
         final StringBuilder exceptionMessageBuilder = new StringBuilder(90).append("ARM getProfileEntitlements: ");
         ProfileEntitlementResponse profileEntitlementResponse;
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         try {
-            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
             profileEntitlementResponse = armClientService.getProfileEntitlementResponse(bearerToken, emptyRpoRequest);
-        } catch (FeignException e) {
-            throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
-                                                                 .append(e)
-                                                                 .toString(),
-                                                             executionDetail, userAccount, e);
+        } catch (FeignException feignException) {
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("getProfileEntitlements");
+                    profileEntitlementResponse = armClientService.getProfileEntitlementResponse(refreshedBearer, emptyRpoRequest);
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx).toString(),
+                                                                     executionDetail, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(feignException).toString(),
+                                                                 executionDetail, userAccount);
+            }
         }
         log.info("ARM RPO Response - ProfileEntitlementResponse: {}", profileEntitlementResponse);
         processGetProfileEntitlementsResponse(userAccount, profileEntitlementResponse, exceptionMessageBuilder, executionDetail);

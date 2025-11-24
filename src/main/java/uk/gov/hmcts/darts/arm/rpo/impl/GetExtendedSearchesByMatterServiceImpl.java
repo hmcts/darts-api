@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedSearchesByMatterRequestGenerator;
@@ -49,9 +50,22 @@ public class GetExtendedSearchesByMatterServiceImpl implements GetExtendedSearch
         ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse;
         try {
             extendedSearchesByMatterResponse = armClientService.getExtendedSearchesByMatter(bearerToken, requestGenerator.getJsonRequest());
-        } catch (FeignException e) {
-            log.error(errorMessage.append("Unable to get ARM RPO response {}").append(e).toString(), e);
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        } catch (FeignException feignException) {
+            log.error(errorMessage.append("Unable to get ARM RPO response {}").append(feignException).toString(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("getExtendedSearchesByMatter");
+                    extendedSearchesByMatterResponse = armClientService.getExtendedSearchesByMatter(refreshedBearer, requestGenerator.getJsonRequest());
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
+                                                                     armRpoExecutionDetailEntity, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException).toString(),
+                                                                 armRpoExecutionDetailEntity, userAccount);
+            }
         }
         log.info("ARM RPO Response - ExtendedSearchesByMatterResponse: {}", extendedSearchesByMatterResponse);
         return processExtendedSearchesByMatterResponse(executionId, userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);

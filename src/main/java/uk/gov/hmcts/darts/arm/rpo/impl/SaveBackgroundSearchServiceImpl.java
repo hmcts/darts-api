@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
@@ -31,13 +32,26 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
 
         StringBuilder errorMessage = new StringBuilder(134).append("Failure during ARM save background search: ");
         SaveBackgroundSearchResponse saveBackgroundSearchResponse;
+        SaveBackgroundSearchRequest saveBackgroundSearchRequest =
+            createSaveBackgroundSearchRequest(searchName, armRpoExecutionDetailEntity.getSearchId());
         try {
-            SaveBackgroundSearchRequest saveBackgroundSearchRequest =
-                createSaveBackgroundSearchRequest(searchName, armRpoExecutionDetailEntity.getSearchId());
             saveBackgroundSearchResponse = armClientService.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
-        } catch (FeignException e) {
-            log.error(errorMessage.append("Unable to save background search").append(e).toString(), e);
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        } catch (FeignException feignException) {
+            log.error(errorMessage.append("Unable to save background search").append(feignException).toString(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("saveBackgroundSearch");
+                    saveBackgroundSearchResponse = armClientService.saveBackgroundSearch(refreshedBearer, saveBackgroundSearchRequest);
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
+                                                                     armRpoExecutionDetailEntity, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException).toString(),
+                                                                 armRpoExecutionDetailEntity, userAccount);
+            }
         }
         log.info("ARM RPO Response - SaveBackgroundSearchResponse: {}", saveBackgroundSearchResponse);
         armRpoUtil.handleResponseStatus(userAccount, saveBackgroundSearchResponse, errorMessage, armRpoExecutionDetailEntity);

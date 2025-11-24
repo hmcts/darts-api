@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
@@ -67,9 +68,21 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
         ArmAsyncSearchResponse armAsyncSearchResponse;
         try {
             armAsyncSearchResponse = armClientService.addAsyncSearch(bearerToken, requestGenerator.getJsonRequest());
-        } catch (FeignException e) {
-            throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(e).toString(),
-                                                             executionDetail, userAccount);
+        } catch (FeignException feignException) {
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("addAsyncSearch");
+                    armAsyncSearchResponse = armClientService.addAsyncSearch(refreshedBearer, requestGenerator.getJsonRequest());
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx).toString(),
+                                                                     executionDetail, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(feignException).toString(),
+                                                                 executionDetail, userAccount);
+            }
         }
         log.info("ARM RPO Response - ArmAsyncSearchResponse: {}", armAsyncSearchResponse);
         return processAddAsyncSearch(userAccount, armAsyncSearchResponse, exceptionMessageBuilder, executionDetail, searchName);

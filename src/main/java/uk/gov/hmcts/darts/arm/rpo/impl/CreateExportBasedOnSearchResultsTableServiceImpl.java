@@ -42,7 +42,6 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
     private final CurrentTimeHelper currentTimeHelper;
     private final ObjectMapper objectMapper;
 
-
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
                                                          List<MasterIndexFieldByRecordClassSchema> headerColumns,
@@ -57,7 +56,8 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM createExportBasedOnSearchResultsTable: ");
+        StringBuilder errorMessage = new StringBuilder(87);
+        errorMessage.append("Failure during ARM createExportBasedOnSearchResultsTable: ");
         CreateExportBasedOnSearchResultsTableRequest request;
         try {
             request = createRequestForCreateExportBasedOnSearchResultsTable(
@@ -74,8 +74,22 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
         try {
             baseRpoResponse = armClientService.createExportBasedOnSearchResultsTable(bearerToken, request);
         } catch (FeignException feignException) {
-            baseRpoResponse = processCreateExportBasedOnSearchResultsTableResponseFeignException(userAccount, feignException, errorMessage,
-                                                                                                 armRpoExecutionDetailEntity);
+            int status = feignException.status();
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                // Retry once with refreshed token
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("createExportBasedOnSearchResultsTable");
+                    baseRpoResponse = armClientService.createExportBasedOnSearchResultsTable(refreshedBearer, request);
+                } catch (FeignException retryEx) {
+                    baseRpoResponse = processCreateExportBasedOnSearchResultsTableResponseFeignException(userAccount, feignException,
+                                                                                                         errorMessage.append("API call failed after retry. "),
+                                                                                                         armRpoExecutionDetailEntity);
+                }
+            } else {
+                baseRpoResponse = processCreateExportBasedOnSearchResultsTableResponseFeignException(userAccount, feignException, errorMessage,
+                                                                                                     armRpoExecutionDetailEntity);
+            }
+
         }
         log.info("ARM RPO Response - CreateExportBasedOnSearchResultsTable response: {}", baseRpoResponse);
         return processCreateExportBasedOnSearchResultsTableResponse(userAccount, baseRpoResponse, errorMessage,
