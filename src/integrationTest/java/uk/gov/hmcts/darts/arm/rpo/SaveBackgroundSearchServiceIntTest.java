@@ -152,7 +152,7 @@ class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
 
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
-        response.setStatus(9876543);
+        response.setStatus(9_876_543);
         when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
