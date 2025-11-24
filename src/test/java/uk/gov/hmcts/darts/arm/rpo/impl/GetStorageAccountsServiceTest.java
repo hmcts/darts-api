@@ -5,7 +5,6 @@ import feign.Request;
 import feign.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
-import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
@@ -277,7 +275,6 @@ class GetStorageAccountsServiceTest {
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
     }
 
-    @Disabled
     @Test
     void getStorageAccounts_shouldRetryOn401_thenSucceed() {
         // given
@@ -286,10 +283,10 @@ class GetStorageAccountsServiceTest {
             .status(401)
             .reason("Unauthorized")
             .build();
-        FeignException feign401 = FeignException.errorStatus("removeProduction", response);
+        FeignException feign401 = FeignException.errorStatus("getStorageAccounts", response);
 
         // First call throws 401
-        when(armRpoClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class))).thenThrow(feign401);
+        when(armRpoClient.getStorageAccounts(eq(BEARER_TOKEN), any(StorageAccountRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -321,18 +318,17 @@ class GetStorageAccountsServiceTest {
 
     }
 
-    @Disabled
     @Test
     void getStorageAccounts_shouldRetryOn403_thenSucceed() {
         // given
         Response response = Response.builder()
-            .request(Request.create(Request.HttpMethod.POST, "/removeProduction", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .request(Request.create(Request.HttpMethod.POST, "/getStorageAccounts", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
             .status(403)
             .reason("Forbidden")
             .build();
-        FeignException feign403 = FeignException.errorStatus("removeProduction", response);
+        FeignException feign403 = FeignException.errorStatus("getStorageAccounts", response);
 
-        when(armRpoClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class)))
+        when(armRpoClient.getStorageAccounts(eq(BEARER_TOKEN), any(StorageAccountRequest.class)))
             .thenThrow(feign403);
 
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
