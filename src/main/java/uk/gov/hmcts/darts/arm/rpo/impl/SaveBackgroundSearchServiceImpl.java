@@ -92,7 +92,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
             HttpStatus httpStatus = HttpStatus.valueOf(baseRpoResponse.getStatus());
 
             if (HttpStatus.BAD_REQUEST.value() == httpStatus.value() && baseRpoResponse.getMessage().contains(SEARCH_WITH_NO_RESULTS)) {
-                log.warn("Background search has no results, marking RPO as completed");
+                log.warn("Background search has no results, marking RPO as failed");
                 throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with invalid status - ").append(httpStatus)
                                                                      .append(AND_RESPONSE).append(baseRpoResponse).toString(),
                                                                  armRpoExecutionDetailEntity, userAccount);
