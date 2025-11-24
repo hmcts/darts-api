@@ -116,4 +116,65 @@ class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 
     }
+
+    @Test
+    void saveBackgroundSearch_ReturnsResponseWithEmptyResponse() {
+
+        // given
+        SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
+        when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        var bearerAuth = "Bearer some-token";
+
+        // when
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class,
+            () -> saveBackgroundSearchService.saveBackgroundSearch(bearerAuth, armRpoExecutionDetail.getId(), "searchName", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM save background search: ARM RPO API response is invalid"));
+
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
+        assertEquals(ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
+
+    }
+
+    @Test
+    void saveBackgroundSearch_ReturnsResponseWithIllegalStatus() {
+
+        // given
+        SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
+        response.setStatus(9876543);
+        when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        var bearerAuth = "Bearer some-token";
+
+        // when
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class,
+            () -> saveBackgroundSearchService.saveBackgroundSearch(bearerAuth, armRpoExecutionDetail.getId(), "searchName", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM save background search: ARM RPO API response is invalid"));
+
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
+        assertEquals(ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
+
+    }
 }
