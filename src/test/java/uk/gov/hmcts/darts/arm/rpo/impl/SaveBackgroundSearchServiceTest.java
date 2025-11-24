@@ -281,6 +281,36 @@ class SaveBackgroundSearchServiceTest {
         verifyNoMoreInteractions(armRpoService);
     }
 
+    @Test
+    void saveBackgroundSearch_ThrowsFeignExceptionWithJsonMessage() {
+        // given
+        String jsonResponse = "{\"status\":500,\"isError\":true,\"responseStatus\":1}";
+        FeignException feignException = FeignException.errorStatus(
+            "saveBackgroundSearch",
+            feign.Response.builder()
+                .status(500)
+                .reason("Bad Request")
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .body(jsonResponse, StandardCharsets.UTF_8)
+                .build()
+        );
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+            .thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount)
+        );
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString("Failure during ARM save background search: Unable to save background search"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
     @AfterEach
     void close() {
         armRpoHelperMocks.close();
