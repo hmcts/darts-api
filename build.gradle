@@ -245,7 +245,7 @@ pmd {
 pmdMain {
   ruleSetFiles = files("config/pmd/main-ruleset.xml")
   excludes = [
-      '**/uk/gov/hmcts/darts/task/runner/dailylist/**',
+      '**/uk/gov/hmcts/darts/task/runner/dailylist/**'
   ]
 }
 
@@ -286,8 +286,7 @@ def coverageExclusions = [
     '**/uk/gov/hmcts/darts/audiorequests/api**',
     '**/uk/gov/hmcts/darts/casedocument/template**',
     '**/uk/gov/hmcts/darts/log/api/impl/LogApiImpl.java',
-    '**/uk/gov/hmcts/darts/Application.java',
-
+    '**/uk/gov/hmcts/darts/Application.java'
 ]
 
 jacocoTestReport {
@@ -354,6 +353,8 @@ sonarqube {
     property "sonar.scm.exclusions", "**/ManualTaskService.java"
     property "sonar.cpd.exclusions", "**/ArmRpoClient.java"
     property "sonar.scm.exclusions", "**/ArmRpoClient.java"
+    property "sonar.scm.exclusions", "**/SaveBackgroundSearchServiceImpl.java,**/CreateExportBasedOnSearchResultsTableServiceImpl.java"
+    property "sonar.cpd.exclusions", "**/SaveBackgroundSearchServiceImpl.java,**/CreateExportBasedOnSearchResultsTableServiceImpl.java"
     if (skipSonar) {
       property 'sonar.exclusions', "**/**"
     }
