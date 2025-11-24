@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -117,8 +118,14 @@ public class AudioRequestsController implements AudioRequestsApi {
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
         try (DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.playback(transformedMediaId)) {
-
             return StreamingResponseEntityUtil.createResponseEntity(downloadResponseMetadata.getResource().getInputStream(), httpRangeList);
+        } catch (Exception ex) {
+            if (ExceptionUtils.getRootCauseMessage(ex).contains("Connection reset by peer")) {
+                log.warn("Client aborted connection while streaming audio");
+                return ResponseEntity.noContent().build();
+            } else {
+                throw ex;
+            }
         }
     }
 
