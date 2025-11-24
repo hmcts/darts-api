@@ -58,7 +58,7 @@ class GetIndexesByMatterIdServiceTest {
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccount;
 
-    private ArmRpoHelperMocks armRpoHelperMocks = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
 
     @BeforeEach
     void setUp() {
