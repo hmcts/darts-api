@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GetExtendedProductionsByMatterServiceTest {
 
-    public static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+    private static final Integer EXECUTION_ID = 1;
+    private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+
     @Mock
     private ArmRpoClient armRpoClient;
 
@@ -47,12 +49,12 @@ class GetExtendedProductionsByMatterServiceTest {
     private GetExtendedProductionsByMatterServiceImpl getExtendedProductionsByMatterService;
 
     private UserAccountEntity userAccount;
-    private static final Integer EXECUTION_ID = 1;
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         userAccount = new UserAccountEntity();
 
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -86,10 +88,10 @@ class GetExtendedProductionsByMatterServiceTest {
         // then
         assertTrue(result);
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetExtendedProductionsByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -107,10 +109,10 @@ class GetExtendedProductionsByMatterServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO Extended Productions By Matter: Unable to get ARM RPO response"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetExtendedProductionsByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -128,10 +130,10 @@ class GetExtendedProductionsByMatterServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO Extended Productions By Matter: ARM RPO API response is invalid"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetExtendedProductionsByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -150,10 +152,10 @@ class GetExtendedProductionsByMatterServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO Extended Productions By Matter: ARM RPO API response is invalid"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetExtendedProductionsByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -177,16 +179,16 @@ class GetExtendedProductionsByMatterServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO Extended Productions By Matter: Production Id is missing from ARM RPO response"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetExtendedProductionsByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 
 }

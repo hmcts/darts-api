@@ -50,6 +50,12 @@ import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS
 @ExtendWith(MockitoExtension.class)
 class GetProductionOutputFilesServiceTest {
 
+    private static final Integer EXECUTION_ID = 1;
+    private static final String TOKEN = "some token";
+    private static final String PRODUCTION_ID = UUID.randomUUID().toString();
+    private static final String PRODUCTION_EXPORT_FILE_ID_1 = UUID.randomUUID().toString();
+    private static final String PRODUCTION_EXPORT_FILE_ID_2 = UUID.randomUUID().toString();
+
     private GetProductionOutputFilesService getProductionOutputFilesService;
     private ArmRpoService armRpoService;
     private ArmRpoClient armRpoClient;
@@ -58,12 +64,6 @@ class GetProductionOutputFilesServiceTest {
     private ArmApiService armApiService;
 
     private ArmRpoHelperMocks armRpoHelperMocks;
-
-    private static final Integer EXECUTION_ID = 1;
-    private static final String TOKEN = "some token";
-    private static final String PRODUCTION_ID = UUID.randomUUID().toString();
-    private static final String PRODUCTION_EXPORT_FILE_ID_1 = UUID.randomUUID().toString();
-    private static final String PRODUCTION_EXPORT_FILE_ID_2 = UUID.randomUUID().toString();
 
     @BeforeEach
     void setUp() {

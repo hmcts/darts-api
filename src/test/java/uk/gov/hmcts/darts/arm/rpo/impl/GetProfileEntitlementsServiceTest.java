@@ -42,6 +42,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GetProfileEntitlementsServiceTest {
 
+    private static final Integer EXECUTION_ID = 1;
+    private static final String TOKEN = "some token";
+    private static final String ENTITLEMENT_NAME = "some entitlement name";
+
     private GetProfileEntitlementsService getProfileEntitlementsService;
 
     @Mock
@@ -52,10 +56,6 @@ class GetProfileEntitlementsServiceTest {
 
     private ArmRpoHelperMocks armRpoHelperMocks;
     private ArgumentCaptor<ArmRpoExecutionDetailEntity> executionDetailCaptor;
-
-    private static final Integer EXECUTION_ID = 1;
-    private static final String TOKEN = "some token";
-    private static final String ENTITLEMENT_NAME = "some entitlement name";
 
     @BeforeEach
     void beforeEach() {

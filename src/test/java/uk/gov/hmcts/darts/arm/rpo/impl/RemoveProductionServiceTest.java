@@ -139,14 +139,11 @@ class RemoveProductionServiceTest {
         verifyNoMoreInteractions(armRpoService);
     }
 
-    /**
-     * Add to RemoveProductionServiceTest.java
-     */
     @Test
     void removeProduction_shouldRetryOn401_thenSucceed() {
         // given
         Response response = Response.builder()
-            .request(Request.create(Request.HttpMethod.POST, "/some", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .request(Request.create(Request.HttpMethod.POST, "/removeProduction", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
             .status(401)
             .reason("Unauthorized")
             .build();
@@ -208,7 +205,6 @@ class RemoveProductionServiceTest {
         verify(armRpoUtil).retryGetBearerToken("removeProduction");
         verify(armRpoClient).removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class));
     }
-
 
     @AfterEach
     void close() {

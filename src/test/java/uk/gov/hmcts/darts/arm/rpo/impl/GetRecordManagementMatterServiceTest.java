@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +29,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GetRecordManagementMatterServiceTest {
 
+    private static final Integer EXECUTION_ID = 1;
+
     @Mock
     private ArmRpoClient armRpoClient;
     @Mock
@@ -40,11 +42,11 @@ class GetRecordManagementMatterServiceTest {
 
     private UserAccountEntity userAccountEntity;
 
-    private static final Integer EXECUTION_ID = 1;
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         userAccountEntity = new UserAccountEntity();
 
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -68,10 +70,10 @@ class GetRecordManagementMatterServiceTest {
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetRecordManagementMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
     }
 
     @Test
@@ -84,10 +86,10 @@ class GetRecordManagementMatterServiceTest {
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetRecordManagementMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
     }
 
     @Test
@@ -97,10 +99,10 @@ class GetRecordManagementMatterServiceTest {
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetRecordManagementMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
     }
 
     @Test
@@ -123,14 +125,14 @@ class GetRecordManagementMatterServiceTest {
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetRecordManagementMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 }

@@ -44,6 +44,16 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AddAsyncSearchServiceTest {
 
+    private static final Integer EXECUTION_ID = 1;
+    private static final int RPO_CSV_START_HOUR = 25;
+    private static final int RPO_CSV_END_HOUR = 49;
+    private static final String SEARCH_ID = "some search id";
+    private static final String MATTER_ID = "some matter id";
+    private static final String ENTITLEMENT_ID = "some entitlement id";
+    private static final String INDEX_ID = "some index id";
+    private static final String SORTING_FIELD = "some sorting field";
+    private static final String TOKEN = "some token";
+
     @Mock
     private ArmApiService armApiService;
 
@@ -56,18 +66,10 @@ class AddAsyncSearchServiceTest {
     private ArgumentCaptor<String> requestCaptor;
     private ArmRpoHelperMocks armRpoHelperMocks;
 
-    private static final Integer EXECUTION_ID = 1;
-    private static final int RPO_CSV_START_HOUR = 25;
-    private static final int RPO_CSV_END_HOUR = 49;
-    private static final String SEARCH_ID = "some search id";
-    private static final String MATTER_ID = "some matter id";
-    private static final String ENTITLEMENT_ID = "some entitlement id";
-    private static final String INDEX_ID = "some index id";
-    private static final String SORTING_FIELD = "some sorting field";
-    private static final String TOKEN = "some token";
-
     @BeforeEach
     void addAsyncSearch() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
+
         armRpoService = spy(ArmRpoService.class);
         armRpoClient = spy(ArmRpoClient.class);
         armAutomatedTaskRepository = mock(ArmAutomatedTaskRepository.class);
@@ -81,13 +83,6 @@ class AddAsyncSearchServiceTest {
         addAsyncSearchService = new AddAsyncSearchServiceImpl(armClientService, armRpoService, armRpoUtil,
                                                               armAutomatedTaskRepository);
 
-        armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
-
-    }
-
-    @AfterEach
-    void afterEach() {
-        armRpoHelperMocks.close();
     }
 
     @Test
@@ -297,6 +292,11 @@ class AddAsyncSearchServiceTest {
             .thenReturn(Optional.of(armAutomatedTaskEntity));
 
         return armAutomatedTaskEntity;
+    }
+
+    @AfterEach
+    void afterEach() {
+        armRpoHelperMocks.close();
     }
 
 }

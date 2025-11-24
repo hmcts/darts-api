@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,10 +58,11 @@ class GetIndexesByMatterIdServiceTest {
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccount;
 
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks = new ArmRpoHelperMocks();
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         userAccount = new UserAccountEntity();
@@ -93,11 +94,11 @@ class GetIndexesByMatterIdServiceTest {
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
         assertEquals("indexId", armRpoExecutionDetailEntityArgumentCaptor.getValue().getIndexId());
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getCompletedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -115,10 +116,10 @@ class GetIndexesByMatterIdServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO get indexes by matter ID: Unable to get ARM RPO response"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -133,10 +134,10 @@ class GetIndexesByMatterIdServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO get indexes by matter ID: ARM RPO API response is invalid"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -156,10 +157,10 @@ class GetIndexesByMatterIdServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -181,10 +182,10 @@ class GetIndexesByMatterIdServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -215,11 +216,11 @@ class GetIndexesByMatterIdServiceTest {
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
         assertEquals("indexId", armRpoExecutionDetailEntityArgumentCaptor.getValue().getIndexId());
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getCompletedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -247,10 +248,10 @@ class GetIndexesByMatterIdServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -276,10 +277,10 @@ class GetIndexesByMatterIdServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -302,10 +303,10 @@ class GetIndexesByMatterIdServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -328,15 +329,15 @@ class GetIndexesByMatterIdServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 }

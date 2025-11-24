@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,10 +58,11 @@ class DownloadProductionServiceTest {
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccount;
 
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         userAccount = new UserAccountEntity();
@@ -90,10 +91,10 @@ class DownloadProductionServiceTest {
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getDownloadProductionRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus(), userAccount);
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getCompletedRpoStatus(), userAccount);
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -114,10 +115,10 @@ class DownloadProductionServiceTest {
             "Failure during download production: Failed ARM RPO download production with id: productionExportId"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getDownloadProductionRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -136,16 +137,16 @@ class DownloadProductionServiceTest {
             "Failure during download production: Error during ARM RPO download production id: productionExportId"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getDownloadProductionRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 
 }

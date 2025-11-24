@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CreateExportBasedOnSearchResultsTableCheckServiceTest {
+    private static final Integer EXECUTION_ID = 1;
 
     @Mock
     private ArmRpoClient armRpoClient;
@@ -48,13 +49,13 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    private static final Integer EXECUTION_ID = 1;
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private final Duration pollDuration = Duration.ofHours(4);
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
@@ -114,8 +115,8 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
         return response;
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 }

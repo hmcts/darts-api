@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,10 +65,11 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccount;
 
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks = new ArmRpoHelperMocks();
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         userAccount = new UserAccountEntity();
@@ -113,7 +114,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(response);
-        ArmRpoStateEntity armRpoStateEntity = ARM_RPO_HELPER_MOCKS.armRpoStateEnumToEntity(armRpoStateEnum);
+        ArmRpoStateEntity armRpoStateEntity = armRpoHelperMocks.armRpoStateEnumToEntity(armRpoStateEnum);
 
         // when
         List<MasterIndexFieldByRecordClassSchema> result = getMasterIndexFieldByRecordClassSchemaService.getMasterIndexFieldByRecordClassSchema(
@@ -132,10 +133,10 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
 
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
                                                          eq(armRpoStateEntity),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
         assertEquals("2", armRpoExecutionDetailEntityArgumentCaptor.getValue().getSortingField());
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getCompletedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -155,10 +156,10 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM get master index field by record class schema: Unable to get ARM RPO response"));
         verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -178,10 +179,10 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM get master index field by record class schema: Unable to find master index fields in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -204,10 +205,10 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM get master index field by record class schema: Unable to find master index fields in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -217,7 +218,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
     void getMasterIndexFieldByRecordClassSchemaWithInvalidRpoState(ArmRpoStateEnum armRpoStateEnum) {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        ArmRpoStateEntity armRpoStateEntity = ARM_RPO_HELPER_MOCKS.armRpoStateEnumToEntity(armRpoStateEnum);
+        ArmRpoStateEntity armRpoStateEntity = armRpoHelperMocks.armRpoStateEnumToEntity(armRpoStateEnum);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class,
@@ -229,15 +230,15 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
             "Failure during ARM get master index field by record class schema: Invalid state provided"));
         verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
                                                          eq(armRpoStateEntity),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
-        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 
 

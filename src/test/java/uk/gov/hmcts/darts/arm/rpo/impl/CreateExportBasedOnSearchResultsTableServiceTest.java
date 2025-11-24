@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +46,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
     private static final String BEARER_TOKEN = "token";
+    private static final Integer EXECUTION_ID = 1;
 
     @Mock
     private ArmRpoClient armRpoClient;
@@ -61,13 +62,13 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    private static final Integer EXECUTION_ID = 1;
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private final Duration pollDuration = Duration.ofHours(4);
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
 
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
@@ -104,10 +105,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // assert that the productionName of armRpoExecutionDetailEntity contains the production name
         assertThat(armRpoExecutionDetailEntity.getProductionName(), containsString(PRODUCTION_NAME));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -125,8 +126,8 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // then
         assertFalse(result);
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
         verifyNoMoreInteractions(armRpoService);
     }
@@ -147,8 +148,8 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // then
         assertFalse(result);
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
         verifyNoMoreInteractions(armRpoService);
     }
@@ -171,10 +172,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM createExportBasedOnSearchResultsTable: Polling can only run for a maximum of"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
@@ -193,8 +194,8 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // then
         assertFalse(result);
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
         verifyNoMoreInteractions(armRpoService);
 
@@ -217,10 +218,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with status - 200 OK and response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -243,10 +244,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with status - 200 OK and response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -268,10 +269,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with invalid status - 400 BAD_REQUEST"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -294,10 +295,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with status - 200 OK and response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -319,10 +320,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with invalid status - 400 BAD_REQUEST"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -345,10 +346,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with status - 200 OK and response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -370,10 +371,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with status - 500 INTERNAL_SERVER_ERROR"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -396,10 +397,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with status - 500 INTERNAL_SERVER_ERROR and response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -420,10 +421,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: Could not construct API request"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -444,10 +445,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: Unable to get ARM RPO response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -470,10 +471,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API failed with status - 500 INTERNAL_SERVER_ERROR"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -496,10 +497,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: Unable to get ARM RPO response from client"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -522,10 +523,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: Unable to get ARM RPO response from client"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -548,10 +549,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: Unable to get ARM RPO response from client"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -574,10 +575,10 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             "Failure during ARM createExportBasedOnSearchResultsTable: ARM RPO API createExportBasedOnSearchResultsTable is invalid"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
     }
@@ -623,8 +624,8 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         return response;
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 }
