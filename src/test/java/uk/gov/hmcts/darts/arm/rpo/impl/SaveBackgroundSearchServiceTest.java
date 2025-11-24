@@ -255,6 +255,7 @@ class SaveBackgroundSearchServiceTest {
 
     @Test
     void saveBackgroundSearch_ThrowsFeignBadRequestExceptionWithJsonMessage() {
+        
         // given
         String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results cannot be saved\"}";
         FeignException feignException = FeignException.errorStatus(
