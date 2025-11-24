@@ -45,8 +45,6 @@ class SaveBackgroundSearchServiceTest {
 
     private SaveBackgroundSearchServiceImpl saveBackgroundSearchService;
 
-    private ObjectMapper objectMapper;
-
     private UserAccountEntity userAccount;
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoHelperMocks armRpoHelperMocks;
@@ -61,7 +59,7 @@ class SaveBackgroundSearchServiceTest {
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
 
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        objectMapper = objectMapperConfig.objectMapper();
+        ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
@@ -255,7 +253,6 @@ class SaveBackgroundSearchServiceTest {
 
     @Test
     void saveBackgroundSearch_ThrowsFeignBadRequestExceptionWithJsonMessage() {
-        
         // given
         String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results cannot be saved\"}";
         FeignException feignException = FeignException.errorStatus(
