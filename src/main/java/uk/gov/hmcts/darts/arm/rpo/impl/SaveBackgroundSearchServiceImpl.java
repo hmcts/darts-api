@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.SaveBackgroundSearchService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
@@ -49,7 +50,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
                 createSaveBackgroundSearchRequest(searchName, armRpoExecutionDetailEntity.getSearchId());
             saveBackgroundSearchResponse = armClientService.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
         } catch (FeignException feignException) {
-            log.error(errorMessage.append("Unable to save background search").append(feignException).toString(), feignException);
+            log.error(errorMessage.append("Unable to save background search").append(feignException).toString());
             processSaveBackgroundSearchException(userAccount, feignException, errorMessage, armRpoExecutionDetailEntity);
         }
         log.info("ARM RPO Response - SaveBackgroundSearchResponse: {}", saveBackgroundSearchResponse);
@@ -93,9 +94,8 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
 
             if (HttpStatus.BAD_REQUEST.value() == httpStatus.value() && baseRpoResponse.getMessage().contains(SEARCH_WITH_NO_RESULTS)) {
                 log.warn("Background search has no results, marking RPO as failed");
-                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with invalid status - ").append(httpStatus)
-                                                                     .append(AND_RESPONSE).append(baseRpoResponse).toString(),
-                                                                 armRpoExecutionDetailEntity, userAccount);
+                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
+                throw new ArmRpoException(errorMessage.toString(), null);
             }
         } catch (IllegalArgumentException e) {
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("ARM RPO API baseRpoResponse status is invalid - ")
