@@ -102,7 +102,8 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
             .findLatestByCreatedDateTimeDesc().orElseThrow();
 
         assertNotNull(armRpoExecutionDetailEntity.getId());
-
+        assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), armRpoExecutionDetailEntity.getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), armRpoExecutionDetailEntity.getArmRpoStatus().getId());
     }
 
     @Test
