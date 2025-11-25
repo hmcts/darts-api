@@ -1,9 +1,12 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import ch.qos.logback.classic.Level;
-import org.junit.jupiter.api.Assertions;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.core.io.Resource;
@@ -35,6 +38,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -252,7 +256,6 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
     @Test
     void audioRequestPlayback_ShouldLogWarn_WhenClientAborts() throws Exception {
-        // given
         var blobId = UUID.randomUUID().toString();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -274,7 +277,11 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
                 Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
             );
 
-        // when
+        // monitor logs to check for warn after request
+        Logger controllerLogger = (Logger) LoggerFactory.getLogger(AudioRequestsController.class);
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+        controllerLogger.addAppender(listAppender);
         try (
             // mock failing input stream to simulate client abort during streaming
             DownloadResponseMetaData mockedDownloadResponse = mock(DownloadResponseMetaData.class);
@@ -294,16 +301,21 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
             MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
                 .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
 
-            // then
             mockMvc.perform(requestBuilder)
                 .andExpect(status().isNoContent());
 
-            Assertions.assertFalse(logAppender.searchLogs(
-                "Client aborted connection while streaming audio",
-                Level.WARN
-            ).isEmpty(), "Expected WARN log for client abort not found");
+            boolean foundWarn = listAppender.list.stream()
+                .anyMatch(event ->
+                              event.getLevel() == Level.WARN 
+                                  &&
+                                  event.getFormattedMessage().contains("Client aborted connection while streaming audio")
+                );
+            assertTrue(foundWarn, "Expected WARN log for client abort not found");
 
-        } 
+        } finally {
+            controllerLogger.detachAppender(listAppender);
+            listAppender.stop();
+        }
     }
 
 }
