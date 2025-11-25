@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.testutils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -21,8 +20,6 @@ import uk.gov.hmcts.darts.task.runner.AutomatedOnDemandTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.test.common.AwaitabilityUtil;
 import uk.gov.hmcts.darts.test.common.FileStore;
-import uk.gov.hmcts.darts.test.common.LogUtil;
-import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.TokenStub;
@@ -83,8 +80,6 @@ public class IntegrationBase extends TestBase {
     private List<AutomatedOnDemandTask> automatedOnDemandTask;
     @Autowired
     private AutomatedTasksApi automatedTasksApi;
-    protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
-
 
     protected TokenStub tokenStub = new TokenStub();
 
@@ -102,11 +97,6 @@ public class IntegrationBase extends TestBase {
     static {
         // container will be automatically stopped
         REDIS.start();
-    }
-
-    @BeforeEach
-    protected void clearLogs() {
-        logAppender.reset();
     }
     
     @AfterEach
