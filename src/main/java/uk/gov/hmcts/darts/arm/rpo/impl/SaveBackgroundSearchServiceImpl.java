@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
-import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoSearchNoResultsException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.SaveBackgroundSearchService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
@@ -28,8 +28,7 @@ import static java.util.Objects.isNull;
 @Slf4j
 public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchService {
 
-    private static final String AND_RESPONSE = " and response - ";
-    public static final String SEARCH_WITH_NO_RESULTS = "Search with no results";
+    private static final String SEARCH_WITH_NO_RESULTS = "Search with no results";
 
     private final ArmClientService armClientService;
     private final ArmRpoService armRpoService;
@@ -51,7 +50,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
             saveBackgroundSearchResponse = armClientService.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
         } catch (FeignException feignException) {
             log.error(errorMessage.append("Unable to save background search").append(feignException).toString());
-            processSaveBackgroundSearchException(userAccount, feignException, errorMessage, armRpoExecutionDetailEntity);
+            processSaveBackgroundSearchException(userAccount, feignException, errorMessage, armRpoExecutionDetailEntity, executionId);
         }
         log.info("ARM RPO Response - SaveBackgroundSearchResponse: {}", saveBackgroundSearchResponse);
         armRpoUtil.handleResponseStatus(userAccount, saveBackgroundSearchResponse, errorMessage, armRpoExecutionDetailEntity);
@@ -82,7 +81,8 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
     @SneakyThrows
     private void processSaveBackgroundSearchException(UserAccountEntity userAccount,
                                                       FeignException feignException, StringBuilder errorMessage,
-                                                      ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+                                                      ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
+                                                      Integer executionId) {
         BaseRpoResponse baseRpoResponse = getBaseRpoResponse(userAccount, feignException, errorMessage, armRpoExecutionDetailEntity);
         if (isNull(baseRpoResponse) || isNull(baseRpoResponse.getStatus()) || isNull(baseRpoResponse.getIsError())) {
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("ARM RPO API saveBackgroundSearch is invalid - ")
@@ -95,7 +95,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
             if (HttpStatus.BAD_REQUEST.value() == httpStatus.value() && baseRpoResponse.getMessage().contains(SEARCH_WITH_NO_RESULTS)) {
                 log.warn("Background search has no results, marking RPO as failed");
                 armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
-                throw new ArmRpoException(errorMessage.toString(), null);
+                throw new ArmRpoSearchNoResultsException(executionId);
             }
         } catch (IllegalArgumentException e) {
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("ARM RPO API baseRpoResponse status is invalid - ")

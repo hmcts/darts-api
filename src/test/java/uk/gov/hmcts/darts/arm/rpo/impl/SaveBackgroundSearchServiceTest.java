@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoSearchNoResultsException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
@@ -268,12 +269,12 @@ class SaveBackgroundSearchServiceTest {
             .thenThrow(feignException);
 
         // when
-        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+        ArmRpoSearchNoResultsException armRpoException = assertThrows(ArmRpoSearchNoResultsException.class, () ->
             saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount)
         );
 
         // then
-        assertThat(armRpoException.getMessage(), containsString("Search with no results"));
+        assertThat(armRpoException.getMessage(), containsString("RPO endpoint search returned no results for execution id 1"));
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
                                                          eq(armRpoHelperMocks.getInProgressRpoStatus()), any());

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoSearchNoResultsException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
@@ -69,6 +70,9 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
 
             log.info("ARM RPO search flow completed successfully");
             logApi.armRpoSearchSuccessful(executionId);
+        } catch (ArmRpoSearchNoResultsException armRpoSearchNoResultsException) {
+            log.warn("No results found during ARM RPO search flow for execution id {}", executionId);
+            logApi.armRpoSearchFailed(executionId);
         } catch (Exception e) {
             log.error("Error occurred during ARM RPO search flow", e);
             logApi.armRpoSearchFailed(executionId);
