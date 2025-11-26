@@ -117,12 +117,13 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
+        log.warn("Streaming request received for transformedMediaId: {}", transformedMediaId);
         try (DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.playback(transformedMediaId)) {
             return StreamingResponseEntityUtil.createResponseEntity(downloadResponseMetadata.getResource().getInputStream(), httpRangeList);
         } catch (Exception ex) {
             if (ExceptionUtils.getRootCauseMessage(ex).contains("Connection reset by peer")) {
                 log.warn("Client aborted connection while streaming audio");
-                return ResponseEntity.noContent().build();
+                throw ex;
             } else {
                 throw ex;
             }
