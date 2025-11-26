@@ -88,7 +88,7 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
         when(armApiBaseClient.getProfileEntitlementResponse(anyString(), any()))
             .thenReturn(getProfileEntitlementResponse());
         when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(anyString(), any()))
-            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse("propertyName1", "propertyName2"));
+            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse("propertyName1", "ingestionDate"));
         when(armApiBaseClient.addAsyncSearch(anyString(), any()))
             .thenReturn(getAsyncSearchResponse());
         when(armApiBaseClient.saveBackgroundSearch(anyString(), any()))
