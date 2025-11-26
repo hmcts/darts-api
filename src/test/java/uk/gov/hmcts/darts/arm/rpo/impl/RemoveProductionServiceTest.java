@@ -141,7 +141,7 @@ class RemoveProductionServiceTest {
     }
 
     @Test
-    void removeProduction_shouldRetryOn401_thenSucceed() {
+    void removeProduction_shouldRetryOnUnauthorised_thenSucceed() {
         // given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/removeProduction", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
@@ -175,7 +175,7 @@ class RemoveProductionServiceTest {
     }
 
     @Test
-    void removeProduction_shouldRetryOn403_thenSucceed() {
+    void removeProduction_shouldRetryOnForbidden_thenSucceed() {
         // given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/removeProduction", java.util.Map.of(), null, StandardCharsets.UTF_8, null))

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,9 +41,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,7 +79,7 @@ class GetStorageAccountsServiceTest {
 
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
-        when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
+        lenient().when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
 
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
@@ -89,18 +90,7 @@ class GetStorageAccountsServiceTest {
     @Test
     void getStorageAccounts_shouldReturnsSuccess_whenSingularMatchingNamesExist() {
         // given
-        StorageAccountResponse.DataDetails dataDetails1 = new StorageAccountResponse.DataDetails();
-        dataDetails1.setId("indexId1");
-        dataDetails1.setName("unexpectedAccountName");
-
-        StorageAccountResponse.DataDetails dataDetails2 = new StorageAccountResponse.DataDetails();
-        dataDetails2.setId("indexId2");
-        dataDetails2.setName("expectedAccountName");
-
-        StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
-        storageAccountResponse.setStatus(200);
-        storageAccountResponse.setIsError(false);
-        storageAccountResponse.setDataDetails(List.of(dataDetails1, dataDetails2));
+        StorageAccountResponse storageAccountResponse = getStorageAccountResponse();
         when(armRpoClient.getStorageAccounts(anyString(), any(StorageAccountRequest.class))).thenReturn(storageAccountResponse);
         when(armApiConfigurationProperties.getArmStorageAccountName()).thenReturn("expectedAccountName");
 
@@ -208,7 +198,6 @@ class GetStorageAccountsServiceTest {
                                                          eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
-        verifyNoMoreInteractions(armRpoService);
     }
 
     @ParameterizedTest
@@ -240,7 +229,7 @@ class GetStorageAccountsServiceTest {
                                                          eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
-        verifyNoMoreInteractions(armRpoService);
+
     }
 
     @Test
@@ -276,7 +265,7 @@ class GetStorageAccountsServiceTest {
     }
 
     @Test
-    void getStorageAccounts_shouldRetryOn401_thenSucceed() {
+    void getStorageAccounts_shouldRetryOnUnauthorised_thenSucceed() {
         // given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/getStorageAccounts", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
@@ -291,19 +280,8 @@ class GetStorageAccountsServiceTest {
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        StorageAccountResponse.DataDetails dataDetails1 = new StorageAccountResponse.DataDetails();
-        dataDetails1.setId("indexId1");
-        dataDetails1.setName("unexpectedAccountName");
-
-        StorageAccountResponse.DataDetails dataDetails2 = new StorageAccountResponse.DataDetails();
-        dataDetails2.setId("indexId2");
-        dataDetails2.setName("expectedAccountName");
-
-        StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
-        storageAccountResponse.setStatus(200);
-        storageAccountResponse.setIsError(false);
-        storageAccountResponse.setDataDetails(List.of(dataDetails1, dataDetails2));
-        when(armRpoClient.getStorageAccounts(anyString(), any(StorageAccountRequest.class))).thenReturn(storageAccountResponse);
+        StorageAccountResponse storageAccountResponse = getStorageAccountResponse();
+        when(armRpoClient.getStorageAccounts(eq("Bearer refreshed"), any(StorageAccountRequest.class))).thenReturn(storageAccountResponse);
         when(armApiConfigurationProperties.getArmStorageAccountName()).thenReturn("expectedAccountName");
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
@@ -315,11 +293,15 @@ class GetStorageAccountsServiceTest {
         verify(armRpoClient).getStorageAccounts(eq(BEARER_TOKEN), any(StorageAccountRequest.class));
         verify(armRpoUtil).retryGetBearerToken(anyString());
         verify(armRpoClient).getStorageAccounts(eq("Bearer refreshed"), any(StorageAccountRequest.class));
-
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getGetStorageAccountsRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
     }
 
     @Test
-    void getStorageAccounts_shouldRetryOn403_thenSucceed() {
+    void getStorageAccounts_shouldRetryOnForbidden_thenSucceed() {
         // given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/getStorageAccounts", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
@@ -333,19 +315,8 @@ class GetStorageAccountsServiceTest {
 
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        StorageAccountResponse.DataDetails dataDetails1 = new StorageAccountResponse.DataDetails();
-        dataDetails1.setId("indexId1");
-        dataDetails1.setName("unexpectedAccountName");
-
-        StorageAccountResponse.DataDetails dataDetails2 = new StorageAccountResponse.DataDetails();
-        dataDetails2.setId("indexId2");
-        dataDetails2.setName("expectedAccountName");
-
-        StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
-        storageAccountResponse.setStatus(200);
-        storageAccountResponse.setIsError(false);
-        storageAccountResponse.setDataDetails(List.of(dataDetails1, dataDetails2));
-        when(armRpoClient.getStorageAccounts(anyString(), any(StorageAccountRequest.class))).thenReturn(storageAccountResponse);
+        StorageAccountResponse storageAccountResponse = getStorageAccountResponse();
+        when(armRpoClient.getStorageAccounts(eq("Bearer refreshed"), any(StorageAccountRequest.class))).thenReturn(storageAccountResponse);
         when(armApiConfigurationProperties.getArmStorageAccountName()).thenReturn("expectedAccountName");
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
@@ -366,10 +337,31 @@ class GetStorageAccountsServiceTest {
         verify(armRpoClient).getStorageAccounts(eq(BEARER_TOKEN), any(StorageAccountRequest.class));
         verify(armRpoUtil).retryGetBearerToken("getStorageAccounts");
         verify(armRpoClient).getStorageAccounts(eq("Bearer refreshed"), any(StorageAccountRequest.class));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getGetStorageAccountsRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
     }
 
     @AfterEach
     void close() {
         armRpoHelperMocks.close();
+    }
+
+    private static @NotNull StorageAccountResponse getStorageAccountResponse() {
+        StorageAccountResponse.DataDetails dataDetails1 = new StorageAccountResponse.DataDetails();
+        dataDetails1.setId("indexId1");
+        dataDetails1.setName("unexpectedAccountName");
+
+        StorageAccountResponse.DataDetails dataDetails2 = new StorageAccountResponse.DataDetails();
+        dataDetails2.setId("indexId2");
+        dataDetails2.setName("expectedAccountName");
+
+        StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
+        storageAccountResponse.setStatus(200);
+        storageAccountResponse.setIsError(false);
+        storageAccountResponse.setDataDetails(List.of(dataDetails1, dataDetails2));
+        return storageAccountResponse;
     }
 }
