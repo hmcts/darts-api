@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -35,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -42,6 +46,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.CloseResource"})
 class AddAsyncSearchServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
@@ -61,6 +66,7 @@ class AddAsyncSearchServiceTest {
     private ArmRpoClient armRpoClient;
     private ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private AddAsyncSearchService addAsyncSearchService;
+    private ArmRpoUtil armRpoUtil;
 
     private ArgumentCaptor<ArmRpoExecutionDetailEntity> executionDetailCaptor;
     private ArgumentCaptor<String> requestCaptor;
@@ -77,7 +83,8 @@ class AddAsyncSearchServiceTest {
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         requestCaptor = ArgumentCaptor.forClass(String.class);
 
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
+        armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
+
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         addAsyncSearchService = new AddAsyncSearchServiceImpl(armClientService, armRpoService, armRpoUtil,
@@ -86,7 +93,7 @@ class AddAsyncSearchServiceTest {
     }
 
     @Test
-    void addAsyncSearch_shouldSucceedWhenASuccessResponseIsObtainedFromArm() {
+    void addAsyncSearch_shouldSucceed_WhenASuccessResponseIsObtainedFromArm() {
         //  Given
         createArmAutomatedTaskEntityAndSetMock();
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
@@ -256,6 +263,158 @@ class AddAsyncSearchServiceTest {
                                                  armRpoHelperMocks.getFailedRpoStatus(),
                                                  someUserAccount);
         verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void addAsyncSearch_ShouldRetryOnUnauthorised_WhenResponseIsValid() {
+        //  Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/addAsyncSearch", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("addAsyncSearch", response);
+        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        createArmAutomatedTaskEntityAndSetMock();
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        ArmAsyncSearchResponse armAsyncSearchResponse = new ArmAsyncSearchResponse();
+        armAsyncSearchResponse.setStatus(200);
+        armAsyncSearchResponse.setIsError(false);
+        armAsyncSearchResponse.setSearchId(SEARCH_ID);
+        when(armRpoClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenReturn(armAsyncSearchResponse);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        String searchName = addAsyncSearchService.addAsyncSearch(TOKEN, EXECUTION_ID, someUserAccount);
+
+        // Then
+        assertThat(searchName, Matchers.matchesPattern("DARTS_RPO_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}"));
+
+        // And verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getAddAsyncSearchRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify the expected request data has been created
+        verify(armRpoClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
+
+        String jsonRequest = requestCaptor.getValue();
+
+        assertEquals("DARTS_RPO_2025_01_02_12_34_00", parse(jsonRequest)
+            .read("$.name", String.class));
+
+        assertEquals("DARTS_RPO_2025_01_02_12_34_00", parse(jsonRequest)
+            .read("$.searchName", String.class));
+
+        assertEquals(MATTER_ID, parse(jsonRequest)
+            .read("$.matterId", String.class));
+
+        assertEquals(ENTITLEMENT_ID, parse(jsonRequest)
+            .read("$.entitlementId", String.class));
+
+        assertEquals(INDEX_ID, parse(jsonRequest)
+            .read("$.indexId", String.class));
+
+        assertEquals(SORTING_FIELD, parse(jsonRequest)
+            .read("$.sortingField", String.class));
+
+        assertEquals("2024-12-31T11:34:00Z", parse(jsonRequest)
+            .read("$.queryTree.children[1].field.value[0]", String.class));
+
+        assertEquals("2025-01-01T11:34:00Z", parse(jsonRequest)
+            .read("$.queryTree.children[1].field.value[1]", String.class));
+
+        // And verify execution detail status moves to completed as the final operation
+        verify(armRpoService).updateArmRpoStatus(executionDetailCaptor.capture(),
+                                                 eq(armRpoHelperMocks.getCompletedRpoStatus()),
+                                                 eq(someUserAccount));
+        verifyNoMoreInteractions(armRpoService);
+
+        // And verify the search id was set
+        assertEquals(SEARCH_ID, executionDetailCaptor.getValue().getSearchId());
+    }
+
+    @Test
+    void addAsyncSearch_ShouldRetryOnForbidden_WhenResponseIsValid() {
+        //  Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/addAsyncSearch", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(403)
+            .reason("Forbidden")
+            .build();
+        FeignException feign403 = FeignException.errorStatus("addAsyncSearch", response);
+        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign403);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        createArmAutomatedTaskEntityAndSetMock();
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        ArmAsyncSearchResponse armAsyncSearchResponse = new ArmAsyncSearchResponse();
+        armAsyncSearchResponse.setStatus(200);
+        armAsyncSearchResponse.setIsError(false);
+        armAsyncSearchResponse.setSearchId(SEARCH_ID);
+        when(armRpoClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenReturn(armAsyncSearchResponse);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        String searchName = addAsyncSearchService.addAsyncSearch(TOKEN, EXECUTION_ID, someUserAccount);
+
+        // Then
+        assertThat(searchName, Matchers.matchesPattern("DARTS_RPO_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}"));
+
+        // And verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getAddAsyncSearchRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify the expected request data has been created
+        verify(armRpoClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
+
+        String jsonRequest = requestCaptor.getValue();
+
+        assertEquals("DARTS_RPO_2025_01_02_12_34_00", parse(jsonRequest)
+            .read("$.name", String.class));
+
+        assertEquals("DARTS_RPO_2025_01_02_12_34_00", parse(jsonRequest)
+            .read("$.searchName", String.class));
+
+        assertEquals(MATTER_ID, parse(jsonRequest)
+            .read("$.matterId", String.class));
+
+        assertEquals(ENTITLEMENT_ID, parse(jsonRequest)
+            .read("$.entitlementId", String.class));
+
+        assertEquals(INDEX_ID, parse(jsonRequest)
+            .read("$.indexId", String.class));
+
+        assertEquals(SORTING_FIELD, parse(jsonRequest)
+            .read("$.sortingField", String.class));
+
+        assertEquals("2024-12-31T11:34:00Z", parse(jsonRequest)
+            .read("$.queryTree.children[1].field.value[0]", String.class));
+
+        assertEquals("2025-01-01T11:34:00Z", parse(jsonRequest)
+            .read("$.queryTree.children[1].field.value[1]", String.class));
+
+        // And verify execution detail status moves to completed as the final operation
+        verify(armRpoService).updateArmRpoStatus(executionDetailCaptor.capture(),
+                                                 eq(armRpoHelperMocks.getCompletedRpoStatus()),
+                                                 eq(someUserAccount));
+        verifyNoMoreInteractions(armRpoService);
+
+        // And verify the search id was set
+        assertEquals(SEARCH_ID, executionDetailCaptor.getValue().getSearchId());
     }
 
     private void createSearchResponseAndSetMock(String searchId) {

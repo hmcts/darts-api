@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,11 +32,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.CloseResource"})
 class GetExtendedSearchesByMatterServiceTest {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
@@ -46,6 +52,8 @@ class GetExtendedSearchesByMatterServiceTest {
     private ArmApiService armApiService;
     @Mock
     private ArmRpoService armRpoService;
+
+    private ArmRpoUtil armRpoUtil;
 
     private GetExtendedSearchesByMatterServiceImpl getExtendedSearchesByMatterService;
 
@@ -62,7 +70,7 @@ class GetExtendedSearchesByMatterServiceTest {
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         armRpoExecutionDetailEntity.setSearchId(SEARCH_ID);
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
+        armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         getExtendedSearchesByMatterService = new GetExtendedSearchesByMatterServiceImpl(armClientService, armRpoService, armRpoUtil);
@@ -441,6 +449,98 @@ class GetExtendedSearchesByMatterServiceTest {
         verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(armRpoHelperMocks.getFailedRpoStatus()),
                                                  any(UserAccountEntity.class));
         verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getExtendedSearchesByMatter_ShouldRetryOnUnauthorised_WhenResponseIsValid() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getExtendedSearchesByMatter", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getExtendedSearchesByMatter", response);
+        when(armRpoClient.getExtendedSearchesByMatter(eq("token"), anyString())).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
+        extendedSearchesByMatterResponse.setStatus(200);
+        extendedSearchesByMatterResponse.setIsError(false);
+        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setSearchId(SEARCH_ID);
+        search.setTotalCount(4);
+        search.setName(PRODUCTION_NAME);
+        search.setIsSaved(true);
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
+        searchDetail.setSearch(search);
+        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+
+        armRpoExecutionDetailEntity.setMatterId("1");
+
+        when(armRpoClient.getExtendedSearchesByMatter(eq("Bearer refreshed"), any())).thenReturn(extendedSearchesByMatterResponse);
+
+        // when
+        String result = getExtendedSearchesByMatterService.getExtendedSearchesByMatter("token", 1, userAccount);
+
+        // then
+        assertThat(result, containsString(PRODUCTION_NAME));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
+                                                         eq(armRpoHelperMocks.getGetExtendedSearchesByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(armRpoHelperMocks.getCompletedRpoStatus()),
+                                                 any(UserAccountEntity.class));
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
+    void getExtendedSearchesByMatter_ShouldRetryOnForbidden_WhenResponseIsValid() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getIndexesByMatterId", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(403)
+            .reason("Forbidden")
+            .build();
+        FeignException feign403 = FeignException.errorStatus("getIndexesByMatterId", response);
+        when(armRpoClient.getExtendedSearchesByMatter(eq("token"), anyString())).thenThrow(feign403);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
+        extendedSearchesByMatterResponse.setStatus(200);
+        extendedSearchesByMatterResponse.setIsError(false);
+        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setSearchId(SEARCH_ID);
+        search.setTotalCount(4);
+        search.setName(PRODUCTION_NAME);
+        search.setIsSaved(true);
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
+        searchDetail.setSearch(search);
+        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+
+        armRpoExecutionDetailEntity.setMatterId("1");
+
+        when(armRpoClient.getExtendedSearchesByMatter(eq("Bearer refreshed"), any())).thenReturn(extendedSearchesByMatterResponse);
+
+        // when
+        String result = getExtendedSearchesByMatterService.getExtendedSearchesByMatter("token", 1, userAccount);
+
+        // then
+        assertThat(result, containsString(PRODUCTION_NAME));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
+                                                         eq(armRpoHelperMocks.getGetExtendedSearchesByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(armRpoHelperMocks.getCompletedRpoStatus()),
+                                                 any(UserAccountEntity.class));
+        verifyNoMoreInteractions(armRpoService);
+
     }
 
     @AfterEach

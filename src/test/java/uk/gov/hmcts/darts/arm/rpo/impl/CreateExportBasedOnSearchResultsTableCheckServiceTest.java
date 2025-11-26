@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +59,8 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
         armRpoHelperMocks = new ArmRpoHelperMocks();
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
+        ArmRpoUtil armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
+
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         createExportBasedOnSearchResultsTableService = new CreateExportBasedOnSearchResultsTableServiceImpl(

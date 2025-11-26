@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
@@ -27,6 +30,7 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,11 +44,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.CloseResource"})
 class GetMasterIndexFieldByRecordClassSchemaServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
@@ -64,6 +71,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccount;
+    private ArmRpoUtil armRpoUtil;
 
     private ArmRpoHelperMocks armRpoHelperMocks;
 
@@ -74,7 +82,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         userAccount = new UserAccountEntity();
         armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
+        armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         getMasterIndexFieldByRecordClassSchemaService = new GetMasterIndexFieldByRecordClassSchemaServiceImpl(
@@ -84,7 +92,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
     @ParameterizedTest
     @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
         "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.INCLUDE)
-    void getMasterIndexFieldByRecordClassSchemaSuccess(ArmRpoStateEnum armRpoStateEnum) {
+    void getMasterIndexFieldByRecordClassSchema_Success(ArmRpoStateEnum armRpoStateEnum) {
         // given
         MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
         masterIndexField1.setMasterIndexFieldId("1");
@@ -141,7 +149,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
     }
 
     @Test
-    void getMasterIndexFieldByRecordClassSchemaWhereClientThrowsFeignException() {
+    void getMasterIndexFieldByRecordClassSchema_WhereClientThrowsFeignException() {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenThrow(FeignException.class);
@@ -164,7 +172,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
     }
 
     @Test
-    void getMasterIndexFieldByRecordClassSchemaWithNullResponse() {
+    void getMasterIndexFieldByRecordClassSchema_WithNullResponse() {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(null);
@@ -187,7 +195,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
     }
 
     @Test
-    void getMasterIndexFieldByRecordClassSchemaWithEmptyResponse() {
+    void getMasterIndexFieldByRecordClassSchema_WithEmptyResponse() {
         // given
         MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
         response.setMasterIndexFields(Collections.emptyList());
@@ -215,7 +223,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
     @ParameterizedTest
     @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
         "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.EXCLUDE)
-    void getMasterIndexFieldByRecordClassSchemaWithInvalidRpoState(ArmRpoStateEnum armRpoStateEnum) {
+    void getMasterIndexFieldByRecordClassSchema_WithInvalidRpoState(ArmRpoStateEnum armRpoStateEnum) {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         ArmRpoStateEntity armRpoStateEntity = armRpoHelperMocks.armRpoStateEnumToEntity(armRpoStateEnum);
@@ -233,6 +241,150 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
                                                          eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          eq(userAccount));
         verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
+        "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.INCLUDE)
+    void getMasterIndexFieldByRecordClassSchema_ShouldRetryOnUnauthorised_WhenResponseIsValid(ArmRpoStateEnum armRpoStateEnum) {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getMasterIndexFieldByRecordClassSchemaService", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getMasterIndexFieldByRecordClassSchemaService", response);
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), any(MasterIndexFieldByRecordClassSchemaRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField1.setMasterIndexFieldId("1");
+        masterIndexField1.setDisplayName("displayName");
+        masterIndexField1.setPropertyName("propertyName");
+        masterIndexField1.setPropertyType("propertyType");
+        masterIndexField1.setIsMasked(true);
+
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField2.setMasterIndexFieldId("2");
+        masterIndexField2.setDisplayName("displayName");
+        masterIndexField2.setPropertyName("ingestionDate");
+        masterIndexField2.setPropertyType("propertyType");
+        masterIndexField2.setIsMasked(false);
+
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField3 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField3.setMasterIndexFieldId("3");
+        masterIndexField3.setDisplayName("displayName");
+        masterIndexField3.setPropertyName("bf_018");
+        masterIndexField3.setPropertyType("propertyType");
+        masterIndexField3.setIsMasked(false);
+
+        var masterIndexFieldByRecordClassSchemaResponse = new MasterIndexFieldByRecordClassSchemaResponse();
+        masterIndexFieldByRecordClassSchemaResponse.setStatus(200);
+        masterIndexFieldByRecordClassSchemaResponse.setIsError(false);
+        masterIndexFieldByRecordClassSchemaResponse.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2, masterIndexField3));
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq("Bearer refreshed"), any(MasterIndexFieldByRecordClassSchemaRequest.class)))
+            .thenReturn(masterIndexFieldByRecordClassSchemaResponse);
+        ArmRpoStateEntity armRpoStateEntity = armRpoHelperMocks.armRpoStateEnumToEntity(armRpoStateEnum);
+
+        // when
+        List<MasterIndexFieldByRecordClassSchema> result = getMasterIndexFieldByRecordClassSchemaService.getMasterIndexFieldByRecordClassSchema(
+            BEARER_TOKEN, EXECUTION_ID, armRpoStateEntity, userAccount);
+
+        // then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        MasterIndexFieldByRecordClassSchema masterIndexFieldByRecordClassSchema = result.getFirst();
+        assertEquals("1", masterIndexFieldByRecordClassSchema.getMasterIndexField());
+        assertEquals("displayName", masterIndexFieldByRecordClassSchema.getDisplayName());
+        assertEquals("propertyName", masterIndexFieldByRecordClassSchema.getPropertyName());
+        assertEquals("propertyType", masterIndexFieldByRecordClassSchema.getPropertyType());
+        assertTrue(masterIndexFieldByRecordClassSchema.getIsMasked());
+
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(armRpoStateEntity),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        assertEquals("2", armRpoExecutionDetailEntityArgumentCaptor.getValue().getSortingField());
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getCompletedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
+        "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.INCLUDE)
+    void getMasterIndexFieldByRecordClassSchema_ShouldRetryOnForbidden_WhenResponseIsValid(ArmRpoStateEnum armRpoStateEnum) {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getMasterIndexFieldByRecordClassSchemaService", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(403)
+            .reason("Forbidden")
+            .build();
+        FeignException feign403 = FeignException.errorStatus("getMasterIndexFieldByRecordClassSchemaService", response);
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), any(MasterIndexFieldByRecordClassSchemaRequest.class))).thenThrow(feign403);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField1.setMasterIndexFieldId("1");
+        masterIndexField1.setDisplayName("displayName");
+        masterIndexField1.setPropertyName("propertyName");
+        masterIndexField1.setPropertyType("propertyType");
+        masterIndexField1.setIsMasked(true);
+
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField2.setMasterIndexFieldId("2");
+        masterIndexField2.setDisplayName("displayName");
+        masterIndexField2.setPropertyName("ingestionDate");
+        masterIndexField2.setPropertyType("propertyType");
+        masterIndexField2.setIsMasked(false);
+
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField3 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField3.setMasterIndexFieldId("3");
+        masterIndexField3.setDisplayName("displayName");
+        masterIndexField3.setPropertyName("bf_018");
+        masterIndexField3.setPropertyType("propertyType");
+        masterIndexField3.setIsMasked(false);
+
+        var masterIndexFieldByRecordClassSchemaResponse = new MasterIndexFieldByRecordClassSchemaResponse();
+        masterIndexFieldByRecordClassSchemaResponse.setStatus(200);
+        masterIndexFieldByRecordClassSchemaResponse.setIsError(false);
+        masterIndexFieldByRecordClassSchemaResponse.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2, masterIndexField3));
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq("Bearer refreshed"), any(MasterIndexFieldByRecordClassSchemaRequest.class)))
+            .thenReturn(masterIndexFieldByRecordClassSchemaResponse);
+        ArmRpoStateEntity armRpoStateEntity = armRpoHelperMocks.armRpoStateEnumToEntity(armRpoStateEnum);
+
+        // when
+        List<MasterIndexFieldByRecordClassSchema> result = getMasterIndexFieldByRecordClassSchemaService.getMasterIndexFieldByRecordClassSchema(
+            BEARER_TOKEN, EXECUTION_ID, armRpoStateEntity, userAccount);
+
+        // then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        MasterIndexFieldByRecordClassSchema masterIndexFieldByRecordClassSchema = result.getFirst();
+        assertEquals("1", masterIndexFieldByRecordClassSchema.getMasterIndexField());
+        assertEquals("displayName", masterIndexFieldByRecordClassSchema.getDisplayName());
+        assertEquals("propertyName", masterIndexFieldByRecordClassSchema.getPropertyName());
+        assertEquals("propertyType", masterIndexFieldByRecordClassSchema.getPropertyType());
+        assertTrue(masterIndexFieldByRecordClassSchema.getIsMasked());
+
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(armRpoStateEntity),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        assertEquals("2", armRpoExecutionDetailEntityArgumentCaptor.getValue().getSortingField());
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getCompletedRpoStatus()), eq(userAccount));
         verifyNoMoreInteractions(armRpoService);
     }
 

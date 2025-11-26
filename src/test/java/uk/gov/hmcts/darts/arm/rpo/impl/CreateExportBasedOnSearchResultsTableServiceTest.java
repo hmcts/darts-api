@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -36,12 +39,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.CloseResource"})
 class CreateExportBasedOnSearchResultsTableServiceTest {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
@@ -65,6 +71,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     private ArmRpoHelperMocks armRpoHelperMocks;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private final Duration pollDuration = Duration.ofHours(4);
+    private ArmRpoUtil armRpoUtil;
 
     @BeforeEach
     void setUp() {
@@ -73,7 +80,8 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
+        armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
+
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         createExportBasedOnSearchResultsTableCheckService = new CreateExportBasedOnSearchResultsTableServiceImpl(
@@ -581,6 +589,76 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
 
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ShouldRetryOnUnauthorised_WhenResponseIsValid() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/createExportBasedOnSearchResultsTable", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("createExportBasedOnSearchResultsTable", response);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        var createExportBasedOnSearchResultsTableResponse = createResponse(200, false, 0);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenReturn(createExportBasedOnSearchResultsTableResponse);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
+
+        // when
+        boolean result = createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
+            BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount);
+
+        // then
+        assertTrue(result);
+        // assert that the productionName of armRpoExecutionDetailEntity contains the production name
+        assertThat(armRpoExecutionDetailEntity.getProductionName(), containsString(PRODUCTION_NAME));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTable_ShouldRetryOnForbidden_WhenResponseIsValid() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/createExportBasedOnSearchResultsTable", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(403)
+            .reason("Forbidden")
+            .build();
+        FeignException feign403 = FeignException.errorStatus("createExportBasedOnSearchResultsTable", response);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign403);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        var createExportBasedOnSearchResultsTableResponse = createResponse(200, false, 0);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenReturn(createExportBasedOnSearchResultsTableResponse);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
+
+        // when
+        boolean result = createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
+            BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount);
+
+        // then
+        assertTrue(result);
+        // assert that the productionName of armRpoExecutionDetailEntity contains the production name
+        assertThat(armRpoExecutionDetailEntity.getProductionName(), containsString(PRODUCTION_NAME));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
     }
 
     private String getFeignResponseAsString(String status, boolean isError, String responseStatus) {

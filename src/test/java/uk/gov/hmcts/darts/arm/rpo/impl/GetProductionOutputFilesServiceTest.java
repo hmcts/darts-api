@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +39,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -46,7 +51,7 @@ import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.IN_PROGRESS_
 import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 
 @TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
-@SuppressWarnings("checkstyle:linelength")
+@SuppressWarnings({"checkstyle:linelength", "PMD.CloseResource"})
 @ExtendWith(MockitoExtension.class)
 class GetProductionOutputFilesServiceTest {
 
@@ -57,6 +62,7 @@ class GetProductionOutputFilesServiceTest {
     private static final String PRODUCTION_EXPORT_FILE_ID_2 = UUID.randomUUID().toString();
 
     private GetProductionOutputFilesService getProductionOutputFilesService;
+    private ArmRpoUtil armRpoUtil;
     private ArmRpoService armRpoService;
     private ArmRpoClient armRpoClient;
 
@@ -69,7 +75,7 @@ class GetProductionOutputFilesServiceTest {
     void setUp() {
         armRpoService = spy(ArmRpoService.class);
         armRpoClient = spy(ArmRpoClient.class);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
+        armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         getProductionOutputFilesService = new GetProductionOutputFilesServiceImpl(armClientService, armRpoService, armRpoUtil);
@@ -429,6 +435,96 @@ class GetProductionOutputFilesServiceTest {
         // And verify execution detail status moves to failed as the final operation
         verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity,
                                                  armRpoHelperMocks.getFailedRpoStatus(),
+                                                 someUserAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getProductionOutputFiles_ShouldRetryOnUnauthorised_WhenResponseIsValid() {
+        // Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getProductionOutputFiles", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getProductionOutputFiles", response);
+        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        var productionOutputFilesResponse = createProductionOutputFilesResponse(
+            Collections.singletonList(createProductionExportFile(createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1)))
+        );
+
+        when(armRpoClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
+            .thenReturn(productionOutputFilesResponse);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        List<String> productionOutputFiles = getProductionOutputFilesService.getProductionOutputFiles(TOKEN, EXECUTION_ID, someUserAccount);
+
+        // Then
+        assertEquals(1, productionOutputFiles.size());
+        assertEquals(PRODUCTION_EXPORT_FILE_ID_1, productionOutputFiles.getFirst());
+
+        // And verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProductionOutputFilesRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify execution detail status moves to failed as the final operation
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity,
+                                                 armRpoHelperMocks.getCompletedRpoStatus(),
+                                                 someUserAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getProductionOutputFiles_ShouldRetryOnForbidden_WhenResponseIsValid() {
+        // Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getProductionOutputFiles", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(403)
+            .reason("Forbidden")
+            .build();
+        FeignException feign403 = FeignException.errorStatus("getProductionOutputFiles", response);
+        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign403);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        var productionOutputFilesResponse = createProductionOutputFilesResponse(
+            Collections.singletonList(createProductionExportFile(createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1)))
+        );
+
+        when(armRpoClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
+            .thenReturn(productionOutputFilesResponse);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        List<String> productionOutputFiles = getProductionOutputFilesService.getProductionOutputFiles(TOKEN, EXECUTION_ID, someUserAccount);
+
+        // Then
+        assertEquals(1, productionOutputFiles.size());
+        assertEquals(PRODUCTION_EXPORT_FILE_ID_1, productionOutputFiles.getFirst());
+
+        // And verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProductionOutputFilesRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify execution detail status moves to failed as the final operation
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity,
+                                                 armRpoHelperMocks.getCompletedRpoStatus(),
                                                  someUserAccount);
         verifyNoMoreInteractions(armRpoService);
     }

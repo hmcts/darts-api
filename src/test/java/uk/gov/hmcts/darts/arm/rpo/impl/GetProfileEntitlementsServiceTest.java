@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,7 +35,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -40,6 +46,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.CloseResource"})
 class GetProfileEntitlementsServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
@@ -51,6 +58,7 @@ class GetProfileEntitlementsServiceTest {
     @Mock
     private ArmApiService armApiService;
 
+    private ArmRpoUtil armRpoUtil;
     private ArmRpoService armRpoService;
     private ArmRpoClient armRpoClient;
 
@@ -67,7 +75,8 @@ class GetProfileEntitlementsServiceTest {
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
         armApiConfigurationProperties.setArmServiceEntitlement(ENTITLEMENT_NAME);
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService, armApiService);
+        armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
+
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         getProfileEntitlementsService = new GetProfileEntitlementsServiceImpl(armClientService, armRpoService, armRpoUtil, armApiConfigurationProperties);
@@ -224,6 +233,102 @@ class GetProfileEntitlementsServiceTest {
                                                  armRpoHelperMocks.getFailedRpoStatus(),
                                                  someUserAccount);
         verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getProfileEntitlements_ShouldRetryOnUnauthorised_WhenResponseIsValid() {
+        //  Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getProfileEntitlements", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getProfileEntitlements", response);
+        when(armRpoClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        var profileEntitlement = new ProfileEntitlementResponse.ProfileEntitlement();
+        profileEntitlement.setName(ENTITLEMENT_NAME);
+        profileEntitlement.setEntitlementId("some entitlement id");
+        var profileEntitlementResponse = new ProfileEntitlementResponse();
+        profileEntitlementResponse.setStatus(200);
+        profileEntitlementResponse.setIsError(false);
+        profileEntitlementResponse.setEntitlements(List.of(profileEntitlement));
+
+        when(armRpoClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
+            .thenReturn(profileEntitlementResponse);
+
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        getProfileEntitlementsService.getProfileEntitlements(TOKEN, EXECUTION_ID, someUserAccount);
+
+        // Then verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProfileEntitlementsRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify execution detail status moves to completed as the final operation
+        verify(armRpoService).updateArmRpoStatus(executionDetailCaptor.capture(),
+                                                 eq(armRpoHelperMocks.getCompletedRpoStatus()),
+                                                 eq(someUserAccount));
+        verifyNoMoreInteractions(armRpoService);
+
+        // And verify the entitlement id was set
+        assertEquals("some entitlement id", executionDetailCaptor.getValue().getEntitlementId());
+    }
+
+    @Test
+    void getProfileEntitlements_ShouldRetryOnForbidden_WhenResponseIsValid() {
+        //  Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getProfileEntitlements", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(403)
+            .reason("Forbidden")
+            .build();
+        FeignException feign403 = FeignException.errorStatus("getProfileEntitlements", response);
+        when(armRpoClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign403);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        var profileEntitlement = new ProfileEntitlementResponse.ProfileEntitlement();
+        profileEntitlement.setName(ENTITLEMENT_NAME);
+        profileEntitlement.setEntitlementId("some entitlement id");
+        var profileEntitlementResponse = new ProfileEntitlementResponse();
+        profileEntitlementResponse.setStatus(200);
+        profileEntitlementResponse.setIsError(false);
+        profileEntitlementResponse.setEntitlements(List.of(profileEntitlement));
+
+        when(armRpoClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
+            .thenReturn(profileEntitlementResponse);
+
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        getProfileEntitlementsService.getProfileEntitlements(TOKEN, EXECUTION_ID, someUserAccount);
+
+        // Then verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProfileEntitlementsRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify execution detail status moves to completed as the final operation
+        verify(armRpoService).updateArmRpoStatus(executionDetailCaptor.capture(),
+                                                 eq(armRpoHelperMocks.getCompletedRpoStatus()),
+                                                 eq(someUserAccount));
+        verifyNoMoreInteractions(armRpoService);
+
+        // And verify the entitlement id was set
+        assertEquals("some entitlement id", executionDetailCaptor.getValue().getEntitlementId());
     }
 
     private ArmRpoExecutionDetailEntity createInitialExecutionDetailEntityAndSetMock() {
