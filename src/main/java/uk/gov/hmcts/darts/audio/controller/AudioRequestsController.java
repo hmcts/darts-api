@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 
+import java.io.IOException;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -110,24 +111,29 @@ public class AudioRequestsController implements AudioRequestsApi {
         return addAudioRequestCommon(audioRequestDetails, AudioRequestType.DOWNLOAD);
     }
 
-    @SneakyThrows
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
-        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
-    public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
-        log.warn("Streaming request received for transformedMediaId: {}", transformedMediaId);
-        try (DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.playback(transformedMediaId)) {
-            return StreamingResponseEntityUtil.createResponseEntity(downloadResponseMetadata.getResource().getInputStream(), httpRangeList);
-        } catch (Exception ex) {
-            if (ExceptionUtils.getRootCauseMessage(ex).contains("Connection reset by peer")) {
-                log.warn("Client aborted connection while streaming audio");
-                throw ex;
-            } else {
-                throw ex;
+        @SneakyThrows
+        @Override
+        @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+        @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
+            securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+            globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
+        public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
+            log.warn("Streaming request received for transformedMediaId: {}", transformedMediaId);
+            try (DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.playback(transformedMediaId)) {
+                try {
+                    return StreamingResponseEntityUtil.createResponseEntity(
+                        downloadResponseMetadata.getResource().getInputStream(),
+                        httpRangeList
+                    );
+                } catch (IOException ioEx) {
+                    String root = ExceptionUtils.getRootCauseMessage(ioEx);
+                    if (root != null && (root.contains("Connection reset by peer") || root.contains("Broken pipe"))) {
+                        log.warn("Client aborted connection while streaming audio");
+                        return ResponseEntity.noContent().build();
+                    }
+                    throw ioEx; 
+                }
             }
-        }
     }
 
     @Override
