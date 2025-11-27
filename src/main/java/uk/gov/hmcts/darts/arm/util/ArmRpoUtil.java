@@ -87,9 +87,8 @@ public class ArmRpoUtil {
     }
 
     public String retryGetBearerToken(String endpointName) {
-        String bearerToken;
         armApiService.evictToken();
-        bearerToken = armApiService.getArmBearerToken();
+        String bearerToken = armApiService.getArmBearerToken();
         if (StringUtils.isEmpty(bearerToken)) {
             throw new ArmRpoException("Unable to get bearer token for " + endpointName + " after retrying");
         }

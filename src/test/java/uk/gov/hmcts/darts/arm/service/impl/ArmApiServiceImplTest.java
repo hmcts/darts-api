@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cache.CacheManager;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
@@ -43,21 +41,17 @@ class ArmApiServiceImplTest {
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
-    private CacheManager cacheManager;
-    @Mock
-    private StringRedisTemplate redis;
-    @Mock
-    private ArmClientService armClientService;
-    @Mock
     private ArmAuthTokenCache armAuthTokenClient;
     @Mock
     private ArmRpoClient armRpoClient;
+
     private ArmApiServiceImpl armApiService;
 
     @BeforeEach
     void setUp() {
         ArmClientService armClientService = new ArmClientServiceImpl(armTokenClient, armApiClient, armRpoClient);
-        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armDataManagementConfiguration, armClientService, armAuthTokenClient);
+        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armDataManagementConfiguration,
+                                              armClientService, armAuthTokenClient);
     }
 
     @Test

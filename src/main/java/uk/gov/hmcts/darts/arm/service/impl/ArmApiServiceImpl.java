@@ -62,10 +62,17 @@ public class ArmApiServiceImpl implements ArmApiService {
 
         try {
             return armClientService.updateMetadata(getArmBearerToken(), armUpdateMetadataRequest);
-        } catch (FeignException e) {
+        } catch (FeignException feignException) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error("Error during ARM update metadata: Detail: {}", e.contentUTF8(), e);
-            throw e;
+            log.error("Error during ARM update metadata: Detail: {}", feignException.contentUTF8(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                evictToken();
+                return armClientService.updateMetadata(getArmBearerToken(), armUpdateMetadataRequest);
+            } else {
+                throw feignException;
+            }
         }
     }
 
@@ -73,13 +80,29 @@ public class ArmApiServiceImpl implements ArmApiService {
     @SuppressWarnings({"PMD.CloseResource"})
     public DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException {
         FileBasedDownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
-
-        feign.Response response = armClientService.downloadArmData(
-            getArmBearerToken(),
-            armApiConfigurationProperties.getCabinetId(),
-            externalRecordId,
-            externalFileId
-        );
+        feign.Response response;
+        try {
+            response = armClientService.downloadArmData(
+                getArmBearerToken(),
+                armApiConfigurationProperties.getCabinetId(),
+                externalRecordId,
+                externalFileId
+            );
+        } catch (FeignException feignException) {
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                evictToken();
+                response = armClientService.downloadArmData(
+                    getArmBearerToken(),
+                    armApiConfigurationProperties.getCabinetId(),
+                    externalRecordId,
+                    externalFileId
+                );
+            } else {
+                throw feignException;
+            }
+        }
 
         // on any error occurring return a download failure
         if (!HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
