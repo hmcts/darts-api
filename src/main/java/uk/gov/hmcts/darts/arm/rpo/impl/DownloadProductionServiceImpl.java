@@ -48,7 +48,7 @@ public class DownloadProductionServiceImpl implements DownloadProductionService 
             // If unauthorized or forbidden, retry once with a refreshed token
             if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
                 try {
-                    String refreshedBearer = armRpoUtil.retryGetBearerToken("addAsyncSearch");
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("downloadProduction");
                     response = armRpoDownloadProduction.downloadProduction(refreshedBearer, executionId, productionExportFileId);
                 } catch (FeignException retryEx) {
                     throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
