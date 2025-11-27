@@ -351,8 +351,8 @@ sonarqube {
     property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
     property "sonar.cpd.exclusions", "**/ManualTaskService.java"
     property "sonar.scm.exclusions", "**/ManualTaskService.java"
-    property "sonar.cpd.exclusions", "**/ArmRpoClient.java"
-    property "sonar.scm.exclusions", "**/ArmRpoClient.java"
+    property "sonar.cpd.exclusions", "**/ArmRpoClient.java,**/ArmApiBaseClient.java,ArmAuthClient.java"
+    property "sonar.scm.exclusions", "**/ArmRpoClient.java,**/ArmApiBaseClient.java,ArmAuthClient.java"
     property "sonar.scm.exclusions", "**/SaveBackgroundSearchServiceImpl.java,**/CreateExportBasedOnSearchResultsTableServiceImpl.java"
     property "sonar.cpd.exclusions", "**/SaveBackgroundSearchServiceImpl.java,**/CreateExportBasedOnSearchResultsTableServiceImpl.java"
     if (skipSonar) {
