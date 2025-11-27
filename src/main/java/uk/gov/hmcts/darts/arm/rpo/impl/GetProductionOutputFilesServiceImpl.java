@@ -28,6 +28,7 @@ import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.PreserveStackTrace"})
 public class GetProductionOutputFilesServiceImpl implements GetProductionOutputFilesService {
 
     private final ArmClientService armClientService;
@@ -56,7 +57,7 @@ public class GetProductionOutputFilesServiceImpl implements GetProductionOutputF
         try {
             productionOutputFilesResponse = armClientService.getProductionOutputFiles(bearerToken, createProductionOutputFilesRequest(productionId));
         } catch (FeignException feignException) {
-            log.error(exceptionMessageBuilder.append("Unable to get ARM RPO response ").append(feignException).toString(), feignException);
+            log.error(exceptionMessageBuilder.append("Unable to get ARM RPO response ").append(feignException.getMessage()).toString(), feignException);
             int status = feignException.status();
             // If unauthorized or forbidden, retry once with a refreshed token
             if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
@@ -65,12 +66,14 @@ public class GetProductionOutputFilesServiceImpl implements GetProductionOutputF
                     productionOutputFilesResponse = armClientService.getProductionOutputFiles(
                         refreshedBearer, createProductionOutputFilesRequest(productionId));
                 } catch (FeignException retryEx) {
-                    throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx).toString(),
-                                                                     executionDetail, userAccount);
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        executionDetail, userAccount);
                 }
             } else {
-                throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(feignException).toString(),
-                                                                 executionDetail, userAccount);
+                throw armRpoUtil.handleFailureAndCreateException(
+                    exceptionMessageBuilder.append("API call failed: ").append(feignException.getMessage()).toString(),
+                    executionDetail, userAccount);
             }
         }
         log.info("ARM RPO Response - ProductionOutputFilesResponse: {}", productionOutputFilesResponse);

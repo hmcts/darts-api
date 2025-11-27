@@ -20,7 +20,7 @@ import static java.util.Objects.isNull;
 @Service
 @AllArgsConstructor
 @Slf4j
-@SuppressWarnings("PMD.CyclomaticComplexity")
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.PreserveStackTrace"})
 public class GetRecordManagementMatterServiceImpl implements GetRecordManagementMatterService {
 
     private static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
@@ -42,7 +42,7 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
         try {
             recordManagementMatterResponse = armClientService.getRecordManagementMatter(bearerToken, emptyRpoRequest);
         } catch (FeignException feignException) {
-            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(), feignException);
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException.getMessage()).toString(), feignException);
             int status = feignException.status();
             // If unauthorized or forbidden, retry once with a refreshed token
             if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
@@ -50,11 +50,12 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
                     String refreshedBearer = armRpoUtil.retryGetBearerToken("getRecordManagementMatter");
                     recordManagementMatterResponse = armClientService.getRecordManagementMatter(refreshedBearer, emptyRpoRequest);
                 } catch (FeignException retryEx) {
-                    throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
-                                                                     armRpoExecutionDetailEntity, userAccount);
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        errorMessage.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        armRpoExecutionDetailEntity, userAccount);
                 }
             } else {
-                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException).toString(),
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException.getMessage()).toString(),
                                                                  armRpoExecutionDetailEntity, userAccount);
             }
         }

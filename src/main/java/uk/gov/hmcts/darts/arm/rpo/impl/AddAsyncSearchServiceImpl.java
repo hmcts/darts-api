@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.PreserveStackTrace"})
 public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
 
     private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
@@ -76,12 +77,14 @@ public class AddAsyncSearchServiceImpl implements AddAsyncSearchService {
                     String refreshedBearer = armRpoUtil.retryGetBearerToken("addAsyncSearch");
                     armAsyncSearchResponse = armClientService.addAsyncSearch(refreshedBearer, requestGenerator.getJsonRequest());
                 } catch (FeignException retryEx) {
-                    throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx).toString(),
-                                                                     executionDetail, userAccount);
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        executionDetail, userAccount);
                 }
             } else {
-                throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(feignException).toString(),
-                                                                 executionDetail, userAccount);
+                throw armRpoUtil.handleFailureAndCreateException(
+                    exceptionMessageBuilder.append("API call failed: ").append(feignException.getMessage()).toString(),
+                    executionDetail, userAccount);
             }
         }
         log.info("ARM RPO Response - ArmAsyncSearchResponse: {}", armAsyncSearchResponse);

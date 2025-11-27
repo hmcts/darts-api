@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.PreserveStackTrace"})
 public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlementsService {
 
     private final ArmClientService armClientService;
@@ -50,12 +51,14 @@ public class GetProfileEntitlementsServiceImpl implements GetProfileEntitlements
                     String refreshedBearer = armRpoUtil.retryGetBearerToken("getProfileEntitlements");
                     profileEntitlementResponse = armClientService.getProfileEntitlementResponse(refreshedBearer, emptyRpoRequest);
                 } catch (FeignException retryEx) {
-                    throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx).toString(),
-                                                                     executionDetail, userAccount);
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        executionDetail, userAccount);
                 }
             } else {
-                throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(feignException).toString(),
-                                                                 executionDetail, userAccount);
+                throw armRpoUtil.handleFailureAndCreateException(
+                    exceptionMessageBuilder.append("API call failed: ").append(feignException.getMessage()).toString(),
+                    executionDetail, userAccount);
             }
         }
         log.info("ARM RPO Response - ProfileEntitlementResponse: {}", profileEntitlementResponse);

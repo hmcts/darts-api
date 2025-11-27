@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.PreserveStackTrace"})
 public class RemoveProductionServiceImpl implements RemoveProductionService {
 
     private final ArmClientService armClientService;
@@ -39,7 +40,7 @@ public class RemoveProductionServiceImpl implements RemoveProductionService {
             removeProductionResponse = armClientService.removeProduction(bearerToken, request);
         } catch (FeignException feignException) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(), feignException);
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException.getMessage()).toString(), feignException);
             int status = feignException.status();
             // If unauthorized or forbidden, retry once with a refreshed token
             if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
@@ -47,11 +48,12 @@ public class RemoveProductionServiceImpl implements RemoveProductionService {
                     String refreshedBearer = armRpoUtil.retryGetBearerToken("removeProduction");
                     removeProductionResponse = armClientService.removeProduction(refreshedBearer, request);
                 } catch (FeignException retryEx) {
-                    throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
-                                                                     armRpoExecutionDetailEntity, userAccount);
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        errorMessage.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        armRpoExecutionDetailEntity, userAccount);
                 }
             } else {
-                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException).toString(),
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException.getMessage()).toString(),
                                                                  armRpoExecutionDetailEntity, userAccount);
             }
         }

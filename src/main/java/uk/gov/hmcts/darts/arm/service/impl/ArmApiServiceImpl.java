@@ -108,11 +108,6 @@ public class ArmApiServiceImpl implements ArmApiService {
 
     @Override
     public String getArmBearerToken() {
-        // TODO: Remove logging of username and password once testing is complete
-        log.debug("Get ARM Bearer Token with Username: {}, Password: {}",
-                  armApiConfigurationProperties.getArmUsername(),
-                  armApiConfigurationProperties.getArmPassword());
-
         ArmTokenRequest armTokenRequest = ArmTokenRequest.builder()
             .username(armApiConfigurationProperties.getArmUsername())
             .password(armApiConfigurationProperties.getArmPassword())

@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.PreserveStackTrace"})
 public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchService {
 
     private final ArmClientService armClientService;
@@ -37,7 +38,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
         try {
             saveBackgroundSearchResponse = armClientService.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
         } catch (FeignException feignException) {
-            log.error(errorMessage.append("Unable to save background search").append(feignException).toString(), feignException);
+            log.error(errorMessage.append("Unable to save background search").append(feignException.getMessage()).toString(), feignException);
             int status = feignException.status();
             // If unauthorized or forbidden, retry once with a refreshed token
             if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
@@ -45,11 +46,12 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
                     String refreshedBearer = armRpoUtil.retryGetBearerToken("saveBackgroundSearch");
                     saveBackgroundSearchResponse = armClientService.saveBackgroundSearch(refreshedBearer, saveBackgroundSearchRequest);
                 } catch (FeignException retryEx) {
-                    throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed after retry: ").append(retryEx).toString(),
-                                                                     armRpoExecutionDetailEntity, userAccount);
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        errorMessage.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        armRpoExecutionDetailEntity, userAccount);
                 }
             } else {
-                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException).toString(),
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException.getMessage()).toString(),
                                                                  armRpoExecutionDetailEntity, userAccount);
             }
         }

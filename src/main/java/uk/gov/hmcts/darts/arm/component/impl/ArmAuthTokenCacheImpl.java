@@ -102,8 +102,6 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
                                             "ARM token returned empty access token");
             }
 
-            //TODO REMOVE ONCE TESTED
-            log.debug("Fetched ARM Bearer Token from token: {}", firstAccessToken);
             String firstBearer = String.format("Bearer %s", firstAccessToken);
 
             EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
