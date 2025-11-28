@@ -19,6 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
+import uk.gov.hmcts.darts.arm.service.RemoveRpoProductionsService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
@@ -57,6 +58,7 @@ import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.OutboundAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ProcessArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.RemoveRpoProductionsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
@@ -76,10 +78,11 @@ import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.RemoveOldArmRpoProductionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
 import java.time.LocalDateTime;
@@ -97,7 +100,7 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
-class AutomatedTaskServiceTest extends IntegrationBase {
+class AutomatedTaskServiceTest extends PostgresIntegrationBase {
 
     @Autowired
     private AutomatedTaskService automatedTaskService;
@@ -150,6 +153,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     private ArmRpoPollService armRpoPollService;
     @Autowired
     private UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
+    @Autowired
+    private RemoveRpoProductionsService removeRpoProductionsService;
 
     @MockitoBean
     private UserIdentity userIdentity;
@@ -1019,6 +1024,37 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 automatedTaskRepository,
                 mock(ArmRpoPollAutomatedTaskConfig.class),
                 armRpoPollService,
+                logApi,
+                lockService
+            );
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+    }
+
+    @Test
+    void givenConfiguredTasksUpdateCronAndResetCronForRemoveOldArmRpoProductionsAutomatedTask() {
+        AutomatedTask automatedTask =
+            new RemoveOldArmRpoProductionsAutomatedTask(
+                automatedTaskRepository,
+                removeRpoProductionsService,
+                mock(RemoveRpoProductionsAutomatedTaskConfig.class),
                 logApi,
                 lockService
             );
