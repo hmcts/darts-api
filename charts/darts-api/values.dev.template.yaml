@@ -6,7 +6,7 @@ java:
   devmemoryRequests: "1Gi"
   devcpuRequests: "250m"
   devmemoryLimits: "2Gi"
-  devcpuLimits: "1500m"
+  devcpuLimits: "2500m"
   ingressHost: ${SERVICE_FQDN}
   aadIdentityName: darts
   global:
