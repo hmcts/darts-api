@@ -98,7 +98,7 @@ public class IntegrationBase extends TestBase {
         // container will be automatically stopped
         REDIS.start();
     }
-
+    
     @AfterEach
     protected void clearTestData() {
         FileStore.getFileStore().remove();

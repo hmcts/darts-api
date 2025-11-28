@@ -1,16 +1,24 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -21,6 +29,8 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -28,9 +38,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -66,6 +79,9 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
+    
+    @MockitoSpyBean
+    private MediaRequestService mediaRequestService;
 
     @MockitoSpyBean
     private DataManagementService dataManagementService;
@@ -236,6 +252,70 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
             .andExpect(status().isBadRequest());
 
         verifyNoInteractions(mockAuthorisation);
+    }
+
+    @Test
+    void audioRequestPlayback_ShouldLogWarn_WhenClientAborts() throws Exception {
+        var blobId = UUID.randomUUID().toString();
+
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, PLAYBACK);
+        var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
+
+        var transientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
+            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                mediaRequestEntity,
+                objectRecordStatusEntity,
+                blobId
+            ));
+
+        final Integer transformedMediaId = transientObjectDirectoryEntity.getTransformedMedia().getId();
+
+        doNothing().when(mockAuthorisation)
+            .authoriseByTransformedMediaId(
+                transformedMediaId,
+                Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            );
+
+        // monitor logs to check for warn after request
+        Logger controllerLogger = (Logger) LoggerFactory.getLogger(AudioRequestsController.class);
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+        controllerLogger.addAppender(listAppender);
+        try (
+            // mock failing input stream to simulate client abort during streaming
+            DownloadResponseMetaData mockedDownloadResponse = mock(DownloadResponseMetaData.class);
+            InputStream failingStream = new InputStream() {
+                @Override
+                public int read() throws IOException {
+                    throw new IOException("Connection reset by peer");
+                }
+            }
+        ) {
+            Resource mockedResource = mock(Resource.class);
+
+            when(mockedDownloadResponse.getResource()).thenReturn(mockedResource);
+            when(mockedResource.getInputStream()).thenReturn(failingStream);
+            doReturn(mockedDownloadResponse).when(mediaRequestService).playback(transformedMediaId);
+
+            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+                .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
+
+            mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent());
+
+            boolean foundWarn = listAppender.list.stream()
+                .anyMatch(event ->
+                              event.getLevel() == Level.WARN 
+                                  &&
+                                  event.getFormattedMessage().contains("Client aborted connection while streaming audio")
+                );
+            assertTrue(foundWarn, "Expected WARN log for client abort not found");
+
+        } finally {
+            controllerLogger.detachAppender(listAppender);
+            listAppender.stop();
+        }
     }
 
 }
