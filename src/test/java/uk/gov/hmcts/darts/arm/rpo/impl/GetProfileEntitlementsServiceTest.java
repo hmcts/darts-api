@@ -284,6 +284,46 @@ class GetProfileEntitlementsServiceTest {
     }
 
     @Test
+    void getProfileEntitlements_shouldRetryOnUnauthorised_thenFail() {
+        //  Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getProfileEntitlements", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getProfileEntitlements", response);
+        when(armRpoClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
+            .thenThrow(feign401);
+
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            getProfileEntitlementsService.getProfileEntitlements(TOKEN, EXECUTION_ID, someUserAccount));
+
+        // Then verify execution detail state moves to in progress
+        assertThat(exception.getMessage(), containsString("Unauthorized"));
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProfileEntitlementsRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify execution detail status moves to completed as the final operation
+        verify(armRpoService).updateArmRpoStatus(executionDetailCaptor.capture(),
+                                                 eq(armRpoHelperMocks.getFailedRpoStatus()),
+                                                 eq(someUserAccount));
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
     void getProfileEntitlements_ShouldRetryOnForbidden_WhenResponseIsValid() {
         //  Given
         Response response = Response.builder()

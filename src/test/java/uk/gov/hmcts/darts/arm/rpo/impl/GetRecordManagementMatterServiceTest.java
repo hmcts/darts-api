@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -182,6 +184,45 @@ class GetRecordManagementMatterServiceTest {
                                                          eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
+    }
+
+    @Test
+    void getRecordManagementMatter_ShouldRetryOnUnauthorised_ThenFail() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getRecordManagementMatter", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getRecordManagementMatter", response);
+
+        // First call throws 401
+        when(armRpoClient.getRecordManagementMatter(eq(BEARER_TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoClient.getRecordManagementMatter(eq("Bearer refreshed"), any())).thenThrow(feign401);
+
+        Integer executionId = 1;
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setId(executionId);
+        when(armRpoService.getArmRpoExecutionDetailEntity(executionId)).thenReturn(armRpoExecutionDetailEntity);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            getRecordManagementMatterService.getRecordManagementMatter(BEARER_TOKEN, executionId, userAccountEntity));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Unauthorized"));
+        verify(armRpoClient).getRecordManagementMatter(eq(BEARER_TOKEN), any());
+        verify(armRpoUtil).retryGetBearerToken("getRecordManagementMatter");
+        verify(armRpoClient).getRecordManagementMatter(eq("Bearer refreshed"), any());
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getGetRecordManagementMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
     }
 
     @Test

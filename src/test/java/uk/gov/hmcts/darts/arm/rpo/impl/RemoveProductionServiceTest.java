@@ -175,6 +175,39 @@ class RemoveProductionServiceTest {
     }
 
     @Test
+    void removeProduction_shouldRetryOnUnauthorised_thenFail() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/removeProduction", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("removeProduction", response);
+
+        // First call throws 401
+        when(armRpoClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoClient.removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class))).thenThrow(feign401);
+
+        armRpoExecutionDetailEntity.setProductionId("123");
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            removeProductionService.removeProduction(BEARER_TOKEN, 1, userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Unauthorized"));
+        verify(armRpoClient).removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class));
+        verify(armRpoUtil).retryGetBearerToken(anyString());
+        verify(armRpoClient).removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class));
+
+    }
+
+    @Test
     void removeProduction_shouldRetryOnForbidden_thenSucceed() {
         // given
         Response response = Response.builder()

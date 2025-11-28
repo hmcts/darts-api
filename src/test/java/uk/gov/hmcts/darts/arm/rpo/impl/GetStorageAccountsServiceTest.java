@@ -301,6 +301,41 @@ class GetStorageAccountsServiceTest {
     }
 
     @Test
+    void getStorageAccounts_shouldRetryOnUnauthorised_thenFail() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getStorageAccounts", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getStorageAccounts", response);
+
+        // First call throws 401
+        when(armRpoClient.getStorageAccounts(eq(BEARER_TOKEN), any(StorageAccountRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoClient.getStorageAccounts(eq("Bearer refreshed"), any(StorageAccountRequest.class))).thenThrow(feign401);
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            getStorageAccountsService.getStorageAccounts(BEARER_TOKEN, 1, userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Unauthorized"));
+        verify(armRpoClient).getStorageAccounts(eq(BEARER_TOKEN), any(StorageAccountRequest.class));
+        verify(armRpoUtil).retryGetBearerToken(anyString());
+        verify(armRpoClient).getStorageAccounts(eq("Bearer refreshed"), any(StorageAccountRequest.class));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getGetStorageAccountsRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+    }
+
+    @Test
     void getStorageAccounts_shouldRetryOnForbidden_thenSucceed() {
         // given
         Response response = Response.builder()

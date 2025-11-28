@@ -355,6 +355,38 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
+    void saveBackgroundSearch_shouldRetryOnUnauthorised_thenFail() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("saveBackgroundSearch", response);
+
+        // First call throws 401
+        when(armRpoClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Unauthorized"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
     void saveBackgroundSearch_shouldRetryOnForbidden_thenSucceed() {
         // given
         Response response = Response.builder()
